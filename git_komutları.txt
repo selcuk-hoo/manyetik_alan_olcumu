@@ -1,0 +1,26 @@
+ilk yükleme:
+	git init
+	git add .
+	git commit -m "İlk yükleme"
+	git branch -M main
+	git remote add origin https://github.com/selcuk-hoo/manyetik_alan_olcumu.git
+	
+	(repo ismiyle ilgili çakışma olursa):
+	git remote set-url origin https://github.com/selcuk-hoo/manyetik_alan_olcumu.git
+
+	git push -u origin main
+
+çekme:
+    git pull origin main
+
+çakışma varsa:
+    git stash
+    git pull origin main
+    git stash pop
+
+.so dosyasını derleme:
+    g++ -O3 -ffast-math -shared -fPIC -o lib_integrator.so integrator.cpp
+    g++ -O3 -ffast-math -dynamiclib -o integrator.dylib integrator.cpp
+
+yüklememe konusunda çok ısrarcı ise:
+    git push origin main --force
