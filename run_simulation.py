@@ -46,10 +46,9 @@ def main():
     E_tot = np.sqrt(p_magic**2 + M2**2)
     beta0 = p_magic / E_tot
     gamma0 = 1.0 / np.sqrt(1.0 - beta0**2)
-    eRatio = config.get("eRatio", 1.0)
     R0 = config["R0"]
-    # İhtiyaç duyulan Radyal Elektrik Alan (E0) hesabı
-    E0_V_m = -eRatio * (p_magic_base * (p_magic_base / np.sqrt(p_magic_base**2 + M2**2)) / R0) * 1e9
+    # İhtiyaç duyulan Radyal Elektrik Alan (E0) hesabı (eRatio = 1 sabit)
+    E0_V_m = -(p_magic_base * (p_magic_base / np.sqrt(p_magic_base**2 + M2**2)) / R0) * 1e9
     
     # ---------------------------------------------------------
     # 2. BAŞLANGIÇ KOŞULLARI (Faz Uzayı)

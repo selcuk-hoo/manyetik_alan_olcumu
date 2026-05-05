@@ -146,14 +146,18 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         E[1] = E_r * sin_th;
         E[2] = E_z;
 
-        // Tilt around beam axis (s): rotates radial E into vertical plane.
-        //   dipole_tilt [rad] (field_params[26]): E_z += E_r * sin(tilt)
-        double dipole_tilt = field_params[26];
-        E[2] += E_r * std::sin(dipole_tilt);
-
-        // Stray B projected onto (radial, tangential, vertical) unit vectors
-        B[0] = -B0rad * cos_th + B0long * sin_th;
-        B[1] = -B0rad * sin_th - B0long * cos_th;
+        // Tilt of the equivalent magnetic deflector around the beam axis (s).
+        // The magnetic dipole that produces the same horizontal bending has
+        // B_eq = p_magic / (q·R0) [T] pointing vertically (Z).
+        // A tilt φ [rad] around s rotates this vertical field into the radial
+        // plane: B_radial = B_eq·sin(φ).  A radial B on a horizontally moving
+        // proton exerts a vertical Lorentz force: F_z = q·v·B_r.
+        double M_GeV   = 0.938272046;
+        double p_magic = M_GeV / std::sqrt(G_P);           // [GeV/c]
+        double B_eq    = p_magic * 1e9 / (C_LIGHT * R0);   // [T]
+        double b_tilt  = B_eq * std::sin(field_params[26]);
+        B[0] = -B0rad * cos_th + B0long * sin_th + b_tilt * cos_th;
+        B[1] = -B0rad * sin_th - B0long * cos_th + b_tilt * sin_th;
         B[2] = B0ver;
     } else if (element_type == 2 || element_type == 3) {
         // QUADRUPOLE (QF or QD, normal — no time modulation).
