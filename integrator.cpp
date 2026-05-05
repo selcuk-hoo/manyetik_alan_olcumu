@@ -92,9 +92,10 @@ void rotate_all(double* y, double theta) {
 //   [9] sextSwitch   1 = sextupole on
 //   [19] quadModA    modulation amplitude (type 4 only)
 //   [20] quadModF    modulation frequency [Hz] (type 4 only)
-//   [21] (unused)
-//   [22] (unused)
-//   [23] quadYOffset per-element vertical quad centre shift [m] (internal runtime override)
+//   [21] (unused, reserved 0)
+//   [22] (unused, reserved 0)
+//   [23] quadVertOffset per-element vertical quad centre shift [m] (internal runtime override)
+//        "vert" = local-frame y = global-frame Z
 //
 // element_type: 0 = DEFLECTOR, 1 = DRIFT, 2 = QUAD_F, 3 = QUAD_D, 4 = QUAD_F_MOD
 void get_electromagnetic_fields(double t, const double* r, const double* field_params, int element_type, double* E, double* B) {
@@ -106,7 +107,7 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
     double B0long   = field_params[5];
     double quadK1   = field_params[6];
     double sextK1   = field_params[7];
-    double quadYOffset = field_params[23];
+    double quadVertOffset = field_params[23];
     
     double X = r[0], Y = r[1], Z = r[2];
     double R = std::sqrt(X*X + Y*Y);
@@ -146,14 +147,18 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         E[1] = E_r * sin_th;
         E[2] = E_z;
 
-        // Tilt around beam axis (s): rotates radial E into vertical plane.
-        //   dipole_tilt [rad] (field_params[26]): E_z += E_r * sin(tilt)
-        double dipole_tilt = field_params[26];
-        E[2] += E_r * std::sin(dipole_tilt);
-
-        // Stray B projected onto (radial, tangential, vertical) unit vectors
-        B[0] = -B0rad * cos_th + B0long * sin_th;
-        B[1] = -B0rad * sin_th - B0long * cos_th;
+        // Tilt of the equivalent magnetic deflector around the beam axis (s).
+        // The magnetic dipole that produces the same horizontal bending has
+        // B_eq = p_magic / (q·R0) [T] pointing vertically (Z).
+        // A tilt φ [rad] around s rotates this vertical field into the radial
+        // plane: B_radial = B_eq·sin(φ).  A radial B on a horizontally moving
+        // proton exerts a vertical Lorentz force: F_z = q·v·B_r.
+        double M_GeV   = 0.938272046;
+        double p_magic = M_GeV / std::sqrt(G_P);           // [GeV/c]
+        double B_eq    = p_magic * 1e9 / (C_LIGHT * R0);   // [T]
+        double b_tilt  = B_eq * std::sin(field_params[26]);
+        B[0] = -B0rad * cos_th + B0long * sin_th + b_tilt * cos_th;
+        B[1] = -B0rad * sin_th - B0long * cos_th + b_tilt * sin_th;
         B[2] = B0ver;
     } else if (element_type == 2 || element_type == 3) {
         // QUADRUPOLE (QF or QD, normal — no time modulation).
@@ -169,8 +174,8 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double current_K1 = (element_type == 2) ? quadK1 : -quadK1;
         double dev_quad = X - R0 - quadXOffset;
 
-        double y_rel = Z - quadYOffset;
-        double B_quad_r = current_K1 * y_rel;
+        double vert_rel = Z - quadVertOffset;
+        double B_quad_r = current_K1 * vert_rel;
         double B_quad_z = current_K1 * dev_quad;
 
         // Optional sextupole overlay.  Maxwell's ∇·B = 0 requires:
@@ -180,8 +185,8 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double sextSwitch = field_params[9];
         if (sextSwitch > 0.0) {
             double current_sK1 = (element_type == 2) ? sextK1 : -sextK1;
-            B_quad_r += current_sK1 * dev_quad * y_rel;
-            B_quad_z += 0.5 * current_sK1 * (dev_quad*dev_quad - y_rel*y_rel);
+            B_quad_r += current_sK1 * dev_quad * vert_rel;
+            B_quad_z += 0.5 * current_sK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
         }
 
         B[0] = B_quad_r;
@@ -198,15 +203,15 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double K1_eff   = quadK0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
 
         double dev_quad = X - R0 - quadXOffset;
-        double y_rel = Z - quadYOffset;
-        double B_quad_r = K1_eff * y_rel;
+        double vert_rel = Z - quadVertOffset;
+        double B_quad_r = K1_eff * vert_rel;
         double B_quad_z = K1_eff * dev_quad;
 
         // Same Maxwell-correct sextupole overlay as in type 2/3
         double sextSwitch = field_params[9];
         if (sextSwitch > 0.0) {
-            B_quad_r += sextK1 * dev_quad * y_rel;
-            B_quad_z += 0.5 * sextK1 * (dev_quad*dev_quad - y_rel*y_rel);
+            B_quad_r += sextK1 * dev_quad * vert_rel;
+            B_quad_z += 0.5 * sextK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
         }
 
         B[0] = B_quad_r;
