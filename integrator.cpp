@@ -480,11 +480,11 @@ void run_integration(double* y_init, const double* field_params,
             }
 
             // ---- Poincaré section trigger ----
-            // target_quad < 0 → every cell-0 arc entry (full-turn section)
+            // target_quad < 0 → cell-0 ARC1 entry once per revolution (full-turn section)
             // target_quad ≥ 0 → specific quad: even=QF(elem2), odd=QD(elem6)
             bool is_poincare_mark = false;
             if (target_quad < 0) {
-                if (elem == 0) is_poincare_mark = true;
+                if (elem == 0 && current_fodo == 0) is_poincare_mark = true;
             } else {
                 if ((target_quad % 2 == 0) && elem == 0) {
                     if (current_fodo == (target_quad / 2)) is_poincare_mark = true;
