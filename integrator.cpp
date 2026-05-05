@@ -146,22 +146,28 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         E[1] = E_r * sin_th;
         E[2] = E_z;
 
+        // Tilt around beam axis (s): rotates radial E into vertical plane.
+        //   dipole_tilt [rad] (field_params[26]): E_z += E_r * sin(tilt)
+        double dipole_tilt = field_params[26];
+        E[2] += E_r * std::sin(dipole_tilt);
+
         // Stray B projected onto (radial, tangential, vertical) unit vectors
         B[0] = -B0rad * cos_th + B0long * sin_th;
         B[1] = -B0rad * sin_th - B0long * cos_th;
         B[2] = B0ver;
     } else if (element_type == 2 || element_type == 3) {
         // QUADRUPOLE (QF or QD, normal — no time modulation).
-        // Y ekseninden sapmalara odaklama uygular.
-
-        // dev_quad = X - R0: radial deviation from the quad magnetic centre.
+        // Misalignment dipole components:
+        //   dy [m] (field_params[23]): vertical offset   → B_r = K1*(Z-dy)
+        //   dx [m] (field_params[25]): radial offset     → B_Z = K1*(dev-dx)
         // Pure quadrupole (satisfies ∇·B = 0 and ∇×B = 0):
-        //   B_r =  K1 * Z
-        //   B_Z =  K1 * dev
+        //   B_r =  K1 * (Z - dy)
+        //   B_Z =  K1 * (dev - dx)
         // QF (type 2): K1 > 0 → horizontally focusing, vertically defocusing.
         // QD (type 3): K1 → -K1 (sign flip).
+        double quadXOffset = field_params[25];
         double current_K1 = (element_type == 2) ? quadK1 : -quadK1;
-        double dev_quad = X - R0;
+        double dev_quad = X - R0 - quadXOffset;
 
         double y_rel = Z - quadYOffset;
         double B_quad_r = current_K1 * y_rel;
@@ -185,12 +191,13 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         // QUAD_F_MOD: focusing quad with time-modulated K1 (cell 0 only).
         // Used for parametric resonance studies.
         //   K1_eff(t) = K0 * (1 + A_mod * cos(2π * f_mod * t))
-        double quadK0 = field_params[24];
-        double A_mod  = field_params[19];
-        double f_mod  = field_params[20];
-        double K1_eff = quadK0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
+        double quadK0   = field_params[24];
+        double quadXOffset = field_params[25];
+        double A_mod    = field_params[19];
+        double f_mod    = field_params[20];
+        double K1_eff   = quadK0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
 
-        double dev_quad = X - R0;
+        double dev_quad = X - R0 - quadXOffset;
         double y_rel = Z - quadYOffset;
         double B_quad_r = K1_eff * y_rel;
         double B_quad_z = K1_eff * dev_quad;
@@ -354,7 +361,11 @@ void run_integration(double* y_init, const double* field_params,
                      double t0, double t_end, double h, int dim,
                      int return_steps, double* history_out,
                      int max_poincare, double* poincare_out,
-                     double* poincare_t, int* poincare_count) {
+                     double* poincare_t, int* poincare_count,
+                     const double* quad_dy,     // 2*nFODO: vertical misalignment [m] per quad
+                     const double* quad_dx,     // 2*nFODO: radial misalignment [m] per quad
+                     const double* dipole_tilt) // 2*nFODO: s-axis tilt [rad] per deflector
+{
     
     long long total_steps_est = (long long)((t_end - t0) / h);
     if (total_steps_est <= 0) return;
@@ -366,8 +377,6 @@ void run_integration(double* y_init, const double* field_params,
     double quadLen  = field_params[13];
     double dir      = field_params[11];
     double driftLen = field_params[18];
-    int    nFODO_off = (int)std::round(field_params[21]);
-    double B0hor = field_params[22];
 
     int    target_quad  = (int)std::round(field_params[14]);
 
@@ -520,13 +529,26 @@ void run_integration(double* y_init, const double* field_params,
             // ANA SİMÜLASYON DÖNGÜSÜ (run_integration)
             // Python (ctypes) tarafından tetiklenir.
             // ==============================================================================
-            double field_params_local[25];
+            // field_params_local[25] = quad_dx runtime override
+            // field_params_local[26] = dipole_tilt runtime override
+            double field_params_local[27];
             for (int fp = 0; fp < 25; ++fp) field_params_local[fp] = field_params[fp];
-            field_params_local[23] = 0.0;
-            // Dikey mis-alignment (B0hor ile oluşturulan quad offset'i)
-            bool is_target_first_quad = (elem == 2) && (nFODO_off >= 0) && (current_fodo == nFODO_off);
-            if (is_target_first_quad && std::abs(field_params[6]) > 1e-20) {
-                field_params_local[23] = B0hor / field_params[6];
+            field_params_local[23] = 0.0;  // quad_dy
+            field_params_local[25] = 0.0;  // quad_dx
+            field_params_local[26] = 0.0;  // dipole_tilt
+
+            if (elem == 2) {               // QF
+                int qidx = 2 * current_fodo;
+                field_params_local[23] = quad_dy[qidx];
+                field_params_local[25] = quad_dx[qidx];
+            } else if (elem == 6) {        // QD
+                int qidx = 2 * current_fodo + 1;
+                field_params_local[23] = quad_dy[qidx];
+                field_params_local[25] = quad_dx[qidx];
+            } else if (elem == 0) {        // ARC1
+                field_params_local[26] = dipole_tilt[2 * current_fodo];
+            } else if (elem == 4) {        // ARC2
+                field_params_local[26] = dipole_tilt[2 * current_fodo + 1];
             }
 
             double start_metric = (type == 0) ? std::atan2(y_init[1], y_init[0]) : y_init[1];

@@ -32,5 +32,19 @@
     "eRatio": 1.0,
     "quadModA": 0.0,
     "quadModF": 10000.0,
-    "nFODO_off": 8
+    "nFODO_off": -1,
+
+    "error_quad_index": -1,
+    "error_quad_dy": 0.0,
+    "error_quad_dx": 0.0,
+
+    "quad_random_dy_max": 0.0,
+    "quad_random_dx_max": 0.0,
+    "quad_random_seed": 42,
+
+    "error_dipole_index": -1,
+    "error_dipole_tilt": 0.0,
+
+    "dipole_random_tilt_max": 0.0,
+    "dipole_random_seed": 43
 }

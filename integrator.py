@@ -34,9 +34,10 @@ _lib.run_integration.argtypes = [
     ctypes.POINTER(ctypes.c_double), # poincare_out
     ctypes.POINTER(ctypes.c_double), # poincare_t_out
     ctypes.POINTER(ctypes.c_int),    # poincare_count
+    ctypes.POINTER(ctypes.c_double), # quad_dy    [2*nFODO, m]
+    ctypes.POINTER(ctypes.c_double), # quad_dx    [2*nFODO, m]
+    ctypes.POINTER(ctypes.c_double), # dipole_tilt[2*nFODO, rad]
 ]
-_lib.run_integration.restype = None
-
 _lib.run_integration.restype = None
 
 # ==============================================================================
@@ -94,8 +95,6 @@ class FieldParams:
         ]
         return (ctypes.c_double * len(params))(*params)
 
-        return (ctypes.c_double * len(params))(*params)
-
 # ==============================================================================
 # KOORDİNAT DÖNÜŞÜMLERİ
 # C++ tarafında tüm simülasyon Kartezyen global koordinatlarda çözülür.
@@ -135,28 +134,24 @@ def convert_global_to_local_matrix(history_global_np, R0, initial_z):
     
     return history_local
 
-    return history_local
-
 # ==============================================================================
 # ANA ENTEGRASYON ÇAĞRISI
 # ==============================================================================
-def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000):
+def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
+                       quad_dy=None, quad_dx=None, dipole_tilt=None):
     """
-    Bir parçacığı verilen başlangıç koşulları ve zaman aralığı için C++ 
+    Bir parçacığı verilen başlangıç koşulları ve zaman aralığı için C++
     motorunu (GL4 Simplektik Entegratör) kullanarak takip eder.
-    
+
     Parametreler:
-    - y0_local: Yerel faz uzayı başlangıç koşulları [x, y, z, px, py, pz, sx, sy, sz]
-    - t0: Başlangıç zamanı (saniye)
-    - t_end: Bitiş zamanı (saniye)
-    - h: Zaman adımı (saniye)
-    - fields: FieldParams nesnesi
-    - return_steps: Python tarafına kaç adımda bir veri kaydedileceği
-    
-    Döndürdükleri:
-    - hist_local: Tüm kaydedilen adımlar için yerel koordinatlar
-    - poin_local: Poincaré kesit noktaları (Belirli bir QF'den geçişler)
-    - poincare_t_np: Poincaré geçiş zamanları
+    - y0_local   : [x, y, z, px, py, pz, sx, sy, sz] yerel faz uzayı
+    - t0, t_end  : başlangıç / bitiş zamanı [s]
+    - h          : zaman adımı [s]
+    - fields     : FieldParams nesnesi
+    - return_steps: kaç adımda bir veri kaydedilsin
+    - quad_dy    : her quad için dikey misalignment [m], boy 2*nFODO
+    - quad_dx    : her quad için radyal misalignment [m], boy 2*nFODO
+    - dipole_tilt: her deflektör için s-ekseni dönme açısı [rad], boy 2*nFODO
     """
     if fields is None: fields = FieldParams()
     R0 = fields.R0
@@ -179,8 +174,13 @@ def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000):
     y0_arr = (ctypes.c_double * 9)(*y0_global)
     field_arr = fields.to_c_array()
 
+    # Hata dizileri: boyut 2*nFODO (QF0,QD0,QF1,QD1,... ve ARC1_0,ARC2_0,...)
+    n_q = 2 * int(fields.nFODO)
+    _qdy = (ctypes.c_double * n_q)(*(quad_dy if quad_dy is not None else np.zeros(n_q)))
+    _qdx = (ctypes.c_double * n_q)(*(quad_dx if quad_dx is not None else np.zeros(n_q)))
+    _dtilt = (ctypes.c_double * n_q)(*(dipole_tilt if dipole_tilt is not None else np.zeros(n_q)))
+
     # C++ hafıza bloklarının (array) Python tarafında tahsis edilmesi.
-    # C++ fonksiyonu değerleri bu pointer'ların gösterdiği belleğe yazacaktır.
     history_c = (ctypes.c_double * (9 * return_steps))()
     max_poincare = 200000
     poincare_c = (ctypes.c_double * (9 * max_poincare))()
@@ -188,7 +188,9 @@ def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000):
     poincare_t_c = (ctypes.c_double * max_poincare)()
 
     # Asıl C++ fonksiyon çağrısı (Performans kritik bölüm)
-    _lib.run_integration(y0_arr, field_arr, t0, t_end, h, 9, return_steps, history_c, max_poincare, poincare_c, poincare_t_c, poincare_count)
+    _lib.run_integration(y0_arr, field_arr, t0, t_end, h, 9, return_steps, history_c,
+                         max_poincare, poincare_c, poincare_t_c, poincare_count,
+                         _qdy, _qdx, _dtilt)
 
     # C++ bellek bloklarını numpy dizilerine (array) çevirme
     num_p = poincare_count[0]

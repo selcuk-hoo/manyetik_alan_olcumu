@@ -115,6 +115,54 @@ def main():
     h = config.get("dt", 1e-11)
     return_steps = config.get("return_steps", 10000)
     adim_sayisi = int((t_end - t0) / h)
+
+    # ---------------------------------------------------------
+    # HATA DİZİLERİ
+    # Her quad ve deflektör için ayrı hata değerleri.
+    # İndeks düzeni: [QF_0, QD_0, QF_1, QD_1, ..., QF_{N-1}, QD_{N-1}]
+    # Deflektör:     [ARC1_0, ARC2_0, ARC1_1, ARC2_1, ...]
+    # ---------------------------------------------------------
+    n_cells = int(alanlar.nFODO)
+    n_q = 2 * n_cells   # toplam quad sayısı
+    n_d = 2 * n_cells   # toplam deflektör sayısı
+
+    quad_dy_arr    = np.zeros(n_q)
+    quad_dx_arr    = np.zeros(n_q)
+    dipole_tilt_arr = np.zeros(n_d)
+
+    # Geriye dönük uyumluluk: eski B0hor/nFODO_off mekanizması
+    nFODO_off_val = config.get("nFODO_off", -1)
+    B0hor_val     = config.get("B0hor", 0.0)
+    k1_val        = config.get("k1", 0.0)
+    if nFODO_off_val >= 0 and abs(k1_val) > 1e-20 and abs(B0hor_val) > 1e-20:
+        quad_dy_arr[2 * nFODO_off_val] += B0hor_val / k1_val   # QF of that cell
+
+    # Tek quad hatası
+    eq_idx = config.get("error_quad_index", -1)
+    if 0 <= eq_idx < n_q:
+        quad_dy_arr[eq_idx] += config.get("error_quad_dy", 0.0)
+        quad_dx_arr[eq_idx] += config.get("error_quad_dx", 0.0)
+
+    # Rastgele quad hataları
+    dy_max = config.get("quad_random_dy_max", 0.0)
+    dx_max = config.get("quad_random_dx_max", 0.0)
+    if dy_max > 0 or dx_max > 0:
+        rng_q = np.random.default_rng(config.get("quad_random_seed", 42))
+        if dy_max > 0:
+            quad_dy_arr += rng_q.uniform(-dy_max, dy_max, n_q)
+        if dx_max > 0:
+            quad_dx_arr += rng_q.uniform(-dx_max, dx_max, n_q)
+
+    # Tek deflektör hatası
+    ed_idx = config.get("error_dipole_index", -1)
+    if 0 <= ed_idx < n_d:
+        dipole_tilt_arr[ed_idx] += config.get("error_dipole_tilt", 0.0)
+
+    # Rastgele deflektör hataları
+    tilt_max = config.get("dipole_random_tilt_max", 0.0)
+    if tilt_max > 0:
+        rng_d = np.random.default_rng(config.get("dipole_random_seed", 43))
+        dipole_tilt_arr += rng_d.uniform(-tilt_max, tilt_max, n_d)
     
     print("\n================ SİMÜLASYON PARAMETRELERİ ================")
     print(f"R0 (Yarıçap)      : {R0} m")
@@ -131,7 +179,8 @@ def main():
 
     # C++ Entegratörünün çağrılması (Performans Kritik Bölüm)
     sonuclar_local, poin_local, poincare_t_arr = integrate_particle(
-        y0, t0, t_end, h, fields=alanlar, return_steps=return_steps
+        y0, t0, t_end, h, fields=alanlar, return_steps=return_steps,
+        quad_dy=quad_dy_arr, quad_dx=quad_dx_arr, dipole_tilt=dipole_tilt_arr
     )
     end_time = time.time()
     
