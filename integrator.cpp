@@ -92,9 +92,10 @@ void rotate_all(double* y, double theta) {
 //   [9] sextSwitch   1 = sextupole on
 //   [19] quadModA    modulation amplitude (type 4 only)
 //   [20] quadModF    modulation frequency [Hz] (type 4 only)
-//   [21] nFODO_off   apply quad offset at elem=2 of this cell (0-based), <0 disables
-//   [22] B0hor       equivalent horizontal field [T] for offset formula y_off = B0hor / K1
-//   [23] quadYOffset per-element vertical quad centre shift [m] (internal runtime override)
+//   [21] (unused, reserved 0)
+//   [22] (unused, reserved 0)
+//   [23] quadVertOffset per-element vertical quad centre shift [m] (internal runtime override)
+//        "vert" = local-frame y = global-frame Z
 //
 // element_type: 0 = DEFLECTOR, 1 = DRIFT, 2 = QUAD_F, 3 = QUAD_D, 4 = QUAD_F_MOD
 void get_electromagnetic_fields(double t, const double* r, const double* field_params, int element_type, double* E, double* B) {
@@ -106,7 +107,7 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
     double B0long   = field_params[5];
     double quadK1   = field_params[6];
     double sextK1   = field_params[7];
-    double quadYOffset = field_params[23];
+    double quadVertOffset = field_params[23];
     
     double X = r[0], Y = r[1], Z = r[2];
     double R = std::sqrt(X*X + Y*Y);
@@ -173,8 +174,8 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double current_K1 = (element_type == 2) ? quadK1 : -quadK1;
         double dev_quad = X - R0 - quadXOffset;
 
-        double y_rel = Z - quadYOffset;
-        double B_quad_r = current_K1 * y_rel;
+        double vert_rel = Z - quadVertOffset;
+        double B_quad_r = current_K1 * vert_rel;
         double B_quad_z = current_K1 * dev_quad;
 
         // Optional sextupole overlay.  Maxwell's ∇·B = 0 requires:
@@ -184,8 +185,8 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double sextSwitch = field_params[9];
         if (sextSwitch > 0.0) {
             double current_sK1 = (element_type == 2) ? sextK1 : -sextK1;
-            B_quad_r += current_sK1 * dev_quad * y_rel;
-            B_quad_z += 0.5 * current_sK1 * (dev_quad*dev_quad - y_rel*y_rel);
+            B_quad_r += current_sK1 * dev_quad * vert_rel;
+            B_quad_z += 0.5 * current_sK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
         }
 
         B[0] = B_quad_r;
@@ -202,15 +203,15 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double K1_eff   = quadK0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
 
         double dev_quad = X - R0 - quadXOffset;
-        double y_rel = Z - quadYOffset;
-        double B_quad_r = K1_eff * y_rel;
+        double vert_rel = Z - quadVertOffset;
+        double B_quad_r = K1_eff * vert_rel;
         double B_quad_z = K1_eff * dev_quad;
 
         // Same Maxwell-correct sextupole overlay as in type 2/3
         double sextSwitch = field_params[9];
         if (sextSwitch > 0.0) {
-            B_quad_r += sextK1 * dev_quad * y_rel;
-            B_quad_z += 0.5 * sextK1 * (dev_quad*dev_quad - y_rel*y_rel);
+            B_quad_r += sextK1 * dev_quad * vert_rel;
+            B_quad_z += 0.5 * sextK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
         }
 
         B[0] = B_quad_r;

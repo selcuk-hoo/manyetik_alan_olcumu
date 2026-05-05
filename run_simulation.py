@@ -106,8 +106,6 @@ def main():
     alanlar.h = float(config.get("h", 1.0))
     alanlar.quadModA = float(config.get("quadModA", 0.0))
     alanlar.quadModF = float(config.get("quadModF", 0.0))
-    alanlar.nFODO_off = float(config.get("nFODO_off", -1))
-    alanlar.B0hor = float(config.get("B0hor", 0.0))
     
     t0 = 0.0
     t_end = config.get("t2", 1e-5)
@@ -128,13 +126,6 @@ def main():
     quad_dy_arr    = np.zeros(n_q)
     quad_dx_arr    = np.zeros(n_q)
     dipole_tilt_arr = np.zeros(n_d)
-
-    # Geriye dönük uyumluluk: eski B0hor/nFODO_off mekanizması
-    nFODO_off_val = config.get("nFODO_off", -1)
-    B0hor_val     = config.get("B0hor", 0.0)
-    k1_val        = config.get("k1", 0.0)
-    if nFODO_off_val >= 0 and abs(k1_val) > 1e-20 and abs(B0hor_val) > 1e-20:
-        quad_dy_arr[2 * nFODO_off_val] += B0hor_val / k1_val   # QF of that cell
 
     # Tek quad hatası
     eq_idx = config.get("error_quad_index", -1)
