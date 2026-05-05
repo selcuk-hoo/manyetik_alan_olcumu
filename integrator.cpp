@@ -92,8 +92,8 @@ void rotate_all(double* y, double theta) {
 //   [9] sextSwitch   1 = sextupole on
 //   [19] quadModA    modulation amplitude (type 4 only)
 //   [20] quadModF    modulation frequency [Hz] (type 4 only)
-//   [21] nFODO_off   apply quad offset at elem=2 of this cell (0-based), <0 disables
-//   [22] B0hor       equivalent horizontal field [T] for offset formula y_off = B0hor / K1
+//   [21] (unused)
+//   [22] (unused)
 //   [23] quadYOffset per-element vertical quad centre shift [m] (internal runtime override)
 //
 // element_type: 0 = DEFLECTOR, 1 = DRIFT, 2 = QUAD_F, 3 = QUAD_D, 4 = QUAD_F_MOD

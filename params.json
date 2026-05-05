@@ -26,13 +26,10 @@
     "h": 100,
     "E0_power": 1.0,
     "B0ver": 0.0,
-    "B0hor": 1e-06,
     "B0long": 0.0,
-    "B0rad_corr": 0.0,
     "eRatio": 1.0,
     "quadModA": 0.0,
     "quadModF": 10000.0,
-    "nFODO_off": -1,
 
     "error_quad_index": -1,
     "error_quad_dy": 0.0,
