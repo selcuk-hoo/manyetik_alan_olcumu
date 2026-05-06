@@ -31,8 +31,8 @@ def main():
 
     # Bilinen rastgele hatalar (seed sabit → tekrarlanabilir)
     rng = np.random.default_rng(seed=7)
-    dy_max = 0.05e-3   # 50 μm RMS civarı
-    dx_max = 0.05e-3
+    dy_max = 0.5e-3   # 0.5 mm RMS civarı
+    dx_max = 0.5e-3
     dy_gercek = rng.uniform(-dy_max, dy_max, n_q)
     dx_gercek = rng.uniform(-dx_max, dx_max, n_q)
 

@@ -54,7 +54,7 @@ class FieldParams:
         self.B0ver = 0.0
         self.B0rad = 0.0
         self.B0long = 0.0
-        self.quadK1 = 0.0
+        self.quadG1 = 0.0
         self.sextK1 = 0.0
         self.quadSwitch = 1.0
         self.sextSwitch = 0.0
@@ -70,7 +70,7 @@ class FieldParams:
         self.quadModA = 0.0
         self.quadModF = 0.0
         self.quadVertOffset = 0.0  # dikey quad merkez kayması [m] (çalışma zamanı override)
-        self.quadK0 = 0.0
+        self.quadG0 = 0.0
 
     def to_c_array(self):
         """
@@ -80,14 +80,14 @@ class FieldParams:
         params = [
             self.R0, self.E0, self.E0_power,
             self.B0ver, self.B0rad, self.B0long,
-            self.quadK1, self.sextK1,
+            self.quadG1, self.sextK1,
             self.quadSwitch, self.sextSwitch,
             self.EDMSwitch, self.direction,
             self.nFODO, self.quadLen,
             self.poincare_quad_index,
             self.rfSwitch, self.rfVoltage, self.h, self.driftLen,
             self.quadModA, self.quadModF, 0.0,
-            0.0, self.quadVertOffset, self.quadK0
+            0.0, self.quadVertOffset, self.quadG0
         ]
         return (ctypes.c_double * len(params))(*params)
 

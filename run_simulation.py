@@ -90,8 +90,8 @@ def main():
     alanlar.B0ver = config.get("B0ver", 0.0)
     alanlar.B0rad = config.get("B0rad", 0.0)
     alanlar.B0long = config.get("B0long", 0.0)
-    alanlar.quadK1 = config.get("k1", 0.0)
-    alanlar.quadK0 = config.get("k0", alanlar.quadK1)
+    alanlar.quadG1 = config.get("g1", 0.0)
+    alanlar.quadG0 = config.get("g0", alanlar.quadG1)
     alanlar.sextK1 = config.get("sextK1", 0.0)
     alanlar.quadSwitch = float(config.get("quadSwitch", 1))
     alanlar.sextSwitch = float(config.get("sextSwitch", 0))
@@ -161,7 +161,7 @@ def main():
     print(f"Başlangıç dikey y : {y0_vert*1000:.2f} mm")
     print(f"Elektrik Alan (E0): {E0_V_m/1e6:.4f} MV/m")
     print(f"FODO Hücre Sayısı : {alanlar.nFODO}")
-    print(f"Quadrupole (K1)   : {alanlar.quadK1}")
+    print(f"Quadrupole (G1)   : {alanlar.quadG1}")
     print(f"Sextupole (S1)    : {alanlar.sextK1}")
     print("==========================================================\n")
     print(f"Simülasyon motoru çalışıyor (Toplam Adım: {adim_sayisi:,})")
@@ -239,8 +239,7 @@ def main():
     # ve spinin net kayma eğilimini (eğimi) ortaya çıkarır.
     # ---------------------------------------------------------
     from scipy.signal import savgol_filter
-    window_size = (len(sx_arr) // 4) * 2 + 1 
-    if window_size < 5: window_size = 5
+    window_size = max(5, (len(sx_arr) // 4) * 2 + 1)
     sx_filtered = savgol_filter(sx_arr, window_length=window_size, polyorder=1)
     sy_filtered = savgol_filter(sy_arr, window_length=window_size, polyorder=1)
     

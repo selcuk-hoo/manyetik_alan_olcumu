@@ -4,7 +4,7 @@ ilk yükleme:
 	git commit -m "İlk yükleme"
 	git branch -M main
 	git remote add origin https://github.com/selcuk-hoo/manyetik_alan_olcumu.git
-	
+
 	(repo ismiyle ilgili çakışma olursa):
 	git remote set-url origin https://github.com/selcuk-hoo/manyetik_alan_olcumu.git
 
@@ -18,9 +18,62 @@ ilk yükleme:
     git pull origin main
     git stash pop
 
-.so dosyasını derleme:
-    g++ -O3 -ffast-math -shared -fPIC -o lib_integrator.so integrator.cpp
-    g++ -O3 -ffast-math -dynamiclib -o integrator.dylib integrator.cpp
+belirli dosyaları gönderme:
+    git add integrator.cpp integrator.py params.json
+    git commit -m "açıklama"
+    git push origin main
+
+tag oluşturma (çalışan versiyonu işaretleme):
+    git tag v1.0
+    git push origin v1.0
+
+    (açıklamalı tag):
+    git tag -a v1.0 -m "açıklama"
+    git push origin v1.0
+
+eski bir tag'e dönme:
+    git checkout v1.0
+
+    (geri döndükten sonra main'e dönmek için):
+    git checkout main
+
+branch oluşturma ve geçiş:
+    git checkout -b yeni-ozellik
+
+    (var olan bir branch'e geçiş):
+    git checkout main
+
+branch'i main'e birleştirme:
+    git checkout main
+    git merge yeni-ozellik
+    git push origin main
+
+tüm branch ve tag'leri listeleme:
+    git branch -a
+    git tag
+
+son commit'i geri alma (dosyalar değişmeden kalır):
+    git reset HEAD~1
+
+değişiklikleri görmek:
+    git status
+    git diff
+
+commit geçmişi:
+    git log --oneline
 
 yüklememe konusunda çok ısrarcı ise:
     git push origin main --force
+
+---
+
+integrator.cpp derleme:
+
+    Linux:
+        g++ -O3 -ffast-math -shared -fPIC -o lib_integrator.so integrator.cpp
+
+    macOS:
+        g++ -O3 -ffast-math -dynamiclib -o integrator.dylib integrator.cpp
+
+    (g++ yoksa macOS'te önce xcode komut satırı araçlarını kur):
+        xcode-select --install
