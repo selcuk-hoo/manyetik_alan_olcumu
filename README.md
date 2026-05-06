@@ -16,9 +16,10 @@ Bu proje, Proton Elektrik Dipol Momenti (EDM) deneyleri için tasarlanmış tam 
 6. [Simülasyon Orkestrasyonu: `run_simulation.py`](#6-simülasyon-orkestrasyonu-run_simulationpy)
 7. [Görselleştirme: `plot_results.py`](#7-görselleştirme-plot_resultspy)
 8. [Tepki Matrisi: `build_response_matrix.py`](#8-tepki-matrisi-build_response_matrixpy)
-9. [Geri Çatım Testi: `test_reconstruction.py`](#9-geri-çatım-testi-test_reconstructionpy)
-10. [Parametreler: `params.json`](#10-parametreler-paramsjson)
-11. [Kurulum ve Çalıştırma](#11-kurulum-ve-çalıştırma)
+9. [Quad Geri Çatım Testi: `test_reconstruction.py`](#9-quad-geri-çatım-testi-test_reconstructionpy)
+10. [LOCO Geri Çatım Testi: `test_loco_reconstruction.py`](#10-loco-geri-çatım-testi-test_loco_reconstructionpy)
+11. [Parametreler: `params.json`](#11-parametreler-paramsjson)
+12. [Kurulum ve Çalıştırma](#12-kurulum-ve-çalıştırma)
 
 ---
 
@@ -231,19 +232,21 @@ COD profilini, RMS değerini ve betatron tune etiketini tek bir yardımcı fonks
 
 ### Motivasyon
 
-Kapalı yörünge sapması ile quad kaçıklıkları arasındaki doğrusal ilişki bir matrisle özetlenebilir:
+Kapalı yörünge sapması ile hizalama hataları arasındaki doğrusal ilişki matrislerle özetlenebilir:
 
-$$\mathbf{y}_{\text{COD}} = R_{dy} \cdot \mathbf{d}_y \qquad \mathbf{x}_{\text{COD}} = R_{dx} \cdot \mathbf{d}_x$$
+$$\mathbf{y}_{\text{COD}} = R_{dy} \cdot \mathbf{d}_y + R_{\text{tilt}} \cdot \boldsymbol{\theta} \qquad \mathbf{x}_{\text{COD}} = R_{dx} \cdot \mathbf{d}_x$$
 
-$R$ matrisi bir kez hesaplanır ve ardından hızlı hata analizi için tekrar tekrar kullanılır.
+Burada $\mathbf{d}_y$ quad dikey kaçıklıkları, $\mathbf{d}_x$ quad radyal kaçıklıkları ve $\boldsymbol{\theta}$ deflektör eğim açılarıdır.
 
-### `setup_fields()`
+Dikkat: Dipol eğimi (tilt) B alanına **radyal bir bileşen** ekler ($B_X = B_{eq}\sin\theta$) ve bu yalnızca **dikey COD**'u etkiler. Radyal COD yalnızca quad radyal kaçıklığına ($d_x$) duyarlıdır. İki düzlem bu sayede ayrışır.
 
-`params.json`'dan bağımsız, sabit başlangıç koşulları oluşturur: her simülasyon `(x=0, y=0)` ideal yörüngeden başlar; böylece tepki matrisi başlangıç tepmesinden etkilenmez.
+### `setup_fields(config, g1_override=None)`
 
-### `run_sim()`
+`params.json`'dan bağımsız, sabit başlangıç koşulları oluşturur: her simülasyon `(x=0, y=0)` ideal yörüngeden başlar. `g1_override` parametresi LOCO için ikinci optik konfigürasyonu tanımlar.
 
-Tek bir simülasyon çalıştırır ve `cod_data.txt` dosyasından 48 BPM konumundaki (her hücrenin QF ve QD girişleri) x ve y değerlerini okur:
+### `run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None)`
+
+Tek bir simülasyon çalıştırır. `dipole_tilt` verilmezse sıfır kabul edilir. BPM konumları:
 
 ```python
 def read_cod_quads(nFODO):
@@ -251,53 +254,106 @@ def read_cod_quads(nFODO):
     qd = k * 8 + 6   # QD giriş satırı (elem=6)
 ```
 
-### Matrisin Doldurulması
+### `build_matrices(alanlar, state0, config, delta_q, delta_tilt, label)`
 
-Her kolon için **aynı anda** hem `dy[i] = δ` hem `dx[i] = δ` uygulanır. Düzlemler bağımsız olduğundan:
+Bir optik konfigürasyon için üç matrisi birden hesaplar:
 
-- `y_cod − y0` yalnızca `dy[i]`'ye yanıt verir → `R_dy` kolonunu verir
-- `x_cod − x0` yalnızca `dx[i]`'ye yanıt verir → `R_dx` kolonunu verir
-
-Bu sayede 97 yerine **49 simülasyon** (1 referans + 48 pertürbasyon) yeterli olur.
+**Quad matrisleri (R_dy ve R_dx) — birleşik koşum:**
+Her `i` için `dy[i] = δ` ve `dx[i] = δ` aynı anda uygulanır. Düzlemler bağımsız olduğundan tek koşumda iki sütun elde edilir:
 
 ```python
-R_dy[:, i] = (y_cod - y0) / delta   # dikey kaçıklık → dikey COD
-R_dx[:, i] = (x_cod - x0) / delta   # radyal kaçıklık → radyal COD
+R_dy[:, i] = (y_cod - y0) / delta_q   # dikey kaçıklık → dikey COD
+R_dx[:, i] = (x_cod - x0) / delta_q   # radyal kaçıklık → radyal COD
 ```
 
-### Koşul Sayısı
+**Dipol tilt matrisi (R_tilt) — ayrı koşum:**
+Her `i` için yalnızca `tilt[i] = δ_tilt` uygulanır, quad kaçıklıkları sıfırdır:
+
+```python
+R_tilt[:, i] = (y_cod - y0) / delta_tilt  # tilt → dikey COD [mm/rad]
+```
+
+Dipol tilt indeksleme: `tilt[2k]` = hücre k'daki ARC1, `tilt[2k+1]` = ARC2.
+
+Toplam koşum sayısı: 1 referans + 48 quad + 48 tilt = **97 koşum** per konfigürasyon.
+
+### LOCO: İki Optik Konfigürasyon
+
+Tek ölçümde:
+$$\mathbf{y}_{\text{COD}} = R_{dy}\,\mathbf{d}_y + R_{\text{tilt}}\,\boldsymbol{\theta}$$
+48 denklem, 96 bilinmeyen → **belirsiz sistem.**
+
+İki farklı optik konfigürasyonla (nominal $g_1$ ve $g_1 \times 1.02$):
+
+$$\begin{pmatrix} \mathbf{y}_1 \\ \mathbf{y}_2 \end{pmatrix} = \underbrace{\begin{pmatrix} R_{dy,1} & R_{\text{tilt},1} \\ R_{dy,2} & R_{\text{tilt},2} \end{pmatrix}}_{M_{96\times96}} \begin{pmatrix} \mathbf{d}_y \\ \boldsymbol{\theta} \end{pmatrix}$$
+
+Optik değişince $R_{dy}$ ve $R_{\text{tilt}}$ farklı oranlarda değişir; $M$'nin koşulunu $\kappa(M)$ ile kontrol ederiz.
+
+### Kaydedilen Dosyalar
+
+| Dosya | İçerik | Boyut |
+|-------|--------|-------|
+| `R_dy.npy`, `R_dx.npy` | Nominal, geriye dönük uyumluluk | 48×48 |
+| `R_dy_1.npy`, `R_dx_1.npy`, `R_tilt_1.npy` | Nominal konfigürasyon | 48×48 |
+| `R_dy_2.npy`, `R_dx_2.npy`, `R_tilt_2.npy` | Pertürbe konfigürasyon | 48×48 |
+| `M_loco.npy` | Birleşik LOCO matrisi | 96×96 |
+
+### Koşul Sayıları
 
 ```
-κ(R_dy) ≈ 165,   κ(R_dx) ≈ 152
+κ(R_dy) ≈ 165,   κ(R_dx) ≈ 152   (nominal, quad-only)
+κ(M_loco): simülasyon sonrası raporlanır
 ```
 
-İyi koşullu matrisler ($\kappa \ll 10^8$) doğrudan terslenebilir; SVD'ye gerek yoktur.
+$\kappa(M) < 10^6$ → doğrudan çözüm; $10^6$–$10^{10}$ → SVD/Tikhonov önerilir.
 
 ---
 
-## 9. Geri Çatım Testi: `test_reconstruction.py`
+## 9. Quad Geri Çatım Testi: `test_reconstruction.py`
 
 ### Yöntem
 
-1. `seed=7` ile tekrarlanabilir rastgele hatalar üretilir (±0.5 mm, RMS ≈ 0.29 mm)
-2. Referans simülasyon (`dy=0, dx=0`) ve hatalı simülasyon çalıştırılır
-3. Fark `dy_cod`, `dx_cod` olarak elde edilir
-4. Doğrusal sistem çözülür:
+1. `seed=7` ile tekrarlanabilir rastgele hatalar üretilir (±0.5 mm)
+2. Referans ve hatalı simülasyonlar çalıştırılır
+3. Net COD farkı alınır
+4. 48×48 doğrusal sistem çözülür:
 
 $$\hat{\mathbf{d}}_y = R_{dy}^{-1}\,\mathbf{y}_{\text{COD}} \qquad \hat{\mathbf{d}}_x = R_{dx}^{-1}\,\mathbf{x}_{\text{COD}}$$
 
-### Beklenen Sonuçlar
+### Sonuçlar
 
 | Metrik | dy | dx |
 |--------|----|----|
 | Korelasyon | 1.000000 | 1.000000 |
 | Hata RMS | ~0.05 μm | ~0.08 μm |
 
-COD RMS ~1.7 mm'den 48 quad'ın tüm kaçıklıkları ~0.1 μm hassasiyetle geri çatılır. Bu, doğrusal modelin geçerli olduğunu ve tepki matrisinin tam terslenebilir olduğunu doğrular.
+COD RMS ~1.7 mm'den 48 quad kaçıklığı ~0.1 μm hassasiyetle geri çatılır.
 
 ---
 
-## 10. Parametreler: `params.json`
+## 10. LOCO Geri Çatım Testi: `test_loco_reconstruction.py`
+
+### Motivasyon
+
+Gerçek bir halkada hem quad kaçıklıkları hem de deflektör eğimleri vardır ve ikisi de dikey COD'u etkiler. Bu dosya, iki konfigürasyon ölçümünü birleştirerek her ikisini eş zamanlı geri çatar.
+
+### Yöntem
+
+1. `seed=13` ile rastgele `dy` (±0.3 mm) ve `tilt` (±0.2 mrad) hataları üretilir
+2. Her iki optik konfigürasyonda (nominal + pertürbe $g_1$) referans ve hatalı COD ölçümleri alınır
+3. 96×96 LOCO sistemi çözülür:
+
+$$M \cdot \begin{pmatrix} \hat{\mathbf{d}}_y \\ \hat{\boldsymbol{\theta}} \end{pmatrix} = \begin{pmatrix} \mathbf{y}_{\text{COD},1} \\ \mathbf{y}_{\text{COD},2} \end{pmatrix}$$
+
+4. Ek olarak radyal quad ($d_x$) geri çatımı tek konfigürasyonla yapılır (tilt radyal COD'u etkilemez)
+
+### Ön Koşul
+
+`build_response_matrix.py` çalıştırılmış ve `M_loco.npy` mevcut olmalıdır.
+
+---
+
+## 11. Parametreler: `params.json`
 
 ### Geometri ve Fizik
 
@@ -333,7 +389,7 @@ COD RMS ~1.7 mm'den 48 quad'ın tüm kaçıklıkları ~0.1 μm hassasiyetle geri
 
 ---
 
-## 11. Kurulum ve Çalıştırma
+## 12. Kurulum ve Çalıştırma
 
 ### Gereksinimler
 
@@ -364,16 +420,25 @@ python plot_results.py
 # → simulasyon_sonuclari.png
 ```
 
-**Adım 3 — Tepki matrisini hesapla** (bir kez yap, sonuçları sakla; ~30-40 dakika):
+**Adım 3 — Tepki matrisini hesapla** (bir kez yap, sonuçları sakla):
 ```bash
 python build_response_matrix.py
-# → R_dy.npy, R_dx.npy
+# Konfigürasyon 1 (nominal g1): R_dy_1, R_dx_1, R_tilt_1
+# Konfigürasyon 2 (g1×1.02):   R_dy_2, R_dx_2, R_tilt_2
+# Birleşik LOCO matrisi:        M_loco (96×96)
+# Geriye dönük uyumluluk:       R_dy, R_dx
 ```
 
-**Adım 4 — Geri çatım testi:**
+**Adım 4a — Quad-only geri çatım testi:**
 ```bash
 python test_reconstruction.py
 # → reconstruction_test.npz ve konsol istatistikleri
+```
+
+**Adım 4b — LOCO geri çatım testi** (quad dy + dipol tilt eş zamanlı):
+```bash
+python test_loco_reconstruction.py
+# → loco_reconstruction_test.npz ve konsol istatistikleri
 ```
 
 ### Tipik Parametre Değişiklikleri
