@@ -176,13 +176,17 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         //   B_Z =  K1 * (dev - dx)
         // QF (type 2): K1 > 0 → horizontally focusing, vertically defocusing.
         // QD (type 3): K1 → -K1 (sign flip).
+        // k1/k0 in params.json are normalised gradients [m⁻²]: K1_phys = k1 * Bρ [T/m].
+        double M_GeV_q = 0.938272046;
+        double Brig = (M_GeV_q / std::sqrt(G_P)) * 1e9 / C_LIGHT;  // Bρ [T·m]
+
         double quadXOffset = field_params[25];
         double current_K1 = (element_type == 2) ? quadK1 : -quadK1;
         double dev_quad = X - R0 - quadXOffset;
 
         double vert_rel = Z - quadVertOffset;
-        double B_quad_r = current_K1 * vert_rel;
-        double B_quad_z = current_K1 * dev_quad;
+        double B_quad_r = current_K1 * Brig * vert_rel;
+        double B_quad_z = current_K1 * Brig * dev_quad;
 
         // Optional sextupole overlay.  Maxwell's ∇·B = 0 requires:
         //   B_r =  K2 * dev * Z
@@ -191,8 +195,8 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double sextSwitch = field_params[9];
         if (sextSwitch > 0.0) {
             double current_sK1 = (element_type == 2) ? sextK1 : -sextK1;
-            B_quad_r += current_sK1 * dev_quad * vert_rel;
-            B_quad_z += 0.5 * current_sK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
+            B_quad_r += current_sK1 * Brig * dev_quad * vert_rel;
+            B_quad_z += 0.5 * current_sK1 * Brig * (dev_quad*dev_quad - vert_rel*vert_rel);
         }
 
         B[0] = B_quad_r;
@@ -208,16 +212,19 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double f_mod    = field_params[20];
         double K1_eff   = quadK0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
 
+        double M_GeV_m  = 0.938272046;
+        double Brig_m   = (M_GeV_m / std::sqrt(G_P)) * 1e9 / C_LIGHT;  // Bρ [T·m]
+
         double dev_quad = X - R0 - quadXOffset;
         double vert_rel = Z - quadVertOffset;
-        double B_quad_r = K1_eff * vert_rel;
-        double B_quad_z = K1_eff * dev_quad;
+        double B_quad_r = K1_eff * Brig_m * vert_rel;
+        double B_quad_z = K1_eff * Brig_m * dev_quad;
 
         // Same Maxwell-correct sextupole overlay as in type 2/3
         double sextSwitch = field_params[9];
         if (sextSwitch > 0.0) {
-            B_quad_r += sextK1 * dev_quad * vert_rel;
-            B_quad_z += 0.5 * sextK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
+            B_quad_r += sextK1 * Brig_m * dev_quad * vert_rel;
+            B_quad_z += 0.5 * sextK1 * Brig_m * (dev_quad*dev_quad - vert_rel*vert_rel);
         }
 
         B[0] = B_quad_r;
@@ -485,11 +492,13 @@ void run_integration(double* y_init, const double* field_params,
             }
 
             // ---- Poincaré section trigger ----
-            // target_quad < 0 → cell-0 ARC1 entry once per revolution (full-turn section)
+            // target_quad < 0 → every ARC1 entry (elem=0), 24 hits/turn.
+            //   Tune formula: Q_full = nFODO * avg_dphi / (2π) requires
+            //   avg_dphi to be the per-cell phase advance (24 samples/turn).
             // target_quad ≥ 0 → specific quad: even=QF(elem2), odd=QD(elem6)
             bool is_poincare_mark = false;
             if (target_quad < 0) {
-                if (elem == 0 && current_fodo == 0) is_poincare_mark = true;
+                if (elem == 0) is_poincare_mark = true;
             } else {
                 if ((target_quad % 2 == 0) && elem == 0) {
                     if (current_fodo == (target_quad / 2)) is_poincare_mark = true;
