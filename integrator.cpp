@@ -87,7 +87,7 @@ void rotate_all(double* y, double theta) {
 //   [3] B0ver    uniform vertical B [T]
 //   [4] B0rad    uniform radial B [T]
 //   [5] B0long   uniform longitudinal B [T]
-//   [6] quadK1   quadrupole gradient K1 [T/m]
+//   [6] quadG1   quadrupole gradient G1 [T/m]
 //   [7] sextK1   sextupole strength K2 [T/m²]
 //   [9] sextSwitch   1 = sextupole on
 //   [19] quadModA    modulation amplitude (type 4 only)
@@ -105,7 +105,7 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
     double B0ver    = field_params[3];
     double B0rad    = field_params[4];
     double B0long   = field_params[5];
-    double quadK1   = field_params[6];
+    double quadG1   = field_params[6];
     double sextK1   = field_params[7];
     double quadVertOffset = field_params[23];
     
@@ -172,17 +172,17 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         //   dy [m] (field_params[23]): vertical offset   → B_r = K1*(Z-dy)
         //   dx [m] (field_params[25]): radial offset     → B_Z = K1*(dev-dx)
         // Pure quadrupole (satisfies ∇·B = 0 and ∇×B = 0):
-        //   B_r =  K1 * (Z - dy)
-        //   B_Z =  K1 * (dev - dx)
-        // QF (type 2): K1 > 0 → horizontally focusing, vertically defocusing.
-        // QD (type 3): K1 → -K1 (sign flip).
+        //   B_r =  G1 * (Z - dy)
+        //   B_Z =  G1 * (dev - dx)
+        // QF (type 2): G1 > 0 → horizontally focusing, vertically defocusing.
+        // QD (type 3): G1 → -G1 (sign flip).
         double quadXOffset = field_params[25];
-        double current_K1 = (element_type == 2) ? quadK1 : -quadK1;
+        double current_G1 = (element_type == 2) ? quadG1 : -quadG1;
         double dev_quad = X - R0 - quadXOffset;
 
         double vert_rel = Z - quadVertOffset;
-        double B_quad_r = current_K1 * vert_rel;
-        double B_quad_z = current_K1 * dev_quad;
+        double B_quad_r = current_G1 * vert_rel;
+        double B_quad_z = current_G1 * dev_quad;
 
         // Optional sextupole overlay.  Maxwell's ∇·B = 0 requires:
         //   B_r =  K2 * dev * Z
@@ -199,19 +199,19 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         B[1] = 0.0;     // no longitudinal field in an ideal quad
         B[2] = B_quad_z;
     } else if (element_type == 4) {
-        // QUAD_F_MOD: focusing quad with time-modulated K1 (cell 0 only).
+        // QUAD_F_MOD: focusing quad with time-modulated G1 (cell 0 only).
         // Used for parametric resonance studies.
-        //   K1_eff(t) = K0 * (1 + A_mod * cos(2π * f_mod * t))
-        double quadK0   = field_params[24];
+        //   G1_eff(t) = G0 * (1 + A_mod * cos(2π * f_mod * t))
+        double quadG0   = field_params[24];
         double quadXOffset = field_params[25];
         double A_mod    = field_params[19];
         double f_mod    = field_params[20];
-        double K1_eff   = quadK0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
+        double G1_eff   = quadG0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
 
         double dev_quad = X - R0 - quadXOffset;
         double vert_rel = Z - quadVertOffset;
-        double B_quad_r = K1_eff * vert_rel;
-        double B_quad_z = K1_eff * dev_quad;
+        double B_quad_r = G1_eff * vert_rel;
+        double B_quad_z = G1_eff * dev_quad;
 
         // Same Maxwell-correct sextupole overlay as in type 2/3
         double sextSwitch = field_params[9];
