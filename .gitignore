@@ -1,5 +1,7 @@
 __pycache__/
 *.pyc
+*.npy
+*.npz
 simulation_data.txt
 poincare_data.txt
 rf.txt
