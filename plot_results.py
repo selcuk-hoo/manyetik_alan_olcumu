@@ -93,6 +93,41 @@ def _save_rf_plot(params):
     print("RF faz diyagramı 'rf.png' olarak kaydedildi.")
 
 
+def _plot_cod(ax, cod_s, cod_data, Q, Q_label, title, ylabel, xlim):
+    if cod_s is not None:
+        lbl = f"{Q_label}={Q:.3f}" if Q is not None else "tur ort."
+        ax.plot(cod_s, cod_data, 'b-', lw=1.5, label=lbl)
+        rms = np.sqrt(np.mean(cod_data**2))
+        ax.text(0.97, 0.97,
+                f"RMS = {rms*1e3:.2f} μm\nTop = {np.sum(cod_data)*1e3:.2f} μm",
+                transform=ax.transAxes, fontsize=8, va='top', ha='right',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.85))
+        ax.legend(fontsize=8)
+    ax.axhline(0, color='gray', lw=0.8, linestyle='--')
+    ax.set_title(title)
+    ax.set_xlabel("s (m)")
+    ax.set_ylabel(ylabel)
+    ax.set_xlim(0, xlim)
+    ax.grid(True, linestyle='--', alpha=0.5)
+
+
+def _plot_phase_space(ax, u, up, plane, title):
+    if len(u) > 1:
+        ax.plot(u, up, 'ko', markersize=3)
+        eps = 2 * np.sqrt(max(0, np.var(u) * np.var(up) - np.cov(u, up)[0, 1]**2))
+        ax.text(0.05, 0.95, f"$\\epsilon_{plane} = {eps:.1e}$ $\\pi$·mm·mrad",
+                transform=ax.transAxes, fontsize=9, va='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    else:
+        ax.text(0.5, 0.5, "Poincaré verisi yok",
+                ha='center', va='center', transform=ax.transAxes, fontsize=10,
+                bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.9))
+    ax.set_title(title)
+    ax.set_xlabel(f"{plane} (mm)")
+    ax.set_ylabel(f"{plane}' (mrad)")
+    ax.grid(True, linestyle='--', alpha=0.5)
+
+
 def main():
     """
     Ana görselleştirme rutini. 'simulation_data.txt', 'cod_data.txt' ve 
@@ -185,38 +220,9 @@ def main():
     axs[0, 0].set_ylabel("x (mm)")
     axs[0, 0].grid(True, linestyle='--', alpha=0.5)
 
-    if cod_s is not None:
-        lbl = f"Qx={Qx:.3f}" if Qx is not None else "tur ort."
-        axs[0, 1].plot(cod_s, cod_x, 'b-', lw=1.5, label=lbl)
-        rms_x   = np.sqrt(np.mean(cod_x**2))
-        sum_x   = np.sum(cod_x)
-        axs[0, 1].text(0.97, 0.97,
-                       f"RMS = {rms_x*1e3:.2f} μm\nTop = {sum_x*1e3:.2f} μm",
-                       transform=axs[0, 1].transAxes, fontsize=8, va='top', ha='right',
-                       bbox=dict(boxstyle='round', facecolor='white', alpha=0.85))
-        axs[0, 1].legend(fontsize=8)
-    axs[0, 1].axhline(0, color='gray', lw=0.8, linestyle='--')
-    axs[0, 1].set_title("Kapalı Yörünge — COD x")
-    axs[0, 1].set_xlabel("s (m)")
-    axs[0, 1].set_ylabel("$x_{CO}$ (mm)")
-    axs[0, 1].set_xlim(0, circumference)
-    axs[0, 1].grid(True, linestyle='--', alpha=0.5)
+    _plot_cod(axs[0, 1], cod_s, cod_x, Qx, "Qx", "Kapalı Yörünge — COD x", "$x_{CO}$ (mm)", circumference)
 
-    if len(x_pc) > 1:
-        axs[0, 2].plot(x_pc, xp_pc, 'ko', markersize=3)
-        vx  = np.var(x_pc); vxp = np.var(xp_pc)
-        eps = 2 * np.sqrt(max(0, vx * vxp - np.cov(x_pc, xp_pc)[0, 1]**2))
-        axs[0, 2].text(0.05, 0.95, f"$\\epsilon_x = {eps:.1e}$ $\\pi$·mm·mrad",
-                       transform=axs[0, 2].transAxes, fontsize=9, va='top',
-                       bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-    else:
-        axs[0, 2].text(0.5, 0.5, "Poincaré verisi yok\n(x' = Px_global → yay artefaktı)",
-                       ha='center', va='center', transform=axs[0, 2].transAxes, fontsize=10,
-                       bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.9))
-    axs[0, 2].set_title("Yatay Faz Uzayı (x–x')")
-    axs[0, 2].set_xlabel("x (mm)")
-    axs[0, 2].set_ylabel("x' (mrad)")
-    axs[0, 2].grid(True, linestyle='--', alpha=0.5)
+    _plot_phase_space(axs[0, 2], x_pc, xp_pc, "x", "Yatay Faz Uzayı (x–x')")
     _plot_fft(axs[0, 3], t_sec, x, "x(t) FFT")
 
     # ---- Row 2: vertical y ----
@@ -226,38 +232,9 @@ def main():
     axs[1, 0].set_ylabel("y (mm)")
     axs[1, 0].grid(True, linestyle='--', alpha=0.5)
 
-    if cod_s is not None:
-        lbl = f"Qy={Qy:.3f}" if Qy is not None else "tur ort."
-        axs[1, 1].plot(cod_s, cod_y, 'b-', lw=1.5, label=lbl)
-        rms_y   = np.sqrt(np.mean(cod_y**2))
-        sum_y   = np.sum(cod_y)
-        axs[1, 1].text(0.97, 0.97,
-                       f"RMS = {rms_y*1e3:.2f} μm\nTop = {sum_y*1e3:.2f} μm",
-                       transform=axs[1, 1].transAxes, fontsize=8, va='top', ha='right',
-                       bbox=dict(boxstyle='round', facecolor='white', alpha=0.85))
-        axs[1, 1].legend(fontsize=8)
-    axs[1, 1].axhline(0, color='gray', lw=0.8, linestyle='--')
-    axs[1, 1].set_title("Kapalı Yörünge — COD y")
-    axs[1, 1].set_xlabel("s (m)")
-    axs[1, 1].set_ylabel("$y_{CO}$ (mm)")
-    axs[1, 1].set_xlim(0, circumference)
-    axs[1, 1].grid(True, linestyle='--', alpha=0.5)
+    _plot_cod(axs[1, 1], cod_s, cod_y, Qy, "Qy", "Kapalı Yörünge — COD y", "$y_{CO}$ (mm)", circumference)
 
-    if len(y_pc) > 1:
-        axs[1, 2].plot(y_pc, yp_pc, 'ko', markersize=3)
-        vy  = np.var(y_pc); vyp = np.var(yp_pc)
-        eps = 2 * np.sqrt(max(0, vy * vyp - np.cov(y_pc, yp_pc)[0, 1]**2))
-        axs[1, 2].text(0.05, 0.95, f"$\\epsilon_y = {eps:.1e}$ $\\pi$·mm·mrad",
-                       transform=axs[1, 2].transAxes, fontsize=9, va='top',
-                       bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-    else:
-        axs[1, 2].text(0.5, 0.5, "Poincaré verisi yok",
-                       ha='center', va='center', transform=axs[1, 2].transAxes, fontsize=10,
-                       bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.9))
-    axs[1, 2].set_title("Dikey Faz Uzayı (y–y')")
-    axs[1, 2].set_xlabel("y (mm)")
-    axs[1, 2].set_ylabel("y' (mrad)")
-    axs[1, 2].grid(True, linestyle='--', alpha=0.5)
+    _plot_phase_space(axs[1, 2], y_pc, yp_pc, "y", "Dikey Faz Uzayı (y–y')")
     _plot_fft(axs[1, 3], t_sec, y, "y(t) FFT")
 
     # ---- Row 3: spin ----
@@ -284,11 +261,12 @@ def main():
         ax.set_ylabel(ylabel)
         ax.grid(True, linestyle='--', alpha=0.5)
 
-    _spin_panel(axs[2, 0], sx, "$S_x$")
-    axs[2, 0].set_title("Radyal Spin ($S_x$-t)")
-
-    _spin_panel(axs[2, 1], sy, "$S_y$")
-    axs[2, 1].set_title("Dikey Spin ($S_y$-t)")
+    for ax, sig, lbl, title in [
+        (axs[2, 0], sx, "$S_x$", "Radyal Spin ($S_x$-t)"),
+        (axs[2, 1], sy, "$S_y$", "Dikey Spin ($S_y$-t)"),
+    ]:
+        _spin_panel(ax, sig, lbl)
+        ax.set_title(title)
 
     axs[2, 2].plot(t, sz, 'k-', lw=0.8)
     axs[2, 2].set_title("Longitudinal Spin ($S_z$-t)")

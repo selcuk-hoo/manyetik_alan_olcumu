@@ -45,6 +45,7 @@ const double M_P     = 1.672621777e-27;   // proton rest mass [kg]
 const double Q_E     = 1.602176565e-19;   // proton charge [C]
 const double G_P     = 1.792847356;       // proton anomalous magnetic moment G = (g-2)/2
 const double EDM_ETA = 1.88e-15;          // proton EDM sensitivity parameter η
+const double M_PROTON_GEV = 0.938272046;  // proton rest mass [GeV/c²]
 
 inline void cross_product(const double* a, const double* b, double* res) {
     res[0] = a[1]*b[2] - a[2]*b[1];
@@ -54,6 +55,13 @@ inline void cross_product(const double* a, const double* b, double* res) {
 
 inline double dot_product(const double* a, const double* b) {
     return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+}
+
+// Local radial deviation: R - R0 for arc elements, X - R0 for straights.
+inline double radial_dev(const double* y, double R0, int elem) {
+    if (elem == 0 || elem == 4)
+        return std::sqrt(y[0]*y[0] + y[1]*y[1]) - R0;
+    return y[0] - R0;
 }
 
 // Rotate position, momentum and spin vectors together around the Z-axis by
@@ -138,11 +146,6 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
                 E_z = E0 * pow_n * ((n-1.0)*zR - (n*n-1.0)*(n+1.0)*zR2*zR/6.0);
             }
         }
-        // ELEKTROMANYETİK ALAN (FODO) TANIMLAMALARI
-        // Verilen 's' (uzunlamasına konum) değerine göre parçacığın halkanın hangi 
-        // elemanının (Dipol, Quadrupole, Sextupole, RF Kovuğu vb.) içinde olduğunu bulur
-        // ve o noktadaki yerel elektromanyetik alanları (E, B) hesaplar.
-        // Ayrıca K-Modülasyon ve misalignments (B0hor vs) hatalarını da burada ekler.
         E[0] = E_r * cos_th;
         E[1] = E_r * sin_th;
         E[2] = E_z;
@@ -154,9 +157,8 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         // s rotates B_eq·ẑ into the radial plane: ΔB_r = B_eq·sin(φ).
         // Adding this as a UNIFORM field (no position-dependent cos/sin factors)
         // ensures ∇·B = 0 so the GL4 symplectic structure is preserved.
-        double M_GeV   = 0.938272046;
-        double p_magic = M_GeV / std::sqrt(G_P);           // [GeV/c]
-        double B_eq    = p_magic * 1e9 / (C_LIGHT * R0);   // [T]
+        double p_magic = M_PROTON_GEV / std::sqrt(G_P);  // [GeV/c]
+        double B_eq    = p_magic * 1e9 / (C_LIGHT * R0); // [T]
         // b_tilt: uniform radial offset (∇·B = 0 preserved).
         // A tilt φ around s rotates B_eq·ẑ into the radial plane: ΔB_r = B_eq·sin(φ).
         // After rotate_all the arc entry is always at X≈R0, Y≈0, so the local
@@ -395,9 +397,8 @@ void run_integration(double* y_init, const double* field_params,
     double V_rf      = field_params[16];
     double h_rf      = field_params[17];
 
-    double M_GeV   = 0.938272046;
-    double p_magic = M_GeV / std::sqrt(G_P);
-    double E_magic = std::sqrt(p_magic*p_magic + M_GeV*M_GeV);
+    double p_magic = M_PROTON_GEV / std::sqrt(G_P);
+    double E_magic = std::sqrt(p_magic*p_magic + M_PROTON_GEV*M_PROTON_GEV);
     double beta_magic = p_magic / E_magic;
     double circumference = 2.0 * M_PI * R0 + 4.0 * nFODO * driftLen + 2.0 * nFODO * quadLen; 
     double omega_rf = h_rf * 2.0 * M_PI * beta_magic * C_LIGHT / circumference;
@@ -502,14 +503,7 @@ void run_integration(double* y_init, const double* field_params,
             if (is_poincare_mark && p_saved < max_poincare) {
                 poincare_t[p_saved] = t;
                 for (int i = 0; i < dim; ++i) poincare_out[p_saved*dim + i] = y_init[i];
-                double true_x = 0.0;
-                if (elem == 0 || elem == 4) {
-                    double R = std::sqrt(y_init[0]*y_init[0] + y_init[1]*y_init[1]);
-                    true_x = R - R0;
-                } else {
-                    true_x = y_init[0] - R0;
-                }
-                poincare_out[p_saved*dim + 0] = true_x + R0;
+                poincare_out[p_saved*dim + 0] = radial_dev(y_init, R0, elem) + R0;
                 poincare_out[p_saved*dim + 1] = global_S;
                 p_saved++;
             }
@@ -520,14 +514,7 @@ void run_integration(double* y_init, const double* field_params,
             // so s=0 and s=circumference carry the same number of averaged turns.
             if (past_first_rev) {
                 int idx = current_fodo * 8 + elem;
-                double cod_x = 0.0;
-                if (elem == 0 || elem == 4) {
-                    double R = std::sqrt(y_init[0]*y_init[0] + y_init[1]*y_init[1]);
-                    cod_x = R - R0;
-                } else {
-                    cod_x = y_init[0] - R0;
-                }
-                stage_x[idx] = cod_x * 1000.0;  // mm (overwrite — one visit per rev)
+                stage_x[idx] = radial_dev(y_init, R0, elem) * 1000.0;
                 stage_y[idx] = y_init[2] * 1000.0;
             }
 
@@ -564,7 +551,6 @@ void run_integration(double* y_init, const double* field_params,
                 field_params_local[26] = dipole_tilt[2 * current_fodo + 1];
             }
 
-            double start_metric = (type == 0) ? std::atan2(y_init[1], y_init[0]) : y_init[1];
             double accumulated = 0.0;
 
             while (accumulated < target_val && t < t_end) {
@@ -613,14 +599,7 @@ void run_integration(double* y_init, const double* field_params,
 
                 if (global_step % save_interval == 0 && save_idx < return_steps) {
                     for (int i = 0; i < dim; ++i) history_out[save_idx*dim + i] = y_init[i];
-                double true_x = 0.0;
-                if (elem == 0 || elem == 4) {
-                    double R = std::sqrt(y_init[0]*y_init[0] + y_init[1]*y_init[1]);
-                    true_x = R - R0;
-                } else {
-                    true_x = y_init[0] - R0;
-                }
-                history_out[save_idx*dim + 0] = true_x + R0;
+                    history_out[save_idx*dim + 0] = radial_dev(y_init, R0, elem) + R0;
                     history_out[save_idx*dim + 1] = global_S;
                     save_idx++;
                 }

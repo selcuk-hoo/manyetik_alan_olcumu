@@ -239,8 +239,7 @@ def main():
     # ve spinin net kayma eğilimini (eğimi) ortaya çıkarır.
     # ---------------------------------------------------------
     from scipy.signal import savgol_filter
-    window_size = (len(sx_arr) // 4) * 2 + 1 
-    if window_size < 5: window_size = 5
+    window_size = max(5, (len(sx_arr) // 4) * 2 + 1)
     sx_filtered = savgol_filter(sx_arr, window_length=window_size, polyorder=1)
     sy_filtered = savgol_filter(sy_arr, window_length=window_size, polyorder=1)
     
