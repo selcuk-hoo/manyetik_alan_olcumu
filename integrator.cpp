@@ -156,9 +156,14 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double M_GeV   = 0.938272046;
         double p_magic = M_GeV / std::sqrt(G_P);           // [GeV/c]
         double B_eq    = p_magic * 1e9 / (C_LIGHT * R0);   // [T]
+        // b_tilt: uniform radial offset (∇·B = 0 preserved).
+        // A tilt φ around s rotates B_eq·ẑ into the radial plane: ΔB_r = B_eq·sin(φ).
+        // After rotate_all the arc entry is always at X≈R0, Y≈0, so the local
+        // radial direction ≈ global X. Adding b_tilt as a constant X-component
+        // (no cos_th/sin_th factors) keeps the field uniform inside the magnet.
         double b_tilt  = B_eq * std::sin(field_params[26]);
-        B[0] = -B0rad * cos_th + B0long * sin_th + b_tilt * cos_th;
-        B[1] = -B0rad * sin_th - B0long * cos_th + b_tilt * sin_th;
+        B[0] = -B0rad * cos_th + B0long * sin_th + b_tilt;
+        B[1] = -B0rad * sin_th - B0long * cos_th;
         B[2] = B0ver;
     } else if (element_type == 2 || element_type == 3) {
         // QUADRUPOLE (QF or QD, normal — no time modulation).
