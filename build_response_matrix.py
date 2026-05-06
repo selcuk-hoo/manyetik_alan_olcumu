@@ -208,10 +208,10 @@ def main():
     g1_pert  = g1_nom * (1.0 + eps)
 
     print("=" * 60)
-    print("Aşama 1: Quad-only tepki matrisleri (tek konfigürasyon)")
+    print("Konfigürasyon 1: nominal optik")
     print("=" * 60)
-    print(f"  n_quad = {n_q},  δ_q = {delta_q*1e3:.2f} mm")
-    print(f"  g1 = {g1_nom} T/m (nominal)")
+    print(f"  n_quad = {n_q},  δ_q = {delta_q*1e3:.2f} mm,  δ_tilt = {delta_t*1e3:.2f} mrad")
+    print(f"  g1 = {g1_nom} T/m")
     print()
 
     alanlar1, state01 = setup_fields(config, g1_override=g1_nom)
@@ -237,9 +237,9 @@ def main():
 
     print()
     print("=" * 60)
-    print("Aşama 2: İkinci optik konfigürasyon (LOCO için)")
+    print("Konfigürasyon 2: pertürbe optik (LOCO için)")
     print("=" * 60)
-    print(f"  g1_pert = {g1_pert:.4f} T/m  (nominal × {1+eps:.2f})")
+    print(f"  g1 = {g1_pert:.4f} T/m  (nominal × {1+eps:.2f}  →  %{eps*100:.0f} değişim)")
     print()
 
     alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
