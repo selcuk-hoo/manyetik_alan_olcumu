@@ -210,7 +210,9 @@ def main():
                        transform=axs[0, 2].transAxes, fontsize=9, va='top',
                        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     else:
-        axs[0, 2].plot(x, (data[:, 4] / data[:, 6]) * 1000, 'k.', markersize=1)
+        axs[0, 2].text(0.5, 0.5, "Poincaré verisi yok\n(x' = Px_global → yay artefaktı)",
+                       ha='center', va='center', transform=axs[0, 2].transAxes, fontsize=10,
+                       bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.9))
     axs[0, 2].set_title("Yatay Faz Uzayı (x–x')")
     axs[0, 2].set_xlabel("x (mm)")
     axs[0, 2].set_ylabel("x' (mrad)")
@@ -249,7 +251,9 @@ def main():
                        transform=axs[1, 2].transAxes, fontsize=9, va='top',
                        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     else:
-        axs[1, 2].plot(y, (data[:, 5] / data[:, 6]) * 1000, 'k.', markersize=1)
+        axs[1, 2].text(0.5, 0.5, "Poincaré verisi yok",
+                       ha='center', va='center', transform=axs[1, 2].transAxes, fontsize=10,
+                       bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.9))
     axs[1, 2].set_title("Dikey Faz Uzayı (y–y')")
     axs[1, 2].set_xlabel("y (mm)")
     axs[1, 2].set_ylabel("y' (mrad)")
