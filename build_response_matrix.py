@@ -3,8 +3,8 @@
 build_response_matrix.py
 
 Quad kaçıklıklarının tepki matrisini hesaplar:
-  R_dy [48×48] : quad_dy (dikey kaçıklık) → x_COD (quad girişlerinde)
-  R_dx [48×48] : quad_dx (radyal kaçıklık) → y_COD (quad girişlerinde)
+  R_dy [48×48] : quad_dy (dikey kaçıklık) → y_COD (quad girişlerinde)
+  R_dx [48×48] : quad_dx (radyal kaçıklık) → x_COD (quad girişlerinde)
 
 Her sütun: tek bir quada δ=0.1 mm kaçıklık → tüm BPM'lerde ölçülen COD / δ
 Toplam koşum sayısı: 1 referans + 48 dy + 48 dx = 97
@@ -136,8 +136,8 @@ def main():
         dy = np.zeros(n_q); dy[i] = delta
         dx = np.zeros(n_q); dx[i] = delta
         x_cod, y_cod = run_sim(alanlar, state0, config, dy, dx)
-        R_dy[:, i] = (x_cod - x0) / delta  # [mm/m]
-        R_dx[:, i] = (y_cod - y0) / delta  # [mm/m]
+        R_dy[:, i] = (y_cod - y0) / delta  # dy → y_COD [mm/m]
+        R_dx[:, i] = (x_cod - x0) / delta  # dx → x_COD [mm/m]
         if (i + 1) % 8 == 0:
             elapsed = time.time() - t_start
             remaining = elapsed / (i + 1) * (n_q - i - 1)

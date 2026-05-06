@@ -49,18 +49,20 @@ def main():
     print("Hatalı koşum...")
     x_cod, y_cod = run_sim(alanlar, state0, config, dy_gercek, dx_gercek)
 
-    # Net COD değişimi
-    dx_cod = x_cod - x0
-    dy_cod = y_cod - y0
+    # Net COD değişimi (x_cod radyal, y_cod dikey — her ikisi mm cinsinden)
+    dx_cod = x_cod - x0  # radyal COD değişimi [mm]
+    dy_cod = y_cod - y0  # dikey  COD değişimi [mm]
 
-    print(f"\nÖlçülen COD — x: RMS={np.std(dx_cod)*1e3:.3f} mm, "
-          f"max={np.max(np.abs(dx_cod))*1e3:.3f} mm")
-    print(f"              y: RMS={np.std(dy_cod)*1e3:.3f} mm, "
-          f"max={np.max(np.abs(dy_cod))*1e3:.3f} mm")
+    print(f"\nÖlçülen COD — radyal: RMS={np.std(dx_cod)*1e3:.3f} μm, "
+          f"max={np.max(np.abs(dx_cod))*1e3:.3f} μm")
+    print(f"              dikey:  RMS={np.std(dy_cod)*1e3:.3f} μm, "
+          f"max={np.max(np.abs(dy_cod))*1e3:.3f} μm")
 
-    # Geri çatım: R @ hata = COD  →  hata = R^{-1} @ COD
-    dy_geri = np.linalg.solve(R_dy, dx_cod)
-    dx_geri = np.linalg.solve(R_dx, dy_cod)
+    # Geri çatım:
+    #   R_dy @ dy = dy_cod (dikey kaçıklık → dikey COD)
+    #   R_dx @ dx = dx_cod (radyal kaçıklık → radyal COD)
+    dy_geri = np.linalg.solve(R_dy, dy_cod)
+    dx_geri = np.linalg.solve(R_dx, dx_cod)
 
     # Hata analizi
     hata_dy = dy_geri - dy_gercek
