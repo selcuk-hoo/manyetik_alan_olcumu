@@ -114,7 +114,7 @@ def main():
     delta = 1e-4                      # 0.1 mm pertürbasyon
 
     print(f"Tepki matrisi: {n_q} quad, δ = {delta*1e3:.2f} mm")
-    print(f"Toplam koşum: {1 + 2*n_q}")
+    print(f"Toplam koşum: {1 + n_q} (dy ve dx aynı anda uygulanıyor)")
     print()
 
     # Referans COD (hatasız)
@@ -125,28 +125,18 @@ def main():
           f"x_max={np.max(np.abs(x0))*1e3:.2f} μm, "
           f"y_max={np.max(np.abs(y0))*1e3:.2f} μm")
 
-    # R_dy: quad_dy → x_COD
+    # dy ve dx aynı anda uygulanır: düzlemler ayrıştığından
+    #   x_COD değişimi → yalnızca dy'den gelir → R_dy sütunu
+    #   y_COD değişimi → yalnızca dx'den gelir → R_dx sütunu
     R_dy = np.zeros((n_q, n_q))
-    print(f"\nR_dy ({n_q}×{n_q}) — dikey kaçıklık → x_COD:")
-    t_start = time.time()
-    for i in range(n_q):
-        dy = np.zeros(n_q)
-        dy[i] = delta
-        x_cod, _ = run_sim(alanlar, state0, config, dy, np.zeros(n_q))
-        R_dy[:, i] = (x_cod - x0) / delta  # [mm/m]
-        if (i + 1) % 8 == 0:
-            elapsed = time.time() - t_start
-            remaining = elapsed / (i + 1) * (n_q - i - 1)
-            print(f"  {i+1}/{n_q}  ({elapsed:.0f}s geçti, ~{remaining:.0f}s kaldı)")
-
-    # R_dx: quad_dx → y_COD
     R_dx = np.zeros((n_q, n_q))
-    print(f"\nR_dx ({n_q}×{n_q}) — radyal kaçıklık → y_COD:")
+    print(f"\nR_dy ve R_dx ({n_q}×{n_q}) — birleşik koşumlar:")
     t_start = time.time()
     for i in range(n_q):
-        dx = np.zeros(n_q)
-        dx[i] = delta
-        _, y_cod = run_sim(alanlar, state0, config, np.zeros(n_q), dx)
+        dy = np.zeros(n_q); dy[i] = delta
+        dx = np.zeros(n_q); dx[i] = delta
+        x_cod, y_cod = run_sim(alanlar, state0, config, dy, dx)
+        R_dy[:, i] = (x_cod - x0) / delta  # [mm/m]
         R_dx[:, i] = (y_cod - y0) / delta  # [mm/m]
         if (i + 1) % 8 == 0:
             elapsed = time.time() - t_start
