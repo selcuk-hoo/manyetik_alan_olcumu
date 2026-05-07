@@ -2,18 +2,23 @@
 """
 test_loco_reconstruction.py
 
-İki optik konfigürasyondaki COD ölçümlerinden quad dy ve dipol tilt hatalarını
-eş zamanlı olarak geri çatar.
+İki optik konfigürasyondaki COD ölçümlerinden quad dy, dx ve dipol tilt
+hatalarını eş zamanlı olarak geri çatar.
 
-Kullanılan sistem:
-  M @ [dy; tilt] = [y_COD_1; y_COD_2]
+Sistem:
+  M @ [dy; tilt] = [y_COD_1; y_COD_2]   (dikey, 96×96 LOCO)
+  R_dx @ dx      = x_COD_1               (radyal, 48×48)
 
-  M = [[R_dy_1, R_tilt_1],   (nominal g1)
-       [R_dy_2, R_tilt_2]]   (pertürbe g1)
+BPM hataları (params.json'dan):
+  bpm_noise_sigma  : her ölçümde bağımsız Gaussian gürültü [m]
+                     (elektronik gürültü, tur-tur değişen)
+  bpm_offset_sigma : her BPM için sabit sistematik ofset [m]
+                     (kalibrasyon hatası, ortalama almakla yok olmaz)
 
-Boyutlar: M [96×96], [dy;tilt] [96], [y_COD_1;y_COD_2] [96]
-
-Ön koşul: build_response_matrix.py çalıştırılmış ve tüm .npy dosyaları mevcut.
+Çözüm yöntemleri:
+  linalg.solve : doğrudan LU — iyi koşullu sistemler için yedek
+  SVD          : kırpmalı tekil değer ayrışımı (rcond eşiği)
+  Tikhonov     : min ||Mx-b||² + λ||x||²  —  gürültülü sistemler için
 """
 import json
 import numpy as np
@@ -23,101 +28,198 @@ from build_response_matrix import setup_fields, run_sim
 BASE = os.path.dirname(os.path.abspath(__file__))
 
 
+def apply_bpm_errors(cod, sigma_noise, sigma_offset, offset_vec, rng):
+    """COD vektörüne BPM gürültüsü ve ofseti ekler."""
+    noisy = cod.copy()
+    if sigma_noise > 0:
+        noisy += rng.normal(0, sigma_noise, len(cod))
+    if sigma_offset > 0:
+        noisy += offset_vec
+    return noisy
+
+
+def compute_svd(M):
+    """M matrisinin SVD'sini hesaplar."""
+    return np.linalg.svd(M, full_matrices=False)
+
+
+def solve_svd(b, U, s, Vt, rcond=1e-6):
+    """Kırpmalı SVD ile Mx = b çözer.
+
+    rcond: en büyük tekil değere oranla eşik — altındakiler sıfırlanır.
+    """
+    threshold = rcond * s[0]
+    s_inv = np.where(s > threshold, 1.0 / s, 0.0)
+    kept    = int(np.sum(s > threshold))
+    dropped = len(s) - kept
+    x = Vt.T @ (s_inv * (U.T @ b))
+    return x, kept, dropped
+
+
+def solve_tikhonov(b, U, s, Vt, lambda_):
+    """Tikhonov regularizasyonu: min ||Mx-b||² + λ||x||²
+
+    SVD üzerinden filtre faktörleriyle çözüm:
+      x = V @ diag(σᵢ/(σᵢ²+λ)) @ Uᵀ @ b
+
+    Büyük σᵢ → faktör ≈ 1/σᵢ  (korunur)
+    Küçük σᵢ → faktör ≈ σᵢ/λ  (bastırılır, kırpmalı SVD'deki sıfır yerine)
+    """
+    filter_factors = s / (s**2 + lambda_)
+    x = Vt.T @ (filter_factors * (U.T @ b))
+    residual = np.linalg.norm(U @ (s * (Vt @ x)) - b)  # ||Mx - b||
+    return x, residual
+
+
+def find_lambda_discrepancy(b, U, s, Vt, sigma_noise, n_obs, eta=1.0):
+    """Uyumsuzluk ilkesiyle λ seçer: ||Mx-b|| ≈ η × σ_noise × √n_obs
+
+    eta: güvenlik faktörü (varsayılan 1.0)
+    Gerçek deneyde uygulanabilir — yalnızca σ_noise bilinmesi yeterli.
+    """
+    target = eta * sigma_noise * np.sqrt(n_obs)
+    lam_lo, lam_hi = 1e-10 * s[0]**2, 1e10 * s[0]**2
+    for _ in range(60):
+        lam_mid = np.sqrt(lam_lo * lam_hi)
+        _, res = solve_tikhonov(b, U, s, Vt, lam_mid)
+        if res < target:
+            lam_hi = lam_mid
+        else:
+            lam_lo = lam_mid
+    return np.sqrt(lam_lo * lam_hi)
+
+
+def find_lambda_optimal(b, U, s, Vt, x_true):
+    """Simülasyona özgü: gerçek hatayı minimize eden λ'yı bulur.
+
+    Gerçek deneyde KULLANILAMAZ — yalnızca doğrulama amacıyla.
+    """
+    lambdas = np.logspace(-4, 8, 500) * s[-1]**2
+    best_lam, best_err = lambdas[0], np.inf
+    for lam in lambdas:
+        x, _ = solve_tikhonov(b, U, s, Vt, lam)
+        err = np.linalg.norm(x - x_true)
+        if err < best_err:
+            best_err, best_lam = err, lam
+    return best_lam
+
+
+def print_results(label, dy_g, dy_r, dx_g, dx_r, tilt_g, tilt_r):
+    hata_dy   = dy_r   - dy_g
+    hata_dx   = dx_r   - dx_g
+    hata_tilt = tilt_r - tilt_g
+    corr_dy   = np.corrcoef(dy_g,   dy_r)[0, 1]
+    corr_dx   = np.corrcoef(dx_g,   dx_r)[0, 1]
+    corr_tilt = np.corrcoef(tilt_g, tilt_r)[0, 1]
+    print(f"\n--- {label} ---")
+    print(f"dy   hata RMS : {np.std(hata_dy)*1e6:8.2f} μm    korelasyon: {corr_dy:.6f}")
+    print(f"dx   hata RMS : {np.std(hata_dx)*1e6:8.2f} μm    korelasyon: {corr_dx:.6f}")
+    print(f"tilt hata RMS : {np.std(hata_tilt)*1e6:8.2f} μrad  korelasyon: {corr_tilt:.6f}")
+
+
 def main():
     os.chdir(BASE)
 
     with open("params.json") as f:
         config = json.load(f)
 
-    # Matrisleri yükle
-    R_dy_1   = np.load("R_dy_1.npy")
-    R_dx_1   = np.load("R_dx_1.npy")
-    R_tilt_1 = np.load("R_tilt_1.npy")
-    R_dy_2   = np.load("R_dy_2.npy")
-    R_tilt_2 = np.load("R_tilt_2.npy")
-    M_loco   = np.load("M_loco.npy")
+    R_dx_1 = np.load("R_dx_1.npy")
+    M_loco = np.load("M_loco.npy")
 
-    n_q = R_dy_1.shape[0]   # 48
-    eps = 0.02
+    n_q     = R_dx_1.shape[0]   # 48
     g1_nom  = config.get("g1", 0.21)
-    g1_pert = g1_nom * (1.0 + eps)
+    g1_pert = g1_nom * 1.02
 
-    # Optik konfigürasyonları
-    alanlar1, state01 = setup_fields(config, g1_override=g1_nom)
+    sigma_noise  = config.get("bpm_noise_sigma",  0.0)
+    sigma_offset = config.get("bpm_offset_sigma", 0.0)
+    offset_seed  = config.get("bpm_offset_seed",  55)
+
+    alanlar1, state01 = setup_fields(config)
     alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
 
-    # Bilinen rastgele hatalar (tekrarlanabilir)
+    rng_offset = np.random.default_rng(seed=offset_seed)
+    bpm_offset_dy = rng_offset.normal(0, sigma_offset, n_q) if sigma_offset > 0 else np.zeros(n_q)
+    bpm_offset_dx = rng_offset.normal(0, sigma_offset, n_q) if sigma_offset > 0 else np.zeros(n_q)
+    rng_noise = np.random.default_rng(seed=99)
+
     rng = np.random.default_rng(seed=13)
-    dy_max   = 0.3e-3   # ±0.3 mm quad dikey kaçıklık
-    tilt_max = 0.2e-3   # ±0.2 mrad dipol tilt
-    dy_gercek   = rng.uniform(-dy_max,   dy_max,   n_q)
-    tilt_gercek = rng.uniform(-tilt_max, tilt_max, n_q)
+    dy_gercek   = rng.uniform(-0.3e-3, 0.3e-3, n_q)
+    dx_gercek   = rng.uniform(-0.3e-3, 0.3e-3, n_q)
+    tilt_gercek = rng.uniform(-0.2e-3, 0.2e-3, n_q)
 
-    print(f"Gerçek hatalar:")
-    print(f"  dy   RMS = {np.std(dy_gercek)*1e3:.3f} mm,  max = {np.max(np.abs(dy_gercek))*1e3:.3f} mm")
-    print(f"  tilt RMS = {np.std(tilt_gercek)*1e3:.3f} mrad, max = {np.max(np.abs(tilt_gercek))*1e3:.3f} mrad")
+    print("Gerçek hatalar:")
+    print(f"  dy   RMS = {np.std(dy_gercek)*1e3:.3f} mm")
+    print(f"  dx   RMS = {np.std(dx_gercek)*1e3:.3f} mm")
+    print(f"  tilt RMS = {np.std(tilt_gercek)*1e3:.3f} mrad")
+    if sigma_noise > 0:
+        print(f"\nBPM gürültü σ = {sigma_noise*1e6:.1f} μm,  ofset σ = {sigma_offset*1e6:.1f} μm")
 
-    # Referans COD (sıfır hata, her iki konfigürasyon)
     print("\nReferans koşumları...")
     x0_1, y0_1 = run_sim(alanlar1, state01, config, np.zeros(n_q), np.zeros(n_q))
     x0_2, y0_2 = run_sim(alanlar2, state02, config, np.zeros(n_q), np.zeros(n_q))
 
-    # Hatalı simülasyon (quad dy + dipol tilt)
     print("Hatalı koşumlar...")
-    _, y_cod_1 = run_sim(alanlar1, state01, config,
-                         dy_gercek, np.zeros(n_q), dipole_tilt=tilt_gercek)
-    _, y_cod_2 = run_sim(alanlar2, state02, config,
-                         dy_gercek, np.zeros(n_q), dipole_tilt=tilt_gercek)
+    x_cod_1, y_cod_1 = run_sim(alanlar1, state01, config,
+                                dy_gercek, dx_gercek, dipole_tilt=tilt_gercek)
+    x_cod_2, y_cod_2 = run_sim(alanlar2, state02, config,
+                                dy_gercek, dx_gercek, dipole_tilt=tilt_gercek)
 
-    dy_cod_1 = y_cod_1 - y0_1
-    dy_cod_2 = y_cod_2 - y0_2
+    dy_cod_1_ideal = y_cod_1 - y0_1
+    dy_cod_2_ideal = y_cod_2 - y0_2
+    dx_cod_1_ideal = x_cod_1 - x0_1
 
-    print(f"\nÖlçülen COD (dikey):")
-    print(f"  [nom]  RMS = {np.std(dy_cod_1)*1e3:.3f} μm, max = {np.max(np.abs(dy_cod_1))*1e3:.3f} μm")
-    print(f"  [pert] RMS = {np.std(dy_cod_2)*1e3:.3f} μm, max = {np.max(np.abs(dy_cod_2))*1e3:.3f} μm")
+    dy_cod_1 = apply_bpm_errors(dy_cod_1_ideal, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
+    dy_cod_2 = apply_bpm_errors(dy_cod_2_ideal, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
+    dx_cod_1 = apply_bpm_errors(dx_cod_1_ideal, sigma_noise, sigma_offset, bpm_offset_dx, rng_noise)
 
-    # LOCO geri çatım: M @ [dy; tilt] = [y_COD_1; y_COD_2]
-    rhs = np.concatenate([dy_cod_1, dy_cod_2])
-    sol = np.linalg.solve(M_loco, rhs)
+    print(f"\nÖlçülen COD:")
+    print(f"  dikey [nom]  RMS = {np.std(dy_cod_1)*1e3:.3f} mm")
+    print(f"  dikey [pert] RMS = {np.std(dy_cod_2)*1e3:.3f} mm")
+    print(f"  radyal[nom]  RMS = {np.std(dx_cod_1)*1e3:.3f} mm")
 
-    dy_geri   = sol[:n_q]
-    tilt_geri = sol[n_q:]
+    rhs    = np.concatenate([dy_cod_1, dy_cod_2])
+    x_true = np.concatenate([dy_gercek, tilt_gercek])
 
-    hata_dy   = dy_geri   - dy_gercek
-    hata_tilt = tilt_geri - tilt_gercek
+    # SVD — bir kez hesapla, tüm yöntemler paylaşır
+    U, s, Vt = compute_svd(M_loco)
+    print(f"\nSVD: σ_max={s[0]:.3e}, σ_min={s[-1]:.3e}, κ={s[0]/s[-1]:.3e}")
 
-    print("\n--- LOCO Geri Çatım Sonuçları ---")
-    print(f"dy   gerçek  RMS : {np.std(dy_gercek)*1e3:.4f} mm")
-    print(f"dy   geri ç. RMS : {np.std(dy_geri)*1e3:.4f} mm")
-    print(f"dy   hata    RMS : {np.std(hata_dy)*1e6:.2f} μm")
-    print(f"dy   hata    max : {np.max(np.abs(hata_dy))*1e6:.2f} μm")
-    print()
-    print(f"tilt gerçek  RMS : {np.std(tilt_gercek)*1e6:.4f} μrad")
-    print(f"tilt geri ç. RMS : {np.std(tilt_geri)*1e6:.4f} μrad")
-    print(f"tilt hata    RMS : {np.std(hata_tilt)*1e6:.2f} μrad")
-    print(f"tilt hata    max : {np.max(np.abs(hata_tilt))*1e6:.2f} μrad")
+    # Yöntem 1: linalg.solve (yedek)
+    sol_dir = np.linalg.solve(M_loco, rhs)
+    dx_dir  = np.linalg.solve(R_dx_1, dx_cod_1)
+    print_results("linalg.solve",
+                  dy_gercek, sol_dir[:n_q], dx_gercek, dx_dir,
+                  tilt_gercek, sol_dir[n_q:])
 
-    corr_dy   = np.corrcoef(dy_gercek, dy_geri)[0, 1]
-    corr_tilt = np.corrcoef(tilt_gercek, tilt_geri)[0, 1]
-    print(f"\nKorelasyon — dy  : {corr_dy:.6f}")
-    print(f"             tilt: {corr_tilt:.6f}")
+    # Yöntem 2: Kırpmalı SVD
+    sol_svd, kept, dropped = solve_svd(rhs, U, s, Vt, rcond=1e-6)
+    print(f"\nSVD: tutulan {kept}/{len(s)}, atılan {dropped}/{len(s)}")
+    print_results("SVD (rcond=1e-6)",
+                  dy_gercek, sol_svd[:n_q], dx_gercek, dx_dir,
+                  tilt_gercek, sol_svd[n_q:])
 
-    # Ayrıca quad-only dx geri çatımı (radyal, tilt etkilemez)
-    print("\n--- Radyal Quad (dx) Geri Çatımı ---")
-    dx_gercek = rng.uniform(-dy_max, dy_max, n_q)
-    x_cod_1, _ = run_sim(alanlar1, state01, config,
-                          np.zeros(n_q), dx_gercek)
-    dx_cod_1 = x_cod_1 - x0_1
-    dx_geri = np.linalg.solve(R_dx_1, dx_cod_1)
-    hata_dx = dx_geri - dx_gercek
-    corr_dx = np.corrcoef(dx_gercek, dx_geri)[0, 1]
-    print(f"dx   hata    RMS : {np.std(hata_dx)*1e6:.2f} μm")
-    print(f"Korelasyon — dx  : {corr_dx:.6f}")
+    # Yöntem 3: Tikhonov — optimal λ (simülasyon doğrulaması)
+    lam_opt = find_lambda_optimal(rhs, U, s, Vt, x_true)
+    sol_tik_opt, _ = solve_tikhonov(rhs, U, s, Vt, lam_opt)
+    print(f"\nTikhonov optimal λ = {lam_opt:.3e}  (gerçek hata minimize edildi — sim. only)")
+    print_results("Tikhonov (optimal λ)",
+                  dy_gercek, sol_tik_opt[:n_q], dx_gercek, dx_dir,
+                  tilt_gercek, sol_tik_opt[n_q:])
+
+    # Yöntem 4: Tikhonov — uyumsuzluk ilkesi (σ_noise bilinmesi yeterli)
+    if sigma_noise > 0:
+        lam_disc = find_lambda_discrepancy(rhs, U, s, Vt, sigma_noise, len(rhs))
+        sol_tik_disc, res_disc = solve_tikhonov(rhs, U, s, Vt, lam_disc)
+        print(f"\nTikhonov uyumsuzluk ilkesi: λ = {lam_disc:.3e},  ||Mx-b|| = {res_disc:.3e}")
+        print_results("Tikhonov (uyumsuzluk ilkesi)",
+                      dy_gercek, sol_tik_disc[:n_q], dx_gercek, dx_dir,
+                      tilt_gercek, sol_tik_disc[n_q:])
 
     np.savez("loco_reconstruction_test.npz",
-             dy_gercek=dy_gercek, dy_geri=dy_geri,
-             tilt_gercek=tilt_gercek, tilt_geri=tilt_geri,
-             dx_gercek=dx_gercek, dx_geri=dx_geri)
+             dy_gercek=dy_gercek,   dy_geri=sol_tik_opt[:n_q],
+             dx_gercek=dx_gercek,   dx_geri=dx_dir,
+             tilt_gercek=tilt_gercek, tilt_geri=sol_tik_opt[n_q:],
+             singular_values=s)
     print("\nSonuçlar 'loco_reconstruction_test.npz' dosyasına kaydedildi.")
 
 
