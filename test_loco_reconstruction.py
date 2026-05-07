@@ -217,9 +217,11 @@ def main():
                   dy_gercek, sol_tik_opt[:n_q], dx_gercek, dx_dir,
                   tilt_gercek, sol_tik_opt[n_q:])
 
-    # Yöntem 4: Tikhonov — uyumsuzluk ilkesi (σ_noise bilinmesi yeterli)
+    # Yöntem 4: Tikhonov — uyumsuzluk ilkesi
+    # Efektif σ: hem gürültü hem ofset residual'a katkıda bulunur
     if sigma_noise > 0:
-        lam_disc = find_lambda_discrepancy(rhs, U, s, Vt, sigma_noise, len(rhs))
+        sigma_eff = np.sqrt(sigma_noise**2 + sigma_offset**2)
+        lam_disc = find_lambda_discrepancy(rhs, U, s, Vt, sigma_eff, len(rhs))
         sol_tik_disc, res_disc = solve_tikhonov(rhs, U, s, Vt, lam_disc)
         print(f"\nTikhonov uyumsuzluk ilkesi: λ = {lam_disc:.3e},  ||Mx-b|| = {res_disc:.3e}")
         print_results("Tikhonov (uyumsuzluk ilkesi)",
