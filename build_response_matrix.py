@@ -40,10 +40,11 @@ from integrator import integrate_particle, FieldParams
 BASE = os.path.dirname(os.path.abspath(__file__))
 
 
-def setup_fields(config, g1_override=None):
+def setup_fields(config, g1_override=None, g0_override=None):
     """FieldParams ve başlangıç koşullarını oluşturur.
 
-    g1_override: None ise config["g1"] kullanılır; verilirse o değer kullanılır.
+    g1_override: tüm quadların gradyanı (None → config["g1"])
+    g0_override: yalnızca 1. FODO'nun 1. QF gradyanı (None → config["g0"])
     """
     M2  = 0.938272046      # proton kütlesi [GeV/c²]
     AMU = 1.792847356      # G = (g-2)/2
@@ -68,8 +69,9 @@ def setup_fields(config, g1_override=None):
     alanlar.B0ver       = config.get("B0ver", 0.0)
     alanlar.B0rad       = config.get("B0rad", 0.0)
     alanlar.B0long      = config.get("B0long", 0.0)
+    g0 = g0_override if g0_override is not None else config.get("g0", g1)
     alanlar.quadG1      = g1
-    alanlar.quadG0      = config.get("g0", g1)
+    alanlar.quadG0      = g0
     alanlar.sextK1      = config.get("sextK1", 0.0)
     alanlar.quadSwitch  = float(config.get("quadSwitch", 1))
     alanlar.sextSwitch  = float(config.get("sextSwitch", 0))
@@ -204,17 +206,19 @@ def main():
     delta_q  = 1e-4   # 0.1 mm quad kaçıklık pertürbasyonu
     delta_t  = 1e-4   # 0.1 mrad dipol tilt pertürbasyonu
     g1_nom   = config.get("g1", 0.21)
-    eps      = 0.02   # %2 optik pertürbasyon
-    g1_pert  = g1_nom * (1.0 + eps)
+    g0_nom   = config.get("g0", g1_nom)   # 1. FODO 1. QF nominal gradyanı
+    eps      = 0.10   # %10 tek quad pertürbasyonu
+    g0_pert  = g0_nom * (1.0 + eps)
 
     print("=" * 60)
     print("Konfigürasyon 1: nominal optik")
     print("=" * 60)
     print(f"  n_quad = {n_q},  δ_q = {delta_q*1e3:.2f} mm,  δ_tilt = {delta_t*1e3:.2f} mrad")
-    print(f"  g1 = {g1_nom} T/m")
+    print(f"  g1 = {g1_nom} T/m (tüm quadlar)")
+    print(f"  g0 = {g0_nom} T/m (1. FODO 1. QF)")
     print()
 
-    alanlar1, state01 = setup_fields(config, g1_override=g1_nom)
+    alanlar1, state01 = setup_fields(config)
     t_total = time.time()
 
     R_dy_1, R_dx_1, R_tilt_1 = build_matrices(
@@ -237,12 +241,13 @@ def main():
 
     print()
     print("=" * 60)
-    print("Konfigürasyon 2: pertürbe optik (LOCO için)")
+    print("Konfigürasyon 2: tek quad pertürbasyonu (LOCO için)")
     print("=" * 60)
-    print(f"  g1 = {g1_pert:.4f} T/m  (nominal × {1+eps:.2f}  →  %{eps*100:.0f} değişim)")
+    print(f"  g1 = {g1_nom} T/m (tüm quadlar — değişmedi)")
+    print(f"  g0 = {g0_pert:.4f} T/m (1. FODO 1. QF  →  %{eps*100:.0f} değişim)")
     print()
 
-    alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
+    alanlar2, state02 = setup_fields(config, g0_override=g0_pert)
 
     R_dy_2, R_dx_2, R_tilt_2 = build_matrices(
         alanlar2, state02, config,
@@ -280,8 +285,8 @@ def main():
     elif cond_loco < 1e10:
         print("  → Koşul sayısı yüksek: SVD/Tikhonov regularizasyonu önerilir.")
     else:
-        print("  UYARI: Çok yüksek koşul sayısı — optik pertürbasyon yetersiz olabilir.")
-        print(f"  İpucu: eps={eps} yerine daha büyük bir değer deneyin (ör. 0.03–0.05).")
+        print("  UYARI: Çok yüksek koşul sayısı — tek quad pertürbasyonu yetersiz.")
+        print(f"  İpucu: eps={eps} yerine daha büyük bir değer veya tüm quadları değiştirmeyi deneyin.")
 
     total_elapsed = time.time() - t_total
     print(f"\nToplam süre: {total_elapsed:.0f}s")
