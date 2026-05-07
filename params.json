@@ -42,5 +42,12 @@
     "error_dipole_tilt": 0.0,
 
     "dipole_random_tilt_max": 0.0,
-    "dipole_random_seed": 43
+    "dipole_random_seed": 43,
+
+    "quad_random_tilt_max": 0.0,
+    "quad_random_tilt_seed": 44,
+
+    "bpm_noise_sigma": 0.0,
+    "bpm_offset_sigma": 0.0,
+    "bpm_offset_seed": 55
 }

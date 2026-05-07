@@ -19,6 +19,8 @@ BPM hataları (params.json'dan):
   linalg.solve : doğrudan LU — iyi koşullu sistemler için yedek
   SVD          : kırpmalı tekil değer ayrışımı (rcond eşiği)
   Tikhonov     : min ||Mx-b||² + λ||x||²  —  gürültülü sistemler için
+
+Ön koşul: build_response_matrix.py çalıştırılmış ve .npy dosyaları mevcut.
 """
 import json
 import numpy as np
@@ -29,7 +31,12 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 
 
 def apply_bpm_errors(cod, sigma_noise, sigma_offset, offset_vec, rng):
-    """COD vektörüne BPM gürültüsü ve ofseti ekler."""
+    """COD vektörüne BPM gürültüsü ve ofseti ekler.
+
+    sigma_noise  : her ölçümde yeniden çekilen Gaussian gürültü std [m]
+    sigma_offset : sabit BPM ofseti (offset_vec ile verilir)
+    offset_vec   : önceden üretilmiş sabit ofset dizisi [m]
+    """
     noisy = cod.copy()
     if sigma_noise > 0:
         noisy += rng.normal(0, sigma_noise, len(cod))
@@ -137,11 +144,15 @@ def main():
     alanlar1, state01 = setup_fields(config)
     alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
 
+    # Sabit BPM ofseti: kalibrasyon hatası, her ölçümde aynı
     rng_offset = np.random.default_rng(seed=offset_seed)
     bpm_offset_dy = rng_offset.normal(0, sigma_offset, n_q) if sigma_offset > 0 else np.zeros(n_q)
     bpm_offset_dx = rng_offset.normal(0, sigma_offset, n_q) if sigma_offset > 0 else np.zeros(n_q)
+
+    # Simülasyon gürültüsü için ayrı RNG (tur-tur değişen)
     rng_noise = np.random.default_rng(seed=99)
 
+    # Bilinen rastgele hatalar
     rng = np.random.default_rng(seed=13)
     dy_gercek   = rng.uniform(-0.3e-3, 0.3e-3, n_q)
     dx_gercek   = rng.uniform(-0.3e-3, 0.3e-3, n_q)
