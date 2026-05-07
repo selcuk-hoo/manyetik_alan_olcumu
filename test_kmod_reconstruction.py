@@ -89,9 +89,12 @@ def main():
     rng_noise = np.random.default_rng(seed=99)
 
     # Quad hataları (geri çatılacak)
-    rng = np.random.default_rng(seed=13)
-    dy_gercek = rng.uniform(-0.3e-3, 0.3e-3, n_q)
-    dx_gercek = rng.uniform(-0.3e-3, 0.3e-3, n_q)
+    dy_max = config.get("quad_random_dy_max", 0.3e-3)
+    dx_max = config.get("quad_random_dx_max", 0.3e-3)
+    quad_seed = config.get("quad_random_seed", 13)
+    rng = np.random.default_rng(seed=quad_seed)
+    dy_gercek = rng.uniform(-dy_max, dy_max, n_q)
+    dx_gercek = rng.uniform(-dx_max, dx_max, n_q)
 
     # Dipol tiltler — sabit, tüm ölçümlerde aynı (BPM ofseti gibi davranır)
     tilt_max  = config.get("dipole_random_tilt_max", 0.2e-3)
