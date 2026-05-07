@@ -140,20 +140,30 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
 
 
 def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
-                   label=""):
+                   label="", sigma_noise=0.0, rng=None):
     """Verilen optik konfigürasyon için R_dy, R_dx ve R_tilt matrislerini hesaplar.
 
     delta_q    : quad kaçıklık pertürbasyonu [m]  (varsayılan 0.1 mm)
     delta_tilt : dipol tilt pertürbasyonu    [rad] (varsayılan 0.1 mrad)
     label      : ilerleme çıktısı için etiket
+    sigma_noise: BPM ölçüm gürültüsü std [m] — her koşumda bağımsız eklenir
+                 BPM ofseti farkta iptal olduğundan burada uygulanmaz.
+    rng        : numpy RNG nesnesi (sigma_noise > 0 ise gerekli)
     """
     n_q = 2 * int(alanlar.nFODO)
+
+    def add_noise(x_arr, y_arr):
+        if sigma_noise > 0 and rng is not None:
+            return (x_arr + rng.normal(0, sigma_noise, n_q),
+                    y_arr + rng.normal(0, sigma_noise, n_q))
+        return x_arr, y_arr
 
     # Referans COD
     t0 = time.time()
     if label:
         print(f"  [{label}] Referans koşumu...")
     x0, y0 = run_sim(alanlar, state0, config, np.zeros(n_q), np.zeros(n_q))
+    x0, y0 = add_noise(x0, y0)
     if label:
         print(f"  [{label}] Referans tamamlandı ({time.time()-t0:.1f}s). "
               f"x_max={np.max(np.abs(x0))*1e3:.2f} μm, "
@@ -169,17 +179,15 @@ def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
         dy = np.zeros(n_q); dy[i] = delta_q
         dx = np.zeros(n_q); dx[i] = delta_q
         x_cod, y_cod = run_sim(alanlar, state0, config, dy, dx)
-        R_dy[:, i] = (y_cod - y0) / delta_q   # dy → y_COD [mm/m]
-        R_dx[:, i] = (x_cod - x0) / delta_q   # dx → x_COD [mm/m]
+        x_cod, y_cod = add_noise(x_cod, y_cod)
+        R_dy[:, i] = (y_cod - y0) / delta_q
+        R_dx[:, i] = (x_cod - x0) / delta_q
         if label and (i + 1) % 8 == 0:
             el = time.time() - t_start
             rem = el / (i + 1) * (n_q - i - 1)
             print(f"  [{label}] quad {i+1}/{n_q}  ({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
 
-    # Dipol tilt matrisi: her dipole ayrı ayrı tilt uygulanır
-    # dipole_tilt[2*k]   → ARC1 (elem=0) hücre k'da
-    # dipole_tilt[2*k+1] → ARC2 (elem=4) hücre k'da
-    # Tilt B_X bileşeni yaratır → dikey kuvvet → y_COD değişir
+    # Dipol tilt matrisi
     R_tilt = np.zeros((n_q, n_q))
     if label:
         print(f"  [{label}] R_tilt ({n_q}×{n_q})...")
@@ -188,7 +196,8 @@ def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
         tilt = np.zeros(n_q); tilt[i] = delta_tilt
         _, y_cod = run_sim(alanlar, state0, config,
                            np.zeros(n_q), np.zeros(n_q), dipole_tilt=tilt)
-        R_tilt[:, i] = (y_cod - y0) / delta_tilt  # tilt → y_COD [mm/rad]
+        _, y_cod = add_noise(np.zeros(n_q), y_cod)
+        R_tilt[:, i] = (y_cod - y0) / delta_tilt
         if label and (i + 1) % 8 == 0:
             el = time.time() - t_start
             rem = el / (i + 1) * (n_q - i - 1)
@@ -216,12 +225,20 @@ def main():
     print(f"  g1 = {g1_nom} T/m")
     print()
 
+    sigma_noise = config.get("bpm_noise_sigma", 0.0)
+    rng_build   = np.random.default_rng(seed=77) if sigma_noise > 0 else None
+    if sigma_noise > 0:
+        print(f"  BPM gürültüsü (R matrisi): σ = {sigma_noise*1e6:.1f} μm")
+        print(f"  Not: BPM ofseti farkta iptal olur → R'ye uygulanmaz")
+    print()
+
     alanlar1, state01 = setup_fields(config)
     t_total = time.time()
 
     R_dy_1, R_dx_1, R_tilt_1 = build_matrices(
         alanlar1, state01, config,
-        delta_q=delta_q, delta_tilt=delta_t, label="nom"
+        delta_q=delta_q, delta_tilt=delta_t, label="nom",
+        sigma_noise=sigma_noise, rng=rng_build
     )
 
     np.save("R_dy.npy",    R_dy_1)   # geriye dönük uyumluluk
@@ -248,7 +265,8 @@ def main():
 
     R_dy_2, R_dx_2, R_tilt_2 = build_matrices(
         alanlar2, state02, config,
-        delta_q=delta_q, delta_tilt=delta_t, label="pert"
+        delta_q=delta_q, delta_tilt=delta_t, label="pert",
+        sigma_noise=sigma_noise, rng=rng_build
     )
 
     np.save("R_dy_2.npy",   R_dy_2)
