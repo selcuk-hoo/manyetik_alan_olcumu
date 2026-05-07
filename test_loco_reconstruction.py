@@ -90,9 +90,9 @@ def find_lambda_discrepancy(b, U, s, Vt, sigma_noise, n_obs, eta=1.0):
         lam_mid = np.sqrt(lam_lo * lam_hi)
         _, res = solve_tikhonov(b, U, s, Vt, lam_mid)
         if res < target:
-            lam_hi = lam_mid
+            lam_lo = lam_mid   # λ çok küçük → artır
         else:
-            lam_lo = lam_mid
+            lam_hi = lam_mid   # λ çok büyük → azalt
     return np.sqrt(lam_lo * lam_hi)
 
 
