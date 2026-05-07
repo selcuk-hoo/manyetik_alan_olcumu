@@ -17,7 +17,11 @@ Fikir:
             büyük          bastırılmış
 
   Quad katkısı g ile orantılı (ΔR_dy/R_dy ≈ δg/g ≈ %2).
-  Tilt katkısı yalnızca beta fonksiyonu değişiminden gelir (ΔR_tilt << ΔR_dy).
+  Tilt katkısı, iki konfigürasyon arasındaki beta fonksiyonu DEĞİŞİMİNDEN
+  gelir (Δβ/β << δg/g), dolayısıyla ΔR_tilt << ΔR_dy.
+  Not: tilt'in sıfırıncı mertebe katkısı (R_tilt @ tilt) Δy'de iptal olur
+  çünkü aynı tilt her iki konfigürasyonda da mevcuttur. İptal OLMAYAN kısım
+  tilt'in beta fonksiyonlarını değiştirmesinden doğan birinci mertebe etkidir.
 
 BPM hataları:
   Ofset: her iki ölçümde de aynı BPM → Δy'de common-mode rejection ile

@@ -153,8 +153,13 @@ def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
     background_tilt: sabit dipol tilt arka planı [rad dizisi].
                      None → sıfır tilt (mevcut davranış).
                      Verildiğinde referans ve tüm pertürbasyon koşumları
-                     bu tilt ile yapılır — tilt sütun farkında iptal olur
-                     ama beta fonksiyonlarına etkisi R matrisine yansır.
+                     bu tilt ile yapılır.
+                     Sütun farkında iptal olan yalnızca tilt'in sıfırıncı
+                     mertebe katkısı (R_tilt @ bg_tilt)'tır. Tilt'in beta
+                     fonksiyonlarını değiştirmesinden doğan birinci mertebe
+                     etki (∂R_dy/∂tilt * bg_tilt) iptal OLMAZ — bu etki
+                     hesaplanan R_dy sütunlarına yansır ve bu parametrenin
+                     asıl yakalamak istediği büyüklüktür.
     """
     n_q = 2 * int(alanlar.nFODO)
     bg_tilt = background_tilt if background_tilt is not None else np.zeros(n_q)
