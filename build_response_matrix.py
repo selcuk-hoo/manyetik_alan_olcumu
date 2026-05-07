@@ -140,17 +140,24 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
 
 
 def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
-                   label="", sigma_noise=0.0, rng=None):
+                   label="", sigma_noise=0.0, rng=None, background_tilt=None):
     """Verilen optik konfigürasyon için R_dy, R_dx ve R_tilt matrislerini hesaplar.
 
-    delta_q    : quad kaçıklık pertürbasyonu [m]  (varsayılan 0.1 mm)
-    delta_tilt : dipol tilt pertürbasyonu    [rad] (varsayılan 0.1 mrad)
-    label      : ilerleme çıktısı için etiket
-    sigma_noise: BPM ölçüm gürültüsü std [m] — her koşumda bağımsız eklenir
-                 BPM ofseti farkta iptal olduğundan burada uygulanmaz.
-    rng        : numpy RNG nesnesi (sigma_noise > 0 ise gerekli)
+    delta_q        : quad kaçıklık pertürbasyonu [m]  (varsayılan 0.1 mm)
+    delta_tilt     : dipol tilt pertürbasyonu    [rad] (varsayılan 0.1 mrad)
+    label          : ilerleme çıktısı için etiket
+    sigma_noise    : her ölçüme eklenen Gaussian gürültü std [m]
+                     (gerçek deneyde ortalama alınsa da tamamen bastırılamaz)
+                     BPM ofseti farkta iptal olduğundan burada uygulanmaz.
+    rng            : numpy RNG nesnesi (sigma_noise > 0 ise gerekli)
+    background_tilt: sabit dipol tilt arka planı [rad dizisi].
+                     None → sıfır tilt (mevcut davranış).
+                     Verildiğinde referans ve tüm pertürbasyon koşumları
+                     bu tilt ile yapılır — tilt sütun farkında iptal olur
+                     ama beta fonksiyonlarına etkisi R matrisine yansır.
     """
     n_q = 2 * int(alanlar.nFODO)
+    bg_tilt = background_tilt if background_tilt is not None else np.zeros(n_q)
 
     def add_noise(x_arr, y_arr):
         if sigma_noise > 0 and rng is not None:
@@ -158,11 +165,12 @@ def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
                     y_arr + rng.normal(0, sigma_noise, n_q))
         return x_arr, y_arr
 
-    # Referans COD
+    # Referans COD (sabit arka plan tilti dahil)
     t0 = time.time()
     if label:
         print(f"  [{label}] Referans koşumu...")
-    x0, y0 = run_sim(alanlar, state0, config, np.zeros(n_q), np.zeros(n_q))
+    x0, y0 = run_sim(alanlar, state0, config, np.zeros(n_q), np.zeros(n_q),
+                     dipole_tilt=bg_tilt)
     x0, y0 = add_noise(x0, y0)
     if label:
         print(f"  [{label}] Referans tamamlandı ({time.time()-t0:.1f}s). "
@@ -178,7 +186,8 @@ def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
     for i in range(n_q):
         dy = np.zeros(n_q); dy[i] = delta_q
         dx = np.zeros(n_q); dx[i] = delta_q
-        x_cod, y_cod = run_sim(alanlar, state0, config, dy, dx)
+        x_cod, y_cod = run_sim(alanlar, state0, config, dy, dx,
+                               dipole_tilt=bg_tilt)
         x_cod, y_cod = add_noise(x_cod, y_cod)
         R_dy[:, i] = (y_cod - y0) / delta_q
         R_dx[:, i] = (x_cod - x0) / delta_q
@@ -187,13 +196,13 @@ def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
             rem = el / (i + 1) * (n_q - i - 1)
             print(f"  [{label}] quad {i+1}/{n_q}  ({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
 
-    # Dipol tilt matrisi
+    # Dipol tilt matrisi (arka plan tiltine ek olarak pertürbasyon)
     R_tilt = np.zeros((n_q, n_q))
     if label:
         print(f"  [{label}] R_tilt ({n_q}×{n_q})...")
     t_start = time.time()
     for i in range(n_q):
-        tilt = np.zeros(n_q); tilt[i] = delta_tilt
+        tilt = bg_tilt.copy(); tilt[i] += delta_tilt
         _, y_cod = run_sim(alanlar, state0, config,
                            np.zeros(n_q), np.zeros(n_q), dipole_tilt=tilt)
         _, y_cod = add_noise(np.zeros(n_q), y_cod)
@@ -303,6 +312,53 @@ def main():
         print("  UYARI: Çok yüksek koşul sayısı — tek quad pertürbasyonu yetersiz.")
         print(f"  İpucu: eps={eps} yerine daha büyük bir değer veya tüm quadları değiştirmeyi deneyin.")
 
+    # ── K-modülasyon matrisleri: sabit dipol tilt arka planı ile ──────────────
+    tilt_max  = config.get("dipole_random_tilt_max", 0.0)
+    tilt_seed = config.get("dipole_random_seed", 43)
+
+    if tilt_max > 0:
+        print()
+        print("=" * 60)
+        print("K-modülasyon matrisleri: sabit dipol tilt arka planı ile")
+        print("=" * 60)
+        rng_tilt = np.random.default_rng(seed=tilt_seed)
+        bg_tilt  = rng_tilt.uniform(-tilt_max, tilt_max, n_q)
+        print(f"  tilt_max = {tilt_max*1e3:.3f} mrad,  RMS = {np.std(bg_tilt)*1e3:.3f} mrad")
+        print(f"  Seed: {tilt_seed}")
+        print()
+
+        print("Konfigürasyon 1 (kmod, g_nom + sabit tilt)...")
+        R_dy_1t, R_dx_1t, _ = build_matrices(
+            alanlar1, state01, config,
+            delta_q=delta_q, delta_tilt=delta_t, label="kmod-nom",
+            sigma_noise=sigma_noise, rng=rng_build,
+            background_tilt=bg_tilt,
+        )
+
+        print()
+        print("Konfigürasyon 2 (kmod, g_pert + sabit tilt)...")
+        R_dy_2t, R_dx_2t, _ = build_matrices(
+            alanlar2, state02, config,
+            delta_q=delta_q, delta_tilt=delta_t, label="kmod-pert",
+            sigma_noise=sigma_noise, rng=rng_build,
+            background_tilt=bg_tilt,
+        )
+
+        dR_dy_kmod = R_dy_2t - R_dy_1t
+        dR_dx_kmod = R_dx_2t - R_dx_1t
+        np.save("dR_dy_kmod.npy", dR_dy_kmod)
+        np.save("dR_dx_kmod.npy", dR_dx_kmod)
+        np.save("bg_tilt_kmod.npy", bg_tilt)
+
+        cond_dR_dy = np.linalg.cond(dR_dy_kmod)
+        cond_dR_dx = np.linalg.cond(dR_dx_kmod)
+        print(f"\n  ΔR_dy_kmod koşul sayısı: {cond_dR_dy:.3e}")
+        print(f"  ΔR_dx_kmod koşul sayısı: {cond_dR_dx:.3e}")
+        print("  Kaydedildi: dR_dy_kmod.npy, dR_dx_kmod.npy, bg_tilt_kmod.npy")
+    else:
+        print("\n  dipole_random_tilt_max = 0 → K-modülasyon matrisleri atlandı.")
+        print("  (params.json'da dipole_random_tilt_max > 0 yapın ve yeniden çalıştırın)")
+
     total_elapsed = time.time() - t_total
     print(f"\nToplam süre: {total_elapsed:.0f}s")
     print("Kaydedilen dosyalar:")
@@ -310,6 +366,9 @@ def main():
     print("  R_dy_1.npy, R_dx_1.npy, R_tilt_1.npy  (nominal konfigürasyon)")
     print("  R_dy_2.npy, R_dx_2.npy, R_tilt_2.npy  (pertürbe konfigürasyon)")
     print("  M_loco.npy                     (96×96 birleşik LOCO matrisi)")
+    if tilt_max > 0:
+        print("  dR_dy_kmod.npy, dR_dx_kmod.npy  (k-mod: tilt arka planı ile ΔR)")
+        print("  bg_tilt_kmod.npy                 (sabit dipol tilt dizisi)")
 
 
 if __name__ == "__main__":
