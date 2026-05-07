@@ -94,8 +94,10 @@ def main():
     dx_gercek = rng.uniform(-0.3e-3, 0.3e-3, n_q)
 
     # Dipol tiltler — sabit, tüm ölçümlerde aynı (BPM ofseti gibi davranır)
-    rng_tilt = np.random.default_rng(seed=77)
-    tilt_sabit = rng_tilt.uniform(-0.2e-3, 0.2e-3, n_q)
+    tilt_max  = config.get("dipole_random_tilt_max", 0.2e-3)
+    tilt_seed = config.get("dipole_random_seed", 43)
+    rng_tilt  = np.random.default_rng(seed=tilt_seed)
+    tilt_sabit = rng_tilt.uniform(-tilt_max, tilt_max, n_q)
 
     print(f"\nGerçek hatalar:")
     print(f"  dy   RMS = {np.std(dy_gercek)*1e3:.3f} mm")
