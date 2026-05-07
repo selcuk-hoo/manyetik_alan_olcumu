@@ -206,16 +206,14 @@ def main():
     delta_q  = 1e-4   # 0.1 mm quad kaçıklık pertürbasyonu
     delta_t  = 1e-4   # 0.1 mrad dipol tilt pertürbasyonu
     g1_nom   = config.get("g1", 0.21)
-    g0_nom   = config.get("g0", g1_nom)   # 1. FODO 1. QF nominal gradyanı
-    eps      = 0.10   # %10 tek quad pertürbasyonu
-    g0_pert  = g0_nom * (1.0 + eps)
+    eps      = 0.02   # %2 global optik pertürbasyon
+    g1_pert  = g1_nom * (1.0 + eps)
 
     print("=" * 60)
     print("Konfigürasyon 1: nominal optik")
     print("=" * 60)
     print(f"  n_quad = {n_q},  δ_q = {delta_q*1e3:.2f} mm,  δ_tilt = {delta_t*1e3:.2f} mrad")
-    print(f"  g1 = {g1_nom} T/m (tüm quadlar)")
-    print(f"  g0 = {g0_nom} T/m (1. FODO 1. QF)")
+    print(f"  g1 = {g1_nom} T/m")
     print()
 
     alanlar1, state01 = setup_fields(config)
@@ -241,13 +239,12 @@ def main():
 
     print()
     print("=" * 60)
-    print("Konfigürasyon 2: tek quad pertürbasyonu (LOCO için)")
+    print("Konfigürasyon 2: global optik pertürbasyon (LOCO için)")
     print("=" * 60)
-    print(f"  g1 = {g1_nom} T/m (tüm quadlar — değişmedi)")
-    print(f"  g0 = {g0_pert:.4f} T/m (1. FODO 1. QF  →  %{eps*100:.0f} değişim)")
+    print(f"  g1 = {g1_pert:.4f} T/m  (tüm quadlar  →  %{eps*100:.0f} değişim)")
     print()
 
-    alanlar2, state02 = setup_fields(config, g0_override=g0_pert)
+    alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
 
     R_dy_2, R_dx_2, R_tilt_2 = build_matrices(
         alanlar2, state02, config,
