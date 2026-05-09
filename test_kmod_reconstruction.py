@@ -184,11 +184,79 @@ def main():
     print(f"  Gürültüden : {np.std(hata_noise)*1e6:.2f} μm")
     print(f"  Toplam     : {np.std(dy_geri - dy_gercek)*1e6:.2f} μm")
 
-    np.savez("kmod_reconstruction_test.npz",
-             dy_gercek=dy_gercek, dy_geri=dy_geri,
-             dx_gercek=dx_gercek, dx_geri=dx_geri,
-             tilt_sabit=tilt_sabit,
-             quad_signal=quad_signal, tilt_contam=tilt_contam)
+    # ── LOCO çözümü: dy ve tilt birlikte (96×96) ─────────────────────────
+    print("\n" + "=" * 60)
+    print("LOCO çözümü: dy ve tilt birlikte (96×96)")
+    print("=" * 60)
+
+    dy_loco = tilt_loco = None
+    dy_loco_reg = tilt_loco_reg = None
+
+    if os.path.exists("M_loco.npy"):
+        M_loco = np.load("M_loco.npy")
+        cond_M = np.linalg.cond(M_loco)
+        print(f"  M_loco şekli      : {M_loco.shape}")
+        print(f"  κ(M_loco)         : {cond_M:.3e}")
+
+        # ÖNEMLİ: LOCO ham y1, y2 ölçümlerini kullanır (fark değil).
+        # BPM ofseti İPTAL OLMAZ — eğer ofset varsa LOCO'nun çözebilmesi için
+        # ofset bir bilinmeyen olarak modellenmeli (burada modellemiyoruz).
+        # Bu yüzden test gürültü ve ofset olmadan en temiz sonucu verir.
+        rhs = np.concatenate([y1_meas, y2_meas])
+
+        # Doğrudan çözüm
+        try:
+            sol = np.linalg.solve(M_loco, rhs)
+            dy_loco   = sol[:n_q]
+            tilt_loco = sol[n_q:]
+            print("\n[LOCO doğrudan çözüm]")
+            print_results("dy   (LOCO)",   dy_gercek,  dy_loco)
+            print_results("tilt (LOCO)",   tilt_sabit, tilt_loco)
+        except np.linalg.LinAlgError as e:
+            print(f"  Doğrudan çözüm başarısız: {e}")
+
+        # SVD ile regularize edilmiş çözüm (kötü koşullu durumlarda)
+        U, S, Vt = np.linalg.svd(M_loco, full_matrices=False)
+        cutoff = S[0] * 1e-6
+        S_inv = np.where(S > cutoff, 1.0 / S, 0.0)
+        n_kept = int(np.sum(S > cutoff))
+        sol_reg = Vt.T @ (S_inv * (U.T @ rhs))
+        dy_loco_reg   = sol_reg[:n_q]
+        tilt_loco_reg = sol_reg[n_q:]
+        print(f"\n[LOCO + SVD truncate, cutoff = σ_max × 1e-6, "
+              f"{n_kept}/{len(S)} mod tutuldu]")
+        print_results("dy   (LOCO+SVD)", dy_gercek,  dy_loco_reg)
+        print_results("tilt (LOCO+SVD)", tilt_sabit, tilt_loco_reg)
+    else:
+        print("  M_loco.npy bulunamadı — önce build_response_matrix.py'ı çalıştırın.")
+
+    # ── Karşılaştırma özeti ──────────────────────────────────────────────
+    print("\n" + "=" * 60)
+    print("Özet: dy geri çatım hatası RMS [μm]")
+    print("=" * 60)
+    print(f"  K-mod (yalnız ΔR_dy ile)           : "
+          f"{np.std(dy_geri - dy_gercek)*1e6:9.2f}")
+    if dy_loco is not None:
+        print(f"  LOCO (M_loco doğrudan)             : "
+              f"{np.std(dy_loco - dy_gercek)*1e6:9.2f}")
+    if dy_loco_reg is not None:
+        print(f"  LOCO (M_loco + SVD truncate)       : "
+              f"{np.std(dy_loco_reg - dy_gercek)*1e6:9.2f}")
+
+    save_dict = dict(
+        dy_gercek=dy_gercek, dy_geri=dy_geri,
+        dx_gercek=dx_gercek, dx_geri=dx_geri,
+        tilt_sabit=tilt_sabit,
+        quad_signal=quad_signal, tilt_contam=tilt_contam,
+    )
+    if dy_loco is not None:
+        save_dict["dy_loco"]   = dy_loco
+        save_dict["tilt_loco"] = tilt_loco
+    if dy_loco_reg is not None:
+        save_dict["dy_loco_reg"]   = dy_loco_reg
+        save_dict["tilt_loco_reg"] = tilt_loco_reg
+
+    np.savez("kmod_reconstruction_test.npz", **save_dict)
     print("\nSonuçlar 'kmod_reconstruction_test.npz' dosyasına kaydedildi.")
 
 

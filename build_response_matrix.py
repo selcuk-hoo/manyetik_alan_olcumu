@@ -5,11 +5,11 @@ build_response_matrix.py
 İki aşamalı tepki matrisi hesabı:
 
 Aşama 1 — Quad-only (tek optik konfigürasyon):
-  R_dy [48×48] : quad_dy (dikey kaçıklık)  → y_COD (quad girişlerinde) [mm/m]
-  R_dx [48×48] : quad_dx (radyal kaçıklık) → x_COD (quad girişlerinde) [mm/m]
+  R_dy [48×48] : quad_dy (dikey kaçıklık)  → y_COD (quad girişlerinde) [m/m]
+  R_dx [48×48] : quad_dx (radyal kaçıklık) → x_COD (quad girişlerinde) [m/m]
 
 Aşama 2 — LOCO benzeri (iki optik konfigürasyon, dipol tilt de dahil):
-  R_tilt [48×48] : dipol_tilt (s-ekseni etrafında açı) → y_COD [mm/rad]
+  R_tilt [48×48] : dipol_tilt (s-ekseni etrafında açı) → y_COD [m/rad]
 
   Dikey düzlem karışıklığı:
     y_COD = R_dy @ dy + R_tilt @ tilt  (tek ölçüm → 96 bilinmeyene 48 denklem: belirsiz)
@@ -25,21 +25,38 @@ Aşama 2 — LOCO benzeri (iki optik konfigürasyon, dipol tilt de dahil):
 
   κ(M) küçük olduğunda dy ve tilt eş zamanlı geri çatılabilir.
 
+Düzeltmeler (önceki sürüme göre):
+  • dx ve dy AYRI koşumlarla pertürbe ediliyor (önceki sürüm aynı koşumda
+    ikisini birden yapıyor ve düzlemler arası kuplaj sızıntısına açıktı).
+  • Tüm pertürbasyon koşumları artık ProcessPoolExecutor ile paralel çalışıyor.
+    Her worker süreci kendi geçici çalışma dizinine chdir eder; böylece
+    C++ entegratörünün yazdığı `cod_data.txt` dosyaları çakışmaz.
+
+Komut satırı:
+  python build_response_matrix.py --workers 7
+
 Kaydedilen dosyalar:
   R_dy.npy, R_dx.npy                         — nominal, quad-only (mevcut format)
   R_dy_1.npy, R_dx_1.npy, R_tilt_1.npy      — nominal konfigürasyon
   R_dy_2.npy, R_dx_2.npy, R_tilt_2.npy      — pertürbe konfigürasyon
   M_loco.npy                                  — 96×96 birleşik LOCO matrisi
 """
+import argparse
+import atexit
 import json
 import numpy as np
 import os
+import shutil
+import tempfile
 import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
 from integrator import integrate_particle, FieldParams
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
 
+# ── Fiziksel kurulum ──────────────────────────────────────────────────────
 def setup_fields(config, g1_override=None, g0_override=None):
     """FieldParams ve başlangıç koşullarını oluşturur.
 
@@ -97,9 +114,13 @@ def setup_fields(config, g1_override=None, g0_override=None):
 
 def read_cod_quads(nFODO):
     """QF ve QD giriş noktalarında x ve y COD değerlerini döndürür.
+
+    NOT: Dosya yolu **CWD'ye** görelidir (BASE değil). Bu, paralelleştirmede
+    her worker'ın kendi geçici dizininde çalışmasını mümkün kılar.
+
     Sıralama: [QF_0, QD_0, QF_1, QD_1, ..., QF_23, QD_23]
     """
-    cd = np.loadtxt(os.path.join(BASE, "cod_data.txt"), skiprows=1)
+    cd = np.loadtxt("cod_data.txt", skiprows=1)
     n = int(nFODO)
     x_bpm = np.empty(2 * n)
     y_bpm = np.empty(2 * n)
@@ -116,12 +137,13 @@ def read_cod_quads(nFODO):
 def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
     """Tek bir parçacık koşumu yapar ve BPM konumlarında COD değerlerini döndürür.
 
-    dipole_tilt: None → sıfır tilt (mevcut davranış)
+    Çıktı dosyaları (`cod_data.txt`, `rf.txt`) her zaman **CWD**'ye yazılır;
+    paralel modda her worker süreci kendi geçici dizininde olduğundan dosyalar
+    çakışmaz.
     """
     for fname in ("cod_data.txt", "rf.txt"):
-        p = os.path.join(BASE, fname)
-        if os.path.exists(p):
-            os.remove(p)
+        if os.path.exists(fname):
+            os.remove(fname)
     n_q = 2 * int(alanlar.nFODO)
     if dipole_tilt is None:
         dipole_tilt = np.zeros(n_q)
@@ -139,88 +161,140 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
     return read_cod_quads(int(alanlar.nFODO))
 
 
-def build_matrices(alanlar, state0, config, delta_q=1e-4, delta_tilt=1e-4,
-                   label="", sigma_noise=0.0, rng=None, background_tilt=None):
+# ── Paralelleştirme yardımcıları ──────────────────────────────────────────
+def _worker_init():
+    """Her worker süreci kendi geçici dizinine chdir eder.
+
+    C++ entegratör `cod_data.txt`'yi CWD'ye yazdığından, paralel worker'lar
+    aynı dosya üzerinde çakışmasın diye bu izolasyon gereklidir.
+    """
+    tmp = tempfile.mkdtemp(prefix=f"kmod_w{os.getpid()}_")
+    os.chdir(tmp)
+    atexit.register(shutil.rmtree, tmp, ignore_errors=True)
+
+
+def _run_one(task):
+    """Worker giriş noktası: setup + run_sim → COD."""
+    config, g1_override, g0_override, kind, idx, dy_arr, dx_arr, tilt_arr = task
+    alanlar, state0 = setup_fields(config, g1_override=g1_override,
+                                   g0_override=g0_override)
+    x_cod, y_cod = run_sim(alanlar, state0, config, dy_arr, dx_arr,
+                           dipole_tilt=tilt_arr)
+    return kind, idx, x_cod, y_cod
+
+
+def build_matrices(config, g1_override=None, g0_override=None,
+                   delta_q=1e-4, delta_tilt=1e-4, label="",
+                   sigma_noise=0.0, noise_seed=77,
+                   background_tilt=None, n_workers=1):
     """Verilen optik konfigürasyon için R_dy, R_dx ve R_tilt matrislerini hesaplar.
 
     delta_q        : quad kaçıklık pertürbasyonu [m]  (varsayılan 0.1 mm)
     delta_tilt     : dipol tilt pertürbasyonu    [rad] (varsayılan 0.1 mrad)
     label          : ilerleme çıktısı için etiket
-    sigma_noise    : her ölçüme eklenen Gaussian gürültü std [m]
+    sigma_noise    : R inşası sırasında BPM'lere eklenen Gaussian gürültü std [m]
                      (gerçek deneyde ortalama alınsa da tamamen bastırılamaz)
-                     BPM ofseti farkta iptal olduğundan burada uygulanmaz.
-    rng            : numpy RNG nesnesi (sigma_noise > 0 ise gerekli)
+    noise_seed     : gürültü RNG tohumu
     background_tilt: sabit dipol tilt arka planı [rad dizisi].
                      None → sıfır tilt (mevcut davranış).
                      Verildiğinde referans ve tüm pertürbasyon koşumları
-                     bu tilt ile yapılır.
-                     Sütun farkında iptal olan yalnızca tilt'in sıfırıncı
-                     mertebe katkısı (R_tilt @ bg_tilt)'tır. Tilt'in beta
-                     fonksiyonlarını değiştirmesinden doğan birinci mertebe
-                     etki (∂R_dy/∂tilt * bg_tilt) iptal OLMAZ — bu etki
-                     hesaplanan R_dy sütunlarına yansır ve bu parametrenin
-                     asıl yakalamak istediği büyüklüktür.
+                     bu tilt ile yapılır. Sütun farkında iptal olan yalnızca
+                     tilt'in sıfırıncı mertebe katkısı (R_tilt @ bg_tilt)'tır;
+                     birinci mertebe etki (∂R_dy/∂tilt * bg_tilt) hesaplanan
+                     R_dy sütunlarına yansır.
+    n_workers      : paralel worker süreci sayısı (1 → seri).
     """
-    n_q = 2 * int(alanlar.nFODO)
-    bg_tilt = background_tilt if background_tilt is not None else np.zeros(n_q)
+    n_q = 2 * int(config.get("nFODO", 24))
+    bg_tilt = (background_tilt if background_tilt is not None
+               else np.zeros(n_q))
+    zeros = np.zeros(n_q)
 
-    def add_noise(x_arr, y_arr):
-        if sigma_noise > 0 and rng is not None:
-            return (x_arr + rng.normal(0, sigma_noise, n_q),
-                    y_arr + rng.normal(0, sigma_noise, n_q))
-        return x_arr, y_arr
-
-    # Referans COD (sabit arka plan tilti dahil)
-    t0 = time.time()
-    if label:
-        print(f"  [{label}] Referans koşumu...")
-    x0, y0 = run_sim(alanlar, state0, config, np.zeros(n_q), np.zeros(n_q),
-                     dipole_tilt=bg_tilt)
-    x0, y0 = add_noise(x0, y0)
-    if label:
-        print(f"  [{label}] Referans tamamlandı ({time.time()-t0:.1f}s). "
-              f"x_max={np.max(np.abs(x0))*1e3:.2f} μm, "
-              f"y_max={np.max(np.abs(y0))*1e3:.2f} μm")
-
-    # Quad matrisleri: dy ve dx aynı anda pertürbe edilir (düzlemler ayrışık)
-    R_dy = np.zeros((n_q, n_q))
-    R_dx = np.zeros((n_q, n_q))
-    if label:
-        print(f"  [{label}] R_dy ve R_dx ({n_q}×{n_q})...")
-    t_start = time.time()
+    # Görev listesi: 1 referans + n_q dy + n_q dx + n_q tilt = 3*n_q + 1
+    # ÖNEMLİ: dy ve dx artık AYRI koşumlarda pertürbe ediliyor (önceki sürüm
+    # aynı koşumda ikisini birden yapıyor → düzlemler arası kuplaj sızıntısı).
+    tasks = []
+    tasks.append((config, g1_override, g0_override,
+                  'ref', 0, zeros, zeros, bg_tilt))
     for i in range(n_q):
-        dy = np.zeros(n_q); dy[i] = delta_q
-        dx = np.zeros(n_q); dx[i] = delta_q
-        x_cod, y_cod = run_sim(alanlar, state0, config, dy, dx,
-                               dipole_tilt=bg_tilt)
-        x_cod, y_cod = add_noise(x_cod, y_cod)
-        R_dy[:, i] = (y_cod - y0) / delta_q
-        R_dx[:, i] = (x_cod - x0) / delta_q
-        if label and (i + 1) % 8 == 0:
-            el = time.time() - t_start
-            rem = el / (i + 1) * (n_q - i - 1)
-            print(f"  [{label}] quad {i+1}/{n_q}  ({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
-
-    # Dipol tilt matrisi (arka plan tiltine ek olarak pertürbasyon)
-    R_tilt = np.zeros((n_q, n_q))
-    if label:
-        print(f"  [{label}] R_tilt ({n_q}×{n_q})...")
-    t_start = time.time()
+        dy = zeros.copy(); dy[i] = delta_q
+        tasks.append((config, g1_override, g0_override,
+                      'dy', i, dy, zeros, bg_tilt))
+    for i in range(n_q):
+        dx = zeros.copy(); dx[i] = delta_q
+        tasks.append((config, g1_override, g0_override,
+                      'dx', i, zeros, dx, bg_tilt))
     for i in range(n_q):
         tilt = bg_tilt.copy(); tilt[i] += delta_tilt
-        _, y_cod = run_sim(alanlar, state0, config,
-                           np.zeros(n_q), np.zeros(n_q), dipole_tilt=tilt)
-        _, y_cod = add_noise(np.zeros(n_q), y_cod)
-        R_tilt[:, i] = (y_cod - y0) / delta_tilt
-        if label and (i + 1) % 8 == 0:
-            el = time.time() - t_start
-            rem = el / (i + 1) * (n_q - i - 1)
-            print(f"  [{label}] dipol {i+1}/{n_q}  ({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
+        tasks.append((config, g1_override, g0_override,
+                      'tilt', i, zeros, zeros, tilt))
 
+    n_total = len(tasks)
+    if label:
+        print(f"  [{label}] {n_total} koşum, n_workers={n_workers}")
+    t0 = time.time()
+
+    results = {}
+    progress_step = max(1, n_total // 10)
+
+    if n_workers > 1:
+        with ProcessPoolExecutor(max_workers=n_workers,
+                                 initializer=_worker_init) as pool:
+            futures = [pool.submit(_run_one, t) for t in tasks]
+            for j, fut in enumerate(as_completed(futures), 1):
+                kind, idx, x_cod, y_cod = fut.result()
+                results[(kind, idx)] = (x_cod, y_cod)
+                if label and (j % progress_step == 0 or j == n_total):
+                    el = time.time() - t0
+                    rem = el / j * (n_total - j)
+                    print(f"  [{label}] {j}/{n_total}  "
+                          f"({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
+    else:
+        for j, t in enumerate(tasks, 1):
+            kind, idx, x_cod, y_cod = _run_one(t)
+            results[(kind, idx)] = (x_cod, y_cod)
+            if label and (j % progress_step == 0 or j == n_total):
+                el = time.time() - t0
+                rem = el / j * (n_total - j)
+                print(f"  [{label}] {j}/{n_total}  "
+                      f"({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
+
+    # Referans ve gürültü uygulaması (deterministik, tek thread'de)
+    x0_clean, y0_clean = results[('ref', 0)]
+    rng = np.random.default_rng(noise_seed) if sigma_noise > 0 else None
+
+    def _noisy(arr):
+        return arr + rng.normal(0, sigma_noise, len(arr)) if rng is not None else arr
+
+    x0 = _noisy(x0_clean)
+    y0 = _noisy(y0_clean)
+
+    R_dy   = np.zeros((n_q, n_q))
+    R_dx   = np.zeros((n_q, n_q))
+    R_tilt = np.zeros((n_q, n_q))
+
+    for i in range(n_q):
+        _, y_cod = results[('dy', i)]
+        R_dy[:, i] = (_noisy(y_cod) - y0) / delta_q
+    for i in range(n_q):
+        x_cod, _ = results[('dx', i)]
+        R_dx[:, i] = (_noisy(x_cod) - x0) / delta_q
+    for i in range(n_q):
+        _, y_cod = results[('tilt', i)]
+        R_tilt[:, i] = (_noisy(y_cod) - y0) / delta_tilt
+
+    if label:
+        print(f"  [{label}] tamamlandı ({time.time()-t0:.1f}s)")
     return R_dy, R_dx, R_tilt
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Tepki matrisi inşası — paralel."
+    )
+    parser.add_argument("--workers", "-w", type=int, default=1,
+                        help="Paralel worker süreç sayısı (öneri: çekirdek-1)")
+    args = parser.parse_args()
+
     os.chdir(BASE)
     with open("params.json") as f:
         config = json.load(f)
@@ -232,41 +306,35 @@ def main():
     eps      = 0.02   # %2 global optik pertürbasyon
     g1_pert  = g1_nom * (1.0 + eps)
 
-    print("=" * 60)
-    print("Konfigürasyon 1: nominal optik")
-    print("=" * 60)
-    print(f"  n_quad = {n_q},  δ_q = {delta_q*1e3:.2f} mm,  δ_tilt = {delta_t*1e3:.2f} mrad")
-    print(f"  g1 = {g1_nom} T/m")
-    print()
-
     sigma_noise = config.get("bpm_noise_sigma", 0.0)
-    rng_build   = np.random.default_rng(seed=77) if sigma_noise > 0 else None
+
+    print("=" * 60)
+    print(f"Konfigürasyon 1: nominal optik  (n_workers={args.workers})")
+    print("=" * 60)
+    print(f"  n_quad = {n_q},  δ_q = {delta_q*1e3:.2f} mm,  "
+          f"δ_tilt = {delta_t*1e3:.2f} mrad")
+    print(f"  g1 = {g1_nom} T/m")
     if sigma_noise > 0:
-        print(f"  BPM gürültüsü (R matrisi): σ = {sigma_noise*1e6:.1f} μm")
-        print(f"  Not: BPM ofseti farkta iptal olur → R'ye uygulanmaz")
+        print(f"  BPM gürültüsü (R inşasında): σ = {sigma_noise*1e6:.1f} μm")
     print()
 
-    alanlar1, state01 = setup_fields(config)
     t_total = time.time()
 
     R_dy_1, R_dx_1, R_tilt_1 = build_matrices(
-        alanlar1, state01, config,
+        config, g1_override=g1_nom,
         delta_q=delta_q, delta_tilt=delta_t, label="nom",
-        sigma_noise=sigma_noise, rng=rng_build
+        sigma_noise=sigma_noise, n_workers=args.workers,
     )
 
-    np.save("R_dy.npy",    R_dy_1)   # geriye dönük uyumluluk
-    np.save("R_dx.npy",    R_dx_1)
-    np.save("R_dy_1.npy",  R_dy_1)
-    np.save("R_dx_1.npy",  R_dx_1)
+    np.save("R_dy.npy",     R_dy_1)   # geriye dönük uyumluluk
+    np.save("R_dx.npy",     R_dx_1)
+    np.save("R_dy_1.npy",   R_dy_1)
+    np.save("R_dx_1.npy",   R_dx_1)
     np.save("R_tilt_1.npy", R_tilt_1)
 
-    cond_dy1   = np.linalg.cond(R_dy_1)
-    cond_dx1   = np.linalg.cond(R_dx_1)
-    cond_tilt1 = np.linalg.cond(R_tilt_1)
-    print(f"\n  [nom] R_dy  koşul sayısı: {cond_dy1:.3e}")
-    print(f"  [nom] R_dx  koşul sayısı: {cond_dx1:.3e}")
-    print(f"  [nom] R_tilt koşul sayısı: {cond_tilt1:.3e}")
+    print(f"\n  [nom] κ(R_dy)   = {np.linalg.cond(R_dy_1):.3e}")
+    print(f"  [nom] κ(R_dx)   = {np.linalg.cond(R_dx_1):.3e}")
+    print(f"  [nom] κ(R_tilt) = {np.linalg.cond(R_tilt_1):.3e}")
 
     print()
     print("=" * 60)
@@ -275,31 +343,24 @@ def main():
     print(f"  g1 = {g1_pert:.4f} T/m  (tüm quadlar  →  %{eps*100:.0f} değişim)")
     print()
 
-    alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
-
     R_dy_2, R_dx_2, R_tilt_2 = build_matrices(
-        alanlar2, state02, config,
+        config, g1_override=g1_pert,
         delta_q=delta_q, delta_tilt=delta_t, label="pert",
-        sigma_noise=sigma_noise, rng=rng_build
+        sigma_noise=sigma_noise, n_workers=args.workers,
     )
 
     np.save("R_dy_2.npy",   R_dy_2)
     np.save("R_dx_2.npy",   R_dx_2)
     np.save("R_tilt_2.npy", R_tilt_2)
 
-    cond_dy2   = np.linalg.cond(R_dy_2)
-    cond_dx2   = np.linalg.cond(R_dx_2)
-    cond_tilt2 = np.linalg.cond(R_tilt_2)
-    print(f"\n  [pert] R_dy  koşul sayısı: {cond_dy2:.3e}")
-    print(f"  [pert] R_dx  koşul sayısı: {cond_dx2:.3e}")
-    print(f"  [pert] R_tilt koşul sayısı: {cond_tilt2:.3e}")
+    print(f"\n  [pert] κ(R_dy)   = {np.linalg.cond(R_dy_2):.3e}")
+    print(f"  [pert] κ(R_dx)   = {np.linalg.cond(R_dx_2):.3e}")
+    print(f"  [pert] κ(R_tilt) = {np.linalg.cond(R_tilt_2):.3e}")
 
     # LOCO birleşik matrisi: dikey düzlem
-    #   M @ [dy; tilt] = [y_COD_1; y_COD_2]
     M_loco = np.block([[R_dy_1, R_tilt_1],
-                        [R_dy_2, R_tilt_2]])
+                       [R_dy_2, R_tilt_2]])
     np.save("M_loco.npy", M_loco)
-
     cond_loco = np.linalg.cond(M_loco)
 
     print()
@@ -310,12 +371,11 @@ def main():
     print(f"  κ(M_loco)     : {cond_loco:.3e}")
 
     if cond_loco < 1e6:
-        print("  → Koşul sayısı makul: dy ve dipol tilt eş zamanlı geri çatılabilir.")
+        print("  → Koşul sayısı makul: dy ve tilt eş zamanlı geri çatılabilir.")
     elif cond_loco < 1e10:
         print("  → Koşul sayısı yüksek: SVD/Tikhonov regularizasyonu önerilir.")
     else:
-        print("  UYARI: Çok yüksek koşul sayısı — tek quad pertürbasyonu yetersiz.")
-        print(f"  İpucu: eps={eps} yerine daha büyük bir değer veya tüm quadları değiştirmeyi deneyin.")
+        print("  UYARI: Çok yüksek koşul sayısı — global pertürbasyon yetersiz.")
 
     # ── K-modülasyon matrisleri: sabit dipol tilt arka planı ile ──────────────
     tilt_max  = config.get("dipole_random_tilt_max", 0.0)
@@ -328,25 +388,24 @@ def main():
         print("=" * 60)
         rng_tilt = np.random.default_rng(seed=tilt_seed)
         bg_tilt  = rng_tilt.uniform(-tilt_max, tilt_max, n_q)
-        print(f"  tilt_max = {tilt_max*1e3:.3f} mrad,  RMS = {np.std(bg_tilt)*1e3:.3f} mrad")
-        print(f"  Seed: {tilt_seed}")
+        print(f"  tilt_max = {tilt_max*1e3:.3f} mrad,  "
+              f"RMS = {np.std(bg_tilt)*1e3:.3f} mrad,  seed={tilt_seed}")
         print()
 
         print("Konfigürasyon 1 (kmod, g_nom + sabit tilt)...")
         R_dy_1t, R_dx_1t, _ = build_matrices(
-            alanlar1, state01, config,
+            config, g1_override=g1_nom,
             delta_q=delta_q, delta_tilt=delta_t, label="kmod-nom",
-            sigma_noise=sigma_noise, rng=rng_build,
-            background_tilt=bg_tilt,
+            sigma_noise=sigma_noise, background_tilt=bg_tilt,
+            n_workers=args.workers,
         )
 
-        print()
-        print("Konfigürasyon 2 (kmod, g_pert + sabit tilt)...")
+        print("\nKonfigürasyon 2 (kmod, g_pert + sabit tilt)...")
         R_dy_2t, R_dx_2t, _ = build_matrices(
-            alanlar2, state02, config,
+            config, g1_override=g1_pert,
             delta_q=delta_q, delta_tilt=delta_t, label="kmod-pert",
-            sigma_noise=sigma_noise, rng=rng_build,
-            background_tilt=bg_tilt,
+            sigma_noise=sigma_noise, background_tilt=bg_tilt,
+            n_workers=args.workers,
         )
 
         dR_dy_kmod = R_dy_2t - R_dy_1t
@@ -355,25 +414,14 @@ def main():
         np.save("dR_dx_kmod.npy", dR_dx_kmod)
         np.save("bg_tilt_kmod.npy", bg_tilt)
 
-        cond_dR_dy = np.linalg.cond(dR_dy_kmod)
-        cond_dR_dx = np.linalg.cond(dR_dx_kmod)
-        print(f"\n  ΔR_dy_kmod koşul sayısı: {cond_dR_dy:.3e}")
-        print(f"  ΔR_dx_kmod koşul sayısı: {cond_dR_dx:.3e}")
+        print(f"\n  κ(ΔR_dy_kmod) = {np.linalg.cond(dR_dy_kmod):.3e}")
+        print(f"  κ(ΔR_dx_kmod) = {np.linalg.cond(dR_dx_kmod):.3e}")
         print("  Kaydedildi: dR_dy_kmod.npy, dR_dx_kmod.npy, bg_tilt_kmod.npy")
     else:
         print("\n  dipole_random_tilt_max = 0 → K-modülasyon matrisleri atlandı.")
-        print("  (params.json'da dipole_random_tilt_max > 0 yapın ve yeniden çalıştırın)")
 
     total_elapsed = time.time() - t_total
-    print(f"\nToplam süre: {total_elapsed:.0f}s")
-    print("Kaydedilen dosyalar:")
-    print("  R_dy.npy, R_dx.npy            (nominal, geriye dönük uyumluluk)")
-    print("  R_dy_1.npy, R_dx_1.npy, R_tilt_1.npy  (nominal konfigürasyon)")
-    print("  R_dy_2.npy, R_dx_2.npy, R_tilt_2.npy  (pertürbe konfigürasyon)")
-    print("  M_loco.npy                     (96×96 birleşik LOCO matrisi)")
-    if tilt_max > 0:
-        print("  dR_dy_kmod.npy, dR_dx_kmod.npy  (k-mod: tilt arka planı ile ΔR)")
-        print("  bg_tilt_kmod.npy                 (sabit dipol tilt dizisi)")
+    print(f"\nToplam süre: {total_elapsed:.0f}s  (n_workers={args.workers})")
 
 
 if __name__ == "__main__":
