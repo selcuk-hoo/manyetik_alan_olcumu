@@ -17,21 +17,12 @@ Fikir:
             büyük          bastırılmış
 
   Quad katkısı g ile orantılı (ΔR_dy/R_dy ≈ δg/g ≈ %2).
-  Tilt katkısı, iki konfigürasyon arasındaki beta fonksiyonu DEĞİŞİMİNDEN
-  gelir (Δβ/β << δg/g), dolayısıyla ΔR_tilt << ΔR_dy.
-  Not: tilt'in sıfırıncı mertebe katkısı (R_tilt @ tilt) Δy'de iptal olur
-  çünkü aynı tilt her iki konfigürasyonda da mevcuttur. İptal OLMAYAN kısım
-  tilt'in beta fonksiyonlarını değiştirmesinden doğan birinci mertebe etkidir.
+  Tilt katkısı yalnızca beta fonksiyonu değişiminden gelir (ΔR_tilt << ΔR_dy).
 
 BPM hataları:
   Ofset: her iki ölçümde de aynı BPM → Δy'de common-mode rejection ile
          tamamen iptal olur. Referans ölçümüne gerek yok.
   Gürültü: bağımsız iki realization, Δy'de √2·σ_noise olarak kalır.
-
-Matris kaynağı (öncelik sırasıyla):
-  dR_dy_kmod.npy / dR_dx_kmod.npy  — sabit dipol tilt arka planı ile inşa
-  edilmişse kullanılır (params.json'da dipole_random_tilt_max > 0 olmalı).
-  Yoksa R_dy_1/2.npy farkına döner (ideal — tilt arka planı yok).
 
 Ön koşul: build_response_matrix.py çalıştırılmış olmalı.
 """
@@ -64,30 +55,19 @@ def main():
     with open("params.json") as f:
         config = json.load(f)
 
-    # Matris kaynağını seç: sabit tilt arka planı ile inşa edilmiş k-mod
-    # matrisleri varsa onları kullan (daha gerçekçi), yoksa ideal ΔR'ye dön.
-    kmod_files = ("dR_dy_kmod.npy", "dR_dx_kmod.npy")
-    use_kmod_matrices = all(os.path.exists(f) for f in kmod_files)
-
-    if use_kmod_matrices:
-        dR_dy = np.load("dR_dy_kmod.npy")
-        dR_dx = np.load("dR_dx_kmod.npy")
-        print("Matris kaynağı: dR_dy_kmod.npy / dR_dx_kmod.npy  (sabit tilt arka planı ile)")
-    else:
-        R_dy_1 = np.load("R_dy_1.npy")
-        R_dy_2 = np.load("R_dy_2.npy")
-        R_dx_1 = np.load("R_dx_1.npy")
-        R_dx_2 = np.load("R_dx_2.npy")
-        dR_dy  = R_dy_2 - R_dy_1
-        dR_dx  = R_dx_2 - R_dx_1
-        print("Matris kaynağı: R_dy_1/2.npy farkı  (ideal — tilt arka planı yok)")
-
-    # Tilt kirliliği hesabı için R_tilt farkı (her iki durumda mevcut matrisler)
+    # Mevcut matrislerden ΔR hesapla
+    R_dy_1   = np.load("R_dy_1.npy")
+    R_dy_2   = np.load("R_dy_2.npy")
+    R_dx_1   = np.load("R_dx_1.npy")
+    R_dx_2   = np.load("R_dx_2.npy")
     R_tilt_1 = np.load("R_tilt_1.npy")
     R_tilt_2 = np.load("R_tilt_2.npy")
+
+    dR_dy   = R_dy_2   - R_dy_1    # ΔR_dy  ≈ (δg/g) × R_dy
+    dR_dx   = R_dx_2   - R_dx_1
     dR_tilt = R_tilt_2 - R_tilt_1  # küçük — yalnızca β değişiminden
 
-    n_q    = dR_dy.shape[0]   # 48
+    n_q    = R_dy_1.shape[0]   # 48
     g1_nom = config.get("g1", 0.21)
     eps    = 0.02
     g1_pert = g1_nom * (1.0 + eps)
@@ -184,79 +164,11 @@ def main():
     print(f"  Gürültüden : {np.std(hata_noise)*1e6:.2f} μm")
     print(f"  Toplam     : {np.std(dy_geri - dy_gercek)*1e6:.2f} μm")
 
-    # ── LOCO çözümü: dy ve tilt birlikte (96×96) ─────────────────────────
-    print("\n" + "=" * 60)
-    print("LOCO çözümü: dy ve tilt birlikte (96×96)")
-    print("=" * 60)
-
-    dy_loco = tilt_loco = None
-    dy_loco_reg = tilt_loco_reg = None
-
-    if os.path.exists("M_loco.npy"):
-        M_loco = np.load("M_loco.npy")
-        cond_M = np.linalg.cond(M_loco)
-        print(f"  M_loco şekli      : {M_loco.shape}")
-        print(f"  κ(M_loco)         : {cond_M:.3e}")
-
-        # ÖNEMLİ: LOCO ham y1, y2 ölçümlerini kullanır (fark değil).
-        # BPM ofseti İPTAL OLMAZ — eğer ofset varsa LOCO'nun çözebilmesi için
-        # ofset bir bilinmeyen olarak modellenmeli (burada modellemiyoruz).
-        # Bu yüzden test gürültü ve ofset olmadan en temiz sonucu verir.
-        rhs = np.concatenate([y1_meas, y2_meas])
-
-        # Doğrudan çözüm
-        try:
-            sol = np.linalg.solve(M_loco, rhs)
-            dy_loco   = sol[:n_q]
-            tilt_loco = sol[n_q:]
-            print("\n[LOCO doğrudan çözüm]")
-            print_results("dy   (LOCO)",   dy_gercek,  dy_loco)
-            print_results("tilt (LOCO)",   tilt_sabit, tilt_loco)
-        except np.linalg.LinAlgError as e:
-            print(f"  Doğrudan çözüm başarısız: {e}")
-
-        # SVD ile regularize edilmiş çözüm (kötü koşullu durumlarda)
-        U, S, Vt = np.linalg.svd(M_loco, full_matrices=False)
-        cutoff = S[0] * 1e-6
-        S_inv = np.where(S > cutoff, 1.0 / S, 0.0)
-        n_kept = int(np.sum(S > cutoff))
-        sol_reg = Vt.T @ (S_inv * (U.T @ rhs))
-        dy_loco_reg   = sol_reg[:n_q]
-        tilt_loco_reg = sol_reg[n_q:]
-        print(f"\n[LOCO + SVD truncate, cutoff = σ_max × 1e-6, "
-              f"{n_kept}/{len(S)} mod tutuldu]")
-        print_results("dy   (LOCO+SVD)", dy_gercek,  dy_loco_reg)
-        print_results("tilt (LOCO+SVD)", tilt_sabit, tilt_loco_reg)
-    else:
-        print("  M_loco.npy bulunamadı — önce build_response_matrix.py'ı çalıştırın.")
-
-    # ── Karşılaştırma özeti ──────────────────────────────────────────────
-    print("\n" + "=" * 60)
-    print("Özet: dy geri çatım hatası RMS [μm]")
-    print("=" * 60)
-    print(f"  K-mod (yalnız ΔR_dy ile)           : "
-          f"{np.std(dy_geri - dy_gercek)*1e6:9.2f}")
-    if dy_loco is not None:
-        print(f"  LOCO (M_loco doğrudan)             : "
-              f"{np.std(dy_loco - dy_gercek)*1e6:9.2f}")
-    if dy_loco_reg is not None:
-        print(f"  LOCO (M_loco + SVD truncate)       : "
-              f"{np.std(dy_loco_reg - dy_gercek)*1e6:9.2f}")
-
-    save_dict = dict(
-        dy_gercek=dy_gercek, dy_geri=dy_geri,
-        dx_gercek=dx_gercek, dx_geri=dx_geri,
-        tilt_sabit=tilt_sabit,
-        quad_signal=quad_signal, tilt_contam=tilt_contam,
-    )
-    if dy_loco is not None:
-        save_dict["dy_loco"]   = dy_loco
-        save_dict["tilt_loco"] = tilt_loco
-    if dy_loco_reg is not None:
-        save_dict["dy_loco_reg"]   = dy_loco_reg
-        save_dict["tilt_loco_reg"] = tilt_loco_reg
-
-    np.savez("kmod_reconstruction_test.npz", **save_dict)
+    np.savez("kmod_reconstruction_test.npz",
+             dy_gercek=dy_gercek, dy_geri=dy_geri,
+             dx_gercek=dx_gercek, dx_geri=dx_geri,
+             tilt_sabit=tilt_sabit,
+             quad_signal=quad_signal, tilt_contam=tilt_contam)
     print("\nSonuçlar 'kmod_reconstruction_test.npz' dosyasına kaydedildi.")
 
 

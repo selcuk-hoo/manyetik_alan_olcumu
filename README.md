@@ -363,21 +363,117 @@ COD RMS ~1.7 mm'den 48 quad kaçıklığı ~0.1 μm hassasiyetle geri çatılır
 
 ### Motivasyon
 
-Gerçek bir halkada hem quad kaçıklıkları hem de deflektör eğimleri vardır ve ikisi de dikey COD'u etkiler. Bu dosya, iki konfigürasyon ölçümünü birleştirerek her ikisini eş zamanlı geri çatar.
+Gerçek bir halkada hem quad kaçıklıkları hem de deflektör eğimleri vardır ve ikisi de dikey COD'u etkiler. Tek bir ölçümde:
 
-### Yöntem
+$$\mathbf{y}_{\text{COD}} = R_{dy}\,\mathbf{d}_y + R_{\text{tilt}}\,\boldsymbol{\theta}$$
 
-1. `seed=13` ile rastgele `dy` (±0.3 mm) ve `tilt` (±0.2 mrad) hataları üretilir
-2. Her iki optik konfigürasyonda (nominal + pertürbe $g_1$) referans ve hatalı COD ölçümleri alınır
-3. 96×96 LOCO sistemi çözülür:
+Bu 48 denklem, 96 bilinmeyen içerir → **belirsiz sistem**, doğrudan çözülemez.
 
-$$M \cdot \begin{pmatrix} \hat{\mathbf{d}}_y \\ \hat{\boldsymbol{\theta}} \end{pmatrix} = \begin{pmatrix} \mathbf{y}_{\text{COD},1} \\ \mathbf{y}_{\text{COD},2} \end{pmatrix}$$
+**LOCO çözümü:** İki farklı optik konfigürasyonda ölçüm al. Konfigürasyonlar arasında $R_{dy}$ ve $R_{\text{tilt}}$ farklı oranlarda değiştiğinden sistem belirli hale gelir:
 
-4. Ek olarak radyal quad ($d_x$) geri çatımı tek konfigürasyonla yapılır (tilt radyal COD'u etkilemez)
+$$\underbrace{\begin{pmatrix} R_{dy,1} & R_{\text{tilt},1} \\ R_{dy,2} & R_{\text{tilt},2} \end{pmatrix}}_{M_{96\times96}} \begin{pmatrix} \mathbf{d}_y \\ \boldsymbol{\theta} \end{pmatrix} = \begin{pmatrix} \mathbf{y}_1 \\ \mathbf{y}_2 \end{pmatrix}$$
+
+Konfigürasyon 1: nominal $g_1 = 0.21$ T/m. Konfigürasyon 2: $g_1 \times 1.02$ (tüm quadlar %2 artırılmış). Radyal kaçıklık $d_x$ tilt etkilemediğinden ayrı bir 48×48 sistemle çözülür.
+
+---
+
+### BPM Hata Modeli
+
+Gerçek deneyde iki tür BPM hatası kaçınılmazdır.
+
+**Gürültü** (`bpm_noise_sigma`, $\sigma_n$): Elektronik okuma gürültüsü. Ölçümden ölçüme bağımsız Gaussian değişkendir. Tekrarlı ölçüm ortalamasıyla bastırılabilir, ancak pratikte ~1 μm altına indirilmesi zordur.
+
+**Ofset** (`bpm_offset_sigma`, $\sigma_o$): Mekanik veya elektriksel kalibrasyon hatası. BPM başına sabit ve sistematiktir. Ortalama almakla **giderilmez**.
+
+**Common-mode rejection:** COD ölçümü her zaman bir fark işlemidir:
+
+$$\mathbf{y}_{\text{COD}} = \mathbf{y}_{\text{hatalı}} - \mathbf{y}_{\text{referans}}$$
+
+Her iki ölçüm de aynı BPM'lerden okunduğundan sabit ofset her ikisinde de aynıdır ve farkta iptal olur. Geriye yalnızca gürültü kalır; etkin standart sapma $\sqrt{2}\,\sigma_n$'dir (iki bağımsız gürültü).
+
+Bu nedenle kod, BPM hatalarını ham ölçümlere (fark almadan önce) uygular:
+
+```python
+y0_meas    = y0    + offset + noise_ref    # referans ölçümü
+y_cod_meas = y_cod + offset + noise_pert   # hatalı ölçüm
+dy_cod = y_cod_meas - y0_meas              # offset iptal, √2·noise kalır
+```
+
+**Tepki matrisi inşasında:** Ofset yine farkta iptal olur (`y_pert − y_ref`). Yalnızca gürültü her matris sütununu etkiler. Etkin sütun gürültüsü: $\sqrt{2}\,\sigma_n / \delta_q$.
+
+---
+
+### Tikhonov Regularizasyonu
+
+Doğrudan çözüm `np.linalg.solve(M, b)` gürültüyü $\kappa(M) \approx 6.5\times10^5$ katı büyütür; küçük bir ölçüm hatası çözümü mahveder.
+
+**Tikhonov regularizasyonu** gürültü bastırma ile sinyal kaybı arasında denge kurar:
+
+$$\min_{\mathbf{x}} \|\,M\mathbf{x} - \mathbf{b}\,\|^2 + \lambda\|\mathbf{x}\|^2$$
+
+SVD ($M = U\Sigma V^T$) üzerinden kapalı form çözümü:
+
+$$\hat{\mathbf{x}} = V\,\text{diag}\!\left(\frac{\sigma_i}{\sigma_i^2+\lambda}\right)U^T\mathbf{b}$$
+
+**Filtre faktörü** $f_i = \sigma_i/(\sigma_i^2+\lambda)$'nın davranışı:
+
+| $\sigma_i$ | $f_i$ yaklaşımı | Etki |
+|---|---|---|
+| $\sigma_i \gg \sqrt{\lambda}$ | $\approx 1/\sigma_i$ | mod korunur |
+| $\sigma_i \ll \sqrt{\lambda}$ | $\approx \sigma_i/\lambda \to 0$ | mod bastırılır |
+
+Kırpmalı SVD'den farkı: sert sıfırlama yerine sürekli bastırma. $\lambda$ arttıkça küçük modlar yavaşça söner; bu gürültülü sistemlerde daha kararlıdır.
+
+### Lambda Seçimi
+
+**Optimal $\lambda$** (yalnızca simülasyonda): $x_{\text{true}}$ bilinerek $\|\hat{x} - x_{\text{true}}\|$ minimize edilir. Gerçek deneyde uygulanamaz; teorik üst sınırı gösterir.
+
+**Uyumsuzluk ilkesi** (gerçek deneyde uygulanabilir): Mükemmel çözümde bile residual sıfır olamaz — en iyi ihtimalle ölçüm gürültüsü kadar kalır:
+
+$$\|M\hat{x} - \mathbf{b}\| \approx \sigma_{\text{eff}} \cdot \sqrt{n_{\text{obs}}}$$
+
+COD ölçümlerinde ofset farkta iptal olduğundan $\sigma_{\text{eff}} = \sqrt{2}\,\sigma_n$. Bu hedefi sağlayan $\lambda$ log-uzayda ikili arama (binary search) ile bulunur. Yalnızca $\sigma_n$ bilmek yeterlidir.
+
+---
+
+### Sonuçlar
+
+Test koşulları: $\sigma_n = 10\,\mu\text{m}$, $\sigma_o = 50\,\mu\text{m}$; $d_y \in \pm 0.3\,\text{mm}$, $d_x \in \pm 0.3\,\text{mm}$, $\theta \in \pm 0.2\,\text{mrad}$.
+
+| Yöntem | dy hata RMS | dy korelasyon | tilt hata RMS | tilt korelasyon |
+|---|---|---|---|---|
+| linalg.solve | 92.7 μm | 0.874 | 207 μrad | 0.453 |
+| SVD (rcond=1e-6) | 92.7 μm | 0.874 | 207 μrad | 0.453 |
+| Tikhonov (optimal $\lambda=1.74$) | 38.2 μm | 0.980 | 39 μrad | 0.925 |
+| Tikhonov (uyumsuzluk $\lambda=1.41$) | **37.6 μm** | **0.980** | **40 μrad** | **0.922** |
+
+Radyal kaçıklık $d_x$: her iki yöntemde de 0.67 μm, $r = 0.99999$.
+
+Uyumsuzluk ilkesi ($\lambda = 1.41$), ground truth gerektirmeden optimal $\lambda = 1.74$'e neredeyse eşdeğer performans veriyor. Yöntem gerçek deneyde doğrudan uygulanabilir.
+
+### Nihai Hataların Manyetik Alan Karşılıkları
+
+Halka parametreleri: $p_{\text{magic}} = 0.701\,\text{GeV/c}$, $B\rho = 2.337\,\text{T·m}$, $B_0 = 24.48\,\text{mT}$, $L_{\text{dipol}} = 12.5\,\text{m}$.
+
+**$d_y^{\text{rms}} = 38.2\,\mu\text{m}$** — Kaçık quad başına efektif dipol alanı:
+
+$$B_{\text{eff}} = g_1 \cdot \delta y = 0.21\,\frac{\text{T}}{\text{m}} \times 38.2\,\mu\text{m} = 8.0\,\mu\text{T}$$
+
+$$\Delta BL = g_1 \cdot L_q \cdot \delta y = 3.21\,\mu\text{T·m} \quad (= 1.37\,\text{ppb} \cdot B\rho \text{ per quad})$$
+
+**$\theta^{\text{rms}} = 40.1\,\mu\text{rad}$** — Dönen dipol başına radyal alan bileşeni:
+
+$$B_r = B_0 \cdot \theta = 24.48\,\text{mT} \times 40.1\,\mu\text{rad} = 981\,\text{nT}$$
+
+$$\Delta BL = B_0 \cdot L_{\text{dip}} \cdot \theta = 12.3\,\mu\text{T·m} \quad \left(\frac{B_r}{B_0} = 40.1\,\text{ppm}\right)$$
+
+**$d_x^{\text{rms}} = 0.67\,\mu\text{m}$** — Kaçık quad başına efektif dikey dipol alanı:
+
+$$B_{\text{eff}} = g_1 \cdot \delta x = 141\,\text{nT} \qquad \Delta BL = 56\,\text{pT·m per quad}$$
 
 ### Ön Koşul
 
-`build_response_matrix.py` çalıştırılmış ve `M_loco.npy` mevcut olmalıdır.
+`build_response_matrix.py` çalıştırılmış ve `M_loco.npy` ile `R_dx_1.npy` mevcut olmalıdır.
 
 ---
 
@@ -492,7 +588,20 @@ Bu sonuç tablosu, LOCO yaklaşımının k-mod'a göre üstünlüğünü doğrud
 | `error_quad_dy/dx` | Tek quad kaçıklığı [m] |
 | `quad_random_dy/dx_max` | Tüm quadlara rastgele hata genliği [m] |
 | `quad_random_seed` | Tekrarlanabilirlik için tohum sayısı |
+| `error_dipole_index` | Tek dipol hatası indeksi (−1 = devre dışı) |
+| `error_dipole_tilt` | Tek dipol tilt açısı [rad] |
 | `dipole_random_tilt_max` | Tüm deflektörlere rastgele açısal hata [rad] |
+| `dipole_random_seed` | Dipol tilt rastgele tohumu |
+| `quad_random_tilt_max` | Tüm quadlara rastgele tilt açısı [rad] |
+| `quad_random_tilt_seed` | Quad tilt rastgele tohumu |
+
+### BPM Hata Modeli
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `bpm_noise_sigma` | Tur-tura bağımsız Gaussian gürültü std [m]; tepki matrisi inşasında ve geri çatımda etkindir |
+| `bpm_offset_sigma` | BPM başına sabit sistematik ofset std [m]; yalnızca geri çatım COD'unda görülür (matriste farkta iptal olur) |
+| `bpm_offset_seed` | Ofset vektörü rastgele tohumu |
 
 ---
 

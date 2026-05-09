@@ -90,9 +90,9 @@ def find_lambda_discrepancy(b, U, s, Vt, sigma_noise, n_obs, eta=1.0):
         lam_mid = np.sqrt(lam_lo * lam_hi)
         _, res = solve_tikhonov(b, U, s, Vt, lam_mid)
         if res < target:
-            lam_hi = lam_mid
+            lam_lo = lam_mid   # λ çok küçük → artır
         else:
-            lam_lo = lam_mid
+            lam_hi = lam_mid   # λ çok büyük → azalt
     return np.sqrt(lam_lo * lam_hi)
 
 
@@ -175,13 +175,19 @@ def main():
     x_cod_2, y_cod_2 = run_sim(alanlar2, state02, config,
                                 dy_gercek, dx_gercek, dipole_tilt=tilt_gercek)
 
-    dy_cod_1_ideal = y_cod_1 - y0_1
-    dy_cod_2_ideal = y_cod_2 - y0_2
-    dx_cod_1_ideal = x_cod_1 - x0_1
+    # Önce ham ölçümlere gürültü + ofset ekle, sonra fark al
+    # → ofset her iki ölçümde aynı olduğundan farkta iptal olur
+    # → sadece iki bağımsız gürültü kalır (etkin std = √2 × σ_noise)
+    y0_1_meas  = apply_bpm_errors(y0_1,    sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
+    y_cod_1_meas = apply_bpm_errors(y_cod_1, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
+    y0_2_meas  = apply_bpm_errors(y0_2,    sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
+    y_cod_2_meas = apply_bpm_errors(y_cod_2, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
+    x0_1_meas  = apply_bpm_errors(x0_1,    sigma_noise, sigma_offset, bpm_offset_dx, rng_noise)
+    x_cod_1_meas = apply_bpm_errors(x_cod_1, sigma_noise, sigma_offset, bpm_offset_dx, rng_noise)
 
-    dy_cod_1 = apply_bpm_errors(dy_cod_1_ideal, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
-    dy_cod_2 = apply_bpm_errors(dy_cod_2_ideal, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
-    dx_cod_1 = apply_bpm_errors(dx_cod_1_ideal, sigma_noise, sigma_offset, bpm_offset_dx, rng_noise)
+    dy_cod_1 = y_cod_1_meas - y0_1_meas
+    dy_cod_2 = y_cod_2_meas - y0_2_meas
+    dx_cod_1 = x_cod_1_meas - x0_1_meas
 
     print(f"\nÖlçülen COD:")
     print(f"  dikey [nom]  RMS = {np.std(dy_cod_1)*1e3:.3f} mm")
@@ -217,9 +223,11 @@ def main():
                   dy_gercek, sol_tik_opt[:n_q], dx_gercek, dx_dir,
                   tilt_gercek, sol_tik_opt[n_q:])
 
-    # Yöntem 4: Tikhonov — uyumsuzluk ilkesi (σ_noise bilinmesi yeterli)
+    # Yöntem 4: Tikhonov — uyumsuzluk ilkesi
+    # Efektif σ: hem gürültü hem ofset residual'a katkıda bulunur
     if sigma_noise > 0:
-        lam_disc = find_lambda_discrepancy(rhs, U, s, Vt, sigma_noise, len(rhs))
+        sigma_eff = np.sqrt(2) * sigma_noise  # her farkta iki bağımsız gürültü
+        lam_disc = find_lambda_discrepancy(rhs, U, s, Vt, sigma_eff, len(rhs))
         sol_tik_disc, res_disc = solve_tikhonov(rhs, U, s, Vt, lam_disc)
         print(f"\nTikhonov uyumsuzluk ilkesi: λ = {lam_disc:.3e},  ||Mx-b|| = {res_disc:.3e}")
         print_results("Tikhonov (uyumsuzluk ilkesi)",

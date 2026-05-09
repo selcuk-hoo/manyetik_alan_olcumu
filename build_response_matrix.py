@@ -165,22 +165,33 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
 def _worker_init():
     """Her worker süreci kendi geçici dizinine chdir eder.
 
-    C++ entegratör `cod_data.txt`'yi CWD'ye yazdığından, paralel worker'lar
-    aynı dosya üzerinde çakışmasın diye bu izolasyon gereklidir.
+    delta_q    : quad kaçıklık pertürbasyonu [m]  (varsayılan 0.1 mm)
+    delta_tilt : dipol tilt pertürbasyonu    [rad] (varsayılan 0.1 mrad)
+    label      : ilerleme çıktısı için etiket
+    sigma_noise: her ölçüme eklenen Gaussian gürültü std [m]
+                 (gerçek deneyde ortalama alınsa da tamamen bastırılamaz)
+                 BPM ofseti farkta iptal olduğundan burada uygulanmaz.
+    rng        : numpy RNG nesnesi (sigma_noise > 0 ise gerekli)
     """
     tmp = tempfile.mkdtemp(prefix=f"kmod_w{os.getpid()}_")
     os.chdir(tmp)
     atexit.register(shutil.rmtree, tmp, ignore_errors=True)
 
+    def add_noise(arr):
+        if sigma_noise > 0 and rng is not None:
+            return arr + rng.normal(0, sigma_noise, n_q)
+        return arr
 
-def _run_one(task):
-    """Worker giriş noktası: setup + run_sim → COD."""
-    config, g1_override, g0_override, kind, idx, dy_arr, dx_arr, tilt_arr = task
-    alanlar, state0 = setup_fields(config, g1_override=g1_override,
-                                   g0_override=g0_override)
-    x_cod, y_cod = run_sim(alanlar, state0, config, dy_arr, dx_arr,
-                           dipole_tilt=tilt_arr)
-    return kind, idx, x_cod, y_cod
+    # Referans COD
+    t0 = time.time()
+    if label:
+        print(f"  [{label}] Referans koşumu...")
+    x0, y0 = run_sim(alanlar, state0, config, np.zeros(n_q), np.zeros(n_q))
+    x0, y0 = add_noise(x0), add_noise(y0)
+    if label:
+        print(f"  [{label}] Referans tamamlandı ({time.time()-t0:.1f}s). "
+              f"x_max={np.max(np.abs(x0))*1e3:.2f} μm, "
+              f"y_max={np.max(np.abs(y0))*1e3:.2f} μm")
 
 
 def build_matrices(config, g1_override=None, g0_override=None,
@@ -216,19 +227,18 @@ def build_matrices(config, g1_override=None, g0_override=None,
     tasks.append((config, g1_override, g0_override,
                   'ref', 0, zeros, zeros, bg_tilt))
     for i in range(n_q):
-        dy = zeros.copy(); dy[i] = delta_q
-        tasks.append((config, g1_override, g0_override,
-                      'dy', i, dy, zeros, bg_tilt))
-    for i in range(n_q):
-        dx = zeros.copy(); dx[i] = delta_q
-        tasks.append((config, g1_override, g0_override,
-                      'dx', i, zeros, dx, bg_tilt))
-    for i in range(n_q):
-        tilt = bg_tilt.copy(); tilt[i] += delta_tilt
-        tasks.append((config, g1_override, g0_override,
-                      'tilt', i, zeros, zeros, tilt))
+        dy = np.zeros(n_q); dy[i] = delta_q
+        dx = np.zeros(n_q); dx[i] = delta_q
+        x_cod, y_cod = run_sim(alanlar, state0, config, dy, dx)
+        R_dy[:, i] = (add_noise(y_cod) - y0) / delta_q
+        R_dx[:, i] = (add_noise(x_cod) - x0) / delta_q
+        if label and (i + 1) % 8 == 0:
+            el = time.time() - t_start
+            rem = el / (i + 1) * (n_q - i - 1)
+            print(f"  [{label}] quad {i+1}/{n_q}  ({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
 
-    n_total = len(tasks)
+    # Dipol tilt matrisi
+    R_tilt = np.zeros((n_q, n_q))
     if label:
         print(f"  [{label}] {n_total} koşum, n_workers={n_workers}")
     t0 = time.time()
@@ -273,14 +283,14 @@ def build_matrices(config, g1_override=None, g0_override=None,
     R_tilt = np.zeros((n_q, n_q))
 
     for i in range(n_q):
-        _, y_cod = results[('dy', i)]
-        R_dy[:, i] = (_noisy(y_cod) - y0) / delta_q
-    for i in range(n_q):
-        x_cod, _ = results[('dx', i)]
-        R_dx[:, i] = (_noisy(x_cod) - x0) / delta_q
-    for i in range(n_q):
-        _, y_cod = results[('tilt', i)]
-        R_tilt[:, i] = (_noisy(y_cod) - y0) / delta_tilt
+        tilt = np.zeros(n_q); tilt[i] = delta_tilt
+        _, y_cod = run_sim(alanlar, state0, config,
+                           np.zeros(n_q), np.zeros(n_q), dipole_tilt=tilt)
+        R_tilt[:, i] = (add_noise(y_cod) - y0) / delta_tilt
+        if label and (i + 1) % 8 == 0:
+            el = time.time() - t_start
+            rem = el / (i + 1) * (n_q - i - 1)
+            print(f"  [{label}] dipol {i+1}/{n_q}  ({el:.0f}s geçti, ~{rem:.0f}s kaldı)")
 
     if label:
         print(f"  [{label}] tamamlandı ({time.time()-t0:.1f}s)")
