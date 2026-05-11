@@ -123,9 +123,10 @@ def main():
     n_q = 2 * n_cells   # toplam quad sayısı
     n_d = 2 * n_cells   # toplam deflektör sayısı
 
-    quad_dy_arr    = np.zeros(n_q)
-    quad_dx_arr    = np.zeros(n_q)
+    quad_dy_arr     = np.zeros(n_q)
+    quad_dx_arr     = np.zeros(n_q)
     dipole_tilt_arr = np.zeros(n_d)
+    quad_tilt_arr   = np.zeros(n_q)
 
     # Tek quad hatası
     eq_idx = config.get("error_quad_index", -1)
@@ -149,10 +150,16 @@ def main():
         dipole_tilt_arr[ed_idx] += config.get("error_dipole_tilt", 0.0)
 
     # Rastgele deflektör hataları
-    tilt_max = config.get("dipole_random_tilt_max", 0.0)
-    if tilt_max > 0:
+    d_tilt_max = config.get("dipole_random_tilt_max", 0.0)
+    if d_tilt_max > 0:
         rng_d = np.random.default_rng(config.get("dipole_random_seed", 43))
-        dipole_tilt_arr += rng_d.uniform(-tilt_max, tilt_max, n_d)
+        dipole_tilt_arr += rng_d.uniform(-d_tilt_max, d_tilt_max, n_d)
+
+    # Rastgele quad tilt hataları (skew-quadrupol → x-y kuplaji)
+    q_tilt_max = config.get("quad_random_tilt_max", 0.0)
+    if q_tilt_max > 0:
+        rng_qt = np.random.default_rng(config.get("quad_random_tilt_seed", 44))
+        quad_tilt_arr += rng_qt.uniform(-q_tilt_max, q_tilt_max, n_q)
     
     print("\n================ SİMÜLASYON PARAMETRELERİ ================")
     print(f"R0 (Yarıçap)      : {R0} m")
@@ -170,7 +177,8 @@ def main():
     # C++ Entegratörünün çağrılması (Performans Kritik Bölüm)
     sonuclar_local, poin_local, poincare_t_arr = integrate_particle(
         y0, t0, t_end, h, fields=alanlar, return_steps=return_steps,
-        quad_dy=quad_dy_arr, quad_dx=quad_dx_arr, dipole_tilt=dipole_tilt_arr
+        quad_dy=quad_dy_arr, quad_dx=quad_dx_arr,
+        dipole_tilt=dipole_tilt_arr, quad_tilt=quad_tilt_arr,
     )
     end_time = time.time()
     

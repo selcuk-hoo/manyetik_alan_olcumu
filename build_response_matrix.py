@@ -103,7 +103,8 @@ def read_cod_quads(nFODO):
     return x_bpm, y_bpm
 
 
-def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
+def run_sim(alanlar, state0, config, quad_dy, quad_dx,
+            dipole_tilt=None, quad_tilt=None):
     """Tek koşum, BPM COD'larını döndürür. Çıktı dosyaları CWD'ye yazılır."""
     for fname in ("cod_data.txt", "rf.txt"):
         if os.path.exists(fname):
@@ -111,6 +112,8 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
     n_q = 2 * int(alanlar.nFODO)
     if dipole_tilt is None:
         dipole_tilt = np.zeros(n_q)
+    if quad_tilt is None:
+        quad_tilt = np.zeros(n_q)
     integrate_particle(
         state0,
         t0=0.0,
@@ -121,6 +124,7 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None):
         quad_dy=quad_dy,
         quad_dx=quad_dx,
         dipole_tilt=dipole_tilt,
+        quad_tilt=quad_tilt,
     )
     return read_cod_quads(int(alanlar.nFODO))
 

@@ -85,29 +85,36 @@ def main():
     dx_gercek = rng.uniform(-dx_max, dx_max, n_q)
 
     # Dipol tiltler — modelde yok, her iki ölçümde aynı (common-mode)
-    tilt_max  = config.get("dipole_random_tilt_max", 0.2e-3)
-    tilt_seed = config.get("dipole_random_seed", 43)
-    rng_tilt  = np.random.default_rng(seed=tilt_seed)
-    tilt_sabit = rng_tilt.uniform(-tilt_max, tilt_max, n_q)
+    d_tilt_max  = config.get("dipole_random_tilt_max", 0.0)
+    d_tilt_seed = config.get("dipole_random_seed", 43)
+    rng_dtilt   = np.random.default_rng(seed=d_tilt_seed)
+    dipole_tilt_sabit = rng_dtilt.uniform(-d_tilt_max, d_tilt_max, n_q) if d_tilt_max > 0 else np.zeros(n_q)
+
+    # Quad tilt — modelde yok, skew-quadrupol bileşeni → x-y kuplaji
+    q_tilt_max  = config.get("quad_random_tilt_max", 0.0)
+    q_tilt_seed = config.get("quad_random_tilt_seed", 44)
+    rng_qtilt   = np.random.default_rng(seed=q_tilt_seed)
+    quad_tilt_sabit = rng_qtilt.uniform(-q_tilt_max, q_tilt_max, n_q) if q_tilt_max > 0 else np.zeros(n_q)
 
     print(f"\nGercek hatalar:")
-    print(f"  dy   RMS = {np.std(dy_gercek)*1e3:.3f} mm")
-    print(f"  dx   RMS = {np.std(dx_gercek)*1e3:.3f} mm")
-    print(f"  tilt RMS = {np.std(tilt_sabit)*1e3:.3f} mrad  (gorulmez — modelde yok)")
+    print(f"  dy        RMS = {np.std(dy_gercek)*1e3:.3f} mm")
+    print(f"  dx        RMS = {np.std(dx_gercek)*1e3:.3f} mm")
+    print(f"  dipol tilt RMS = {np.std(dipole_tilt_sabit)*1e3:.3f} mrad  (gorulmez — modelde yok)")
+    print(f"  quad tilt RMS = {np.std(quad_tilt_sabit)*1e3:.3f} mrad  (gorulmez — x-y kuplaji yaratir)")
     if sigma_noise > 0 or sigma_offset > 0:
         print(f"  BPM gurultu s={sigma_noise*1e6:.1f} um, ofset s={sigma_offset*1e6:.1f} um")
         print(f"  -> Ofset, delta_y farki ile otomatik iptal olur")
 
-    # İki konfigürasyonda simülasyon — tilt fiziksel olarak var ama modelde yok
+    # İki konfigürasyonda simülasyon — tilt'ler fiziksel olarak var ama modelde yok
     alanlar1, state01 = setup_fields(config)
     alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
 
     print("\nKonfigurasyon 1 (g_nom) kosumu...")
     x1, y1 = run_sim(alanlar1, state01, config, dy_gercek, dx_gercek,
-                     dipole_tilt=tilt_sabit)
+                     dipole_tilt=dipole_tilt_sabit, quad_tilt=quad_tilt_sabit)
     print("Konfigurasyon 2 (g_pert) kosumu...")
     x2, y2 = run_sim(alanlar2, state02, config, dy_gercek, dx_gercek,
-                     dipole_tilt=tilt_sabit)
+                     dipole_tilt=dipole_tilt_sabit, quad_tilt=quad_tilt_sabit)
 
     # BPM hatalarını uygula — farkta ofset iptal olur
     y1_meas = apply_bpm_errors(y1, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)
@@ -139,7 +146,8 @@ def main():
     np.savez("kmod_reconstruction_test.npz",
              dy_gercek=dy_gercek, dy_geri=dy_geri,
              dx_gercek=dx_gercek, dx_geri=dx_geri,
-             tilt_sabit=tilt_sabit,
+             dipole_tilt_sabit=dipole_tilt_sabit,
+             quad_tilt_sabit=quad_tilt_sabit,
              quad_signal_y=quad_signal_y, quad_signal_x=quad_signal_x,
              delta_y=delta_y, delta_x=delta_x)
     print("\nSonuclar 'kmod_reconstruction_test.npz' dosyasina kaydedildi.")
