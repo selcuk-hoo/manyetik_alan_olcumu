@@ -17,8 +17,7 @@ Bu proje, Proton Elektrik Dipol Momenti (EDM) deneyleri için tasarlanmış tam 
 7. [Görselleştirme: `plot_results.py`](#7-görselleştirme-plot_resultspy)
 8. [Tepki Matrisi: `build_response_matrix.py`](#8-tepki-matrisi-build_response_matrixpy)
 9. [Quad Geri Çatım Testi: `test_reconstruction.py`](#9-quad-geri-çatım-testi-test_reconstructionpy)
-10. [LOCO Geri Çatım Testi: `test_loco_reconstruction.py`](#10-loco-geri-çatım-testi-test_loco_reconstructionpy)
-10b. [K-Modülasyon Geri Çatım Testi: `test_kmod_reconstruction.py`](#10b-k-modülasyon-geri-çatım-testi-test_kmod_reconstructionpy)
+10. [K-Modülasyon Geri Çatım Testi: `test_kmod_reconstruction.py`](#10-k-modülasyon-geri-çatım-testi-test_kmod_reconstructionpy)
 11. [Parametreler: `params.json`](#11-parametreler-paramsjson)
 12. [Kurulum ve Çalıştırma](#12-kurulum-ve-çalıştırma)
 
@@ -233,21 +232,21 @@ COD profilini, RMS değerini ve betatron tune etiketini tek bir yardımcı fonks
 
 ### Motivasyon
 
-Kapalı yörünge sapması ile hizalama hataları arasındaki doğrusal ilişki matrislerle özetlenebilir:
+Kapalı yörünge sapması ile hizalama hataları arasındaki doğrusal ilişki şöyle özetlenir:
 
-$$\mathbf{y}_{\text{COD}} = R_{dy} \cdot \mathbf{d}_y + R_{\text{tilt}} \cdot \boldsymbol{\theta} \qquad \mathbf{x}_{\text{COD}} = R_{dx} \cdot \mathbf{d}_x$$
+$$\mathbf{y}_{\text{COD}} = R_{dy} \cdot \mathbf{d}_y \qquad \mathbf{x}_{\text{COD}} = R_{dx} \cdot \mathbf{d}_x$$
 
-Burada $\mathbf{d}_y$ quad dikey kaçıklıkları, $\mathbf{d}_x$ quad radyal kaçıklıkları ve $\boldsymbol{\theta}$ deflektör eğim açılarıdır.
+Burada $\mathbf{d}_y$ quad dikey kaçıklıkları ve $\mathbf{d}_x$ quad radyal kaçıklıklarıdır. **Dipol tilt bu modelde kasıtlı olarak yer almaz** — gerçek ölçümde gürültü kaynağı olarak var olur, ama modelin bilgisi dışındadır. Bölüm 10'da bunun ne anlama geldiği ayrıntılı incelenir.
 
-Dikkat: Dipol eğimi (tilt) B alanına **radyal bir bileşen** ekler ($B_X = B_{eq}\sin\theta$) ve bu yalnızca **dikey COD**'u etkiler. Radyal COD yalnızca quad radyal kaçıklığına ($d_x$) duyarlıdır. İki düzlem bu sayede ayrışır.
+Dikkat: dipol eğimi (tilt) B alanına radyal bir bileşen ekler ($B_X = B_{eq}\sin\theta$) ve yalnızca **dikey COD**'u etkiler. Radyal COD yalnızca quad radyal kaçıklığına ($d_x$) duyarlıdır. İki düzlem bu sayede bağımsız çözülür.
 
 ### `setup_fields(config, g1_override=None)`
 
-`params.json`'dan bağımsız, sabit başlangıç koşulları oluşturur: her simülasyon `(x=0, y=0)` ideal yörüngeden başlar. `g1_override` parametresi LOCO için ikinci optik konfigürasyonu tanımlar.
+`params.json`'dan bağımsız, sabit başlangıç koşulları oluşturur: her simülasyon `(x=0, y=0)` ideal yörüngeden başlar. `g1_override` parametresi k-modülasyon için ikinci optik konfigürasyonu (pertürbe gradyan) tanımlar.
 
 ### `run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None)`
 
-Tek bir simülasyon çalıştırır. `dipole_tilt` verilmezse sıfır kabul edilir. BPM konumları:
+Tek bir simülasyon çalıştırır. `dipole_tilt` verilmezse sıfır kabul edilir; ancak testte gerçekçi bir tilt vektörü geçirilir (bkz. Bölüm 10). BPM konumları her hücrenin QF ve QD giriş noktalarından okunur:
 
 ```python
 def read_cod_quads(nFODO):
@@ -257,83 +256,60 @@ def read_cod_quads(nFODO):
 
 ### `build_matrices(config, g1_override=None, ..., n_workers=1)`
 
-Bir optik konfigürasyon için üç matrisi birden hesaplar. Her sütun **sonlu fark** (numerik Jacobian) ile elde edilir:
-
-**Quad matrisleri (R_dy ve R_dx) — ayrı koşumlar:**
-
-Her quad için yalnızca tek bileşen pertürbe edilir:
+Bir optik konfigürasyon için $R_{dy}$ ve $R_{dx}$ matrislerini hesaplar. Her sütun **sonlu fark** (numerik Jacobian) ile elde edilir:
 
 ```python
-# R_dy sütunu i: yalnız dy[i] = δ_q
-R_dy[:, i] = (y_cod_dy_i - y0) / delta_q
+# R_dy sütunu i: yalnız dy[i] = δ_q, diğer tüm hatalar sıfır
+R_dy[:, i] = (y_cod_dy_i − y0) / delta_q
 
-# R_dx sütunu i: yalnız dx[i] = δ_q
-R_dx[:, i] = (x_cod_dx_i - x0) / delta_q
+# R_dx sütunu i: yalnız dx[i] = δ_q, diğer tüm hatalar sıfır
+R_dx[:, i] = (x_cod_dx_i − x0) / delta_q
 ```
 
-> **Not (önceki sürümden değişiklik):** Eski uygulama her `i` için `dy[i]` ve `dx[i]`'yi *aynı koşumda* pertürbe ediyordu. Bu, "düzlemler bağımsız" varsayımına dayalı bir optimizasyondu fakat $\partial y/\partial d_x \neq 0$ olduğunda (örn. skew-quad veya solenoid kuplajı varsa) `R_dy` sütunlarına `dx`'ten sızıntı bırakıyordu. Yeni uygulama dy ve dx pertürbasyonlarını ayırır → koşum sayısı 2 katına çıkar, ancak paralelleştirme bunu fazlasıyla telafi eder.
+`dy` ve `dx` pertürbasyonları **ayrı koşumlarda** yapılır. Eski uygulama her `i` için ikisini aynı koşumda pertürbe ediyordu; bu, düzlemler tam bağımsızsa doğru ama kuplaj varsa (`∂y/∂dx ≠ 0`) sütunlara çapraz sızıntı bırakıyordu.
 
-**Dipol tilt matrisi (R_tilt) — ayrı koşum:**
-Her `i` için yalnızca `tilt[i] = δ_tilt` uygulanır:
+Dipol tilt matrisi ($R_{\text{tilt}}$) bu sürümde **hesaplanmaz** — hem koşum sayısını düşürür (97 → 145 yerine 97) hem de tasarım kararını yansıtır: tilt bilgisi modele dahil edilmeyecek.
 
-```python
-R_tilt[:, i] = (y_cod_tilt_i - y0) / delta_tilt  # [m/rad]
-```
-
-Dipol tilt indeksleme: `tilt[2k]` = hücre k'daki ARC1, `tilt[2k+1]` = ARC2.
-
-Toplam koşum sayısı: 1 referans + 48 dy + 48 dx + 48 tilt = **145 koşum** per konfigürasyon.
+Toplam koşum sayısı: 1 referans + 48 dy + 48 dx = **97 koşum** per konfigürasyon.
 
 ### Paralelleştirme
 
-Tüm pertürbasyon koşumları birbirinden bağımsızdır → `ProcessPoolExecutor` ile çekirdek sayısı kadar paralel çalıştırılır:
+Tüm pertürbasyon koşumları birbirinden bağımsızdır → `ProcessPoolExecutor` ile otomatik olarak paralel çalıştırılır. `--workers` belirtilmezse `os.cpu_count() − 1` kullanılır:
 
 ```bash
-python build_response_matrix.py --workers 7   # 7 paralel süreç
+python build_response_matrix.py            # otomatik (çekirdek-1 worker)
+python build_response_matrix.py --workers 7  # elle belirleme
 ```
 
-**Çakışma sorunu ve çözümü:** C++ entegratör, `cod_data.txt`'yi geçerli çalışma dizinine yazar. Tüm worker'lar aynı dizinde olsaydı dosyalar birbirini ezerdi. Bu nedenle her worker süreci başlangıçta kendine ait bir geçici dizin oluşturur ve oraya `chdir` eder:
+**Çakışma sorunu ve çözümü:** C++ entegratör `cod_data.txt`'yi geçerli çalışma dizinine yazar. Birden fazla worker aynı dizinde çalışırsa dosyalar birbirini ezerdi. Her worker başlangıçta kendi geçici dizinine `chdir` eder:
 
 ```python
 def _worker_init():
     tmp = tempfile.mkdtemp(prefix=f"kmod_w{os.getpid()}_")
     os.chdir(tmp)
-    atexit.register(shutil.rmtree, tmp, ignore_errors=True)
+    atexit.register(shutil.rmtree, tmp, ignore_errors=True)  # temizlik
 ```
 
-Worker süreci kapanırken (`atexit`) dizin silinir.
+### İki Konfigürasyon ve Fark Matrisleri
 
-**Ölçeklenme:** N worker ile yaklaşık N kat hızlanma beklenir (tek koşum CPU-bağımlı, dosya I/O minimal). 8 çekirdekte 7 worker, 12 çekirdekte 11 worker önerilir (1 çekirdek OS için).
+`main()` iki konfigürasyon hesaplar ve farkı kaydeder:
 
-### LOCO: İki Optik Konfigürasyon
+| Konfigürasyon | Gradyan | Kaydedilen dosyalar |
+|---------------|---------|---------------------|
+| Nominal | $g_1 = 0.21\ \text{T/m}$ | `R_dy_1.npy`, `R_dx_1.npy` |
+| Pertürbe | $g_1 \times 1.02$ | `R_dy_2.npy`, `R_dx_2.npy` |
+| Fark | $\Delta R = R_2 - R_1$ | `dR_dy.npy`, `dR_dx.npy` |
 
-Tek ölçümde:
-$$\mathbf{y}_{\text{COD}} = R_{dy}\,\mathbf{d}_y + R_{\text{tilt}}\,\boldsymbol{\theta}$$
-48 denklem, 96 bilinmeyen → **belirsiz sistem.**
-
-İki farklı optik konfigürasyonla (nominal $g_1$ ve $g_1 \times 1.02$):
-
-$$\begin{pmatrix} \mathbf{y}_1 \\ \mathbf{y}_2 \end{pmatrix} = \underbrace{\begin{pmatrix} R_{dy,1} & R_{\text{tilt},1} \\ R_{dy,2} & R_{\text{tilt},2} \end{pmatrix}}_{M_{96\times96}} \begin{pmatrix} \mathbf{d}_y \\ \boldsymbol{\theta} \end{pmatrix}$$
-
-Optik değişince $R_{dy}$ ve $R_{\text{tilt}}$ farklı oranlarda değişir; $M$'nin koşulunu $\kappa(M)$ ile kontrol ederiz.
-
-### Kaydedilen Dosyalar
-
-| Dosya | İçerik | Boyut |
-|-------|--------|-------|
-| `R_dy.npy`, `R_dx.npy` | Nominal, geriye dönük uyumluluk | 48×48 |
-| `R_dy_1.npy`, `R_dx_1.npy`, `R_tilt_1.npy` | Nominal konfigürasyon | 48×48 |
-| `R_dy_2.npy`, `R_dx_2.npy`, `R_tilt_2.npy` | Pertürbe konfigürasyon | 48×48 |
-| `M_loco.npy` | Birleşik LOCO matrisi | 96×96 |
+K-modülasyon testi $\Delta R$ matrislerini kullanır (bkz. Bölüm 10).
 
 ### Koşul Sayıları
 
 ```
-κ(R_dy) ≈ 165,   κ(R_dx) ≈ 152   (nominal, quad-only)
-κ(M_loco): simülasyon sonrası raporlanır
+κ(R_dy_1) ≈ 165,   κ(R_dx_1) ≈ 152   (nominal konfigürasyon)
+κ(dR_dy), κ(dR_dx): çalıştırma sonrası raporlanır
 ```
 
-$\kappa(M) < 10^6$ → doğrudan çözüm; $10^6$–$10^{10}$ → SVD/Tikhonov önerilir.
+$\kappa < 10^6$ → doğrudan `linalg.solve`; $10^6$–$10^{10}$ → SVD/Tikhonov regularizasyonu önerilir.
 
 ---
 
@@ -359,200 +335,108 @@ COD RMS ~1.7 mm'den 48 quad kaçıklığı ~0.1 μm hassasiyetle geri çatılır
 
 ---
 
-## 10. LOCO Geri Çatım Testi: `test_loco_reconstruction.py`
+## 10. K-Modülasyon Geri Çatım Testi: `test_kmod_reconstruction.py`
 
-### Motivasyon
+### Fikir: Referanssız Geri Çatım
 
-Gerçek bir halkada hem quad kaçıklıkları hem de deflektör eğimleri vardır ve ikisi de dikey COD'u etkiler. Tek bir ölçümde:
+Klasik COD geri çatımı bir **referans ölçüm** gerektirir: önce hatasız makinede yörüngeyi ölç, sonra hatalı makinede ölç, farkı al. Pratikte hatasız bir makine yoktur; ölçülen şey her zaman BPM ofseti, dipol tilti ve quad kaçıklığının toplamıdır.
 
-$$\mathbf{y}_{\text{COD}} = R_{dy}\,\mathbf{d}_y + R_{\text{tilt}}\,\boldsymbol{\theta}$$
-
-Bu 48 denklem, 96 bilinmeyen içerir → **belirsiz sistem**, doğrudan çözülemez.
-
-**LOCO çözümü:** İki farklı optik konfigürasyonda ölçüm al. Konfigürasyonlar arasında $R_{dy}$ ve $R_{\text{tilt}}$ farklı oranlarda değiştiğinden sistem belirli hale gelir:
-
-$$\underbrace{\begin{pmatrix} R_{dy,1} & R_{\text{tilt},1} \\ R_{dy,2} & R_{\text{tilt},2} \end{pmatrix}}_{M_{96\times96}} \begin{pmatrix} \mathbf{d}_y \\ \boldsymbol{\theta} \end{pmatrix} = \begin{pmatrix} \mathbf{y}_1 \\ \mathbf{y}_2 \end{pmatrix}$$
-
-Konfigürasyon 1: nominal $g_1 = 0.21$ T/m. Konfigürasyon 2: $g_1 \times 1.02$ (tüm quadlar %2 artırılmış). Radyal kaçıklık $d_x$ tilt etkilemediğinden ayrı bir 48×48 sistemle çözülür.
-
----
-
-### BPM Hata Modeli
-
-Gerçek deneyde iki tür BPM hatası kaçınılmazdır.
-
-**Gürültü** (`bpm_noise_sigma`, $\sigma_n$): Elektronik okuma gürültüsü. Ölçümden ölçüme bağımsız Gaussian değişkendir. Tekrarlı ölçüm ortalamasıyla bastırılabilir, ancak pratikte ~1 μm altına indirilmesi zordur.
-
-**Ofset** (`bpm_offset_sigma`, $\sigma_o$): Mekanik veya elektriksel kalibrasyon hatası. BPM başına sabit ve sistematiktir. Ortalama almakla **giderilmez**.
-
-**Common-mode rejection:** COD ölçümü her zaman bir fark işlemidir:
-
-$$\mathbf{y}_{\text{COD}} = \mathbf{y}_{\text{hatalı}} - \mathbf{y}_{\text{referans}}$$
-
-Her iki ölçüm de aynı BPM'lerden okunduğundan sabit ofset her ikisinde de aynıdır ve farkta iptal olur. Geriye yalnızca gürültü kalır; etkin standart sapma $\sqrt{2}\,\sigma_n$'dir (iki bağımsız gürültü).
-
-Bu nedenle kod, BPM hatalarını ham ölçümlere (fark almadan önce) uygular:
-
-```python
-y0_meas    = y0    + offset + noise_ref    # referans ölçümü
-y_cod_meas = y_cod + offset + noise_pert   # hatalı ölçüm
-dy_cod = y_cod_meas - y0_meas              # offset iptal, √2·noise kalır
-```
-
-**Tepki matrisi inşasında:** Ofset yine farkta iptal olur (`y_pert − y_ref`). Yalnızca gürültü her matris sütununu etkiler. Etkin sütun gürültüsü: $\sqrt{2}\,\sigma_n / \delta_q$.
-
----
-
-### Tikhonov Regularizasyonu
-
-Doğrudan çözüm `np.linalg.solve(M, b)` gürültüyü $\kappa(M) \approx 6.5\times10^5$ katı büyütür; küçük bir ölçüm hatası çözümü mahveder.
-
-**Tikhonov regularizasyonu** gürültü bastırma ile sinyal kaybı arasında denge kurar:
-
-$$\min_{\mathbf{x}} \|\,M\mathbf{x} - \mathbf{b}\,\|^2 + \lambda\|\mathbf{x}\|^2$$
-
-SVD ($M = U\Sigma V^T$) üzerinden kapalı form çözümü:
-
-$$\hat{\mathbf{x}} = V\,\text{diag}\!\left(\frac{\sigma_i}{\sigma_i^2+\lambda}\right)U^T\mathbf{b}$$
-
-**Filtre faktörü** $f_i = \sigma_i/(\sigma_i^2+\lambda)$'nın davranışı:
-
-| $\sigma_i$ | $f_i$ yaklaşımı | Etki |
-|---|---|---|
-| $\sigma_i \gg \sqrt{\lambda}$ | $\approx 1/\sigma_i$ | mod korunur |
-| $\sigma_i \ll \sqrt{\lambda}$ | $\approx \sigma_i/\lambda \to 0$ | mod bastırılır |
-
-Kırpmalı SVD'den farkı: sert sıfırlama yerine sürekli bastırma. $\lambda$ arttıkça küçük modlar yavaşça söner; bu gürültülü sistemlerde daha kararlıdır.
-
-### Lambda Seçimi
-
-**Optimal $\lambda$** (yalnızca simülasyonda): $x_{\text{true}}$ bilinerek $\|\hat{x} - x_{\text{true}}\|$ minimize edilir. Gerçek deneyde uygulanamaz; teorik üst sınırı gösterir.
-
-**Uyumsuzluk ilkesi** (gerçek deneyde uygulanabilir): Mükemmel çözümde bile residual sıfır olamaz — en iyi ihtimalle ölçüm gürültüsü kadar kalır:
-
-$$\|M\hat{x} - \mathbf{b}\| \approx \sigma_{\text{eff}} \cdot \sqrt{n_{\text{obs}}}$$
-
-COD ölçümlerinde ofset farkta iptal olduğundan $\sigma_{\text{eff}} = \sqrt{2}\,\sigma_n$. Bu hedefi sağlayan $\lambda$ log-uzayda ikili arama (binary search) ile bulunur. Yalnızca $\sigma_n$ bilmek yeterlidir.
-
----
-
-### Sonuçlar
-
-Test koşulları: $\sigma_n = 10\,\mu\text{m}$, $\sigma_o = 50\,\mu\text{m}$; $d_y \in \pm 0.3\,\text{mm}$, $d_x \in \pm 0.3\,\text{mm}$, $\theta \in \pm 0.2\,\text{mrad}$.
-
-| Yöntem | dy hata RMS | dy korelasyon | tilt hata RMS | tilt korelasyon |
-|---|---|---|---|---|
-| linalg.solve | 92.7 μm | 0.874 | 207 μrad | 0.453 |
-| SVD (rcond=1e-6) | 92.7 μm | 0.874 | 207 μrad | 0.453 |
-| Tikhonov (optimal $\lambda=1.74$) | 38.2 μm | 0.980 | 39 μrad | 0.925 |
-| Tikhonov (uyumsuzluk $\lambda=1.41$) | **37.6 μm** | **0.980** | **40 μrad** | **0.922** |
-
-Radyal kaçıklık $d_x$: her iki yöntemde de 0.67 μm, $r = 0.99999$.
-
-Uyumsuzluk ilkesi ($\lambda = 1.41$), ground truth gerektirmeden optimal $\lambda = 1.74$'e neredeyse eşdeğer performans veriyor. Yöntem gerçek deneyde doğrudan uygulanabilir.
-
-### Nihai Hataların Manyetik Alan Karşılıkları
-
-Halka parametreleri: $p_{\text{magic}} = 0.701\,\text{GeV/c}$, $B\rho = 2.337\,\text{T·m}$, $B_0 = 24.48\,\text{mT}$, $L_{\text{dipol}} = 12.5\,\text{m}$.
-
-**$d_y^{\text{rms}} = 38.2\,\mu\text{m}$** — Kaçık quad başına efektif dipol alanı:
-
-$$B_{\text{eff}} = g_1 \cdot \delta y = 0.21\,\frac{\text{T}}{\text{m}} \times 38.2\,\mu\text{m} = 8.0\,\mu\text{T}$$
-
-$$\Delta BL = g_1 \cdot L_q \cdot \delta y = 3.21\,\mu\text{T·m} \quad (= 1.37\,\text{ppb} \cdot B\rho \text{ per quad})$$
-
-**$\theta^{\text{rms}} = 40.1\,\mu\text{rad}$** — Dönen dipol başına radyal alan bileşeni:
-
-$$B_r = B_0 \cdot \theta = 24.48\,\text{mT} \times 40.1\,\mu\text{rad} = 981\,\text{nT}$$
-
-$$\Delta BL = B_0 \cdot L_{\text{dip}} \cdot \theta = 12.3\,\mu\text{T·m} \quad \left(\frac{B_r}{B_0} = 40.1\,\text{ppm}\right)$$
-
-**$d_x^{\text{rms}} = 0.67\,\mu\text{m}$** — Kaçık quad başına efektif dikey dipol alanı:
-
-$$B_{\text{eff}} = g_1 \cdot \delta x = 141\,\text{nT} \qquad \Delta BL = 56\,\text{pT·m per quad}$$
-
-### Ön Koşul
-
-`build_response_matrix.py` çalıştırılmış ve `M_loco.npy` ile `R_dx_1.npy` mevcut olmalıdır.
-
----
-
-## 10b. K-Modülasyon Geri Çatım Testi: `test_kmod_reconstruction.py`
-
-### Fikir
-
-Geleneksel COD geri çatımı bir **referans ölçüm** gerektirir: önce hatasız makinede yörüngeyi ölç, sonra hatalı makinede ölç, farkı al. Pratikte hatasız bir makine yoktur; ölçülen şey her zaman BPM ofseti, dipol tilti ve quad kaçıklığının toplamıdır.
-
-K-modülasyon yaklaşımının umudu şudur: aynı hata kümesi sabit kalırken **iki farklı optik konfigürasyonda** (gradyanı $g$ ve $g(1+\varepsilon)$) ölç. İki ölçümü çıkar:
+K-modülasyon yaklaşımının umudu şudur: aynı hata kümesi sabit kalırken **iki farklı optik konfigürasyonda** (gradyanı $g_{\text{nom}}$ ve $g_{\text{pert}} = g_{\text{nom}}(1+\varepsilon)$, $\varepsilon = 0.02$) ölç. İki ölçümün farkı alındığında:
 
 $$\Delta \mathbf{y} = \mathbf{y}(g_{\text{pert}}) - \mathbf{y}(g_{\text{nom}})$$
 
-İdeal beklenti:
+Her bileşenin bu farka katkısı:
 
 | Bileşen | $\mathbf{y}(g_{\text{nom}})$'da | $\mathbf{y}(g_{\text{pert}})$'de | $\Delta \mathbf{y}$'de |
 |---------|-------------------------------|--------------------------------|----------------------|
-| BPM ofseti $\mathbf{b}$ | $+\mathbf{b}$ | $+\mathbf{b}$ | **0** (common-mode rejection) |
-| Quad sinyali $R_{dy}\mathbf{d}_y$ | $R_{dy,1}\mathbf{d}_y$ | $R_{dy,2}\mathbf{d}_y$ | $\Delta R_{dy}\,\mathbf{d}_y$ (büyük, $\propto \varepsilon$) |
-| Tilt katkısı $R_{\text{tilt}}\boldsymbol{\theta}$ | $R_{\text{tilt},1}\boldsymbol{\theta}$ | $R_{\text{tilt},2}\boldsymbol{\theta}$ | $\Delta R_{\text{tilt}}\,\boldsymbol{\theta}$ (umut: küçük) |
+| BPM ofseti $\mathbf{b}$ | $+\mathbf{b}$ | $+\mathbf{b}$ | **0** — common-mode rejection |
+| Quad kaçıklığı $R_{dy}\mathbf{d}_y$ | $R_{dy,1}\mathbf{d}_y$ | $R_{dy,2}\mathbf{d}_y$ | $\Delta R_{dy}\,\mathbf{d}_y$ — sinyal |
+| Dipol tilt $R_{\text{tilt}}\boldsymbol{\theta}$ | $R_{\text{tilt},1}\boldsymbol{\theta}$ | $R_{\text{tilt},2}\boldsymbol{\theta}$ | $\Delta R_{\text{tilt}}\,\boldsymbol{\theta}$ — kirlilik |
 
-Eğer $\Delta R_{\text{tilt}}\,\boldsymbol{\theta} \ll \Delta R_{dy}\,\mathbf{d}_y$ ise:
+**BPM ofseti otomatik iptal olur** çünkü her iki ölçümde de sistematik olarak aynı yönde kayar. Bu yöntemi cazip yapan budur: BPM kalibrasyonu yapılmadan bile quad kaçıklığı geri çatılabilir.
+
+**Dipol tilt** ise her iki ölçümde sabit kalır ama $R_{\text{tilt}}$, gradyan değiştiğinde biraz farklılaşır ($R_{\text{tilt},1} \neq R_{\text{tilt},2}$). Bu fark sıfır değilse tilt kirliliği Δy'ye sızar.
+
+Eğer kirlilik sinyalden çok küçükse ($\Delta R_{\text{tilt}}\,\boldsymbol{\theta} \ll \Delta R_{dy}\,\mathbf{d}_y$), tilt modele dahil edilmeden yalnız $\Delta R_{dy}$ ile geri çatılır:
 
 $$\hat{\mathbf{d}}_y = \Delta R_{dy}^{-1}\,\Delta \mathbf{y}$$
 
-ile referans ölçüme **gerek kalmadan** quad kaçıklıkları geri çatılabilir.
+### Tasarım Kararı: Tilt Modelde Yok
 
-### Gerçek Sonuç: Fikir Bu Halkada İşlemiyor
+Bu simülasyonda $R_{\text{tilt}}$ kasıtlı olarak hesaplanmamıştır. Dipol tilt gerçek halkada fiziksel olarak var olmaya devam eder; ölçümde gürültü kaynağı olarak görünür. Yöntemin ne kadar sağlam olduğunu test etmek için:
 
-Test çalıştırıldığında tipik çıktı (örneğin $\theta_{\max}=0.2\ \text{mrad}$, $d_{y,\max}=0.3\ \text{mm}$):
+1. Simülasyon `tilt_sabit` vektörüyle gerçekçi biçimde çalışır.
+2. Geri çatım ise bu vektörden habersiz yalnız $\Delta R_{dy}$'yi kullanır.
+3. Ortaya çıkan hata, tilt kirliliğinin kör geri çatıma ne kadar zarar verdiğini gösterir.
 
-```
-Δy bileşenleri (gürültüsüz):
-  Quad sinyali  ΔR_dy·dy   RMS =    52189 μm
-  Tilt kirliliği ΔR_tilt·θ RMS =  1217834 μm
-  Oran (kirlilik/sinyal)       = 2333.5%
+### BPM Hata Modeli
 
-[Gerçekçi: tilt sabit, BPM hataları var]
-  dy   hata RMS = 17090 μm   korelasyon = 0.095
-```
+Gerçek deneyde iki tür BPM hatası vardır:
 
-Yani quad kaçıklığını geri çatmak istediğimiz hatadan **100 kat daha büyük** bir geri çatım hatası alıyoruz. Tilt kirliliği quad sinyalini gömüyor.
+**Gürültü** (`bpm_noise_sigma`, $\sigma_n$): Her ölçümde bağımsız Gaussian değişken. Δy'de iki bağımsız gürültü toplandığından etkin sapma $\sqrt{2}\,\sigma_n$ olur.
 
-### Neden? Δβ/β ≈ δg/g
+**Ofset** (`bpm_offset_sigma`, $\sigma_o$): BPM başına sabit ve sistematik. Δy farkında her iki ölçümde aynı ofseti içerdiğinden **tamamen iptal olur** — tekrarlı ölçüm gerektirmez.
 
-Kodun iddiası şuydu: "tilt katkısı yalnız beta fonksiyonu değişiminden gelir, bu da $\Delta\beta/\beta \ll \delta g/g$ olduğu için bastırılır." Bu **yanlış**:
-
-- Tüm quadlar **global** olarak $\varepsilon$ kadar değişince, beta fonksiyonları da $\Delta\beta/\beta \approx \varepsilon$ mertebesinde değişir.
-- Tune kayması $\Delta Q$, eğer çalışma noktası bir tamsayı rezonansına yakınsa $\propto \cot(\pi Q)$ ile büyük olabilir.
-- Sonuç: $\Delta R_{\text{tilt}}/R_{\text{tilt}} \sim \varepsilon/2 + \pi\cot(\pi Q)\,\Delta Q$
-
-Dolayısıyla:
-
-$$\frac{\|\Delta R_{\text{tilt}}\boldsymbol{\theta}\|}{\|\Delta R_{dy}\mathbf{d}_y\|} \approx \frac{\|R_{\text{tilt}}\boldsymbol{\theta}\|}{2\,\|R_{dy}\mathbf{d}_y\|}$$
-
-Bu halkada elektrostatik bükücü plakaların integre alanı çok büyüktür → **dipol tilt COD'u, quad kaçıklığı COD'undan onlarca kat büyük**. Oran 23× → 2333% kirlilik.
-
-### Çıkarımlar ve Öneriler
-
-1. **Global gradyan değişikliği k-modülasyon için yetersiz.** Tilt kirliliğini bastırmak için ya çok daha küçük gradyan değişikliği (etki yok), ya çok daha büyük (lineerlik bozulur), ya da tamamen farklı bir yaklaşım gerekir.
-
-2. **Önerilen yaklaşım — LOCO birleşik çözüm:** `M_loco` (96×96) matrisini kullanarak $\mathbf{d}_y$ ve $\boldsymbol{\theta}$'yı **birlikte** çöz. Test betiği bunu da yapar (en alttaki "LOCO çözümü" bloğu). $\kappa(M_{\text{loco}})$ küçükse bu yöntem hem dy hem tilt için doğru sonuç verir.
-
-3. **Alternatif — per-quad k-modülasyon:** Tüm quadları aynı anda değiştirmek yerine her birini **tek başına** modüle et. O zaman uzaktaki beta fonksiyonları neredeyse hiç değişmez ($\Delta\beta/\beta \to 0$), tilt kirliliği lokal kalır. Bu klasik k-modülasyon optik ölçüm tekniğidir; bu kodda henüz uygulanmamıştır ve doğal bir sonraki adımdır.
-
-4. **Fizik sınırı:** Eğer bir halkada tilt CO bozulması quad-misalignment CO bozulmasından çok büyükse, hiçbir kmod varyantı dy'yi izole edemez. Tilt'lerin önceden bağımsız ölçülüp düzeltilmesi (veya LOCO ile birlikte çözülmesi) gerekir.
-
-### Test Çıktısı
-
-`test_kmod_reconstruction.py` üç sonucu yan yana raporlar:
-
-```
-Özet: dy geri çatım hatası RMS [μm]
-  K-mod (yalnız ΔR_dy ile)           : 17090.25   ← tilt'le bozulur
-  LOCO (M_loco doğrudan)             :    XX.YY   ← κ(M_loco) küçükse iyi
-  LOCO (M_loco + SVD truncate)       :    XX.YY   ← regularize edilmiş
+```python
+# Ofset her iki ölçüme aynı biçimde eklenir → farkta sıfırlanır
+y1_meas = y1 + bpm_offset + noise_1
+y2_meas = y2 + bpm_offset + noise_2
+delta_y = y2_meas - y1_meas   # offset iptal, sqrt(2)·sigma_n kalır
 ```
 
-Bu sonuç tablosu, LOCO yaklaşımının k-mod'a göre üstünlüğünü doğrudan kanıtlar.
+### Sinyal ve Kirlilik Teşhisi
+
+Betik, geri çatım öncesinde sinyal-kirlilik oranını raporlar:
+
+```
+Sinyal ve kirlilik:
+  quad_signal_y (tiltsiz beklenti) RMS =  5219.7 um   ← ΔR_dy · dy
+  gercek delta_y                   RMS =  5222.7 um   ← simülasyon ölçümü
+  fark (tilt + gurultu)            RMS =    12.6 um   ← kirlilik
+```
+
+`quad_signal_y = ΔR_dy @ dy_gercek` doğrudan matris çarpımıdır, simülasyon değildir. Gerçek $\Delta y$ ile arasındaki fark ($12.6\,\mu\text{m}$) tilt kirliliğini ve BPM gürültüsünü birlikte ölçer.
+
+**Kirlilik/sinyal oranı** ne kadar düşükse yöntem o kadar güvenilirdir. Bu oran büyük çıkarsa ($\gg 100\%$) tilt modele dahil edilmeden geri çatım anlamsız olur.
+
+### Geri Çatım Sonuçları
+
+Test, hem dikey ($d_y$) hem radyal ($d_x$) kaçıklıkları ayrı ayrı çözer:
+
+```
+[Gercekci: tilt gorulmez, BPM hatalari var]
+  dy    hata RMS =  4.22 um   korelasyon = 0.723
+  dx    hata RMS = 11.44 um   korelasyon = 0.428
+```
+
+Sonuçları yorumlama kılavuzu:
+
+| Korelasyon | Yorum |
+|---|---|
+| > 0.99 | Mükemmel — tilt kirliliği ihmal edilebilir |
+| 0.7 – 0.99 | Kabul edilebilir — kirlilik kısmen sinyali bozuyor |
+| 0.3 – 0.7 | Zayıf — kirlilik / gürültü baskın |
+| < 0.3 | Anlamsız — geri çatım başarısız |
+
+$d_x$ için korelasyonun $d_y$'den daha düşük çıkması beklenir: radyal kaçıklık sinyal zinciri ($\Delta R_{dx}$) daha küçük olduğundan aynı mutlak gürültü daha büyük görece etki yapar.
+
+### Parametre Önerileri
+
+`params.json`'da test koşullarını ayarlamak için:
+
+```json
+"quad_random_dy_max":    0.0003,   // ±0.3 mm quad dikey kaçıklık
+"quad_random_dx_max":    0.0003,   // ±0.3 mm quad radyal kaçıklık
+"quad_random_seed":      13,
+"dipole_random_tilt_max": 0.0002,  // ±0.2 mrad dipol tilt (modelde görünmez)
+"dipole_random_seed":    43,
+"bpm_noise_sigma":       1e-5,     // 10 μm elektronik gürültü
+"bpm_offset_sigma":      5e-5      // 50 μm sistematik ofset (farkta iptal olur)
+```
+
+### Ön Koşul
+
+`build_response_matrix.py` çalıştırılmış ve `R_dy_1.npy`, `R_dy_2.npy`, `R_dx_1.npy`, `R_dx_2.npy` mevcut olmalıdır.
 
 ---
 
@@ -638,37 +522,30 @@ python plot_results.py
 
 **Adım 3 — Tepki matrisini hesapla** (bir kez yap, sonuçları sakla):
 ```bash
-# Seri (tek çekirdek):
+# Otomatik (os.cpu_count()-1 worker):
 python build_response_matrix.py
 
-# Paralel (önerilen, çekirdek-1 worker):
+# Elle belirleme:
 python build_response_matrix.py --workers 7   # 8 çekirdekli makine için
 python build_response_matrix.py --workers 11  # 12 çekirdekli makine için
 
-# Konfigürasyon 1 (nominal g1): R_dy_1, R_dx_1, R_tilt_1
-# Konfigürasyon 2 (g1×1.02):   R_dy_2, R_dx_2, R_tilt_2
-# Birleşik LOCO matrisi:        M_loco (96×96)
-# Geriye dönük uyumluluk:       R_dy, R_dx
-# (params.json'da dipole_random_tilt_max>0 ise k-mod matrisleri de inşa edilir)
+# Üretilen dosyalar:
+#   R_dy_1.npy, R_dx_1.npy   ← nominal konfigürasyon (g1)
+#   R_dy_2.npy, R_dx_2.npy   ← pertürbe konfigürasyon (g1×1.02)
+#   dR_dy.npy,  dR_dx.npy    ← fark matrisleri (k-mod testi için)
 ```
 
-**Adım 4a — Quad-only geri çatım testi:**
+**Adım 4a — Quad-only geri çatım testi** (tek konfigürasyon, referans ölçüm var):
 ```bash
 python test_reconstruction.py
 # → reconstruction_test.npz ve konsol istatistikleri
 ```
 
-**Adım 4b — LOCO geri çatım testi** (quad dy + dipol tilt eş zamanlı):
-```bash
-python test_loco_reconstruction.py
-# → loco_reconstruction_test.npz ve konsol istatistikleri
-```
-
-**Adım 4c — K-modülasyon ve LOCO karşılaştırması** (referanssız geri çatım):
+**Adım 4b — K-modülasyon testi** (referanssız, tilt görünmez):
 ```bash
 python test_kmod_reconstruction.py
 # → kmod_reconstruction_test.npz
-# → konsola: K-mod ile LOCO yan yana hata RMS karşılaştırması
+# → konsola: sinyal/kirlilik oranı ve geri çatım hata RMS
 ```
 
 ### Tipik Parametre Değişiklikleri
