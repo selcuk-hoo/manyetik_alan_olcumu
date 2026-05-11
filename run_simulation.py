@@ -240,11 +240,12 @@ def main():
 
         # ---------------------------------------------------------
         # 4b. x-y KUPLAJ TEŞHİSİ (nicel)
-        # 1) Jx salınım oranı : kuplajsız Jx korunur. std(Jx)/mean(Jx)
-        #    0'a yakınsa kuplaj zayıf, 1'e yakınsa güçlü.
-        # 2) FFT çapraz pik   : kuplaj varsa y sinyalinde νx pikinin
-        #    (ve x sinyalinde νy pikinin) gücü artar. Oran 0→yok,
-        #    ~1→tam kuplaj.
+        # 1) Jx salınım oranı : std(Jx)/mean(Jx). DİKKAT — bu metrik
+        #    β fonksiyonu normalize edilmediğinden artalan değeri
+        #    yüksek olur. Kuplaj sinyali için θ=0 baseline ile
+        #    karşılaştır (bkz. scan_quad_tilt.py).
+        # 2) FFT çapraz pik   : y sinyalinde νx pikinin gücü / νy
+        #    pikinin gücü. Δ(cross) ∝ θ_quad_tilt beklenir.
         # ---------------------------------------------------------
         if poin_local.shape[0] > 8:
             Jx = x_pc**2 + xp_pc**2
