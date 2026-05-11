@@ -6,8 +6,13 @@ quad_random_tilt_max degerini tarayip x-y kuplaj metriklerinin
 beklenen olceklerle uyumunu dogrular.
 
 Beklenen yasalar (zayif kuplaj rejimi, rezonanstan uzak):
-  Jx_osc       ∝ theta_max      (egim ≈ 1.0, log-log)
-  cross_peak   ∝ theta_max^2    (egim ≈ 2.0, log-log)
+  Hem Jx_osc hem cross_peak AMPLITUD orani oldugundan, kuplaj
+  katsayisi |C-| ∝ theta ile dogrudan dogru orantili olmali:
+    Delta_Jx_osc     ∝ theta_max   (egim ≈ 1.0, log-log)
+    Delta_cross_peak ∝ theta_max   (egim ≈ 1.0, log-log)
+
+  ONEMLI: theta=0 baseline'i cikarilmali — yoksa sextupol/lineer
+  olmayan kaynaklardan gelen artalan kuplaji egimi sifirlar.
 
 Cikti:
   scan_quad_tilt.csv  — theta_max, Jx_osc, Jy_osc, cross_y, cross_x
@@ -127,15 +132,15 @@ def main():
     with open("params.json") as f:
         config = json.load(f)
 
-    # Tarama degerleri (rad). 0 noktasi ayri ele aliniyor (log icin).
-    thetas = np.array([1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3])
+    # Once theta=0 baseline (sextupol vb. kaynakli artalan kuplaji)
+    thetas = np.array([0.0, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3])
 
-    print("=" * 60)
-    print("quad_random_tilt_max taramasi")
-    print("=" * 60)
+    print("=" * 70)
+    print("quad_random_tilt_max taramasi (baseline cikarmali)")
+    print("=" * 70)
     print(f"{'theta_max[mrad]':>16s}  {'Jx_osc':>10s}  {'Jy_osc':>10s}  "
           f"{'cross_y':>10s}  {'cross_x':>10s}")
-    print("-" * 60)
+    print("-" * 70)
 
     results = []
     t0 = time.time()
@@ -150,34 +155,71 @@ def main():
               f"{cy:10.4e}  {cx:10.4e}")
     print(f"\nToplam sure: {time.time()-t0:.1f}s")
 
-    if len(results) < 3:
+    if len(results) < 4:
         print("Fit icin yeterli nokta yok.")
         return
 
     arr = np.array(results)
-    th = arr[:, 0]
-    Jx_o = arr[:, 1]
-    cy   = arr[:, 3]
+    # Baseline (theta=0) ayir
+    base_mask = arr[:, 0] == 0.0
+    pert_mask = arr[:, 0] > 0.0
+    base = arr[base_mask][0] if base_mask.any() else np.zeros(5)
+    pert = arr[pert_mask]
 
-    # log-log fit
-    mask_J = (Jx_o > 0)
-    mask_F = (cy > 0)
-    slope_J, _ = np.polyfit(np.log(th[mask_J]), np.log(Jx_o[mask_J]), 1)
-    slope_F, _ = np.polyfit(np.log(th[mask_F]), np.log(cy[mask_F]), 1)
+    th  = pert[:, 0]
+    dJx = np.abs(pert[:, 1] - base[1])
+    dJy = np.abs(pert[:, 2] - base[2])
+    dcy = np.abs(pert[:, 3] - base[3])
+    dcx = np.abs(pert[:, 4] - base[4])
 
-    print("\n" + "=" * 60)
-    print("log-log fit egimleri (beklenen: Jx_osc=1.0, cross=2.0)")
-    print("=" * 60)
-    print(f"  d log(Jx_osc)     / d log(theta)  = {slope_J:.3f}  (bekl. ~1.0)")
-    print(f"  d log(cross_y@x)  / d log(theta)  = {slope_F:.3f}  (bekl. ~2.0)")
+    print("\nBaseline (theta=0):")
+    print(f"  Jx_osc={base[1]:.4e}  Jy_osc={base[2]:.4e}  "
+          f"cross_y={base[3]:.4e}  cross_x={base[4]:.4e}")
+    print("\nBaseline cikarilmis sinyaller (|metric(theta) - metric(0)|):")
+    print(f"{'theta_max[mrad]':>16s}  {'dJx':>10s}  {'dJy':>10s}  "
+          f"{'dcross_y':>10s}  {'dcross_x':>10s}")
+    for i in range(len(th)):
+        print(f"{th[i]*1e3:16.4f}  {dJx[i]:10.4e}  {dJy[i]:10.4e}  "
+              f"{dcy[i]:10.4e}  {dcx[i]:10.4e}")
+
+    def _slope(y):
+        m = y > 0
+        if m.sum() < 3:
+            return float('nan')
+        return np.polyfit(np.log(th[m]), np.log(y[m]), 1)[0]
+
+    sJx = _slope(dJx)
+    sJy = _slope(dJy)
+    scy = _slope(dcy)
+    scx = _slope(dcx)
+
+    print("\n" + "=" * 70)
+    print("log-log fit egimleri (beklenen tum metrikler icin ~1.0)")
+    print("=" * 70)
+    print(f"  d log(|dJx_osc|)     / d log(theta) = {sJx:.3f}")
+    print(f"  d log(|dJy_osc|)     / d log(theta) = {sJy:.3f}")
+    print(f"  d log(|dcross_y|)    / d log(theta) = {scy:.3f}")
+    print(f"  d log(|dcross_x|)    / d log(theta) = {scx:.3f}")
     print()
-    if abs(slope_J - 1.0) < 0.2 and abs(slope_F - 2.0) < 0.4:
-        print("  -> quad_tilt fizigi DOGRU olceklenyor (skew-quadrupol).")
-    else:
-        print("  -> Sapma var: rezonansa yakin olabilir veya")
-        print("     dogrusal-olmayan rejimde takiliyorsun.")
 
-    # CSV ve grafik
+    good = [s for s in [sJx, sJy, scy, scx] if not np.isnan(s)]
+    n_good = sum(1 for s in good if abs(s - 1.0) < 0.25)
+    if n_good >= 3:
+        print("  -> quad_tilt fizigi DOGRU olceklenyor (|C-| ∝ theta).")
+    else:
+        print("  -> Bazi metrikler beklenenden sapiyor. Olasi sebepler:")
+        print("     * Rezonansa cok yakin (nu_x ~ nu_y)")
+        print("     * Artalan kuplaji (sextupol) baseline > delta")
+        print("     * Tarama araligi cok genis (lineer rejim disinda)")
+
+    # Sonraki adimlar icin kullanilabilir bir kalibrasyon sabiti
+    if not np.isnan(scx) and abs(scx - 1.0) < 0.3:
+        # k = dcross_x / theta
+        k = dcx[-1] / th[-1]
+        print(f"\n  Kalibrasyon sabiti  k = d(cross_x) / theta ≈ {k:.3e}")
+        print(f"  Tersine kullanim: theta_max ≈ d(cross_x) / k")
+
+    # CSV
     np.savetxt("scan_quad_tilt.csv", arr,
                header="theta_max_rad Jx_osc Jy_osc cross_y_at_x cross_x_at_y",
                fmt="%.6e")
@@ -189,23 +231,25 @@ def main():
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots(1, 2, figsize=(11, 4.5))
 
-        ax[0].loglog(th*1e3, Jx_o, 'o-', label=f"Jx_osc (egim={slope_J:.2f})")
-        ax[0].loglog(th*1e3, arr[:, 2], 's--', label="Jy_osc", alpha=0.6)
-        ref = Jx_o[0] * (th / th[0])
-        ax[0].loglog(th*1e3, ref, 'k:', label="ref: egim=1", alpha=0.5)
+        ax[0].loglog(th*1e3, dJx, 'o-', label=f"|dJx_osc| (egim={sJx:.2f})")
+        ax[0].loglog(th*1e3, dJy, 's--', label=f"|dJy_osc| (egim={sJy:.2f})", alpha=0.6)
+        if dJx[-1] > 0:
+            ref = dJx[-1] * (th / th[-1])
+            ax[0].loglog(th*1e3, ref, 'k:', label="ref: egim=1", alpha=0.5)
         ax[0].set_xlabel("theta_max [mrad]")
-        ax[0].set_ylabel("J salinim orani")
-        ax[0].set_title("Courant-Snyder invariant salinimi")
+        ax[0].set_ylabel("|metric(theta) - metric(0)|")
+        ax[0].set_title("J salinim deltasi (baseline cikarilmis)")
         ax[0].grid(True, which='both', alpha=0.3)
         ax[0].legend()
 
-        ax[1].loglog(th*1e3, cy, 'o-', label=f"cross_y@nu_x (egim={slope_F:.2f})")
-        ax[1].loglog(th*1e3, arr[:, 4], 's--', label="cross_x@nu_y", alpha=0.6)
-        ref2 = cy[0] * (th / th[0])**2
-        ax[1].loglog(th*1e3, ref2, 'k:', label="ref: egim=2", alpha=0.5)
+        ax[1].loglog(th*1e3, dcx, 'o-', label=f"|dcross_x| (egim={scx:.2f})")
+        ax[1].loglog(th*1e3, dcy, 's--', label=f"|dcross_y| (egim={scy:.2f})", alpha=0.6)
+        if dcx[-1] > 0:
+            ref2 = dcx[-1] * (th / th[-1])
+            ax[1].loglog(th*1e3, ref2, 'k:', label="ref: egim=1", alpha=0.5)
         ax[1].set_xlabel("theta_max [mrad]")
-        ax[1].set_ylabel("FFT capraz pik orani")
-        ax[1].set_title("Spektral kuplaj kaniti")
+        ax[1].set_ylabel("|metric(theta) - metric(0)|")
+        ax[1].set_title("FFT capraz pik deltasi (baseline cikarilmis)")
         ax[1].grid(True, which='both', alpha=0.3)
         ax[1].legend()
 
