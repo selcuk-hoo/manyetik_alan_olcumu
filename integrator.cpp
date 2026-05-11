@@ -186,6 +186,18 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         double B_quad_r = current_G1 * vert_rel;
         double B_quad_z = current_G1 * dev_quad;
 
+        // Skew quadrupole component from tilt around s-axis (field_params[27]).
+        // A small rotation φ around s mixes the principal axes: the field of a
+        // quad tilted by φ is (to first order in φ):
+        //   B_r += -2 G φ (X - R0 - dx)   ← x → y coupling
+        //   B_Z += +2 G φ (Z - dy)        ← y → x coupling
+        // Factor 2 from the 4-fold symmetry of quadrupole field (sin 2φ ≈ 2φ).
+        double q_tilt = field_params[27];
+        if (q_tilt != 0.0) {
+            B_quad_r += -2.0 * current_G1 * q_tilt * dev_quad;
+            B_quad_z +=  2.0 * current_G1 * q_tilt * vert_rel;
+        }
+
         // Optional sextupole overlay.  Maxwell's ∇·B = 0 requires:
         //   B_r =  K2 * dev * Z
         //   B_Z = (K2/2) * (dev² - Z²)    ← factor 0.5 is mandatory
@@ -377,7 +389,8 @@ void run_integration(double* y_init, const double* field_params,
                      double* poincare_t, int* poincare_count,
                      const double* quad_dy,     // 2*nFODO: vertical misalignment [m] per quad
                      const double* quad_dx,     // 2*nFODO: radial misalignment [m] per quad
-                     const double* dipole_tilt) // 2*nFODO: s-axis tilt [rad] per deflector
+                     const double* dipole_tilt, // 2*nFODO: s-axis tilt [rad] per deflector
+                     const double* quad_tilt)   // 2*nFODO: s-axis tilt [rad] per quad
 {
     
     long long total_steps_est = (long long)((t_end - t0) / h);
@@ -531,20 +544,24 @@ void run_integration(double* y_init, const double* field_params,
             // ==============================================================================
             // field_params_local[25] = quad_dx runtime override
             // field_params_local[26] = dipole_tilt runtime override
-            double field_params_local[27];
+            // field_params_local[27] = quad_tilt runtime override (skew quad coupling)
+            double field_params_local[28];
             for (int fp = 0; fp < 25; ++fp) field_params_local[fp] = field_params[fp];
             field_params_local[23] = 0.0;  // quad_dy
             field_params_local[25] = 0.0;  // quad_dx
             field_params_local[26] = 0.0;  // dipole_tilt
+            field_params_local[27] = 0.0;  // quad_tilt
 
             if (elem == 2) {               // QF
                 int qidx = 2 * current_fodo;
                 field_params_local[23] = quad_dy[qidx];
                 field_params_local[25] = quad_dx[qidx];
+                field_params_local[27] = quad_tilt[qidx];
             } else if (elem == 6) {        // QD
                 int qidx = 2 * current_fodo + 1;
                 field_params_local[23] = quad_dy[qidx];
                 field_params_local[25] = quad_dx[qidx];
+                field_params_local[27] = quad_tilt[qidx];
             } else if (elem == 0) {        // ARC1
                 field_params_local[26] = dipole_tilt[2 * current_fodo];
             } else if (elem == 4) {        // ARC2
