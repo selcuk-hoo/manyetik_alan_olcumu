@@ -38,6 +38,7 @@ _lib.run_integration.argtypes = [
     ctypes.POINTER(ctypes.c_double), # quad_dx    [2*nFODO, m]
     ctypes.POINTER(ctypes.c_double), # dipole_tilt[2*nFODO, rad]
     ctypes.POINTER(ctypes.c_double), # quad_tilt  [2*nFODO, rad]
+    ctypes.POINTER(ctypes.c_double), # quad_dG    [2*nFODO, fractional]
 ]
 _lib.run_integration.restype = None
 
@@ -136,7 +137,7 @@ def convert_global_to_local_matrix(history_global_np, R0, initial_z):
 # ==============================================================================
 def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
                        quad_dy=None, quad_dx=None, dipole_tilt=None,
-                       quad_tilt=None):
+                       quad_tilt=None, quad_dG=None):
     """
     Bir parçacığı verilen başlangıç koşulları ve zaman aralığı için C++
     motorunu (GL4 Simplektik Entegratör) kullanarak takip eder.
@@ -152,6 +153,8 @@ def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
     - dipole_tilt: her deflektör için s-ekseni dönme açısı [rad], boy 2*nFODO
     - quad_tilt  : her quad için s-ekseni dönme açısı [rad], boy 2*nFODO
                    (skew-quadrupol bileşeni yaratır → x-y kuplajı)
+    - quad_dG    : her quad için fraksiyonel gradyan sapması, boy 2*nFODO
+                   (ör. 0.10 = +%10). Tek-quad k-modülasyonu için kullanılır.
     """
     if fields is None: fields = FieldParams()
     R0 = fields.R0
@@ -180,6 +183,7 @@ def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
     _qdx = (ctypes.c_double * n_q)(*(quad_dx if quad_dx is not None else np.zeros(n_q)))
     _dtilt = (ctypes.c_double * n_q)(*(dipole_tilt if dipole_tilt is not None else np.zeros(n_q)))
     _qtilt = (ctypes.c_double * n_q)(*(quad_tilt if quad_tilt is not None else np.zeros(n_q)))
+    _qdG  = (ctypes.c_double * n_q)(*(quad_dG  if quad_dG  is not None else np.zeros(n_q)))
 
     # C++ hafıza bloklarının (array) Python tarafında tahsis edilmesi.
     history_c = (ctypes.c_double * (9 * return_steps))()
@@ -191,7 +195,7 @@ def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
     # Asıl C++ fonksiyon çağrısı (Performans kritik bölüm)
     _lib.run_integration(y0_arr, field_arr, t0, t_end, h, 9, return_steps, history_c,
                          max_poincare, poincare_c, poincare_t_c, poincare_count,
-                         _qdy, _qdx, _dtilt, _qtilt)
+                         _qdy, _qdx, _dtilt, _qtilt, _qdG)
 
     # C++ bellek bloklarını numpy dizilerine (array) çevirme
     num_p = poincare_count[0]
