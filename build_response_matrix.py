@@ -223,9 +223,10 @@ def build_matrices(config, g1_override=None, g0_override=None,
 
 
 def main():
+    default_workers = max(1, (os.cpu_count() or 2) - 1)
     parser = argparse.ArgumentParser(description="Tepki matrisi insasi - paralel.")
-    parser.add_argument("--workers", "-w", type=int, default=1,
-                        help="Paralel worker sayisi (oneri: cekirdek-1)")
+    parser.add_argument("--workers", "-w", type=int, default=default_workers,
+                        help=f"Paralel worker sayisi (default: cekirdek-1 = {default_workers})")
     args = parser.parse_args()
 
     os.chdir(BASE)
