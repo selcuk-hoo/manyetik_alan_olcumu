@@ -58,9 +58,25 @@ def main():
     dR_dx = R_dx_2 - R_dx_1
 
     n_q     = R_dy_1.shape[0]
-    g1_nom  = config.get("g1", 0.21)
-    eps     = 0.02
-    g1_pert = g1_nom * (1.0 + eps)
+
+    # Tek-quad k-mod modu: params.json'da "kmod_single_quad_index" >= 0 ise
+    # baz olarak g0 kullanilir, secilen quad g0*(1+eps), digerleri g0.
+    # Yoksa eski uniform modu: baz g1, hepsi g1*1.02.
+    kmod_single = config.get("kmod_single_quad_index", -1)
+    kmod_eps    = config.get("kmod_single_quad_eps", 0.10)
+    if 0 <= kmod_single < n_q:
+        g1_nom = config.get("g0", config.get("g1", 0.21))
+        eps    = kmod_eps
+        g1_pert = g1_nom
+        quad_dG_pert = np.zeros(n_q)
+        quad_dG_pert[kmod_single] = eps
+        print(f"K-mod modu: TEK QUAD #{kmod_single}, baz=g0={g1_nom}, eps={eps*100:.1f}%")
+    else:
+        g1_nom  = config.get("g1", 0.21)
+        eps     = 0.02
+        g1_pert = g1_nom * (1.0 + eps)
+        quad_dG_pert = None
+        print(f"K-mod modu: UNIFORM g1*{1+eps:.3f}")
 
     print(f"dR_dy kosul sayisi : {np.linalg.cond(dR_dy):.3e}")
     print(f"dR_dx kosul sayisi : {np.linalg.cond(dR_dx):.3e}")
@@ -106,7 +122,7 @@ def main():
         print(f"  -> Ofset, delta_y farki ile otomatik iptal olur")
 
     # İki konfigürasyonda simülasyon — tilt'ler fiziksel olarak var ama modelde yok
-    alanlar1, state01 = setup_fields(config)
+    alanlar1, state01 = setup_fields(config, g1_override=g1_nom)
     alanlar2, state02 = setup_fields(config, g1_override=g1_pert)
 
     print("\nKonfigurasyon 1 (g_nom) kosumu...")
@@ -114,7 +130,8 @@ def main():
                      dipole_tilt=dipole_tilt_sabit, quad_tilt=quad_tilt_sabit)
     print("Konfigurasyon 2 (g_pert) kosumu...")
     x2, y2 = run_sim(alanlar2, state02, config, dy_gercek, dx_gercek,
-                     dipole_tilt=dipole_tilt_sabit, quad_tilt=quad_tilt_sabit)
+                     dipole_tilt=dipole_tilt_sabit, quad_tilt=quad_tilt_sabit,
+                     quad_dG=quad_dG_pert)
 
     # BPM hatalarını uygula — farkta ofset iptal olur
     y1_meas = apply_bpm_errors(y1, sigma_noise, sigma_offset, bpm_offset_dy, rng_noise)

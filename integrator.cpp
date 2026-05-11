@@ -179,7 +179,9 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         // QF (type 2): G1 > 0 → horizontally focusing, vertically defocusing.
         // QD (type 3): G1 → -G1 (sign flip).
         double quadXOffset = field_params[25];
+        double quad_dG_frac = field_params[28];   // fractional gradient deviation (k-mod single-quad)
         double current_G1 = (element_type == 2) ? quadG1 : -quadG1;
+        current_G1 *= (1.0 + quad_dG_frac);
         double dev_quad = X - R0 - quadXOffset;
 
         double vert_rel = Z - quadVertOffset;
@@ -390,7 +392,8 @@ void run_integration(double* y_init, const double* field_params,
                      const double* quad_dy,     // 2*nFODO: vertical misalignment [m] per quad
                      const double* quad_dx,     // 2*nFODO: radial misalignment [m] per quad
                      const double* dipole_tilt, // 2*nFODO: s-axis tilt [rad] per deflector
-                     const double* quad_tilt)   // 2*nFODO: s-axis tilt [rad] per quad
+                     const double* quad_tilt,   // 2*nFODO: s-axis tilt [rad] per quad
+                     const double* quad_dG)     // 2*nFODO: fractional gradient deviation per quad
 {
     
     long long total_steps_est = (long long)((t_end - t0) / h);
@@ -545,23 +548,27 @@ void run_integration(double* y_init, const double* field_params,
             // field_params_local[25] = quad_dx runtime override
             // field_params_local[26] = dipole_tilt runtime override
             // field_params_local[27] = quad_tilt runtime override (skew quad coupling)
-            double field_params_local[28];
+            // field_params_local[28] = quad_dG runtime override (fractional gradient deviation)
+            double field_params_local[29];
             for (int fp = 0; fp < 25; ++fp) field_params_local[fp] = field_params[fp];
             field_params_local[23] = 0.0;  // quad_dy
             field_params_local[25] = 0.0;  // quad_dx
             field_params_local[26] = 0.0;  // dipole_tilt
             field_params_local[27] = 0.0;  // quad_tilt
+            field_params_local[28] = 0.0;  // quad_dG
 
             if (elem == 2) {               // QF
                 int qidx = 2 * current_fodo;
                 field_params_local[23] = quad_dy[qidx];
                 field_params_local[25] = quad_dx[qidx];
                 field_params_local[27] = quad_tilt[qidx];
+                field_params_local[28] = quad_dG[qidx];
             } else if (elem == 6) {        // QD
                 int qidx = 2 * current_fodo + 1;
                 field_params_local[23] = quad_dy[qidx];
                 field_params_local[25] = quad_dx[qidx];
                 field_params_local[27] = quad_tilt[qidx];
+                field_params_local[28] = quad_dG[qidx];
             } else if (elem == 0) {        // ARC1
                 field_params_local[26] = dipole_tilt[2 * current_fodo];
             } else if (elem == 4) {        // ARC2
