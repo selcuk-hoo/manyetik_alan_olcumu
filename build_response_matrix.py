@@ -2,24 +2,21 @@
 """
 build_response_matrix.py
 
-İki aşamalı tepki matrisi hesabı:
+K-modülasyon için iki optik konfigürasyonda tepki matrislerini hesaplar:
 
-Aşama 1 — Quad-only (tek optik konfigürasyon):
-  R_dy [48×48] : quad_dy (dikey kaçıklık)  → y_COD (quad girişlerinde) [m/m]
-  R_dx [48×48] : quad_dx (radyal kaçıklık) → x_COD (quad girişlerinde) [m/m]
+  R_dy [48×48] : quad_dy (dikey hizalama hatası) → y_COD [m/m]
+  R_dx [48×48] : quad_dx (radyal hizalama hatası) → x_COD [m/m]
 
-Aşama 2 — LOCO benzeri (iki optik konfigürasyon, dipol tilt de dahil):
-  R_tilt [48×48] : dipol_tilt (s-ekseni etrafında açı) → y_COD [m/rad]
+Dipol tilt ve quad tilt modelde YOK — bunlar ölçümde gürültü olarak kalır,
+tepki matrisi tarafından görülmez.
 
-  Birleşik 96×96 sistem:
-    M @ [dy; tilt] = [y_COD_1; y_COD_2]
-    M = [[R_dy_1, R_tilt_1],
-         [R_dy_2, R_tilt_2]]
+İki konfigürasyon (g_nom, g_pert = g_nom × 1.02) matrislerinin farkı:
+  ΔR_dy = R_dy_2 - R_dy_1   →  test_kmod_reconstruction.py bunu kullanır
+  ΔR_dx = R_dx_2 - R_dx_1
 
-Düzeltmeler:
-  • dx ve dy AYRI koşumlarla pertürbe ediliyor.
-  • Tüm pertürbasyon koşumları ProcessPoolExecutor ile paralel.
-    Her worker süreci kendi geçici dizinine chdir eder.
+• dx ve dy AYRI koşumlarla pertürbe edilir.
+• Tüm koşumlar ProcessPoolExecutor ile paralelleştirilir.
+  Her worker kendi geçici dizinine chdir eder (cod_data.txt çakışmasını önler).
 
 Komut satırı:
   python build_response_matrix.py --workers 7
@@ -147,31 +144,29 @@ def _run_one(task):
 
 
 def build_matrices(config, g1_override=None, g0_override=None,
-                   delta_q=1e-4, delta_tilt=1e-4, label="",
+                   delta_q=1e-4, label="",
                    sigma_noise=0.0, noise_seed=77,
-                   background_tilt=None, n_workers=1):
-    """R_dy, R_dx, R_tilt matrislerini hesaplar (paralel)."""
+                   n_workers=1):
+    """R_dy ve R_dx matrislerini hesaplar (paralel).
+
+    Tepki matrisi yalnızca quad hizalama hatalarını modeller.
+    Dipol tilt tepki matrisi kasıtlı olarak hesaplanmaz.
+    """
     n_q = 2 * int(config.get("nFODO", 24))
-    bg_tilt = (background_tilt if background_tilt is not None
-               else np.zeros(n_q))
     zeros = np.zeros(n_q)
 
-    # 1 referans + n_q dy + n_q dx + n_q tilt = 3*n_q + 1
+    # 1 referans + n_q dy + n_q dx = 2*n_q + 1 koşum
     tasks = []
     tasks.append((config, g1_override, g0_override,
-                  'ref', 0, zeros, zeros, bg_tilt))
+                  'ref', 0, zeros, zeros, zeros))
     for i in range(n_q):
         dy = zeros.copy(); dy[i] = delta_q
         tasks.append((config, g1_override, g0_override,
-                      'dy', i, dy, zeros, bg_tilt))
+                      'dy', i, dy, zeros, zeros))
     for i in range(n_q):
         dx = zeros.copy(); dx[i] = delta_q
         tasks.append((config, g1_override, g0_override,
-                      'dx', i, zeros, dx, bg_tilt))
-    for i in range(n_q):
-        tilt = bg_tilt.copy(); tilt[i] += delta_tilt
-        tasks.append((config, g1_override, g0_override,
-                      'tilt', i, zeros, zeros, tilt))
+                      'dx', i, zeros, dx, zeros))
 
     n_total = len(tasks)
     if label:
@@ -203,7 +198,6 @@ def build_matrices(config, g1_override=None, g0_override=None,
                 print(f"  [{label}] {j}/{n_total}  "
                       f"({el:.0f}s gecti, ~{rem:.0f}s kaldi)")
 
-    # Referans + gurultu (tek thread, deterministik)
     x0_clean, y0_clean = results[('ref', 0)]
     rng = np.random.default_rng(noise_seed) if sigma_noise > 0 else None
 
@@ -213,9 +207,8 @@ def build_matrices(config, g1_override=None, g0_override=None,
     x0 = _noisy(x0_clean)
     y0 = _noisy(y0_clean)
 
-    R_dy   = np.zeros((n_q, n_q))
-    R_dx   = np.zeros((n_q, n_q))
-    R_tilt = np.zeros((n_q, n_q))
+    R_dy = np.zeros((n_q, n_q))
+    R_dx = np.zeros((n_q, n_q))
 
     for i in range(n_q):
         _, y_cod = results[('dy', i)]
@@ -223,13 +216,10 @@ def build_matrices(config, g1_override=None, g0_override=None,
     for i in range(n_q):
         x_cod, _ = results[('dx', i)]
         R_dx[:, i] = (_noisy(x_cod) - x0) / delta_q
-    for i in range(n_q):
-        _, y_cod = results[('tilt', i)]
-        R_tilt[:, i] = (_noisy(y_cod) - y0) / delta_tilt
 
     if label:
         print(f"  [{label}] tamamlandi ({time.time()-t0:.1f}s)")
-    return R_dy, R_dx, R_tilt
+    return R_dy, R_dx
 
 
 def main():
@@ -242,123 +232,60 @@ def main():
     with open("params.json") as f:
         config = json.load(f)
 
-    n_q      = 2 * int(config.get("nFODO", 24))
-    delta_q  = 1e-4
-    delta_t  = 1e-4
-    g1_nom   = config.get("g1", 0.21)
-    eps      = 0.02
-    g1_pert  = g1_nom * (1.0 + eps)
+    n_q     = 2 * int(config.get("nFODO", 24))
+    delta_q = 1e-4
+    g1_nom  = config.get("g1", 0.21)
+    eps     = 0.02
+    g1_pert = g1_nom * (1.0 + eps)
 
     sigma_noise = config.get("bpm_noise_sigma", 0.0)
 
     print("=" * 60)
-    print(f"Konfigurasyon 1: nominal optik  (n_workers={args.workers})")
+    print(f"Konfigurasyon 1: nominal optik  (g1={g1_nom}, n_workers={args.workers})")
     print("=" * 60)
-    print(f"  n_quad = {n_q},  delta_q = {delta_q*1e3:.2f} mm,  "
-          f"delta_tilt = {delta_t*1e3:.2f} mrad")
-    print(f"  g1 = {g1_nom} T/m")
+    print(f"  n_quad={n_q},  delta_q={delta_q*1e3:.2f} mm")
     if sigma_noise > 0:
-        print(f"  BPM gurultusu (R insasinda): sigma = {sigma_noise*1e6:.1f} um")
+        print(f"  BPM gurultusu (R insasinda): sigma={sigma_noise*1e6:.1f} um")
     print()
 
     t_total = time.time()
 
-    R_dy_1, R_dx_1, R_tilt_1 = build_matrices(
+    R_dy_1, R_dx_1 = build_matrices(
         config, g1_override=g1_nom,
-        delta_q=delta_q, delta_tilt=delta_t, label="nom",
+        delta_q=delta_q, label="nom",
         sigma_noise=sigma_noise, n_workers=args.workers,
     )
 
-    np.save("R_dy.npy",     R_dy_1)
-    np.save("R_dx.npy",     R_dx_1)
-    np.save("R_dy_1.npy",   R_dy_1)
-    np.save("R_dx_1.npy",   R_dx_1)
-    np.save("R_tilt_1.npy", R_tilt_1)
+    np.save("R_dy_1.npy", R_dy_1)
+    np.save("R_dx_1.npy", R_dx_1)
 
-    print(f"\n  [nom] kappa(R_dy)   = {np.linalg.cond(R_dy_1):.3e}")
-    print(f"  [nom] kappa(R_dx)   = {np.linalg.cond(R_dx_1):.3e}")
-    print(f"  [nom] kappa(R_tilt) = {np.linalg.cond(R_tilt_1):.3e}")
+    print(f"\n  [nom] kappa(R_dy) = {np.linalg.cond(R_dy_1):.3e}")
+    print(f"  [nom] kappa(R_dx) = {np.linalg.cond(R_dx_1):.3e}")
 
     print()
     print("=" * 60)
-    print("Konfigurasyon 2: global optik perturbasyon (LOCO icin)")
+    print(f"Konfigurasyon 2: perturbe optik  (g1={g1_pert:.4f}, +{eps*100:.0f}%)")
     print("=" * 60)
-    print(f"  g1 = {g1_pert:.4f} T/m  (tum quadlar  ->  %{eps*100:.0f} degisim)")
     print()
 
-    R_dy_2, R_dx_2, R_tilt_2 = build_matrices(
+    R_dy_2, R_dx_2 = build_matrices(
         config, g1_override=g1_pert,
-        delta_q=delta_q, delta_tilt=delta_t, label="pert",
+        delta_q=delta_q, label="pert",
         sigma_noise=sigma_noise, n_workers=args.workers,
     )
 
-    np.save("R_dy_2.npy",   R_dy_2)
-    np.save("R_dx_2.npy",   R_dx_2)
-    np.save("R_tilt_2.npy", R_tilt_2)
+    np.save("R_dy_2.npy", R_dy_2)
+    np.save("R_dx_2.npy", R_dx_2)
 
-    print(f"\n  [pert] kappa(R_dy)   = {np.linalg.cond(R_dy_2):.3e}")
-    print(f"  [pert] kappa(R_dx)   = {np.linalg.cond(R_dx_2):.3e}")
-    print(f"  [pert] kappa(R_tilt) = {np.linalg.cond(R_tilt_2):.3e}")
+    dR_dy = R_dy_2 - R_dy_1
+    dR_dx = R_dx_2 - R_dx_1
+    np.save("dR_dy.npy", dR_dy)
+    np.save("dR_dx.npy", dR_dx)
 
-    M_loco = np.block([[R_dy_1, R_tilt_1],
-                       [R_dy_2, R_tilt_2]])
-    np.save("M_loco.npy", M_loco)
-    cond_loco = np.linalg.cond(M_loco)
-
-    print()
-    print("=" * 60)
-    print("LOCO birlesik matrisi ozeti")
-    print("=" * 60)
-    print(f"  M_loco boyutu : {M_loco.shape[0]}x{M_loco.shape[1]}")
-    print(f"  kappa(M_loco) : {cond_loco:.3e}")
-
-    if cond_loco < 1e6:
-        print("  -> Kosul sayisi makul: dy ve tilt es zamanli geri catilabilir.")
-    elif cond_loco < 1e10:
-        print("  -> Kosul sayisi yuksek: SVD/Tikhonov regularizasyonu onerilir.")
-    else:
-        print("  UYARI: Cok yuksek kosul sayisi.")
-
-    tilt_max  = config.get("dipole_random_tilt_max", 0.0)
-    tilt_seed = config.get("dipole_random_seed", 43)
-
-    if tilt_max > 0:
-        print()
-        print("=" * 60)
-        print("K-modulasyon matrisleri: sabit dipol tilt arka plani ile")
-        print("=" * 60)
-        rng_tilt = np.random.default_rng(seed=tilt_seed)
-        bg_tilt  = rng_tilt.uniform(-tilt_max, tilt_max, n_q)
-        print(f"  tilt_max = {tilt_max*1e3:.3f} mrad,  "
-              f"RMS = {np.std(bg_tilt)*1e3:.3f} mrad,  seed={tilt_seed}")
-        print()
-
-        print("Konfigurasyon 1 (kmod, g_nom + sabit tilt)...")
-        R_dy_1t, R_dx_1t, _ = build_matrices(
-            config, g1_override=g1_nom,
-            delta_q=delta_q, delta_tilt=delta_t, label="kmod-nom",
-            sigma_noise=sigma_noise, background_tilt=bg_tilt,
-            n_workers=args.workers,
-        )
-
-        print("\nKonfigurasyon 2 (kmod, g_pert + sabit tilt)...")
-        R_dy_2t, R_dx_2t, _ = build_matrices(
-            config, g1_override=g1_pert,
-            delta_q=delta_q, delta_tilt=delta_t, label="kmod-pert",
-            sigma_noise=sigma_noise, background_tilt=bg_tilt,
-            n_workers=args.workers,
-        )
-
-        dR_dy_kmod = R_dy_2t - R_dy_1t
-        dR_dx_kmod = R_dx_2t - R_dx_1t
-        np.save("dR_dy_kmod.npy", dR_dy_kmod)
-        np.save("dR_dx_kmod.npy", dR_dx_kmod)
-        np.save("bg_tilt_kmod.npy", bg_tilt)
-
-        print(f"\n  kappa(dR_dy_kmod) = {np.linalg.cond(dR_dy_kmod):.3e}")
-        print(f"  kappa(dR_dx_kmod) = {np.linalg.cond(dR_dx_kmod):.3e}")
-    else:
-        print("\n  dipole_random_tilt_max = 0 -> k-mod matrisleri atlandi.")
+    print(f"\n  [pert] kappa(R_dy) = {np.linalg.cond(R_dy_2):.3e}")
+    print(f"  [pert] kappa(R_dx) = {np.linalg.cond(R_dx_2):.3e}")
+    print(f"\n  kappa(dR_dy) = {np.linalg.cond(dR_dy):.3e}")
+    print(f"  kappa(dR_dx) = {np.linalg.cond(dR_dx):.3e}")
 
     total_elapsed = time.time() - t_total
     print(f"\nToplam sure: {total_elapsed:.0f}s  (n_workers={args.workers})")
