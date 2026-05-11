@@ -237,7 +237,37 @@ def main():
             
             print(f"-> Betatron Tune Qx          : {Qx:.4f}")
             print(f"-> Betatron Tune Qy          : {Qy:.4f}")
-        
+
+        # ---------------------------------------------------------
+        # 4b. x-y KUPLAJ TEŞHİSİ (nicel)
+        # 1) Jx salınım oranı : kuplajsız Jx korunur. std(Jx)/mean(Jx)
+        #    0'a yakınsa kuplaj zayıf, 1'e yakınsa güçlü.
+        # 2) FFT çapraz pik   : kuplaj varsa y sinyalinde νx pikinin
+        #    (ve x sinyalinde νy pikinin) gücü artar. Oran 0→yok,
+        #    ~1→tam kuplaj.
+        # ---------------------------------------------------------
+        if poin_local.shape[0] > 8:
+            Jx = x_pc**2 + xp_pc**2
+            Jy = y_pc**2 + yp_pc**2
+            Jx_osc = np.std(Jx) / np.mean(Jx) if np.mean(Jx) > 0 else 0.0
+            Jy_osc = np.std(Jy) / np.mean(Jy) if np.mean(Jy) > 0 else 0.0
+
+            from numpy.fft import rfft, rfftfreq
+            xc = x_pc - x_pc.mean()
+            yc = y_pc - y_pc.mean()
+            Fx = np.abs(rfft(xc))
+            Fy = np.abs(rfft(yc))
+            freqs = rfftfreq(len(xc))
+            ix = np.argmax(Fx[1:]) + 1
+            iy = np.argmax(Fy[1:]) + 1
+            cross_y_at_x = Fy[ix] / Fy[iy] if Fy[iy] > 0 else 0.0
+            cross_x_at_y = Fx[iy] / Fx[ix] if Fx[ix] > 0 else 0.0
+
+            print(f"-> Jx salınım oranı          : {Jx_osc:.4f}  (0=kuplajsız)")
+            print(f"-> Jy salınım oranı          : {Jy_osc:.4f}")
+            print(f"-> FFT capraz pik (y@νx / y@νy): {cross_y_at_x:.4f}")
+            print(f"-> FFT capraz pik (x@νy / x@νx): {cross_x_at_y:.4f}")
+
     sx_arr = sonuclar_local[:, 6]
     sy_arr = sonuclar_local[:, 7]
     
