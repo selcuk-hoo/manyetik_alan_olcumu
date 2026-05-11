@@ -131,23 +131,14 @@ def main():
     print("Geri catim sonuclari")
     print("=" * 60)
 
-    # İdeal: tilt sıfır, gürültü yok — yalnız quad sinyali ile
-    dy_ideal = np.linalg.solve(dR_dy, quad_signal_y)
-    dx_ideal = np.linalg.solve(dR_dx, quad_signal_x)
-    print("\n[Ideal: tilt=0, gurultu=0]")
-    print_results("dy", dy_gercek, dy_ideal)
-    print_results("dx", dx_gercek, dx_ideal)
-
-    # Gerçekçi: tilt var (modelde yok), BPM hataları var
     dy_geri = np.linalg.solve(dR_dy, delta_y)
     dx_geri = np.linalg.solve(dR_dx, delta_x)
-    print("\n[Gercekci: tilt gorulmez, BPM hatalari var]")
-    print_results("dy", dy_gercek, dy_geri)
-    print_results("dx", dx_gercek, dx_geri)
+    print_results("\n  dy", dy_gercek, dy_geri)
+    print_results(  "  dx", dx_gercek, dx_geri)
 
     np.savez("kmod_reconstruction_test.npz",
-             dy_gercek=dy_gercek, dy_geri=dy_geri, dy_ideal=dy_ideal,
-             dx_gercek=dx_gercek, dx_geri=dx_geri, dx_ideal=dx_ideal,
+             dy_gercek=dy_gercek, dy_geri=dy_geri,
+             dx_gercek=dx_gercek, dx_geri=dx_geri,
              tilt_sabit=tilt_sabit,
              quad_signal_y=quad_signal_y, quad_signal_x=quad_signal_x,
              delta_y=delta_y, delta_x=delta_x)
