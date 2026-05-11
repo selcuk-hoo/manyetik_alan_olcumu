@@ -2,6 +2,8 @@ __pycache__/
 *.pyc
 *.npy
 *.npz
+*.csv
+scan_quad_tilt.png
 simulation_data.txt
 poincare_data.txt
 rf.txt
