@@ -240,12 +240,9 @@ def main():
     parser.add_argument("--workers", "-w", type=int, default=default_workers,
                         help=f"Paralel worker sayisi (default: cekirdek-1 = {default_workers})")
     parser.add_argument("--single-quad", type=int, default=None,
-                        help="Tek-quad k-mod modu: bu indeksli quad fraksiyonel "
-                             "olarak modulasyon goren tek quad olur. Diger quadlar "
-                             "nominal kalir. Olmazsa eski uniform %2 modu kullanilir.")
-    parser.add_argument("--single-quad-eps", type=float, default=0.10,
-                        help="Tek-quad modu icin fraksiyonel modulasyon "
-                             "(default: 0.10 = +%%10).")
+                        help="params.json 'kmod_single_quad_index' degerini override eder.")
+    parser.add_argument("--single-quad-eps", type=float, default=None,
+                        help="params.json 'kmod_single_quad_eps' degerini override eder.")
     args = parser.parse_args()
 
     os.chdir(BASE)
@@ -255,17 +252,20 @@ def main():
     n_q     = 2 * int(config.get("nFODO", 24))
     delta_q = 1e-4
 
-    if args.single_quad is not None:
-        if not (0 <= args.single_quad < n_q):
-            raise ValueError(f"--single-quad {args.single_quad} araligi disinda "
-                             f"(0..{n_q-1})")
+    # Once params.json'dan oku, sonra CLI varsa override et.
+    single_quad = args.single_quad if args.single_quad is not None \
+                  else config.get("kmod_single_quad_index", -1)
+    single_eps  = args.single_quad_eps if args.single_quad_eps is not None \
+                  else config.get("kmod_single_quad_eps", 0.10)
+
+    if single_quad is not None and 0 <= single_quad < n_q:
         # Tek-quad modunda baz = g0; tum quadlar g0, sadece secilen quad g0*(1+eps)
         g1_nom  = config.get("g0", config.get("g1", 0.21))
-        eps     = args.single_quad_eps
+        eps     = single_eps
         g1_pert = g1_nom  # uniform pert YOK
         quad_dG_pert = np.zeros(n_q)
-        quad_dG_pert[args.single_quad] = eps
-        mode_label = f"single_q={args.single_quad}, baz=g0={g1_nom}, eps={eps*100:.0f}%"
+        quad_dG_pert[single_quad] = eps
+        mode_label = f"single_q={single_quad}, baz=g0={g1_nom}, eps={eps*100:.0f}%"
     else:
         # Uniform modda eski davranis: baz = g1, tum quadlar pert'te g1*1.02
         g1_nom  = config.get("g1", 0.21)
