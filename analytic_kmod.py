@@ -375,8 +375,9 @@ def main():
             x, y = run_sim(alanlar, state0, config, dy_true, dx_true,
                            dipole_tilt=dipole_tilt, quad_tilt=quad_tilt,
                            quad_dG=dG)
-            y_m = y.copy()
-            x_m = x.copy()
+            # run_sim → read_cod_quads → cod_data.txt → mm; analitik R m/m biriminde
+            y_m = y * 1e-3   # mm → m
+            x_m = x * 1e-3   # mm → m
             if sigma_noise > 0:
                 y_m += rng_noise.normal(0, sigma_noise, n_q)
                 x_m += rng_noise.normal(0, sigma_noise, n_q)
