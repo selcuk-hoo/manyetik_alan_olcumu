@@ -538,7 +538,135 @@ Bu spec aşıldığında (örn. tilt > 0.5 mrad) korelasyon hızlı düşer; o n
 
 ---
 
-## 12. Parametreler: `params.json`
+## 12. Tepki Matrisi, LOCO ve K-Modülasyon: Karşılaştırma ve Teorik Yaklaşım
+
+Bu bölüm üç birbiriyle ilişkili yöntemi karşılaştırır: lineer optik ölçümü (LOCO), k-modülasyon temelli kapalı yörünge fark analizi ve teorik tepki matrisi ile doğrudan geri çatım.
+
+### Temel Fizik: Misalignment → Dipol Kick → COD
+
+Bir quad'ın Δy kadar dikey kayması, o quad'ı bir dipol kick kaynağına dönüştürür:
+
+$$\theta_j = K_j L_j \cdot \Delta y_j$$
+
+Bu kick, tüm BPM'lerde bir kapalı yörünge sapması (COD) yaratır:
+
+$$y_{\mathrm{CO}}(s_i) = \frac{\sqrt{\beta_i \beta_j}}{2\sin(\pi Q)} \cdot K_j L_j \cdot \Delta y_j \cdot \cos\!\bigl(|\phi_i - \phi_j| - \pi Q\bigr)$$
+
+Matris biçiminde: $\mathbf{y} = R \cdot \boldsymbol{\Delta y}$, burada **tepki matrisi**:
+
+$$R_{ij} = \frac{\sqrt{\beta_i \beta_j}}{2\sin(\pi Q)} \cdot K_j L_j \cdot \cos\!\bigl(|\phi_i - \phi_j| - \pi Q\bigr)$$
+
+β fonksiyonları, faz ilerlemeleri φ ve tune Q biliniyorsa bu matris **analitik olarak** hesaplanabilir; simülasyon veya ölçüm gerektirmez.
+
+---
+
+### Yöntem 1 — LOCO (Linear Optics from Closed Orbits)
+
+**Nasıl çalışır:**  
+Her düzeltici dipol j için tek tek bir kick θ_j uygulanır ve tüm BPM'lerdeki yörünge değişimi ölçülür. Bu işlem N_corr kez tekrarlanarak **orbit response matrix (ORM)** inşa edilir:
+
+$$M_{ij}^{\mathrm{meas}} = \frac{\Delta y_i}{\theta_j}$$
+
+Ardından bir makine modeli $M^{\mathrm{model}}(K_1, \ldots, K_n, g_{\mathrm{BPM}}, g_{\mathrm{corr}})$ ölçülen ORM'ye fit edilir.
+
+**Ne verir:**
+- Quadrupol gradyan sapmaları δK [1/m²]
+- Beta fonksiyonları β(s) ve faz ilerlemeleri φ(s) → beta-beating haritası
+- BPM kazanç hataları, düzeltici kalibrasyon hataları
+
+**Ne vermez:**
+- Doğrudan transvers hizalama hatası (Δy, Δx metre cinsinden)
+- δK'nın kaynağını ayırt etmez: "Bu kick fiziksel bir pozisyon kaymasından mı yoksa demir/güç kaynağı hatasından mı geliyor?" sorusunu yanıtlayamaz.
+- BPM ofset hatalarını otomatik iptal etmez; ayrı fit parametresi olarak işlenmesi gerekir.
+
+**Pratik not:**  
+LOCO için N_corr ≈ 48 ayrı düzeltici kick ölçümü gerekir. Sonuçlar makine optiğini tanımlamak için altın standarttır; hizalama çıkarımı için ek adım gerektirir.
+
+---
+
+### Yöntem 2 — K-Modülasyon COD Farkı (Bu Simülasyonun Yöntemi)
+
+**Nasıl çalışır:**  
+Halka **iki farklı gradyan konfigürasyonunda** (g₁ ve g₂ = g₁ × 1.02) çalıştırılır. Her iki konfigürasyonda BPM'lerden COD ölçülür ve fark alınır:
+
+$$\Delta \mathbf{y} = \mathbf{y}(g_2) - \mathbf{y}(g_1) = \underbrace{(R_2 - R_1)}_{\Delta R} \cdot \boldsymbol{\Delta y}_{\mathrm{true}}$$
+
+**ΔR** matrisi, tepki matrisinin iki optik konfigürasyon arasındaki farkıdır; misalignment vektörü ΔR⁻¹ ile geri çatılır.
+
+**Ne verir:**
+- Doğrudan transvers hizalama pozisyonu (Δy, Δx metre cinsinden)
+- BPM ofset hatalarının otomatik iptali: ofsetler her iki ölçümde aynı olduğundan farkta common-mode olarak silinir
+- Gradyan hatasından bağımsız hizalama bilgisi
+
+**Ne vermez:**
+- Optik parametreler (β, φ) doğrudan elde edilmez
+- Quad tilt ve dipol tilt modele dahil değildir; bu hatalar ΔR'yi değil yalnızca sinyal gürültüsünü etkiler (bkz. Bölüm 11)
+
+**Pratik not:**  
+Yalnızca **iki BPM okuması** (iki gradyan ayarında) gerekir. Trim quad kicki veya tek tek pertürbasyon ölçümü yapılmasına gerek yoktur. Bu yöntemin temel avantajı budur.
+
+---
+
+### Yöntem 3 — Analitik Tepki Matrisi ile Doğrudan Geri Çatım
+
+**Temel fikir:**  
+`build_response_matrix.py` her quad için birim misalignment uygulayarak R matrisini nümerik olarak inşa eder (N_quad + 1 koşum × 2 konfigürasyon ≈ 97 simülasyon). Oysa yukarıdaki formül β, φ ve Q biliniyorsa R'yi **analitik olarak** verir; hiçbir pertürbasyon simülasyonu gerekmez.
+
+Analitik yol:
+
+```
+1. FODO optiğinden (veya LOCO ölçümünden) β, φ, Q'yu al
+2. g₁ ve g₂ için R₁, R₂ matrislerini formülden hesapla
+3. ΔR = R₂ - R₁
+4. Gerçek halkada iki gradyan ayarında BPM oku: y₁, y₂
+5. Δy = y₂ − y₁
+6. Δy_true = ΔR⁻¹ · Δy
+```
+
+**Avantajları:**
+- Simülasyon maliyeti sıfır
+- Fizik şeffaf: β fonksiyonu ve tune değişiminin katkısı açıkça görülür
+- Gerçek deneyde uygulanabilir (tasarım β'sı veya LOCO'dan ölçülen β kullanılabilir)
+
+**Sınırlılıkları:**
+- Lineer yaklaşım; nonlineer etkiler (sextupol, fringe) yok sayılır
+- β fonksiyonlarındaki hata doğrudan ΔR hatasına dönüşür
+- Quad tilt, dipol tilt gibi modellenmemiş hatalar geri çatım performansını düşürür
+
+**pEDM için durum:**  
+24-katlı simetrik FODO halkasında tasarım β değerleri gerçek β'dan çok az sapar. Analitik ΔR matrisi simülasyon tabanlı ΔR ile neredeyse özdeştir. Bu yaklaşım hem hızlı doğrulama hem de gerçek deney uygulaması için uygundur.
+
+---
+
+### Karşılaştırma Tablosu
+
+| Özellik | LOCO | K-mod COD farkı | Analitik R |
+|---|---|---|---|
+| Gerekli ölçüm | N_corr kick ölçümü | 2 BPM okuması | 2 BPM okuması |
+| Ön koşul | Trim quad/düzeltici | İki gradyan modu | β, φ, Q bilgisi |
+| Doğrudan çıktı | δK, β-beat, BPM kazancı | Δy, Δx [m] | Δy, Δx [m] |
+| Hizalama yolu | Dolaylı (δK → Δy) | Doğrudan | Doğrudan |
+| BPM ofset | Ayrı fit parametresi | Otomatik iptal | Otomatik iptal |
+| Quad tilt etkisi | Görünmez | Kirlilik (§11) | Kirlilik (§11) |
+| Nonlineer etkiler | Hayır (ORM lineer) | Simülasyon kapsar | Hayır |
+| Hesap maliyeti | N_corr simülasyon | 97 simülasyon | Sıfır simülasyon |
+
+---
+
+### Üç Yöntemin Tamamlayıcı Kullanımı
+
+Gerçek bir deney için önerilen sıra:
+
+1. **LOCO** → makine optiğini kalibre et, β ve φ haritasını çıkar
+2. **Analitik ΔR** → ölçülen β ile tepki matrisini hesapla (simülasyon gerekmez)
+3. **K-mod COD farkı** → iki gradyan ayarında BPM oku, ΔR⁻¹ · Δy ile hizalamayı geri çat
+4. Quad pozisyon düzeltmesi uygula, iterasyon gerekirse tekrarla
+
+Bu kombinasyon hem hesap etkin hem fiziksel olarak şeffaf hem de BPM ofset bağışıklığı sağlar.
+
+---
+
+## 13. Parametreler: `params.json`
 
 ### Geometri ve Fizik
 
@@ -587,7 +715,7 @@ Bu spec aşıldığında (örn. tilt > 0.5 mrad) korelasyon hızlı düşer; o n
 
 ---
 
-## 13. Kurulum ve Çalıştırma
+## 14. Kurulum ve Çalıştırma
 
 ### Gereksinimler
 

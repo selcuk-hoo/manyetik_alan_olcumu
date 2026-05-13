@@ -104,7 +104,7 @@ def read_cod_quads(nFODO):
 
 
 def run_sim(alanlar, state0, config, quad_dy, quad_dx,
-            dipole_tilt=None, quad_tilt=None):
+            dipole_tilt=None, quad_tilt=None, quad_dG=None):
     """Tek koşum, BPM COD'larını döndürür. Çıktı dosyaları CWD'ye yazılır."""
     for fname in ("cod_data.txt", "rf.txt"):
         if os.path.exists(fname):
@@ -114,6 +114,8 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx,
         dipole_tilt = np.zeros(n_q)
     if quad_tilt is None:
         quad_tilt = np.zeros(n_q)
+    if quad_dG is None:
+        quad_dG = np.zeros(n_q)
     integrate_particle(
         state0,
         t0=0.0,
@@ -125,6 +127,7 @@ def run_sim(alanlar, state0, config, quad_dy, quad_dx,
         quad_dx=quad_dx,
         dipole_tilt=dipole_tilt,
         quad_tilt=quad_tilt,
+        quad_dG=quad_dG,
     )
     return read_cod_quads(int(alanlar.nFODO))
 
@@ -139,38 +142,43 @@ def _worker_init():
 
 def _run_one(task):
     """Worker giriş noktası: setup + run_sim → COD."""
-    config, g1_override, g0_override, kind, idx, dy_arr, dx_arr, tilt_arr = task
+    (config, g1_override, g0_override, kind, idx,
+     dy_arr, dx_arr, tilt_arr, dG_arr) = task
     alanlar, state0 = setup_fields(config, g1_override=g1_override,
                                    g0_override=g0_override)
     x_cod, y_cod = run_sim(alanlar, state0, config, dy_arr, dx_arr,
-                           dipole_tilt=tilt_arr)
+                           dipole_tilt=tilt_arr, quad_dG=dG_arr)
     return kind, idx, x_cod, y_cod
 
 
 def build_matrices(config, g1_override=None, g0_override=None,
                    delta_q=1e-4, label="",
                    sigma_noise=0.0, noise_seed=77,
-                   n_workers=1):
+                   n_workers=1, quad_dG_pert=None):
     """R_dy ve R_dx matrislerini hesaplar (paralel).
 
+    quad_dG_pert: opsiyonel, boy 2*nFODO dizisi, fraksiyonel gradyan sapması.
+    Tek-quad k-modülasyonu için kullanılır (örn. yalnız tek bir quad'ın 0.10).
+
     Tepki matrisi yalnızca quad hizalama hatalarını modeller.
-    Dipol tilt tepki matrisi kasıtlı olarak hesaplanmaz.
+    Dipol tilt ve quad tilt kasıtlı olarak modele dahil değildir.
     """
     n_q = 2 * int(config.get("nFODO", 24))
     zeros = np.zeros(n_q)
+    dG = quad_dG_pert if quad_dG_pert is not None else zeros
 
     # 1 referans + n_q dy + n_q dx = 2*n_q + 1 koşum
     tasks = []
     tasks.append((config, g1_override, g0_override,
-                  'ref', 0, zeros, zeros, zeros))
+                  'ref', 0, zeros, zeros, zeros, dG))
     for i in range(n_q):
         dy = zeros.copy(); dy[i] = delta_q
         tasks.append((config, g1_override, g0_override,
-                      'dy', i, dy, zeros, zeros))
+                      'dy', i, dy, zeros, zeros, dG))
     for i in range(n_q):
         dx = zeros.copy(); dx[i] = delta_q
         tasks.append((config, g1_override, g0_override,
-                      'dx', i, zeros, dx, zeros))
+                      'dx', i, zeros, dx, zeros, dG))
 
     n_total = len(tasks)
     if label:
@@ -231,6 +239,10 @@ def main():
     parser = argparse.ArgumentParser(description="Tepki matrisi insasi - paralel.")
     parser.add_argument("--workers", "-w", type=int, default=default_workers,
                         help=f"Paralel worker sayisi (default: cekirdek-1 = {default_workers})")
+    parser.add_argument("--single-quad", type=int, default=None,
+                        help="params.json 'kmod_single_quad_index' degerini override eder.")
+    parser.add_argument("--single-quad-eps", type=float, default=None,
+                        help="params.json 'kmod_single_quad_eps' degerini override eder.")
     args = parser.parse_args()
 
     os.chdir(BASE)
@@ -239,16 +251,35 @@ def main():
 
     n_q     = 2 * int(config.get("nFODO", 24))
     delta_q = 1e-4
-    g1_nom  = config.get("g1", 0.21)
-    eps     = 0.02
-    g1_pert = g1_nom * (1.0 + eps)
+
+    # Once params.json'dan oku, sonra CLI varsa override et.
+    single_quad = args.single_quad if args.single_quad is not None \
+                  else config.get("kmod_single_quad_index", -1)
+    single_eps  = args.single_quad_eps if args.single_quad_eps is not None \
+                  else config.get("kmod_single_quad_eps", 0.10)
+
+    if single_quad is not None and 0 <= single_quad < n_q:
+        # Tek-quad modunda baz = g0; tum quadlar g0, sadece secilen quad g0*(1+eps)
+        g1_nom  = config.get("g0", config.get("g1", 0.21))
+        eps     = single_eps
+        g1_pert = g1_nom  # uniform pert YOK
+        quad_dG_pert = np.zeros(n_q)
+        quad_dG_pert[single_quad] = eps
+        mode_label = f"single_q={single_quad}, baz=g0={g1_nom}, eps={eps*100:.0f}%"
+    else:
+        # Uniform modda eski davranis: baz = g1, tum quadlar pert'te g1*1.02
+        g1_nom  = config.get("g1", 0.21)
+        eps     = 0.02
+        g1_pert = g1_nom * (1.0 + eps)
+        quad_dG_pert = None
+        mode_label = f"uniform g1*1.02"
 
     sigma_noise = config.get("bpm_noise_sigma", 0.0)
 
     print("=" * 60)
     print(f"Konfigurasyon 1: nominal optik  (g1={g1_nom}, n_workers={args.workers})")
     print("=" * 60)
-    print(f"  n_quad={n_q},  delta_q={delta_q*1e3:.2f} mm")
+    print(f"  n_quad={n_q},  delta_q={delta_q*1e3:.2f} mm,  mod: {mode_label}")
     if sigma_noise > 0:
         print(f"  BPM gurultusu (R insasinda): sigma={sigma_noise*1e6:.1f} um")
     print()
@@ -269,7 +300,10 @@ def main():
 
     print()
     print("=" * 60)
-    print(f"Konfigurasyon 2: perturbe optik  (g1={g1_pert:.4f}, +{eps*100:.0f}%)")
+    if quad_dG_pert is not None:
+        print(f"Konfigurasyon 2: tek-quad pert ({mode_label})")
+    else:
+        print(f"Konfigurasyon 2: uniform pert  (g1={g1_pert:.4f}, +{eps*100:.0f}%)")
     print("=" * 60)
     print()
 
@@ -277,6 +311,7 @@ def main():
         config, g1_override=g1_pert,
         delta_q=delta_q, label="pert",
         sigma_noise=sigma_noise, n_workers=args.workers,
+        quad_dG_pert=quad_dG_pert,
     )
 
     np.save("R_dy_2.npy", R_dy_2)
