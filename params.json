@@ -34,8 +34,8 @@
     "error_quad_dy": 0.0,
     "error_quad_dx": 0.0,
 
-    "quad_random_dy_max": 0.0,
-    "quad_random_dx_max": 0.0,
+    "quad_random_dy_max": 1e-4,
+    "quad_random_dx_max": 1e-4,
     "quad_random_seed": 42,
 
     "error_dipole_index": -1,

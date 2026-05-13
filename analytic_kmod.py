@@ -434,33 +434,40 @@ def main():
         print_results("dy (simülasyon ΔR)", dy_true, dy_sim)
         print_results("dx (simülasyon ΔR)", dx_true, dx_sim)
 
-    # ─── Beta hatası senaryosu ───────────────────────────────────────
-    # Tüm quad gradyanları ±%5 hatalıysa (gerçek β tasarım β'sından sapıyor)
-    # Analitik R tasarım β'sını kullanır → geri çatım kalitesi düşer
+    # ─── Self-consistency testi ─────────────────────────────────────
+    # Analitik forward model ile: delta_y = dR @ dy_true → mükemmel geri çatım
     print("\n" + "=" * 65)
-    print("Beta-fonksiyonu hatası etkisi (analitik ΔR sabit, β değişiyor)")
+    print("Self-consistency testi (analitik forward model)")
     print("=" * 65)
+    dy_self = reconstruct(dR_dy, dR_dy @ dy_true)
+    dx_self = reconstruct(dR_dx, dR_dx @ dx_true)
+    print_results("dy (öz-tutarlılık)", dy_true, dy_self)
+    print_results("dx (öz-tutarlılık)", dx_true, dx_self)
 
-    for beta_err_pct in [0, 1, 2, 5, 10]:
+    # ─── Beta hatası senaryosu ───────────────────────────────────────
+    # Gerçek halka g_err gradyanıyla çalışıyor (tasarım g_nom'dan sapıyor).
+    # Analitik ΔR tasarım β'sını (g_nom) kullanıyor → model hatası → bozuk geri çatım.
+    # Forward model: analitik R(g_err) ile — hızlı, simülasyon gerektirmez.
+    print("\n" + "=" * 65)
+    print("Beta-fonksiyonu hatası etkisi (analitik forward, tasarım ΔR sabit)")
+    print("=" * 65)
+    print("  (Gerçek halka g_err'de, model hâlâ g_nom β'sını kullanıyor)")
+    print(f"  {'g_hata':>8}  {'dy hata RMS':>12}  {'corr':>8}  {'dx hata RMS':>12}  {'corr':>8}")
+
+    for beta_err_pct in [0, 1, 2, 5, 10, 20]:
         g_err = g_nom * (1.0 + beta_err_pct / 100.0)
-        try:
-            from build_response_matrix import setup_fields, run_sim
-            alanlar1e, s0e = setup_fields(config, g1_override=g_err)
-            alanlar2e, _   = setup_fields(config, g1_override=g_err * 1.02)
-            rng2 = np.random.default_rng(seed=99)
-            x1e, y1e = run_sim(alanlar1e, s0e, config, dy_true, dx_true,
-                                dipole_tilt=np.zeros(n_q), quad_tilt=np.zeros(n_q))
-            x2e, y2e = run_sim(alanlar2e, s0e, config, dy_true, dx_true,
-                                dipole_tilt=np.zeros(n_q), quad_tilt=np.zeros(n_q))
-            dy_e = y2e - y1e
-        except Exception:
-            # Analitik forward model
-            _, R1e, R2e = build_analytic_dR(config, g_err, g_err*1.02, 'y')
-            dy_e = (R2e - R1e) @ dy_true
+        _, R1e_y, R2e_y = build_analytic_dR(config, g_err, g_err*1.02, 'y')
+        _, R1e_x, R2e_x = build_analytic_dR(config, g_err, g_err*1.02, 'x')
+        dy_e = (R2e_y - R1e_y) @ dy_true
+        dx_e = (R2e_x - R1e_x) @ dx_true
         dy_rec = reconstruct(dR_dy, dy_e)
-        err = dy_rec - dy_true
-        corr = np.corrcoef(dy_true, dy_rec)[0, 1] if np.std(dy_true) > 0 else float('nan')
-        print(f"  g_err={beta_err_pct:+3d}%   dy hata RMS={np.std(err)*1e6:7.2f} μm   corr={corr:.4f}")
+        dx_rec = reconstruct(dR_dx, dx_e)
+        ey = dy_rec - dy_true
+        ex = dx_rec - dx_true
+        cy = np.corrcoef(dy_true, dy_rec)[0,1] if np.std(dy_true) > 0 else float('nan')
+        cx = np.corrcoef(dx_true, dx_rec)[0,1] if np.std(dx_true) > 0 else float('nan')
+        print(f"  {beta_err_pct:+7d}%  {np.std(ey)*1e6:10.2f} μm  {cy:8.4f}  "
+              f"{np.std(ex)*1e6:10.2f} μm  {cx:8.4f}")
 
     # ─── Kayıt ──────────────────────────────────────────────────────
     np.savez("analytic_kmod_result.npz",
