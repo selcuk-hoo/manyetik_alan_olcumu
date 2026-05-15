@@ -316,8 +316,8 @@ def main():
         print("\n" + "=" * 65)
         print("Simülasyon R matrisiyle karşılaştırma (R_dy_1, R_dx_1)")
         print("=" * 65)
-        R_sim_dy = np.load("R_dy_1.npy")
-        R_sim_dx = np.load("R_dx_1.npy")
+        R_sim_dy = np.load("R_dy_1.npy") * 1e-3   # mm/m → m/m
+        R_sim_dx = np.load("R_dx_1.npy") * 1e-3   # mm/m → m/m
 
         corr_dy = np.corrcoef(R1_dy.ravel(), R_sim_dy.ravel())[0, 1]
         corr_dx = np.corrcoef(R1_dx.ravel(), R_sim_dx.ravel())[0, 1]
@@ -427,8 +427,10 @@ def main():
 
     # Simülasyon ΔR varsa karşılaştır
     if all(os.path.exists(f) for f in ["dR_dy.npy", "dR_dx.npy"]):
-        dR_sim_y = np.load("dR_dy.npy")
-        dR_sim_x = np.load("dR_dx.npy")
+        # build_response_matrix.py cod_data.txt'i mm cinsinden okur, delta_q m cinsinden →
+        # dR_dy.npy birimi mm/m; analitik sinyal m cinsinde → 1e-3 ile m/m'e çevir.
+        dR_sim_y = np.load("dR_dy.npy") * 1e-3
+        dR_sim_x = np.load("dR_dx.npy") * 1e-3
         dy_sim = reconstruct(dR_sim_y, delta_y)
         dx_sim = reconstruct(dR_sim_x, delta_x)
         print()
