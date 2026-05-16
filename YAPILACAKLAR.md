@@ -226,7 +226,7 @@ r_k = −β · KL · cos(k · μ − π·Q) / (2 · sin(π·Q))    k = 0, 1, ...
 ### 4.3 Sirkülant Matrislerin Spektral Ayrışması
 
 Sirkülant matrislerin en önemli özelliği: hepsi **aynı özvektör kümesine** sahiptir
-— bu özvektörler DFT (Ayrık Fourier Dönüşümü) matrisinin sütunlarıdır.
+— bu özvektörler DFT matrisinin sütunlarıdır.
 
 ```
 C = F⁻¹ · diag(λ) · F
@@ -234,12 +234,33 @@ C = F⁻¹ · diag(λ) · F
 
 Burada:
 - `F` : DFT matrisi, `F_kj = exp(−2πi·k·j/N) / √N`
-- `λ_k` : C'nin k. özdeğeri, ilk satırın FFT'si: `λ = FFT(r)`
+- `λ_k` : C'nin k. özdeğeri, ilk satırın ayrık Fourier dönüşümü: `λ = DFT(r)`
+
+### 4.4 DFT vs. FFT: Önemli Bir Ayrım
+
+Belgede bu iki terim birbirinin yerine kullanılmamalıdır:
+
+- **DFT (Ayrık Fourier Dönüşümü)** bir **matematiksel tanımdır**:
+  ```
+  X_k = Σ_{n=0}^{N-1}  x_n · exp(−2πi·k·n/N)
+  ```
+  Sirkülant matrisin özvektörleri **DFT matrisinin** sütunlarıdır. Özdeğerler
+  ilk satırın **DFT'sidir**. Bu, matematiksel yapıyı tanımlayan ifadedir.
+
+- **FFT (Hızlı Fourier Dönüşümü)** DFT'yi hesaplamak için kullanılan
+  **algoritmanın adıdır**. Cooley-Tukey algoritması, naif O(N²) hesabı
+  O(N log N)'e indirir. Çıktı matematiksel olarak DFT ile aynıdır.
+
+**Pratik dil:** Teorik açıklamalarda "DFT" (yapı), kodda ve hesaplama
+maliyetinden söz ederken "FFT" (algoritma) deriz. `np.fft.fft(x)` çağrısı
+FFT algoritmasıyla DFT'yi hesaplar.
+
+### 4.5 Spektral Ayrışmanın Pratik Faydaları
 
 Bu ayrışma üç şeyi mümkün kılar:
 
-1. **Verimli çarpım**: `C · x = IFFT(λ · FFT(x))` — O(N log N)
-2. **Verimli tersleme**: `C⁻¹ · y = IFFT(FFT(y) / λ)` — O(N log N)
+1. **Verimli çarpım**: `C · x = IDFT(λ · DFT(x))` — FFT ile O(N log N)
+2. **Verimli tersleme**: `C⁻¹ · y = IDFT(DFT(y) / λ)` — FFT ile O(N log N)
 3. **Mod bazlı analiz**: Her k modu için ayrı "kazanç" faktörü `|λ_k|` incelenebilir
 
 Karşılaştırma: genel matris çarpımı O(N²), terslemesi O(N³).
@@ -273,10 +294,11 @@ Bu adım, matristeki `√β_i` çarpanlarını soldan kaldırır.
 
 **Adım 2 — Özdeğerleri hesapla:**
 ```
-λ_k = FFT(ilk_satır_M)_k    k = 0, 1, ..., N−1
+λ_k = DFT(ilk_satır_M)_k    k = 0, 1, ..., N−1
 ```
+Pratikte FFT algoritması kullanılır: `lambda_arr = np.fft.fft(M[0, :])`.
 `M`'nin ilk satırı: `M_{0,j} = −√(β_j) · cos(j·μ − πQ) / (2·sin(πQ))`.
-Bu satırın FFT'si, tüm sirkülant matrisin spektral içeriğini verir.
+Bu satırın DFT'si, sirkülant matrisin tüm spektral içeriğini taşır.
 
 **Adım 3 — İşaretsiz KL faktörünü hesapla:**
 ```
@@ -350,7 +372,82 @@ ayrı terslendiğinden model hatası bu şekilde birikmez.
 
 ---
 
-## 6. Uygulama Planı
+## 6. Twiss Parametreleri: Analitik mi, Deneysel mi?
+
+Yöntemin doğruluğu, R matrisinin gerçek makineye ne kadar iyi uyduğuna bağlıdır.
+R matrisinin yapı taşları üç Twiss niceliğidir: betatron tunu Q, beta fonksiyonu
+β ve faz ilerlemesi μ. Bunların kaynağı kritik bir tasarım kararıdır.
+
+### 6.1 Saf Analitik Yaklaşımın Problemi
+
+`params.json`'dan okunan örgü konfigürasyonu (`g0`, `g1`, `quadLen`, `driftLen`,
+`nFODO`) üzerinden transfer matrisleriyle hesaplanan Twiss parametreleri,
+**modelin** Twiss değerleridir — gerçek makinenin değil. Aralarındaki fark şu
+nedenlerle ortaya çıkar:
+
+- Kuadrupol kalibrasyon hataları (gerçek `g` değeri okunan değerden farklıdır)
+- Sextupol etkisi, dipol bozucu manyetik alanları, fringe field düzeltmeleri
+- Sıcaklık ve mekanik tolerans kaynaklı dalgalanmalar
+
+Bu fark `(β_gerçek − β_model)/β_model` mertebesinde tipik olarak %1 – %5
+düzeyindedir. Doğrudan R'ye girdiğinden rekonstrüksiyon hatasına aynı oranda
+katkı yapar.
+
+### 6.2 Tune Q'nun Rolü ve Kritik Önemi
+
+Yanıt matrisinin paydasında `sin(πQ)` bulunur. Q yarı-tam sayıya (0.5, 1.5, …)
+yaklaştıkça payda sıfırlanır ve R patlar. Q'daki küçük bir belirsizliğin etkisi
+makinenin çalışma noktasına bağlıdır:
+
+```
+dR/R  ≈  −π · ΔQ · cot(πQ)
+```
+
+Q = 0.25 gibi makul bir çalışma noktasında `cot(π·0.25) = 1`, dolayısıyla
+`ΔQ = 0.01` yaklaşık `dR/R ≈ 3.1%` hataya yol açar. Q yarı-tam sayıya yaklaştıkça
+bu duyarlılık keskin biçimde artar.
+
+**Sonuç:** Q, deneysel değerine yerleştirilmesi gereken en kritik parametredir.
+Neyse ki tune ölçümü hızlandırıcı tesislerinde rutin ve hassas bir prosedürdür
+(turn-by-turn BPM verisinin FFT'siyle binde bir doğrulukta okunur).
+
+### 6.3 Önerilen Hibrit Yaklaşım
+
+`fodo_lattice.py`'de Twiss kaynağı **isteğe bağlı** olacak. Varsayılan parametre
+imzaları şöyle:
+
+```python
+compute_twiss_at_quads(config,
+                       g,
+                       plane,
+                       Q_measured=None,       # None → analitik hesapla
+                       beta_measured=None)    # None → analitik hesapla
+```
+
+- `Q_measured` verildiyse: bu değer doğrudan kullanılır
+- `beta_measured` verildiyse: bu skaler veya N-vektörü R'ye giydirilir
+- Hiçbiri verilmediyse: `params.json` + transfer matrisi formülleriyle analitik
+  hesaplama yapılır
+
+Bu yapı, hem analitik (Aşama A: ideal test) hem deneysel (Aşama C: gerçekçi
+rekonstrüksiyon) modu desteklemeyi mümkün kılar.
+
+### 6.4 Duyarlılık Analizinin Yeri
+
+Q ve β'nın etkisi yalnızca "kullan/kullanma" sorusu değildir; her birinin
+belirsizlik seviyesi de raporlanmalıdır. Aşama D'ye iki yeni alt test eklenir:
+
+| Test | Tarama aralığı | Çıktı |
+|------|----------------|-------|
+| β belirsizliği | `δβ/β` = 0% – 5% RMS | Rekonstrüksiyon RMS hatası eğrisi |
+| Q belirsizliği | `ΔQ` = ±0.001, ±0.005, ±0.01, ±0.02 | Rekonstrüksiyon RMS hatası eğrisi |
+
+Bu eğriler makalede "yöntemi kullanmak için Twiss parametrelerinin hangi
+hassasiyette bilinmesi gerekiyor" sorusuna nicel yanıt verecek.
+
+---
+
+## 7. Uygulama Planı
 
 ### 6.1 `fodo_lattice.py` — Temel Twiss Kütüphanesi
 
@@ -378,10 +475,12 @@ propagate_twiss(M_cell)
 # → (beta, alpha, mu) Courant-Snyder parametreleri
 # M_cell'in izinden mu, M[0,1]/sin(mu) formülünden beta hesaplar
 
-compute_twiss_at_quads(config, K, plane)
+compute_twiss_at_quads(config, K, plane, Q_measured=None, beta_measured=None)
 # → (beta_arr, phi_arr, Q) — her kuadrupol konumunda Twiss parametreleri
 # config: params.json'dan gelen örgü konfigürasyonu
 # phi_arr kümülatif faz, Q toplam betatron tunu
+# Q_measured: verilirse analitik Q yerine kullanılır (deneysel mod)
+# beta_measured: skaler veya N-vektörü; verilirse analitik β yerine kullanılır
 
 signed_KL(N_fodo, K_abs, L_q, plane)
 # → KL işaret dizisi [+KL, -KL, +KL, ...]
@@ -502,7 +601,7 @@ hale geliyor? (korelasyon < 0.9 veya RMS hata > 10 μm eşikleri kullanılabilir
 
 ---
 
-## 7. Kontrol Noktaları ve Başarı Kriterleri
+## 8. Kontrol Noktaları ve Başarı Kriterleri
 
 Her adımın tamamlandığını doğrulamak için aşağıdaki sayısal testler yapılmalıdır:
 
@@ -531,7 +630,7 @@ Her adımın tamamlandığını doğrulamak için aşağıdaki sayısal testler 
 
 ---
 
-## 8. Dosya Yapısı
+## 9. Dosya Yapısı
 
 | Dosya | Rol |
 |---|---|
@@ -545,7 +644,7 @@ Her adımın tamamlandığını doğrulamak için aşağıdaki sayısal testler 
 
 ---
 
-## 9. Kodlama Sırası
+## 10. Kodlama Sırası
 
 1. `fodo_lattice.py` yazılır → dahili tutarlılık testi geçilir
 2. `spectral_inversion.py` Aşama A eklenir → ideal test geçilir
