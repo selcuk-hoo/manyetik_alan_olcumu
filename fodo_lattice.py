@@ -66,29 +66,30 @@ def thick_quad_matrix(K, L, focusing):
                          [sqk * np.sinh(phi), np.cosh(phi)]])
 
 
-def sector_bend_matrix(L, R0, plane):
+def arc_matrix(L):
     """
-    Saf sektör dipol matrisi (kenar odaklaması yok).
-    plane='x' : bükülen düzlem (zayıf odaklama)
-    plane='y' : bükülmeyen düzlem (drift gibi)
+    Bu halka tamamen elektrik büküm kullanıyor (E_r = E0·R0/R, n=1, manyetik
+    dipol yok). n=1 halinde elektrik alanın betatron odaklamasına katkısı
+    matematiksel olarak tam sıfırdır: yatay odaklama kuvveti F_x = R0·(eE0 - γmv²)/(R0+x)
+    ve eE0 = γmv²/R0 denge koşulundan F_x → 0. Dikey kuvvet de E_z=0 için sıfır.
+    Bu nedenle arc bölgeleri her iki düzlemde de saf drift olarak modellenir.
     """
-    if plane == 'y':
-        return drift_matrix(L)
-    theta = L / R0
-    return np.array([[np.cos(theta),       R0 * np.sin(theta)],
-                     [-np.sin(theta) / R0, np.cos(theta)]])
+    return drift_matrix(L)
 
 
 # =============================================================================
 # 3. FODO hücresi: parçacığın gördüğü eleman sırası
 # =============================================================================
-def cell_element_sequence(config, K_QF, K_QD, plane):
+def cell_element_sequence(config, K_abs, plane):
     """
     Bir FODO hücresinin transfer matrislerini, parçacığın geçeceği sırayla
     döndürür. Quad merkezlerinde "marker" yerleştirir → Twiss buralarda örneklenir.
 
-    Hücre yapısı (per cell):
-        drift(L_d) + QF + drift(L_d) + arc + drift(L_d) + QD + drift(L_d) + arc
+    Hücre yapısı (COD verisinden çıkarılan gerçek sıra):
+        arc + drift(L_d) + QF + drift(L_d) + arc + drift(L_d) + QD + drift(L_d)
+
+    QF ve QD aynı mutlak gradient büyüklüğünü paylaşır (|K| = g1/Brho).
+    C++ kodunda: current_G1 = (elem==QF) ? +quadG1 : -quadG1  → aynı |K|.
 
     Marker konvansiyonu: her quad'ın MERKEZİnde örnekleme yapılır
     (yani yarım-quad öncesi + yarım-quad sonrası şeklinde bölünür).
@@ -102,7 +103,7 @@ def cell_element_sequence(config, K_QF, K_QD, plane):
     L_q  = config['quadLen']
     R0   = config['R0']
     nF   = int(config['nFODO'])
-    arc_len = 2.0 * np.pi * R0 / (2 * nF)  # her yarım hücre başına arc
+    arc_len = 2.0 * np.pi * R0 / (2 * nF)
 
     # QF ve QD'nin bu düzlemde odaklayıp odaklamadığı
     if plane == 'x':
@@ -110,17 +111,18 @@ def cell_element_sequence(config, K_QF, K_QD, plane):
     else:
         QF_foc, QD_foc = False, True
 
-    half_QF = thick_quad_matrix(K_QF, L_q / 2.0, focusing=QF_foc)
-    half_QD = thick_quad_matrix(K_QD, L_q / 2.0, focusing=QD_foc)
-    D       = drift_matrix(L_d)
-    A       = sector_bend_matrix(arc_len, R0, plane)
+    half_QF = thick_quad_matrix(K_abs, L_q / 2.0, focusing=QF_foc)
+    half_QD = thick_quad_matrix(K_abs, L_q / 2.0, focusing=QD_foc)
+    D = drift_matrix(L_d)
+    A = arc_matrix(arc_len)   # elektrik halka: saf drift
 
-    # Sıralı liste, marker'lar quad merkezleri sonrasında
-    elements = [D, half_QF]   # drift → QF'nin ilk yarısı  → MARKER (QF merkezi)
+    # Gerçek hücre sırası (arc önce, quad ortada):
+    # A → D → [QF_half → MARKER → QF_half] → D → A → D → [QD_half → MARKER → QD_half] → D
+    elements = [A, D, half_QF]        # arc + drift + QF ilk yarısı → MARKER
     marker_idx = [len(elements) - 1]
     elements += [half_QF, D, A, D, half_QD]   # QF ikinci yarısı + drift + arc + drift + QD ilk yarısı → MARKER
     marker_idx.append(len(elements) - 1)
-    elements += [half_QD, D, A]    # QD ikinci yarısı + drift + arc → cell sonu
+    elements += [half_QD, D]          # QD ikinci yarısı + drift → hücre sonu
     return elements, marker_idx
 
 
@@ -182,10 +184,11 @@ def compute_twiss_at_quads(config, plane, Q_measured=None, beta_measured=None):
 
     p_GeV = magic_momentum_proton(config.get('momError', 0.0))
     Brho  = compute_Brho(p_GeV)
-    K_QF  = config['g0'] / Brho
-    K_QD  = config['g1'] / Brho
+    # C++ kodu: QF ve QD aynı mutlak gradient kullanır → quadG1 = g1
+    # (g0 yalnızca kmod modülasyonu için cell-0 QF'de kullanılır)
+    K_abs = config['g1'] / Brho
 
-    elements, marker_idx = cell_element_sequence(config, K_QF, K_QD, plane)
+    elements, marker_idx = cell_element_sequence(config, K_abs, plane)
     M_cell = propagate_through(elements)
     beta0, alpha0, mu_cell = twiss_from_periodic_matrix(M_cell)
 
@@ -243,13 +246,12 @@ def signed_KL(config, plane):
     L_q  = config['quadLen']
     p    = magic_momentum_proton(config.get('momError', 0.0))
     Brho = compute_Brho(p)
-    K_QF = config['g0'] / Brho
-    K_QD = config['g1'] / Brho
-
+    # C++ kodu: QF ve QD aynı |K| kullanır (g1); g0 sadece kmod cell-0 içindir.
+    K_abs = config['g1'] / Brho
     sign = +1.0 if plane == 'x' else -1.0
     KL = np.empty(2 * nF)
-    KL[0::2] =  sign * K_QF * L_q   # QF
-    KL[1::2] = -sign * K_QD * L_q   # QD
+    KL[0::2] =  sign * K_abs * L_q   # QF: x'de odaklayan
+    KL[1::2] = -sign * K_abs * L_q   # QD: x'de dağıtan
     return KL
 
 
