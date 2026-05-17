@@ -9,8 +9,15 @@ Bu modül periyodik FODO örgüsünün simetrisinden faydalanır:
 
 Simülasyon kütüphanesine (integrator) bağımlılığı yoktur; tamamen analitiktir.
 
-Hibrit Twiss kaynağı: compute_twiss_at_quads çağrısında Q_measured veya
-beta_measured verilirse analitik değer yerine kullanılır.
+Hücre yapısı (integrator.cpp ile uyumlu, v2.8 referansı):
+    QF → drift → arc → drift → QD → drift → arc → drift → (sonraki QF)
+
+Elektrik halkada arc deflektörler her iki düzlemde de saf drift olarak
+modellenir (n=1 silindirik kapasitör: E_z = 0 ⟹ dikey kuvvet sıfır;
+radyal düzlemde de bükme hareketi saf dönme olarak yaklaşılır).
+Bu, v2.8 analitik referansıyla tam uyumludur: Q_x = Q_y ≈ 2.36.
+
+Örnekleme konvansiyonu: her quad GİRİŞİNDE (quad merkezinde değil).
 """
 
 import json
@@ -66,124 +73,8 @@ def thick_quad_matrix(K, L, focusing):
                          [sqk * np.sinh(phi), np.cosh(phi)]])
 
 
-def arc_matrix(L, K):
-    """
-    Arc transfer matrisi, verilen odaklama gücü K [1/m²] için.
-
-    K > 0: odaklayan (cos/sin), K < 0: dağıtan (cosh/sinh), K = 0: drift.
-
-    Elektrik halka için K_x_arc ve K_y_arc analitik formüllerden tam türetmek
-    karmaşıktır; standart (1-n+1/γ²)/ρ² yaklaşımı simülasyonu tam tutmaz.
-    Bu nedenle K değerleri calibrate_arc_K() ile sayısal olarak elde edilir.
-    """
-    if K > 0:
-        sqk = np.sqrt(K); phi = sqk * L
-        return np.array([[np.cos(phi),       np.sin(phi) / sqk],
-                         [-sqk * np.sin(phi), np.cos(phi)]])
-    elif K < 0:
-        sqk = np.sqrt(-K); phi = sqk * L
-        return np.array([[np.cosh(phi),       np.sinh(phi) / sqk],
-                         [sqk * np.sinh(phi), np.cosh(phi)]])
-    else:
-        return drift_matrix(L)
-
-
-def calibrate_arc_K(config, Q_target, plane, K_bounds=(-3e-4, 3e-4), tol=1e-7):
-    """
-    Hedef tune Q_target'a karşılık gelen arc odaklama gücünü sayısal arama ile
-    bulur (bisection). Halkanın gerçek (ölçülen) Q'sundan başlanır; analitik
-    formüllerin yetersiz kaldığı durumlarda (elektrik halka, çoklu fiziksel
-    etki) kalibre edilmiş tek-parametre modeli sağlar.
-
-    Q_target  : ölçülen veya simülasyondan alınan tune (skaler)
-    plane     : 'x' veya 'y'
-    K_bounds  : arama aralığı [m⁻²]
-    """
-    p_GeV = magic_momentum_proton(config.get('momError', 0.0))
-    Brho  = compute_Brho(p_GeV)
-    K_abs = config['g1'] / Brho
-
-    def tune_for_K(K_arc):
-        elements, _ = cell_element_sequence(config, K_abs, plane, K_arc)
-        M = propagate_through(elements)
-        trace = M[0, 0] + M[1, 1]
-        c = trace / 2.0
-        if abs(c) >= 1.0:
-            return None
-        mu = np.arccos(c)
-        return int(config['nFODO']) * mu / (2.0 * np.pi)
-
-    lo, hi = K_bounds
-    # nFODO/2π·μ olduğundan tune K ile monoton artar (büyük K → büyük μ)
-    while hi - lo > tol:
-        mid = 0.5 * (lo + hi)
-        Q_mid = tune_for_K(mid)
-        if Q_mid is None or Q_mid > Q_target:
-            hi = mid
-        else:
-            lo = mid
-    return 0.5 * (lo + hi)
-
-
 # =============================================================================
-# 3. FODO hücresi: parçacığın gördüğü eleman sırası
-# =============================================================================
-def cell_element_sequence(config, K_abs, plane, K_arc):
-    """
-    Bir FODO hücresinin transfer matrislerini, parçacığın geçeceği sırayla
-    döndürür. Quad merkezlerinde "marker" yerleştirir → Twiss buralarda örneklenir.
-
-    Hücre yapısı (COD verisinden çıkarılan gerçek sıra):
-        arc + drift(L_d) + QF + drift(L_d) + arc + drift(L_d) + QD + drift(L_d)
-
-    QF ve QD aynı mutlak gradient büyüklüğünü paylaşır (|K| = g1/Brho).
-    C++ kodunda: current_G1 = (elem==QF) ? +quadG1 : -quadG1  → aynı |K|.
-
-    Marker konvansiyonu: her quad'ın MERKEZİnde örnekleme yapılır
-    (yani yarım-quad öncesi + yarım-quad sonrası şeklinde bölünür).
-
-    Geri dönüş: (matrices, marker_indices)
-        matrices         : sırayla 2×2 matris listesi
-        marker_indices   : matrices listesinde quad-merkezi pozisyonlarına
-                           karşılık gelen indeksler (her hücre için 2 marker)
-    """
-    L_d  = config['driftLen']
-    L_q  = config['quadLen']
-    R0   = config['R0']
-    nF   = int(config['nFODO'])
-    arc_len = 2.0 * np.pi * R0 / (2 * nF)
-
-    # QF ve QD'nin bu düzlemde odaklayıp odaklamadığı
-    if plane == 'x':
-        QF_foc, QD_foc = True, False
-    else:
-        QF_foc, QD_foc = False, True
-
-    half_QF = thick_quad_matrix(K_abs, L_q / 2.0, focusing=QF_foc)
-    half_QD = thick_quad_matrix(K_abs, L_q / 2.0, focusing=QD_foc)
-    D = drift_matrix(L_d)
-    A = arc_matrix(arc_len, K_arc)   # K_arc düzleme göre ayrı geçilir
-
-    # Gerçek hücre sırası (arc önce, quad ortada):
-    # A → D → [QF_half → MARKER → QF_half] → D → A → D → [QD_half → MARKER → QD_half] → D
-    elements = [A, D, half_QF]        # arc + drift + QF ilk yarısı → MARKER
-    marker_idx = [len(elements) - 1]
-    elements += [half_QF, D, A, D, half_QD]   # QF ikinci yarısı + drift + arc + drift + QD ilk yarısı → MARKER
-    marker_idx.append(len(elements) - 1)
-    elements += [half_QD, D]          # QD ikinci yarısı + drift → hücre sonu
-    return elements, marker_idx
-
-
-def propagate_through(elements):
-    """Element listesini soldan sağa çarparak toplam transfer matrisini döndürür."""
-    M = np.eye(2)
-    for E in elements:
-        M = E @ M
-    return M
-
-
-# =============================================================================
-# 4. Twiss parametrelerinin çıkarımı
+# 3. Twiss parametrelerinin çıkarımı
 # =============================================================================
 def twiss_from_periodic_matrix(M):
     """
@@ -216,79 +107,71 @@ def propagate_twiss(beta0, alpha0, M):
     return beta, alpha
 
 
-def compute_twiss_at_quads(config, plane, Q_measured=None, beta_measured=None,
-                           K_arc=None):
+# =============================================================================
+# 4. Twiss parametrelerinin her quad girişinde hesaplanması
+# =============================================================================
+def compute_twiss_at_quads(config, plane):
     """
-    Her kuadrupol merkezinde Twiss parametrelerini hesaplar.
+    Her kuadrupol GİRİŞİNDE Twiss parametrelerini hesaplar.
 
-    Hibrit Twiss kaynağı:
-      Q_measured      : verilirse arc odaklama K_arc bunu sağlayacak şekilde
-                        kalibre edilir (sayısal bisection). Önerilen mod —
-                        elektrik halkalarda analitik formüller yetersizdir.
-      beta_measured   : skaler veya N-vektör; verilirse analitik β yerine kullanılır
-      K_arc           : doğrudan arc odaklama gücü [1/m²]. Q_measured varsa
-                        bu parametre yok sayılır.
+    Hücre yapısı (QF girişinden başlayarak, arc = saf drift):
+        QF → drift(L_d) → arc(L_def) → drift(L_d) → QD
+           → drift(L_d) → arc(L_def) → drift(L_d) → (sonraki QF)
 
     Geri dönüş: (beta_arr [N], phi_arr [N], Q)
-        N = 2 * nFODO     (toplam quad sayısı)
+        N = 2 * nFODO  (toplam quad sayısı; çift indeksler QF, tek indeksler QD)
     """
     nF = int(config['nFODO'])
     N  = 2 * nF
 
     p_GeV = magic_momentum_proton(config.get('momError', 0.0))
     Brho  = compute_Brho(p_GeV)
-    # C++ kodu: QF ve QD aynı mutlak gradient kullanır → quadG1 = g1
-    # (g0 yalnızca kmod modülasyonu için cell-0 QF'de kullanılır)
     K_abs = config['g1'] / Brho
 
-    # K_arc: deneysel/ölçülen Q'dan kalibrasyon ya da kullanıcı verir
-    if Q_measured is not None:
-        K_arc_eff = calibrate_arc_K(config, float(Q_measured), plane)
-    elif K_arc is not None:
-        K_arc_eff = float(K_arc)
+    L_d     = config['driftLen']
+    L_q     = config['quadLen']
+    R0      = config['R0']
+    arc_len = np.pi * R0 / nF   # L_def = 2πR0 / (2*nFODO) = πR0/nFODO
+
+    if plane == 'x':
+        QF_foc, QD_foc = True, False
     else:
-        K_arc_eff = 0.0   # saf drift; analitik en alt sınır
+        QF_foc, QD_foc = False, True
 
-    elements, marker_idx = cell_element_sequence(config, K_abs, plane, K_arc_eff)
-    M_cell = propagate_through(elements)
+    M_QF = thick_quad_matrix(K_abs, L_q, focusing=QF_foc)
+    M_QD = thick_quad_matrix(K_abs, L_q, focusing=QD_foc)
+    M_D   = drift_matrix(L_d)
+    M_A   = drift_matrix(arc_len)  # arc modeled as pure drift
+
+    # QF çıkışından QD girişine (drift + arc + drift)
+    M_mid = M_D @ M_A @ M_D
+    # QD çıkışından sonraki QF girişine (drift + arc + drift)
+    M_end = M_D @ M_A @ M_D
+
+    # Tek hücre transfer matrisi (QF girişinden QF girişine)
+    M_cell = M_end @ M_QD @ M_mid @ M_QF
     beta0, alpha0, mu_cell = twiss_from_periodic_matrix(M_cell)
-
-    # Tek hücre içinde marker konumlarında β ve φ örnekle
-    cell_beta = []
-    cell_phi  = []
-    M_accum = np.eye(2)
-    for k, E in enumerate(elements):
-        M_accum = E @ M_accum
-        if k in marker_idx:
-            beta_k, _ = propagate_twiss(beta0, alpha0, M_accum)
-            cell_beta.append(beta_k)
-            # Faz: tek-noktalı transfer matrisinden φ = atan2(M[0,1], β0·M[0,0] - α0·M[0,1])
-            phi_k = np.arctan2(M_accum[0, 1],
-                               beta0 * M_accum[0, 0] - alpha0 * M_accum[0, 1])
-            if phi_k < 0:
-                phi_k += 2.0 * np.pi
-            cell_phi.append(phi_k)
-
-    cell_beta = np.array(cell_beta)
-    cell_phi  = np.array(cell_phi)
-
-    # Hücre boyunca tekrarlat
-    beta_arr = np.tile(cell_beta, nF)
-    phi_arr  = np.zeros(N)
-    for i_cell in range(nF):
-        phi_arr[2 * i_cell    ] = i_cell * mu_cell + cell_phi[0]
-        phi_arr[2 * i_cell + 1] = i_cell * mu_cell + cell_phi[1]
-
-    # K_arc kalibre edildiyse mu_cell zaten doğru Q'yu verir
     Q = nF * mu_cell / (2.0 * np.pi)
 
-    if beta_measured is not None:
-        if np.isscalar(beta_measured):
-            beta_arr = np.full(N, float(beta_measured))
-        else:
-            beta_arr = np.asarray(beta_measured, dtype=float)
-            if beta_arr.shape != (N,):
-                raise ValueError(f"beta_measured boyutu {N} olmalı, {beta_arr.shape} verildi")
+    # QF girişi → QD girişi transfer matrisi
+    M_to_QD = M_mid @ M_QF
+
+    beta_QD, _ = propagate_twiss(beta0, alpha0, M_to_QD)
+
+    # Faz ilerleme: QF girişinde φ=0 (referans), QD girişinde φ_QD
+    phi_QD = np.arctan2(M_to_QD[0, 1],
+                        beta0 * M_to_QD[0, 0] - alpha0 * M_to_QD[0, 1])
+    if phi_QD < 0:
+        phi_QD += 2.0 * np.pi
+
+    # Tüm hücreler için dizi oluştur (her hücre mu_cell kadar faz artışı)
+    beta_arr = np.zeros(N)
+    phi_arr  = np.zeros(N)
+    for i_cell in range(nF):
+        beta_arr[2 * i_cell    ] = beta0
+        beta_arr[2 * i_cell + 1] = beta_QD
+        phi_arr [2 * i_cell    ] = i_cell * mu_cell          # QF girişi
+        phi_arr [2 * i_cell + 1] = i_cell * mu_cell + phi_QD # QD girişi
 
     return beta_arr, phi_arr, Q
 
@@ -307,7 +190,6 @@ def signed_KL(config, plane):
     L_q  = config['quadLen']
     p    = magic_momentum_proton(config.get('momError', 0.0))
     Brho = compute_Brho(p)
-    # C++ kodu: QF ve QD aynı |K| kullanır (g1); g0 sadece kmod cell-0 içindir.
     K_abs = config['g1'] / Brho
     sign = +1.0 if plane == 'x' else -1.0
     KL = np.empty(2 * nF)
@@ -330,7 +212,6 @@ def build_response_matrix(beta, phi, Q, KL):
     N = len(beta)
     denom = 2.0 * np.sin(np.pi * Q)
     sqb = np.sqrt(beta)
-    # |φ_i - φ_j| matrisi
     dphi = np.abs(phi[:, None] - phi[None, :])
     R = -np.outer(sqb, sqb) * np.cos(dphi - np.pi * Q) * KL[None, :] / denom
     return R
@@ -365,7 +246,6 @@ def fft_invert(y, beta, phi, Q, KL):
     yalnızca (i-j)'ye bağlı olduğu sürece geçerlidir (gerçekte block-circulant
     yapıda küçük sapma olur — bkz. spectral_inversion.py Aşama B).
     """
-    N = len(y)
     sqb = np.sqrt(beta)
 
     # Adım 1
@@ -395,7 +275,7 @@ def direct_invert(R, y):
 def _self_test(config_path="params.json"):
     """
     Bu modül doğrudan çalıştırıldığında bütün adımları sıfırdan kurar:
-      1. Twiss hesapla
+      1. Analitik Twiss hesapla (arc = saf drift, v2.8 referansı)
       2. R inşa et
       3. Rastgele Δq üret, y = R·Δq hesapla
       4. FFT geri dönüşümüyle Δq'yu kurtar
@@ -406,19 +286,16 @@ def _self_test(config_path="params.json"):
 
     print("=" * 60)
     print("fodo_lattice.py — dahili tutarlılık testi")
+    print("Arc deflektörler: SAF DRIFT (v2.8 analitik referansı)")
     print("=" * 60)
 
-    # Simülasyonun gerçek tune'ları (run_simulation.py çıktısından)
-    Q_sim = {'x': 2.6877, 'y': 2.0918}
-
     for plane in ['x', 'y']:
-        print(f"\n--- Düzlem: {plane}  (hedef Q_sim={Q_sim[plane]}) ---")
-        beta, phi, Q = compute_twiss_at_quads(config, plane,
-                                              Q_measured=Q_sim[plane])
+        beta, phi, Q = compute_twiss_at_quads(config, plane)
         KL = signed_KL(config, plane)
         R  = build_response_matrix(beta, phi, Q, KL)
         N  = len(beta)
 
+        print(f"\n--- Düzlem: {plane} ---")
         print(f"  N (quad sayısı) : {N}")
         print(f"  Q (tune)        : {Q:.6f}")
         print(f"  β aralığı       : [{beta.min():.3f}, {beta.max():.3f}] m")
