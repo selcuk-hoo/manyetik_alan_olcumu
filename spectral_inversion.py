@@ -14,6 +14,9 @@ varsayılır (Qx = 2.6824 kalibre, Qy = 2.3617 fizikten).
 import json
 import os
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')   # ekran gerekmez; PNG çıktısı
+import matplotlib.pyplot as plt
 
 from fodo_lattice import (
     compute_twiss_at_quads,
@@ -111,6 +114,97 @@ def stage_A_ideal(config, plane='y', N_real=20, sigma_q=100e-6, seed=0,
 
 
 # =============================================================================
+# Aşama B — Kondisyon sayısı haritası
+# =============================================================================
+def stage_B_condition_map(config, plane='y', g_pert_frac=0.02,
+                          out_dir='.', verbose=True):
+    """
+    Aşama B: R₁, R₂ ve ΔR matrislerinin mod bazlı kondisyonunu karşılaştırır.
+
+    Beta-normalize edilmiş yanıt operatörünün özdeğerleri = ilk satırının
+    DFT'si. |λ_k| → mod k'nın "kazancı"; |λ_k|⁻¹ → o mod için gürültü
+    yükseltme faktörü.
+
+    Adımlar:
+      1. g_nom = config['g1'],  g_pert = (1+g_pert_frac)·g_nom
+      2. R₁ = R(g_nom),  R₂ = R(g_pert),  ΔR = R₁ − R₂
+      3. Her matris için β-normalize ilk satır → λ_k = FFT(ilk_satır)
+      4. log10|λ_k|⁻¹ grafiği (k modu vs. zorluk)
+      5. Global κ değerleri (SVD oranı) raporla
+
+    Beklenti: ΔR mod gücü, R₁/R₂'nin "farkı" kadar küçük → ΔR çok daha
+    zayıf koşullu modlara sahip.
+    """
+    if plane == 'x':
+        from fodo_lattice import calibrate_K_x_arc
+        K_x_arc = calibrate_K_x_arc(config)
+    else:
+        K_x_arc = None
+
+    g_nom  = config['g1']
+    g_pert = g_nom * (1.0 + g_pert_frac)
+
+    R1, beta1, phi1, Q1, KL1 = build_R_for_gradient(config, g_nom,  plane, K_x_arc)
+    R2, beta2, phi2, Q2, KL2 = build_R_for_gradient(config, g_pert, plane, K_x_arc)
+    dR = R1 - R2
+    N  = len(beta1)
+
+    # β-normalize ilk satır → modal özdeğerler
+    def modal_eigs(M, beta_i, beta_j):
+        sqi = np.sqrt(beta_i); sqj = np.sqrt(beta_j)
+        # M'in β-normalize hali: M / (sqrt(β_i)·sqrt(β_j))
+        # Bu hal, sirkülant yaklaşımına en yakındır
+        M_norm = M / np.outer(sqi, sqj)
+        return np.fft.fft(M_norm[0, :])
+
+    lam_R1 = modal_eigs(R1, beta1, beta1)
+    lam_R2 = modal_eigs(R2, beta2, beta2)
+    lam_dR = modal_eigs(dR, beta1, beta1)
+
+    # Genel kondisyon sayıları (SVD)
+    kappa = {
+        'R1': np.linalg.cond(R1),
+        'R2': np.linalg.cond(R2),
+        'dR': np.linalg.cond(dR),
+    }
+
+    if verbose:
+        print(f"\n[Aşama B] Düzlem={plane},  g_pert/g_nom-1 = {g_pert_frac:+.1%}")
+        print(f"  Q1 = {Q1:.6f},  Q2 = {Q2:.6f}")
+        print(f"  κ(R1) = {kappa['R1']:.3e}")
+        print(f"  κ(R2) = {kappa['R2']:.3e}")
+        print(f"  κ(ΔR) = {kappa['dR']:.3e}    ← ΔR yöntemi bunu kullanır")
+        print(f"  Oran  κ(ΔR)/κ(R1) ≈ {kappa['dR']/kappa['R1']:.1f}")
+
+    # Mod bazlı plot
+    fig, ax = plt.subplots(figsize=(9, 5))
+    k = np.arange(N)
+    ax.semilogy(k, 1.0/np.abs(lam_R1), 'o-', label='|λ_k|⁻¹  R₁',  ms=4)
+    ax.semilogy(k, 1.0/np.abs(lam_R2), 's-', label='|λ_k|⁻¹  R₂',  ms=4)
+    ax.semilogy(k, 1.0/np.abs(lam_dR), '^-', label='|λ_k|⁻¹  ΔR',  ms=4, color='C3')
+    ax.set_xlabel('Fourier mod indeksi k')
+    ax.set_ylabel('Modal kondisyon  |λ_k|⁻¹  [m / m]')
+    ax.set_title(f"Aşama B — Modal kondisyon haritası (düzlem={plane}, "
+                 f"Δg/g={g_pert_frac:+.1%})")
+    ax.grid(True, which='both', alpha=0.4)
+    ax.legend()
+    fig.tight_layout()
+    out_path = os.path.join(out_dir, f'stage_B_condition_{plane}.png')
+    fig.savefig(out_path, dpi=120)
+    plt.close(fig)
+    if verbose:
+        print(f"  Grafik: {out_path}")
+
+    return {
+        'plane': plane, 'Q1': Q1, 'Q2': Q2,
+        'lam_R1': lam_R1, 'lam_R2': lam_R2, 'lam_dR': lam_dR,
+        'kappa': kappa,
+        'R1': R1, 'R2': R2, 'dR': dR,
+        'beta': beta1, 'phi': phi1, 'KL1': KL1, 'KL2': KL2,
+    }
+
+
+# =============================================================================
 # Çalıştırma
 # =============================================================================
 if __name__ == "__main__":
@@ -124,3 +218,7 @@ if __name__ == "__main__":
     # Aşama A: her iki düzlem için ideal test
     for plane in ['x', 'y']:
         stage_A_ideal(config, plane=plane, N_real=20)
+
+    # Aşama B: kondisyon haritası
+    for plane in ['x', 'y']:
+        stage_B_condition_map(config, plane=plane, g_pert_frac=0.02)
