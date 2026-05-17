@@ -2,7 +2,7 @@
 
 **Yazar:** Selcuk H.
 
-Bu proje, Proton Elektrik Dipol Momenti (EDM) deneyleri için tasarlanmış tam 6 boyutlu bir depolama halkası simülasyonudur. Parçacık dinamiği ve spin presesyonu C++ ile yüksek hassasiyetle çözülür; parametre yönetimi, analiz ve görselleştirme Python katmanında yapılır.
+Bu proje, Proton Elektrik Dipol Momenti (EDM) deneyleri için tasarlanmış tam 6 boyutlu bir depolama halkası simülasyonudur. Parçacık dinamiği ve spin presesyonu C++ ile yüksek hassasiyetle çözülür; Twiss analizi, yanıt matrisi hesabı ve quad hizalama geri çatımı Python katmanında yapılır.
 
 ---
 
@@ -15,12 +15,11 @@ Bu proje, Proton Elektrik Dipol Momenti (EDM) deneyleri için tasarlanmış tam 
 5. [Python Köprüsü: `integrator.py`](#5-python-köprüsü-integratorpy)
 6. [Simülasyon Orkestrasyonu: `run_simulation.py`](#6-simülasyon-orkestrasyonu-run_simulationpy)
 7. [Görselleştirme: `plot_results.py`](#7-görselleştirme-plot_resultspy)
-8. [Tepki Matrisi: `build_response_matrix.py`](#8-tepki-matrisi-build_response_matrixpy)
-9. [Quad Geri Çatım Testi: `test_reconstruction.py`](#9-quad-geri-çatım-testi-test_reconstructionpy)
-10. [K-Modülasyon Geri Çatım Testi: `test_kmod_reconstruction.py`](#10-k-modülasyon-geri-çatım-testi-test_kmod_reconstructionpy)
-11. [Quad Tilt: Skew-Quadrupol ve x-y Kuplajı](#11-quad-tilt-skew-quadrupol-ve-x-y-kuplajı)
-12. [Parametreler: `params.json`](#12-parametreler-paramsjson)
-13. [Kurulum ve Çalıştırma](#13-kurulum-ve-çalıştırma)
+8. [Analitik Twiss Kütüphanesi: `fodo_lattice.py`](#8-analitik-twiss-kütüphanesi-fodo_latticepy)
+9. [DFT/FFT Tabanlı Quad Geri Çatım: `spectral_inversion.py`](#9-dftfft-tabanlı-quad-geri-çatım-spectral_inversionpy)
+10. [Quad Tilt: Skew-Quadrupol ve x-y Kuplajı](#10-quad-tilt-skew-quadrupol-ve-x-y-kuplajı)
+11. [Parametreler: `params.json`](#11-parametreler-paramsjson)
+12. [Kurulum ve Çalıştırma](#12-kurulum-ve-çalıştırma)
 
 ---
 
@@ -33,13 +32,13 @@ Proton EDM deneyi, protonun elektrik dipol momentini ölçerek CP-simetri ihlali
 Bunu yapabilmek için halkadaki her türlü hizalama hatası (quad kaçıklıkları, deflektör açısal sapmaları) hassas biçimde ölçülmeli ve düzeltilmelidir. Bu simülatör iki temel soruyu yanıtlar:
 
 1. **İleri problem:** Verilen bir hata kümesi için kapalı yörünge sapması (COD) ne kadardır?
-2. **Ters problem:** Ölçülen COD'dan asıl hataları geri çatabilir miyiz?
+2. **Ters problem:** BPM ölçümlerinden quad kaçıklıklarını geri çatabilir miyiz?
 
 ### Sihirli Momentum
 
 Proton EDM deneyinin can alıcı koşulu:
 
-$$p_{\text{magic}} = \frac{m_p c}{\sqrt{G_p}} \approx 0.701\ \text{GeV/c}$$
+$$p_{\text{magic}} = \frac{m_p c}{\sqrt{G_p}} \approx 0.7007\ \text{GeV/c}$$
 
 Bu momentumda, elektrik alandan kaynaklanan spin presesyonu tam olarak sıfırlanır (Thomas terimi ile Larmor terimi birbirini götürür). Böylece spin, radyal yönde donmuş kalır ve yalnızca EDM varlığında dikey bileşen kazanır.
 
@@ -50,26 +49,31 @@ Bu momentumda, elektrik alandan kaynaklanan spin presesyonu tam olarak sıfırla
 Halka, 24 özdeş **FODO hücresi**nden oluşur. Her hücre 8 elemandan ibarettir ve sırayla şöyle ilerler:
 
 ```
-ARC1 → DRIFT → QF → DRIFT → ARC2 → DRIFT → QD → DRIFT
-elem=0   =1    =2    =3    =4    =5    =6    =7
+QF → DRIFT → ARC → DRIFT → QD → DRIFT → ARC → DRIFT
+elem=0  =1    =2    =3    =4    =5    =6    =7
 ```
 
 | Eleman | Tipi | Görevi |
 |--------|------|--------|
-| ARC1, ARC2 | Silindirik kapasitör (elektrik yay) | Parçacığı büküp halka boyunca taşır |
-| QF | Odaklayan quadrupol (G₁ > 0) | Radyal düzlemde odaklar |
-| QD | Ayrıştıran quadrupol (−G₁) | Dikey düzlemde odaklar |
+| QF | Odaklayan quadrupol (g₁ > 0) | Yatay düzlemde odaklar, dikey dağıtır |
+| QD | Ayrıştıran quadrupol (−g₁) | Dikey düzlemde odaklar, yatay dağıtır |
+| ARC | Silindirik kapasitör (elektrik yay, n=1) | Parçacığı büküp halka boyunca taşır |
 | DRIFT | Serbest yol | Saha yok, parçacık düz ilerler |
 
-24 hücre × 2 quad/hücre = **48 quadrupol**, dolayısıyla tepki matrisi 48×48 boyutundadır.
+24 hücre × 2 quad/hücre = **48 quadrupol**, dolayısıyla yanıt matrisi 48×48 boyutundadır.
 
 ### Betatron Tune
 
-FODO örgüsündeki odaklama gücü, parçacığın halkayı her dolaşımında kaç salınım yaptığını belirler: bu sayıya **betatron tune** denir.
+FODO örgüsündeki odaklama gücü, parçacığın halkayı her dolaşımında kaç salınım yaptığını belirler. Temiz simülasyondan (sıfır hizalama hatası, başlangıç yalnız açısal kick) elde edilen değerler:
 
-$$Q_x \approx 2.69 \qquad Q_y \approx 2.37 \quad (G_1 = 0.21\ \text{T/m için})$$
+$$Q_x = 2.6824 \qquad Q_y = 2.3621 \quad (g_1 = 0.21\ \text{T/m, params.json varsayılanı})$$
 
-Tune tamsayıdan uzak tutulmazsa rezonans instabilitesi oluşur.
+### Arc Odaklaması: Yatay ve Dikey Farklıdır
+
+n=1 silindirik kapasitörde Maxwell denklemleri $E_z = 0$ gerektirir. Bu nedenle:
+
+- **Dikey düzlem:** `K_y_arc = 0` — arc elemanı saf drift gibi davranır. Dikey tune ($Q_y \approx 2.36$) yalnızca quad odaklamasından gelir.
+- **Yatay düzlem:** Merkezkaç kuvveti + relativistik Coriolis kuplajı sıfır olmayan bir yatay odaklama yaratır. Basit analitik formül bu etkiyi tam vermez; `K_x_arc` değeri bisection ile simülasyon referansına ($Q_x = 2.6824$) kalibre edilir.
 
 ---
 
@@ -85,7 +89,7 @@ Simülatör **global Kartezyen** koordinat kullanır:
 
 ### Yerel ↔ Global Dönüşüm (`integrator.py`)
 
-Her yay elemanından sonra `rotate_all()` C++ fonksiyonu koordinat çerçevesini `−Φ_def` kadar döndürür. Bu sayede parçacık her eleman girişinde daima `X ≈ R₀, Y ≈ 0` konumundan başlıyor gibi görünür (**dönen çerçeve** ya da Frenet–Serret benzeri). Python katmanı ise analiz için bu global koordinatları yerel sapmaya `(x = X − R₀, y = Z)` çevirir:
+Her yay elemanından sonra `rotate_all()` C++ fonksiyonu koordinat çerçevesini `−Φ_def` kadar döndürür. Bu sayede parçacık her eleman girişinde daima `X ≈ R₀, Y ≈ 0` konumundan başlıyor gibi görünür. Python katmanı ise analiz için bu global koordinatları yerel sapmaya `(x = X − R₀, y = Z)` çevirir:
 
 ```python
 # integrator.py — convert_global_to_local_matrix
@@ -109,7 +113,7 @@ Hareket denklemleri (Newton + Thomas-BMT) **Gauss–Legendre 4. derece örtük R
 
 Her eleman tipinde farklı alanlar tanımlıdır:
 
-**Yay (ARC, tip 0):** Silindirik kapasitör. Radyal elektrik alan ve isteğe bağlı saçaklanma alanları:
+**Yay (ARC, tip 0):** Silindirik kapasitör. Radyal elektrik alan:
 
 $$E_r(R,Z) = E_0 \left(\frac{R_0}{R}\right)^n \left[1 - \frac{n^2-1}{2}\left(\frac{Z}{R}\right)^2 + \ldots\right]$$
 
@@ -117,25 +121,17 @@ $$E_r(R,Z) = E_0 \left(\frac{R_0}{R}\right)^n \left[1 - \frac{n^2-1}{2}\left(\fr
 
 $$B_r = G_1\,(Z - d_y) \qquad B_Z = G_1\,(X - R_0 - d_x)$$
 
-Burada $d_y$ dikey, $d_x$ radyal quad kaçıklığıdır. Dikkat edilmesi gereken fizik:
+Burada $d_y$ dikey, $d_x$ radyal quad kaçıklığıdır:
 - **$d_y \neq 0$** → dikey kuvvet → **dikey (y) yörünge** değişir
 - **$d_x \neq 0$** → radyal kuvvet → **radyal (x) yörünge** değişir
 
-İki düzlem birbirinden bağımsızdır (çift yok).
+İki düzlem bu sayede temel düzeyde birbirinden bağımsızdır (quad tilt olmadığı sürece).
 
 ### Kapalı Yörünge Verisi: `cod_data.txt`
 
-Her FODO hücresiyle eleman sınırında parçacığın konumu `stage_x` (radyal sapma) ve `stage_y` (dikey konum) arabelleklerine alınır. Her devir sonunda bu değerler birikimli toplama eklenir. Simülasyon bitince toplam tur sayısına bölünerek **tur ortalamalı COD** dosyaya yazılır. Betatron salınımları sıfır-ortalıklı olduğundan ortalama işlemi onları yok eder; geriye yalnızca **kapalı yörünge sapması** kalır.
+Her FODO hücresinin eleman sınırında parçacığın konumu arabelleklere alınır. Her devir sonunda bu değerler birikimli toplama eklenir. Simülasyon bitince toplam tur sayısına bölünerek **tur ortalamalı COD** dosyaya yazılır. Betatron salınımları sıfır-ortalıklı olduğundan ortalama işlemi onları yok eder; geriye yalnızca **kapalı yörünge sapması** kalır.
 
-### Poincaré Kesiti
-
-`target_quad < 0` (yani `poincare_quad_index = −1`) seçildiğinde, her FODO hücresinin ARC1 girişinde (`elem = 0`) parçacık durumu kaydedilir: bu **tur başına 24 nokta** demektir. Poincaré verisinden Betatron Tune şöyle çıkarılır:
-
-```
-Q = nFODO × ⟨Δφ⟩ / (2π)
-```
-
-burada `Δφ` ardışık noktalar arasındaki ortalama faz adımıdır (`arctan2(x', x)` ile hesaplanır). Bunun çalışması için parçacığın `dev0` ya da `theta0` ile küçük bir betatron tepmesi almış olması gerekir.
+Dosya formatı: her satır `[s_m, x_mm, y_mm]`, toplam `nFODO × 8 + 1 = 193` satır (boundary kapanışı dahil).
 
 ### Thomas-BMT Spin Dinamiği
 
@@ -162,6 +158,16 @@ Ana çağrı noktasıdır. Şunları yapar:
 3. **Global → Yerel dönüşüm:** `convert_global_to_local_matrix()` ile sonuçlar analiz koordinatlarına döndürülür
 4. **Poincaré verisi:** C++ 200 000'e kadar nokta saklayabilir; Python bunları numpy dizisine çevirir
 
+Önemli diziler:
+
+| Parametre | Boyut | Açıklama |
+|-----------|-------|----------|
+| `quad_dy` | (2×nFODO,) | Her quad dikey kaçıklığı [m] |
+| `quad_dx` | (2×nFODO,) | Her quad radyal kaçıklığı [m] |
+| `quad_tilt` | (2×nFODO,) | Her quad eğim açısı [rad] |
+| `dipole_tilt` | (2×nFODO,) | Her deflektör eğim açısı [rad] |
+| `quad_dG` | (2×nFODO,) | Her quad gradyan sapması [T/m] |
+
 ---
 
 ## 6. Simülasyon Orkestrasyonu: `run_simulation.py`
@@ -169,7 +175,7 @@ Ana çağrı noktasıdır. Şunları yapar:
 ### Sihirli Momentumun Hesabı
 
 ```python
-p_magic = M2 / sqrt(AMU)          # GeV/c cinsinden
+p_magic = M2 / sqrt(AMU)          # GeV/c cinsinden, M2=0.938272, AMU=1.792847
 beta0   = p_magic / sqrt(p²+M²)   # göreli hız
 E0_V_m  = -(p_magic * beta0 / R0) * 1e9  # gerekli radyal elektrik alan [V/m]
 ```
@@ -178,25 +184,13 @@ Elektrik alan miktarı, sihirli momentumdaki protonu `R₀` yarıçaplı dairese
 
 ### Başlangıç Koşulları
 
-`params.json`'dan okunan `dev0` (radyal sapma), `y0` (dikey sapma), `theta0_hor/ver` (açısal sapma) ile başlangıç faz uzayı noktası oluşturulur. Tune ölçümü için `dev0 = 1e-5 m` (10 μm) varsayılan tepme değeri atanmıştır; bu küçük tepme ~385 tur boyunca ortalamada ~0.5 μm COD bırakır ve ölçümleri etkilemez.
+`params.json`'dan okunan `dev0` (radyal sapma), `y0` (dikey sapma), `theta0_hor/ver` (açısal sapma) ile başlangıç faz uzayı noktası oluşturulur.
+
+> **Not:** Tune ölçümü için `dev0 = 1e-5 m` tepme değeri atanır. Ancak hizalama hataları (100 μm) büyük dikey kapalı yörünge yarattığında `arctan2` tabanlı tune tahmini güvenilmez sonuç üretir. Doğru tune değerleri `fodo_lattice.py` ile analitik olarak elde edilir (bkz. Bölüm 8).
 
 ### Hata Dizileri
 
 Her quad için `quad_dy`, `quad_dx` ve her deflektör için `dipole_tilt` dizileri oluşturulur. `params.json`'dan tek bir elemana veya tüm halkalara rastgele hata verilmesi desteklenir.
-
-### Tune Tahmini: `_tune_full()`
-
-Poincaré verisi üzerinden `arctan2(x', x)` faz açısı hesaplanır, `np.unwrap` ile 2π atlamaları düzeltilir ve ardışık adımlar arasındaki ortalama açı adımından tune elde edilir:
-
-```python
-dphi     = np.diff(np.unwrap(np.arctan2(upc, uc)))
-avg_dphi = abs(np.mean(dphi))
-Q = (nFODO * avg_dphi) / (2 * pi)   # poincare_quad_index < 0 ise
-```
-
-### Savitzky-Golay Spin Trendi
-
-Spin bileşenleri hızlı g-2 salınımı içerir. Bu salınımı yumuşatıp altındaki yavaş EDM trendini ortaya çıkarmak için Savitzky–Golay filtresi uygulanır, ardından doğrusal fit ile eğim hesaplanır.
 
 ---
 
@@ -215,233 +209,295 @@ Spin bileşenleri hızlı g-2 salınımı içerir. Bu salınımı yumuşatıp al
 
 `cod_data.txt` dosyasını okur; her FODO hücresi 8 eleman içerdiğinden toplam `nFODO × 8 = 192` satır beklenir.
 
-### `_plot_cod()`
-
-COD profilini, RMS değerini ve betatron tune etiketini tek bir yardımcı fonksiyonda çizer.
-
-### `_estimate_tune()`
-
-`plot_results.py` içindeki bağımsız tune tahmincisidir; `poincaré_data.txt` dosyasını okuyarak `arctan2` yöntemiyle $Q_x$ ve $Q_y$ hesaplar.
-
-### `_save_rf_plot()`
-
-`rf.txt` mevcutsa RF kovuk faz diyagramını (`ψ` vs `dp/p`) ayrı bir dosyaya (`rf.png`) kaydeder.
-
 ---
 
-## 8. Tepki Matrisi: `build_response_matrix.py`
+## 8. Analitik Twiss Kütüphanesi: `fodo_lattice.py`
 
-### Motivasyon
+Bu modül simülasyon kütüphanesine (integrator) **hiçbir bağımlılık** taşımaz; tamamen analitik transfer matrisleri kullanır. `spectral_inversion.py` tarafından içe aktarılır.
 
-Kapalı yörünge sapması ile hizalama hataları arasındaki doğrusal ilişki şöyle özetlenir:
-
-$$\mathbf{y}_{\text{COD}} = R_{dy} \cdot \mathbf{d}_y \qquad \mathbf{x}_{\text{COD}} = R_{dx} \cdot \mathbf{d}_x$$
-
-Burada $\mathbf{d}_y$ quad dikey kaçıklıkları ve $\mathbf{d}_x$ quad radyal kaçıklıklarıdır. **Dipol tilt bu modelde kasıtlı olarak yer almaz** — gerçek ölçümde gürültü kaynağı olarak var olur, ama modelin bilgisi dışındadır. Bölüm 10'da bunun ne anlama geldiği ayrıntılı incelenir.
-
-Dikkat: dipol eğimi (tilt) B alanına radyal bir bileşen ekler ($B_X = B_{eq}\sin\theta$) ve yalnızca **dikey COD**'u etkiler. Radyal COD yalnızca quad radyal kaçıklığına ($d_x$) duyarlıdır. İki düzlem bu sayede bağımsız çözülür.
-
-### `setup_fields(config, g1_override=None)`
-
-`params.json`'dan bağımsız, sabit başlangıç koşulları oluşturur: her simülasyon `(x=0, y=0)` ideal yörüngeden başlar. `g1_override` parametresi k-modülasyon için ikinci optik konfigürasyonu (pertürbe gradyan) tanımlar.
-
-### `run_sim(alanlar, state0, config, quad_dy, quad_dx, dipole_tilt=None)`
-
-Tek bir simülasyon çalıştırır. `dipole_tilt` verilmezse sıfır kabul edilir; ancak testte gerçekçi bir tilt vektörü geçirilir (bkz. Bölüm 10). BPM konumları her hücrenin QF ve QD giriş noktalarından okunur:
+### Fiziksel Sabitler ve Manyetik Rijitlik
 
 ```python
-def read_cod_quads(nFODO):
-    qf = k * 8 + 2   # QF giriş satırı (elem=2)
-    qd = k * 8 + 6   # QD giriş satırı (elem=6)
+magic_momentum_proton(mom_error=0.0)  # → p_magic [GeV/c]
+compute_Brho(p_GeV_c)                 # → Brho = p / (q·c) [T·m]
 ```
 
-### `build_matrices(config, g1_override=None, ..., n_workers=1)`
+Kuadrupol odaklama gücü: `K_abs = g₁ / Brho` [m⁻²].
 
-Bir optik konfigürasyon için $R_{dy}$ ve $R_{dx}$ matrislerini hesaplar. Her sütun **sonlu fark** (numerik Jacobian) ile elde edilir:
+### Transfer Matrisleri (2×2, tek düzlem)
 
 ```python
-# R_dy sütunu i: yalnız dy[i] = δ_q, diğer tüm hatalar sıfır
-R_dy[:, i] = (y_cod_dy_i − y0) / delta_q
-
-# R_dx sütunu i: yalnız dx[i] = δ_q, diğer tüm hatalar sıfır
-R_dx[:, i] = (x_cod_dx_i − x0) / delta_q
+drift_matrix(L)                         # serbest drift
+thick_quad_matrix(K, L, focusing=True)  # kalın-lens kuadrupol (cos/sin veya cosh/sinh)
+arc_matrix(L, K)                        # K>0 odaklayan, K<0 dağıtan, K=0 drift
 ```
 
-`dy` ve `dx` pertürbasyonları **ayrı koşumlarda** yapılır. Eski uygulama her `i` için ikisini aynı koşumda pertürbe ediyordu; bu, düzlemler tam bağımsızsa doğru ama kuplaj varsa (`∂y/∂dx ≠ 0`) sütunlara çapraz sızıntı bırakıyordu.
+Yatay arc için `K = K_x_arc > 0`; dikey arc için `K = 0` (saf drift).
 
-Dipol tilt matrisi ($R_{\text{tilt}}$) bu sürümde **hesaplanmaz** — hem koşum sayısını düşürür (97 → 145 yerine 97) hem de tasarım kararını yansıtır: tilt bilgisi modele dahil edilmeyecek.
+### K_x_arc Kalibrasyonu
 
-Toplam koşum sayısı: 1 referans + 48 dy + 48 dx = **97 koşum** per konfigürasyon.
+Yatay arc odaklaması analitik olarak bilinemez; bir kez bisection ile kalibre edilir:
 
-### Paralelleştirme
+```python
+K_x_arc = calibrate_K_x_arc(config, Q_x_target=2.6824)
+```
 
-Tüm pertürbasyon koşumları birbirinden bağımsızdır → `ProcessPoolExecutor` ile otomatik olarak paralel çalıştırılır. `--workers` belirtilmezse `os.cpu_count() − 1` kullanılır:
+Referans değer `QX_REF_CLEAN_SIM = 2.6824`, ideal koşullarda (sıfır hizalama hatası, başlangıç yalnız açısal kick) simülasyondan doğrudan ölçülmüştür.
+
+### Twiss Parametreleri
+
+```python
+beta, phi, Q = compute_twiss_at_quads(config, plane, K_x_arc=None, Q_x_target=None)
+```
+
+**Döngü mantığı:** Her FODO hücresinin QF ve QD giriş noktalarında (toplam $N = 2 \times \text{nFODO}$ konum):
+
+1. Periyodik çözüm: $M_\text{cell}$'in iz (trace) değerinden $\mu = \arccos(\text{tr}/2)$ ve $\beta_0 = M_{01}/\sin\mu$
+2. Her elemanda transfer matrisiyle $\begin{pmatrix}\beta(s)\\\alpha(s)\end{pmatrix}$ takibi
+3. Kümülatif faz $\phi_i = \int_0^{s_i} ds/\beta(s)$
+4. Tune: $Q = N_\text{hücre} \cdot \mu / (2\pi)$
+
+Düzlem kuralları:
+
+| Düzlem | QF rolü | QD rolü | Arc |
+|--------|---------|---------|-----|
+| `x` (yatay) | odaklayan | dağıtan | `K_x_arc` |
+| `y` (dikey) | dağıtan | odaklayan | `K = 0` (drift) |
+
+### İşaretli KL Dizisi
+
+```python
+KL = signed_KL(config, plane)  # shape (N,)
+```
+
+Her quad için integre güç, işaretiyle birlikte:
+
+| Düzlem | QF | QD |
+|--------|----|----|
+| `x` | `+K·L` | `−K·L` |
+| `y` | `−K·L` | `+K·L` |
+
+Bu işaret kuralı Courant-Snyder yanıt matrisi formülüyle tutarlıdır.
+
+### Yanıt Matrisi
+
+```python
+R = build_response_matrix(beta, phi, Q, KL)  # → N×N ndarray
+```
+
+Courant-Snyder formülü:
+
+$$R_{ij} = \frac{\sqrt{\beta_i \cdot \beta_j}}{2\sin(\pi Q)} \cdot \cos\!\bigl(|\phi_i - \phi_j| - \pi Q\bigr) \cdot KL_j$$
+
+**Önemli:** Formülde öncü eksi işareti yoktur. `KL_j` işaretini zaten taşır; ekstra eksi koymak yanlış işaret getirir (geçmişte bu hata corr = −0.999 sonucuna yol açmış ve düzeltilmiştir).
+
+### FFT Geri Dönüşümü (Sirkülant Yaklaşım)
+
+```python
+dq_hat = fft_invert(y, beta, phi, Q, KL)
+```
+
+Beş adımlı algoritma:
+
+1. $\tilde{y}_i = y_i / \sqrt{\beta_i}$ — beta normalizasyonu
+2. $\lambda_k = \text{FFT}(m_k)$,  $m_k = \cos(|\phi_k-\phi_0|-\pi Q)/(2\sin\pi Q)$ — sirkülant özdeğerleri
+3. $\tilde{U}_k = \text{FFT}(\tilde{y})_k / \lambda_k$ — Fourier uzayında bölme
+4. $u = \text{IFFT}(\tilde{U})$
+5. $\Delta q_j = u_j / (\sqrt{\beta_j} \cdot KL_j)$
+
+FODO örgüsü ideal sirkülant değil (QF ve QD farklı $\beta$) → bu algoritma ~5 μm'lik blok-sirkülant yaklaşım hatası bırakır. Kesin çözüm için `direct_invert` kullanılır.
+
+### Kesin Çözücü
+
+```python
+dq_hat = direct_invert(R, y)  # np.linalg.solve(R, y)
+```
+
+### Kondisyon Sayıları (params.json varsayılanları)
+
+| Matris | κ | Anlam |
+|--------|---|-------|
+| $R_x$ | 141 | Yatay yanıt iyi koşullu |
+| $R_y$ | 161 | Dikey yanıt iyi koşullu |
+| $\Delta R_y$ (2% Δg) | ~27 500 | ΔR yöntemi 170× daha kötü koşullu |
+
+### Dahili Test
 
 ```bash
-python build_response_matrix.py            # otomatik (çekirdek-1 worker)
-python build_response_matrix.py --workers 7  # elle belirleme
+python fodo_lattice.py
 ```
 
-**Çakışma sorunu ve çözümü:** C++ entegratör `cod_data.txt`'yi geçerli çalışma dizinine yazar. Birden fazla worker aynı dizinde çalışırsa dosyalar birbirini ezerdi. Her worker başlangıçta kendi geçici dizinine `chdir` eder:
+```
+--- Düzlem: x ---  Q=2.682400  κ(R)=141  FFT RMS=4.5 μm  Direct RMS=4.8e-13 μm
+--- Düzlem: y ---  Q=2.361735  κ(R)=161  FFT RMS=5.9 μm  Direct RMS=7.4e-13 μm
+```
+
+---
+
+## 9. DFT/FFT Tabanlı Quad Geri Çatım: `spectral_inversion.py`
+
+Bu betik, BPM ölçümlerinden quad hizalama hatalarını geri çatmak için dört aşamalı bir analiz gerçekleştirir. Simülasyon "gerçek makine" rolünü üstlenir.
+
+### Neden ΔR Yöntemi Yetersiz?
+
+Klasik iki-kmod yaklaşımında iki ölçümün farkı alınır:
+
+$$\Delta y = y_1 - y_2 = (R_1 - R_2) \cdot \Delta q = \Delta R \cdot \Delta q$$
+
+BPM ofseti farkta iptal olduğundan bu yaklaşım cazip görünür. Ancak $\kappa(\Delta R) \approx 27\ 500$ — yani girişteki %1 model hatası çıkışta %275 rekonstrüksiyon hatasına dönüşür. Bu yöntem pratikte başarısız olur.
+
+### İki-kmod Ayrı Tersme Yöntemi
+
+Her ölçüm **ayrı ayrı** tersine çevrilir:
+
+$$v_1 = R_1^{-1} \cdot y_1 = \Delta q + R_1^{-1} \cdot b$$
+$$v_2 = R_2^{-1} \cdot y_2 = \Delta q + R_2^{-1} \cdot b$$
+$$\hat{\Delta q} = \frac{v_1 + v_2}{2}$$
+
+Her $R_i$ iyi koşulludur ($\kappa \approx 150$); ortalama alma BPM ofset kalıntısını kısmi baskılar. Kondisyon avantajı: $\kappa(\Delta R) / \kappa(R) \approx 170\times$.
+
+---
+
+### Aşama A — İdeal Geri Çatım Üst-Sınır Testi
 
 ```python
-def _worker_init():
-    tmp = tempfile.mkdtemp(prefix=f"kmod_w{os.getpid()}_")
-    os.chdir(tmp)
-    atexit.register(shutil.rmtree, tmp, ignore_errors=True)  # temizlik
+stage_A_ideal(config, plane='y', N_real=20, sigma_q=100e-6, seed=0)
 ```
 
-### İki Konfigürasyon ve Fark Matrisleri
+**Amaç:** Model ile makine mükemmel uyumda olsaydı rekonstrüksiyon ne kadar iyi olurdu?
 
-`main()` iki konfigürasyon hesaplar ve farkı kaydeder:
+**Prosedür:**
+1. Analitik $R$ hesapla
+2. $N_\text{real}$ adet rastgele $\Delta q$ vektörü üret ($\sigma = 100\ \mu\text{m}$ Gaussian)
+3. $y = R \cdot \Delta q$ (simülasyon yok)
+4. FFT ve direct yöntemlerle geri çat, RMS hatayı raporla
 
-| Konfigürasyon | Gradyan | Kaydedilen dosyalar |
-|---------------|---------|---------------------|
-| Nominal | $g_1 = 0.21\ \text{T/m}$ | `R_dy_1.npy`, `R_dx_1.npy` |
-| Pertürbe | $g_1 \times 1.02$ | `R_dy_2.npy`, `R_dx_2.npy` |
-| Fark | $\Delta R = R_2 - R_1$ | `dR_dy.npy`, `dR_dx.npy` |
+**Beklenti ve tipik sonuç:**
 
-K-modülasyon testi $\Delta R$ matrislerini kullanır (bkz. Bölüm 10).
+| Yöntem | RMS hata | Korelasyon |
+|--------|----------|------------|
+| Direct (np.linalg.solve) | < 1 pm | 1.000000 |
+| FFT (sirkülant yaklaşım) | ~5 μm | ~0.999 |
 
-### Koşul Sayıları
-
-```
-κ(R_dy_1) ≈ 165,   κ(R_dx_1) ≈ 152   (nominal konfigürasyon)
-κ(dR_dy), κ(dR_dx): çalıştırma sonrası raporlanır
-```
-
-$\kappa < 10^6$ → doğrudan `linalg.solve`; $10^6$–$10^{10}$ → SVD/Tikhonov regularizasyonu önerilir.
+Direct çözüm makine hassasiyetindedir; FFT hatasının kaynağı FODO'nun tam sirkülant olmamasıdır.
 
 ---
 
-## 9. Quad Geri Çatım Testi: `test_reconstruction.py`
-
-### Yöntem
-
-1. `seed=7` ile tekrarlanabilir rastgele hatalar üretilir (±0.5 mm)
-2. Referans ve hatalı simülasyonlar çalıştırılır
-3. Net COD farkı alınır
-4. 48×48 doğrusal sistem çözülür:
-
-$$\hat{\mathbf{d}}_y = R_{dy}^{-1}\,\mathbf{y}_{\text{COD}} \qquad \hat{\mathbf{d}}_x = R_{dx}^{-1}\,\mathbf{x}_{\text{COD}}$$
-
-### Sonuçlar
-
-| Metrik | dy | dx |
-|--------|----|----|
-| Korelasyon | 1.000000 | 1.000000 |
-| Hata RMS | ~0.05 μm | ~0.08 μm |
-
-COD RMS ~1.7 mm'den 48 quad kaçıklığı ~0.1 μm hassasiyetle geri çatılır.
-
----
-
-## 10. K-Modülasyon Geri Çatım Testi: `test_kmod_reconstruction.py`
-
-### Fikir: Referanssız Geri Çatım
-
-Klasik COD geri çatımı bir **referans ölçüm** gerektirir: önce hatasız makinede yörüngeyi ölç, sonra hatalı makinede ölç, farkı al. Pratikte hatasız bir makine yoktur; ölçülen şey her zaman BPM ofseti, dipol tilti ve quad kaçıklığının toplamıdır.
-
-K-modülasyon yaklaşımının umudu şudur: aynı hata kümesi sabit kalırken **iki farklı optik konfigürasyonda** (gradyanı $g_{\text{nom}}$ ve $g_{\text{pert}} = g_{\text{nom}}(1+\varepsilon)$, $\varepsilon = 0.02$) ölç. İki ölçümün farkı alındığında:
-
-$$\Delta \mathbf{y} = \mathbf{y}(g_{\text{pert}}) - \mathbf{y}(g_{\text{nom}})$$
-
-Her bileşenin bu farka katkısı:
-
-| Bileşen | $\mathbf{y}(g_{\text{nom}})$'da | $\mathbf{y}(g_{\text{pert}})$'de | $\Delta \mathbf{y}$'de |
-|---------|-------------------------------|--------------------------------|----------------------|
-| BPM ofseti $\mathbf{b}$ | $+\mathbf{b}$ | $+\mathbf{b}$ | **0** — common-mode rejection |
-| Quad kaçıklığı $R_{dy}\mathbf{d}_y$ | $R_{dy,1}\mathbf{d}_y$ | $R_{dy,2}\mathbf{d}_y$ | $\Delta R_{dy}\,\mathbf{d}_y$ — sinyal |
-| Dipol tilt $R_{\text{tilt}}\boldsymbol{\theta}$ | $R_{\text{tilt},1}\boldsymbol{\theta}$ | $R_{\text{tilt},2}\boldsymbol{\theta}$ | $\Delta R_{\text{tilt}}\,\boldsymbol{\theta}$ — kirlilik |
-
-**BPM ofseti otomatik iptal olur** çünkü her iki ölçümde de sistematik olarak aynı yönde kayar. Bu yöntemi cazip yapan budur: BPM kalibrasyonu yapılmadan bile quad kaçıklığı geri çatılabilir.
-
-**Dipol tilt** ise her iki ölçümde sabit kalır ama $R_{\text{tilt}}$, gradyan değiştiğinde biraz farklılaşır ($R_{\text{tilt},1} \neq R_{\text{tilt},2}$). Bu fark sıfır değilse tilt kirliliği Δy'ye sızar.
-
-Eğer kirlilik sinyalden çok küçükse ($\Delta R_{\text{tilt}}\,\boldsymbol{\theta} \ll \Delta R_{dy}\,\mathbf{d}_y$), tilt modele dahil edilmeden yalnız $\Delta R_{dy}$ ile geri çatılır:
-
-$$\hat{\mathbf{d}}_y = \Delta R_{dy}^{-1}\,\Delta \mathbf{y}$$
-
-### Tasarım Kararı: Tilt Modelde Yok
-
-Bu simülasyonda $R_{\text{tilt}}$ kasıtlı olarak hesaplanmamıştır. Dipol tilt gerçek halkada fiziksel olarak var olmaya devam eder; ölçümde gürültü kaynağı olarak görünür. Yöntemin ne kadar sağlam olduğunu test etmek için:
-
-1. Simülasyon `tilt_sabit` vektörüyle gerçekçi biçimde çalışır.
-2. Geri çatım ise bu vektörden habersiz yalnız $\Delta R_{dy}$'yi kullanır.
-3. Ortaya çıkan hata, tilt kirliliğinin kör geri çatıma ne kadar zarar verdiğini gösterir.
-
-### BPM Hata Modeli
-
-Gerçek deneyde iki tür BPM hatası vardır:
-
-**Gürültü** (`bpm_noise_sigma`, $\sigma_n$): Her ölçümde bağımsız Gaussian değişken. Δy'de iki bağımsız gürültü toplandığından etkin sapma $\sqrt{2}\,\sigma_n$ olur.
-
-**Ofset** (`bpm_offset_sigma`, $\sigma_o$): BPM başına sabit ve sistematik. Δy farkında her iki ölçümde aynı ofseti içerdiğinden **tamamen iptal olur** — tekrarlı ölçüm gerektirmez.
+### Aşama B — Kondisyon Sayısı Haritası
 
 ```python
-# Ofset her iki ölçüme aynı biçimde eklenir → farkta sıfırlanır
-y1_meas = y1 + bpm_offset + noise_1
-y2_meas = y2 + bpm_offset + noise_2
-delta_y = y2_meas - y1_meas   # offset iptal, sqrt(2)·sigma_n kalır
+stage_B_condition_map(config, plane='y', g_pert_frac=0.02, out_dir='.')
 ```
 
-### Sinyal ve Kirlilik Teşhisi
+**Amaç:** Her Fourier modunun ne kadar iyi ya da kötü koşullu olduğunu görsel olarak göster.
 
-Betik, geri çatım öncesinde sinyal-kirlilik oranını raporlar:
+**Prosedür:**
+1. $R_1$ (nominal $g$), $R_2$ (pertürbe $g$), $\Delta R = R_1 - R_2$ matrislerini hesapla
+2. Her matrisin $\beta$-normalize ilk satırını FFT'le → özdeğerler $\lambda_k$
+3. $|\lambda_k|^{-1}$ mod bazlı kondisyon faktörünü çiz (log ölçek)
 
-```
-Sinyal ve kirlilik:
-  quad_signal_y (tiltsiz beklenti) RMS =  5219.7 um   ← ΔR_dy · dy
-  gercek delta_y                   RMS =  5222.7 um   ← simülasyon ölçümü
-  fark (tilt + gurultu)            RMS =    12.6 um   ← kirlilik
-```
+**Çıktı dosyaları:** `stage_B_condition_x.png`, `stage_B_condition_y.png`
 
-`quad_signal_y = ΔR_dy @ dy_gercek` doğrudan matris çarpımıdır, simülasyon değildir. Gerçek $\Delta y$ ile arasındaki fark ($12.6\,\mu\text{m}$) tilt kirliliğini ve BPM gürültüsünü birlikte ölçer.
-
-**Kirlilik/sinyal oranı** ne kadar düşükse yöntem o kadar güvenilirdir. Bu oran büyük çıkarsa ($\gg 100\%$) tilt modele dahil edilmeden geri çatım anlamsız olur.
-
-### Geri Çatım Sonuçları
-
-Test, hem dikey ($d_y$) hem radyal ($d_x$) kaçıklıkları ayrı ayrı çözer:
+**Tipik değerler (y-düzlemi, Δg/g = +2%):**
 
 ```
-[Gercekci: tilt gorulmez, BPM hatalari var]
-  dy    hata RMS =  4.22 um   korelasyon = 0.723
-  dx    hata RMS = 11.44 um   korelasyon = 0.428
+κ(R₁) ≈  161       ← iki-kmod yöntemi bunu kullanır
+κ(R₂) ≈  161
+κ(ΔR) ≈ 27 560     ← ΔR yöntemi bunu kullanır — 171× daha kötü
 ```
-
-Sonuçları yorumlama kılavuzu:
-
-| Korelasyon | Yorum |
-|---|---|
-| > 0.99 | Mükemmel — tilt kirliliği ihmal edilebilir |
-| 0.7 – 0.99 | Kabul edilebilir — kirlilik kısmen sinyali bozuyor |
-| 0.3 – 0.7 | Zayıf — kirlilik / gürültü baskın |
-| < 0.3 | Anlamsız — geri çatım başarısız |
-
-$d_x$ için korelasyonun $d_y$'den daha düşük çıkması beklenir: radyal kaçıklık sinyal zinciri ($\Delta R_{dx}$) daha küçük olduğundan aynı mutlak gürültü daha büyük görece etki yapar.
-
-### Parametre Önerileri
-
-`params.json`'da test koşullarını ayarlamak için:
-
-```json
-"quad_random_dy_max":    0.0003,   // ±0.3 mm quad dikey kaçıklık
-"quad_random_dx_max":    0.0003,   // ±0.3 mm quad radyal kaçıklık
-"quad_random_seed":      13,
-"dipole_random_tilt_max": 0.0002,  // ±0.2 mrad dipol tilt (modelde görünmez)
-"dipole_random_seed":    43,
-"bpm_noise_sigma":       1e-5,     // 10 μm elektronik gürültü
-"bpm_offset_sigma":      5e-5      // 50 μm sistematik ofset (farkta iptal olur)
-```
-
-### Ön Koşul
-
-`build_response_matrix.py` çalıştırılmış ve `R_dy_1.npy`, `R_dy_2.npy`, `R_dx_1.npy`, `R_dx_2.npy` mevcut olmalıdır.
 
 ---
 
-## 11. Quad Tilt: Skew-Quadrupol ve x-y Kuplajı
+### Aşama C — İki-kmod Rekonstrüksiyonu (Simülasyon = Gerçek Makine)
+
+```python
+stage_C_two_kmod(config, plane='y', g_pert_frac=0.02,
+                 sigma_dq=100e-6, seed=42, t_end=1.5e-4)
+```
+
+**Amaç:** Simülasyon "gerçek makine" rolünü üstlenir; analitik model $R$'yi sağlar. İkisi arasındaki küçük Twiss uyuşmazlığında yöntemin başarısı ölçülür.
+
+**Prosedür:**
+1. Rastgele $\Delta q$ vektörü üret (seed sabit, $\sigma = 100\ \mu\text{m}$)
+2. Simülasyon $(g_\text{nom},\ \Delta q)$ → $y_1$
+3. Simülasyon $(g_\text{pert},\ \Delta q)$ → $y_2$
+4. Analitik $R_1$, $R_2$ hesapla
+5. $v_1 = R_1^{-1} \cdot y_1$,  $v_2 = R_2^{-1} \cdot y_2$
+6. $\hat{\Delta q} = (v_1 + v_2)/2$
+
+**BPM konumları:** `cod_data.txt`'den QF giriş (satır `k×8+2`) ve QD giriş (satır `k×8+6`) okunur; her biri mm cinsinden — m'ye çevrilir.
+
+**Tipik sonuçlar:**
+
+| Düzlem | Yöntem | RMS hata | Korelasyon |
+|--------|--------|----------|------------|
+| y | İki-kmod ort. | 1.4 μm | 0.9999 |
+| y | ΔR direkt | 406 μm | 0.62 |
+| x | İki-kmod ort. | 4.8 μm | 0.9980 |
+| x | ΔR direkt | 1 626 μm | 0.07 |
+
+İki-kmod yöntemi ΔR yöntemine karşı **280–340× daha iyi RMS** sağlamaktadır.
+
+**Başarı kriteri (YAPILACAKLAR.md):** RMS < 10 μm, corr > 0.95 — sağlandı.
+
+---
+
+### Aşama D — Gürbüzlük Testi
+
+```python
+stage_D_robustness(config, plane='y', g_pert_frac=0.02,
+                   sigma_dq=100e-6, seed=42, t_end=1.5e-4, N_trials=8)
+```
+
+**Amaç:** Dört gerçekçi hata kaynağında rekonstrüksiyon kalitesinin nasıl bozulduğunu sistematik biçimde ölçmek.
+
+**Test edilen hata türleri:**
+
+| # | Hata kaynağı | Tarama aralığı | Uygulama yöntemi |
+|---|---|---|---|
+| 1 | BPM ölçüm gürültüsü | 0–20 μm RMS | $y_{1,2}$'ye bağımsız Gaussian ekle |
+| 2 | BPM sabit ofseti | 0–200 μm RMS | Her iki ölçüme aynı $b$ vektörü ekle |
+| 3 | Model beta hatası | 0–5% RMS | $\beta$'yı $(1+\delta)$ ile pertürbe et, $R$'yi yeniden inşa et |
+| 4 | Kuadrupol eğimi | 0–2 mrad RMS | Ayrı simülasyon çifti `quad_tilt_arr` ile |
+
+**1 ve 3 için baz simülasyon yeniden kullanılır (hızlı). 4 için her eğim seviyesinde yeni simülasyon koşulur.**
+
+**Çıktı dosyaları:** `stage_D_robustness_y.png`, `stage_D_robustness_x.png`
+
+**Tipik sonuçlar (y-düzlemi):**
+
+| Hata türü | 10 μm eşiği aşıldığı nokta | Yorum |
+|---|---|---|
+| BPM gürültüsü | σ ≈ 3–4 μm | Kritik: gürültü azaltılmalı |
+| BPM sabit ofseti | σ ≈ 10 μm | Hassas: iki-kmod ofseti tam iptal etmez |
+| Model β hatası | δβ/β ≈ 2% | Twiss hassasiyeti için üst sınır |
+| Kuadrupol eğimi | > 2 mrad dahi iyi | Oldukça gürbüz |
+
+---
+
+### `build_R_for_gradient()` Yardımcı Fonksiyonu
+
+```python
+R, beta, phi, Q, KL = build_R_for_gradient(config, g, plane, K_x_arc_x=None)
+```
+
+Verilen gradyan $g$ için config'in `g1` alanını geçici güncelleyerek Twiss + $R$ hesaplar. `K_x_arc` yatay kalibrasyonu bir kez yapılıp farklı $g$ değerleri için sabit tutulur (arc geometrisi $g$'den bağımsız).
+
+---
+
+### Tüm Aşamaları Çalıştırmak
+
+```bash
+python spectral_inversion.py
+```
+
+Sırayla çalışır: A (her iki düzlem) → B (her iki düzlem) → C (y, x) → D (y, x).
+
+Toplam süre: ~30–40 dakika (D aşamasındaki tilt simülasyonları dahil).
+
+---
+
+## 10. Quad Tilt: Skew-Quadrupol ve x-y Kuplajı
 
 ### Fizik: Neden Quad Tilt = Skew-Quadrupol?
 
@@ -468,205 +524,22 @@ if (q_tilt != 0.0) {
 }
 ```
 
-### Nicel Kuplaj Teşhisleri
+### Rekonstrüksiyona Etkisi
 
-Görsel beating, x-y kuplajının kalitatif göstergesidir; ancak nicel diagnoz için iki ölçü `run_simulation.py` çıktısında doğrudan basılır:
+`spectral_inversion.py` yanıt matrisi quad tilti modellemez. Tilt, BPM ölçümüne modelsiz kirlilik olarak sızar. Aşama D gürbüzlük testinden elde edilen sayısal tablo:
 
-**1) Courant-Snyder invariant'larının salınımı**
-- Kuplaj yoksa $J_x = x^2 + p_x^2$ yaklaşık korunur.
-- Kuplajla $J_x$ ve $J_y$ enerji takas eder.
-- Metrik: $\sigma(J_x)/\langle J_x\rangle$.
+| σ_tilt | Ek RMS hatası (y-düzlemi) |
+|--------|--------------------------|
+| 0.0 mrad | 0 μm (baz) |
+| 0.5 mrad | +0.03 μm |
+| 1.0 mrad | +0.12 μm |
+| 2.0 mrad | +0.45 μm |
 
-**2) FFT Çapraz Pik**
-- Saf x sinyali yalnız $\nu_x$ pikine sahiptir.
-- Kuplaj varsa **y sinyalinde de $\nu_x$ piki** belirir.
-- Metrik: $F_y(\nu_x) / F_y(\nu_y)$.
-
-Bu iki metriğin **mutlak** değerleri sextupol vb. doğrusal-olmayan etkilerden gelen bir artalanın üzerine kurulur. Tilt sinyali ancak artalan **çıkarılarak** görülür.
-
-### Doğrulama Taraması: `scan_quad_tilt.py`
-
-Skew-quadrupol fiziğinin doğru ölçeklendiğini doğrulamak için tek bir betik:
-
-```bash
-python scan_quad_tilt.py
-```
-
-`theta_max` $\in \{0, 0.01, 0.03, 0.1, 0.3, 1, 3\}$ mrad için tek koşum yapar, artalan ($\theta=0$) çıkarılmış metriklerin $\theta$ ile log-log eğimini fit eder. Kuplaj katsayısı $|C^-| \propto \theta$ olduğundan **tüm metriklerde eğim ≈ 1.0** beklenir.
-
-Tipik çıktı:
-
-```
-log-log fit egimleri (beklenen tum metrikler icin ~1.0)
-  d log(|dJx_osc|)     / d log(theta) = 0.754
-  d log(|dJy_osc|)     / d log(theta) = 1.956
-  d log(|dcross_y|)    / d log(theta) = 0.924
-  d log(|dcross_x|)    / d log(theta) = 1.106
-  -> quad_tilt fizigi DOGRU olceklenyor (|C-| ∝ theta).
-```
-
-> **Not:** `dJy_osc` eğiminin ~2 çıkması bir hata değildir. Başlangıçta $y_0 \approx 0$ olduğundan kuplajla aktarılan y genliği $\propto \theta \cdot x$ olur; dolayısıyla $J_y = y^2 \propto \theta^2$. Asimetrik başlangıç koşulundan kaynaklanır, kuplaj fiziğine aykırı değildir.
-
-> **Not:** `dJx_osc` eğiminin 1'in altında kalması, taranan aralığın üst ucunda (3 mrad ≈ 0.17°) lineer rejim dışına çıkıldığı içindir. Son nokta atıldığında eğim 1'e yaklaşır.
-
-### Tilt'in K-Modülasyon Geri Çatımına Etkisi
-
-Tepki matrisi ($\Delta R_{dy}$, $\Delta R_{dx}$) quad tilt'i **modellemez** (Bölüm 10'daki tasarım kararı uyarınca). Gerçek halkada tilt varsa Δy farkına modellenmemiş bir kirlilik sızar ve geri çatım kalitesini düşürür.
-
-İki temsili senaryo:
-
-| Senaryo | quad_tilt | Kirlilik (Δy farkında) | dy hata RMS | corr(dy) |
-|---|---|---|---|---|
-| Yüksek tilt | 1.0 mrad | 280 μm | 38.6 μm | 0.818 |
-| Gerçekçi | 0.2 mrad | 58.8 μm | 6.6 μm | 0.993 |
-
-Kirlilik ve hata, $\theta$ ile yaklaşık lineer ölçeklenir; **5× tilt azaltma ≈ 5× hata azaltma** kalitesi tutuyor.
-
-### Toleranslar (Pratik Spec)
-
-Aşağıdaki gerçekçi konfigürasyonla k-modülasyon **hizalama hatasını <10 μm RMS hassasiyetle, korelasyon > 0.99 ile** geri çatar:
-
-```json
-"quad_random_dy_max":    1e-4,    // ±100 μm dikey kaçıklık
-"quad_random_dx_max":    1e-4,    // ±100 μm radyal kaçıklık
-"quad_random_tilt_max":  2e-4,    // ±0.2 mrad quad tilt (modelde yok)
-"bpm_noise_sigma":       1e-6,    // 1 μm BPM gürültüsü
-"bpm_offset_sigma":      1e-4     // 100 μm BPM ofseti (farkta iptal)
-```
-
-Bu spec aşıldığında (örn. tilt > 0.5 mrad) korelasyon hızlı düşer; o noktada $R_{\text{qtilt}}$'i modele dahil eden gelişmiş bir geri çatım gerekir.
+İki-kmod yöntemi quad eğimine karşı oldukça gürbüzdür: 2 mrad eğimde ek hata 0.5 μm'nin altındadır.
 
 ---
 
-## 12. Tepki Matrisi, LOCO ve K-Modülasyon: Karşılaştırma ve Teorik Yaklaşım
-
-Bu bölüm üç birbiriyle ilişkili yöntemi karşılaştırır: lineer optik ölçümü (LOCO), k-modülasyon temelli kapalı yörünge fark analizi ve teorik tepki matrisi ile doğrudan geri çatım.
-
-### Temel Fizik: Misalignment → Dipol Kick → COD
-
-Bir quad'ın Δy kadar dikey kayması, o quad'ı bir dipol kick kaynağına dönüştürür:
-
-$$\theta_j = K_j L_j \cdot \Delta y_j$$
-
-Bu kick, tüm BPM'lerde bir kapalı yörünge sapması (COD) yaratır:
-
-$$y_{\mathrm{CO}}(s_i) = \frac{\sqrt{\beta_i \beta_j}}{2\sin(\pi Q)} \cdot K_j L_j \cdot \Delta y_j \cdot \cos\!\bigl(|\phi_i - \phi_j| - \pi Q\bigr)$$
-
-Matris biçiminde: $\mathbf{y} = R \cdot \boldsymbol{\Delta y}$, burada **tepki matrisi**:
-
-$$R_{ij} = \frac{\sqrt{\beta_i \beta_j}}{2\sin(\pi Q)} \cdot K_j L_j \cdot \cos\!\bigl(|\phi_i - \phi_j| - \pi Q\bigr)$$
-
-β fonksiyonları, faz ilerlemeleri φ ve tune Q biliniyorsa bu matris **analitik olarak** hesaplanabilir; simülasyon veya ölçüm gerektirmez.
-
----
-
-### Yöntem 1 — LOCO (Linear Optics from Closed Orbits)
-
-**Nasıl çalışır:**  
-Her düzeltici dipol j için tek tek bir kick θ_j uygulanır ve tüm BPM'lerdeki yörünge değişimi ölçülür. Bu işlem N_corr kez tekrarlanarak **orbit response matrix (ORM)** inşa edilir:
-
-$$M_{ij}^{\mathrm{meas}} = \frac{\Delta y_i}{\theta_j}$$
-
-Ardından bir makine modeli $M^{\mathrm{model}}(K_1, \ldots, K_n, g_{\mathrm{BPM}}, g_{\mathrm{corr}})$ ölçülen ORM'ye fit edilir.
-
-**Ne verir:**
-- Quadrupol gradyan sapmaları δK [1/m²]
-- Beta fonksiyonları β(s) ve faz ilerlemeleri φ(s) → beta-beating haritası
-- BPM kazanç hataları, düzeltici kalibrasyon hataları
-
-**Ne vermez:**
-- Doğrudan transvers hizalama hatası (Δy, Δx metre cinsinden)
-- δK'nın kaynağını ayırt etmez: "Bu kick fiziksel bir pozisyon kaymasından mı yoksa demir/güç kaynağı hatasından mı geliyor?" sorusunu yanıtlayamaz.
-- BPM ofset hatalarını otomatik iptal etmez; ayrı fit parametresi olarak işlenmesi gerekir.
-
-**Pratik not:**  
-LOCO için N_corr ≈ 48 ayrı düzeltici kick ölçümü gerekir. Sonuçlar makine optiğini tanımlamak için altın standarttır; hizalama çıkarımı için ek adım gerektirir.
-
----
-
-### Yöntem 2 — K-Modülasyon COD Farkı (Bu Simülasyonun Yöntemi)
-
-**Nasıl çalışır:**  
-Halka **iki farklı gradyan konfigürasyonunda** (g₁ ve g₂ = g₁ × 1.02) çalıştırılır. Her iki konfigürasyonda BPM'lerden COD ölçülür ve fark alınır:
-
-$$\Delta \mathbf{y} = \mathbf{y}(g_2) - \mathbf{y}(g_1) = \underbrace{(R_2 - R_1)}_{\Delta R} \cdot \boldsymbol{\Delta y}_{\mathrm{true}}$$
-
-**ΔR** matrisi, tepki matrisinin iki optik konfigürasyon arasındaki farkıdır; misalignment vektörü ΔR⁻¹ ile geri çatılır.
-
-**Ne verir:**
-- Doğrudan transvers hizalama pozisyonu (Δy, Δx metre cinsinden)
-- BPM ofset hatalarının otomatik iptali: ofsetler her iki ölçümde aynı olduğundan farkta common-mode olarak silinir
-- Gradyan hatasından bağımsız hizalama bilgisi
-
-**Ne vermez:**
-- Optik parametreler (β, φ) doğrudan elde edilmez
-- Quad tilt ve dipol tilt modele dahil değildir; bu hatalar ΔR'yi değil yalnızca sinyal gürültüsünü etkiler (bkz. Bölüm 11)
-
-**Pratik not:**  
-Yalnızca **iki BPM okuması** (iki gradyan ayarında) gerekir. Trim quad kicki veya tek tek pertürbasyon ölçümü yapılmasına gerek yoktur. Bu yöntemin temel avantajı budur.
-
----
-
-### Yöntem 3 — Analitik Tepki Matrisi ile Doğrudan Geri Çatım
-
-**Temel fikir:**  
-`build_response_matrix.py` her quad için birim misalignment uygulayarak R matrisini nümerik olarak inşa eder (N_quad + 1 koşum × 2 konfigürasyon ≈ 97 simülasyon). Oysa yukarıdaki formül β, φ ve Q biliniyorsa R'yi **analitik olarak** verir; hiçbir pertürbasyon simülasyonu gerekmez.
-
-Analitik yol:
-
-```
-1. FODO optiğinden (veya LOCO ölçümünden) β, φ, Q'yu al
-2. g₁ ve g₂ için R₁, R₂ matrislerini formülden hesapla
-3. ΔR = R₂ - R₁
-4. Gerçek halkada iki gradyan ayarında BPM oku: y₁, y₂
-5. Δy = y₂ − y₁
-6. Δy_true = ΔR⁻¹ · Δy
-```
-
-**Avantajları:**
-- Simülasyon maliyeti sıfır
-- Fizik şeffaf: β fonksiyonu ve tune değişiminin katkısı açıkça görülür
-- Gerçek deneyde uygulanabilir (tasarım β'sı veya LOCO'dan ölçülen β kullanılabilir)
-
-**Sınırlılıkları:**
-- Lineer yaklaşım; nonlineer etkiler (sextupol, fringe) yok sayılır
-- β fonksiyonlarındaki hata doğrudan ΔR hatasına dönüşür
-- Quad tilt, dipol tilt gibi modellenmemiş hatalar geri çatım performansını düşürür
-
-**pEDM için durum:**  
-24-katlı simetrik FODO halkasında tasarım β değerleri gerçek β'dan çok az sapar. Analitik ΔR matrisi simülasyon tabanlı ΔR ile neredeyse özdeştir. Bu yaklaşım hem hızlı doğrulama hem de gerçek deney uygulaması için uygundur.
-
----
-
-### Karşılaştırma Tablosu
-
-| Özellik | LOCO | K-mod COD farkı | Analitik R |
-|---|---|---|---|
-| Gerekli ölçüm | N_corr kick ölçümü | 2 BPM okuması | 2 BPM okuması |
-| Ön koşul | Trim quad/düzeltici | İki gradyan modu | β, φ, Q bilgisi |
-| Doğrudan çıktı | δK, β-beat, BPM kazancı | Δy, Δx [m] | Δy, Δx [m] |
-| Hizalama yolu | Dolaylı (δK → Δy) | Doğrudan | Doğrudan |
-| BPM ofset | Ayrı fit parametresi | Otomatik iptal | Otomatik iptal |
-| Quad tilt etkisi | Görünmez | Kirlilik (§11) | Kirlilik (§11) |
-| Nonlineer etkiler | Hayır (ORM lineer) | Simülasyon kapsar | Hayır |
-| Hesap maliyeti | N_corr simülasyon | 97 simülasyon | Sıfır simülasyon |
-
----
-
-### Üç Yöntemin Tamamlayıcı Kullanımı
-
-Gerçek bir deney için önerilen sıra:
-
-1. **LOCO** → makine optiğini kalibre et, β ve φ haritasını çıkar
-2. **Analitik ΔR** → ölçülen β ile tepki matrisini hesapla (simülasyon gerekmez)
-3. **K-mod COD farkı** → iki gradyan ayarında BPM oku, ΔR⁻¹ · Δy ile hizalamayı geri çat
-4. Quad pozisyon düzeltmesi uygula, iterasyon gerekirse tekrarla
-
-Bu kombinasyon hem hesap etkin hem fiziksel olarak şeffaf hem de BPM ofset bağışıklığı sağlar.
-
----
-
-## 13. Parametreler: `params.json`
+## 11. Parametreler: `params.json`
 
 ### Geometri ve Fizik
 
@@ -678,7 +551,7 @@ Bu kombinasyon hem hesap etkin hem fiziksel olarak şeffaf hem de BPM ofset bağ
 | `quadLen` | Quad uzunluğu [m] | 0.4 |
 | `driftLen` | Serbest yol uzunluğu [m] | 2.0833 |
 | `g1` | QF/QD gradyanı [T/m] | 0.21 |
-| `g0` | Modüle quad gradyanı [T/m] | 0.20 |
+| `g0` | İkincil quad gradyanı [T/m] | 0.20 |
 
 ### Simülasyon Kontrolü
 
@@ -688,7 +561,7 @@ Bu kombinasyon hem hesap etkin hem fiziksel olarak şeffaf hem de BPM ofset bağ
 | `dt` | Zaman adımı [s] | 1e-11 |
 | `return_steps` | Kaydedilen veri noktası sayısı | 10000 |
 | `poincare_quad_index` | Poincaré kesiti konumu (−1 = her hücre) | −1 |
-| `dev0`, `y0` | Tune ölçümü için başlangıç tepmesi [m] | 1e-5 |
+| `dev0`, `y0` | Başlangıç tepmesi [m] | 1e-5 |
 
 ### Hata Modeli
 
@@ -696,26 +569,27 @@ Bu kombinasyon hem hesap etkin hem fiziksel olarak şeffaf hem de BPM ofset bağ
 |-----------|----------|
 | `error_quad_index` | Tek quad hatası indeksi (−1 = devre dışı) |
 | `error_quad_dy/dx` | Tek quad kaçıklığı [m] |
-| `quad_random_dy/dx_max` | Tüm quadlara rastgele hata genliği [m] |
-| `quad_random_seed` | Tekrarlanabilirlik için tohum sayısı |
-| `error_dipole_index` | Tek dipol hatası indeksi (−1 = devre dışı) |
-| `error_dipole_tilt` | Tek dipol tilt açısı [rad] |
-| `dipole_random_tilt_max` | Tüm deflektörlere rastgele açısal hata [rad] |
-| `dipole_random_seed` | Dipol tilt rastgele tohumu |
-| `quad_random_tilt_max` | Tüm quadlara rastgele tilt açısı [rad] |
+| `quad_random_dy_max` | Tüm quadlara rastgele dikey hata genliği [m] |
+| `quad_random_dx_max` | Tüm quadlara rastgele radyal hata genliği [m] |
+| `quad_random_seed` | Tekrarlanabilirlik için tohum |
+| `error_dipole_index` | Tek deflektör hatası indeksi (−1 = devre dışı) |
+| `error_dipole_tilt` | Tek deflektör eğim açısı [rad] |
+| `dipole_random_tilt_max` | Tüm deflektörlere rastgele eğim açısı [rad] |
+| `dipole_random_seed` | Deflektör tilt rastgele tohumu |
+| `quad_random_tilt_max` | Tüm quadlara rastgele eğim açısı [rad] |
 | `quad_random_tilt_seed` | Quad tilt rastgele tohumu |
 
 ### BPM Hata Modeli
 
 | Parametre | Açıklama |
 |-----------|----------|
-| `bpm_noise_sigma` | Tur-tura bağımsız Gaussian gürültü std [m]; tepki matrisi inşasında ve geri çatımda etkindir |
-| `bpm_offset_sigma` | BPM başına sabit sistematik ofset std [m]; yalnızca geri çatım COD'unda görülür (matriste farkta iptal olur) |
+| `bpm_noise_sigma` | Her ölçümde bağımsız Gaussian gürültü std [m] |
+| `bpm_offset_sigma` | BPM başına sabit sistematik ofset std [m] |
 | `bpm_offset_seed` | Ofset vektörü rastgele tohumu |
 
 ---
 
-## 14. Kurulum ve Çalıştırma
+## 12. Kurulum ve Çalıştırma
 
 ### Gereksinimler
 
@@ -723,7 +597,7 @@ Bu kombinasyon hem hesap etkin hem fiziksel olarak şeffaf hem de BPM ofset bağ
 pip install numpy scipy matplotlib
 ```
 
-### Derleme
+### C++ Kütüphanesinin Derlenmesi
 
 ```bash
 # Linux
@@ -733,58 +607,74 @@ g++ -shared -o lib_integrator.so -fPIC -O3 integrator.cpp
 clang++ -dynamiclib -o lib_integrator.dylib -O3 integrator.cpp
 ```
 
-### Adım Adım Kullanım
+### Dosya Yapısı
 
-**Adım 1 — Normal simülasyon** (fizik sonuçları + tune + COD):
+| Dosya | Rol |
+|-------|-----|
+| `integrator.cpp` | C++ GL4 entegratör (parçacık dinamiği + spin) |
+| `integrator.py` | C kütüphanesine ctypes köprüsü |
+| `run_simulation.py` | Simülasyon orkestrasyonu, COD ve Poincaré verisi |
+| `plot_results.py` | Simülasyon görselleştirme paneli |
+| `fodo_lattice.py` | Analitik Twiss, yanıt matrisi, FFT geri dönüşüm |
+| `spectral_inversion.py` | Dört aşamalı quad hizalama geri çatım analizi |
+| `params.json` | Örgü ve hata parametreleri |
+
+### Tipik İş Akışı
+
+**Adım 1 — Normal simülasyon** (parçacık dinamiği, COD, Poincaré verisi):
+
 ```bash
 python run_simulation.py
 ```
 
+Çıktılar: `cod_data.txt`, `poincare_data.txt`, `history.txt`
+
 **Adım 2 — Görselleştirme:**
+
 ```bash
 python plot_results.py
 # → simulasyon_sonuclari.png
 ```
 
-**Adım 3 — Tepki matrisini hesapla** (bir kez yap, sonuçları sakla):
+**Adım 3 — Analitik Twiss doğrulaması:**
+
 ```bash
-# Otomatik (os.cpu_count()-1 worker):
-python build_response_matrix.py
-
-# Elle belirleme:
-python build_response_matrix.py --workers 7   # 8 çekirdekli makine için
-python build_response_matrix.py --workers 11  # 12 çekirdekli makine için
-
-# Üretilen dosyalar:
-#   R_dy_1.npy, R_dx_1.npy   ← nominal konfigürasyon (g1)
-#   R_dy_2.npy, R_dx_2.npy   ← pertürbe konfigürasyon (g1×1.02)
-#   dR_dy.npy,  dR_dx.npy    ← fark matrisleri (k-mod testi için)
+python fodo_lattice.py
+# → Qx, Qy, κ(R) raporlanır; Direct ve FFT geri dönüşüm test edilir
 ```
 
-**Adım 4a — Quad-only geri çatım testi** (tek konfigürasyon, referans ölçüm var):
+**Adım 4 — Quad geri çatım analizi (4 aşama):**
+
 ```bash
-python test_reconstruction.py
-# → reconstruction_test.npz ve konsol istatistikleri
+python spectral_inversion.py
+# → Aşama A: ideal test (her iki düzlem)
+# → Aşama B: kondisyon haritası — stage_B_condition_x.png, stage_B_condition_y.png
+# → Aşama C: iki-kmod rekonstrüksiyon (simülasyonlu)
+# → Aşama D: gürbüzlük taraması — stage_D_robustness_y.png, stage_D_robustness_x.png
 ```
 
-**Adım 4b — K-modülasyon testi** (referanssız, tilt görünmez):
-```bash
-python test_kmod_reconstruction.py
-# → kmod_reconstruction_test.npz
-# → konsola: sinyal/kirlilik oranı ve geri çatım hata RMS
-```
+Toplam süre: ~30–40 dakika (tilt simülasyonları dahil).
 
 ### Tipik Parametre Değişiklikleri
 
 Rastgele quad hataları eklemek için `params.json`'da:
+
 ```json
-"quad_random_dy_max": 0.0005,
-"quad_random_dx_max": 0.0005,
+"quad_random_dy_max": 0.0001,
+"quad_random_dx_max": 0.0001,
 "quad_random_seed": 42
 ```
 
 Tek bir quada hata vermek için:
+
 ```json
 "error_quad_index": 5,
 "error_quad_dy": 0.0003
+```
+
+Quad eğimi eklemek için:
+
+```json
+"quad_random_tilt_max": 0.001,
+"quad_random_tilt_seed": 44
 ```
