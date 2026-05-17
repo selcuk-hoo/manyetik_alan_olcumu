@@ -303,17 +303,20 @@ def signed_KL(config, plane):
 # =============================================================================
 def build_response_matrix(beta, phi, Q, KL):
     """
-    Courant-Snyder yanıt matrisi:
+    Courant-Snyder kapalı-yörünge yanıt matrisi:
 
-        R_ij = -sqrt(β_i β_j) · cos(|φ_i - φ_j| - πQ) · KL_j / (2 sin(πQ))
+        R_ij = sqrt(β_i β_j) · cos(|φ_i - φ_j| - πQ) · KL_j / (2 sin(πQ))
+
+    İşaret kuralı: KL_j içinde quad tipi (QF/QD) ve düzlem (x/y) işareti
+    saklanır (bkz. signed_KL). Bu formülün önünde ek bir "-" yoktur —
+    simülasyon ile karşılaştırmada doğrulanmıştır.
 
     Boyut: N×N (N = len(beta))
     """
-    N = len(beta)
     denom = 2.0 * np.sin(np.pi * Q)
     sqb = np.sqrt(beta)
     dphi = np.abs(phi[:, None] - phi[None, :])
-    R = -np.outer(sqb, sqb) * np.cos(dphi - np.pi * Q) * KL[None, :] / denom
+    R = np.outer(sqb, sqb) * np.cos(dphi - np.pi * Q) * KL[None, :] / denom
     return R
 
 
@@ -334,7 +337,7 @@ def fft_invert(y, beta, phi, Q, KL):
 
     Adım 1: ỹ_i = y_i / sqrt(β_i)             (β normalizasyonu, soldan)
     Adım 2: Normalize sirkülant operatörün ilk satırı:
-                m_k = -cos(|φ_k - φ_0| - πQ) / (2 sin(πQ))
+                m_k = cos(|φ_k - φ_0| - πQ) / (2 sin(πQ))
             Özdeğerler λ_k = DFT(m)
     Adım 3: Bilinmeyen dönüşümü u_j = sqrt(β_j) · KL_j · Δq_j
             ỹ_i = Σ_j M_ij u_j olduğundan DFT uzayında:
@@ -353,7 +356,7 @@ def fft_invert(y, beta, phi, Q, KL):
 
     # Adım 2 — normalize sirkülant matrisin ilk satırı
     dphi0 = np.abs(phi - phi[0])
-    first_row = -np.cos(dphi0 - np.pi * Q) / (2.0 * np.sin(np.pi * Q))
+    first_row = np.cos(dphi0 - np.pi * Q) / (2.0 * np.sin(np.pi * Q))
     lam = circulant_eigenvalues_from_first_row(first_row)
 
     # Adım 3-4
