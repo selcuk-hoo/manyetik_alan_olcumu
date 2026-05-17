@@ -9,13 +9,19 @@ Bu modül periyodik FODO örgüsünün simetrisinden faydalanır:
 
 Simülasyon kütüphanesine (integrator) bağımlılığı yoktur; tamamen analitiktir.
 
-Hücre yapısı (integrator.cpp ile uyumlu, v2.8 referansı):
+Hücre yapısı (integrator.cpp ile uyumlu):
     QF → drift → arc → drift → QD → drift → arc → drift → (sonraki QF)
 
-Elektrik halkada arc deflektörler her iki düzlemde de saf drift olarak
-modellenir (n=1 silindirik kapasitör: E_z = 0 ⟹ dikey kuvvet sıfır;
-radyal düzlemde de bükme hareketi saf dönme olarak yaklaşılır).
-Bu, v2.8 analitik referansıyla tam uyumludur: Q_x = Q_y ≈ 2.36.
+Arc deflektör fiziksel davranışı (n=1 silindirik elektrik kapasitör):
+  * DİKEY düzlem: E_z = 0 tam olarak (Maxwell, n=1) → arc = saf drift, K_y_arc = 0
+  * YATAY düzlem: merkezkaç + relativistik dispersiyon kuplajı sıfır olmayan
+    odaklama yaratır. Basit analitik formül (1-n±β²)/ρ² sonucu tam vermez
+    (dönen referans çerçevesindeki Coriolis kuplajı sebebiyle).
+    K_x_arc, "ideal örgü" simülasyonundan (hizalama hatası sıfır, başlangıç
+    yalnız açısal kick) elde edilen Qx_ref ile bisection kalibre edilir.
+
+Doğrulama: ideal sim'de Qx ≈ 2.68, Qy ≈ 2.36 (params.json varsayılan
+örgüsünde, R0=95.49 m, g1=0.21, nFODO=24).
 
 Örnekleme konvansiyonu: her quad GİRİŞİNDE (quad merkezinde değil).
 """
@@ -73,6 +79,88 @@ def thick_quad_matrix(K, L, focusing):
                          [sqk * np.sinh(phi), np.cosh(phi)]])
 
 
+def arc_matrix(L, K):
+    """
+    Arc transfer matrisi, verilen odaklama gücü K [1/m²] için.
+
+    K > 0  → odaklayan (cos/sin)
+    K < 0  → dağıtan (cosh/sinh)
+    K = 0  → saf drift
+
+    Elektrik halka için K_y_arc = 0 (Maxwell, n=1 → E_z=0).
+    K_x_arc, ideal simülasyon Qx referansından kalibrasyonla bulunur
+    (bkz. calibrate_K_x_arc).
+    """
+    if K > 0:
+        sqk = np.sqrt(K); phi = sqk * L
+        return np.array([[np.cos(phi),       np.sin(phi) / sqk],
+                         [-sqk * np.sin(phi), np.cos(phi)]])
+    elif K < 0:
+        sqk = np.sqrt(-K); phi = sqk * L
+        return np.array([[np.cosh(phi),       np.sinh(phi) / sqk],
+                         [sqk * np.sinh(phi), np.cosh(phi)]])
+    else:
+        return drift_matrix(L)
+
+
+# Temiz simülasyondan kalibre edilmiş referans yatay tune
+# (params.json varsayılanı: R0=95.49, g1=0.21, nFODO=24,
+#  hizalama hatası = 0, başlangıç yalnız açısal kick → Qx ≈ 2.6824 arctan2)
+QX_REF_CLEAN_SIM = 2.6824
+
+
+def calibrate_K_x_arc(config, Q_x_target=QX_REF_CLEAN_SIM,
+                     K_bounds=(0.0, 1.0e-3), tol=1e-10):
+    """
+    Yatay arc odaklamasını, verilen hedef tune Q_x_target'a uydurmak için
+    bisection ile bulur.
+
+    Hedef varsayılanı (QX_REF_CLEAN_SIM = 2.6824) ideal koşullarda
+    simülasyonun verdiği temiz Qx değeridir — hizalama hatası kapalı,
+    başlangıç yalnız 1 mrad açısal kick.
+
+    Dikey için ayrı bir fonksiyon yok: K_y_arc = 0 (Maxwell n=1 → E_z=0).
+
+    Geri dönüş: K_x_arc [m⁻²], pozitif (odaklayıcı)
+    """
+    nF      = int(config['nFODO'])
+    L_d     = config['driftLen']
+    L_q     = config['quadLen']
+    R0      = config['R0']
+    L_arc   = np.pi * R0 / nF
+
+    p_GeV = magic_momentum_proton(config.get('momError', 0.0))
+    Brho  = compute_Brho(p_GeV)
+    K_abs = config['g1'] / Brho
+
+    M_QF = thick_quad_matrix(K_abs, L_q, focusing=True)
+    M_QD = thick_quad_matrix(K_abs, L_q, focusing=False)
+    M_D  = drift_matrix(L_d)
+
+    def Q_for_K(K_arc):
+        M_A   = arc_matrix(L_arc, K_arc)
+        M_mid = M_D @ M_A @ M_D
+        M_end = M_D @ M_A @ M_D
+        M_cell = M_end @ M_QD @ M_mid @ M_QF
+        tr2 = (M_cell[0, 0] + M_cell[1, 1]) / 2.0
+        if abs(tr2) >= 1.0:
+            return None
+        mu = np.arccos(tr2)
+        if M_cell[0, 1] < 0:
+            mu = 2.0 * np.pi - mu
+        return nF * mu / (2.0 * np.pi)
+
+    lo, hi = K_bounds
+    while hi - lo > tol:
+        mid = 0.5 * (lo + hi)
+        Q_mid = Q_for_K(mid)
+        if Q_mid is None or Q_mid > Q_x_target:
+            hi = mid
+        else:
+            lo = mid
+    return 0.5 * (lo + hi)
+
+
 # =============================================================================
 # 3. Twiss parametrelerinin çıkarımı
 # =============================================================================
@@ -110,13 +198,20 @@ def propagate_twiss(beta0, alpha0, M):
 # =============================================================================
 # 4. Twiss parametrelerinin her quad girişinde hesaplanması
 # =============================================================================
-def compute_twiss_at_quads(config, plane):
+def compute_twiss_at_quads(config, plane, K_x_arc=None, Q_x_target=None):
     """
     Her kuadrupol GİRİŞİNDE Twiss parametrelerini hesaplar.
 
-    Hücre yapısı (QF girişinden başlayarak, arc = saf drift):
+    Hücre yapısı (QF girişinden başlayarak):
         QF → drift(L_d) → arc(L_def) → drift(L_d) → QD
            → drift(L_d) → arc(L_def) → drift(L_d) → (sonraki QF)
+
+    Arc modeli:
+      plane='y':  arc = saf drift  (K_y_arc = 0, fizikten)
+      plane='x':  arc = ince odaklama, K_x_arc kalibre edilir
+                  - K_x_arc parametresi verilirse o kullanılır
+                  - Verilmezse Q_x_target (varsayılan: temiz sim Qx=2.6824)
+                    ile bisection kalibrasyonu yapılır
 
     Geri dönüş: (beta_arr [N], phi_arr [N], Q)
         N = 2 * nFODO  (toplam quad sayısı; çift indeksler QF, tek indeksler QD)
@@ -135,13 +230,18 @@ def compute_twiss_at_quads(config, plane):
 
     if plane == 'x':
         QF_foc, QD_foc = True, False
+        if K_x_arc is None:
+            target = QX_REF_CLEAN_SIM if Q_x_target is None else float(Q_x_target)
+            K_x_arc = calibrate_K_x_arc(config, Q_x_target=target)
+        K_arc_eff = K_x_arc
     else:
         QF_foc, QD_foc = False, True
+        K_arc_eff = 0.0   # fizik: n=1 → E_z=0 → arc dikeyde saf drift
 
     M_QF = thick_quad_matrix(K_abs, L_q, focusing=QF_foc)
     M_QD = thick_quad_matrix(K_abs, L_q, focusing=QD_foc)
     M_D   = drift_matrix(L_d)
-    M_A   = drift_matrix(arc_len)  # arc modeled as pure drift
+    M_A   = arc_matrix(arc_len, K_arc_eff)
 
     # QF çıkışından QD girişine (drift + arc + drift)
     M_mid = M_D @ M_A @ M_D
