@@ -1,0 +1,46 @@
+{
+    "_comment": "Test-specific parameters. Accelerator parameters are in params.json.",
+
+    "EPS": 0.02,
+    "T_END": 1.5e-4,
+
+    "test1": {
+        "_comment": "compare_regularization.py — Tikhonov L-curve + TSVD scree",
+        "lambda_grid_log_min": -12,
+        "lambda_grid_log_max": 2,
+        "lambda_grid_n": 200
+    },
+
+    "test2": {
+        "_comment": "mode_transfer.py — spatial transfer function. Amplitude comes from params.json quad_random_dy/dx_max.",
+        "BPM_NOISE": 1e-6,
+        "N_REALIZATIONS": 40,
+        "TIKHONOV_LAMBDA": {"y": 3.57e-2, "x": 4.94e-2},
+        "TSVD_K": {"y": 3, "x": 5}
+    },
+
+    "test3": {
+        "_comment": "kxarc_sensitivity.py — inverse-crime K_x_arc perturbation scan",
+        "delta_min": -0.10,
+        "delta_max": 0.10,
+        "delta_n": 21
+    },
+
+    "test4": {
+        "_comment": "drift_monitor_sim.py — calibrated-reference drift tracking. DQ0_RMS comes from params.json quad_random_dy/dx_max.",
+        "BPM_OFFSET": 50e-6,
+        "BPM_NOISE": 1e-6,
+        "DRIFT_RAMP": 10e-6,
+        "N_EPOCHS": 10
+    },
+
+    "test5": {
+        "_comment": "bpm_offset_drift_sim.py — two-estimator robustness vs BPM drift. DQ0_RMS comes from params.json quad_random_dy/dx_max.",
+        "BPM_OFFSET": 50e-6,
+        "BPM_NOISE": 1e-6,
+        "DRIFT_RAMP": 10e-6,
+        "N_EPOCHS": 60,
+        "AVG_WINDOW": 30,
+        "DRIFT_RATES_um_per_epoch": [0.0, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
+    }
+}
