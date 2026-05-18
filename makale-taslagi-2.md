@@ -4,24 +4,24 @@
 
 ## Özet
 
-Proton EDM (pEDM) deneyinin alternating-gradient versiyonunda, quad hizalama
-hatalarından kaynaklanan sahte vertikal ortalama alan birincil sistematik
-kaynaktır; hedef EDM hassasiyeti hizalamanın $\sim 10\,\mu\text{m}$
-seviyesinde bilinmesini gerektirir [Omarov 2021, PRD]. Bu çalışmada,
-48-quadrupole'lü pEDM örgüsünde BPM tabanlı tepki-matrisi yöntemlerinin
-bu hedefe hangi koşullarda ulaşabildiğini sistematik olarak inceliyoruz.
-Dört aday yöntem (mutlak $R^{-1}$, iki-gradient $\Delta R^{-1}$,
-düzenlileştirme, kalibrasyon-referans drift modu) ortak bir simülasyon
-altyapısı üzerinde karşılaştırılır. Gerçekçi BPM gürültü ve ofset
-seviyelerinde, klasik k-modülasyon ruhundaki $\Delta R^{-1}$ yaklaşımı
-hedef hassasiyete ulaşamamaktadır ($10^3$ μm mertebesi RMS); buna karşılık
-kalibrasyon anına göre **değişimi** takip eden drift modu 6-7 μm RMS
-hassasiyet vermektedir. Bu sonucun yapısal nedeni gösterilir: lineer,
-iki-ölçümlü, ön-yargısız, tam ofset iptali sınıfı içindeki estimator'lar
-yapısal olarak $\|\Delta R^{-1}\|\sim\|R^{-1}\|/\varepsilon$ gürültü
-büyütmesine maruz kalır. Bu sınır ancak problemi yeniden tanımlayarak
-(mutlak hizalama yerine zamana göre değişim) aşılabilir. Çalışma, drift
-modu üzerine kurulu iki katmanlı bir online izleme şeması önerir.
+Proton EDM (pEDM) deneyinin alternating-gradient versiyonunda quad
+hizalama hatalarının sürekli izlenmesi zorunludur: Omarov vd. [Omarov 2021,
+PRD] bu hataların spin koherans zaman ölçeğinde $\sim 10\,\mu\text{m}$
+seviyesinde bilinmesi gerektiğini göstermiştir. Bu çalışmada, kalibrasyon
+referansına dayalı bir **online drift izleme yöntemi** öneriyoruz ve bu
+yöntemin 48-quadrupole'lü pEDM FODO örgüsündeki başarısını sistematik
+simülasyon testleriyle doğruluyoruz. Yöntem, kalibrasyon anındaki BPM
+okumasını referans alarak $\widehat{\delta q}(t) = R^{-1}(\mathbf{y}(t)
+-\mathbf{y}_0)$ ile hizalama driftini tahmin eder; gerçekçi BPM gürültü
+ve ofset seviyelerinde 6-7 μm RMS hassasiyet elde edilir. Bu başarının
+fiziksel temeli olarak, lineer iki-ölçümlü tam-ofset-iptal eden estimator
+sınıfında $\|\Delta R^{-1}\|\sim\|R^{-1}\|/\varepsilon$ yapısal alt
+sınırı türetilir; bu sınır k-modülasyon ruhundaki $\Delta R^{-1}$
+yaklaşımlarının pEDM koşullarında ($\varepsilon\approx 0.02$, BPM gürültüsü
+$\sim 1\,\mu$m) hedef hassasiyete ulaşamayacağını ($10^3\,\mu$m mertebesi)
+açıklar. Açık uç: örgü modeli hatalarının (β beating, tune kayması) drift
+modu performansına etkisi, yöntemin pratikte kullanılabilirliğinin
+belirleyicisidir ve devam eden çalışmalarda ölçülmektedir.
 
 ---
 
@@ -72,17 +72,18 @@ deflektörlerle eşli tasarımdadır. Bu yüzden yerel k-modülasyon yerine
 
 ### 1.4 Çalışmanın katkısı
 
-Yeni bir matematiksel yöntem icadı değil; pEDM koşullarına uygun klasik
-yaklaşımların sistematik bir değerlendirmesi. Spesifik katkılar:
+Bu çalışmanın merkezi katkısı, pEDM için **sürekli online çalışabilen bir
+hizalama drift izleme yöntemi** önermek ve altı sistematik simülasyon
+testiyle bu yöntemin 10 μm hedefine ulaştığını doğrulamaktır. Yöntem iki
+katmanlı bir operasyonel mimari içinde çalışır: yavaş bir mutlak kalibrasyon
+katmanı (LOCO/BBA, saatlik-günlük) ile hızlı bir online drift katmanı.
 
-- Aday tepki-matrisi tabanlı yöntemleri tek bir formalizmde tanımlamak,
-- Her birini aynı simülasyon altyapısı üzerinde aynı hata bütçesiyle
-  nicelemek,
-- BPM ofset iptal koşulu altında belirli bir estimator sınıfı için bir
-  alt-sınır türetmek (§2.4),
-- Bu sınırın mutlak ölçüm problemini drift ölçüm problemine dönüştürerek
-  aşılabildiğini göstermek,
-- Operasyonel olarak uygulanabilir bir iki katmanlı işletme şeması önermek.
+Bu yöntemin neden çalıştığı ve rakip yaklaşımların neden yapısal sınırlara
+takıldığı, aynı simülasyon altyapısı üzerinde nicelenmiştir. Bu karşılaştırma
+ayrı bir katkı olarak sunulmaktadır: lineer iki-ölçümlü tam-ofset-iptal eden
+estimator sınıfı için bir alt sınır türetilmiş (§2.4) ve k-modülasyon ruhlu
+$\Delta R^{-1}$ yaklaşımlarının bu sınır nedeniyle hedef hassasiyete
+ulaşamayacağı sayısal olarak gösterilmiştir.
 
 ---
 
@@ -128,8 +129,16 @@ bilgisini ofsete kurban eder.
 $g_2 = g_1(1+\varepsilon)$, $\varepsilon\approx 0.02$:
 $$\widehat{\Delta q} = \Delta R^{-1}(\mathbf{y}_1 - \mathbf{y}_2),\quad
 \Delta R = R_1 - R_2.$$
-Ofset iptal olur, fakat $\kappa(\Delta R)\approx 27\,000$ — gürültü
-$\sim 1/\varepsilon$ büyür.
+Ofset iptal olur. Kondisyon sayısı için: Courant-Snyder formülünde $R$,
+$(KL)_j$'ye lineer bağlıdır ve $KL\propto g$. Dolayısıyla birinci
+dereceden Taylor açılımı:
+$$\Delta R = R(g_2) - R(g_1) = \varepsilon g_1\frac{\partial R}{\partial g}
++ O(\varepsilon^2) \approx \varepsilon R_1.$$
+Bu ölçeklemeden $\kappa(\Delta R)\approx\kappa(R)/1 = \kappa(R)$ beklenirken,
+$\varepsilon$ sadece büyüklüğü değil tekil değerlerin rölatif ayrışmasını
+da etkiler. Sayısal olarak $\kappa(\Delta R)\approx 27\,000$ iken
+$\kappa(R)\approx 160$ — yaklaşık $1/\varepsilon\approx 50$ oranı,
+$\varepsilon$ taramasıyla Test 2'de doğrulanmaktadır.
 
 #### (iii) $\Delta R^{-1}$ + düzenlileştirme
 Tikhonov: $(\Delta R^\top \Delta R + \lambda I)^{-1}\Delta R^\top$.
@@ -172,26 +181,15 @@ $\|\Delta R^{-1}\|$. $\Delta R \approx \varepsilon R$ ölçeklemesiyle
 yaklaşık $\|R^{-1}\|/\varepsilon$. Bu ölçekleme $\varepsilon\to 0$
 sınırında patlar (§3.2'de SVD spektrumu ile sayısal olarak doğrulanır).
 
-**Sınıfın dışında kalanlar.** Aşağıdaki estimator'lar $\mathcal{C}$'nin
-dışındadır ve bu sınıra uymak zorunda değildir:
-- Ön-yargılı (biased) estimator'lar: Tikhonov, TSVD — bias kabul ederek
-  varyansı azaltır (yöntem (iii); §3.1-3.2'de incelenir).
-- Tam yerine *yaklaşık* ofset iptali isteyen estimator'lar (örn. ofset
-  üzerinde önsel dağılım varsayan Bayesian estimator'lar).
-- Çok-epoch'lu, korelasyonları kullanan estimator'lar (Kalman süzgeçleri,
-  zamansal ortalama).
-- İkiden fazla ölçüm kullanan, lineer olmayan, sparse-prior'lı
-  estimator'lar.
+$\mathcal{C}$ dışında kalan yaklaşımlar (Tikhonov/TSVD, Bayesian,
+Kalman, çok-epoch) bu sınıra uymak zorunda değildir ve farklı
+trade-off'larla çalışır — bunlar §3.1-3.2'de incelenmektedir.
 
-Bu çalışmadaki drift modu (yöntem (iv)) son ikisinin sınırına düşer:
-iki ölçüm aynı zamanda değil iki farklı zamanda alınır, ve estimator
-artık $\Delta q$'yu değil $\Delta q(t) - \Delta q_0$'ı kestirir. Bu,
-$\mathcal{C}$ alt sınırının kapsamı dışındadır.
-
-Teoremin değeri: yöntem (ii)'nin neden yapısal olarak hedeflenen
-hassasiyete ulaşamayacağını, herhangi bir spesifik algoritmik seçimden
-bağımsız olarak gösterir. Aşağıdaki sayısal testlerin (özellikle Test 1
-ve Test 6) sonuçları bu sınırla tutarlıdır.
+Drift modu (yöntem (iv)) da $\mathcal{C}$ dışındadır: iki ölçüm aynı anda
+değil iki farklı zamanda alınır; estimator $\Delta q$'yu değil
+$\delta q(t) = \Delta q(t) - \Delta q_0$'ı kestirir. Ofset zaman farkıyla
+iptal olur ve $\kappa(R)\approx 160$ ile küçük gürültü büyütmesi elde
+edilir. Bu sonuç Test 4 ve Test 6'da sayısal olarak doğrulanmaktadır.
 
 ---
 
@@ -360,25 +358,25 @@ bırakılmıştır.
 
 ## 5. Tartışma ve Sonuçlar
 
-Bu çalışmada pEDM alternating-gradient halkasında quad hizalama hatalarını
-BPM ölçümlerinden 10 μm hassasiyetinde tahmin etmenin koşullarını sistematik
-olarak inceledik. Ana sonuçlar:
+Bu çalışmada, pEDM alternating-gradient halkasında quad hizalama driftini
+sürekli izlemek için kalibrasyon-referans yöntemi önerildi ve bu yöntemin
+gerçekçi BPM hata bütçesi altında (50 μm ofset, 1 μm gürültü, 0.2 mrad
+tilt'ler) 6-7 μm RMS hassasiyetle çalıştığı altı sistematik test ile
+doğrulandı.
 
-1. **Klasik k-modülasyon ruhundaki $\Delta R^{-1}$ yaklaşımı**, R analitik
-   ya da sayısal olarak inşa edilsin, gerçekçi BPM gürültüsü (1 μm RMS)
-   altında 10 μm hedefine ulaşamaz. Bu yapısal bir alt sınırdır
-   (offset–noise duality, §2.4).
+Bu başarı iki katmanlı bir operasyonel mimari üzerine oturmaktadır: yavaş
+bir mutlak kalibrasyon katmanı (LOCO/BBA, fizik-dışı pencereler) referans
+noktasını ve $R$ matrisini sağlar; hızlı drift katmanı fizik run'ı boyunca
+sürekli $\widehat{\delta q}(t) = R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ ile
+çalışır.
 
-2. **Düzenlileştirme** RMS hatayı azaltır ama uzaysal bant genişliğini de
-   azaltır; gürültü problemini bias problemine dönüştürür, sınırı aşmaz.
-
-3. **Drift modu**, mutlak hizalama bilgisini bir kalibrasyon katmanına
-   devrederek matematiksel problemi yeniden tanımlar ve 6-7 μm RMS ile
-   10 μm hedefini geçer.
-
-4. Bu yapıyı uygulanabilir kılan operasyonel mimari, yavaş bir mutlak
-   kalibrasyon katmanıyla hızlı bir drift takip katmanının ayrılmasıdır
-   (§4.1).
+Bu başarının neden mümkün olduğu da gösterilmiştir: lineer iki-ölçümlü
+tam-ofset-iptal eden estimator sınıfı $\mathcal{C}$ için
+$\|\Delta R^{-1}\|\sim\|R^{-1}\|/\varepsilon$ yapısal alt sınırı
+türetilmiştir. k-modülasyon ruhlu $\Delta R^{-1}$ bu sınıfa girmekte ve
+$R$ analitik ya da sayısal inşa edilsin, gerçekçi BPM gürültüsü altında
+hedef hassasiyete ulaşamamaktadır ($10^3\,\mu$m mertebesi). Drift modu
+problemi yeniden tanımlayarak bu sınırın dışına çıkar.
 
 Çalışmanın sınırları ve gelecek işler:
 
@@ -424,20 +422,7 @@ olarak inceledik. Ana sonuçlar:
 ## Ek A: Sayısal simülasyon altyapısı
 
 Tüm sonuçlar Python tabanlı bir simülasyon altyapısında üretildi.
-Hızlandırıcı parametreleri `params.json`, test-spesifik parametreler
-`test_params.json` üzerinden kontrol edildi. Parçacık takibi simplektik
-RK4 entegratörüyle yapıldı (`integrator.py`). Analitik tepki matrisi
-Courant-Snyder formalizmi ile (`fodo_lattice.py`) inşa edildi.
-
-Test betikleri ve çıktı dosyaları:
-
-| Test | Betik | Çıktı |
-|---|---|---|
-| 1 (Düzenlileştirme) | `compare_regularization.py` | `test1_regularization.png` |
-| 2 (Mod transferi, SVD) | `mode_transfer.py` | `test2_mode_transfer.png` |
-| 3 (Ters-suç) | `kxarc_sensitivity.py` | `test3_kxarc_sensitivity.png` |
-| 4 (Drift mode) | `drift_monitor_sim.py` | `test4_drift_monitor.png` |
-| 5 (BPM ofset drifti) | `bpm_offset_drift_sim.py` | `test5_bpm_offset_drift.png` |
-| 6 (Adil karşılaştırma) | `test6_fair_comparison.py` | `test6_fair_comparison.png` |
-
-Pedagojik açıklama: `metot.md`.
+Parçacık takibi dördüncü-mertebe Runge-Kutta (RK4) entegratörüyle
+yapıldı. Analitik tepki matrisi Courant-Snyder formalizmiyle inşa edildi.
+Hızlandırıcı ve test parametreleri ayrı JSON dosyalarında tutulmaktadır.
+Test betikleri ve ham veriler istek üzerine paylaşılmaktadır.
