@@ -1,58 +1,112 @@
-# Metot: Quadrupole Hizalama Drift İzleyicisi
+# Metot: pEDM Halkasında Quad Hizalama Hatalarının BPM Tabanlı Ölçümü
 
 Bu doküman, makalenin 3., 4. ve 5. bölümlerinin pedagojik açıklamasıdır.
-Amaç: konuyu ilk defa duyan birinin de takip edebilmesi. Önce sezgi, sonra
-matematik, sonra simülasyon.
+Amaç: konuyu ilk defa duyan birinin de takip edebilmesi. Önce motivasyon,
+sonra aday yöntemler, sonra sistematik testler, sonra önerilen işletme modu.
+
+**Çalışmanın çerçevesi.** Bu çalışma yeni bir yöntem icadı değildir; pEDM
+halkasının özel koşullarında klasik tepki-matrisi yöntemlerinin **hangi
+sınırlarda 10 μm hizalama hassasiyetine ulaşabildiğini** sistematik olarak
+inceleyen bir mühendislik değerlendirmesidir. Paralel bir çalışmada aynı
+problem yapay sinir ağı yaklaşımıyla da ele alınmaktadır; iki yaklaşımı
+adil biçimde karşılaştırmak için ortak bir referans çerçevesi gereklidir.
+Bu doküman o çerçeveyi kuruyor.
 
 ---
 
-## 1. Önce neyi çözmeye çalıştığımızı netleştirelim
+## 1. Problem motivasyonu
 
-pEDM halkasında 48 adet odaklayıcı (quadrupole) mıknatıs vardır. Bu mıknatıslar
-ideal konumlarından mikronlar mertebesinde kayabilir. Bu kaymalar (misalignment)
-hüzmenin yörüngesini bozar; bozulmuş yörünge BPM (Beam Position Monitor)
-denilen sensörler tarafından ölçülür.
+### 1.1 pEDM'de hizalama neden kritik?
 
-Yani elimizde:
-- **Bilmek istediğimiz:** her quadrupole'un yatay (`dx`) ve dikey (`dy`) kayması.
-  48 quadrupole × 2 düzlem = 96 bilinmeyen.
-- **Ölçtüğümüz:** her BPM'in yatay ve dikey okuması.
+Orijinal proton EDM (pEDM) önerilerinde halka tamamen elektrostatik ve
+**zayıf odaklamalı** idi. Bu tasarımda hassas sistematik olarak ortalama
+manyetik alan ($\langle B\rangle$) hedef alınmıştı. Sonraki nesil tasarımda,
+hüzme dinamiğini iyileştirmek için **manyetik quadrupole'larla alternating
+gradient** (FODO) odaklamasına geçildi. Bu değişiklikle:
 
-İlk gözlem: lineer bir ilişki var. Mıknatıs ε kadar kayarsa, ürettiği saptırma
-da ε ile orantılı. Yani
+- Ortalama manyetik alan hâlâ bir sistematik kaynağıdır, ancak
+- Asıl ölçülmesi gereken sistematik artık **quad hizalama hataları**dır.
+
+Çünkü hizalanmamış bir quad, EDM ölçümünü taklit edebilecek vertikal ortalama
+alan üretir. pEDM'in hedef hassasiyeti, **hizalama hatalarının 10 μm
+seviyesinde bilinmesini** gerektirir.
+
+### 1.2 Problem matematiği
+
+Halkada 48 quadrupole var. Her biri ideal konumundan yatay (`dx`) ve dikey
+(`dy`) ekseninde mikronlar mertebesinde kaymış olabilir. Bu kaymalar hüzmenin
+kapalı yörüngesini bozar; bozulma BPM'lerle ölçülür. Lineer rejimde:
 
 $$ \mathbf{y} = R\,\Delta q + \mathbf{b} + \boldsymbol{\eta}. $$
 
-Burada:
-- $\Delta q$: misalignment vektörü (aradığımız şey).
-- $R$: "yanıt matrisi" — örgünün optiğinden hesaplanır, hangi mıknatıs
-  kayarsa hangi BPM'i ne kadar etkiler söyler.
-- $\mathbf{b}$: BPM elektronik **ofset** — her BPM'in sıfır noktası gerçekten
-  sıfır değil, on mikronlarca kayık olabilir. Bu, sensörün kendi özelliği.
-- $\boldsymbol{\eta}$: ölçüm gürültüsü.
+- $\Delta q$ ∈ ℝ⁴⁸: misalignment vektörü (bilinmeyen).
+- $R$: yanıt matrisi — örgü optiğinden Courant-Snyder formülüyle hesaplanır.
+- $\mathbf{b}$: BPM elektronik ofseti — sensör başına on mikronlar mertebesinde,
+  zaman içinde yavaş değişen.
+- $\boldsymbol{\eta}$: ölçüm gürültüsü — tek-okuma RMS ~1 μm.
 
-Eğer ofset olmasaydı, problem çok basitti: $\widehat{\Delta q} = R^{-1}\mathbf{y}$.
-Ofset yüzünden bu işe yaramaz: hizalama 5 μm seviyesinde iken ofset 50 μm
-ise, $R^{-1}\mathbf{b}$ teriminden gelen yapay sinyal gerçek sinyali boğar.
+Yatay ve dikey düzlemler arasındaki kuplaj ihmal edilebilir olduğu için
+problemi iki bağımsız 48×48 sisteme ayırıyoruz.
 
-**Klasik çözüm — k-modülasyonu.** Quadrupole gradient'ini iki farklı değerde
-çalıştırırsınız: $g_1$ ve $g_2 = g_1(1+\varepsilon)$. Her gradient için ayrı
-bir yanıt matrisi var: $R_1$ ve $R_2$. İki ölçüm:
+### 1.3 Niye konvansiyonel k-modülasyon doğrudan uygulanamıyor?
 
-$$ \mathbf{y}_1 = R_1\Delta q + \mathbf{b} + \boldsymbol{\eta}_1, \quad
-   \mathbf{y}_2 = R_2\Delta q + \mathbf{b} + \boldsymbol{\eta}_2. $$
+Sabit-β depolama halkalarında klasik k-modülasyonu (Lee 2004, vd.) tek bir
+quad'ın gradient'ini titretip o quad'taki hüzmenin tepkisinden hizalama hatasını
+bulur. Bu yöntem şu varsayımlara dayanır:
 
-Çıkarın:
+1. $\beta$ fonksiyonu quad konumunda yerel olarak bilinir ve sabittir.
+2. Modülasyon frekansı tek bir tune'dan iyi ayrılır.
+3. Tek-quad modülasyonu örgünün geri kalanını etkilemez.
 
-$$ \mathbf{y}_1 - \mathbf{y}_2 = (R_1-R_2)\Delta q + (\boldsymbol{\eta}_1-\boldsymbol{\eta}_2). $$
+pEDM örgüsü bu üç varsayımı **birden** zorlar:
+- 48 quad'ın her birinde β farklıdır (FODO ile değişken),
+- Halkayı işletim sırasında onlarca farklı frekansta modüle etmek
+  sistematik temizliğini bozar,
+- Manyetik quad'lar birbirlerine eşli (coupled) tasarımdadır.
 
-Ofset $\mathbf{b}$ gitti! Şimdi $\Delta R = R_1-R_2$ matrisini tersleyebiliriz.
-Bu, literatürdeki standart yöntemdir. Ama bu basit hikâyenin sandığınızdan
-zor bir alt-metni var. O alt-metni bu dokümanın 2. bölümünde anlatacağız.
+Bu yüzden klasik yerel k-modülasyon yerine **küresel tepki matrisi tabanlı
+yaklaşımları** araştırıyoruz. Aşağıda bu yaklaşımların aday formlarını
+listeleyip her birini sistematik olarak ölçüyoruz.
+
+### 1.4 Aday yöntemler
+
+Tepki matrisi formalizmiyle 96 bilinmeyenli sistemi çözmenin akla gelen
+yolları:
+
+| # | Yöntem | Çözdüğü |
+|---|---|---|
+| (i) | Tek-gradient direct: $\widehat{\Delta q} = R^{-1}\mathbf{y}$ | Mutlak hizalama |
+| (ii) | İki-gradient $\Delta R$: $\widehat{\Delta q} = \Delta R^{-1}(\mathbf{y}_1-\mathbf{y}_2)$ | Mutlak hizalama (k-mod ruhu) |
+| (iii) | $\Delta R$ + düzenlileştirme (Tikhonov, TSVD) | Mutlak, gürültü dengeli |
+| (iv) | Drift modu: $\widehat{\delta q}(t) = R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ | Kalibrasyondan beri **değişim** |
+| (v) | Yapay sinir ağı (paralel çalışma) | Mutlak/drift |
+
+Her yöntem farklı bir hata kaynağına (BPM ofseti, gürültü, model uyumsuzluğu,
+tilt'ler) karşı farklı davranıyor. Geri kalan bölümler bu davranışı niceliyor.
+
+### 1.5 Bir özet beklentisi
+
+Aşağıdaki bölümlerin sonunda göstereceğimiz tablo şu olacak:
+
+| Yöntem | Mutlak hassasiyet | Drift hassasiyeti | Online uygulanabilir? |
+|---|---|---|---|
+| (i) Direct $R^{-1}$ | Ofset baskın → 100+ μm | — | Evet |
+| (ii) $\Delta R^{-1}$ direkt | ~6 μm (gürültüsüz) / ~1900 μm (gürültülü) | ~1000 μm | Hayır (fizik bozar) |
+| (iii) Düzenlileştirme | ~50 μm (bias) | ~50 μm | Kısmen |
+| (iv) Drift modu | Uygulanamaz | **~6 μm** | **Evet** |
+
+10 μm hedefine ulaşan tek pratik klasik yol drift modu görünüyor. Bu
+çalışmanın esas katkısı, bu sonucu **sistematik olarak göstermek** ve
+neden böyle olduğunu yapısal nedenlerle açıklamak.
 
 ---
 
-## 2. Ofset–gürültü ikilemi (makalenin §3'ü)
+## 2. Yöntemleri sınırlayan yapısal kısıt: ofset–gürültü ikilemi
+
+Bu bölümün amacı, yukarıdaki aday yöntemlerin (ii) ve (iii) seçeneklerinin
+neden **belli bir taban hata seviyesinin altına inemediğini** matematiksel
+olarak göstermek. Bu sınır, herhangi bir spesifik algoritmaya değil,
+problemin yapısına özgü.
 
 ### 2.1 Sezgi: niye $\Delta R$'yi terslemek tehlikeli?
 
@@ -110,7 +164,16 @@ filtreliyorsunuz; ama o yüksek frekanslarda gerçek detay da kayboluyor. Sonuç
 Yani düzenlileştirme **gürültü problemini bir uzaysal bant-genişliği problemine
 dönüştürür.** Bunu §3'te (Test 2) deneyle göstereceğiz.
 
-### 2.4 Üçüncü yol: ofseti farkla yok etmek (drift modu)
+### 2.4 İkilemden kaçış: soruyu değiştirmek
+
+Yukarıdaki imkânsızlık sonucu bir varsayıma dayanıyor: estimator iki
+ölçümünü **aynı zamanda farklı gradient'lerden** alıyor. Bu varsayım
+mutlak hizalama tahmini için kaçınılmaz.
+
+Ama pratikte sistematik kontrolü için **mutlak** hizalamayı bilmek
+zorunda mıyız? pEDM'in sistematik bütçesinde önemli olan, kalibrasyon
+anından bu yana hizalamanın **ne kadar değiştiği** — bu da çok daha kolay
+bir soru.
 
 Eğer iki ölçümü iki **gradient**te değil, iki **zaman**da alırsak, ofset zaten
 sabittir ve çıkarınca gider:
@@ -122,11 +185,16 @@ Sonra **iyi-koşullu** $R^{-1}$ tersini kullanabilirim:
 
 $$ \widehat{\delta q}(t) = R^{-1}\bigl(\mathbf{y}(t)-\mathbf{y}_0\bigr). $$
 
-Bu, ofset–gürültü ikilemini "**hep birden çözmek yerine, sorunu yeniden
-tanımlayarak**" çözüyor: mutlak hizalama bilgisi yerine, kalibrasyon
-anından **fark**ı izliyoruz. Ofset gradient farkıyla değil, **zaman farkıyla**
-iptal oluyor. Bu, makalenin can damarıdır ve §4'te (Test 4) somut olarak
-gösterilir.
+Ofset gradient farkıyla değil, **zaman farkıyla** iptal oluyor. Bu kavramsal
+olarak yeni bir matematiksel formülasyon değil; literatürdeki orbit-bumps
+ve slow-drift correction tekniklerinin bir uygulaması. Yenilik iddiası bunda
+değil. Bu çalışmanın katkısı: pEDM koşullarında bu modun (ii) ve (iii)
+seçeneklerine kıyasla **niceliksel üstünlüğünü göstermek** ve mutlak
+mod ile drift modu arasındaki seçimi sistematik bir karara dönüştürmek.
+
+Bedeli: mutlak hizalama bilgisinin kaybı. Onu ayrı bir yavaş kalibrasyon
+katmanı (LOCO, BBA, survey) verecek; drift modu bu katmanın üstünde sürekli
+çalışır. Bu iki katmanlı yapı §4'te ayrıntılı.
 
 ---
 
@@ -289,7 +357,59 @@ gerçekçi değil.
 **Ders.** Hızlı, hassas izleme için A; uzun vadeli kontrolde B. İkisi
 **tamamlayıcı**, rakip değil.
 
-### 3.6 Beş testin özeti
+### 3.6 Test 6 — Üç yöntemin adil yan yana karşılaştırması
+
+**Sorulan soru.** Test 4'te drift modu çalıştı, Test 1'de $\Delta R^{-1}$
+çuvalladı. Ama bunlar farklı senaryolardı. Tam aynı koşulda, aynı veri,
+aynı hata kaynakları altında yan yana koysak ne çıkar?
+
+**Üç estimator.**
+- A: Analitik $\Delta R^{-1}$, her epoch için mutlak rekonstrüksiyon, sonra
+  epoch farkı → kavramsal olarak "v2.7 yaklaşımının analitik karşılığı".
+- B: Analitik R, tek-gradient drift modu (önerilen).
+- C: Sayısal $\Delta R^{-1}$ (48 finite-difference simülasyondan inşa),
+  per-epoch mutlak, sonra epoch farkı → "v2.7 yaklaşımının orijinali".
+
+**Senaryo.** Tüm estimatörlere aynı veri sunulur:
+- Statik hizalama hataları: params.json'dan (~58 μm RMS)
+- Drift: ~10 μm RMS rastgele
+- BPM ofset: 50 μm RMS sabit
+- BPM gürültü: 1 μm RMS bağımsız
+- Quad ve dipol tilt'i: 0.2 mrad max (modelde **yok** — model uyumsuzluğu)
+
+**Sonuç.**
+
+| Estimator | y-RMS | y-corr | x-RMS | x-corr |
+|---|---|---|---|---|
+| A: Analitik $\Delta R$ | **3282 μm** | -0.02 | **3756 μm** | 0.09 |
+| B: Drift modu | **6.25 μm** | 0.85 | **7.18 μm** | 0.85 |
+| C: Sayısal $\Delta R$ | **980 μm** | -0.02 | **1357 μm** | -0.11 |
+
+**Önemli sayılar.**
+- $\kappa(\Delta R_{\text{analitik}}) \approx 27\,000$
+- $\kappa(\Delta R_{\text{sayısal}}) \approx 27\,000$
+- $\|R_{\text{an}}-R_{\text{num}}\|/\|R_{\text{num}}\|$: %2.2 (y), %6.9 (x)
+- $\kappa(R) \approx 160$
+
+**Yorum.**
+1. **Sayısal R, $\Delta R$ tabanlı yöntemi kurtarmıyor.** Modeli tamamen
+   simülatörden inşa etsek bile $\kappa(\Delta R)$ değişmiyor; gürültü
+   büyütmesi yapısal.
+2. **v2.7'nin 6 μm sonucu farklı bir soruydu.** Orada **tek-epoch mutlak**
+   rekonstrüksiyon ölçülmüştü ve gürültü ya yoktu ya da ihmal edilebilirdi.
+   Drift tahmini için ($\delta q$, kalibrasyona göre değişim) iki epoch
+   farkı gerekir, $\kappa(\Delta R)$ iki kez devreye girer.
+3. **Drift modu mütevazı model uyumsuzluğunu (%2-7) tolere ediyor.** 6-7 μm
+   sonucu BPM gürültüsünden geliyor, $\sqrt{2}\sigma_n\|R^{-1}\|$ ile
+   tutarlı.
+
+Bu test, §2'de ispatlanan ofset-gürültü ikilemini somutlaştırıyor: aynı
+problem, aynı hata kaynakları, üç farklı estimator, üç farklı sonuç.
+Klasik $\Delta R^{-1}$ yaklaşımının numerik ya da analitik versiyonu,
+realistik gürültü altında 10 μm hedefine yaklaşamıyor; drift modu
+yaklaşıyor.
+
+### 3.7 Altı testin özeti
 
 | Test | Soru | Ana sayı |
 |---|---|---|
@@ -298,6 +418,7 @@ gerçekçi değil.
 | 3 | Yatay modelde ters-suç var mı? | $\pm 10\%$ → <0.5 μm değişim |
 | 4 | Drift modu büyük ofseti tolere eder mi? | Mutlak 180 μm → Drift 6 μm |
 | 5 | BPM ofseti kayarsa? | A: <2 μm/epoch'a kadar üstün |
+| 6 | Aday yöntemler aynı senaryoda nasıl? | $\Delta R$: 1000-3700 μm, Drift: 6-7 μm |
 
 ---
 
@@ -455,6 +576,7 @@ mikroskobu" gibi davranır: her modu tek tek incelemenize izin verir.
 | 3 | `kxarc_sensitivity.py` | `test3_kxarc_sensitivity.png` |
 | 4 | `drift_monitor_sim.py` | `test4_drift_monitor.png` |
 | 5 | `bpm_offset_drift_sim.py` | `test5_bpm_offset_drift.png` |
+| 6 | `test6_fair_comparison.py` | `test6_fair_comparison.png` |
 
 Tüm hızlandırıcı parametreleri `params.json`, tüm test parametreleri
 `test_params.json` üzerinden kontrol edilir.
