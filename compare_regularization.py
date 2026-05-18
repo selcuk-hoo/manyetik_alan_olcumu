@@ -35,6 +35,13 @@ from fodo_lattice import (
 )
 from reconstruct import generate_misalignments, run_simulation, EPS, T_END
 
+with open("test_params.json", "r") as _f:
+    _tp = json.load(_f)
+_t1 = _tp["test1"]
+LAM_LOG_MIN = float(_t1["lambda_grid_log_min"])
+LAM_LOG_MAX = float(_t1["lambda_grid_log_max"])
+LAM_GRID_N  = int(_t1["lambda_grid_n"])
+
 
 # =============================================================================
 # Estimator'lar
@@ -143,7 +150,7 @@ def analyze_plane(plane, dq_true, y1, y2, config, axL, axS):
     results.append(("Ham ΔR⁻¹",         dq_raw))
 
     # 5. Tikhonov ΔR — L-curve
-    lam_grid = np.logspace(-12, 2, 200)
+    lam_grid = np.logspace(LAM_LOG_MIN, LAM_LOG_MAX, LAM_GRID_N)
     lam_opt, i_opt, rho, eta = lcurve_optimal_lambda(dR, dy, lam_grid)
     dq_tik = tikhonov(dR, dy, lam_opt)
     results.append((f"Tikhonov ΔR (λ={lam_opt:.2e})", dq_tik))
@@ -198,6 +205,8 @@ def main():
     print("=" * 72)
     print("compare_regularization.py — Test 1")
     print("=" * 72)
+    print(f"EPS={EPS:.4f}  T_END={T_END:.2e}  λ-grid=[10^{LAM_LOG_MIN:.0f}..10^{LAM_LOG_MAX:.0f}, "
+          f"n={LAM_GRID_N}]  (test_params.json)")
 
     # Misalignments ve simülasyonlar (reconstruct.py ile aynı)
     dy_q, dx_q, dt_q, dip_t = generate_misalignments(config)

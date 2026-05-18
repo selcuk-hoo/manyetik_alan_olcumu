@@ -40,17 +40,24 @@ from fodo_lattice import (
     compute_twiss_at_quads, signed_KL, build_response_matrix,
     calibrate_K_x_arc, direct_invert,
 )
+from reconstruct import EPS
 
-EPS         = 0.02
-DQ0_RMS     = 100e-6   # başlangıç misalignment
-DRIFT_RAMP  = 10e-6    # toplam misalignment drift
-BPM_OFFSET  = 50e-6    # başlangıç BPM ofset RMS
-BPM_NOISE   = 1e-6     # her okumadaki BPM gürültüsü
-N_EPOCHS    = 60       # gözlem süresi
-AVG_WINDOW  = 30       # B estimator'ında ortalama penceresi
+with open("params.json", "r") as _f:
+    _cfg = json.load(_f)
+with open("test_params.json", "r") as _f:
+    _tp = json.load(_f)
+_t5 = _tp["test5"]
 
-# BPM ofset drift hızı taraması [μm/epoch RMS]
-DRIFT_RATES = np.array([0.0, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]) * 1e-6
+# Başlangıç misalignment — params.json'dan
+DQ0_RMS    = 0.5 * (float(_cfg["quad_random_dy_max"]) + float(_cfg["quad_random_dx_max"]))
+BPM_OFFSET = float(_t5["BPM_OFFSET"])
+BPM_NOISE  = float(_t5["BPM_NOISE"])
+DRIFT_RAMP = float(_t5["DRIFT_RAMP"])
+N_EPOCHS   = int(_t5["N_EPOCHS"])
+AVG_WINDOW = int(_t5["AVG_WINDOW"])
+
+# BPM ofset drift hızı taraması [μm/epoch RMS → m/epoch]
+DRIFT_RATES = np.array(_t5["DRIFT_RATES_um_per_epoch"]) * 1e-6
 
 
 def build_R(config, g, plane, K_x_arc=None):
@@ -135,9 +142,12 @@ def main():
     print("=" * 72)
     print("bpm_offset_drift_sim.py — Test 5")
     print("=" * 72)
-    print(f"Pencere: {N_EPOCHS} epoch, ortalama penceresi: {AVG_WINDOW} epoch")
-    print(f"BPM gürültüsü: {BPM_NOISE*1e6:.1f} μm/epoch")
-    print(f"Misalignment drift toplam: {DRIFT_RAMP*1e6:.0f} μm")
+    print(f"DQ0_RMS = {DQ0_RMS*1e6:.0f} μm  (params.json)")
+    print(f"EPS={EPS:.4f}  N_EPOCHS={N_EPOCHS}  AVG_WINDOW={AVG_WINDOW}  "
+          f"(test_params.json)")
+    print(f"BPM_OFFSET={BPM_OFFSET*1e6:.0f} μm  BPM_NOISE={BPM_NOISE*1e6:.1f} μm  "
+          f"DRIFT_RAMP={DRIFT_RAMP*1e6:.0f} μm  (test_params.json)")
+    print(f"DRIFT_RATES [μm/epoch]: {list(DRIFT_RATES*1e6)}  (test_params.json)")
 
     rng = np.random.default_rng(2027)
 

@@ -27,6 +27,13 @@ from fodo_lattice import (
 )
 from reconstruct import generate_misalignments, run_simulation, EPS
 
+with open("test_params.json", "r") as _f:
+    _tp = json.load(_f)
+_t3 = _tp["test3"]
+DELTA_MIN = float(_t3["delta_min"])
+DELTA_MAX = float(_t3["delta_max"])
+DELTA_N   = int(_t3["delta_n"])
+
 
 def build_R(config, g, plane, K_x_arc=None):
     cfg = dict(config); cfg['g1'] = g
@@ -60,7 +67,9 @@ def main():
     print(f"\nK_x_arc (true, kalibre edilmiş) = {K_x_true:.6e} m⁻²")
 
     # 3. δ taraması
-    deltas = np.linspace(-0.10, +0.10, 21)
+    print(f"\nδ aralığı: [{DELTA_MIN*100:.1f}%, {DELTA_MAX*100:.1f}%], "
+          f"n={DELTA_N}  (test_params.json)")
+    deltas = np.linspace(DELTA_MIN, DELTA_MAX, DELTA_N)
     rms_x_v1   = []; rms_x_v2   = []; rms_x_avg  = []
     rms_y_v1   = []; rms_y_v2   = []; rms_y_avg  = []
 

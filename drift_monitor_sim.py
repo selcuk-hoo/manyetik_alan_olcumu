@@ -32,12 +32,18 @@ from fodo_lattice import (
     calibrate_K_x_arc, direct_invert,
 )
 
-# Senaryo parametreleri
-DQ0_RMS    = 100e-6   # başlangıç misalignment RMS [m]
-BPM_OFFSET = 50e-6    # BPM ofset RMS [m] — DRIFT YOK, sabit
-BPM_NOISE  = 1e-6     # BPM ölçüm gürültüsü RMS [m]
-DRIFT_RAMP = 10e-6    # toplam misalignment drift RMS [m]
-N_EPOCHS   = 10       # kalibrasyondan sonra kaç epoch izlenecek
+with open("params.json", "r") as _f:
+    _cfg = json.load(_f)
+with open("test_params.json", "r") as _f:
+    _tp = json.load(_f)
+_t4 = _tp["test4"]
+
+# Başlangıç misalignment büyüklüğü — params.json'dan (y ve x ortalaması)
+DQ0_RMS    = 0.5 * (float(_cfg["quad_random_dy_max"]) + float(_cfg["quad_random_dx_max"]))
+BPM_OFFSET = float(_t4["BPM_OFFSET"])
+BPM_NOISE  = float(_t4["BPM_NOISE"])
+DRIFT_RAMP = float(_t4["DRIFT_RAMP"])
+N_EPOCHS   = int(_t4["N_EPOCHS"])
 
 
 def build_R(config, g, plane, K_x_arc=None):
@@ -140,10 +146,9 @@ def main():
     print("=" * 72)
     print("drift_monitor_sim.py — Test 4")
     print("=" * 72)
-    print(f"Senaryo: {N_EPOCHS} epoch boyunca {DRIFT_RAMP*1e6:.0f} μm toplam "
-          f"drift ramp")
-    print(f"BPM ofset: {BPM_OFFSET*1e6:.0f} μm RMS (sabit)")
-    print(f"BPM gürültüsü: {BPM_NOISE*1e6:.1f} μm RMS (her epoch)")
+    print(f"DQ0_RMS    = {DQ0_RMS*1e6:.0f} μm  (params.json quad_random_dy/dx_max ortalaması)")
+    print(f"BPM_OFFSET = {BPM_OFFSET*1e6:.0f} μm  BPM_NOISE = {BPM_NOISE*1e6:.1f} μm  "
+          f"DRIFT_RAMP = {DRIFT_RAMP*1e6:.0f} μm  N_EPOCHS = {N_EPOCHS}  (test_params.json)")
 
     rng = np.random.default_rng(2026)
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))

@@ -35,10 +35,11 @@ from fodo_lattice import (
     direct_invert,
 )
 
-# Gradient pertürbasyon oranı
-EPS = 0.02
-# Simülasyon süresi (50 tur ≈ 2.3e-4 s)
-T_END = 1.5e-4
+# Gradient pertürbasyon oranı ve simülasyon süresi — test_params.json'dan okunur
+with open("test_params.json", "r") as _f:
+    _tp = json.load(_f)
+EPS   = float(_tp["EPS"])
+T_END = float(_tp["T_END"])
 
 
 # =============================================================================
@@ -230,8 +231,9 @@ def main():
     print("reconstruct.py — iki-gradient quad hizalama rekonstrüksiyonu")
     print("=" * 64)
     print(f"g_nom = {config['g1']:.6f} T/m")
+    print(f"EPS   = {EPS:.4f}  (test_params.json)")
     print(f"g_pert = {config['g1']*(1+EPS):.6f} T/m   (Δg/g = {EPS:+.1%})")
-    print(f"Simülasyon süresi: {T_END*1e3:.2f} ms (~{T_END/2.0e-7:.0f} tur)")
+    print(f"Simülasyon süresi: {T_END*1e3:.2f} ms (~{T_END/2.0e-7:.0f} tur)  (test_params.json)")
 
     # 1. Hata vektörlerini üret (run_simulation.py ile aynı)
     dy, dx, dt_quad, dip_t = generate_misalignments(config)

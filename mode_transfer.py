@@ -30,13 +30,17 @@ from fodo_lattice import (
     calibrate_K_x_arc, direct_invert,
 )
 from compare_regularization import tikhonov, tsvd
+from reconstruct import EPS
 
-EPS = 0.02
-AMPLITUDE = 100e-6   # 100 μm
-TIKHONOV_LAMBDA = {'y': 3.57e-2, 'x': 4.94e-2}   # Test 1 L-curve optimumları
-TSVD_K = {'y': 3, 'x': 5}                          # Test 1 oracle optimumları
-BPM_NOISE = 1e-6   # 1 μm RMS BPM gürültüsü (gürültülü senaryo için)
-N_REALIZATIONS = 40   # gürültü ortalamasını yumuşatmak için tekrarlar
+with open("test_params.json", "r") as _f:
+    _tp = json.load(_f)
+_t2 = _tp["test2"]
+BPM_NOISE      = float(_t2["BPM_NOISE"])
+N_REALIZATIONS = int(_t2["N_REALIZATIONS"])
+TIKHONOV_LAMBDA = {k: float(v) for k, v in _t2["TIKHONOV_LAMBDA"].items()}
+TSVD_K          = {k: int(v)   for k, v in _t2["TSVD_K"].items()}
+# Sinüsoidal enjeksiyon amplitüdü düzleme göre params.json'dan alınır
+# (transfer_function() içinde config üzerinden)
 
 
 def build_R(config, g, plane, K_x_arc=None):
@@ -50,7 +54,11 @@ def transfer_function(plane, config, k_range, noise_rms=0.0, n_real=1):
     """Her k için her estimator'ın transfer ratio'sunu hesapla.
     noise_rms > 0 ise BPM okumalarına Gaussian gürültü eklenir; n_real
     realization ortalaması alınır.
+    Amplitüd params.json'dan: y düzlemi → quad_random_dy_max, x → quad_random_dx_max.
     """
+    amplitude_key = 'quad_random_dy_max' if plane == 'y' else 'quad_random_dx_max'
+    amplitude = float(config[amplitude_key])
+
     K_x_arc = calibrate_K_x_arc(config) if plane == 'x' else None
     g_nom = config['g1']; g_pert = g_nom * (1 + EPS)
     R1 = build_R(config, g_nom,  plane, K_x_arc)
@@ -74,7 +82,7 @@ def transfer_function(plane, config, k_range, noise_rms=0.0, n_real=1):
         # (diğer fazda mod kimliksel olarak sıfır olabilir)
         phases = [0.0] if (k == 0 or 2 * k == N) else [0.0, np.pi / 2]
         for phase in phases:
-            dq_true = AMPLITUDE * np.cos(2 * np.pi * k * j / N + phase)
+            dq_true = amplitude * np.cos(2 * np.pi * k * j / N + phase)
             if np.dot(dq_true, dq_true) < (AMPLITUDE * 1e-3) ** 2:
                 continue  # güvenlik
             y1_clean = R1 @ dq_true
@@ -117,9 +125,12 @@ def main():
     print("=" * 64)
     print("mode_transfer.py — Test 2 (signature figure)")
     print("=" * 64)
-    print(f"Mod amplitüdü: {AMPLITUDE*1e6:.0f} μm")
-    print(f"Tikhonov λ (Test 1 L-curve): {TIKHONOV_LAMBDA}")
-    print(f"TSVD k (Test 1 oracle):      {TSVD_K}")
+    print(f"Amplitüd y: {config['quad_random_dy_max']*1e6:.0f} μm  "
+          f"x: {config['quad_random_dx_max']*1e6:.0f} μm  (params.json)")
+    print(f"BPM_NOISE: {BPM_NOISE*1e6:.1f} μm  N_REALIZATIONS: {N_REALIZATIONS}  "
+          f"(test_params.json)")
+    print(f"Tikhonov λ: {TIKHONOV_LAMBDA}  (test_params.json)")
+    print(f"TSVD k:     {TSVD_K}  (test_params.json)")
 
     N = 48
     k_range = np.arange(0, N // 2 + 1)
@@ -127,9 +138,8 @@ def main():
     fig, axes = plt.subplots(2, 2, figsize=(12, 9), sharey='row')
 
     scenarios = [
-        ("Noiseless (analytic)",            0.0,       1),
-        (f"BPM noise σ={BPM_NOISE*1e6:.0f}μm, {N_REALIZATIONS} realizations",
-         BPM_NOISE, N_REALIZATIONS),
+        ("Noiseless (analytic)",  0.0,       1),
+        (f"BPM noise σ={BPM_NOISE*1e6:.0f}μm, {N_REALIZATIONS} real.", BPM_NOISE, N_REALIZATIONS),
     ]
 
     for row, (label, noise, nr) in enumerate(scenarios):
