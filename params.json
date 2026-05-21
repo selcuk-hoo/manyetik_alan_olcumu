@@ -52,5 +52,9 @@
     "bpm_offset_seed": 55,
 
     "kmod_single_quad_index": -1,
-    "kmod_single_quad_eps": 0.10
+    "kmod_single_quad_eps": 0.10,
+
+    "g2": 0.21,
+    "kmod_quad1_index": 0,
+    "kmod_quad2_index": 12
 }
