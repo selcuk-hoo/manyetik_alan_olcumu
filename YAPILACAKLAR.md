@@ -183,6 +183,77 @@ Beklenen minimum: j₂ ≈ 12 (90°) ve j₂ ≈ 36 (270°) civarında.
 
 ---
 
+## Yeni README.md için format notu
+
+Eski `README.md` silindi (refactor-era dosyalara referans verdiği için
+bayatlamıştı). İki-quad çalışması olgunlaştıktan sonra yeni bir README
+yazılacak; **aşağıdaki format ve konvansiyonlara birebir uy:**
+
+### Genel ton
+- Türkçe, mühendislik/ders kitabı tarzı: önce fizik motivasyonu, sonra
+  matematiksel temel, sonra kod yapısı, sonra çalıştırma talimatı.
+- "Neden bu simülasyon?" tarzı sorularla bölüm açılır; cevap teknik
+  ve net olur (pazarlama dili yok).
+
+### Yapı
+1. **Başlık + tek paragraflık tanıtım** + "Yazar: Selcuk H."
+2. **İçindekiler** — numaralandırılmış başlıklar, markdown anchor link'li.
+3. **Numaralı bölümler** (tipik: 12 civarı):
+   1. Fiziksel Arkaplan (sihirli momentum, EDM motivasyonu)
+   2. Halka Geometrisi (FODO örgüsü, tune)
+   3. Koordinat Sistemi (global ↔ yerel)
+   4. C++ Entegratör: `integrator.cpp`
+   5. Python Köprüsü: `integrator.py`
+   6. Simülasyon Orkestrasyonu: `run_simulation.py`
+   7-9. Analiz betikleri (her birine bölüm)
+   10. Özel fizik konuları (örn. quad tilt, x-y kuplajı)
+   11. Parametreler: `params.json` (tam tablo)
+   12. Kurulum ve Çalıştırma (komutlar, tipik iş akışı)
+
+### Biçimsel konvansiyonlar
+- **Matematik:** LaTeX. Displayed: `$$...$$`, inline: `$...$`. Örnek:
+  `$p_{\text{magic}} = m_p c / \sqrt{G_p} \approx 0.7007\ \text{GeV/c}$`
+- **Kod blokları:** dil etiketli — ` ```python `, ` ```bash `, ` ```cpp `,
+  ` ```json `.
+- **Tablolar:** pipe tablosu. Parametre tabloları üç sütun:
+  `| Parametre | Açıklama | Varsayılan |`. Sonuç tabloları:
+  `| Yöntem | RMS hata | Korelasyon |` benzeri.
+- **Uyarılar:** `> **Not:** ...` blok-alıntısı, ince ama önemli detaylar
+  için.
+- **Sayısal sonuçlar:** "Tipik sonuçlar" başlığı altında tablo; gerçek
+  koşumdan alınmış değerler, mertebeleriyle birlikte.
+
+### Tutulması beklenen bölümler (iki-quad versiyonunda da geçerli)
+- **Sihirli Momentum** alt-başlığı (Bölüm 1)
+- **FODO örgüsü diyagramı** (ASCII): `QF → DRIFT → ARC → ... → QD → ...`
+- **GL4 simplektik entegratör** vurgusu (RK4 değil GL4 — bu noktayı
+  ChatGPT incelemesi açıkça düzeltmiş, makale ve README'de tutarlı kal)
+- **K_x_arc kalibrasyonu** (yatay arc'ın analitik olmaması, bisection
+  ile referans tune'a kalibre edilmesi)
+- **Parametre tablosu** dört alt-bölümde: Geometri ve Fizik / Simülasyon
+  Kontrolü / Hata Modeli / BPM Hata Modeli
+- **Kurulum:** Linux ve macOS için ayrı `g++` / `clang++` komutu
+- **Tipik İş Akışı:** numaralı adımlar (Adım 1, 2, ...) her birinin
+  altında konkret komut ve beklenen çıktı dosyası
+
+### İki-quad çalışmasında EKLENECEK bölüm
+- **k-modülasyon stratejisi** başlığı altında:
+  - Uniform k-mod (v2.5)
+  - Tek-quad k-mod (v2.7, neden çatlıyor — faz düğümleri)
+  - İki-quad k-mod (yeni — neden çalışıyor, j₁/j₂ seçim kriteri)
+- **`build_response_matrix.py`** ve **`test_kmod_reconstruction.py`**
+  için ayrı bölümler (Bölüm 7-8 civarı), Aşama A/B/C/D mantığına benzer
+  alt-yapı kurulabilir.
+- **Kondisyon sayısı tablosu** — uniform/tek-quad/iki-quad karşılaştırması.
+
+### Tutulmayacak (eski README'den miras kalmasın)
+- `fodo_lattice.py`, `spectral_inversion.py`, `plot_results.py`
+  bölümleri — bu dosyalar silindi.
+- "Aşama A/B/C/D" terminolojisi spectral_inversion'a özeldi; yeni
+  yapıda benzer ama farklı isimlendirme kullanılabilir.
+
+---
+
 ## Ertelendi (iki-quad sonrası)
 
 Aşağıdaki testler bu klasördeki refactor sonrası altyapıyla (analitik R)
