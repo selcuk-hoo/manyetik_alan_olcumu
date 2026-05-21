@@ -252,23 +252,37 @@ def main():
     n_q     = 2 * int(config.get("nFODO", 24))
     delta_q = 1e-4
 
-    # Once params.json'dan oku, sonra CLI varsa override et.
+    # Geriye uyumluluk: kmod_single_quad_* anahtarlari alias olarak okunur.
     single_quad = args.single_quad if args.single_quad is not None \
                   else config.get("kmod_single_quad_index", -1)
     single_eps  = args.single_quad_eps if args.single_quad_eps is not None \
                   else config.get("kmod_single_quad_eps", 0.10)
 
-    if single_quad is not None and 0 <= single_quad < n_q:
-        # Tek-quad modunda baz = g0; tum quadlar g0, sadece secilen quad g0*(1+eps)
-        g1_nom  = config.get("g0", config.get("g1", 0.21))
-        eps     = single_eps
-        g1_pert = g1_nom  # uniform pert YOK
+    g0 = config.get("g0", config.get("g1", 0.21))
+    g1 = config.get("g1", g0)
+    g2 = config.get("g2", g0)
+    j1 = config.get("kmod_quad1_index", single_quad)
+    j2 = config.get("kmod_quad2_index", -1)
+
+    if 0 <= j1 < n_q and 0 <= j2 < n_q:
+        # Iki-quad mod: j1 -> g1, j2 -> g2, diger 46 quad -> g0
+        g1_nom  = g0
+        g1_pert = g0
         quad_dG_pert = np.zeros(n_q)
-        quad_dG_pert[single_quad] = eps
-        mode_label = f"single_q={single_quad}, baz=g0={g1_nom}, eps={eps*100:.0f}%"
+        quad_dG_pert[j1] = (g1 - g0) / g0
+        quad_dG_pert[j2] = (g2 - g0) / g0
+        mode_label = f"two-quad j1={j1}(g1={g1}), j2={j2}(g2={g2}), baz g0={g0}"
+    elif 0 <= j1 < n_q:
+        # Tek-quad mod
+        g1_nom  = g0
+        g1_pert = g0
+        eps_j1  = (g1 - g0) / g0 if g1 != g0 else single_eps
+        quad_dG_pert = np.zeros(n_q)
+        quad_dG_pert[j1] = eps_j1
+        mode_label = f"single_q={j1}, baz=g0={g0}, eps={eps_j1*100:.1f}%"
     else:
-        # Uniform modda eski davranis: baz = g1, tum quadlar pert'te g1*1.02
-        g1_nom  = config.get("g1", 0.21)
+        # Uniform mod: tum quadlar g1*1.02
+        g1_nom  = g1
         eps     = 0.02
         g1_pert = g1_nom * (1.0 + eps)
         quad_dG_pert = None
@@ -301,7 +315,7 @@ def main():
     print()
     print("=" * 60)
     if quad_dG_pert is not None:
-        print(f"Konfigurasyon 2: tek-quad pert ({mode_label})")
+        print(f"Konfigurasyon 2: k-mod pert ({mode_label})")
     else:
         print(f"Konfigurasyon 2: uniform pert  (g1={g1_pert:.4f}, +{eps*100:.0f}%)")
     print("=" * 60)
