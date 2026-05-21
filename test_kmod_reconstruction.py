@@ -43,6 +43,16 @@ def print_results(label, gercek, geri):
     print(f"  {label:30s}  hata RMS={np.std(hata)*1e6:7.2f} um   korelasyon={corr:.6f}")
 
 
+def tsvd_solve(A, b, tau_rel):
+    """Truncated SVD: σ_i < tau_rel * σ_max olan modlar kesilir.
+    Geriye çözüm + tutulan mod sayısı dönülür."""
+    U, s, Vt = np.linalg.svd(A, full_matrices=False)
+    keep = s > tau_rel * s[0]
+    s_inv = np.where(keep, 1.0 / s, 0.0)
+    x = Vt.T @ (s_inv * (U.T @ b))
+    return x, int(keep.sum()), s
+
+
 def main():
     os.chdir(BASE)
 
@@ -168,10 +178,23 @@ def main():
     print("Geri catim sonuclari")
     print("=" * 60)
 
-    dy_geri = np.linalg.solve(dR_dy, delta_y)
-    dx_geri = np.linalg.solve(dR_dx, delta_x)
-    print_results("\n  dy", dy_gercek, dy_geri)
-    print_results(  "  dx", dx_gercek, dx_geri)
+    # Direkt çözüm (referans, kötü koşullanmışta patlar)
+    dy_direct = np.linalg.solve(dR_dy, delta_y)
+    dx_direct = np.linalg.solve(dR_dx, delta_x)
+    print("\nDirekt çözüm (np.linalg.solve):")
+    print_results("  dy", dy_gercek, dy_direct)
+    print_results("  dx", dx_gercek, dx_direct)
+
+    # TSVD: eşik = residual/sinyal oranı (otomatik)
+    tau_y = np.std(delta_y - quad_signal_y) / np.std(quad_signal_y)
+    tau_x = np.std(delta_x - quad_signal_x) / np.std(quad_signal_x)
+    dy_geri, ny, sy = tsvd_solve(dR_dy, delta_y, tau_y)
+    dx_geri, nx, sx = tsvd_solve(dR_dx, delta_x, tau_x)
+    print(f"\nTSVD çözüm (otomatik eşik = residual/sinyal):")
+    print(f"  dy: tau={tau_y:.2e}, tutulan mod={ny}/{n_q}, σ_max/σ_min(kalan)={sy[0]/sy[ny-1]:.2e}")
+    print(f"  dx: tau={tau_x:.2e}, tutulan mod={nx}/{n_q}, σ_max/σ_min(kalan)={sx[0]/sx[nx-1]:.2e}")
+    print_results("  dy", dy_gercek, dy_geri)
+    print_results("  dx", dx_gercek, dx_geri)
 
     np.savez("kmod_reconstruction_test.npz",
              dy_gercek=dy_gercek, dy_geri=dy_geri,
