@@ -59,20 +59,34 @@ def main():
 
     n_q     = R_dy_1.shape[0]
 
-    # Tek-quad k-mod modu: params.json'da "kmod_single_quad_index" >= 0 ise
-    # baz olarak g0 kullanilir, secilen quad g0*(1+eps), digerleri g0.
-    # Yoksa eski uniform modu: baz g1, hepsi g1*1.02.
-    kmod_single = config.get("kmod_single_quad_index", -1)
-    kmod_eps    = config.get("kmod_single_quad_eps", 0.10)
-    if 0 <= kmod_single < n_q:
-        g1_nom = config.get("g0", config.get("g1", 0.21))
-        eps    = kmod_eps
-        g1_pert = g1_nom
+    # Mod seçimi: iki-quad / tek-quad / uniform.
+    # kmod_single_quad_index/eps geriye uyumluluk aliasi.
+    g0         = config.get("g0", config.get("g1", 0.21))
+    g1         = config.get("g1", g0)
+    g2         = config.get("g2", g0)
+    j1         = config.get("kmod_quad1_index", config.get("kmod_single_quad_index", -1))
+    j2         = config.get("kmod_quad2_index", -1)
+    single_eps = config.get("kmod_single_quad_eps", 0.10)
+
+    if 0 <= j1 < n_q and 0 <= j2 < n_q:
+        # Iki-quad: j1->g1, j2->g2, diger 46 quad->g0
+        g1_nom  = g0
+        g1_pert = g0
         quad_dG_pert = np.zeros(n_q)
-        quad_dG_pert[kmod_single] = eps
-        print(f"K-mod modu: TEK QUAD #{kmod_single}, baz=g0={g1_nom}, eps={eps*100:.1f}%")
+        quad_dG_pert[j1] = (g1 - g0) / g0
+        quad_dG_pert[j2] = (g2 - g0) / g0
+        print(f"K-mod modu: IKI QUAD j1={j1}(g1={g1}), j2={j2}(g2={g2}), baz g0={g0}")
+    elif 0 <= j1 < n_q:
+        # Tek-quad
+        g1_nom  = g0
+        g1_pert = g0
+        eps_j1  = (g1 - g0) / g0 if g1 != g0 else single_eps
+        quad_dG_pert = np.zeros(n_q)
+        quad_dG_pert[j1] = eps_j1
+        print(f"K-mod modu: TEK QUAD #{j1}, baz=g0={g0}, eps={eps_j1*100:.1f}%")
     else:
-        g1_nom  = config.get("g1", 0.21)
+        # Uniform
+        g1_nom  = g1
         eps     = 0.02
         g1_pert = g1_nom * (1.0 + eps)
         quad_dG_pert = None
@@ -80,7 +94,6 @@ def main():
 
     print(f"dR_dy kosul sayisi : {np.linalg.cond(dR_dy):.3e}")
     print(f"dR_dx kosul sayisi : {np.linalg.cond(dR_dx):.3e}")
-    print(f"dg/g               : {eps*100:.1f}%  (g_nom={g1_nom}, g_pert={g1_pert:.4f})")
 
     # BPM hata parametreleri
     sigma_noise  = config.get("bpm_noise_sigma",  0.0)
