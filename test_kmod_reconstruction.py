@@ -53,6 +53,43 @@ def tsvd_solve(A, b, tau_rel):
     return x, int(keep.sum()), s
 
 
+def fourier_basis(n_q, N):
+    """n_q quad için N harmoniklik Fourier baz matrisi: sütunlar [1, cos, sin, cos, sin, ...]
+    Boyut: (n_q, 2N+1)"""
+    j = np.arange(n_q)
+    cols = [np.ones(n_q)]
+    for k in range(1, N + 1):
+        cols.append(np.cos(2 * np.pi * k * j / n_q))
+        cols.append(np.sin(2 * np.pi * k * j / n_q))
+    return np.column_stack(cols)
+
+
+def fourier_reconstruct(dR, delta, dy_gercek, n_q, N_list):
+    """Her N için Fourier tabanlı en küçük kareler rekonstrüksiyonu.
+    Döndürür: sözlük {N: dy_geri}"""
+    results = {}
+    print(f"\n{'N':>3}  {'κ(ΔR·F)':>10}  {'model hatasi RMS':>17}  {'olcum hatasi RMS':>17}  {'korelasyon':>11}")
+    print("-" * 65)
+    for N in N_list:
+        F = fourier_basis(n_q, N)
+        M = dR @ F                          # (n_q, 2N+1)
+        a, _, _, sv = np.linalg.lstsq(M, delta, rcond=None)
+        dy_geri = F @ a
+
+        kappa = sv[0] / sv[-1] if sv[-1] > 0 else np.inf
+
+        # Model hatası: gerçek dy'nin N harmonikle ne kadar iyi temsil edilir
+        a_ref, _, _, _ = np.linalg.lstsq(F, dy_gercek, rcond=None)
+        dy_model = F @ a_ref
+        model_err = np.std(dy_gercek - dy_model) * 1e6
+
+        olcum_err = np.std(dy_geri - dy_gercek) * 1e6
+        corr = np.corrcoef(dy_gercek, dy_geri)[0, 1]
+        print(f"  {N:1d}  {kappa:10.3e}  {model_err:14.2f} um  {olcum_err:14.2f} um  {corr:11.6f}")
+        results[N] = dy_geri
+    return results
+
+
 def main():
     os.chdir(BASE)
 
@@ -196,13 +233,29 @@ def main():
     print_results("  dy", dy_gercek, dy_geri)
     print_results("  dx", dx_gercek, dx_geri)
 
+    # Fourier tabanlı rekonstrüksiyon
+    N_list = [1, 2, 3, 4, 5]
+    print("\n" + "=" * 65)
+    print("Fourier rekonstrüksiyonu — dikey (dy)")
+    print("  'model hatasi': gerçek dy'nin N harmonikle temsil hatası")
+    print("  'olcum hatasi': ΔR·F üzerinden geri çatım hatası")
+    print("=" * 65)
+    dy_fourier = fourier_reconstruct(dR_dy, delta_y, dy_gercek, n_q, N_list)
+
+    print("\n" + "=" * 65)
+    print("Fourier rekonstrüksiyonu — yatay (dx)")
+    print("=" * 65)
+    dx_fourier = fourier_reconstruct(dR_dx, delta_x, dx_gercek, n_q, N_list)
+
     np.savez("kmod_reconstruction_test.npz",
              dy_gercek=dy_gercek, dy_geri=dy_geri,
              dx_gercek=dx_gercek, dx_geri=dx_geri,
              dipole_tilt_sabit=dipole_tilt_sabit,
              quad_tilt_sabit=quad_tilt_sabit,
              quad_signal_y=quad_signal_y, quad_signal_x=quad_signal_x,
-             delta_y=delta_y, delta_x=delta_x)
+             delta_y=delta_y, delta_x=delta_x,
+             **{f"dy_fourier_N{N}": dy_fourier[N] for N in N_list},
+             **{f"dx_fourier_N{N}": dx_fourier[N] for N in N_list})
     print("\nSonuclar 'kmod_reconstruction_test.npz' dosyasina kaydedildi.")
 
 
