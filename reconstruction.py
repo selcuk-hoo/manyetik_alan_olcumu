@@ -85,32 +85,35 @@ def soft_threshold(v, t):
     return np.sign(v) * np.maximum(np.abs(v) - t, 0)
 
 
-def lasso_admm(M, b, lam, rho=None, max_iter=3000, tol=1e-12):
-    """ADMM ile LASSO: minimize ½‖M·a − b‖² + λ‖a‖₁
+def lasso_admm(M, b, lam, max_iter=3000, tol=1e-10):
+    """Sütun-normalleştirilmiş LASSO (ADMM), ρ=1 sabit.
 
-    rho: ADMM ceza parametresi (None → 10×λ)
+    M sütunları birim norma ölçeklenir → λ, normalize katsayı uzayında
+    anlam taşır (λ > katsayı genliği → o harmonik sıfırlanır).
+    Dönen a, orijinal (normalleştirilmemiş) katsayılardır.
     """
-    n = M.shape[1]
-    if rho is None:
-        rho = max(lam * 10, 1e-10)
-    MtM = M.T @ M
-    Mtb = M.T @ b
-    A = MtM + rho * np.eye(n)
-    L = np.linalg.cholesky(A)        # A s.p.d. → Cholesky kararlı
+    # Sütun normalizasyonu
+    col_norms = np.linalg.norm(M, axis=0)
+    col_norms = np.maximum(col_norms, 1e-15)
+    Mn = M / col_norms[np.newaxis, :]   # 48×p, her sütun birim norm
+
+    n = Mn.shape[1]
+    rho = 1.0                            # normalize uzayda sabit
+    A = Mn.T @ Mn + rho * np.eye(n)
+    L = np.linalg.cholesky(A)
+    Mtb = Mn.T @ b
 
     x = np.zeros(n); z = np.zeros(n); u = np.zeros(n)
     for _ in range(max_iter):
-        # x-update: (M'M + ρI)x = M'b + ρ(z - u)
         rhs = Mtb + rho * (z - u)
         x = np.linalg.solve(L.T, np.linalg.solve(L, rhs))
-        # z-update: yumuşak eşikleme
-        z_new = soft_threshold(x + u, lam / rho)
-        # u-update: dual değişken
+        z_new = soft_threshold(x + u, lam)   # eşik = λ (ρ=1 olduğu için)
         u += x - z_new
         if np.linalg.norm(z_new - z) < tol:
             break
         z = z_new
-    return z
+
+    return z / col_norms   # orijinal birimlere geri çevir
 
 
 def lasso_reconstruct_report(label, dR, delta, gercek, k_max, antisym, lam, truth_cfg):
@@ -135,10 +138,13 @@ def lasso_reconstruct_report(label, dR, delta, gercek, k_max, antisym, lam, trut
     selected_ks = sorted({f[0] for f in found_all if f[1] > SHOW_THR})
 
     err_rms = np.std(geri - gercek) * 1e6
-    cor     = np.corrcoef(gercek, geri)[0, 1]
+    if np.std(geri) > 1e-15:
+        cor = np.corrcoef(gercek, geri)[0, 1]
+    else:
+        cor = float('nan')
 
     print(f"\n{'=' * 72}")
-    print(f"  LASSO rekonstrüksiyon: {label}   λ={lam:.1e}")
+    print(f"  LASSO rekonstrüksiyon: {label}   λ={lam:.3f} (normalize)")
     print(f"  Tespit edilen harmonikler (>5 μm): {selected_ks}")
     print(f"{'=' * 72}")
     _print_harmonic_table(found_show, truth_cfg)
@@ -411,9 +417,9 @@ def main():
     # sıfıra çeker. λ (lasso_lambda) büyükse daha seyrek çözüm.
     print(f"\n\n{'#' * 72}")
     print(f"# LASSO (KÖR, SEYREK) REKONSTRÜKSİYON")
-    print(f"# λ = {lasso_lam:.1e}   (params.json: lasso_lambda)")
-    print(f"# Fiziksel harmonikler seyreksе LASSO greedy'den üstündür.")
-    print(f"# λ çok küçük → çok harmonik, λ çok büyük → hiç harmonik")
+    print(f"# λ = {lasso_lam:.2f}   (params.json: lasso_lambda, normalize uzayda)")
+    print(f"# M sütunları birim norma ölçeklenir; λ ∈ [0,1] aralığında.")
+    print(f"# λ→0: greedy/lstsq'ye yaklaşır  |  λ→1: tüm harmonikler sıfır")
     print(f"{'#' * 72}")
 
     geri_y_lasso = lasso_reconstruct_report(

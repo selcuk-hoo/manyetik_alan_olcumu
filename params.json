@@ -69,5 +69,5 @@
     "k_search_max": 12,
     "greedy_residual_threshold": 0.15,
     "max_harmonics": 3,
-    "lasso_lambda": 5e-6
+    "lasso_lambda": 0.02
 }
