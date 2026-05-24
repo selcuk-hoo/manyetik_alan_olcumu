@@ -52,16 +52,16 @@
     "kmod_quad2_index": 8,
 
     "dy_harmonics": [
-        {"k": 0, "amp_cos": 0.0,    "amp_sin": 0.0},
-        {"k": 2, "amp_cos": 1.0e-4, "amp_sin": 0.0},
-        {"k": 4, "amp_cos": 0.5e-4, "amp_sin": 5.0e-5}
+        {"k": 0, "amp_cos": 6e-5,    "amp_sin": 3e-5},
+        {"k": 2, "amp_cos": 3.0e-6, "amp_sin": 0.0},
+        {"k": 4, "amp_cos": 0.5e-4, "amp_sin": 5.0e-6}
     ],
     "dx_harmonics": [
         {"k": 1, "amp_cos": 1.0e-4, "amp_sin": 0.0},
         {"k": 3, "amp_cos": 0.0,    "amp_sin": 5.0e-5}
     ],
-    "dy_random_RMS": 1.0e-5,
-    "dx_random_RMS": 1.0e-5,
+    "dy_random_RMS": 3.0e-5,
+    "dx_random_RMS": 3.0e-5,
     "dy_random_seed": 42,
     "dx_random_seed": 43,
     "smooth_antisym_fodo": true,
