@@ -34,10 +34,6 @@
     "error_quad_dy": 0.0,
     "error_quad_dx": 0.0,
 
-    "quad_random_dy_max": 1e-4,
-    "quad_random_dx_max": 1e-4,
-    "quad_random_seed": 42,
-
     "error_dipole_index": -1,
     "error_dipole_tilt": 0.0,
 
@@ -51,10 +47,25 @@
     "bpm_offset_sigma": 0.0,
     "bpm_offset_seed": 55,
 
-    "kmod_single_quad_index": -1,
-    "kmod_single_quad_eps": 0.10,
-
     "g2": 0.21,
-    "kmod_quad1_index": 0,
-    "kmod_quad2_index": 12
+    "kmod_quad1_index": 2,
+    "kmod_quad2_index": 8,
+
+    "dy_harmonics": [
+        {"k": 0, "amp_cos": 0.0,    "amp_sin": 0.0},
+        {"k": 2, "amp_cos": 1.0e-4, "amp_sin": 0.0},
+        {"k": 4, "amp_cos": 0.5e-4, "amp_sin": 5.0e-5}
+    ],
+    "dx_harmonics": [
+        {"k": 1, "amp_cos": 1.0e-4, "amp_sin": 0.0},
+        {"k": 3, "amp_cos": 0.0,    "amp_sin": 5.0e-5}
+    ],
+    "dy_random_RMS": 1.0e-5,
+    "dx_random_RMS": 1.0e-5,
+    "dy_random_seed": 42,
+    "dx_random_seed": 43,
+    "smooth_antisym_fodo": true,
+
+    "k_search_max": 12,
+    "greedy_residual_threshold": 0.02
 }

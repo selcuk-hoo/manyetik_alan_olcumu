@@ -182,19 +182,60 @@ def main():
     rng_noise = np.random.default_rng(seed=99)
 
     # Quad hizalama hataları (geri çatılacak)
+    # Üretim modları, öncelik sırasıyla:
+    #   1) config'de dy_harmonics varsa → FODO antisim. smooth + RMS gürültü
+    #   2) --smooth bayrağı → hardcoded sinüzoidal (geriye uyumluluk)
+    #   3) varsayılan: rastgele uniform
     j = np.arange(n_q)
-    if args.smooth:
-        # Sinüzoidal mod — algoritma testi: N≥4 model hatasını sıfırlamalı
-        #   dy: k=2 ve k=4 harmonikleri
-        #   dx: k=1 ve k=3 harmonikleri (bağımsız test)
-        A = config.get("quad_random_dy_max", 1e-4)
+    if "dy_harmonics" in config or "dx_harmonics" in config:
+        n_fodo = n_q // 2
+        antisym = config.get("smooth_antisym_fodo", True)
+        sign = np.where(j % 2 == 0, 1.0, -1.0 if antisym else 1.0)
+        fodo_idx = j // 2
+
+        def build_smooth(harmonics):
+            f = np.zeros(n_fodo)
+            for h in harmonics:
+                k  = h["k"]
+                ac = h.get("amp_cos", 0.0)
+                as_= h.get("amp_sin", 0.0)
+                if k == 0:
+                    f += ac
+                else:
+                    f += ac * np.cos(2*np.pi*k*np.arange(n_fodo)/n_fodo)
+                    f += as_* np.sin(2*np.pi*k*np.arange(n_fodo)/n_fodo)
+            return sign * f[fodo_idx]
+
+        dy_smooth = build_smooth(config.get("dy_harmonics", []))
+        dx_smooth = build_smooth(config.get("dx_harmonics", []))
+
+        dy_rms  = config.get("dy_random_RMS", 0.0)
+        dx_rms  = config.get("dx_random_RMS", 0.0)
+        dy_seed = config.get("dy_random_seed", 42)
+        dx_seed = config.get("dx_random_seed", 43)
+        rng_dy  = np.random.default_rng(seed=dy_seed)
+        rng_dx  = np.random.default_rng(seed=dx_seed)
+        dy_noise = rng_dy.normal(0, dy_rms, n_q) if dy_rms > 0 else np.zeros(n_q)
+        dx_noise = rng_dx.normal(0, dx_rms, n_q) if dx_rms > 0 else np.zeros(n_q)
+
+        dy_gercek = dy_smooth + dy_noise
+        dx_gercek = dx_smooth + dx_noise
+
+        ks_dy = [h["k"] for h in config.get("dy_harmonics", [])]
+        ks_dx = [h["k"] for h in config.get("dx_harmonics", [])]
+        antisym_str = "ANTİSİM" if antisym else "SİMETRİK"
+        print(f"Mod: HARMONIC ({antisym_str} FODO)")
+        print(f"  dy harmonikleri k={ks_dy}, smooth RMS={np.std(dy_smooth)*1e6:.1f} um, gurultu RMS={dy_rms*1e6:.1f} um")
+        print(f"  dx harmonikleri k={ks_dx}, smooth RMS={np.std(dx_smooth)*1e6:.1f} um, gurultu RMS={dx_rms*1e6:.1f} um")
+    elif args.smooth:
+        A = 1.0e-4
         dy_gercek = A * (np.sin(2*np.pi*2*j/n_q) + 0.5*np.cos(2*np.pi*4*j/n_q))
         dx_gercek = A * (np.cos(2*np.pi*1*j/n_q) + 0.5*np.sin(2*np.pi*3*j/n_q))
-        print("Mod: SMOOTH (sinüzoidal)  dy→k={2,4}  dx→k={1,3}")
+        print("Mod: SMOOTH (sinüzoidal, hardcoded)  dy→k={2,4}  dx→k={1,3}")
     else:
-        dy_max    = config.get("quad_random_dy_max", 0.3e-3)
-        dx_max    = config.get("quad_random_dx_max", 0.3e-3)
-        quad_seed = config.get("quad_random_seed", 13)
+        dy_max    = config.get("quad_random_dy_max", 1e-4)
+        dx_max    = config.get("quad_random_dx_max", 1e-4)
+        quad_seed = config.get("quad_random_seed", 42)
         rng = np.random.default_rng(seed=quad_seed)
         dy_gercek = rng.uniform(-dy_max, dy_max, n_q)
         dx_gercek = rng.uniform(-dx_max, dx_max, n_q)
