@@ -19,6 +19,10 @@
 7. [Bias–variance gerilimi: doğru N kaç?](#7-biasvariance-gerilimi-doğru-n-kaç)
 8. [Hedefli ölçüm: nano-metre hassasiyeti](#8-hedefli-ölçüm-nano-metre-hassasiyeti)
 9. [Pratik mesajlar ve sınırlar](#9-pratik-mesajlar-ve-sınırlar)
+10. [Üç rekonstrüksiyon yaklaşımı: hedefli, greedy, LASSO](#10-üç-rekonstrüksiyon-yaklaşımı-hedefli-greedy-lasso)
+11. [Greedy matching pursuit ve rank-2 tuzağı](#11-greedy-matching-pursuit-ve-rank-2-tuzağı)
+12. [LASSO ve rank-yoksulluk çöküşü](#12-lasso-ve-rank-yoksulluk-çöküşü)
+13. [Çok-konfigürasyon yığma: rank barikatını aşmak](#13-çok-konfigürasyon-yığma-rank-barikatını-aşmak)
 
 ---
 
@@ -476,6 +480,322 @@ rejiminde neden başarısız göründüğünü ve neden gerçekte bilgi
 taşıdığını ortaya koyuyor: bilgi vardı, ama parametrelendirme onu
 çıkarmak için yanlış bir uzay üzerinde çalışıyordu. Doğru baz seçimi,
 doğru sonucu getiriyor.
+
+---
+
+---
+
+## 10. Üç rekonstrüksiyon yaklaşımı: hedefli, greedy, LASSO
+
+Bölüm 8'de gösterilen başarı, bazın tam doğru seçilmesine dayanıyordu:
+"Veride yalnızca k=2 ve k=4 var" bilgisini kullandık.
+Gerçek bir hızlandırıcıda bu bilgi tam olarak elimizde olmaz.
+Üç farklı strateji bu belirsizliği farklı şekillerde ele alır.
+
+### 10.1 Hedefli fit (targeted least squares)
+
+Fiziksel öngörüden yola çıkarak baz k listesini önceden belirle.
+Örneğin: toprak hareketi baskın ise k = 0, 1, 2; optik hata baskın ise
+daha yüksek k değerleri. Bölüm 6-8'in tam analizi bu stratejiyi kapsar.
+
+**Matematiksel özet:**
+
+$$
+\hat{a} = (M^T M)^{-1} M^T \Delta y,
+\qquad M = \Delta R \cdot F(k\_\text{list})
+$$
+
+**Koşul:** $\text{rank}(M) \geq |k\_\text{list}|_\text{sütun}$ — yani
+belirlenmiş (determined) veya aşırı belirlenmiş (overdetermined) sistem.
+Tek-quad kmod ile $\text{rank}(\Delta R) \approx 1$, baz boyutu 3 ise
+bu koşul sağlanmaz; çözüm minimum-norm ve katsayılar yorumlanamaz.
+
+**Ne zaman başarılı, ne zaman başarısız:**
+
+- ✓ Baz tam doğru ve rank(M) ≥ baz boyutu → gürültü tabanına yakın hata
+- ✓ Baz fazla ama simetrik → küçük κ artışı, kabul edilebilir
+- ✗ Baz eksik (bir harmoniği atlarsanız) → mevcut harmoniklerin katsayısı
+  atlanmış harmoniğin sızıntısını taşır, sistematik hata
+- ✗ rank(M) < baz boyutu → minimum-norm çözüm; profil yine de anlamlı
+  olabilir ama bireysel katsayılar güvenilmez
+
+---
+
+## 11. Greedy matching pursuit ve rank-2 tuzağı
+
+Greedy algoritması, yüksek boyutlu seyrek geri çatımda (compressed
+sensing) güçlü bir araçtır: vektörleri sırayla ekleyerek rezidüeli
+azaltır. Ancak bu çalışmada rank-2 $\Delta R$ ile ciddi bir engele çarpar.
+
+### 11.1 Algoritma
+
+$$
+A^{(0)} = \emptyset, \quad r^{(0)} = \Delta y
+$$
+
+Her adımda:
+$$
+k^* = \arg\min_{k \notin A} \bigl\| \Delta y - \Delta R \cdot F_{A \cup \{k\}} \cdot \hat{a} \bigr\|
+$$
+$$
+\text{Eğer } \frac{\|r^{(t-1)}\| - \|r^{(t)}\|}{\|r^{(t-1)}\|} < \tau : \quad \text{dur}
+$$
+
+Seçilen harmonikler setine, elde edilen katsayı vektörü ve profil her
+adımda güncellenir.
+
+### 11.2 Rank-2 ile neden başarısız olur — tekil vektör ötüşmesi
+
+$\Delta R$'nin SVD ayrışımı:
+
+$$
+\Delta R = \sum_{i=1}^{48} \sigma_i u_i v_i^T,
+\qquad \sigma_1, \sigma_2 \gg \sigma_3, \ldots, \sigma_{48}
+$$
+
+Tek-quad veya iki-quad kmod ile $\sigma_1, \sigma_2$ baskın, diğerleri
+$O(\varepsilon)$ kez daha küçük. Greedy şu miktarı minimize eder:
+
+$$
+\|r_k\|^2 = \|\Delta y\|^2 - \frac{(\Delta y^T \Delta R f_k)^2}{\|\Delta R f_k\|^2}
+$$
+
+burada $f_k$, $k$'ıncı FODO-antisimetrik Fourier sütunudur. Paydaki
+$\Delta R f_k$ vektörü yalnızca $u_1$ ve $u_2$ yönlerindeki bileşenleri
+taşır (çünkü küçük $\sigma_i$ içeren $u_i$ yönleri sıfırlanmıştır):
+
+$$
+\Delta R f_k \approx \sigma_1 (v_1^T f_k) u_1 + \sigma_2 (v_2^T f_k) u_2
+$$
+
+Greedy, $\Delta R f_k$'yı $\Delta y$'ye en paralel yapan $k$'yı seçer.
+Bu, $f_k$'nın fiziksel harmoniklerle ilgisi olmayan $v_1$, $v_2$
+vektörlerine projeksiyon yaptığı değeri seçmek demektir.
+
+**Sonuç:** Greedy k=1, 8, 7 gibi fiziksel olmayan harmonikler seçer
+çünkü bu harmoniklerin Fourier sütunları $v_1/v_2$ ile daha iyi hizalıdır.
+Gerçek harmonikler (k=0, 2, 4) yanlış seçilir veya hiç seçilmez.
+
+### 11.3 Sayısal doğrulama (QD+QD, j₁=3, j₂=9)
+
+Gerçek harmonikler: k = 0, 2, 4 (dy_harmonics içinde).
+Greedy seçimi (tek konfigürasyon):
+
+```
+Adım 1: k = 1  (residual düşüşü %38 — büyük, ama yanlış harmonic)
+Adım 2: k = 8  (residual düşüşü %24)
+Adım 3: k = 7  (residual düşüşü %12)
+```
+
+Korelasyon: ~0.40 (gerçek harmonikler hiç seçilmedi).
+
+### 11.4 Rank arttığında greedy kurtarılabilir mi?
+
+Evet. Üç veya daha fazla bağımsız kmod ölçümü yığıldığında:
+
+$$
+[\Delta R_{c0}; \Delta R_{c1}; \Delta R_{c2}]
+$$
+
+bu yığılmış matrisin ilk birkaç tekil vektörü artık fiziksel FODO
+harmoniklerine hizalanmaktadır, çünkü farklı quad'lardan gelen
+$v^{(c)}$ vektörleri birbirini tamamlar. Greedy bu durumda güvenilir
+hale gelir.
+
+---
+
+## 12. LASSO ve rank-yoksulluk çöküşü
+
+LASSO (Least Absolute Shrinkage and Selection Operator), seyrek
+rekonstrüksiyon için standart araçtır. Tüm k = 0, 1, ..., k_max
+harmonikleri baza koyu, L1 ceza yalnızca gerçek olanları hayatta bırak.
+
+### 12.1 Formülasyon
+
+$$
+\hat{a} = \arg\min_{a} \tfrac{1}{2} \|Ma - \Delta y\|^2 + \lambda \|a\|_1,
+\qquad M = \Delta R \cdot F_\text{full}
+$$
+
+$k_{\max} = 12$ ve FODO-antisimetrik baz ile $M$ boyutu $48 \times 25$.
+ADMM ile çözülür:
+
+$$
+x^{k+1} = (M^T M + \rho I)^{-1}(M^T \Delta y + \rho(z^k - u^k))
+$$
+$$
+z^{k+1} = \mathcal{S}_{\lambda/\rho}(x^k + u^k)
+$$
+$$
+u^{k+1} = u^k + x^{k+1} - z^{k+1}
+$$
+
+burada $\mathcal{S}_t(v) = \text{sign}(v)\max(|v|-t, 0)$ yumuşak eşikleme
+(soft thresholding) operatörüdür.
+
+### 12.2 Neden rank-2 M'de başarısız olur
+
+$M = \Delta R \cdot F$ matrisi rank ~2 ve 25 sütunludur. $M$'nin SVD ayrışımı:
+
+$$
+M = U \Sigma V^T, \qquad \Sigma = \text{diag}(\sigma_1, \sigma_2, 0, \ldots, 0)
+$$
+
+(Küçük modlar gürültü mertebesinde olduğundan pratikte sıfır kabul edilir.)
+
+ADMM'deki $x$ adımı, primal değişkeni $M$'nin **sağ tekil vektör uzayına**
+yansıtır: $x \approx V \text{diag}(1/(\sigma_i^2/\rho + 1)) V^T M^T \Delta y$.
+Bu, çözümü 25 boyutlu uzayda yalnızca 2 boyutlu bir altuzaya hapsetmek demektir.
+Dolayısıyla 25 katsayının her biri yaklaşık aynı enerjiyi taşır:
+
+$$
+|x_j| \approx \frac{\|\Delta y\| \cdot \sigma_1}{25(\sigma_1^2 + \rho)} \sim 10 \,\mu\text{m}
+$$
+
+Sütun normalizasyonundan sonra normalize uzayda $|\tilde{x}_j| \approx 0.01$.
+LASSO eşiği $\lambda / \rho = 0.02$ ile tüm katsayılar eşiğin altına düşer:
+
+$$
+\mathcal{S}_{0.02}(0.01) = 0
+$$
+
+**Her katsayı sıfıra itilir.** Bu sonuç λ'ya bağlı değildir:
+- λ küçültülürse: daha fazla katsayı hayatta kalır ama ayrımcılık yok,
+  tüm harmonikler eşit ağırlıklı — fiziksel olarak anlamsız
+- λ büyütülürse: zaten sıfır olan katsayılar daha da sıfırda kalır
+
+### 12.3 LASSO'nun teorik sınırı: Restricted Isometry Property (RIP)
+
+Sıkıştırmalı algılama teorisi, LASSO'nun başarısı için ölçüm matrisinin
+**RIP koşulunu** sağlaması gerektiğini gösterir:
+
+$$
+(1 - \delta_s)\|a\|^2 \leq \|Ma\|^2 \leq (1+\delta_s)\|a\|^2
+\quad \text{s-seyrek her } a \text{ için}
+$$
+
+Bu koşul, $M$'nin sütunlarının lineer bağımsız olmasını gerektirir.
+Rank-2 $M$'de 23 sütun null uzayındadır; RIP açıkça ihlal edilir.
+LASSO uygulanabilir değildir.
+
+**Özet:** LASSO, "ölçüm sayısı << parametre sayısı ama matris iyi"
+durumunda (örn. Gaussian rastgele ölçüm matrisi) işe yarar. "Matris
+rank-yoksul" durumda temel varsayım çöker.
+
+---
+
+## 13. Çok-konfigürasyon yığma: rank barikatını aşmak
+
+### 13.1 Neden rank barikatı var?
+
+Tek quad'ın gradyanını değiştirmek tek bir "sondaj yönü" yaratır.
+ΔR rank ~1, yani bu ölçüm dy alanının yalnızca **tek bir doğrusal
+kombinasyonunu** belirleyebilir:
+
+$$
+\Delta R_{(j)} \approx \sigma_j \, u_j \, v_j^T
+\quad \Rightarrow \quad
+\Delta R_{(j)} \cdot dy \approx \sigma_j (v_j^T dy) u_j
+$$
+
+Tüm bilgi $v_j^T dy$ skaler değerinde, yani tek bir projeksiyon.
+
+k=0 ve k=2 için şu katsayıları belirlemek istiyoruz:
+$a_0$ (DC), $a_{2c}$ (cos₂), $a_{2s}$ (sin₂) — **3 bilinmeyen**.
+
+Her kmod ölçümü 1 denklem verir; 3 bilinmeyen için **en az 3
+bağımsız kmod** gerekir.
+
+### 13.2 Bağımsızlık koşulu
+
+$j_1$, $j_2$, $j_3$ quad'larının sağ tekil vektörleri $v_{j_1}$,
+$v_{j_2}$, $v_{j_3}$'nün FODO-antisimetrik baz $F$ katsayısı uzayına
+projeksiyonları lineer bağımsız olmalıdır. Daha somut olarak:
+
+$$
+\text{rank}\bigl([v_{j_1}^T F;\; v_{j_2}^T F;\; v_{j_3}^T F]\bigr) = 3
+$$
+
+Bu koşul, modüle edilen quad'ların ringin farklı Fourier modlarına
+farklı katkı yaptığı durumlarda sağlanır.
+
+### 13.3 Neden j=1, j=3, j=9 iyi bir seçim?
+
+k=2 harmonik, FODO hücreleri boyunca $\cos(2\pi \cdot 2 \cdot n/24)$ dağılımına sahiptir.
+Üç seçilen QD quad'ının bulunduğu FODO hücrelerinde bu değer:
+
+| Quad | FODO hücresi n | k=2 mod değeri |
+|------|----------------|----------------|
+| j=1  | 0 | cos(0) = **1.000** |
+| j=3  | 1 | cos(π/6) = **0.866** |
+| j=9  | 4 | cos(2π/3) = **−0.500** |
+
+İkisinin pozitif, birinin negatif olması k=2 cos ve sin bileşenlerinin
+disambiguasyonunu sağlar. Üç projeksiyon birbirinden yeterince farklı,
+$\kappa$ yüksek değil.
+
+Tüm seçilen quadlar **QD tipindedir** (tek j); `integrator.cpp`'deki
+QUAD_F_MOD bug'ı yalnızca j=0 (FODO 0 QF) için geçerlidir — seçilen
+quadlar etkilenmez.
+
+### 13.4 Yığılmış sistem
+
+$$
+\underbrace{
+\begin{pmatrix}
+\Delta R_{c0} \\
+\Delta R_{c1} \\
+\Delta R_{c2}
+\end{pmatrix}
+}_{144 \times 48}
+\cdot dy =
+\underbrace{
+\begin{pmatrix}
+\Delta y_{c0} \\
+\Delta y_{c1} \\
+\Delta y_{c2}
+\end{pmatrix}
+}_{144}
+$$
+
+$dy = F \cdot a$ yerine koyarsak:
+
+$$
+\underbrace{M_\text{stack}}_{144 \times 3} \cdot a = \Delta y_\text{stack}
+$$
+
+Her $\Delta R_{ci}$ rank ~1 olduğundan $M_\text{stack}$ rank ~3 (3 bağımsız
+sondaj yönü). Aşırı belirlenmiş sistemde en küçük kareler:
+
+$$
+\hat{a} = (M_\text{stack}^T M_\text{stack})^{-1} M_\text{stack}^T \Delta y_\text{stack}
+$$
+
+**Gürültü analizi:** Tek ölçüm ile kıyasla, yığılmış sistemde her
+ölçümün gürültüsü $1/\sqrt{N_c}$ oranında bastırılır (N_c = konfig sayısı).
+3 bağımsız kmod ölçümü ile teorik gürültü azaltma faktörü $\sqrt{3} \approx 1.73$.
+
+### 13.5 Kaç konfig gerekir — genel kural
+
+k listesinde $n_k$ harmoniğe karşılık gelen sütun sayısı:
+- k=0: 1 sütun (DC)
+- k>0: 2 sütun (cos ve sin)
+
+Toplam bilinmeyen = $1 + 2 \cdot |\{k > 0\}|$.
+
+Bağımsız tek-quad ölçümü sayısı ≥ bu toplam olmalıdır.
+
+Örnekler:
+
+| Hedef | Bilinmeyen | Gereken tek-quad konfig | Gereken çift-quad konfig |
+|-------|-----------|------------------------|--------------------------|
+| Yalnız k=0 | 1 | 1 | 1 |
+| k=0 ve k=2 | 3 | 3 | 2 |
+| k=0, k=2, k=4 | 5 | 5 | 3 |
+| k=0, k=1, k=2 | 5 | 5 | 3 |
+
+Çift-quad kmod her ölçümde rank ~2 katkı verdiğinden daha az ölçümle
+yeterli rank elde edilir.
 
 ---
 

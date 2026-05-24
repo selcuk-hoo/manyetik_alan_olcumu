@@ -143,43 +143,185 @@ $$
 
 ## Adaptif rekonstrüksiyon algoritması
 
-`reconstruction.py` — **greedy matching pursuit** ile dy/dx'in
-Fourier harmoniklerini ve fazlarını veriden otomatik tespit eder.
-Hangi harmoniklerin var olduğunu önceden bilmiyormuş gibi davranır.
+`reconstruction.py` üç farklı stratejiyi uygular ve karşılaştırır.
 
-### Akış
+---
+
+### 1. Hedefli fit (targeted)
+
+**Fikir:** Hangi Fourier harmoniklerinin veride var olduğunu önceden biliyormuşsunuz
+gibi davranın — yalnızca o harmonikleri içeren FODO-antisimetrik baz kullanarak
+doğrudan en küçük kareler çözümü yapın.
+
+```
+F  ← fodo_fourier_basis(n_q, k_list=[0, 2, ...], antisym=True)
+M  ← ΔR · F                   # 48 × |k_list × 2 - 1|
+â  ← lstsq(M, Δy)
+dy_geri ← F · â
+```
+
+**Neden işe yarar:** ΔR rank ~2 olsa bile *M = ΔR · F* matrisi
+baz boyutu kadar sütun içerdiğinden baz boyutu ≤ 2 koşulunda
+belirli/aşırı belirlenmiş sistem elde edilir.
+
+**Ne zaman çalışır, ne zaman çalışmaz:**
+
+| Durum | Sonuç |
+|-------|-------|
+| Baz tam doğru (gerçek harmonikler) | 0.02 μm hata, kor = 1.000 |
+| Bazda fazla harmonik var | κ büyür, gürültü büyütme artar |
+| Bazda eksik harmonik var | sızıntı hatası — var olan harmoniklerin katsayısı kirlenir |
+| Baz boyutu > rank(M) | minimum-norm çözüm; **katsayılar tek tek yorumlanamaz**, ama *profil* anlamlı olabilir |
+
+**Pratik kullanım:** Harmonikler fizikten biliniyorsa (düşük k, toprak hareketi
+baskın) bu mod optimaldır. Bilinmiyorsa greedy veya çok-konfig yaklaşım gerekir.
+
+---
+
+### 2. Greedy matching pursuit (kör)
+
+**Fikir:** Hangi harmoniklerin veride var olduğunu bilmiyormuşsunuz gibi davranın.
+Her adımda rezidüeli en çok düşüren k değerini seçin; seçim kriteri sağlanmaz
+veya harmonik sayısı sınıra ulaşırsa durun.
+
+```
+A ← {}
+Rezidüel ← ‖Δy‖
+Tekrarla:
+  Her k ∉ A için rezidüel_k ← ‖Δy − ΔR·F_{A∪{k}}·â‖
+  k* ← argmin rezidüel_k
+  Eğer (Rezidüel − Rezidüel_k*) / Rezidüel < threshold: dur
+  A ← A ∪ {k*}
+```
+
+**Neden rank-2 ΔR ile başarısız olur:**
+
+ΔR'nin SVD ayrışımına göre, $\Delta R = \sigma_1 u_1 v_1^T + \sigma_2 u_2 v_2^T +
+\text{(küçük modlar)}$ yazılabilir. Greedy algoritması her adımda yalnızca
+bu iki büyük tekil vektör yönünde "görebilir". FODO-antisimetrik $k$'lar
+$u_1$, $u_2$ ile hizalı olmayabilir; bunun yerine greedy $v_1$, $v_2$'ye
+en yakın proyeksiyonu olan *yanlış* harmonikleri seçer. Buna
+**tekil vektör ötüşmesi (aliasing)** denir.
+
+Örnek (QD+QD konfigürasyonu, j₁=3, j₂=9):
+
+| Gerçek harmonikler | Greedy seçimleri |
+|--------------------|-----------------|
+| k = 0, 2, 4 | k = 1, 8, 7 |
+
+Greedy, rezidüeli düşürür ama fiziksel olmayan harmonikler seçer.
+
+**Rank ≥ 3 olunca:** Farklı quad çiftlerini veya tek-quad ölçümlerini
+yığdığınızda (bkz. çok-konfig bölümü) rank artar ve greedy daha güvenilir
+hale gelir.
+
+---
+
+### 3. LASSO (kör, seyrek)
+
+**Fikir:** Tüm k = 0, 1, ..., k_max harmoniklerini adaya koyun; L1 ceza
+terimi gereksiz katsayıları sıfıra çeksin:
+
+$$
+\hat{a} = \arg\min_a \tfrac{1}{2}\|M a - \Delta y\|^2 + \lambda \|a\|_1
+$$
+
+Gerçek harmonikler büyük katsayıya, sahte harmonikler küçük katsayıya sahip
+olduğundan L1 ceza seyrek çözüm üretecektir.
+
+**Neden rank-2 sistemde çalışmaz:**
+
+M = ΔR · F, rank ~2 ve 25+ sütunlu (k_max=12 için). Bu durumda
+çözüm uzayı 23 boyutlu null uzayı içerir; M^T M + ρI sistemi
+normalize uzayda her katsayıyı ~1/25'e bölen 25 eş büyüklükte özdeğere
+sahiptir. Sonuç: her katsayı genliği ≈ |sinyal|/25 ≈ 10 μm/25 ≈ 0.4 μm,
+λ eşiği ise 0.02 (normalize) düzeyinde. Tüm katsayılar eşiğin altına
+düşer → **LASSO tümü sıfıra iter**.
+
+Hiçbir λ seçimi bu durumu kurtaramaz: λ küçütülürse ayrımcılık kaybedilir,
+büyütülürse sinyalin kendisi silinir.
+
+**Sonuç:** LASSO, "az ölçüm – çok parametre" senaryosunda (sıkıştırmalı
+algılama) işe yarar. "Az rank – az parametre" senaryosunda (ΔR rank ~2,
+baz boyutu ~3) temel kavramsal uyumsuzluk vardır; LASSO'nun seçiciliği
+yitirilir.
+
+---
+
+### 4. Çok-konfigürasyon yığma — rank barikatını aşmak
+
+**Temel problem:**
+- Her kmod ölçümü (tek quad) → ΔR rank ~1 → 1 bağımsız denklem
+- k=0 ve k=2 için **3 bilinmeyen** (DC, cos₂, sin₂)
+- 1 veya 2 kmod ölçümü yeterli değil
+
+**Çözüm — üç ayrı quad ölçümü:**
+
+```
+ΔR_c0 @ dy = Δy_c0    (yalnızca j=3 modüle)   → rank ~1
+ΔR_c1 @ dy = Δy_c1    (yalnızca j=9 modüle)   → rank ~1
+ΔR_c2 @ dy = Δy_c2    (yalnızca j=1 modüle)   → rank ~1
+
+Yığılmış:
+[ΔR_c0]         [Δy_c0]
+[ΔR_c1]  @ dy = [Δy_c1]    → toplam rank ~3
+[ΔR_c2]         [Δy_c2]
+```
+
+Yığılmış sistemde M = [ΔR_c0; ΔR_c1; ΔR_c2] @ F boyutu 144×3, rank ~3.
+3 bilinmeyen, 3 bağımsız denklem → belirli sistem. Gürültü fazlasıyla
+sönümlenir (aşırı belirlenmiş).
+
+**Neden j=1, j=3, j=9 seçildi?**
+- Hepsi QD tipi → `integrator.cpp`'nin QUAD_F_MOD bug'ından (j=0 özel durumu) etkilenmez
+- j=3 → FODO hücresi 1, j=9 → FODO hücresi 4, j=1 → FODO hücresi 0
+- k=2 moduna göre: cos(2π×2×1/24) ≈ 0.87, cos(2π×2×4/24) = -0.5, cos(2π×2×0/24) = 1.0
+  → üç farklı projeksiyon → good rank
+
+---
+
+### Algoritma karşılaştırması
+
+| Yöntem | Gereken bilgi | Rank-2 ile | Rank ≥ 3 ile | Katsayı yorumu |
+|--------|--------------|------------|--------------|----------------|
+| Hedefli fit | Hangi k | ✓ (sınırlı) | ✓ | baz boyutu ≤ rank ise evet |
+| Greedy | Hiçbiri | ✗ (yanlış k) | ✓ | her zaman |
+| LASSO | Hiçbiri | ✗ (hepsi sıfır) | ∼ | λ ayarına bağlı |
+| Çok-konfig yığma | Hangi k | — | ✓ | evet |
+
+---
+
+### Akış özeti
 
 ```
 Girdi:  ΔR (48×48)  ve  Δy (48-boyutlu k-mod sinyali)
-Aday harmonikler:  k = 0, 1, ..., k_search_max
 
-Aktif harmonik seti A = {}
-Rezidüel = ‖Δy‖
-Tekrarla:
-  Her k ∉ A için:
-    F_test = FODO-antisim Fourier bazı (A ∪ {k})
-    M_test = ΔR · F_test
-    â = lstsq(M_test, Δy)
-    rezidüel_k = ‖Δy − M_test · â‖
-  k* = arg min rezidüel_k
-  Düşüş = (önceki_rezidüel − rezidüel_k*) / önceki_rezidüel
-  Eğer düşüş < threshold:  dur
-  A.append(k*)
-Son F ile rekonstrüksiyon, her k için (genlik, faz) raporla
+  ┌─ 1. Hedefli fit ──────────────────────────────────────────┐
+  │  k_list = params.json'dan                                  │
+  │  M = ΔR · F(k_list)                                       │
+  │  â = lstsq(M, Δy)  →  dy_geri = F · â                    │
+  └───────────────────────────────────────────────────────────┘
+
+  ┌─ 2. Greedy ───────────────────────────────────────────────┐
+  │  A = {}; Rezidüel = ‖Δy‖                                  │
+  │  Her adım: k* = argmin ‖Δy − ΔR·F_{A∪k}·â‖              │
+  │  Dur: düşüş < threshold veya len(A) = max_harmonics        │
+  └───────────────────────────────────────────────────────────┘
+
+  ┌─ 3. LASSO (ADMM) ─────────────────────────────────────────┐
+  │  M_full = ΔR · F(k=0..k_max); sütun normalize             │
+  │  min ½‖M a − Δy‖² + λ‖a‖₁  →  seyrek â                  │
+  └───────────────────────────────────────────────────────────┘
+
+  ┌─ 4. Çok-konfig (yığma, mevcutsa) ────────────────────────┐
+  │  Her c: ΔR_c = R₂_c − R₁_c                               │
+  │  M_stack = [ΔR_c0; ΔR_c1; ΔR_c2] · F(k=[0,2])          │
+  │  â = lstsq(M_stack, [Δy_c0; Δy_c1; Δy_c2])             │
+  └───────────────────────────────────────────────────────────┘
 ```
 
-### Çıktı formatı
-
-- **Greedy geçmişi**: her adımda hangi k eklendi, rezidüel ne kadar düştü
-- **Tespit edilen harmonikler tablosu**: `k, A_tahmin, φ_tahmin, A_gerçek, φ_gerçek, hata%`
-- **Tam rekonstrüksiyon hatası**: smooth + gürültü tabanı dahil RMS ve korelasyon
-- **`reconstruction_result.npz`**: sayısal sonuçlar (dy_gercek, dy_geri, seçilen k'lar)
-
-### Paralelleştirme
-
-Greedy döngüsü tamamen küçük matris işlemleri (~ms). Paralelleştirme
-gereksiz. Asıl pahalı kısım simülasyondur (`build_response_matrix.py`),
-o zaten `ProcessPoolExecutor` ile paraleldir.
+Detaylı matematiksel türetim, bias–variance analizi ve rank-2 ile
+neden LASSO/greedy'nin çöktüğünün tam kanıtı için [`YÖNTEM.md`](YÖNTEM.md).
 
 ---
 
@@ -217,12 +359,25 @@ o zaten `ProcessPoolExecutor` ile paraleldir.
 
 ### Üretilen veri dosyaları
 
+**Tek-konfig (eski arayüz):**
+
 | Dosya | İçerik | Üreten |
 |-------|--------|--------|
 | `R_dy_1.npy`, `R_dy_2.npy` | Dikey tepki matrisleri (g_nom, g_pert) | build_response_matrix |
 | `R_dx_1.npy`, `R_dx_2.npy` | Yatay tepki matrisleri | build_response_matrix |
+| `dR_dy.npy`, `dR_dx.npy` | Fark matrisleri ΔR = R₂ − R₁ | build_response_matrix |
 | `kmod_reconstruction_test.npz` | Δy, Δx, gerçek dy/dx + Fourier sonuçları | test_kmod_reconstruction |
-| `reconstruction_result.npz` | Adaptif geri çatım çıktıları | reconstruction |
+| `reconstruction_result.npz` | Tek-konfig geri çatım çıktıları | reconstruction |
+
+**Çok-konfig (`--config N` ile):**
+
+| Dosya | İçerik | Üreten |
+|-------|--------|--------|
+| `R_dy_1_cN.npy`, `R_dy_2_cN.npy` | N. konfig tepki matrisleri | build_response_matrix --config N |
+| `R_dx_1_cN.npy`, `R_dx_2_cN.npy` | N. konfig yatay matrisleri | build_response_matrix --config N |
+| `dR_dy_cN.npy`, `dR_dx_cN.npy` | N. konfig ΔR matrisleri | build_response_matrix --config N |
+| `kmod_test_cN.npz` | N. konfig Δy, Δx, gerçek dy/dx | test_kmod_reconstruction --config N |
+| `reconstruction_multi_result.npz` | Yığılmış çok-konfig geri çatım | reconstruction |
 | `scan_j2_results.npy` | j₂ taraması sonuçları (κ vs j₂) | scan_j2 |
 
 ---
@@ -243,15 +398,23 @@ o zaten `ProcessPoolExecutor` ile paraleldir.
 
 ### K-modülasyon konfigürasyonu
 
+**Tekil konfig (eski):**
+
 | Anahtar | Anlam |
 |---------|-------|
 | `kmod_quad1_index` (j₁) | Modüle edilen 1. quad (g₁ uygulanır). −1: kullanılmaz |
 | `kmod_quad2_index` (j₂) | Modüle edilen 2. quad (g₂ uygulanır). −1: kullanılmaz |
 
-**Mod seçim mantığı:**
-- Her ikisi 0…47: **iki-quad** (önerilen — bu çalışmanın odağı)
-- Yalnız j₁: tek-quad (matematiksel olarak başarısız)
-- İkisi de −1: uniform (tüm 48 quad g₁'e ölçeklenir)
+**Çok-konfig (yeni, `--config N` ile):**
+
+| Anahtar | Anlam |
+|---------|-------|
+| `kmod_configs` | `[{"j1": 3, "j2": -1}, {"j1": 9, "j2": -1}, {"j1": 1, "j2": -1}, ...]` listesi. `--config N` ile N. eleman seçilir. |
+
+**Mod seçim mantığı (her konfig için):**
+- `j2 ≥ 0`: **iki-quad** (j₁ ve j₂ aynı anda modüle)
+- `j2 = −1`: **tek-quad** (yalnız j₁ modüle)
+- `j1 = j2 = −1`: uniform (tüm 48 quad g₁'e ölçeklenir)
 
 ### dy/dx üretimi (smooth + gürültü)
 
@@ -297,35 +460,36 @@ g++ -O2 -shared -fPIC -o lib_integrator.so integrator.cpp -std=c++17
 clang++ -O2 -shared -fPIC -o integrator.dylib integrator.cpp -std=c++17
 ```
 
-### 2. Tepki matrislerini hesapla (paralel, ~1 saat)
+### 2a. Tek-konfig (eski arayüz, hızlı başlangıç)
 
 ```bash
+# Tepki matrisleri (params.json'daki kmod_quad1/2_index kullanılır)
 python3 build_response_matrix.py
-```
 
-Üretir: `R_dy_1.npy`, `R_dy_2.npy`, `R_dx_1.npy`, `R_dx_2.npy`.
-
-### 3. K-mod simülasyonu + baseline çözümler
-
-```bash
-# params.json'daki dy_harmonics/dx_harmonics ile çalışır (config-driven)
+# K-mod simülasyonu + Direkt, TSVD, Fourier, Hedefli karşılaştırma
 python3 test_kmod_reconstruction.py
-```
 
-Çıktı: smooth+gürültü dy/dx üretimi → 2 konfigürasyon koşumu →
-Direkt çözüm + TSVD + Fourier (N=1..5) + hedefli harmonik
-karşılaştırmaları → `kmod_reconstruction_test.npz` kaydı.
-
-### 4. Adaptif harmonik tespiti
-
-```bash
+# Hedefli, Greedy ve LASSO geri çatımı
 python3 reconstruction.py
 ```
 
-Çıktı: greedy arama geçmişi → tespit edilen k, genlik, faz değerleri →
-gerçek harmoniklerle karşılaştırma → `reconstruction_result.npz` kaydı.
+### 2b. Çok-konfig (k=0 + k=2 yığılmış fit)
 
-### 5. (İsteğe bağlı) En iyi j₂'yi tara
+```bash
+# Her konfig için tepki matrisi hesapla (params.json'daki kmod_configs listesi)
+for n in 0 1 2; do python3 build_response_matrix.py --config $n; done
+
+# Her konfig için ölçüm simülasyonu
+for n in 0 1 2; do python3 test_kmod_reconstruction.py --config $n; done
+
+# Yığılmış geri çatım — R_dy_1_c0.npy varlığı otomatik çok-konfig modunu tetikler
+python3 reconstruction.py
+```
+
+**Beklenti:** Yığılmış M matrisi (3 konfig × 48 BPM) × 3 Fourier sütunu,
+rank ~3 → k=0 + k=2 (3 bilinmeyen) tam belirlenmiş.
+
+### 3. (İsteğe bağlı) En iyi j₂'yi tara
 
 ```bash
 python3 scan_j2.py --step 4      # kaba (12 j₂, ~75 dk)
