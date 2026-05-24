@@ -54,10 +54,18 @@ def tsvd_solve(A, b, tau_rel):
     return x, int(keep.sum()), s
 
 
-def fourier_basis(n_q, N):
-    """n_q quad için N harmoniklik Fourier baz matrisi: sütunlar [1, cos, sin, cos, sin, ...]
-    Boyut: (n_q, 2N+1)"""
+def fourier_basis(n_q, N=None, k_list=None):
+    """Fourier baz matrisi. İki mod:
+      N       : k=1..N harmonikleri + DC  → boyut (n_q, 2N+1)
+      k_list  : yalnızca belirtilen harmonikler, DC yok → boyut (n_q, 2·len(k_list))
+    """
     j = np.arange(n_q)
+    if k_list is not None:
+        cols = []
+        for k in k_list:
+            cols.append(np.cos(2 * np.pi * k * j / n_q))
+            cols.append(np.sin(2 * np.pi * k * j / n_q))
+        return np.column_stack(cols)
     cols = [np.ones(n_q)]
     for k in range(1, N + 1):
         cols.append(np.cos(2 * np.pi * k * j / n_q))
@@ -65,29 +73,44 @@ def fourier_basis(n_q, N):
     return np.column_stack(cols)
 
 
+def _fit_fourier(dR, delta, dy_gercek, F):
+    """ΔR·F üzerinden LSQ çöz, kappa/model/ölçüm hatası ve korelasyon döndür."""
+    M = dR @ F
+    a, _, _, sv = np.linalg.lstsq(M, delta, rcond=None)
+    dy_geri = F @ a
+    kappa = sv[0] / sv[-1] if len(sv) > 1 and sv[-1] > 0 else (sv[0] if len(sv) == 1 else np.inf)
+    a_ref, _, _, _ = np.linalg.lstsq(F, dy_gercek, rcond=None)
+    model_err = np.std(dy_gercek - F @ a_ref) * 1e6
+    olcum_err = np.std(dy_geri - dy_gercek) * 1e6
+    corr = np.corrcoef(dy_gercek, dy_geri)[0, 1]
+    return dy_geri, kappa, model_err, olcum_err, corr
+
+
 def fourier_reconstruct(dR, delta, dy_gercek, n_q, N_list):
-    """Her N için Fourier tabanlı en küçük kareler rekonstrüksiyonu.
-    Döndürür: sözlük {N: dy_geri}"""
+    """k=1..N harmonikleri + DC taraması."""
     results = {}
-    print(f"\n{'N':>3}  {'κ(ΔR·F)':>10}  {'model hatasi RMS':>17}  {'olcum hatasi RMS':>17}  {'korelasyon':>11}")
-    print("-" * 65)
+    print(f"\n{'N':>3}  {'baz':>6}  {'κ(ΔR·F)':>10}  {'model RMS':>11}  {'ölçüm RMS':>11}  {'korelasyon':>11}")
+    print("-" * 60)
     for N in N_list:
-        F = fourier_basis(n_q, N)
-        M = dR @ F                          # (n_q, 2N+1)
-        a, _, _, sv = np.linalg.lstsq(M, delta, rcond=None)
-        dy_geri = F @ a
-
-        kappa = sv[0] / sv[-1] if sv[-1] > 0 else np.inf
-
-        # Model hatası: gerçek dy'nin N harmonikle ne kadar iyi temsil edilir
-        a_ref, _, _, _ = np.linalg.lstsq(F, dy_gercek, rcond=None)
-        dy_model = F @ a_ref
-        model_err = np.std(dy_gercek - dy_model) * 1e6
-
-        olcum_err = np.std(dy_geri - dy_gercek) * 1e6
-        corr = np.corrcoef(dy_gercek, dy_geri)[0, 1]
-        print(f"  {N:1d}  {kappa:10.3e}  {model_err:14.2f} um  {olcum_err:14.2f} um  {corr:11.6f}")
+        F = fourier_basis(n_q, N=N)
+        dy_geri, kappa, model_err, olcum_err, corr = _fit_fourier(dR, delta, dy_gercek, F)
+        print(f"  {N:1d}  {F.shape[1]:>6d}  {kappa:10.3e}  {model_err:8.2f} um  {olcum_err:8.2f} um  {corr:11.6f}")
         results[N] = dy_geri
+    return results
+
+
+def fourier_reconstruct_targeted(dR, delta, dy_gercek, n_q, k_lists, label="hedefli"):
+    """Belirli harmonik listelerine odaklı rekonstrüksiyon.
+    k_lists: [[2], [2,4], [1,2,3,4], ...]  — her biri bir ölçüm stratejisi."""
+    results = {}
+    print(f"\n{'k listesi':>12}  {'baz':>6}  {'κ(ΔR·F)':>10}  {'model RMS':>11}  {'ölçüm RMS':>11}  {'korelasyon':>11}")
+    print("-" * 68)
+    for k_list in k_lists:
+        F = fourier_basis(n_q, k_list=k_list)
+        dy_geri, kappa, model_err, olcum_err, corr = _fit_fourier(dR, delta, dy_gercek, F)
+        tag = "{" + ",".join(str(k) for k in k_list) + "}"
+        print(f"  {tag:>10}  {F.shape[1]:>6d}  {kappa:10.3e}  {model_err:8.2f} um  {olcum_err:8.2f} um  {corr:11.6f}")
+        results[tuple(k_list)] = dy_geri
     return results
 
 
@@ -250,19 +273,34 @@ def main():
     print_results("  dy", dy_gercek, dy_geri)
     print_results("  dx", dx_gercek, dx_geri)
 
-    # Fourier tabanlı rekonstrüksiyon
+    # Fourier tabanlı rekonstrüksiyon — k=1..N taraması
     N_list = [1, 2, 3, 4, 5]
-    print("\n" + "=" * 65)
-    print("Fourier rekonstrüksiyonu — dikey (dy)")
-    print("  'model hatasi': gerçek dy'nin N harmonikle temsil hatası")
-    print("  'olcum hatasi': ΔR·F üzerinden geri çatım hatası")
-    print("=" * 65)
+    print("\n" + "=" * 68)
+    print("Fourier rekonstrüksiyonu (k=1..N + DC) — dikey (dy)")
+    print("  'model RMS': gerçek dy'nin N harmonikle temsil hatası")
+    print("  'ölçüm RMS': ΔR·F üzerinden geri çatım hatası")
+    print("=" * 68)
     dy_fourier = fourier_reconstruct(dR_dy, delta_y, dy_gercek, n_q, N_list)
 
-    print("\n" + "=" * 65)
-    print("Fourier rekonstrüksiyonu — yatay (dx)")
-    print("=" * 65)
+    print("\n" + "=" * 68)
+    print("Fourier rekonstrüksiyonu (k=1..N + DC) — yatay (dx)")
+    print("=" * 68)
     dx_fourier = fourier_reconstruct(dR_dx, delta_x, dx_gercek, n_q, N_list)
+
+    # Hedefli rekonstrüksiyon — yalnızca ilgilenilen harmonikler
+    # k_listesi: her satır bir strateji (kaç harmonik, hangisi)
+    k_lists = [[2], [4], [2, 4], [1, 2, 3, 4]]
+    print("\n" + "=" * 68)
+    print("Hedefli Fourier rekonstrüksiyonu — dikey (dy)")
+    print("  (DC olmadan, yalnızca seçili harmonikler)")
+    print("=" * 68)
+    dy_targeted = fourier_reconstruct_targeted(dR_dy, delta_y, dy_gercek, n_q, k_lists)
+
+    k_lists_dx = [[1], [3], [1, 3], [1, 2, 3, 4]]
+    print("\n" + "=" * 68)
+    print("Hedefli Fourier rekonstrüksiyonu — yatay (dx)")
+    print("=" * 68)
+    dx_targeted = fourier_reconstruct_targeted(dR_dx, delta_x, dx_gercek, n_q, k_lists_dx)
 
     np.savez("kmod_reconstruction_test.npz",
              dy_gercek=dy_gercek, dy_geri=dy_geri,
