@@ -49,7 +49,7 @@
 
     "g2": 0.21,
     "kmod_quad1_index": 2,
-    "kmod_quad2_index": 8,
+    "kmod_quad2_index": 9,
 
     "dy_harmonics": [
         {"k": 0, "amp_cos": 6e-5,    "amp_sin": 3e-5},
@@ -68,5 +68,6 @@
 
     "k_search_max": 12,
     "greedy_residual_threshold": 0.15,
-    "max_harmonics": 3
+    "max_harmonics": 3,
+    "lasso_lambda": 5e-6
 }

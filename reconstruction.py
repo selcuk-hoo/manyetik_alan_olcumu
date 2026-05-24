@@ -81,6 +81,71 @@ def print_svd_diagnostic(dR_dy, dR_dx):
         print(f"      Fourier katsayısı güvenilir şekilde belirlenebilir.")
 
 
+def soft_threshold(v, t):
+    return np.sign(v) * np.maximum(np.abs(v) - t, 0)
+
+
+def lasso_admm(M, b, lam, rho=None, max_iter=3000, tol=1e-12):
+    """ADMM ile LASSO: minimize ½‖M·a − b‖² + λ‖a‖₁
+
+    rho: ADMM ceza parametresi (None → 10×λ)
+    """
+    n = M.shape[1]
+    if rho is None:
+        rho = max(lam * 10, 1e-10)
+    MtM = M.T @ M
+    Mtb = M.T @ b
+    A = MtM + rho * np.eye(n)
+    L = np.linalg.cholesky(A)        # A s.p.d. → Cholesky kararlı
+
+    x = np.zeros(n); z = np.zeros(n); u = np.zeros(n)
+    for _ in range(max_iter):
+        # x-update: (M'M + ρI)x = M'b + ρ(z - u)
+        rhs = Mtb + rho * (z - u)
+        x = np.linalg.solve(L.T, np.linalg.solve(L, rhs))
+        # z-update: yumuşak eşikleme
+        z_new = soft_threshold(x + u, lam / rho)
+        # u-update: dual değişken
+        u += x - z_new
+        if np.linalg.norm(z_new - z) < tol:
+            break
+        z = z_new
+    return z
+
+
+def lasso_reconstruct_report(label, dR, delta, gercek, k_max, antisym, lam, truth_cfg):
+    """Tam Fourier baz üzerinde LASSO seyrek rekonstrüksiyon.
+
+    LASSO, tüm k=0..k_max harmonikleri üzerinde seyrek çözüm arar;
+    gerçek olmayan harmonikler sıfıra çekilir. λ büyükse daha seyrek.
+    """
+    n_q = dR.shape[0]
+    k_list = list(range(k_max + 1))
+    F_full, meta_full = fodo_fourier_basis(n_q, k_list, antisym=antisym)
+    M = dR @ F_full
+
+    a = lasso_admm(M, delta, lam)
+    geri = F_full @ a
+
+    # Eşik: 5 μm'ın altındakiler sıfır kabul edilir (görüntüleme için)
+    SHOW_THR = 5e-6
+    found_all = harmonics_to_amp_phase(a, meta_full)
+    truth_ks  = {h["k"] for h in truth_cfg}
+    found_show = [f for f in found_all if f[1] > SHOW_THR or f[0] in truth_ks]
+    selected_ks = sorted({f[0] for f in found_all if f[1] > SHOW_THR})
+
+    err_rms = np.std(geri - gercek) * 1e6
+    cor     = np.corrcoef(gercek, geri)[0, 1]
+
+    print(f"\n{'=' * 72}")
+    print(f"  LASSO rekonstrüksiyon: {label}   λ={lam:.1e}")
+    print(f"  Tespit edilen harmonikler (>5 μm): {selected_ks}")
+    print(f"{'=' * 72}")
+    _print_harmonic_table(found_show, truth_cfg)
+    print(f"\n  LASSO profil hatası: hata RMS = {err_rms:.3f} μm   korelasyon = {cor:.6f}")
+    return geri
+
+
 def greedy_search(dR, delta, k_max, threshold, antisym, max_harmonics=None):
     """Adaptif greedy harmonik seçimi.
     Döndürür: (seçilen_k_listesi, son_F, son_a, son_meta, rezidüel_geçmişi)"""
@@ -278,10 +343,11 @@ def main():
     with open("params.json") as f:
         config = json.load(f)
 
-    k_max        = config.get("k_search_max", 12)
-    threshold    = config.get("greedy_residual_threshold", 0.15)
-    antisym      = config.get("smooth_antisym_fodo", True)
+    k_max         = config.get("k_search_max", 12)
+    threshold     = config.get("greedy_residual_threshold", 0.15)
+    antisym       = config.get("smooth_antisym_fodo", True)
     max_harmonics = config.get("max_harmonics", 3)
+    lasso_lam     = config.get("lasso_lambda", 5e-6)
 
     # ΔR'leri hesapla
     R_dy_1 = np.load("R_dy_1.npy")
@@ -340,13 +406,30 @@ def main():
     geri_x = print_report("YATAY (dx)", dR_dx, delta_x, dx_gercek,
                           selected_x, a_x, meta_x, hist_x, dx_cfg)
 
+    # ─── 3) LASSO (kör, seyrek) rekonstrüksiyon ───────────────────────────────
+    # Greedy'nin aksine konveks optimizasyon: L1 ceza terimi sahte harmonikleri
+    # sıfıra çeker. λ (lasso_lambda) büyükse daha seyrek çözüm.
+    print(f"\n\n{'#' * 72}")
+    print(f"# LASSO (KÖR, SEYREK) REKONSTRÜKSİYON")
+    print(f"# λ = {lasso_lam:.1e}   (params.json: lasso_lambda)")
+    print(f"# Fiziksel harmonikler seyreksе LASSO greedy'den üstündür.")
+    print(f"# λ çok küçük → çok harmonik, λ çok büyük → hiç harmonik")
+    print(f"{'#' * 72}")
+
+    geri_y_lasso = lasso_reconstruct_report(
+        "DİKEY (dy)", dR_dy, delta_y, dy_gercek, k_max, antisym, lasso_lam, dy_cfg)
+    geri_x_lasso = lasso_reconstruct_report(
+        "YATAY (dx)", dR_dx, delta_x, dx_gercek, k_max, antisym, lasso_lam, dx_cfg)
+
     np.savez("reconstruction_result.npz",
              dy_gercek=dy_gercek,
              dy_geri_targeted=geri_y_targeted if dy_cfg else np.zeros_like(dy_gercek),
              dy_geri_greedy=geri_y,
+             dy_geri_lasso=geri_y_lasso,
              dx_gercek=dx_gercek,
              dx_geri_targeted=geri_x_targeted if dx_cfg else np.zeros_like(dx_gercek),
              dx_geri_greedy=geri_x,
+             dx_geri_lasso=geri_x_lasso,
              selected_k_y=np.array(selected_y),
              selected_k_x=np.array(selected_x),
              a_y=a_y, a_x=a_x)
