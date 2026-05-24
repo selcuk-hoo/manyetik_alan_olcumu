@@ -271,6 +271,60 @@ def _print_harmonic_table(found, truth_cfg):
             print(f"  {k:>3d}  {a_tah_um:8.2f} μm  {p_tah:8.3f}  {a_gr_um:8.2f} μm  {p_gr:8.3f}  {err:7.2f}%  {flag}")
 
 
+def multi_config_targeted_fit(label, dR_list, delta_list, gercek, k_list,
+                              antisym, truth_cfg, cfg_labels=None):
+    """Birden çok kmod konfigürasyonunu üst üste yığ ve k_list harmoniklerini fit et.
+
+    Her ΔR_c (tek-quad kmod) rank ~1, ikisi rank ~2 vb. Yığılmış sistem:
+      [ΔR_c0; ΔR_c1; ...] @ F @ c = [Δy_c0; Δy_c1; ...]
+    F sütun sayısı kadar bilinmeyen, yığma rankı kadar denklem.
+    """
+    n_q = dR_list[0].shape[0]
+    F, meta = fodo_fourier_basis(n_q, k_list, antisym=antisym)
+
+    # Her konfig için ayrı M_c = ΔR_c @ F ve kappa'sı
+    M_blocks = [dR @ F for dR in dR_list]
+    M_stack  = np.vstack(M_blocks)
+    b_stack  = np.concatenate(delta_list)
+
+    sv_stack = np.linalg.svd(M_stack, compute_uv=False)
+    kappa_stack = sv_stack[0] / sv_stack[-1] if sv_stack[-1] > 0 else np.inf
+    rank_stack = int(np.sum(sv_stack > sv_stack[0] * 1e-3))
+
+    a, _, _, _ = np.linalg.lstsq(M_stack, b_stack, rcond=None)
+    geri = F @ a
+    res  = np.linalg.norm(b_stack - M_stack @ a)
+
+    found = harmonics_to_amp_phase(a, meta)
+
+    print(f"\n{'=' * 72}")
+    print(f"  ÇOK-KONFİG HEDEFLİ rekonstrüksiyon: {label}")
+    print(f"  Konfig sayısı = {len(dR_list)}   k_list = {k_list}   baz boyutu = {F.shape[1]}")
+    print(f"  Yığılmış sistem boyutu: {M_stack.shape}   rezidüel = {res:.4e}")
+    print(f"  κ(yığılmış M) = {kappa_stack:.2e}   etkin rank = {rank_stack}/{F.shape[1]}")
+    if rank_stack >= F.shape[1]:
+        print(f"  → Rank ≥ baz boyutu : sistem belirli, katsayılar fiziksel olarak yorumlanabilir.")
+    else:
+        print(f"  → Rank < baz boyutu: sistem hâlâ underdetermined, daha fazla konfig gerek.")
+    print(f"{'=' * 72}")
+
+    # Konfig başına diagnostic
+    if cfg_labels is None:
+        cfg_labels = [f"c{i}" for i in range(len(dR_list))]
+    print(f"\n  Konfig başına ΔR rank ve sinyal:")
+    for cl, dR_c, dy_c in zip(cfg_labels, dR_list, delta_list):
+        sv_c = np.linalg.svd(dR_c, compute_uv=False)
+        rk_c = int(np.sum(sv_c > sv_c[0] * 1e-2))
+        print(f"    {cl}: σ[0]={sv_c[0]:.2e}  σ[1]={sv_c[1]:.2e}  rank(>1%)={rk_c}  |Δy| RMS={np.std(dy_c)*1e6:.2f} μm")
+
+    _print_harmonic_table(found, truth_cfg)
+
+    err_rms = np.std(geri - gercek) * 1e6
+    cor = np.corrcoef(gercek, geri)[0, 1] if np.std(geri) > 1e-15 else float('nan')
+    print(f"\n  Çok-konfig profil hatası: hata RMS = {err_rms:.3f} μm   korelasyon = {cor:.6f}")
+    return geri, a, meta
+
+
 def targeted_fit_report(label, dR, delta, gercek, truth_cfg, antisym):
     """params.json'daki harmoniklerle doğrudan FODO-antisim fit.
 
@@ -343,6 +397,32 @@ def print_report(label, dR, delta, gercek_full, selected, a, meta, history,
     return geri
 
 
+def _load_multi_configs(n_configs_max=8):
+    """Mevcut R_dy_*_cN.npy ve kmod_test_cN.npz dosyalarını yükle."""
+    dR_dy_list, dR_dx_list = [], []
+    dy_list, dx_list = [], []
+    cfg_labels = []
+    dy_gercek = dx_gercek = None
+    for n in range(n_configs_max):
+        r1 = f"R_dy_1_c{n}.npy"
+        if not os.path.exists(r1):
+            continue
+        R_dy_1 = np.load(f"R_dy_1_c{n}.npy")
+        R_dy_2 = np.load(f"R_dy_2_c{n}.npy")
+        R_dx_1 = np.load(f"R_dx_1_c{n}.npy")
+        R_dx_2 = np.load(f"R_dx_2_c{n}.npy")
+        data   = np.load(f"kmod_test_c{n}.npz")
+        dR_dy_list.append(R_dy_2 - R_dy_1)
+        dR_dx_list.append(R_dx_2 - R_dx_1)
+        dy_list.append(data["delta_y"])
+        dx_list.append(data["delta_x"])
+        if dy_gercek is None:
+            dy_gercek = data["dy_gercek"]
+            dx_gercek = data["dx_gercek"]
+        cfg_labels.append(f"c{n}")
+    return dR_dy_list, dR_dx_list, dy_list, dx_list, dy_gercek, dx_gercek, cfg_labels
+
+
 def main():
     os.chdir(BASE)
 
@@ -355,6 +435,45 @@ def main():
     max_harmonics = config.get("max_harmonics", 3)
     lasso_lam     = config.get("lasso_lambda", 5e-6)
 
+    dy_cfg = config.get("dy_harmonics", [])
+    dx_cfg = config.get("dx_harmonics", [])
+
+    # ─── ÇOK-KONFİG MOD: R_dy_1_c0.npy varsa devreye girer ─────────────────
+    multi_dRy, multi_dRx, multi_dy, multi_dx, mg_dy, mg_dx, mc_labels = \
+        _load_multi_configs()
+
+    if len(multi_dRy) >= 2:
+        print(f"\n{'#' * 72}")
+        print(f"# ÇOK-KONFİGÜRASYON MOD: {len(multi_dRy)} kmod konfigi bulundu ({mc_labels})")
+        print(f"# Yığılmış sistem ile k=0 ve k=2 birlikte çözülecek.")
+        print(f"{'#' * 72}")
+
+        # Her konfig için bireysel ΔR diagnosticleri
+        for cl, dRy in zip(mc_labels, multi_dRy):
+            sv = np.linalg.svd(dRy, compute_uv=False)
+            rk = int(np.sum(sv > sv[0] * 0.01))
+            print(f"  {cl}: ΔR_dy σ[0..2] = {sv[0]:.2e} {sv[1]:.2e} {sv[2]:.2e}   rank(>1%) = {rk}")
+
+        ks_dy = sorted(set(h["k"] for h in dy_cfg))
+        ks_dx = sorted(set(h["k"] for h in dx_cfg))
+        if ks_dy:
+            multi_config_targeted_fit(
+                "DİKEY (dy)", multi_dRy, multi_dy, mg_dy,
+                ks_dy, antisym, dy_cfg, cfg_labels=mc_labels)
+        if ks_dx:
+            multi_config_targeted_fit(
+                "YATAY (dx)", multi_dRx, multi_dx, mg_dx,
+                ks_dx, antisym, dx_cfg, cfg_labels=mc_labels)
+
+        np.savez("reconstruction_multi_result.npz",
+                 dy_gercek=mg_dy, dx_gercek=mg_dx,
+                 n_configs=len(multi_dRy))
+        print("\nÇok-konfig sonuçları 'reconstruction_multi_result.npz' dosyasına kaydedildi.")
+        print("\n(Tek-konfig analizi için R_dy_1.npy ve kmod_reconstruction_test.npz gerekli.)")
+        if not os.path.exists("R_dy_1.npy"):
+            return
+
+    # ─── TEK-KONFİG MOD (eski davranış) ───────────────────────────────────
     # ΔR'leri hesapla
     R_dy_1 = np.load("R_dy_1.npy")
     R_dy_2 = np.load("R_dy_2.npy")
@@ -370,7 +489,7 @@ def main():
     dy_gercek  = data["dy_gercek"]
     dx_gercek  = data["dx_gercek"]
 
-    print(f"Adaptif Fourier rekonstrüksiyonu")
+    print(f"Adaptif Fourier rekonstrüksiyonu (tek-konfig)")
     print(f"  k_search_max = {k_max}")
     print(f"  greedy_residual_threshold = {threshold} (= %{threshold*100:.0f} düşüş)")
     print(f"  max_harmonics (greedy) = {max_harmonics}")
@@ -378,9 +497,6 @@ def main():
 
     # ΔR tekil değer analizi
     print_svd_diagnostic(dR_dy, dR_dx)
-
-    dy_cfg = config.get("dy_harmonics", [])
-    dx_cfg = config.get("dx_harmonics", [])
 
     # ─── 1) Hedefli rekonstrüksiyon ───────────────────────────────────────────
     # params.json'daki harmonikler biliniyormuş gibi fit. En güvenilir mod.

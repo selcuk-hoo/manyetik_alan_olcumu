@@ -114,10 +114,18 @@ def fourier_reconstruct_targeted(dR, delta, dy_gercek, n_q, k_lists, label="hede
     return results
 
 
+def _resolve_kmod_test(config, n_q, cfg_idx=None):
+    """Kmod parametrelerini çöz (test için)."""
+    from build_response_matrix import _resolve_kmod
+    return _resolve_kmod(config, n_q, cfg_idx)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--smooth", action="store_true",
                         help="Rastgele yerine sinüzoidal quad hizalama hatası üret (algoritma testi)")
+    parser.add_argument("--config", "-c", type=int, default=None,
+                        help="kmod_configs[N] konfig indeksi. Verilirse kmod_test_cN.npz kaydeder.")
     args = parser.parse_args()
 
     os.chdir(BASE)
@@ -125,48 +133,24 @@ def main():
     with open("params.json") as f:
         config = json.load(f)
 
-    R_dy_1 = np.load("R_dy_1.npy")
-    R_dy_2 = np.load("R_dy_2.npy")
-    R_dx_1 = np.load("R_dx_1.npy")
-    R_dx_2 = np.load("R_dx_2.npy")
+    cfg_idx = args.config
+    suffix  = f"_c{cfg_idx}" if cfg_idx is not None else ""
+
+    R_dy_1 = np.load(f"R_dy_1{suffix}.npy")
+    R_dy_2 = np.load(f"R_dy_2{suffix}.npy")
+    R_dx_1 = np.load(f"R_dx_1{suffix}.npy")
+    R_dx_2 = np.load(f"R_dx_2{suffix}.npy")
 
     dR_dy = R_dy_2 - R_dy_1
     dR_dx = R_dx_2 - R_dx_1
 
-    n_q     = R_dy_1.shape[0]
+    n_q = R_dy_1.shape[0]
 
-    # Mod seçimi: iki-quad / tek-quad / uniform.
-    # kmod_single_quad_index/eps geriye uyumluluk aliasi.
-    g0         = config.get("g0", config.get("g1", 0.21))
-    g1         = config.get("g1", g0)
-    g2         = config.get("g2", g0)
-    j1         = config.get("kmod_quad1_index", config.get("kmod_single_quad_index", -1))
-    j2         = config.get("kmod_quad2_index", -1)
-    single_eps = config.get("kmod_single_quad_eps", 0.10)
-
-    if 0 <= j1 < n_q and 0 <= j2 < n_q:
-        # Iki-quad: j1->g1, j2->g2, diger 46 quad->g0
-        g1_nom  = g0
-        g1_pert = g0
-        quad_dG_pert = np.zeros(n_q)
-        quad_dG_pert[j1] = (g1 - g0) / g0
-        quad_dG_pert[j2] = (g2 - g0) / g0
-        print(f"K-mod modu: IKI QUAD j1={j1}(g1={g1}), j2={j2}(g2={g2}), baz g0={g0}")
-    elif 0 <= j1 < n_q:
-        # Tek-quad
-        g1_nom  = g0
-        g1_pert = g0
-        eps_j1  = (g1 - g0) / g0 if g1 != g0 else single_eps
-        quad_dG_pert = np.zeros(n_q)
-        quad_dG_pert[j1] = eps_j1
-        print(f"K-mod modu: TEK QUAD #{j1}, baz=g0={g0}, eps={eps_j1*100:.1f}%")
+    g1_nom, g1_pert, quad_dG_pert, mode_label = _resolve_kmod_test(config, n_q, cfg_idx)
+    if cfg_idx is not None:
+        print(f"K-mod modu: kmod_configs[{cfg_idx}] — {mode_label}")
     else:
-        # Uniform
-        g1_nom  = g1
-        eps     = 0.02
-        g1_pert = g1_nom * (1.0 + eps)
-        quad_dG_pert = None
-        print(f"K-mod modu: UNIFORM g1*{1+eps:.3f}")
+        print(f"K-mod modu: {mode_label}")
 
     print(f"dR_dy kosul sayisi : {np.linalg.cond(dR_dy):.3e}")
     print(f"dR_dx kosul sayisi : {np.linalg.cond(dR_dx):.3e}")
@@ -343,7 +327,8 @@ def main():
     print("=" * 68)
     dx_targeted = fourier_reconstruct_targeted(dR_dx, delta_x, dx_gercek, n_q, k_lists_dx)
 
-    np.savez("kmod_reconstruction_test.npz",
+    out_name = f"kmod_test{suffix}.npz" if cfg_idx is not None else "kmod_reconstruction_test.npz"
+    np.savez(out_name,
              dy_gercek=dy_gercek, dy_geri=dy_geri,
              dx_gercek=dx_gercek, dx_geri=dx_geri,
              dipole_tilt_sabit=dipole_tilt_sabit,
@@ -352,7 +337,7 @@ def main():
              delta_y=delta_y, delta_x=delta_x,
              **{f"dy_fourier_N{N}": dy_fourier[N] for N in N_list},
              **{f"dx_fourier_N{N}": dx_fourier[N] for N in N_list})
-    print("\nSonuclar 'kmod_reconstruction_test.npz' dosyasina kaydedildi.")
+    print(f"\nSonuclar '{out_name}' dosyasina kaydedildi.")
 
 
 if __name__ == "__main__":

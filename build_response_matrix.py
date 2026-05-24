@@ -234,11 +234,50 @@ def build_matrices(config, g1_override=None, g0_override=None,
     return R_dy, R_dx
 
 
+def _resolve_kmod(config, n_q, cfg_idx=None):
+    """Kmod parametrelerini çöz. cfg_idx verilirse kmod_configs[cfg_idx] kullanılır."""
+    g0 = config.get("g0", config.get("g1", 0.21))
+    g1 = config.get("g1", g0)
+    g2 = config.get("g2", g0)
+    single_eps = config.get("kmod_single_quad_eps", 0.10)
+
+    if cfg_idx is not None:
+        cfgs = config.get("kmod_configs", [])
+        if cfg_idx >= len(cfgs):
+            raise ValueError(f"kmod_configs[{cfg_idx}] yok (toplam {len(cfgs)} konfig)")
+        j1 = cfgs[cfg_idx]["j1"]
+        j2 = cfgs[cfg_idx]["j2"]
+    else:
+        j1 = config.get("kmod_quad1_index", config.get("kmod_single_quad_index", -1))
+        j2 = config.get("kmod_quad2_index", -1)
+
+    if 0 <= j1 < n_q and 0 <= j2 < n_q:
+        g1_nom = g0; g1_pert = g0
+        quad_dG = np.zeros(n_q)
+        quad_dG[j1] = (g1 - g0) / g0
+        quad_dG[j2] = (g2 - g0) / g0
+        label = f"two-quad j1={j1}(g1={g1}), j2={j2}(g2={g2}), baz g0={g0}"
+    elif 0 <= j1 < n_q:
+        g1_nom = g0; g1_pert = g0
+        eps_j1 = (g1 - g0) / g0 if g1 != g0 else single_eps
+        quad_dG = np.zeros(n_q)
+        quad_dG[j1] = eps_j1
+        label = f"single_q={j1}, baz=g0={g0}, eps={eps_j1*100:.1f}%"
+    else:
+        g1_nom = g1; eps = 0.02; g1_pert = g1_nom * (1.0 + eps)
+        quad_dG = None
+        label = "uniform g1*1.02"
+
+    return g1_nom, g1_pert, quad_dG, label
+
+
 def main():
     default_workers = max(1, (os.cpu_count() or 2) - 1)
     parser = argparse.ArgumentParser(description="Tepki matrisi insasi - paralel.")
     parser.add_argument("--workers", "-w", type=int, default=default_workers,
                         help=f"Paralel worker sayisi (default: cekirdek-1 = {default_workers})")
+    parser.add_argument("--config", "-c", type=int, default=None,
+                        help="kmod_configs[N] konfig indeksi. Verilirse dosyalar _cN son eki alir.")
     parser.add_argument("--single-quad", type=int, default=None,
                         help="params.json 'kmod_single_quad_index' degerini override eder.")
     parser.add_argument("--single-quad-eps", type=float, default=None,
@@ -251,47 +290,17 @@ def main():
 
     n_q     = 2 * int(config.get("nFODO", 24))
     delta_q = 1e-4
+    cfg_idx = args.config
 
-    # Geriye uyumluluk: kmod_single_quad_* anahtarlari alias olarak okunur.
-    single_quad = args.single_quad if args.single_quad is not None \
-                  else config.get("kmod_single_quad_index", -1)
-    single_eps  = args.single_quad_eps if args.single_quad_eps is not None \
-                  else config.get("kmod_single_quad_eps", 0.10)
-
-    g0 = config.get("g0", config.get("g1", 0.21))
-    g1 = config.get("g1", g0)
-    g2 = config.get("g2", g0)
-    j1 = config.get("kmod_quad1_index", single_quad)
-    j2 = config.get("kmod_quad2_index", -1)
-
-    if 0 <= j1 < n_q and 0 <= j2 < n_q:
-        # Iki-quad mod: j1 -> g1, j2 -> g2, diger 46 quad -> g0
-        g1_nom  = g0
-        g1_pert = g0
-        quad_dG_pert = np.zeros(n_q)
-        quad_dG_pert[j1] = (g1 - g0) / g0
-        quad_dG_pert[j2] = (g2 - g0) / g0
-        mode_label = f"two-quad j1={j1}(g1={g1}), j2={j2}(g2={g2}), baz g0={g0}"
-    elif 0 <= j1 < n_q:
-        # Tek-quad mod
-        g1_nom  = g0
-        g1_pert = g0
-        eps_j1  = (g1 - g0) / g0 if g1 != g0 else single_eps
-        quad_dG_pert = np.zeros(n_q)
-        quad_dG_pert[j1] = eps_j1
-        mode_label = f"single_q={j1}, baz=g0={g0}, eps={eps_j1*100:.1f}%"
-    else:
-        # Uniform mod: tum quadlar g1*1.02
-        g1_nom  = g1
-        eps     = 0.02
-        g1_pert = g1_nom * (1.0 + eps)
-        quad_dG_pert = None
-        mode_label = f"uniform g1*1.02"
-
+    g1_nom, g1_pert, quad_dG_pert, mode_label = _resolve_kmod(config, n_q, cfg_idx)
     sigma_noise = config.get("bpm_noise_sigma", 0.0)
+
+    suffix = f"_c{cfg_idx}" if cfg_idx is not None else ""
 
     print("=" * 60)
     print(f"Konfigurasyon 1: nominal optik  (g1={g1_nom}, n_workers={args.workers})")
+    if cfg_idx is not None:
+        print(f"  kmod_config indeksi: {cfg_idx}  dosya son eki: '{suffix}'")
     print("=" * 60)
     print(f"  n_quad={n_q},  delta_q={delta_q*1e3:.2f} mm,  mod: {mode_label}")
     if sigma_noise > 0:
@@ -306,8 +315,8 @@ def main():
         sigma_noise=sigma_noise, n_workers=args.workers,
     )
 
-    np.save("R_dy_1.npy", R_dy_1)
-    np.save("R_dx_1.npy", R_dx_1)
+    np.save(f"R_dy_1{suffix}.npy", R_dy_1)
+    np.save(f"R_dx_1{suffix}.npy", R_dx_1)
 
     print(f"\n  [nom] kappa(R_dy) = {np.linalg.cond(R_dy_1):.3e}")
     print(f"  [nom] kappa(R_dx) = {np.linalg.cond(R_dx_1):.3e}")
@@ -317,6 +326,7 @@ def main():
     if quad_dG_pert is not None:
         print(f"Konfigurasyon 2: k-mod pert ({mode_label})")
     else:
+        eps = g1_pert / g1_nom - 1
         print(f"Konfigurasyon 2: uniform pert  (g1={g1_pert:.4f}, +{eps*100:.0f}%)")
     print("=" * 60)
     print()
@@ -328,13 +338,13 @@ def main():
         quad_dG_pert=quad_dG_pert,
     )
 
-    np.save("R_dy_2.npy", R_dy_2)
-    np.save("R_dx_2.npy", R_dx_2)
+    np.save(f"R_dy_2{suffix}.npy", R_dy_2)
+    np.save(f"R_dx_2{suffix}.npy", R_dx_2)
 
     dR_dy = R_dy_2 - R_dy_1
     dR_dx = R_dx_2 - R_dx_1
-    np.save("dR_dy.npy", dR_dy)
-    np.save("dR_dx.npy", dR_dx)
+    np.save(f"dR_dy{suffix}.npy", dR_dy)
+    np.save(f"dR_dx{suffix}.npy", dR_dx)
 
     print(f"\n  [pert] kappa(R_dy) = {np.linalg.cond(R_dy_2):.3e}")
     print(f"  [pert] kappa(R_dx) = {np.linalg.cond(R_dx_2):.3e}")
