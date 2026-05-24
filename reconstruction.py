@@ -227,14 +227,20 @@ def harmonics_to_amp_phase(a, meta):
 
 
 def truth_harmonics(harmonics_cfg):
-    """params.json'daki harmonik listesini (k, amp, phase, ac, as) formuna çevir."""
+    """params.json'daki harmonik listesini (k, amp, phase, ac, as) formuna çevir.
+    k=0 için yalnız amp_cos kullanılır (sin(0)=0 → amp_sin fiziksel olarak anlamsız)."""
     out = []
     for h in harmonics_cfg:
         k = h["k"]
         ac = h.get("amp_cos", 0.0)
         as_= h.get("amp_sin", 0.0)
-        amp = np.sqrt(ac*ac + as_*as_)
-        phase = np.arctan2(as_, ac) if k > 0 else 0.0
+        if k == 0:
+            amp = abs(ac)
+            phase = 0.0
+            as_ = 0.0
+        else:
+            amp = np.sqrt(ac*ac + as_*as_)
+            phase = np.arctan2(as_, ac)
         out.append((k, amp, phase, ac, as_))
     return out
 
