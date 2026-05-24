@@ -20,6 +20,7 @@ BPM hataları:
 Ön koşul: build_response_matrix.py çalıştırılmış olmalı
           (R_dy_1.npy, R_dy_2.npy, R_dx_1.npy, R_dx_2.npy üretir).
 """
+import argparse
 import json
 import numpy as np
 import os
@@ -91,6 +92,11 @@ def fourier_reconstruct(dR, delta, dy_gercek, n_q, N_list):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--smooth", action="store_true",
+                        help="Rastgele yerine sinüzoidal quad hizalama hatası üret (algoritma testi)")
+    args = parser.parse_args()
+
     os.chdir(BASE)
 
     with open("params.json") as f:
@@ -153,12 +159,23 @@ def main():
     rng_noise = np.random.default_rng(seed=99)
 
     # Quad hizalama hataları (geri çatılacak)
-    dy_max    = config.get("quad_random_dy_max", 0.3e-3)
-    dx_max    = config.get("quad_random_dx_max", 0.3e-3)
-    quad_seed = config.get("quad_random_seed", 13)
-    rng = np.random.default_rng(seed=quad_seed)
-    dy_gercek = rng.uniform(-dy_max, dy_max, n_q)
-    dx_gercek = rng.uniform(-dx_max, dx_max, n_q)
+    j = np.arange(n_q)
+    if args.smooth:
+        # Sinüzoidal mod — algoritma testi: N≥4 model hatasını sıfırlamalı
+        #   dy: k=2 ve k=4 harmonikleri
+        #   dx: k=1 ve k=3 harmonikleri (bağımsız test)
+        A = config.get("quad_random_dy_max", 1e-4)
+        dy_gercek = A * (np.sin(2*np.pi*2*j/n_q) + 0.5*np.cos(2*np.pi*4*j/n_q))
+        dx_gercek = A * (np.cos(2*np.pi*1*j/n_q) + 0.5*np.sin(2*np.pi*3*j/n_q))
+        print("Mod: SMOOTH (sinüzoidal)  dy→k={2,4}  dx→k={1,3}")
+    else:
+        dy_max    = config.get("quad_random_dy_max", 0.3e-3)
+        dx_max    = config.get("quad_random_dx_max", 0.3e-3)
+        quad_seed = config.get("quad_random_seed", 13)
+        rng = np.random.default_rng(seed=quad_seed)
+        dy_gercek = rng.uniform(-dy_max, dy_max, n_q)
+        dx_gercek = rng.uniform(-dx_max, dx_max, n_q)
+        print("Mod: RASTGELE (uniform)")
 
     # Dipol tiltler — modelde yok, her iki ölçümde aynı (common-mode)
     d_tilt_max  = config.get("dipole_random_tilt_max", 0.0)
