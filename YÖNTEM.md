@@ -27,22 +27,22 @@
 Bir hızlandırıcı halkasında her kuadrupol mıknatıs ideal eksenine göre
 küçük bir kaçıklık (`dy_j` dikeyde, `dx_j` yatayda) ile kuruludur.
 Tasarımdan sapma `dy_j ≠ 0` olduğunda, mıknatıs orta ekseninden geçmesi
-gereken parçacık demeti tam ortadan geçmez. Quadrupol gradyenli alanı
-parçacığı **odaklayıcı/saçtırıcı** olarak etkiler; demet ekseninden
+gereken parçacık demeti tam ortadan geçmez. Kuadrupol gradyenli alanı
+parçacığı odaklayıcı/saçtırıcı olarak etkiler; demet ekseninden
 sapmış parçacık ek bir dipol-benzeri kick alır:
 
 $$
-\Delta y'_j \;=\; -K_j \cdot dy_j
+\Delta y'_j = -K_j \cdot dy_j
 $$
 
-burada $K_j = (1/B\rho)\,\partial B/\partial x \cdot L_q$ quad'ın integre kick gücü.
-Her quad'da bu küçük kick'ler birikir ve halkanın **kapalı yörüngesini**
+burada $K_j = (1/B\rho) \cdot (\partial B/\partial x) \cdot L_q$ quad'ın integre kick gücü.
+Her quad'daki bu küçük kick'ler birikir ve halkanın **kapalı yörüngesini**
 ideal eksenden saptırır. BPM'ler (Beam Position Monitor) bu sapmayı
 ölçer:
 
 $$
-y_i^{co} \;=\; \frac{\sqrt{\beta_i}}{2\sin\pi\nu}\,
-\sum_j \sqrt{\beta_j}\;\cos(\pi\nu - |\phi_i - \phi_j|)\;\Delta y'_j
+y_i^{co} = \frac{\sqrt{\beta_i}}{2\sin\pi\nu}
+\sum_j \sqrt{\beta_j} \cos(\pi\nu - |\phi_i - \phi_j|) \cdot \Delta y'_j
 $$
 
 Bu klasik Courant-Snyder formülüdür: BPM $i$'deki sapma, tüm $j$
@@ -56,36 +56,38 @@ ekseninden 10 μm kalıcı bir sapma bile yanlış EDM sinyaline
 benzeyebilir — sistematik hata. Bu yüzden her quad'ın hizalanması
 **~10 μm** mertebesinde bilinmek istenir. Mekanik ölçüm bu hassasiyete
 ulaşmaz; demete dayalı (beam-based) hizalama gerekir. Sorumuz şu:
-**BPM ölçümlerinden 48 quad'ın `dy_j`'leri tek tek geri çatılabilir
-mi?**
+**BPM ölçümlerinden 48 quad'ın `dy_j`'lerini tek tek geri çatabilir
+miyiz?**
 
 ---
 
 ## 2. Tepki matrisi: tek-tane-değil-bütün dilini konuşmak
 
-Yukarıdaki formül linner: tüm $dy_j$'ler birlikte BPM okumalarına
+Yukarıdaki formül lineerdir: tüm $dy_j$'ler birlikte BPM okumalarına
 katkı verir. Matris formuna alalım:
 
 $$
-y \;=\; R \cdot dy, \qquad R_{ij} \;=\; \frac{K_j\sqrt{\beta_i\beta_j}}{2\sin\pi\nu}\,\cos(\pi\nu - |\phi_i - \phi_j|)
+y = R \cdot dy,
+\qquad
+R_{ij} = \frac{K_j \sqrt{\beta_i \beta_j}}{2\sin\pi\nu} \cos(\pi\nu - |\phi_i - \phi_j|)
 $$
 
-$R$ "tepki matrisi" (response matrix, ORM): satır $i$ = BPM, sütun $j$
-= quad. $R_{ij}$, $j$ quad'ı 1 m kaydırılırsa $i$ BPM'inde okunacak
-sapmadır.
+$R$, **tepki matrisi** (response matrix, ORM) olarak adlandırılır:
+satır $i$ BPM'e, sütun $j$ quad'a karşılık gelir. $R_{ij}$, $j$
+numaralı quad 1 m kaydırılırsa $i$ numaralı BPM'de okunacak sapmadır.
 
 Soyut görünüyor ama operasyonel olarak basittir: simülasyonda her quad'ı
 sırayla küçük bir miktar kaydırırız ($\delta = 10^{-4}$ m), kapalı
-yörüngeyi koşturup okuruz, fark alırız:
+yörüngeyi hesaplayıp okuruz, fark alırız:
 
 $$
-R[:,j] \;=\; \frac{y_{co}(d y_j = \delta) - y_{co}(0)}{\delta}
+R[:,j] = \frac{y_{co}(\,dy_j = \delta\,) - y_{co}(0)}{\delta}
 $$
 
 48 quad → 48 simülasyon → tüm $R$ matrisi (48×48).
 
-**Eğer $R$ tersi alınabilir ise:** $dy = R^{-1} y$. Probleme bittiği
-gibi. Sadece bir engel kaldı: BPM ofsetleri.
+**Eğer $R$ tersi alınabilirse:** $dy = R^{-1} y$. Problem çözüldü.
+Sadece bir engel kaldı: BPM ofsetleri.
 
 ---
 
@@ -95,31 +97,33 @@ Bir BPM'in okuduğu değer, gerçek pozisyona ek olarak **elektronik
 ofset** $b_i$ içerir:
 
 $$
-y^{ölçülen} \;=\; R \cdot dy \;+\; b \;+\; n
+y^{\text{ölçülen}} = R \cdot dy + b + n
 $$
 
-$b$ statiktir (zamanla değişmez) ama bilinmez ve **büyüktür**:
-tipik olarak $\sim 300\,\mu m$, oysa quad hizalama sapmasının
-yörüngeye katkısı $\sim 10\,\mu m$. Ofset sinyali boğar; $R \cdot dy = y - b$
-çözülemez.
+$b$ statiktir (zamanla değişmez) ama bilinmez ve büyüktür:
+tipik olarak ~300 μm; oysa quad hizalama sapmasının yörüngeye katkısı
+~10 μm. Ofset sinyali boğar; $R \cdot dy = y - b$ çözülemez.
 
 ### Hile: aynı $b$, farklı $R$
 
-Quad gradyenlerini iki farklı ayarda kurup ($g_{nom}$ ve $g_{pert}$)
+Quad gradyenlerini iki farklı ayarda kurup ($g_{\text{nom}}$ ve $g_{\text{pert}}$)
 iki kez ölç:
 
 $$
-y_1 = R_1 \cdot dy + b + n_1, \qquad y_2 = R_2 \cdot dy + b + n_2
+y_1 = R_1 \cdot dy + b + n_1
+$$
+$$
+y_2 = R_2 \cdot dy + b + n_2
 $$
 
 İkisinin **farkı**:
 
 $$
-\Delta y \;=\; y_2 - y_1 \;=\; (R_2 - R_1)\cdot dy + (n_2 - n_1) \;=\; \Delta R \cdot dy + \Delta n
+\Delta y = y_2 - y_1 = (R_2 - R_1) \cdot dy + (n_2 - n_1) = \Delta R \cdot dy + \Delta n
 $$
 
-$b$ otomatik iptal oldu! Şimdi denklem $\Delta R \cdot dy = \Delta y$.
-Çözmek için $\Delta R$'nin iyi koşullanmış olması gerekir. Bu noktada
+$b$ otomatik iptal oldu. Şimdi denklem $\Delta R \cdot dy = \Delta y$.
+Çözmek için $\Delta R$'nin iyi koşullanmış olması gerekir; bu noktada
 **hangi modülasyon stratejisi** seçildiği belirleyici hale gelir.
 
 ### Üç strateji
@@ -127,14 +131,14 @@ $b$ otomatik iptal oldu! Şimdi denklem $\Delta R \cdot dy = \Delta y$.
 - **Uniform**: tüm quad'lar birlikte ölçeklenir, $g \to g(1+\varepsilon)$.
   Halkanın tüm odaklaması değişir, beta-beat tüm modlarda zengindir,
   $\Delta R$ tam ranklı ve $\kappa(\Delta R) \sim 160$. Mükemmel
-  çalışır. **Ama gerçek bir hızlandırıcıda tüm güç kaynaklarını
-  eşzamanlı kalibre etmek pratikte zor.**
+  çalışır. Ama gerçek bir hızlandırıcıda tüm güç kaynaklarını
+  eşzamanlı kalibre etmek pratikte zordur.
 
 - **Tek-quad**: yalnızca bir quad'ın gradyenini değiştir. $\Delta R$
-  esasen 1 rank, $\kappa \sim 10^8$. Tamamen başarısız.
+  esasen rank-1, $\kappa \sim 10^8$. Tamamen başarısız.
 
 - **İki-quad**: yalnızca iki quad'ın ($j_1$, $j_2$) gradyenini değiştir.
-  $\Delta R$ rank-2 baskın bir matris. $\kappa \sim 10^6$. Hızlandırıcıda
+  $\Delta R$ rank-2 baskın bir matris, $\kappa \sim 10^6$. Hızlandırıcıda
   uygulanabilir ama matematiksel olarak zorlu. **Bu çalışmanın odak
   noktası.**
 
@@ -142,46 +146,50 @@ $b$ otomatik iptal oldu! Şimdi denklem $\Delta R \cdot dy = \Delta y$.
 
 ## 4. İki-quad k-mod neden tam çözmüyor?
 
-İlk içgüdü "iki quad'ın gradyenini değiştiriyorum, demet tüm halkayı
-gezerken sadece o iki noktada farklı kick alacak, dolayısıyla COD
-yalnızca o iki noktadan etkilenecek" şeklindedir. Bu **yanlış**.
-Gradyen değişikliği yalnızca o iki noktadaki kick'i değiştirmez,
+İlk içgüdü şu olabilir: "iki quad'ın gradyenini değiştiriyorum; demet
+tüm halkayı gezerken sadece o iki noktada farklı kick alacak, dolayısıyla
+COD yalnızca o iki noktadan etkilenecek." Bu **yanlıştır**.
+Gradyen değişikliği yalnızca o iki noktadaki kick'i değiştirmez;
 **tüm lattice'in optiğini** (tune $\nu$, beta fonksiyonu $\beta(s)$,
 faz ilerlemesi $\phi(s)$) değiştirir.
 
-$\Delta R$'yi iki parçaya ayır:
+$\Delta R$'yi iki parçaya ayıralım:
 
 $$
-\Delta R[i,j] \;\approx\; \underbrace{K_j\,\delta g_j\,C(i,j)}_{\text{DOĞRUDAN}} \;+\; \underbrace{K_j\,\Delta C(i,j)}_{\text{DOLAYLI}}
+\Delta R[i,j] \approx
+\underbrace{K_j \cdot \delta g_j \cdot C(i,j)}_{\text{DOĞRUDAN}}
++
+\underbrace{K_j \cdot \Delta C(i,j)}_{\text{DOLAYLI}}
 $$
 
-burada $C(i,j) = \sqrt{\beta_i\beta_j}/(2\sin\pi\nu)\cdot\cos(\pi\nu - |\Delta\phi|)$.
+burada $C(i,j) = \sqrt{\beta_i \beta_j} / (2\sin\pi\nu) \cdot \cos(\pi\nu - |\Delta\phi|)$.
 
-- **Doğrudan terim**: yalnızca $j = j_1, j_2$ için sıfırdan farklı
-  (yalnız o quad'ların $\delta g_j$'si var). Büyüklük $\sim \varepsilon$.
-- **Dolaylı terim**: tüm sütunlarda sıfırdan farklı (beta-beat
-  herkese yayılır). Büyüklük $\sim \varepsilon^2$ — beta-beat
-  amplitüdü modülasyon büyüklüğü ile orantılı.
+- **Doğrudan terim**: yalnızca $j = j_1, j_2$ için sıfırdan farklıdır,
+  çünkü sadece bu iki quad'ın $\delta g_j$'si var. Büyüklük ~ $\varepsilon$.
+- **Dolaylı terim**: tüm sütunlarda sıfırdan farklıdır (beta-beat
+  tüm halkaya yayılır). Büyüklük ~ $\varepsilon^2$ — beta-beat
+  amplitüdü modülasyon büyüklüğü ile orantılıdır.
 
-Bu iki terim arasındaki şiddet oranı yaklaşık **1:ε**; tipik %5
+Bu iki terim arasındaki şiddet oranı yaklaşık **1 : ε**; tipik %5
 modülasyon için 20:1. Sonuç: $\Delta R$'nin SVD spektrumunda iki
 büyük tekil değer (doğrudan modlar, $j_1$ ve $j_2$ yönleri) ve 46
-küçük tekil değer (dolaylı modlar) vardır.
+küçük tekil değer (dolaylı modlar) bulunur.
 
 $$
-\kappa(\Delta R) \;\sim\; \frac{1}{\varepsilon} \;\sim\; 20{-}10^6
+\kappa(\Delta R) \sim \frac{1}{\varepsilon} \sim 10^6
 $$
 
-(tam değer beta-beat detaylarına bağlıdır). Matematiksel olarak
-$\Delta R$ tam ranklı (her quad'ın bilgisi orada), ama **kullanılabilir**
-rank etkin olarak 2. Direkt ters çevirme veya TSVD bu küçük modları
-gürültü tabanından ayıramaz, rekonstrüksiyon başarısız olur.
+Matematiksel olarak $\Delta R$ tam ranklıdır — her quad'ın bilgisi
+teorik olarak içindedir — ama **kullanılabilir** rank etkin olarak 2.
+Direkt ters çevirme veya TSVD bu küçük modları gürültü tabanından
+ayıramaz; rekonstrüksiyon başarısız olur.
 
 ---
 
 ## 5. R₁ ve R₂'yi ayrı kullanmak yardım eder mi?
 
-Doğal soru: $\Delta R$ yerine iki tepki matrisini sistemde ayrı tut.
+Doğal soru şudur: $\Delta R$ yerine iki tepki matrisini sistemde ayrı
+tutalım, $dy$ ve $b$'yi aynı anda çözelim.
 
 $$
 \begin{pmatrix} R_1 & I \\ R_2 & I \end{pmatrix}
@@ -191,10 +199,10 @@ $$
 $$
 
 İki bilinmeyen vektör (toplam 96 boyut), iki ölçüm vektörü (96 denklem).
-Görünüşte daha bilgi taşıyor.
+Görünüşte daha fazla bilgi içeriyor.
 
-Bloklar arasında satır indirgemesi uygulayalım — ikinci satırdan
-birinciyi çıkar:
+Bloklar arasında satır indirgemesi uygulayalım — ikinci bloktan birinci
+bloğu çıkaralım:
 
 $$
 \begin{pmatrix} R_1 & I \\ \Delta R & 0 \end{pmatrix}
@@ -203,86 +211,93 @@ $$
 \begin{pmatrix} y_1 \\ \Delta y \end{pmatrix}
 $$
 
-Sistem otomatik ayrıştı:
+Sistem otomatik olarak iki bağımsız alt probleme ayrıştı:
 
-1. **Alt blok**: $\Delta R \cdot dy = \Delta y$ → $dy$'yi belirler.
-2. **Üst blok**: $b = y_1 - R_1\cdot dy$ → $dy$ bulunduktan sonra $b$.
+1. **Alt blok:** $\Delta R \cdot dy = \Delta y$ → $dy$'yi belirler.
+2. **Üst blok:** $b = y_1 - R_1 \cdot dy$ → $dy$ bulunduktan sonra $b$'yi verir.
 
-Yani $dy$'yi bulmak için hâlâ $\Delta R$'nin iyi koşullanması
-gerekiyor. **R₁ ve R₂'yi ayrı kullanmak cebirsel olarak $\Delta R$
-kullanmakla denktir.** Bilgi kazanmaz; sadece aynı bilgiyi farklı
-formda yazar.
+Yani $dy$'yi bulmak için hâlâ $\Delta R$'nin iyi koşullanması gerekiyor.
+**$R_1$ ve $R_2$'yi ayrı kullanmak, cebirsel olarak $\Delta R$
+kullanmakla tamamen denktir.** Bilgi kazanmaz; sadece aynı bilgiyi farklı
+formda yeniden yazar.
 
-Kazanmak istiyorsak **harici bilgi** eklemek zorundayız. İki yol var:
+Kazanmak için **harici bilgi** eklenmesi gerekir. İki yol vardır:
 
-- **(a) $b$ hakkında ön bilgi**: $b$'nin yapısı (örn. düşük-frekanslı
+- **(a) $b$ hakkında ön bilgi:** $b$'nin yapısı (örneğin düşük-frekanslı
   ofset deseni) modellenir, parametre sayısı azaltılır.
-- **(b) $dy$ hakkında ön bilgi**: $dy$'nin "akıllıca" parametrelendirilmesi —
-  örneğin düşük-mertebeli Fourier bileşenleri.
+- **(b) $dy$ hakkında ön bilgi:** $dy$'nin doğru biçimde parametrelendirilmesi
+  — örneğin düşük-mertebeli Fourier bileşenleri.
 
-Bu çalışmada (b) yolunu izliyoruz, çünkü fizik bize $dy$'nin yapısı
+Bu çalışmada **(b)** yolunu izliyoruz; fizik bize $dy$'nin yapısı
 hakkında doğal bir öngörü sağlıyor.
 
 ---
 
 ## 6. Problemi yeniden parametrelendir: Fourier bazı
 
-Kapalı yörünge formülünde bir gizli filtre vardır. Kick dağılımı
-$\theta(s)$ ve onun Fourier ayrışımı:
+Kapalı yörünge formülünde gizli bir filtre vardır. Kick dağılımı
+$\theta(s)$'nin faz-ilerlemesi cinsinden Fourier ayrışımı:
 
 $$
-\theta(s) \;=\; \sum_n \theta_n e^{i n \phi(s)/\nu}
+\theta(s) = \sum_n \theta_n \, e^{i n \phi(s) / \nu}
 $$
 
-COD'nin aynı harmoniği:
+Bu harmoniklerin kapalı yörüngeye katkısı:
 
 $$
-y_n^{co} \;\propto\; \frac{\theta_n}{n^2 - \nu^2}
+y_n^{co} \propto \frac{\theta_n}{n^2 - \nu^2}
 $$
 
-Bu paydanın **rezonans** yapısı vardır: $n \approx \nu$ olan harmonik
-en güçlü yükseltilir, diğer harmonikler $1/(n^2 - \nu^2)$ ile bastırılır.
-BPM ölçümünün taşıdığı bilgi, çoğunlukla **tune yakınındaki birkaç
-harmonik**te yoğunlaşmıştır. Yüksek harmoniklerin sinyali zaten doğal
-olarak küçüktür; gürültü altında kalır.
+Paydanın **rezonans** yapısı belirleyicidir: $n \approx \nu$ olan harmonik
+en güçlü yükseltilir; diğer harmonikler $1/(n^2 - \nu^2)$ ile
+bastırılır. Dolayısıyla BPM ölçümünün taşıdığı bilgi, büyük ölçüde
+**tune yakınındaki birkaç harmonik**te yoğunlaşır. Yüksek harmoniklerin
+sinyali zaten küçüktür; gürültü altında kalır.
 
-**Sonuç:** 48 boyutlu $dy$'nin 48 ayrı bileşenini eşit hassasiyetle
-geri çatmak fiziksel olarak imkânsız — bilgi yok. Buna karşın
-**düşük-mertebeli Fourier bileşenleri** doğal olarak iyi ölçülür.
+**Sonuç:** 48 boyutlu $dy$'nin her 48 bileşenini eşit hassasiyetle
+geri çatmak fiziksel olarak imkânsızdır — yeterli bilgi yoktur.
+Buna karşın **düşük-mertebeli Fourier bileşenleri** doğal olarak
+iyi ölçülür.
 
 ### Fourier baz matrisi
 
-Quad indeksini $j = 0, 1, ..., 47$ alıp her $dy$ vektörünü düşük
-harmonik bileşenleri ile temsil et:
+Quad indeksini $j = 0, 1, \ldots, 47$ alıp her $dy$ vektörünü
+düşük harmonik bileşenlerle temsil edelim:
 
 $$
-dy_j \;=\; a_0 + \sum_{k=1}^{N}\bigl[a_k\cos(2\pi k j/48) + b_k\sin(2\pi k j/48)\bigr]
+dy_j = a_0 + \sum_{k=1}^{N} \left[ a_k \cos\!\left(\frac{2\pi k j}{48}\right) + b_k \sin\!\left(\frac{2\pi k j}{48}\right) \right]
 $$
 
-Matris formunda $dy = F\cdot a$, $F$: 48×(2N+1) baz matrisi, $a$:
-(2N+1)-boyutlu katsayılar.
+Matris formunda $dy = F \cdot a$ olarak yazılır; burada $F$ boyutu
+$48 \times (2N+1)$ olan **Fourier baz matrisi**, $a$ ise
+$(2N+1)$-boyutlu katsayı vektörüdür.
 
-K-mod denkleminde yerleştir:
-
-$$
-\Delta y \;=\; \Delta R \cdot F \cdot a \;\equiv\; M \cdot a
-$$
-
-$M = \Delta R\cdot F$: 48×(2N+1). $N=4$ için 9 bilinmeyen, 48 denklem
-— **aşırı belirlenmiş**. En küçük kareler ile çöz:
+K-mod denklemine yerleştirelim:
 
 $$
-\hat a \;=\; (M^T M)^{-1} M^T \Delta y
+\Delta y = \Delta R \cdot F \cdot a \equiv M \cdot a
 $$
 
-ve geri çatım $\hat{dy} = F\cdot\hat a$.
+$M = \Delta R \cdot F$ matrisi $48 \times (2N+1)$ boyutludur.
+$N = 4$ için 9 bilinmeyen, 48 denklem — **aşırı belirlenmiş** sistem.
+En küçük kareler ile çözülür:
+
+$$
+\hat{a} = (M^T M)^{-1} M^T \Delta y
+$$
+
+ve geri çatım $\hat{dy} = F \cdot \hat{a}$ olarak elde edilir.
 
 ### Neden iyi koşullanır?
 
-$\Delta R$'nin "güçlü" tekil vektörleri (büyük $\sigma$'lı) zaten
-düşük-mertebeli faz harmoniklerinin yönündedir (tune-rezonans gereği).
-$F$'yi bu güçlü altuzaya hizalı seçtiğimiz için $M = \Delta R\cdot F$
-yalnızca "kuvvetli" modları taşır. **$\kappa(M) \ll \kappa(\Delta R)$**.
+$\Delta R$'nin "güçlü" tekil vektörleri (büyük $\sigma$'lı yönler)
+zaten düşük-mertebeli faz harmoniklerinin yönündedir — tune-rezonans
+etkisinin doğal bir sonucu. $F$'yi bu güçlü altuzaya hizalı seçtiğimizde
+$M = \Delta R \cdot F$ yalnızca "kuvvetli" modları taşır:
+
+$$
+\kappa(M) \ll \kappa(\Delta R)
+$$
 
 ---
 
@@ -290,109 +305,120 @@ yalnızca "kuvvetli" modları taşır. **$\kappa(M) \ll \kappa(\Delta R)$**.
 
 $N$ büyüdükçe:
 
-- **Bias (sapma) azalır**: daha çok harmonik baz → gerçek $dy$'yi
-  daha iyi temsil edebilir.
-- **Variance (gürültü büyütmesi) artar**: daha çok serbestlik → fit
-  gürültüyü de modellemeye başlar, katsayıları şişer.
+- **Bias (sapma) azalır:** daha çok harmonik baz eklenir; gerçek
+  $dy$'yi daha iyi temsil etmek mümkün olur.
+- **Variance (gürültü büyütmesi) artar:** daha çok serbestlik derecesi
+  fit'in gürültüyü de modellemeye başlamasına yol açar; katsayılar şişer.
 
-Bu klasik bir trade-off'tur. Doğru $N$ veriye bağlıdır.
+Bu klasik bir ikilemdir. Doğru $N$ veriye bağlıdır.
 
 ### Sayısal örnek
 
-Aşağıda **sinüzoidal test verisi** (smooth dy, $k=2$ ve $k=4$
-harmonikleri içeren) kullanıldı. $N$ taraması sonuçları:
+Aşağıda **sinüzoidal test verisi** kullanılmıştır: $dy$ yalnızca
+$k = 2$ ve $k = 4$ harmoniklerini içerecek şekilde üretilmiştir.
+$N$ taraması sonuçları:
 
-| N | baz | $\kappa(\Delta R\cdot F)$ | model RMS | ölçüm RMS | kor |
-|---|-----|---|-----------|-----------|-----|
+| N | Baz boyutu | $\kappa(\Delta R \cdot F)$ | Model RMS | Ölçüm RMS | Korelasyon |
+|---|-----------|---------------------------|-----------|-----------|------------|
 | 1 | 3 | 8.5 | 79 μm | **1065 μm** | 0.00 |
-| 2 | 5 | 7.9×10³ | 35 μm | 58 μm | 0.75 |
-| 3 | 7 | 1.2×10⁴ | 35 μm | 51 μm | 0.78 |
-| 4 | 9 | 1.5×10⁴ | 0 μm | 37 μm | 0.88 |
-| 5 | 11 | 1.8×10⁴ | 0 μm | 38 μm | 0.88 |
+| 2 | 5 | 7.9 × 10³ | 35 μm | 58 μm | 0.75 |
+| 3 | 7 | 1.2 × 10⁴ | 35 μm | 51 μm | 0.78 |
+| 4 | 9 | 1.5 × 10⁴ | 0 μm | 37 μm | 0.88 |
+| 5 | 11 | 1.8 × 10⁴ | 0 μm | 38 μm | 0.88 |
 
-- **"model RMS"**: $\hat{dy}_{model} = F\cdot F^+\cdot dy_{gerçek}$ kullanarak
-  veriden bağımsız hesaplanmış temsil hatası — "$N$ harmonik yeterli mi?"
-- **"ölçüm RMS"**: gerçek rekonstrüksiyon hatası, gürültü + temsil etkisi.
+Tablodaki iki ölçüt şunlardır:
 
-Okuma:
+- **Model RMS:** $\hat{dy}_{\text{model}} = F \cdot F^+ \cdot dy_{\text{gerçek}}$
+  ile hesaplanan temsil hatası — "N harmonik, gerçek $dy$'yi ne kadar
+  iyi yaklaşıklar?" sorusuna cevap verir. Ölçümden bağımsızdır.
+- **Ölçüm RMS:** gerçek rekonstrüksiyon hatası; hem gürültü hem de temsil
+  etkisini içerir.
 
-- $N=1$: bazda yalnız DC ve $k=1$ var, ama veride $k=2,4$. LSQ bu
-  uyumsuzluğu absurd büyük katsayılarla fitlemeye çalışıyor → 1065 μm hata.
-- $N=2$: bazda $k=2$ var ama $k=4$ yok. Veriden $k=4$ "sızıntı"sı
-  $k=2$ katsayısını saptırıyor. 58 μm hata.
-- $N=4$: tam doğru baz. Model RMS = 0, ölçüm RMS = 37 μm yalnız
-  gürültü artı kötü koşullanma sonucu.
-- $N=5$: ekstra bir harmonik gereksiz ama zarar da çok az — modern
-  bir bias-variance kompromisinde "az fazlalık tolere edilir".
+Tablo okunuşu:
 
-**Genel kural:** $N$, sinyalde bulunan en yüksek harmoniğe eşit ya
-da hafif büyük olmalı. Çok daha fazla → variance domine.
+- **$N = 1$:** Bazda yalnız DC ve $k = 1$ var; oysa veride $k = 2$ ve $k = 4$
+  bulunuyor. LSQ bu uyumsuzluğu absürd büyük katsayılarla gidermeye
+  çalışır → 1065 μm hata.
+- **$N = 2$:** Bazda $k = 2$ var ama $k = 4$ yok. Veriden $k = 4$'ün
+  "sızıntısı" $k = 2$ katsayısını saptırıyor. 58 μm hata.
+- **$N = 4$:** Tam doğru baz. Model RMS = 0; ölçüm RMS = 37 μm, yalnızca
+  gürültü büyütmesinden kaynaklanıyor.
+- **$N = 5$:** Gereksiz bir harmonik eklendi; zarar az ama küçük bir
+  kötüleşme gözlemleniyor.
 
-### Neden N=4 N=2'den iyi?
+**Genel kural:** $N$, sinyalde bulunan en yüksek harmoniğe eşit ya da
+hafif büyük olmalıdır. Çok daha büyük → variance baskın hale gelir.
 
-Bu klasik bir yanlış-tahsis (misattribution) örneğidir. $N=2$'de
-bazda $k=4$ olmadığı için LSQ $k=4$'ün $\Delta y$'ye katkısını
-kendi bazına dağıtmak zorunda — en yakını $k=2$. Sonuç: $k=2$
-katsayısı da kirleniyor. $N=4$'de her harmonik kendi katsayısına
-gidiyor, **temiz atfetme**. Pahası: 4 ekstra sütun, biraz daha
-büyük $\kappa$. Net etki: doğru atfetme kazancı > kötü koşullanma kaybı.
+### Neden N = 4, N = 2'den daha iyi sonuç veriyor?
 
-Daha derin mesaj: **bazınızda gerçek harmoniğin biri eksikse, var
-olan harmoniklerin tahmini de yanlış olur.**
+Bu klasik bir **yanlış-atfetme** (misattribution) örneğidir.
+
+$N = 2$'de bazda $k = 4$ yoktur; dolayısıyla LSQ, $k = 4$'ün $\Delta y$'ye
+katkısını en yakın baz fonksiyonuna — $k = 2$'ye — dağıtmak
+zorunda kalır. Sonuç: $k = 2$ katsayısı da kirlenir, yani gerçekte
+temsil edebildiği bileşeni bile yanlış kestirmiş olur.
+
+$N = 4$'te ise her harmonik kendi katsayısına gider — **temiz atfetme**.
+Bunun bedeli 4 ekstra sütun eklemekten kaynaklanan biraz daha büyük
+$\kappa$'dır. Net etki: doğru atfetme kazancı, kötü koşullanma
+kaybından fazladır.
+
+Daha derin mesaj: **bazınızda gerçek harmoniğin biri eksikse, var olan
+harmoniklerin tahmini de yanlış olur.**
 
 ---
 
 ## 8. Hedefli ölçüm: nano-metre hassasiyeti
 
-Yukarıdaki tablolar şunu söylüyor: 4 harmonik (DC dahil 9 katsayı)
-ile çalışmak $\kappa \approx 10^4$ getiriyor, gürültü 30× büyütülüyor,
-sonuç 37 μm.
+Önceki tablolar, k = 1..4 harmoniklerini içeren geniş baz ile çalışmanın
+$\kappa \approx 10^4$ getirdiğini ve gürültüyü ~30 kat büyüttüğünü
+gösterdi.
 
 Bir adım daha gidelim: **bazı yalnızca veride gerçekten var olan
-harmoniklerle sınırla**. Veride sadece $k=2$ ve $k=4$ olduğunu
-biliyorsak (örneğin fizikten ya da önceki ölçümlerden), baz olarak
-yalnız bunları kullan:
+harmoniklerle sınırla.** Veride sadece $k = 2$ ve $k = 4$ olduğunu
+biliyorsak (önceki ölçümlerden ya da fiziksel öngörüden), baz olarak
+tam olarak bunları kullanalım:
 
 $$
-F_{\{2,4\}}: \quad [\cos(2\pi\cdot 2 j/48),\; \sin(2\pi\cdot 2 j/48),\; \cos(2\pi\cdot 4 j/48),\; \sin(2\pi\cdot 4 j/48)]
+F_{\{2,4\}} = \bigl[\cos(2\pi \cdot 2 \cdot j/48),
+\sin(2\pi \cdot 2 \cdot j/48),
+\cos(2\pi \cdot 4 \cdot j/48),
+\sin(2\pi \cdot 4 \cdot j/48)\bigr]
 $$
 
 4 sütun, 4 katsayı.
 
 ### Sonuçlar
 
-| k listesi | sütun | $\kappa(\Delta R\cdot F)$ | model RMS | ölçüm RMS | kor |
-|-----------|-------|---|-----------|-----------|-----|
+| k listesi | Sütun | $\kappa(\Delta R \cdot F)$ | Model RMS | Ölçüm RMS | Korelasyon |
+|-----------|-------|---------------------------|-----------|-----------|------------|
 | {2} | 2 | 1.1 | 35 μm | 37 μm | 0.89 |
 | {4} | 2 | 14 | 71 μm | **1466 μm** | −0.38 |
 | **{2, 4}** | **4** | **186** | **0 μm** | **0.02 μm** | **1.000** |
-| {1, 2, 3, 4} | 8 | 1.3×10⁴ | 0 μm | 35 μm | 0.90 |
+| {1, 2, 3, 4} | 8 | 1.3 × 10⁴ | 0 μm | 35 μm | 0.90 |
 
-Bulgu çarpıcı: **{2, 4} bazı 0.02 μm hata veriyor — pratik olarak
-gürültü tabanı.** Geniş baz ({1,2,3,4}) ile karşılaştırıldığında **2000×
-daha iyi.**
+Bulgu çarpıcıdır: **{2, 4} bazı 0.02 μm hata veriyor — gürültü tabanı.**
+Geniş baz ({1, 2, 3, 4}) ile karşılaştırıldığında **2000 kat daha iyi.**
 
-### Niçin?
+### Neden bu kadar büyük fark?
 
-Geniş baz, $k=1$ ve $k=3$ için boş yere yer ayırıyor. Bu sütunlar
-veride sıfır katkı taşıyor ama matrisin koşul sayısını berbat ediyor:
-$\kappa$ 186'dan 13000'e çıkıyor. Gürültü büyütmesi yaklaşık olarak
-$\kappa$ ile orantılı; sonuç 2000× daha kötü.
+Geniş baz, $k = 1$ ve $k = 3$ için boş yere yer ayırıyor. Bu sütunlar
+veride sıfır katkı taşımasına rağmen matrisin koşul sayısını bozuyor:
+$\kappa$ 186'dan 13000'e çıkıyor. Gürültü büyütmesi yaklaşık $\kappa$
+ile orantılıdır; bu nedenle sonuç 2000 kat daha kötüye gidiyor.
 
-### Tek harmonik yalıtmak güvenli mi?
+### Tek harmonik yalıtmak ne zaman güvenlidir?
 
-{2} ya da {4} tek başına denenince:
+- **{2}** bazı çalışıyor (37 μm, kor. 0.89), çünkü $k = 2$ harmonik
+  veride $k = 4$'ten iki kat büyüktür. $k = 4$'ün sızıntısı küçük
+  bir pertürbasyon olarak kalır — kabul edilebilir.
+- **{4}** bazı patlar (1466 μm, kor. negatif): $k = 2$ katkısı baskın
+  olduğundan LSQ bu büyük katkıyı yalnızca $k = 4$ katsayısıyla
+  açıklamaya zorlanır; katsayı absürd büyür, sonuç anlamsız çıkar.
 
-- **{2}** çalışıyor (37 μm, kor 0.89), çünkü $k=2$ harmoniği veride
-  $k=4$'ten **iki kat büyük**. $k=4$ sızıntısı küçük bir
-  pertürbasyon — kabul edilebilir.
-- **{4}** patlıyor (1466 μm, kor negatif!). $k=2$ katkısı baskın,
-  ve sadece $k=4$ ile fit edilmeye çalışılınca $a_4$ katsayısı
-  absurd büyür. Sonuç anlamsız.
-
-**Kural:** Tek bir harmoniği yalıtarak ölçmek istiyorsanız, **o
-harmonik veride baskın olmalı** ya da diğer büyük harmonikleri
-baza eklemeniz gerekir.
+**Kural:** Tek bir harmoniği yalıtarak ölçmek istiyorsanız, ya o
+harmonik veride baskın olmalıdır; ya da diğer büyük harmonikler de
+baza eklenmelidir.
 
 ---
 
@@ -400,76 +426,77 @@ baza eklemeniz gerekir.
 
 ### Yöntemin gücü nereden geliyor?
 
-1. **Fiziksel uyum**: Düşük-mertebe Fourier, kapalı yörüngenin doğal
+1. **Fiziksel uyum:** Düşük-mertebe Fourier, kapalı yörüngenin doğal
    "filtre yapısına" uyar. Yüksek harmonikler zaten ölçülemez; onları
    modelden çıkarmak veri kaybı değil, gürültü kazancıdır.
-2. **Az parametre, çok ölçüm**: 48 BPM ile 4 parametre fit edildiğinde
-   istatistiksel olarak büyük SNR avantajı vardır.
-3. **Koşul sayısının zaferi**: Bazı doğru seçilirse $\kappa$ küçük
-   tutulur ve gürültü büyütülmez.
+2. **Az parametre, çok ölçüm:** 48 BPM ile 4 parametre fit edildiğinde
+   istatistiksel olarak büyük SNR avantajı elde edilir.
+3. **Koşul sayısının etkisi:** Baz doğru seçilirse $\kappa$ küçük kalır
+   ve gürültü büyütülmez.
 
-### Sınırlar — gerçek senaryoya transfer
+### Sınırlar: gerçek senaryoya transfer
 
-Yukarıdaki 0.02 μm sonucu **sinüzoidal test verisi** ile elde edildi:
-$dy$ yalnızca $k=2$ ve $k=4$ içerdiğini biliyorduk. Gerçek halkada
-$dy$'nin Fourier içeriği önceden tam bilinmez. İki sezgi yolu:
+Yukarıdaki 0.02 μm sonucu **sinüzoidal test verisi** ile elde edilmiştir:
+$dy$'nin yalnızca $k = 2$ ve $k = 4$ içerdiği önceden biliniyordu.
+Gerçek halkada $dy$'nin Fourier içeriği tam olarak bilinmez. İki yol
+vardır:
 
-- **Fizikten tahmin**: Toprak hareketi, termal genleşme, tünelin
-  oturması — bunlar **düşük frekanslı** hatalardır. $k=1, 2, 3$ tipik
-  baskın modlardır. Bu senaryoda hedefli Fourier yaklaşımı doğal
-  olarak uygulanabilir.
-- **Veri-yönlü tahmin**: Önce geniş bir baz ile ölç, rezidüel
-  spektrumdan hangi harmoniklerin önemli olduğunu gör, sonra dar bir
-  baza geç. Bu **adaptif baz seçimi** stratejisidir (gelecek iş).
+- **Fizikten tahmin:** Toprak hareketi, termal genleşme, tünel oturması
+  gibi kaynaklara bağlı hizalama hataları **düşük frekanslıdır**.
+  $k = 1, 2, 3$ tipik baskın modlardır. Bu senaryoda hedefli Fourier
+  yaklaşımı doğal olarak uygulanabilir.
+- **Veri-yönlü tahmin:** Önce geniş bir bazla ölç, rezidüel spektrumundan
+  hangi harmoniklerin önemli olduğunu gör, sonra dar bir baza geç.
+  Bu **adaptif baz seçimi** stratejisidir.
 
-Eğer $dy$ tamamen rastgele ve düz-spektrumluysa (her quad bağımsız
-olarak rastgele kaydırılmış), düşük-N Fourier yaklaşımı **model
-hatası** ile sınırlanır — yöntem fiziksel olarak doğru cevap veremez.
-Bu durumda 48 quad'ın tek tek hizalanmasını ölçmek için **çoklu
-k-mod ölçümü** (her ölçümde farklı quad çifti) zorunludur.
+Eğer $dy$ tamamen rastgele ve düz-spektrumluysa — yani her quad
+bağımsız ve rastgele kaydırılmışsa — düşük-N Fourier yaklaşımı
+**model hatası** ile sınırlanır. Bu durumda 48 quad'ın tek tek
+hizalanmasını ölçmek için **çoklu k-mod ölçümü** (her seferinde
+farklı bir quad çifti) zorunludur.
 
-### Karşılaştırma — tüm yöntemler
+### Karşılaştırma: tüm yöntemler
 
 | Yöntem | Hata RMS | Korelasyon | Yorum |
 |--------|----------|------------|-------|
-| Direkt çözüm ($R^{-1}$) | 107 μm | 0.03 | $\Delta R$ tekil, başarısız |
-| TSVD | 78 μm | 0.16 | Küçük modları keser, biraz iyileşir |
-| Fourier $N=4$ (geniş) | 37 μm | 0.88 | Fiziksel parametrelendirme |
-| **Fourier {2,4} (sıkı)** | **0.02 μm** | **1.000** | **Doğru baz, gürültü tabanı** |
+| Direkt çözüm ($\Delta R^{-1}$) | 107 μm | 0.03 | $\Delta R$ tekil, başarısız |
+| TSVD | 78 μm | 0.16 | Küçük modlar kesilir, biraz iyileşir |
+| Fourier $N = 4$ (geniş) | 37 μm | 0.88 | Fiziksel parametrelendirme |
+| **Fourier {2, 4} (sıkı)** | **0.02 μm** | **1.000** | **Doğru baz, gürültü tabanı** |
 
 ### Anahtar tasarım kararları
 
-- **Bazda olmayan harmonik veride var ise**: sızıntı + büyük hata.
-- **Bazda olan ama veride sıfır harmonik**: zarar yok, ama $\kappa$
-  büyür (gürültü büyütmesi).
-- **Optimal denge**: $F$ veride var olan harmoniklere **sıkıca**
-  hizalanmış olmalı, ne az ne fazla.
+- **Bazda olmayan harmonik veride varsa:** sızıntı ve büyük hata.
+- **Bazda olan ama veride sıfır harmonik:** zarar vermez, ama $\kappa$ büyür.
+- **Optimal denge:** $F$, veride var olan harmoniklere **sıkıca** hizalanmalı;
+  ne eksik ne fazla.
 
-Bu, klasik tepki-matrisi tabanlı yöntemin neden iki-quad k-mod
-rejiminde başarısız göründüğünü ve neden gerçekte bilgi taşıdığını
-gösteriyor: bilgi vardı, ama parametrelendirmemiz onu çıkarmak için
-yanlış üzerinde duruyordu. Doğru baz, doğru sonuç.
+Bu analiz, klasik tepki-matrisi tabanlı yöntemin iki-quad k-mod
+rejiminde neden başarısız göründüğünü ve neden gerçekte bilgi
+taşıdığını ortaya koyuyor: bilgi vardı, ama parametrelendirme onu
+çıkarmak için yanlış bir uzay üzerinde çalışıyordu. Doğru baz seçimi,
+doğru sonucu getiriyor.
 
 ---
 
 ## Ek: Kod akışı
 
 ```
-1. build_response_matrix.py:
-     R₁, R₂  ←  iki konfigürasyonda her quad'ı sırayla kaydır + simüle
-     ΔR     =  R₂ − R₁
+1. build_response_matrix.py
+     R₁, R₂  ←  iki konfigürasyonda her quad'ı sırayla kaydır + simüle et
+     ΔR = R₂ − R₁
 
-2. test_kmod_reconstruction.py:
-     (a) Gerçek dy/dx üret (rastgele veya smooth)
-     (b) İki konfigürasyonda parçacık takibi koş, y₁ ve y₂'yi al
+2. test_kmod_reconstruction.py
+     (a) Gerçek dy/dx üret (rastgele veya sinüzoidal --smooth)
+     (b) İki konfigürasyonda parçacık takibi; y₁ ve y₂'yi al
      (c) Δy = y₂ − y₁
      (d) Çöz:
-         - Direkt:   dy = ΔR⁻¹ · Δy
-         - TSVD:     küçük tekil değerleri kes
-         - Fourier:  dy = F · (ΔR·F)⁺ · Δy
+         Direkt:   dy = ΔR⁻¹ · Δy
+         TSVD:     küçük tekil değerleri kes
+         Fourier:  dy = F · (ΔR·F)⁺ · Δy
 ```
 
-Fourier seçimi kod içinde:
+Fourier seçimi kod içinde üç satırdır:
 
 ```python
 F = fourier_basis(n_q=48, k_list=[2, 4])   # sıkı baz
@@ -478,4 +505,4 @@ a, *_ = np.linalg.lstsq(M, delta_y, rcond=None)
 dy_geri = F @ a
 ```
 
-Üç satır. Tüm güç, bazın bu üç satırdan önce doğru seçilmesinde.
+Tüm güç, bazın bu üç satırdan önce doğru seçilmesindedir.
