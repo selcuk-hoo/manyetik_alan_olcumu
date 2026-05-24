@@ -67,5 +67,6 @@
     "smooth_antisym_fodo": true,
 
     "k_search_max": 12,
-    "greedy_residual_threshold": 0.02
+    "greedy_residual_threshold": 0.15,
+    "max_harmonics": 3
 }
