@@ -241,6 +241,86 @@ def run(bpm_offset_sigma=100e-6, n_trials=50, seed=0):
     print(f"       R-fit = R kullanır (full rank, ama b sızar)")
 
 
+def model_error_sweep(bpm_offset_sigma=100e-6,
+                      rel_errors=(0.0, 0.001, 0.003, 0.005, 0.01, 0.02, 0.05),
+                      n_trials=50, seed=0):
+    """R modelindeki göreli gradyen hatası arttıkça R-fit kalitesi nasıl bozuluyor?
+
+    Fiziksel model: her quad'ın gradyeni K_j yerine K_j*(1+ε_j) olarak bilinir.
+    Bu R'nin j. sütununu (1+ε_j) ile ölçekler → R_model[:,j] = R_true[:,j]*(1+ε_j).
+    Gerçek orbit y = R_true·Δq + b; fit ise R_model·F'yi kullanır.
+    """
+    with open("params.json") as f:
+        config = json.load(f)
+
+    R, _ = load_matrices()
+    n_q = R.shape[0]
+    antisym = config.get("smooth_antisym_fodo", True)
+    dy_true  = make_truth_dy(config, n_q)
+    truth_ks = sorted(set(h["k"] for h in config["dy_harmonics"]))
+    F_full, meta_full = fodo_basis(n_q, truth_ks, antisym)
+    F_k2,  meta_k2   = fodo_basis(n_q, [2],       antisym)
+
+    # gerçek k=2
+    a2t, *_ = np.linalg.lstsq(F_k2, dy_true, rcond=None)
+    amp_true = np.sqrt(a2t[0]**2 + a2t[1]**2)
+    phi_true = np.arctan2(a2t[1], a2t[0])
+
+    print("=" * 70)
+    print(f"  Model hatası süpürmesi   σ_b = {bpm_offset_sigma*1e6:.0f} μm   ({n_trials} deneme)")
+    print(f"  Gerçek k=2: {amp_true*1e6:.2f} μm @ ∠{phi_true:.3f} rad")
+    print("=" * 70)
+    print(f"  {'δK/K (%)':>10} {'RMS hata (μm)':>15} {'Korelasyon':>12} "
+          f"{'k=2 (μm)':>10} {'k=2 hata%':>10} {'faz Δ (rad)':>12}")
+    print("  " + "-" * 75)
+
+    for sigma_model in rel_errors:
+        rng = np.random.default_rng(seed)
+        rms_list, corr_list, amp_list, phi_list = [], [], [], []
+
+        for _ in range(n_trials):
+            b = rng.normal(0, bpm_offset_sigma, n_q)
+
+            # Gerçek orbit: R_true kullanılır
+            y = R @ dy_true + b
+
+            # Model hatası: her quad'ın gradyeni σ_model göreli hatayla bilinir
+            if sigma_model > 0:
+                eps = rng.normal(0, sigma_model, n_q)
+                R_model = R @ np.diag(1.0 + eps)
+            else:
+                R_model = R
+
+            # Fourier fit: baz = truth harmonikleri
+            M = R_model @ F_full
+            a, *_ = np.linalg.lstsq(M, y, rcond=1e-3)
+            dy_fit = F_full @ a
+
+            rms, corr = profile_error(dy_fit, dy_true)
+            rms_list.append(rms)
+            corr_list.append(corr)
+
+            idx2 = [i for i,(k,_) in enumerate(meta_full) if k==2]
+            amp_list.append(np.sqrt(a[idx2[0]]**2 + a[idx2[1]]**2))
+            phi_list.append(np.arctan2(a[idx2[1]], a[idx2[0]]))
+
+        mean_rms  = np.mean(rms_list)
+        mean_corr = np.mean(corr_list)
+        mean_amp  = np.mean(amp_list) * 1e6
+        dphi = np.abs(np.array(phi_list) - phi_true)
+        dphi = np.minimum(dphi, 2*np.pi - dphi)
+        mean_dphi = np.mean(dphi)
+        amp_err   = abs(mean_amp - amp_true*1e6) / (amp_true*1e6) * 100
+
+        label = f"{sigma_model*100:.2f}"
+        print(f"  {label:>10} {mean_rms:>14.1f}  {mean_corr:>11.3f}  "
+              f"{mean_amp:>9.2f}  {amp_err:>9.1f}  {mean_dphi:>11.3f}")
+
+    print()
+    print("  NOT: δK/K=0 → saf BPM ofset etkisi (model mükemmel)")
+    print("       δK/K>0 → model hatası + BPM ofset birlikte")
+
+
 if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
@@ -248,5 +328,11 @@ if __name__ == "__main__":
                    help="BPM ofset sigma (m), varsayılan=100e-6")
     p.add_argument("--trials", type=int, default=50)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--sweep", action="store_true",
+                   help="Model hatası süpürmesi çalıştır")
     args = p.parse_args()
-    run(bpm_offset_sigma=args.sigma, n_trials=args.trials, seed=args.seed)
+    if args.sweep:
+        model_error_sweep(bpm_offset_sigma=args.sigma,
+                          n_trials=args.trials, seed=args.seed)
+    else:
+        run(bpm_offset_sigma=args.sigma, n_trials=args.trials, seed=args.seed)
