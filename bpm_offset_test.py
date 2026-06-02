@@ -410,6 +410,31 @@ def clean_test(bpm_offset_sigma=100e-6, n_trials=50, seed=0,
     print(f"  gain={gain}  max_iter={max_iter}")
     print("=" * 64)
 
+    # ── TANI 1: sinyal vs ofset büyüklüğü ───────────────────────────────
+    orb_signal = R @ dy_true
+    rng_diag = np.random.default_rng(seed)
+    b_sample = rng_diag.normal(0, bpm_offset_sigma, n_q)
+    print(f"\n  [TANI 1] Sinyal vs ofset büyüklüğü:")
+    print(f"    ‖R·dy_true‖ (orbit sinyali) = {np.linalg.norm(orb_signal)*1e6:8.1f} μm")
+    print(f"    ‖b‖ (BPM ofseti, örnek)     = {np.linalg.norm(b_sample)*1e6:8.1f} μm")
+    # k=2'nin tek başına orbit katkısı
+    F_k2_d, _ = fodo_basis(n_q, [2], antisym)
+    orb_k2 = R @ (F_k2_d @ a2t)
+    print(f"    ‖R·dy(k=2)‖ (yalnız k=2)    = {np.linalg.norm(orb_k2)*1e6:8.1f} μm")
+
+    # ── TANI 2: SADECE ofset (sinyal yok) → CLEAN ne uyduruyor? ──────────
+    print(f"\n  [TANI 2] Sinyal YOK (dy_true=0), yalnız b={bpm_offset_sigma*1e6:.0f}μm:")
+    rng_d2 = np.random.default_rng(seed + 999)
+    b_only_k2 = []
+    for _ in range(n_trials):
+        b = rng_d2.normal(0, bpm_offset_sigma, n_q)
+        acc = clean_orbit(R, b, candidate_ks, antisym, gain, max_iter)  # y = b sadece
+        a2_b = acc.get(2, np.zeros(2))
+        b_only_k2.append(np.sqrt(a2_b[0]**2 + a2_b[1]**2))
+    print(f"    CLEAN'in b'den uydurduğu sahte k=2: "
+          f"{np.mean(b_only_k2)*1e6:.3f} ± {np.std(b_only_k2)*1e6:.3f} μm")
+    print(f"    (Eğer ~0 ise b gerçekten reddediliyor; büyükse sızıntı var)")
+
     rng = np.random.default_rng(seed)
     k2_amps, k2_phis, found_ks_all = [], [], []
 
@@ -437,10 +462,24 @@ def clean_test(bpm_offset_sigma=100e-6, n_trials=50, seed=0,
     amp_err   = abs(mean_amp - amp_true*1e6) / (amp_true*1e6) * 100
 
     print(f"\n  k=2 sonucu ({n_trials} deneme ortalaması):")
-    print(f"    Bulunan genlik : {mean_amp:.2f} ± {std_amp:.2f} μm")
-    print(f"    Gerçek genlik  : {amp_true*1e6:.2f} μm")
-    print(f"    Genlik hatası  : {amp_err:.1f}%")
+    print(f"    Bulunan genlik : {mean_amp:.3f} ± {std_amp:.3f} μm")
+    print(f"    Gerçek genlik  : {amp_true*1e6:.3f} μm")
+    print(f"    Genlik hatası  : {amp_err:.2f}%")
     print(f"    Faz hatası     : {mean_dphi:.3f} rad")
+
+    # ── TANI 3: σ_b süpürmesi → hata b ile ölçekleniyor mu? ─────────────
+    print(f"\n  [TANI 3] σ_b süpürmesi (k=2 std, b ile ölçekleniyor mu?):")
+    print(f"    {'σ_b (μm)':>10} {'k=2 ort (μm)':>14} {'k=2 std (μm)':>14}")
+    for sb in [0.0, 100e-6, 1000e-6, 10000e-6]:
+        rng_s = np.random.default_rng(seed + 7)
+        amps_s = []
+        for _ in range(n_trials):
+            b = rng_s.normal(0, sb, n_q) if sb > 0 else np.zeros(n_q)
+            acc = clean_orbit(R, R @ dy_true + b, candidate_ks, antisym, gain, max_iter)
+            a2s = acc.get(2, np.zeros(2))
+            amps_s.append(np.sqrt(a2s[0]**2 + a2s[1]**2))
+        print(f"    {sb*1e6:>10.0f} {np.mean(amps_s)*1e6:>14.3f} {np.std(amps_s)*1e6:>14.4f}")
+    print(f"    (std σ_b ile orantılı artmalı; sabit ~0 kalırsa b girmiyor demektir)")
 
     # Tipik bir denemede hangi k'lar bulundu?
     from collections import Counter
