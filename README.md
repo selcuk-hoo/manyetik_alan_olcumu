@@ -704,6 +704,52 @@ k=4,6,8 ne olursa olsun, tam verir. Rank yetersizken (mevcut durum) en
 iyi yaklaşık CLEAN'dir. `fourier_reconstruct.py` her iki yöntemi de basar
 ve sızıntı metriğiyle ne kadar uzakta olduğunu gösterir.
 
+### Tasarım kuralı: kaç quad gerekli?
+
+Ulaşılabilir rank, **modüle edilebilen farklı quad sayısına** eşittir
+(aynı quad'ı farklı gradyenle çalıştırmak rank eklemez — bilgi quad'ın
+faz konumundan gelir, gradyen değerinden değil). Buradan basit bir
+tasarım kuralı çıkar:
+
+$$
+\boxed{\text{gereken rank} = \underbrace{2}_{k=2\ (\cos,\sin)}
++ 2 \times (\text{bastırılacak kontaminant harmonik sayısı})}
+$$
+
+| Bastırılacak kontaminant | Gereken rank | Gereken farklı quad |
+|--------------------------|--------------|---------------------|
+| Yok (kontaminant ihmal edilebilir) | 2 | 2 |
+| Yalnız k=4 | 4 | 4 |
+| k=4, k=6 | 6 | 6 |
+| k=4, k=6, k=8 | 8 | 8 |
+
+Bunun pratik sonucu, az sayıda quad varken serttir. Aşağıdaki tablo,
+kontaminant fazları **keyfi** (saf cos değil, rastgele) iken k=2
+kestiriminin rank ile nasıl değiştiğini gösterir (sentetik, 40 rastgele
+geometri ortalaması; gerçek k=2 = 10 μm @ 0.64):
+
+| Rank ≈ quad | Sızıntı | k=2 genlik | Hata | Faz hatası |
+|-------------|---------|-----------|------|------------|
+| 2 | 0.51 | 76 μm | %663 | 1.40 rad |
+| 3 | 0.58 | 95 μm | %848 | 1.45 rad |
+| 4 | 0.60 | 84 μm | %739 | 1.48 rad |
+| 6 | 0.51 | 79 μm | %692 | 1.51 rad |
+| **8** | **0.00** | **10.0 μm** | **%0** | **0.00 rad** |
+
+Dikkat: rank 8'in altında kademeli bir iyileşme **yok** — keyfi
+kontaminant fazlarında k=2 ya tam çözülür (rank 8) ya da güvenilmezdir.
+Daha önce sızıntı testinde fazı iyi (Δ0.11 rad) bulmamız, kontaminantların
+o senaryoda saf cos (hizalı faz) olmasındandı; rastgele fazda bu şans yok.
+
+**Az quad varsa ne yapılabilir:**
+- **2 quad:** k=2'yi yalnızca *tespit* eder (var/yok), kaba bir genlik
+  üst-sınırı verir. Hassas ölçüm değil.
+- **3 quad:** Tek bir kontaminant harmoniğini bile (2 boyut ister) tam
+  null'layamaz; 2 quad'dan kayda değer fark yok.
+- **Tek kaçış — dış bilgi:** k=4,6,8 başka bir ölçüm/modelden bilinirse
+  katkıları çıkarılıp 2 quad ile k=2 kurtarılabilir, ama bu "yalnız
+  veriden" çözüm olmaktan çıkar.
+
 ---
 
 ## 13. Nerede Duruyoruz? Fiziksel Bir Değerlendirme

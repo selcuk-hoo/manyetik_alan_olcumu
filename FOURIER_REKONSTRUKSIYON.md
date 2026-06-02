@@ -817,6 +817,42 @@ noktada null-steering k=2'yi, k=4,6,8 ne olursa olsun, tam verir.
 Rank yetersizken en iyi yaklaşık CLEAN'dir. `fourier_reconstruct.py`
 ikisini de basar.
 
+### Tasarım kuralı: kaç quad gerekli?
+
+Ulaşılabilir rank = **modüle edilen farklı quad sayısı** (aynı quad'ın
+farklı gradyeni rank eklemez; bilgi quad'ın faz konumundan gelir):
+
+$$
+\text{gereken rank} = \underbrace{2}_{k=2} + 2\times(\text{bastırılacak kontaminant sayısı})
+$$
+
+| Bastırılacak | Gereken rank | Farklı quad |
+|--------------|--------------|-------------|
+| Yok | 2 | 2 |
+| k=4 | 4 | 4 |
+| k=4, k=6 | 6 | 6 |
+| k=4, k=6, k=8 | 8 | 8 |
+
+Kontaminant fazları **keyfi** iken k=2 kalitesi (sentetik, 40 geometri
+ortalaması; gerçek k=2 = 10 μm @ 0.64):
+
+| Rank ≈ quad | Sızıntı | k=2 genlik | Hata | Faz hatası |
+|-------------|---------|-----------|------|------------|
+| 2 | 0.51 | 76 μm | %663 | 1.40 rad |
+| 3 | 0.58 | 95 μm | %848 | 1.45 rad |
+| 4 | 0.60 | 84 μm | %739 | 1.48 rad |
+| 6 | 0.51 | 79 μm | %692 | 1.51 rad |
+| **8** | **0.00** | **10.0 μm** | **%0** | **0.00 rad** |
+
+Rank 8'in altında **kademeli iyileşme yok**: keyfi fazda k=2 ya tam
+çözülür (rank 8) ya da güvenilmez. Daha önceki "faz iyi" sonucu
+kontaminantların saf cos (hizalı) olmasındandı — rastgele fazda bu şans
+yok.
+
+**Az quad varsa:** 2 quad k=2'yi yalnız *tespit* eder (var/yok); 3 quad
+tek bir kontaminantı bile tam null'layamaz. Tek kaçış: k=4,6,8'i dış
+ölçüm/modelden bilip çıkarmak.
+
 ---
 
 ## 14. Pratik Rehber ve Açık Sorular
