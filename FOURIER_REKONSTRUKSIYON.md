@@ -274,6 +274,34 @@ boyunca $j_1$ konumuna göre. İkinci bir quad'ı ($j_2$) ekleyince bu
 şekle başka bir titreşim eklenir. Sonuçta $\Delta\mathbf{y}$'nin "görme
 yetisi" yalnızca bu iki yönün gerildiği 2 boyutlu bir alt uzayla sınırlı.
 
+### Temel teorem: rank'ı belirleyen quad sayısıdır, gradyen büyüklüğü değil
+
+Birinci mertebede $\delta R = R_2 - R_1$:
+
+$$
+\delta R = -R\,\mathrm{diag}(\delta K)\,R
+$$
+
+Buradan matris rank eşitsizliği:
+
+$$
+\boxed{\mathrm{rank}(\delta R) \leq \mathrm{rank}\bigl(\mathrm{diag}(\delta K)\bigr)
+= \text{modüle edilen quad sayısı}}
+$$
+
+**$\delta K_j$ katsayısının büyüklüğü rank'a katkı yapmaz.** İki quad'ın
+gradyenini %10 değiştirmek → rank ≤ 2. Aynı iki quad'ı %50 değiştirmek
+→ yine rank ≤ 2. Rank, kaç bağımsız quad konumunun (fazının) gözlemlendiğini
+sayar; gradyen değişiminin büyüklüğü yalnız tekil değerlerin ölçeğini etkiler.
+
+**Deneysel doğrulama:** 2 quad %10 ile 48 quad %2 sayısal olarak karşılaştırıldığında,
+48 quad %2 çok daha iyi sonuç verdi. Genlik rank satın almaz — farklı quad konumları
+satın alır. Bu nedenle:
+
+> Lokalize birkaç quad'ı büyük δK ile modüle etmek yerine **çok sayıda farklı
+> konumdaki quad'ı küçük δK ile** modüle etmek her zaman daha yüksek rank ve
+> daha iyi rekonstrüksiyon sağlar.
+
 ---
 
 ## 8. Kondisyon Sayısı: Gürültü Nasıl Büyür?

@@ -240,6 +240,29 @@ kmod'un ~160'ına doğru iniyor. Tam değer konfigürasyona (hangi quad'lar,
 hangi FODO fazlarında) bağlı ama eğilim açık: **daha çok bağımsız ölçüm
 = daha yüksek rank = daha düşük κ = daha çözülebilir sistem.**
 
+### Temel teorem: rank'ı belirleyen quad sayısıdır, gradyen değil
+
+Birinci mertebede $\Delta R$:
+
+$$\delta R = -R\,\mathrm{diag}(\delta K)\,R$$
+
+Buradan doğrudan şu sonuç çıkar:
+
+$$\mathrm{rank}(\delta R) \leq \mathrm{rank}\bigl(\mathrm{diag}(\delta K)\bigr)
+= \text{modüle edilen quad sayısı}$$
+
+**Yani gradyen değişimi ne kadar büyük olursa olsun rank artmaz.**
+2 quad'ı %10 değiştirmek → rank ≤ 2. 48 quad'ı %2 değiştirmek → rank ≤ 48.
+
+Bu, sayısal olarak doğrulandı: **2 quad %10 ile 48 quad %2 karşılaştırılınca,
+48 quad %2 çok daha etkili** sonuç verdi. Genlik rank satın almaz — farklı
+quad konumları (fazları) satın alır.
+
+Pratik sonuç: lokalize birkaç quad'ı büyük miktarda modüle etmek yerine
+**çok sayıda farklı quad'ı küçük miktarlarda** modüle etmek her zaman daha
+iyidir. Bu sezgi, uniform kmod'un (%2, tüm 48 quad) neden ~6.6 μm hassasiyet
+verirken 2-quad kmod'un (%10 bile olsa) neden başarısız olduğunu açıklar.
+
 Önemli bir nüans: "3 quad'ı aynı anda modüle et" ile "3 ayrı tek-quad
 ölçümü yap ve yığ" matematiksel olarak (quad konumları ölçümler arasında
 değişmiyorsa) aynı rank-3 sistemi üretir. Eşzamanlı modülasyonun avantajı
