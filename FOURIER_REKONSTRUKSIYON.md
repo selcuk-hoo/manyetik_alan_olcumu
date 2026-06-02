@@ -790,6 +790,33 @@ joint lstsq'ye göre büyük ölçüde azaltıyor — pratik kazanç burada.
 Uygulama: `fourier_reconstruct.py` (sade kalite raporu; `clean_gain`,
 `clean_candidates_dy` parametreleriyle).
 
+### Yalnız k=2 isteniyorsa: null-steering ve rank ≥ 8 garantisi
+
+Çoğu zaman k=4,6,8 umursanmaz; tek istenen k=2'yi diğerlerinin sin/cos
+değerlerinden **bağımsız** ölçmek. Doğru araç **null-steering** (MVDR):
+
+$$
+\hat{a}_2 = w^T \Delta\mathbf{y}, \quad
+w^T(\Delta R\,F_2) = 1, \quad w^T(\Delta R\,F_k)=0\ (k=4,6,8)
+$$
+
+k=4,6,8'in cos+sin = 6 bileşenini null'lamak + k=2'nin 2 bileşeni =
+**8 kısıt** → yığılmış $\Delta R$ rank'ı **≥ 8** olmalı. Pratikte:
+"diğer harmonikleri baza al, birlikte fit et, yalnız k=2 raporla."
+Sağlamlık ölçüsü **çözünürlük matrisi** $R = M^+M$'in k=2 satırındaki
+nuisance sızıntısıdır:
+
+| Rank | Nuisance sızıntısı | k=2 (sentetik test) |
+|------|--------------------|----------------------|
+| 8/8 (≥4 iki-quad) | **0.000** | **%0 hata** — kontaminanttan bağımsız |
+| 6/8 | 0.501 | %208 hata |
+| 4/8 (mevcut) | büyük | sızıntı baskın |
+
+**Garantili çözüm:** rank ≥ 8 (≥8 tek-quad / ≥4 iki-quad konfig). O
+noktada null-steering k=2'yi, k=4,6,8 ne olursa olsun, tam verir.
+Rank yetersizken en iyi yaklaşık CLEAN'dir. `fourier_reconstruct.py`
+ikisini de basar.
+
 ---
 
 ## 14. Pratik Rehber ve Açık Sorular

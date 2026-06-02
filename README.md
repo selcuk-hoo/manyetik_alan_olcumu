@@ -668,6 +668,42 @@ imperfect soğurması bile k=2 sızıntısını joint lstsq'ye göre büyük
 > harmonikleri tam çözmek hâlâ rank gerektiriyor (§12 çok-konfig),
 > ama hedef yalnız k=2 ise CLEAN pratik bir kazanç sağlıyor.
 
+### Yalnız k=2 isteniyorsa: null-steering ve garantili çözüm
+
+Çoğu zaman k=4,6,8'i umursamıyoruz — tek istediğimiz **k=2'yi**, üstelik
+diğer harmoniklerin bilinmeyen sin/cos değerlerinden **bağımsız** ölçmek.
+Bunun teorik olarak doğru aracı **null-steering** (dizi işlemedeki MVDR)
+estimatörüdür:
+
+$$
+\hat{a}_2 = w^T \Delta\mathbf{y}, \qquad
+\begin{cases}
+w^T (\Delta R\,F_2) = 1 & \text{(k=2'ye birim tepki)} \\
+w^T (\Delta R\,F_k) = 0,\ k=4,6,8 & \text{(kontaminantlara sıfır tepki)}
+\end{cases}
+$$
+
+k=4,6,8'in cos+sin = 6 bileşenini **null'lamak** + k=2'nin 2 bileşenini
+tutmak = **8 kısıt.** Bunu sağlamak için yığılmış $\Delta R$'nin bu 8
+boyutu gerçekten görmesi, yani **rank ≥ 8** olması gerekir.
+
+Pratikte bu, "diğer harmonikleri baza dahil et, birlikte fit et, ama
+yalnız k=2 raporla" demektir. Sağlamlığın ölçüsü **çözünürlük matrisi**
+$R = M^+ M$'in k=2 satırındaki nuisance girdileridir (sızıntı):
+
+| Rank | Nuisance sızıntısı | k=2 sonucu (sentetik test) |
+|------|--------------------|-----------------------------|
+| 8/8 (≥4 iki-quad konfig) | **0.000** | **%0 hata, faz tam** — kontaminanttan BAĞIMSIZ |
+| 6/8 | 0.501 | %208 hata — hâlâ fazlara bağımlı |
+| 4/8 (mevcut 3-konfig) | büyük | sızıntı baskın |
+
+**Sonuç:** k=2'yi kontaminant fazlarından tam bağımsız ölçmenin
+**garantili** yolu rank'ı ≥ 8'e çıkarmaktır — yani ≥8 bağımsız tek-quad
+(ya da ≥4 iki-quad) kmod konfigürasyonu. O noktada null-steering k=2'yi,
+k=4,6,8 ne olursa olsun, tam verir. Rank yetersizken (mevcut durum) en
+iyi yaklaşık CLEAN'dir. `fourier_reconstruct.py` her iki yöntemi de basar
+ve sızıntı metriğiyle ne kadar uzakta olduğunu gösterir.
+
 ---
 
 ## 13. Nerede Duruyoruz? Fiziksel Bir Değerlendirme
