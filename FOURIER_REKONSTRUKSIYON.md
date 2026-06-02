@@ -415,11 +415,17 @@ oluşturuluyor (rastgele gürültü yok, tüm sinyal bu iki modda):
 | Geniş: $k = 1, 2, 3, 4$ | 13.000 | 35 μm | 0.88 |
 | Tek yanlış: $\{k=4\}$ | 14 | 1466 μm | −0.38 |
 | Tek doğru: $\{k=2\}$ | 1.1 | 37 μm | 0.89 |
-| **Tam doğru: $\{k=2, k=4\}$** | **186** | **0.02 μm** | **1.000** |
+| **Tam doğru: $\{k=2, k=4\}$** | **186** | **0.02 μm ★** | **1.000** |
 
 Tam doğru baz ile geniş baz arasındaki fark: **2000 kat**. Bu farkın
 kaynağı kondisyon sayısındaki 70 katlık artış — gürültü büyütmesi
 kondisyon sayısıyla orantılı.
+
+> **★ İDEALİZE SENARYO:** $\Delta q$ yalnızca $k=2$ ve $k=4$
+> harmoniklerinden oluşuyor, rastgele arka plan **yok**, BPM gürültüsü
+> simülasyon düzeyinde küçük. 100 μm RMS rastgele arka plan eklendiğinde
+> 0.02 μm sonucu tamamen bozulur. Gerçekçi sınırlar için §11 ve §13'e
+> bakın.
 
 ### Neden $\{k=4\}$ bazı patladı?
 
@@ -460,9 +466,13 @@ efektif bilinmeyen sayısını düşürdü ve rank ile tam eşleşti.
 
 ### Ne zaman bozuldu?
 
-**Gerçekçi senaryo:** $\Delta q$ = 100 μm RMS rastgele gürültü +
-10 μm'lik k=0 ve k=2 smooth bileşenler. Baz: $\{k=0, k=2\}$ → 3 sütun
-(DC + cos₂ + sin₂). İki-quad kmod → rank ~2.
+Gerçekçi senaryoda iki ayrı sorun devreye girer. Bunları karıştırmamak
+önemli: biri rank (kaç denklem var?), diğeri SNR (sinyal ne kadar gömülü?).
+
+#### Sorun 1: Rank yetersizliği (sayım sorunu)
+
+**Gerçekçi senaryo:** $\Delta q$ = k=0 ve k=2 smooth bileşenler.
+Baz: $\{k=0, k=2\}$ → 3 sütun (DC + cos₂ + sin₂). İki-quad kmod → rank ~2.
 
 3 bilinmeyen, 2 bağımsız denklem → **yetersiz belirlenmiş sistem.**
 
@@ -478,6 +488,43 @@ en küçük $\|\hat{a}\|$'yı döndürür. Bu çözüm rastgele bir tercih:
 k=0 ile k=2 katkılarını güvenilir biçimde ayrıştıramaz. Profil
 ($\widehat{\Delta q} = F\hat{a}$) anlam taşıyabilir ama bireysel katsayılar
 güvenilir değil.
+
+Bu sorunu §13'teki çok-konfigürasyon yığma ile çözebilirsiniz: üçüncü
+bir bağımsız kmod ekleyin, rank 3'e çıkın.
+
+#### Sorun 2: SNR (Sinyal/Gürültü) — yığma çözmez
+
+Daha köklü bir sorun var. Gerçek $\Delta q$ iki bileşenden oluşur:
+
+$$
+\Delta q = \underbrace{\Delta q_\text{smooth}}_{\text{10 μm, aranan}}
+          + \underbrace{\Delta q_\text{random}}_{\text{100 μm RMS, bilinmez}}
+$$
+
+Bu iki bileşen $\Delta R$ üzerinden ölçüme birlikte karışır:
+
+$$
+\Delta\mathbf{y} = \Delta R\,\Delta q
+= \underbrace{\Delta R\,\Delta q_\text{smooth}}_{\text{aranan sinyal}}
++ \underbrace{\Delta R\,\Delta q_\text{random}}_{\text{parazit: \,\sim\!10\times \text{ büyük}}}
+$$
+
+$|\Delta q_\text{random}|/|\Delta q_\text{smooth}| \approx 10$ olduğundan
+parazit katkısı sinyalden yaklaşık 10 kat büyük. Fourier fit bu iki katkıyı
+birbirinden ayırt edemez — fit "smooth bileşeni bul" komutu almaz, sadece
+$\Delta\mathbf{y} = M\hat{a}$'yı minimize eder ve parazit katkısı sonuca
+karışır.
+
+**Bu BPM ölçüm gürültüsüyle karıştırılmamalı.** BPM gürültüsü
+$\sigma_\eta \sim 1$ μm — elektronik titreşim. Aşırı belirlenmiş sistemde
+(§13) bu gürültü bastırılabilir. Ama $\Delta R\,\Delta q_\text{random}$
+terimi $\Delta\mathbf{y}$'nin içinde gerçek bir **sinyal** olarak görünür,
+gürültü gibi değil. Daha fazla kmod konfigürasyonu eklemek bu parazit
+katkısını azaltmaz — her yeni ölçüm de aynı $\Delta q_\text{random}$'ı
+taşır.
+
+100 μm RMS senaryosunda yapılan testler bu nedenle kötü sonuç vermiştir:
+rank sorunu çözülmüş olsa bile SNR sorunu varlığını korur.
 
 ### Tune-Fourier frekans uyumsuzluğu
 
@@ -543,10 +590,16 @@ penceresinden bakılıyor.
 
 ---
 
-## 13. Çok-Konfigürasyon Yığma: Çözüm Yolu
+## 13. Çok-Konfigürasyon Yığma: Rank Sorununa Çözüm (Ama Yalnız Buna)
 
-Çözüm kavramsal olarak basit: yeterince bağımsız kmod ölçümü yap,
-denklem sayısını bilinmeyen sayısının üstüne çıkar.
+> **Önemli uyarı:** Bu bölüm §11'deki iki sorundan yalnız **birine** —
+> rank yetersizliğine — çözüm sunar. 100 μm RMS rastgele arka plan
+> varlığındaki SNR sorunu farklı bir sorundur ve aşağıdaki yöntemle
+> çözülmez. Her iki sorunu birlikte görmek için §11'deki "Sorun 1 ve
+> Sorun 2" ayrımına bakın.
+
+Rank sorununun çözümü kavramsal olarak basit: yeterince bağımsız kmod
+ölçümü yap, denklem sayısını bilinmeyen sayısının üstüne çıkar.
 
 ### Nasıl?
 
@@ -634,10 +687,11 @@ henüz tamamlanmamış** — bu çalışmanın en öncelikli açık noktası.
    ediliyorsa: bazı biraz geniş tut (1-2 fazla harmonik tolere
    edilebilir ama κ büyür), ya da greedy ile önce tespite çalış.
 
-3. **Random gürültü smooth sinyalden ne kadar büyük?** 100 μm
-   rastgele + 10 μm smooth senaryosunda, smooth bileşenleri
-   çıkarmak için rank kısıtı daha sıkı: 2 bağımsız ölçüm
-   yetmiyor.
+3. **Random bileşen smooth sinyalden ne kadar büyük?** 100 μm
+   rastgele + 10 μm smooth senaryosunda Fourier fit başarısız —
+   bu yalnızca rank sorunu değil (rank 3 ile çözülür), aynı zamanda
+   $\Delta R\,\Delta q_\text{random}$ paraziti ~10× büyük olduğundan
+   SNR da yeterli değil. Yöntem bu senaryoda sınırına dayanmış durumda.
 
 4. **Bağımsız kmod ölçümleri gerçekten bağımsız mı?** Farklı
    quad'lardan gelen $v_{j}$ vektörleri lineer bağımlıysa
@@ -650,10 +704,12 @@ henüz tamamlanmamış** — bu çalışmanın en öncelikli açık noktası.
   (Kod hazır, sonuç raporlanmadı.)
 
 - **Rastgele arka plan varlığında smooth bileşen tespiti:**
-  100 μm random + 10 μm smooth senaryosunda Fourier fit ne kadar
-  güvenilir? Gürültü hem $\Delta\mathbf{y}$'ye hem de random
-  $\Delta q$ yapısına katkıda bulunuyor; ikinci katkının etkisi
-  analiz edilmedi.
+  100 μm random + 10 μm smooth senaryosunda Fourier fit başarısız —
+  bu beklenen bir sonuçtur. $\Delta R\,\Delta q_\text{random}$ katkısı
+  $\Delta R\,\Delta q_\text{smooth}$'tan ~10 kat büyük olduğundan fit
+  paraziti sinyalden ayırt edemiyor. Bu kısıtı aşmak için ya random
+  bileşen modellenmeli (istatistiksel önsel bilgi) ya da smooth sinyal
+  genliği random ile karşılaştırılabilir düzeyde olmalı.
 
 - **Adaptif baz seçimi:** Harmonikler bilinmiyorsa,
   veri-güdümlü olarak doğru baz nasıl belirlenir?
