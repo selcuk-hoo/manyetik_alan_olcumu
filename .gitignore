@@ -60,3 +60,5 @@ simulasyon_sonuclari.png
 *.final
 *.dfinish
 build_rm.log
+leakage_test.log
+params.json.bak
