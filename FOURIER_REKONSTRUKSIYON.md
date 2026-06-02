@@ -523,8 +523,21 @@ gürültü gibi değil. Daha fazla kmod konfigürasyonu eklemek bu parazit
 katkısını azaltmaz — her yeni ölçüm de aynı $\Delta q_\text{random}$'ı
 taşır.
 
-100 μm RMS senaryosunda yapılan testler bu nedenle kötü sonuç vermiştir:
-rank sorunu çözülmüş olsa bile SNR sorunu varlığını korur.
+Yapılandırılmış harmonik senaryo (k=2 = 10 μm, k=4,6,8 = 200–300 μm)
+ile somut sayısal doğrulama yapıldı. `recon_k_list_dy = [2]` ile baz
+yalnız {k=2}, gerçek ise {k=2,4,6,8}:
+
+```
+κ(ΔR·F) = 1.10   etkin rank(M) = 2   baz boyutu = 2
+k=2:  13.50 μm @ φ = 1.12 rad   |   gerçek 10.00 μm @ φ = 0.00 rad
+      %35 genlik hatası, faz tamamen yanlış
+Profil: RMS hata = 76.6 μm   korelasyon = 0.030
+```
+
+**κ = 1.10 ≈ 1** (mükemmel koşullanma) ve **rank = baz boyutu = 2**
+(tam belirlenmiş) koşullarında bile k=2 tahmini tamamen çöküyor.
+Kondisyon sayısı ve rank doğruluğun gerekli ama yeterli koşullarıdır;
+baz gerçeği kapsamıyorsa sızıntı kaçınılmaz.
 
 ### Tune-Fourier frekans uyumsuzluğu
 
@@ -661,9 +674,21 @@ bu yığma işlemini destekliyor. `params.json`'da:
 ```
 
 Sırayla çalıştırılınca üç bağımsız kmod ölçümü elde ediliyor.
-Yığılmış sistemin rank ~3 üretip k=0 ile k=2 katsayılarını
-güvenilir biçimde geri çatıp çatmadığının **sayısal doğrulaması
-henüz tamamlanmamış** — bu çalışmanın en öncelikli açık noktası.
+Bu 3-konfig, k=2,4,6,8 bazı (8 katsayı) için test edildi:
+
+```
+Tek konfig → rank = 2 / 8 → yetersiz belirlenmiş
+  k=2:  ~2307 μm (gerçek 10 μm)
+
+3-konfig yığma → rank = 4 / 8 → hâlâ yetersiz belirlenmiş
+  k=6: %21 hata (300 μm sinyal)   k=2: %511 hata (10 μm sinyal)
+  Profil: RMS = 378 μm   kor = −0.105
+```
+
+Rank 4'e çıktı, 8 katsayı için yetmiyor. K=2,4,6,8 için tam
+çözüm ≥8 bağımsız konfig istiyor. Daha küçük baz (örn. k=0+k=2
+= 3 katsayı) mevcut 3-konfig ile tam belirlenmiş sisteme ulaşır —
+ama o zaman k=4,6,8 katkıları sızıntı yaratır (§11 Sorun 2 aynısı).
 
 ---
 
@@ -699,9 +724,9 @@ henüz tamamlanmamış** — bu çalışmanın en öncelikli açık noktası.
 
 ### Açık sorular
 
-- **k=0 + k=2 (3 bilinmeyen) için çok-konfig yığma sayısal doğrulaması:**
-  3 konfigle rank ~3 elde ediliyor mu? Katsayılar doğru çıkıyor mu?
-  (Kod hazır, sonuç raporlanmadı.)
+- **k=2,4,6,8 için yeterli konfig:** 3-konfig → rank=4/8, k=2 için
+  %511 hata. Tam çözüm ≥8 konfig istiyor. Ancak sızıntı testi gösterdi
+  ki rank=baz olsa bile SNR sorunu devam ediyor — rank yeterli değil.
 
 - **Rastgele arka plan varlığında smooth bileşen tespiti:**
   100 μm random + 10 μm smooth senaryosunda Fourier fit başarısız —

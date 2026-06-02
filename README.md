@@ -432,6 +432,36 @@ k=4,6,8 varken küçük k=2 çekilebilir mi? Bu, `reconstruction.py`'de
 `recon_k_list_dy` anahtarıyla bazı truth'tan ayırarak test edilebilir
 (bkz. §15). Mevcut `params.json` bu yapılandırılmış senaryoyu kullanıyor.
 
+#### Sayısal sonuç: sızıntı testi
+
+`recon_k_list_dy = [2]` ile baz yalnız {k=2} (baz boyutu = 2),
+gerçek ise {k=2, 4, 6, 8}. Sonuç:
+
+```
+κ(ΔR·F) = 1.10   etkin rank(M) = 2   baz boyutu = 2
+UYARI: baz ≠ gerçek harmonikler — sızıntı/kontaminasyon testi.
+k=2:  13.50 μm @ φ = 1.12 rad   |   gerçek 10.00 μm @ φ = 0.00 rad
+      %35 genlik hatası, faz tamamen yanlış
+Profil: RMS hata = 76.6 μm   korelasyon = 0.030
+```
+
+Bu sonuç çarpıcıdır: **κ = 1.10 ≈ 1** (mümkün olan en iyi
+koşullanma) ve **rank = baz boyutu = 2** (tam belirlenmiş sistem)
+koşullarında bile k=2 tahmini tamamen çöküyor. Neden?
+
+Δy içinde k=4,6,8 katkıları var (300 μm mertebesinde) ve fit bunları
+yalnız k=2 bazıyla açıklamak zorunda. Matematiksel olarak:
+
+$$\hat{a}_\text{fit} = a_{2,\text{gerçek}} + \underbrace{(M_2^T M_2)^{-1} M_2^T M_{468}\,a_{468}}_{\text{k=4,6,8 → k=2 sızıntısı}}$$
+
+Sızıntı terimi gerçek sinyalden 10–30× büyük olduğu için k=2
+tahminini tamamen bozuyor. Kondisyon sayısı ve rank bu kirlenmeyi
+engelleyemiyor — yanlış baz seçimi, sayısal kalite ne kadar iyi
+olursa olsun sızıntıya yol açıyor.
+
+**Ders:** İyi kondisyon + tam rank, doğruluk için **gerekli ama
+yeterli değil.** Baz gerçeği kapsamıyorsa sızıntı kaçınılmaz.
+
 ---
 
 ## 11. Greedy ve LASSO
@@ -500,6 +530,31 @@ daha çok bağımsız konfig gerekir: kabaca **bağımsız konfig sayısı ≥
 çözülecek katsayı sayısı.** 8 katsayı için ≥8 tek-quad ölçümü (ya da
 ≥4 iki-quad). Bu, §7'deki "3-4 quad rank'ı artırır" gözleminin aynısı.
 
+### Sayısal sonuçlar: 3-konfig, k=2,4,6,8
+
+3 konfigürasyonu yığarak k=2,4,6,8 için (cos+sin = 8 katsayı)
+çözüm denendi. Karşılaştırma için önce tek-konfig:
+
+```
+Tek konfig (baz = gerçek = k=2,4,6,8):
+  rank = 2 / 8 → yetersiz belirlenmiş
+  k=2:  ~2307 μm (gerçek 10 μm)   korelasyon ≈ −0.04
+```
+
+3-konfig yığma:
+
+```
+Yığılmış rank = 4 / 8 → hâlâ yetersiz belirlenmiş
+k=6:  %21 genlik hatası   (300 μm sinyal, en büyük → en iyi)
+k=2:  %511 genlik hatası  (10 μm sinyal, en küçük  → en kötü)
+Profil: RMS hata = 378 μm   korelasyon = −0.105
+```
+
+Rank 4'e çıktı ama 8 katsayı için yetmiyor. K=2,4,6,8'in hepsini
+tam çözmek için ≥8 bağımsız konfig gerekiyor. Dikkat çekici:
+en büyük sinyal (k=6, 300 μm) rank yetersizliğinde bile en iyi
+sonucu veriyor; en küçük sinyal (k=2, 10 μm) en kötüsünü.
+
 ### Sınır: rank'ı çözer, SNR'ı çözmez
 
 Bu yığma **rank sorununu** çözüyor. §10'daki SNR sorununu (Sorun 3)
@@ -522,12 +577,9 @@ eklemek bu paraziti azaltmıyor. Rank ve SNR iki ayrı sorundur:
 |--------|------|-------|-----|
 | Uniform kmod | ~6.6 μm | Tüm 48 quad eşzamanlı | Pratik uygulama zor |
 | Drift modu | ~6.5 μm | Herhangi orbit ölçümü | Yalnız zamansal değişimler |
-| Hedefli Fourier (idealize) | ~0.02 μm | Baz tam doğru, tek harmonik | Gerçekçi değil |
-| Hedefli Fourier (büyük arka plan) | yüksek | k=4,6,8 ≫ k=2 | SNR sorunu (§10) |
-
-> **Not:** "büyük arka plan" satırı, beyaz gürültü yerine yapılandırılmış
-> harmonik arka planla yapılan testi gösterir. Sayısal sonuçlar `params.json`
-> güncellendikten sonra `reconstruction.py` ile üretilir (bkz. §18).
+| Hedefli Fourier (idealize) | ~0.02 μm | Baz=gerçek={k=2,4}, sin=0 | Gerçekçi değil |
+| Sızıntı testi: baz={k=2}, gerçek={k=2,4,6,8} | 76.6 μm | κ=1.10, rank=2=baz | κ/rank mükemmel, SNR bozuyor |
+| 3-konfig yığma: baz=gerçek={k=2,4,6,8} | 378 μm | rank=4/8, underdetermined | k=2 için ≥8 konfig gerekli |
 
 ### Falso EDM sinyali ve beta fonksiyonu
 
@@ -768,9 +820,11 @@ Bu bir yazılım hatası değil, yöntemin fiziksel sınırı.
 
 ## 18. Açık Konular
 
-- **Çok-konfig yığma doğrulaması:** 3 konfig → rank ~3 elde ediliyor mu?
-  k=0+k=2 katsayıları doğru çıkıyor mu? Kod hazır, sayısal sonuç
-  raporlanmadı.
+- **k=2,4,6,8 için tam belirlenmiş sistem:** 3-konfig → rank=4/8,
+  k=2 için %511 hata. Tam çözüm için ≥8 bağımsız tek-quad konfig
+  gerekiyor. Ancak sızıntı testi gösterdi ki rank=baz olsa bile büyük
+  arka plan harmonikleri k=2 doğruluğunu bozuyor — rank yeterli koşul
+  değil.
 
 - **Beta-beat etkisi:** Gerçek halkada $R$ model $R$'den sapınca
   ne oluyor? %1 beta-beat → kaç μm ek hata? (Test 8, sürmekte.)
