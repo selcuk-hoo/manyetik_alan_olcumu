@@ -88,8 +88,15 @@ def setup_fields(config, g1_override=None, g0_override=None):
 
 
 def read_cod_quads(nFODO):
-    """QF/QD giriş noktalarında x ve y COD. Dosya yolu CWD-relative."""
+    """QF/QD giriş noktalarında x ve y COD. Dosya yolu CWD-relative.
+
+    BİRİM: integrator.cpp orbiti MİLİMETRE olarak yazar (cod_data.txt
+    başlığı x_mm, y_mm; integrator.cpp:533-534'te ×1000). Burada metreye
+    çeviriyoruz ki R = orbit/Δq fiziksel boyutsuz kazanç [m/m] olsun.
+    Bu çevirim olmadan R 1000× şişer (kazanç ~1484 yerine gerçek ~1.48).
+    """
     cd = np.loadtxt("cod_data.txt", skiprows=1)
+    cd[:, 1:3] *= 1e-3          # mm → m  (x_mm, y_mm sütunları)
     n = int(nFODO)
     x_bpm = np.empty(2 * n)
     y_bpm = np.empty(2 * n)
