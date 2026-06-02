@@ -77,6 +77,82 @@ def phase_diff(phi_fit, phi_true):
     return abs(d)
 
 
+# ── k=2 hedefli sağlam kestirim (null-steering) ──────────────────────────────
+
+def k2_robust_estimate(label, dR_list, delta_list, dy_true,
+                       k_target, nuisance_ks, truth_cfg, antisym):
+    """Yalnız k_target harmoniğini, kontaminant (nuisance) harmonikleri
+    açıkça modelleyip 'null'layarak kestirir.
+
+    Fikir: k_target kestirimini diğer harmoniklerin sin/cos değerlerinden
+    BAĞIMSIZ kılmak. Bunun için tüm harmonikleri (k_target + nuisance) baza
+    al, birlikte fit et, AMA yalnız k_target raporla. Diğerleri "modellenip
+    atılır" (projected out) — değerleri umursanmaz.
+
+    Sağlamlık ölçüsü — çözünürlük matrisi R = M⁺M:
+      R[i,i] = 1 ve R[i,j≠i] = 0 ise i. parametre diğerlerinden TAM ayrışmış.
+      k_target satırındaki nuisance girdileri (off-diagonal) ne kadar
+      büyükse, k_target o kadar çok sızıntıya açık.
+
+    Tam ayrışma (sızıntı = 0) için yığılmış sistem rank'ı ≥ baz boyutu
+    olmalı. Rank yetersizse R ≠ I → kestirim kontaminant fazlarına bağımlı.
+    """
+    n_q = dR_list[0].shape[0]
+    all_ks = sorted(set([k_target] + list(nuisance_ks)))
+    F, meta = fodo_basis(n_q, all_ks, antisym)
+    M = np.vstack([dR @ F for dR in dR_list])
+
+    sv   = np.linalg.svd(M, compute_uv=False)
+    rank = int(np.sum(sv > sv[0] * 1e-3))
+    baz  = M.shape[1]
+
+    # Çözüm + çözünürlük matrisi
+    M_pinv = np.linalg.pinv(M, rcond=1e-3)
+    a = M_pinv @ np.concatenate(delta_list)
+    Res = M_pinv @ M          # çözünürlük matrisi (baz × baz)
+
+    # k_target sütun indeksleri (cos, sin)
+    tgt_idx = [i for i, (k, _) in enumerate(meta) if k == k_target]
+    nui_idx = [i for i, (k, _) in enumerate(meta) if k != k_target]
+
+    # k_target satırlarında nuisance'a sızıntı normu (off-diagonal güç)
+    leak = np.linalg.norm(Res[np.ix_(tgt_idx, nui_idx)])
+    self_resp = np.linalg.norm(Res[np.ix_(tgt_idx, tgt_idx)])
+
+    # k_target genlik/faz
+    d = {kind: a[i] for i, (k, kind) in zip(range(len(meta)), meta) if k == k_target}
+    ac, as_ = d.get('cos', 0.0), d.get('sin', 0.0)
+    A_fit, phi_fit = np.sqrt(ac**2 + as_**2), np.arctan2(as_, ac)
+    truth = truth_from_cfg(truth_cfg)
+    A_true, phi_true = truth.get(k_target, (0.0, 0.0))
+
+    print(f"\n{'━'*65}")
+    print(f"  {label}   k={k_target} HEDEFLİ   nuisance={list(nuisance_ks)}")
+    print(f"  rank {rank}/{baz}   "
+          f"{'TAM AYRIŞMA' if rank >= baz else 'EKSİK RANK → sızıntı var'}")
+    print(f"{'━'*65}")
+    print(f"  Çözünürlük (k={k_target}):  öz-tepki = {self_resp:.3f}   "
+          f"nuisance sızıntısı = {leak:.3f}")
+    if rank >= baz:
+        print(f"  → Sızıntı ≈ 0: k={k_target} kestirimi diğer harmoniklerin")
+        print(f"    sin/cos değerlerinden BAĞIMSIZ. Sağlam.")
+    else:
+        print(f"  → Sızıntı ≠ 0: k={k_target} hâlâ kontaminant fazlarına bağımlı.")
+        print(f"    Tam ayrışma için ≥{baz} bağımsız konfig gerek (şu an rank {rank}).")
+    print(f"  {'k':>2}   {'── tahmin ──':^20}   {'── gerçek ──':^20}   ΔA/A      Δφ")
+    print(f"  {'-'*2}   {'-'*20}   {'-'*20}   {'-'*6}    {'-'*6}")
+    fit_str = f"{A_fit*1e6:8.1f} μm  ∠{phi_fit:+5.2f}"
+    if A_true > 0:
+        true_str = f"{A_true*1e6:8.1f} μm  ∠{phi_true:+5.2f}"
+        err_A = abs(A_fit - A_true) / A_true * 100
+        err_phi = phase_diff(phi_fit, phi_true)
+        print(f"  {k_target:>2}   {fit_str}   {true_str}   {err_A:6.1f}%   {err_phi:.2f} rad")
+    else:
+        print(f"  {k_target:>2}   {fit_str}   {'—':^20}   {'—':>6}   —")
+    print(f"{'━'*65}")
+    return A_fit, phi_fit, leak
+
+
 # ── ana fit + rapor ──────────────────────────────────────────────────────────
 
 def fit_report(label, dR_list, delta_list, dy_true, k_list, truth_cfg, antisym):
@@ -322,6 +398,9 @@ def main():
     # CLEAN aday harmonik kümesi: verilmezse gerçek harmonikler kullanılır
     clean_cand = cfg.get("clean_candidates_dy", None)
 
+    # k=2 hedefli sağlam kestirim: hangi harmonik hedef, hangileri nuisance
+    k_target  = cfg.get("k_target_dy", 2)
+
     print("Fourier Rekonstrüksiyon Kalite Raporu")
     print(f"  dy harmonikleri (gerçek): k = {ky}")
     print(f"  dx harmonikleri (gerçek): k = {kx}")
@@ -348,6 +427,13 @@ def main():
         clean_report("DİKEY (dy)  [CLEAN]",
                      dRy, dy_list, dy_true, sorted(cand), dy_cfg, antisym,
                      gain=clean_gain, max_iter=clean_iter)
+
+        # k=2 hedefli sağlam kestirim: diğer harmonikleri modelle-ATla
+        nuisance = [k for k in ky if k != k_target]
+        if nuisance:
+            k2_robust_estimate("DİKEY (dy)  [k=2 hedefli null-steering]",
+                               dRy, dy_list, dy_true, k_target, nuisance,
+                               dy_cfg, antisym)
 
     # ── yatay (dx) ──
     if kx:
