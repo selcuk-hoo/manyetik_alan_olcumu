@@ -59,3 +59,4 @@ simulasyon_sonuclari.png
 *.dwarf2
 *.final
 *.dfinish
+build_rm.log

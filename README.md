@@ -217,9 +217,33 @@ Açıklama: matriste **gerçek bilgi var** ama çok az boyutta (rank ~2).
 Doğrudan ters çevirmek 46 boyutluk "gürültü uzayını" da bir çözüme
 dahil ediyor. Bunu engellemek için problemi yeniden çerçevelemek gerekiyor.
 
----
+### Peki 3-4 quad modüle edilirse?
 
-## 8. Fourier Fikri: Bilinmeyenleri Azalt
+Tek-quad (rank ~1) ile iki-quad (rank ~2) arasındaki sıçrama, doğal
+soruyu doğuruyor: **3 ya da 4 quad modüle edilirse sonuç düzelir mi?**
+
+Evet, ve monoton biçimde. Her bağımsız quad modülasyonu rank'a ~1
+katkı yapıyor:
+
+| Modüle edilen quad | Etkin rank | κ(ΔR) eğilimi |
+|--------------------|------------|----------------|
+| 1 | ~1 | ~4×10⁸ |
+| 2 | ~2 | ~10⁶ |
+| 3 | ~3 | daha düşük |
+| 4 | ~4 | daha da düşük |
+| … | … | … |
+| 48 (uniform) | ~48 | ~160 |
+
+Kondisyon sayısı, quad sayısı arttıkça iki-quad'ın ~10⁶'sından uniform
+kmod'un ~160'ına doğru iniyor. Tam değer konfigürasyona (hangi quad'lar,
+hangi FODO fazlarında) bağlı ama eğilim açık: **daha çok bağımsız ölçüm
+= daha yüksek rank = daha düşük κ = daha çözülebilir sistem.**
+
+Önemli bir nüans: "3 quad'ı aynı anda modüle et" ile "3 ayrı tek-quad
+ölçümü yap ve yığ" matematiksel olarak (quad konumları ölçümler arasında
+değişmiyorsa) aynı rank-3 sistemi üretir. Eşzamanlı modülasyonun avantajı
+hız (tek ölçümde rank-3 bilgi); dezavantajı hangi quad'ın ne kattığını
+çözmenin biraz daha karmaşık olması. Bu "yığma" stratejisi §12'nin konusu.
 
 Bu noktada kritik bir sezgi: quad hizalama hataları fiziksel olarak
 **uzun dalgalı** bozulmalardan kaynaklanır (yerçekimi, zemin hareketi,
@@ -293,7 +317,9 @@ $k=2$'yi $k=4$ cinsinden açıklamaya çalışıyor ve katsayı absürd büyüyo
 ## 10. Ne Zaman Çalışmadı ve Neden?
 
 Hedefli Fourier'ın 0.02 μm başarısı gerçek — ama çok özel koşullar
-altında. Gerçekçi senaryolarda iki ayrı sorunla karşılaşıldı.
+altında. Gerçekçi senaryolarda iki ayrı sorunla karşılaşıldı: rank
+yetersizliği ve SNR (sinyal/gürültü) problemi. Bir de tune frekansının
+tam sayı olmamasının yarattığı, sanıldığından **daha hafif** bir etki var.
 
 ### Sorun 1: Rank yetersizliği (sayım problemi)
 
@@ -304,50 +330,107 @@ rank ~2 bağımsız bilgi üretiyor.
 3 bilinmeyen, 2 bağımsız denklem → **yetersiz belirlenmiş sistem.**
 En küçük kareler sonsuz sayıda çözüm arasından en küçük norma sahip
 olanı döndürür — bu rastgele bir seçim ve $a_0$ ile $a_{2c}$'yi
-güvenilir biçimde birbirinden ayırt edemez.
+güvenilir biçimde birbirinden ayırt edemez. **Çözümü §12'de.**
 
-### Sorun 2: Tune ve Fourier frekanslarının uyumsuzluğu
+### Sorun 2: Tune'un tam sayı olmaması — bir engel değil, yalnızca verim kaybı
 
-Tek bir quad modüle edilince BPM'lerde oluşan orbit deseni
-şu biçimdedir:
+Önceki bir taslakta bu etki abartılmıştı; burada doğrusunu kaydediyoruz.
 
-$$\Delta y_i \propto \sqrt{\beta_i}\,\cos\!\bigl(\phi_i - \phi_{j_1} - \pi Q\bigr)$$
+Tek bir quad modüle edilince BPM'lerde oluşan orbit deseni:
 
-Bu desen **tune frekansında** ($Q \approx 2.68$) titreşiyor — irrasyonel
-bir sayı. Ölçmek istediğimiz Fourier harmonikleri ise tam sayı $k$'da
-titreşiyor.
+$$\Delta y_i \propto \sqrt{\beta_i}\,\cos\!\bigl(|\phi_i - \phi_{j_1}| - \pi Q\bigr)$$
 
-$M = \Delta R \cdot F$ matrisi, "tune-frekanslı ölçüm → Fourier katsayısı"
-dönüşümünü yapmak zorunda. Bu dil çevirisi ne kadar zorsa kondisyon
-sayısı o kadar büyür. Hedefli Fourier'ın 0.02 μm başarısı, test
-verisindeki $k=2, 4$ harmoniklerinin tune frekansıyla *tesadüfen* iyi
-örtüşmesinden kaynaklanıyor.
+Bu desen tune frekansında ($Q \approx 2.68$) salınıyor. **Ama BPM ölçümleri
+hâlâ periyodik** — 48 nokta, halka boyunca tekrar ediyor. Periyodik bir
+sinyalin her Fourier bileşeni (k=2 dahil) tam sayı $k$ ile pekâlâ
+hesaplanabilir ve **sıfır değildir.** Yani tune irrasyonel diye k=2
+ölçülemez değil — ölçülebilir.
 
-### Sorun 3: 100 μm rastgele arka plan SNR'ı boğuyor
+Tam sayı olmamanın gerçek etkisi şu: response sütununun Fourier gücü tek
+bir $k$'da değil, $k \approx Q = 2.68$ çevresinde birkaç komşu moda
+**yayılıyor.** Sonuçları:
 
-Gerçek $\Delta q$ iki bileşenden oluşur:
+- **İyi taraf:** k=2 bileşeni sıfırdan farklı, ölçülebilir. Nitekim
+  $\kappa(M) \approx 186$ bunu kanıtlıyor — sistem çözülebilir.
+- **Kötü taraf:** Response k=2'ye tam hizalı değil, biraz yayılmış.
+  Eğer tune tam 2 olsaydı response saf k=2 olurdu ve $\kappa \approx 1$
+  çıkardı. $Q=2.68$'de $\kappa \approx 186$, bu yayılmanın bedeli —
+  ölçüm mümkün ama optimal değil.
 
-$$\Delta q = \underbrace{\Delta q_\text{smooth}}_{\sim 10\;\mu\text{m}}
-+ \underbrace{\Delta q_\text{random}}_{\sim 100\;\mu\text{m RMS}}$$
+**Sezgi (k=0 → ∞ limiti):** k=2'yi tek başına (k=0 yani DC karşısında)
+çözmek matematiksel olarak en kolayı. Baza komşu harmonikler
+($k=4, 6, \ldots$) eklendikçe çözüm zorlaşır ve doğruluk azalır, ama
+hâlâ kabul edilebilir bir sonuç çıkabilir — çünkü ölçüm periyodik ve
+modlar (yayılmış da olsa) birbirinden ayrışabiliyor. Başarısızlığın
+**asıl** nedeni bu değil; Sorun 1 (rank) ve Sorun 3 (SNR).
 
-$\Delta R$ üzerinden ölçüme karışırlarsa:
+### Sorun 3: Büyük arka plan harmonikleri SNR'ı boğuyor
 
-$$\Delta\mathbf{y} = \underbrace{\Delta R\,\Delta q_\text{smooth}}_{\text{aranan}}
-                  + \underbrace{\Delta R\,\Delta q_\text{random}}_{\sim 10\times\text{sinyal}}$$
+Gerçek $\Delta q$ tek bir temiz harmonikten ibaret değil; ölçmek istediğimiz
+küçük k=2 sinyalinin yanında çok daha büyük başka bileşenler var:
 
-Random katkısı sinyalden 10 kat büyük ve $\Delta\mathbf{y}$'nin içinde
-gerçek bir **sinyal** olarak görünüyor — gürültü gibi değil. Fit
-bunu göremez; sadece $\Delta\mathbf{y} = M\hat{a}$'yı minimize etmeye
-çalışır ve random katkı sonuca karışır.
+$$\Delta q = \underbrace{\Delta q_{k=2}}_{\sim 10\;\mu\text{m, aranan}}
++ \underbrace{\Delta q_\text{diğer}}_{\sim 100\text{–}300\;\mu\text{m}}$$
 
-**Bu, BPM elektronik gürültüsünden tamamen farklı bir sorundur.**
-BPM gürültüsü (~1 μm) ölçüm cihazından kaynaklanır ve aşırı
-belirlenmiş sistemde bastırılabilir. $\Delta R\,\Delta q_\text{random}$
-ise quad kayma alanının kendisinden kaynaklanır — daha fazla ölçüm
-yapmak bunu azaltmaz.
+Her ikisi de $\Delta R$ üzerinden ölçüme karışır:
 
-100 μm RMS senaryosundaki testler bu yüzden kötü sonuç vermiştir
-ve bu beklenen bir sonuçtur.
+$$\Delta\mathbf{y} = \underbrace{\Delta R\,\Delta q_{k=2}}_{\text{aranan}}
+                  + \underbrace{\Delta R\,\Delta q_\text{diğer}}_{\gg\,\text{sinyal}}$$
+
+Arka plan katkısı sinyalden ~10× büyük ve $\Delta\mathbf{y}$'nin içinde
+gerçek bir **sinyal** olarak görünüyor — gürültü gibi değil. Fit bunu
+göremez; sadece $\Delta\mathbf{y} = M\hat{a}$'yı minimize eder ve arka
+plan k=2 tahminine sızabilir.
+
+**Bu, BPM elektronik gürültüsünden tamamen farklı bir sorundur.** BPM
+gürültüsü (~1 μm) ölçüm cihazından kaynaklanır, zamanda rastgeledir ve
+ortalama alarak (ya da aşırı belirlenmiş sistemle) bastırılabilir.
+$\Delta R\,\Delta q_\text{diğer}$ ise quad kayma alanının **uzaysal**
+yapısından kaynaklanır — daha fazla ölçüm yapmak bunu azaltmaz.
+
+#### Lock-in neden burada doğrudan işe yaramaz?
+
+Doğal bir mühendislik refleksi: "büyük gürültü altındaki küçük sinyal →
+lock-in (faz-kilitli) amplifikatör." Lock-in, sinyali bilinen bir
+frekansta modüle edip yanıtı o frekansta süzer; **zamanda** rastgele
+gürültüyü bastırır. K-modülasyon bir anlamda bunu zaten yapıyor: gradyanı
+değiştirip fark alarak DC'yi (BPM ofseti) ve zaman gürültüsünü atıyor.
+
+Ama buradaki arka plan zamanda rastgele değil — quad konumlarının
+**uzayda sabit** dağılımı. Ne zaman ölçersen ölç, $\Delta R\,\Delta q_\text{diğer}$
+terimi orada duruyor. Bu yüzden klasik lock-in bu terimi süzemez.
+
+#### Kritik gözlem: "rastgele" gürültünün içinde k=2 gömülü olabilir
+
+Önceki testlerde arka plan **beyaz Gaussian gürültü** (100 μm RMS) olarak
+verilmişti. Beyaz gürültünün gücü tüm Fourier modlarına eşit dağılır;
+k=2 bileşeni $\approx 100/\sqrt{48} \approx 14$ μm. Bu, ölçmeye
+çalıştığımız 10 μm'lik "asıl" k=2 sinyalinden **büyük.**
+
+Yani fit başarısız olduğunda sandığımız şey: "100 μm gürültü altında
+10 μm k=2 bulunamıyor." Gerçekte olan: fit hem 10 μm amaçlı hem de
+14 μm rastgele k=2 içeriğini **birlikte** görüyor ve ikisini ayırt
+edemiyor. Belki de zaten ölçmek istediğimiz büyüklüğü ölçüyorduk —
+ama "doğru cevap" ile "kirlilik" karışmış durumda.
+
+Bu nedenle daha temiz ve fiziksel bir test kurgusu: beyaz gürültü
+yerine **yapılandırılmış harmonikler** ver. Örneğin k=2'yi küçük
+(10 μm) tut, k=4, 6, 8'i büyük (200–300 μm) yap:
+
+```json
+"dy_harmonics": [
+    {"k": 2, "amp_cos": 1e-5, "amp_sin": 0.0},
+    {"k": 4, "amp_cos": 3e-4, "amp_sin": 0.0},
+    {"k": 6, "amp_cos": 3e-4, "amp_sin": 0.0},
+    {"k": 8, "amp_cos": 2e-4, "amp_sin": 0.0}
+]
+```
+
+Bu kurguda k=2, diğer modlardan **frekansta temiz biçimde ayrı.**
+Soru netleşiyor: hedefli baz {k=2} ile, veride 20–30× daha büyük
+k=4,6,8 varken küçük k=2 çekilebilir mi? Bu, `reconstruction.py`'de
+`recon_k_list_dy` anahtarıyla bazı truth'tan ayırarak test edilebilir
+(bkz. §15). Mevcut `params.json` bu yapılandırılmış senaryoyu kullanıyor.
 
 ---
 
@@ -412,12 +495,22 @@ katkılarını birbirinden ayırmak için yeterli doğrusal bağımsızlığı s
 Hepsi QD tipi olduğu için `integrator.cpp`'deki bilinen j=0 bug'undan
 da etkilenmiyorlar.
 
-### Sınır
+Daha çok harmonik çözmek istenirse (örn. k=2,4,6,8 → cos+sin = 8 katsayı)
+daha çok bağımsız konfig gerekir: kabaca **bağımsız konfig sayısı ≥
+çözülecek katsayı sayısı.** 8 katsayı için ≥8 tek-quad ölçümü (ya da
+≥4 iki-quad). Bu, §7'deki "3-4 quad rank'ı artırır" gözleminin aynısı.
 
-Bu yığma **rank sorununu** çözüyor. §10'daki SNR sorununu çözmüyor.
-100 μm random arka plan varlığında her yeni kmod ölçümü de aynı
-$\Delta q_\text{random}$'ı taşıdığından, daha fazla konfigürasyon
-eklemek bu paraziti azaltmıyor.
+### Sınır: rank'ı çözer, SNR'ı çözmez
+
+Bu yığma **rank sorununu** çözüyor. §10'daki SNR sorununu (Sorun 3)
+çözmüyor. Büyük arka plan harmonikleri varlığında her yeni kmod ölçümü
+de aynı $\Delta q_\text{diğer}$'i taşıdığından, daha fazla konfigürasyon
+eklemek bu paraziti azaltmıyor. Rank ve SNR iki ayrı sorundur:
+
+| Sorun | Kaynak | Çözüm |
+|-------|--------|-------|
+| Rank yetersizliği | denklem < bilinmeyen | Çok-konfig yığma (bu bölüm) |
+| SNR yetersizliği | arka plan ≫ sinyal | Çok-konfig işe yaramaz |
 
 ---
 
@@ -429,8 +522,12 @@ eklemek bu paraziti azaltmıyor.
 |--------|------|-------|-----|
 | Uniform kmod | ~6.6 μm | Tüm 48 quad eşzamanlı | Pratik uygulama zor |
 | Drift modu | ~6.5 μm | Herhangi orbit ölçümü | Yalnız zamansal değişimler |
-| Hedefli Fourier (idealize) | ~0.02 μm | Baz tam doğru, random yok | Gerçekçi değil |
-| Hedefli Fourier (100 μm random) | yüksek | — | SNR sorunu |
+| Hedefli Fourier (idealize) | ~0.02 μm | Baz tam doğru, tek harmonik | Gerçekçi değil |
+| Hedefli Fourier (büyük arka plan) | yüksek | k=4,6,8 ≫ k=2 | SNR sorunu (§10) |
+
+> **Not:** "büyük arka plan" satırı, beyaz gürültü yerine yapılandırılmış
+> harmonik arka planla yapılan testi gösterir. Sayısal sonuçlar `params.json`
+> güncellendikten sonra `reconstruction.py` ile üretilir (bkz. §18).
 
 ### Falso EDM sinyali ve beta fonksiyonu
 
@@ -541,6 +638,29 @@ python3 reconstruction.py
 ```
 Beklenen: ~0.02 μm, korelasyon ≈ 1.
 
+### Yapılandırılmış arka plan + sızıntı testi
+
+Beyaz gürültü yerine, k=2 küçük (10 μm), k=4,6,8 büyük (200–300 μm).
+Soru: hedefli baz {k=2} ile küçük k=2 çekilebilir mi?
+
+```bash
+# params.json: dy_harmonics = k=2 (1e-5), k=4,6,8 (büyük); dy_random_RMS=0
+python3 build_response_matrix.py
+python3 test_kmod_reconstruction.py
+python3 reconstruction.py        # baz = truth (k=2,4,6,8) → 8 katsayı, rank-2'de underdetermined
+```
+
+Bazı truth'tan ayırıp yalnız k=2 ile rekonstrüksiyon (sızıntı/kontaminasyon
+testi) için `params.json`'a şu satırı ekle:
+
+```json
+"recon_k_list_dy": [2]
+```
+
+Bu, veride k=4,6,8 olsa bile rekonstrüksiyon bazını yalnız k=2'den kurar.
+`reconstruction.py` çıktısında "UYARI: baz ≠ gerçek harmonikler" görünür
+ve k=2 katsayısının büyük arka plandan ne kadar etkilendiği raporlanır.
+
 ### Çok-konfigürasyon yığma
 
 ```bash
@@ -579,18 +699,24 @@ Beklenen: yığılmış sistem rank ~3, k=0+k=2 birlikte ayrıştırılır.
 - `j2=−1` → tek-quad
 - `j2≥0` → iki-quad
 
-### Hizalama hatası üretimi
+### Hizalama hatası üretimi (truth)
 
 | Anahtar | Anlam |
 |---------|-------|
-| `dy_harmonics` | `[{k, amp_cos, amp_sin}, ...]` — smooth Fourier bileşenleri |
-| `dy_random_RMS` | Random arka plan gürültüsü RMS (m) |
+| `dy_harmonics` | `[{k, amp_cos, amp_sin}, ...]` — üretilen gerçek hata bileşenleri |
+| `dy_random_RMS` | Beyaz Gaussian arka plan RMS (m). Yapılandırılmış test için 0 |
 | `smooth_antisym_fodo` | `true`: FODO antisimetrik (önerilen, fiziksel) |
+
+> Mevcut varsayılan: `dy_harmonics` = k=2 (10 μm) + k=4,6,8 (200–300 μm),
+> `dy_random_RMS` = 0. Bu, beyaz gürültü yerine yapılandırılmış arka plan
+> testidir (§10, Sorun 3).
 
 ### Rekonstrüksiyon algoritması
 
 | Anahtar | Anlam |
 |---------|-------|
+| `recon_k_list_dy` | (Opsiyonel) Hedefli fit bazını truth'tan ayırır. Örn. `[2]` → veride k=4,6,8 olsa bile baz yalnız k=2. Yoksa baz = truth harmonikleri |
+| `recon_k_list_dx` | Aynısı yatay için |
 | `k_search_max` | Greedy aramasının üst sınırı (Nyquist = 12) |
 | `greedy_residual_threshold` | Minimum oransal rezidüel düşüşü (tipik: 0.01–0.05) |
 | `max_harmonics` | Greedy maksimum harmonik sayısı |

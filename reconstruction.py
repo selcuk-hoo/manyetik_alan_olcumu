@@ -331,33 +331,49 @@ def multi_config_targeted_fit(label, dR_list, delta_list, gercek, k_list,
     return geri, a, meta
 
 
-def targeted_fit_report(label, dR, delta, gercek, truth_cfg, antisym):
+def targeted_fit_report(label, dR, delta, gercek, truth_cfg, antisym,
+                        recon_k_list=None):
     """params.json'daki harmoniklerle doğrudan FODO-antisim fit.
 
     Greedy'den farklı olarak hangi k değerlerinin aranacağı önceden bilinir.
     ΔR'nin düşük etkin rankı, belirlenen harmoniklerin ağırlıklı bileşimini
     verir; gürültü ve model hatası küçükse korelasyon yüksek olur.
+
+    recon_k_list verilirse, REKONSTRÜKSİYON bazı bu k'lardan kurulur —
+    truth'tan bağımsız. Böylece "baz {2} iken, veride büyük k=4,6,8 varken
+    k=2 çekilebilir mi?" gibi sızıntı/kontaminasyon testleri yapılabilir.
+    recon_k_list None ise eski davranış: baz = truth harmonikleri.
     """
     n_q = dR.shape[0]
-    k_list = sorted(set(h["k"] for h in truth_cfg))
+    if recon_k_list is not None:
+        k_list = sorted(set(recon_k_list))
+    else:
+        k_list = sorted(set(h["k"] for h in truth_cfg))
 
     # Sıfır genlikli harmonikleri de dahil et (model doğrulaması için)
     F, meta = fodo_fourier_basis(n_q, k_list, antisym=antisym)
     M = dR @ F
     sv_M = np.linalg.svd(M, compute_uv=False)
     kappa_M = sv_M[0] / sv_M[-1] if sv_M[-1] > 0 else np.inf
+    eff_rank = int(np.sum(sv_M > sv_M[0] * 0.01))   # >%1 σ_max eşiği
 
     a, res = fit_basis(dR, delta, F)
     geri = F @ a
 
     found = harmonics_to_amp_phase(a, meta)
 
+    truth_ks = sorted(set(h["k"] for h in truth_cfg))
     print(f"\n{'=' * 72}")
     print(f"  HEDEFLİ rekonstrüksiyon: {label}")
-    print(f"  k_list = {k_list}   baz boyutu = {F.shape[1]}   rezidüel = {res:.4e}")
-    print(f"  κ(ΔR·F) = {kappa_M:.2e}   — {F.shape[1]} bilinmeyene karşı etkin rank ~2")
-    print(f"  NOT: etkin rank < baz boyutu → çözüm minimum-norm, katsayılar")
-    print(f"       doğrudan yorumlanamaz; rekonstrükte edilmiş profil anlamlı.")
+    print(f"  baz k_list = {k_list}   (gerçek harmonikler = {truth_ks})")
+    print(f"  baz boyutu = {F.shape[1]}   rezidüel = {res:.4e}")
+    print(f"  κ(ΔR·F) = {kappa_M:.2e}   etkin rank(M) = {eff_rank}")
+    if eff_rank < F.shape[1]:
+        print(f"  NOT: etkin rank ({eff_rank}) < baz boyutu ({F.shape[1]}) →")
+        print(f"       çözüm minimum-norm, katsayılar doğrudan yorumlanamaz;")
+        print(f"       rekonstrükte edilmiş profil yine de anlamlı olabilir.")
+    if set(k_list) != set(truth_ks):
+        print(f"  UYARI: baz ≠ gerçek harmonikler — sızıntı/kontaminasyon testi.")
     print(f"{'=' * 72}")
 
     _print_harmonic_table(found, truth_cfg)
@@ -444,6 +460,13 @@ def main():
     dy_cfg = config.get("dy_harmonics", [])
     dx_cfg = config.get("dx_harmonics", [])
 
+    # Opsiyonel: rekonstrüksiyon bazını truth'tan ayır (sızıntı testi).
+    # params.json'da "recon_k_list_dy": [2] gibi verilirse, hedefli fit
+    # bazı yalnız bu k'lardan kurulur — veride başka (büyük) harmonikler
+    # olsa bile. Yoksa baz = truth harmonikleri (eski davranış).
+    recon_ky = config.get("recon_k_list_dy", None)
+    recon_kx = config.get("recon_k_list_dx", None)
+
     # ─── ÇOK-KONFİG MOD: R_dy_1_c0.npy varsa devreye girer ─────────────────
     multi_dRy, multi_dRx, multi_dy, multi_dx, mg_dy, mg_dx, mc_labels = \
         _load_multi_configs()
@@ -508,10 +531,12 @@ def main():
     # params.json'daki harmonikler biliniyormuş gibi fit. En güvenilir mod.
     if dy_cfg:
         geri_y_targeted = targeted_fit_report(
-            "DİKEY (dy)", dR_dy, delta_y, dy_gercek, dy_cfg, antisym)
+            "DİKEY (dy)", dR_dy, delta_y, dy_gercek, dy_cfg, antisym,
+            recon_k_list=recon_ky)
     if dx_cfg:
         geri_x_targeted = targeted_fit_report(
-            "YATAY (dx)", dR_dx, delta_x, dx_gercek, dx_cfg, antisym)
+            "YATAY (dx)", dR_dx, delta_x, dx_gercek, dx_cfg, antisym,
+            recon_k_list=recon_kx)
 
     # ─── 2) Greedy (kör) rekonstrüksiyon ──────────────────────────────────────
     # Hangi harmoniklerin bulunacağı bilinmiyor varsayımıyla çalışır.
