@@ -128,6 +128,66 @@ hizalama hatasını bulmaya çalışır — ama elinde yalnızca 2 bağımsız
 "boyut" vardır. Kalan 46 boyut gürültüyle dolar; hata yüzlerce μm'ye
 çıkar.
 
+#### Neden iki quad Fourier bileşenlerini ölçmeye yetmedi?
+
+İki quad modüle ederek halka boyunca Fourier bileşenlerini belirlemek
+isteniyor. Sezgi şuydu: her quad faz ilerlemesiyle sinüsoidal tepki
+üretir; farklı konumlardaki iki quad birbirini tamamlayarak halkanın
+tüm frekans içeriğini kapsayabilir.
+
+Bu sezginin çöktüğü iki ayrı neden var.
+
+**Birinci neden — sayım yetersizliği:**
+
+Her modüle edilen quad, $\Delta q$ uzayında **tek bir doğrusal
+kombinasyonu** ölçebilir (rank ~1 katkı). Modüle edilen quad $j_1$
+için baskın sağ tekil vektör $v_{j_1}$, o quadin faz uzayındaki
+konumuna ve örgü optiklerine göre belirlenen bir yöndür. Ölçülen
+büyüklük yalnızca $v_{j_1}^T \Delta q$ — 48 boyutlu $\Delta q$'nun
+bir skaler projeksiyonu.
+
+Tek quad → 1 denklem. İki quad → 2 denklem. $k=0$ ve $k=2$
+harmoniklerini çıkarmak için 3 bilinmeyen ($a_0$, $a_{2c}$, $a_{2s}$)
+var. İki ölçüm üç bilinmeyeni belirleyemez; sistem yetersiz belirlenmiş.
+
+**İkinci neden — frekans uyumsuzluğu (daha derin olan):**
+
+Sayım yeterli olsa bile ölçüm yönleri istenen harmoniklerle hizalı
+değildir. Bunu anlamak için $v_{j_1}$'in ne olduğuna bakalım.
+
+Quad $j_1$ modüle edildiğinde, $\Delta R_{(j_1)}$'in baskın sağ tekil
+vektörü yaklaşık olarak:
+
+$$
+v_{j_1,j} \;\propto\; K_j\sqrt{\beta_j}\,\cos\!\bigl(|\phi_j - \phi_{j_1}| - \pi\nu\bigr)
+$$
+
+Bu, **tune frekansında** titreşen bir fonksiyon: halka boyunca $j_1$
+konumu etrafında $\cos(\nu \cdot 2\pi j / N)$ tipinde osilas yapıyor.
+Burada $\nu \approx 2.68$ — **tam sayı değil, irrasyonel**.
+
+Ölçmek istediğimiz Fourier harmonikleri ise $\cos(2\pi k j / N)$
+biçiminde, **tam sayı** $k$ ile titreşiyor: $k = 0, 1, 2, \ldots$
+
+$\nu$-frekanslı bir ölçümden $k$-frekanslı bir harmonik çıkarmak,
+irrasyonel ile tam sayı frekanslar arasında dönüşüm yapmak demektir.
+Bu dönüşüm $M = \Delta R \cdot F$ matrisinin yüksek koşul sayısına
+($\kappa \sim 10^4$–$10^6$) yol açar.
+
+Bir analogiyle: 442 Hz'de tepki veren bir dedektörle 440 Hz'i
+ölçmeye çalışmak gibi. Sinyal var, dedektör kısmen duyuyor, ama
+"doğal frekansı" tam değil; hassasiyet düşük ve gürültüye açık.
+Dedektörün doğal frekansı 440 Hz'e tam eşit olsaydı ölçüm mükemmel
+olurdu — targeted Fourier başarısının özü budur: baz tam doğru
+harmoniklere hizalanınca $\kappa$ 13000'den 186'ya iniyor.
+
+**Sonuç:** "İki quad faz ilerlemesiyle halkanın tamamını kapsar"
+sezgisi kısmen doğru — tepki sinüsoidal olarak değişiyor. Ama bu
+sinüs **tune frekansında**, ölçmek istediğimiz Fourier harmonikleri
+ise **tam sayı frekanslarda**. İki dil örtüşmüyor. Doğru baz
+seçildiğinde bu uyumsuzluk minimize ediliyor; bilinmeyen harmonikler
+varlığında ise kaçınılmaz bir hassasiyet kaybı oluyor.
+
 #### Yeniden parametrelendirme fikri
 
 Peki gerçek halkada $\Delta q$ (quad hizalama hata vektörü) nasıl
