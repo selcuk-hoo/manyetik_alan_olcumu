@@ -523,21 +523,27 @@ gürültü gibi değil. Daha fazla kmod konfigürasyonu eklemek bu parazit
 katkısını azaltmaz — her yeni ölçüm de aynı $\Delta q_\text{random}$'ı
 taşır.
 
-Yapılandırılmış harmonik senaryo (k=2 = 10 μm, k=4,6,8 = 200–300 μm)
-ile somut sayısal doğrulama yapıldı. `recon_k_list_dy = [2]` ile baz
-yalnız {k=2}, gerçek ise {k=2,4,6,8}:
+Yapılandırılmış harmonik senaryo (k=2 = 10 μm @ φ=0.64,
+k=4,6,8 = 200–300 μm) ile somut sayısal doğrulama yapıldı.
+`recon_k_list_dy = [2]` ile baz yalnız {k=2}, gerçek ise {k=2,4,6,8};
+3-konfig yığma:
 
 ```
-κ(ΔR·F) = 1.10   etkin rank(M) = 2   baz boyutu = 2
-k=2:  13.50 μm @ φ = 1.12 rad   |   gerçek 10.00 μm @ φ = 0.00 rad
-      %35 genlik hatası, faz tamamen yanlış
-Profil: RMS hata = 76.6 μm   korelasyon = 0.030
+baz ≠ gerçek (sızıntı)   3 konfig   TAM BELİRLİ   κ = 1.43
+k=2:  19.5 μm @ ∠0.53   |   gerçek 10.0 μm @ ∠0.64
+      %95 genlik hatası, faz Δ = 0.11 rad
+Profil: RMS hata = 79.7 μm   korelasyon = 0.159
 ```
 
-**κ = 1.10 ≈ 1** (mükemmel koşullanma) ve **rank = baz boyutu = 2**
-(tam belirlenmiş) koşullarında bile k=2 tahmini tamamen çöküyor.
-Kondisyon sayısı ve rank doğruluğun gerekli ama yeterli koşullarıdır;
-baz gerçeği kapsamıyorsa sızıntı kaçınılmaz.
+**κ = 1.43 ≈ 1** (mükemmel koşullanma) ve **tam belirli** koşullarında
+bile k=2 **genliği** ~2× şişiyor: k=4,6,8 sızıntısı genliği kirletiyor.
+Kondisyon ve rank doğruluğun gerekli ama yeterli koşullarıdır.
+
+Ancak **faz şaşırtıcı biçimde iyi (Δ=0.11 rad).** Bu, daha eski bir
+taslaktaki "faz tamamen yanlış" sonucunu düzeltir: o test gerçek fazın
+tam 0 olduğu **dejenere** kurguda yapılmıştı (φ=0'da en ufak sızıntı
+fazı uçurur). Gerçek faz 0.64 olunca sızıntı kabaca aynı fazda
+eklendiğinden faz korunur, yalnız genlik şişer. **k=2 fazı ölçülebilir.**
 
 ### Tune-Fourier frekans uyumsuzluğu
 
@@ -756,19 +762,30 @@ $$
 taahhüt eder; CLEAN her turda yalnız bir kesrini çıkardığı için sonraki
 turlarda geri dönüp düzeltebilir — mode-mixing'e daha sağlam.
 
+**Gerçek veri — CLEAN k=2 için en iyisi.** 3-konfig yığma verisiyle
+(k=2 = 10 μm @ φ=0.64, k=4,6,8 = 200–300 μm) üç yöntemin k=2 kestirimi:
+
+| Yöntem | k=2 genlik | k=2 faz | Profil kor. |
+|--------|-----------|---------|-------------|
+| Joint lstsq (8 bilinmeyen) | 61.1 μm (%511) | Δ0.36 | −0.105 |
+| Sızıntı (baz={2}) | 19.5 μm (%95) | Δ0.11 | 0.159 |
+| **CLEAN** (gain=0.2) | **14.3 μm (%43)** | Δ0.18 | **0.260** |
+
+CLEAN k=2 genliğini en yakın (%43, joint'in %511'ine karşı) ve profil
+korelasyonunu en yüksek veriyor. Sebep: büyük harmonikleri (kusurlu da
+olsa) soğurmaya çalıştığı için sızıntıyı k=2'ye yıkmıyor.
+
 **Dürüstlük notu — CLEAN rank eklemez.** Ölçümün taşımadığı bilgiyi
 yaratamaz:
 
 | Durum | CLEAN sonucu |
 |-------|--------------|
-| Tam rank $\Delta R$ | k=2'yi mükemmel ayıklar (9.98 / 10 μm — sentetik test) |
-| Rank yetersiz (4 denklem, 8 bilinmeyen) | Joint lstsq gibi sınıra çarpar |
+| Tam rank $\Delta R$ | k=2'yi mükemmel ayıklar (9.98 / 10 μm — sentetik kontrol) |
+| Rank yetersiz (4 denklem, 8 bilinmeyen) | Büyükleri (k=4,6,8) bulamaz; k=6 için 112/300 μm |
 
-CLEAN'in faydası şu senaryoyla sınırlı: **rank büyük harmonikleri
-ayırmaya yetiyor** ama joint fit bilgiyi minimum-norm ile saçıyorsa.
-Büyükleri temiz soyup zayıfı artıkta bırakır. Rank büyükleri bile
-ayıramıyorsa CLEAN da çaresizdir. Asıl darboğaz hep rank: §13'teki
-çok-konfig yığma ile rank artırılmadan CLEAN tek başına yetmez.
+Yani büyük harmonikleri tam çözmek rank gerektirir. Ama **hedef yalnız
+k=2 ise**, CLEAN'in büyükleri imperfect soğurması bile k=2 sızıntısını
+joint lstsq'ye göre büyük ölçüde azaltıyor — pratik kazanç burada.
 
 Uygulama: `fourier_reconstruct.py` (sade kalite raporu; `clean_gain`,
 `clean_candidates_dy` parametreleriyle).

@@ -433,35 +433,36 @@ k=4,6,8 varken küçük k=2 çekilebilir mi? Bu, `reconstruction.py`'de
 `recon_k_list_dy` anahtarıyla bazı truth'tan ayırarak test edilebilir
 (bkz. §15). Mevcut `params.json` bu yapılandırılmış senaryoyu kullanıyor.
 
-#### Sayısal sonuç: sızıntı testi
+#### Sayısal sonuç: sızıntı testi (gerçek veri)
 
 `recon_k_list_dy = [2]` ile baz yalnız {k=2} (baz boyutu = 2),
-gerçek ise {k=2, 4, 6, 8}. Sonuç:
+gerçek ise {k=2, 4, 6, 8}; k=2 = 10 μm @ φ=0.64, k=4,6,8 = 200–300 μm.
+3-konfig yığma ile çalıştırınca:
 
 ```
-κ(ΔR·F) = 1.10   etkin rank(M) = 2   baz boyutu = 2
-UYARI: baz ≠ gerçek harmonikler — sızıntı/kontaminasyon testi.
-k=2:  13.50 μm @ φ = 1.12 rad   |   gerçek 10.00 μm @ φ = 0.00 rad
-      %35 genlik hatası, faz tamamen yanlış
-Profil: RMS hata = 76.6 μm   korelasyon = 0.030
+baz ≠ gerçek (sızıntı)   3 konfig   TAM BELİRLİ   κ = 1.43
+k=2:  19.5 μm @ ∠0.53   |   gerçek 10.0 μm @ ∠0.64
+      %95 genlik hatası, faz Δ = 0.11 rad (iyi!)
+Profil: RMS hata = 79.7 μm   korelasyon = 0.159
 ```
 
-Bu sonuç çarpıcıdır: **κ = 1.10 ≈ 1** (mümkün olan en iyi
-koşullanma) ve **rank = baz boyutu = 2** (tam belirlenmiş sistem)
-koşullarında bile k=2 tahmini tamamen çöküyor. Neden?
+İki ders bir arada:
 
-Δy içinde k=4,6,8 katkıları var (300 μm mertebesinde) ve fit bunları
-yalnız k=2 bazıyla açıklamak zorunda. Matematiksel olarak:
+- **Genlik kirleniyor (%95 şişme):** k=4,6,8 katkıları sızarak k=2
+  genliğini ~2× büyütüyor. Matematik:
+  $$\hat{a}_\text{fit} = a_{2,\text{gerçek}} + \underbrace{(M_2^T M_2)^{-1} M_2^T M_{468}\,a_{468}}_{\text{k=4,6,8 → k=2 sızıntısı}}$$
+  Kondisyon (κ=1.43) ve rank mükemmel olsa da bu sızıntı durdurulamıyor.
 
-$$\hat{a}_\text{fit} = a_{2,\text{gerçek}} + \underbrace{(M_2^T M_2)^{-1} M_2^T M_{468}\,a_{468}}_{\text{k=4,6,8 → k=2 sızıntısı}}$$
+- **Faz şaşırtıcı biçimde iyi (Δ=0.11 rad):** Bu, önceki bir taslakta
+  belirtilen "faz tamamen yanlış" iddiasını **düzeltir.** O sonuç,
+  gerçek fazın tam 0 olduğu (saf cos) **dejenere** bir kurguda çıkmıştı:
+  φ=0 noktasında en ufak sızıntı fazı uçurur. Gerçek faz 0.64 olunca
+  sızıntı kabaca aynı fazda eklendiği için faz korunuyor, yalnız genlik
+  şişiyor. **k=2 fazı gerçekten ölçülebilir bir büyüklük.**
 
-Sızıntı terimi gerçek sinyalden 10–30× büyük olduğu için k=2
-tahminini tamamen bozuyor. Kondisyon sayısı ve rank bu kirlenmeyi
-engelleyemiyor — yanlış baz seçimi, sayısal kalite ne kadar iyi
-olursa olsun sızıntıya yol açıyor.
-
-**Ders:** İyi kondisyon + tam rank, doğruluk için **gerekli ama
-yeterli değil.** Baz gerçeği kapsamıyorsa sızıntı kaçınılmaz.
+**Ders:** İyi kondisyon + tam rank doğruluk için **gerekli ama yeterli
+değil** — yanlış baz genliği kirletir. Ama faz, bazdan görece bağımsız
+olarak çoğu kurguda korunur.
 
 ---
 
@@ -628,26 +629,44 @@ harmoniğin yalnız bir kesrini çıkarır. Böylece bir moda erkenden tam
 bağlanmaz; sonraki turlarda geri dönüp düzeltebilir. Mode-mixing olan
 $\Delta R$ için bu daha sağlamdır.
 
+### Gerçek veri sonucu: CLEAN k=2 için en iyisi
+
+3-konfig yığma verisiyle (k=2 = 10 μm @ φ=0.64, k=4,6,8 = 200–300 μm)
+üç yöntemin **k=2** kestirimi:
+
+| Yöntem | k=2 genlik | k=2 faz | Profil kor. |
+|--------|-----------|---------|-------------|
+| Joint lstsq (baz=truth, 8 bilinmeyen) | 61.1 μm (%511) | ∠1.00 (Δ0.36) | −0.105 |
+| Sızıntı (baz={2}, tam belirli) | 19.5 μm (%95) | ∠0.53 (Δ0.11) | 0.159 |
+| **CLEAN** (gain=0.2) | **14.3 μm (%43)** | ∠0.47 (Δ0.18) | **0.260** |
+
+Gerçek k=2 = 10 μm @ ∠0.64. CLEAN k=2 genliğini en yakın (%43 hata,
+joint lstsq'nin %511'ine karşı) ve profil korelasyonunu en yüksek
+(0.26) veriyor. Neden? CLEAN büyük harmonikleri (kusurlu da olsa)
+soğurmaya çalıştığı için tüm sızıntıyı k=2'ye yıkmıyor — saf {k=2}
+bazının yaptığının aksine.
+
 ### Önemli dürüstlük notu: CLEAN rank EKLEMEZ
 
 CLEAN bir sihir değil. Ölçümün taşımadığı bilgiyi yaratamaz. Sınırlar:
 
 - **Tam rankta** ($\Delta R$ tüm modları görüyorsa): CLEAN k=2'yi
-  mükemmel ayıklar (sentetik testte 9.98 μm / gerçek 10 μm).
-- **Rank yetersizken** (3-konfig → rank 4, 8 bilinmeyen): CLEAN de
-  joint lstsq de fundamental sınıra çarpar. Hiçbir algoritma 4 bağımsız
-  denklemle 8 bilinmeyeni çözemez.
+  mükemmel ayıklar (sentetik kontrol testinde 9.98 μm / gerçek 10 μm).
+- **Rank yetersizken** (3-konfig → rank 4, 8 bilinmeyen): büyük
+  harmonikleri (k=4,6,8) düzgün bulamaz — gerçek veride k=6 için
+  112 μm verdi (gerçek 300). Hiçbir algoritma 4 bağımsız denklemle
+  8 bilinmeyeni tam çözemez.
 
-CLEAN'in asıl faydası şu senaryoda: **rank büyük harmonikleri ayırmaya
-yetiyor** ama joint fit minimum-norm ile bilgiyi tüm katsayılara
-saçıyorsa. CLEAN büyükleri temiz soyup zayıf olanı artıkta bırakır.
-Eğer rank büyükleri bile ayıramıyorsa CLEAN da çaresizdir.
+Ama bizim **hedefimiz k=2** ve onu CLEAN makul ölçüyor: büyükleri
+imperfect soğurması bile k=2 sızıntısını joint lstsq'ye göre büyük
+ölçüde azaltıyor. Yani CLEAN'in faydası tam da bu senaryoda ortaya
+çıkıyor.
 
-> **Sonuç:** CLEAN, "önce gürültüyü modelle-çıkar, sonra sinyali ölç"
-> stratejisinin disiplinli halidir. SNR sorununa kısmi çare olabilir —
-> **ancak yalnızca rank büyük harmonikleri ayırmaya yetiyorsa.** Asıl
-> darboğaz hâlâ rank: §12'deki çok-konfig yığma ile rank artırılmadan
-> CLEAN tek başına yeterli değil.
+> **Sonuç:** CLEAN, "önce büyük katkıları modelle-çıkar, sonra zayıf
+> sinyali ölç" stratejisinin disiplinli halidir. Gerçek veride k=2
+> için en iyi sonucu verdi (%43 genlik, 0.18 rad faz). Büyük
+> harmonikleri tam çözmek hâlâ rank gerektiriyor (§12 çok-konfig),
+> ama hedef yalnız k=2 ise CLEAN pratik bir kazanç sağlıyor.
 
 ---
 
@@ -655,13 +674,14 @@ Eğer rank büyükleri bile ayıramıyorsa CLEAN da çaresizdir.
 
 ### Sonuçların özeti
 
-| Yöntem | Hata | Koşul | Not |
+| Yöntem | k=2 hatası | Koşul | Not |
 |--------|------|-------|-----|
 | Uniform kmod | ~6.6 μm | Tüm 48 quad eşzamanlı | Pratik uygulama zor |
 | Drift modu | ~6.5 μm | Herhangi orbit ölçümü | Yalnız zamansal değişimler |
 | Hedefli Fourier (idealize) | ~0.02 μm | Baz=gerçek={k=2,4}, sin=0 | Gerçekçi değil |
-| Sızıntı testi: baz={k=2}, gerçek={k=2,4,6,8} | 76.6 μm | κ=1.10, rank=2=baz | κ/rank mükemmel, SNR bozuyor |
-| 3-konfig yığma: baz=gerçek={k=2,4,6,8} | 378 μm | rank=4/8, underdetermined | k=2 için ≥8 konfig gerekli |
+| 3-konfig joint lstsq (baz=truth, 8 bilinmeyen) | %511 | rank=4/8, underdetermined | Bilgiyi 8 katsayıya saçıyor |
+| 3-konfig sızıntı (baz={k=2}) | %95 genlik, Δφ=0.11 | κ=1.43, tam belirli | Genlik şişer, faz iyi |
+| **3-konfig CLEAN** | **%43 genlik, Δφ=0.18** | gain=0.2 | k=2 için en iyi, kor=0.26 |
 
 ### Falso EDM sinyali ve beta fonksiyonu
 
