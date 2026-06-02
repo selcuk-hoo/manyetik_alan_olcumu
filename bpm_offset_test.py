@@ -32,8 +32,12 @@ def load_matrices():
     return R, dR
 
 
-def make_truth_dy(config, n_q=48):
-    """params.json'dan gerçek quad misalignment vektörü üret."""
+def make_truth_dy(config, n_q=48, add_random=False):
+    """params.json'dan gerçek quad misalignment vektörü üret.
+
+    add_random=True: dy_random_RMS değerinde rastgele bileşen ekler.
+    Bu bileşen Fourier bazının dışında → R-fit için SNR sorunu (Sorun 3).
+    """
     harmonics = config.get("dy_harmonics", [])
     antisym   = config.get("smooth_antisym_fodo", True)
     N = n_q // 2
@@ -49,6 +53,11 @@ def make_truth_dy(config, n_q=48):
             dy += s * ac
         else:
             dy += s * (ac * np.cos(2*np.pi*k*n/N) + as_ * np.sin(2*np.pi*k*n/N))
+    if add_random:
+        sigma_r = config.get("dy_random_RMS", 0.0)
+        if sigma_r > 0:
+            rng_r = np.random.default_rng(config.get("dy_random_seed", 42))
+            dy += rng_r.normal(0, sigma_r, n_q)
     return dy
 
 
@@ -95,7 +104,7 @@ def profile_error(dy_fit, dy_true):
 
 # ── Ana test ─────────────────────────────────────────────────────────────────
 
-def run(bpm_offset_sigma=100e-6, n_trials=50, seed=0):
+def run(bpm_offset_sigma=100e-6, n_trials=50, seed=0, add_random=False):
     print("=" * 64)
     print(f"  BPM ofset testi   σ_b = {bpm_offset_sigma*1e6:.0f} μm   ({n_trials} deneme)")
     print("=" * 64)
@@ -107,8 +116,11 @@ def run(bpm_offset_sigma=100e-6, n_trials=50, seed=0):
     n_q = R.shape[0]   # 48
     antisym = config.get("smooth_antisym_fodo", True)
 
-    # gerçek misalignment
-    dy_true = make_truth_dy(config, n_q)
+    # gerçek misalignment (random bileşen opsiyonel)
+    dy_true = make_truth_dy(config, n_q, add_random=add_random)
+    if add_random and config.get("dy_random_RMS", 0) > 0:
+        print(f"  [UYARI] dy_random_RMS = {config['dy_random_RMS']*1e6:.0f} μm eklendi "
+              f"— Fourier bazı dışı bileşen var")
     truth_k2_amp = np.sqrt(
         sum(config["dy_harmonics"][0]["amp_cos"]**2 +
             config["dy_harmonics"][0].get("amp_sin", 0)**2
@@ -243,7 +255,7 @@ def run(bpm_offset_sigma=100e-6, n_trials=50, seed=0):
 
 def model_error_sweep(bpm_offset_sigma=100e-6,
                       rel_errors=(0.0, 0.001, 0.003, 0.005, 0.01, 0.02, 0.05),
-                      n_trials=50, seed=0):
+                      n_trials=50, seed=0, add_random=False):
     """R modelindeki göreli gradyen hatası arttıkça R-fit kalitesi nasıl bozuluyor?
 
     Fiziksel model: her quad'ın gradyeni K_j yerine K_j*(1+ε_j) olarak bilinir.
@@ -256,7 +268,9 @@ def model_error_sweep(bpm_offset_sigma=100e-6,
     R, _ = load_matrices()
     n_q = R.shape[0]
     antisym = config.get("smooth_antisym_fodo", True)
-    dy_true  = make_truth_dy(config, n_q)
+    dy_true  = make_truth_dy(config, n_q, add_random=add_random)
+    if add_random and config.get("dy_random_RMS", 0) > 0:
+        print(f"  [UYARI] dy_random_RMS = {config['dy_random_RMS']*1e6:.0f} μm eklendi")
     truth_ks = sorted(set(h["k"] for h in config["dy_harmonics"]))
     F_full, meta_full = fodo_basis(n_q, truth_ks, antisym)
     F_k2,  meta_k2   = fodo_basis(n_q, [2],       antisym)
@@ -330,9 +344,13 @@ if __name__ == "__main__":
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--sweep", action="store_true",
                    help="Model hatası süpürmesi çalıştır")
+    p.add_argument("--random", action="store_true",
+                   help="dy_random_RMS ekle (Fourier bazı dışı bileşen)")
     args = p.parse_args()
     if args.sweep:
         model_error_sweep(bpm_offset_sigma=args.sigma,
-                          n_trials=args.trials, seed=args.seed)
+                          n_trials=args.trials, seed=args.seed,
+                          add_random=args.random)
     else:
-        run(bpm_offset_sigma=args.sigma, n_trials=args.trials, seed=args.seed)
+        run(bpm_offset_sigma=args.sigma, n_trials=args.trials, seed=args.seed,
+            add_random=args.random)
