@@ -135,6 +135,134 @@ def fit_report(label, dR_list, delta_list, dy_true, k_list, truth_cfg, antisym):
     return dy_hat
 
 
+# ── CLEAN algoritması ────────────────────────────────────────────────────────
+
+def clean_reconstruct(dR_list, delta_list, candidate_ks, antisym,
+                      gain=0.2, max_iter=200, tol=1e-3):
+    """CLEAN (radio-astronomi tarzı) hiyerarşik harmonik çıkarımı.
+
+    Greedy/lstsq'den farkı: her adımda en güçlü harmoniğin yalnızca
+    bir kesrini (loop gain) artık sinyalden çıkarır, sonra döngüyü
+    tekrarlar. Böylece dominant harmonik (örn. k=6, 300 μm) önce
+    soyulur, katkısı çıkarılır, geriye kalan zayıf k=2 daha temiz
+    bir artık sinyalde ölçülür.
+
+    Adım adım:
+      r = Δy                          (artık = ölçüm)
+      döngü:
+        her aday k için: r'yi yalnız k ile fit et, ne kadar düşürür?
+        en çok düşüreni seç (best_k)
+        r -= gain · ΔR·F_k · â_k       (kesirli çıkarım)
+        biriktir: â_toplam[best_k] += gain · â_k
+      durma: artık normu yeterince düşünce ya da max_iter
+
+    Döndürür: {k: (a_cos, a_sin)} biriken katsayılar.
+    """
+    n_q = dR_list[0].shape[0]
+
+    # Her aday k için baz ve yığılmış M matrisini önceden hesapla
+    F_cache, M_cache = {}, {}
+    for k in candidate_ks:
+        F_k, meta_k = fodo_basis(n_q, [k], antisym)
+        F_cache[k] = (F_k, meta_k)
+        M_cache[k] = np.vstack([dR @ F_k for dR in dR_list])
+
+    r = np.concatenate(delta_list).astype(float)
+    r0_norm = np.linalg.norm(r)
+    accum = {k: np.zeros(F_cache[k][0].shape[1]) for k in candidate_ks}
+    history = []
+
+    for it in range(max_iter):
+        best_k, best_a, best_red = None, None, 0.0
+        for k in candidate_ks:
+            M_k = M_cache[k]
+            a_k, _, _, _ = np.linalg.lstsq(M_k, r, rcond=None)
+            r_new = r - M_k @ a_k
+            reduction = np.linalg.norm(r)**2 - np.linalg.norm(r_new)**2
+            if reduction > best_red:
+                best_red, best_k, best_a = reduction, k, a_k
+
+        if best_k is None:
+            break
+
+        # Kesirli (loop-gain) çıkarım
+        M_bk = M_cache[best_k]
+        r = r - gain * (M_bk @ best_a)
+        accum[best_k] += gain * best_a
+        history.append((it, best_k, np.linalg.norm(r) / r0_norm))
+
+        if np.linalg.norm(r) / r0_norm < tol:
+            break
+
+    return accum, history, F_cache
+
+
+def clean_report(label, dR_list, delta_list, dy_true, candidate_ks,
+                 truth_cfg, antisym, gain=0.2, max_iter=200, tol=1e-3):
+    """CLEAN sonuçlarını fit_report ile aynı tablo formatında raporla."""
+    n_q = dR_list[0].shape[0]
+    accum, history, F_cache = clean_reconstruct(
+        dR_list, delta_list, candidate_ks, antisym, gain, max_iter, tol)
+
+    # Biriken katsayılardan profil ve genlik/faz
+    dy_hat = np.zeros(n_q)
+    fit = {}
+    for k in candidate_ks:
+        F_k, meta_k = F_cache[k]
+        a_k = accum[k]
+        dy_hat = dy_hat + F_k @ a_k
+        d = {}
+        for coef, (_, kind) in zip(a_k, meta_k):
+            d[kind] = coef
+        if 'dc' in d:
+            fit[k] = (abs(d['dc']), 0.0)
+        else:
+            ac, as_ = d.get('cos', 0.0), d.get('sin', 0.0)
+            fit[k] = (np.sqrt(ac**2 + as_**2), np.arctan2(as_, ac))
+
+    truth = truth_from_cfg(truth_cfg)
+    rms = np.std(dy_hat - dy_true) * 1e6
+    cor = np.corrcoef(dy_true, dy_hat)[0, 1] if np.std(dy_hat) > 1e-20 else float('nan')
+
+    print(f"\n{'━'*65}")
+    print(f"  {label}   CLEAN   gain={gain}  iter={len(history)}  adaylar k={candidate_ks}")
+    print(f"{'━'*65}")
+    # Kısa CLEAN geçmişi (ilk seçilen modlar)
+    picks = [h[1] for h in history]
+    if picks:
+        seq = []
+        for p in picks:
+            if not seq or seq[-1][0] != p:
+                seq.append([p, 1])
+            else:
+                seq[-1][1] += 1
+        seq_str = "  ".join(f"k={p}×{c}" for p, c in seq[:12])
+        print(f"  Çıkarım sırası: {seq_str}")
+    print(f"  {'k':>2}   {'── tahmin ──':^20}   {'── gerçek ──':^20}   ΔA/A      Δφ")
+    print(f"  {'-'*2}   {'-'*20}   {'-'*20}   {'-'*6}    {'-'*6}")
+
+    for k in sorted(set(fit) | set(truth)):
+        A_fit, phi_fit = fit.get(k, (0.0, 0.0))
+        A_true, phi_true = truth.get(k, (0.0, 0.0))
+        fit_str = f"{A_fit*1e6:8.1f} μm  ∠{phi_fit:+5.2f}"
+        if A_true > 0:
+            true_str = f"{A_true*1e6:8.1f} μm  ∠{phi_true:+5.2f}"
+            err_A = abs(A_fit - A_true) / A_true * 100
+            err_phi = phase_diff(phi_fit, phi_true)
+            err_str = f"{err_A:6.1f}%"
+            phi_str = f"{err_phi:.2f} rad"
+        else:
+            true_str = "        —           "
+            err_str = "     —"
+            phi_str = "    —"
+        print(f"  {k:>2}   {fit_str}   {true_str}   {err_str}   {phi_str}")
+
+    print(f"  {'-'*63}")
+    print(f"  Profil: RMS hata = {rms:.1f} μm   korelasyon = {cor:.3f}")
+    print(f"{'━'*65}")
+    return dy_hat
+
+
 # ── veri yükleme ─────────────────────────────────────────────────────────────
 
 def load_data():
@@ -189,6 +317,11 @@ def main():
     kx      = sorted({h['k'] for h in dx_cfg})
     recon_ky = cfg.get("recon_k_list_dy", None)  # opsiyonel sızıntı testi bazı
 
+    clean_gain = cfg.get("clean_gain", 0.2)      # CLEAN loop gain
+    clean_iter = cfg.get("clean_max_iter", 200)
+    # CLEAN aday harmonik kümesi: verilmezse gerçek harmonikler kullanılır
+    clean_cand = cfg.get("clean_candidates_dy", None)
+
     print("Fourier Rekonstrüksiyon Kalite Raporu")
     print(f"  dy harmonikleri (gerçek): k = {ky}")
     print(f"  dx harmonikleri (gerçek): k = {kx}")
@@ -209,6 +342,12 @@ def main():
             print(f"\n  [Sızıntı testi: baz = k={sorted(recon_ky)}, gerçek = k={ky}]")
             fit_report("DİKEY (dy)  [baz ≠ gerçek — sızıntı]",
                        dRy, dy_list, dy_true, sorted(recon_ky), dy_cfg, antisym)
+
+        # CLEAN: dominant harmonikleri sırayla soyarak zayıf k=2'yi ölç
+        cand = clean_cand if clean_cand is not None else ky
+        clean_report("DİKEY (dy)  [CLEAN]",
+                     dRy, dy_list, dy_true, sorted(cand), dy_cfg, antisym,
+                     gain=clean_gain, max_iter=clean_iter)
 
     # ── yatay (dx) ──
     if kx:
