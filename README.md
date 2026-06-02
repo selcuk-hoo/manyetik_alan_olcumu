@@ -23,6 +23,7 @@
 10. [Ne zaman çalışmadı ve neden?](#10-ne-zaman-çalışmadı-ve-neden)
 11. [Greedy ve LASSO denemeleri](#11-greedy-ve-lasso)
 12. [Çok-konfigürasyon yığma: rank sorununa çözüm](#12-çok-konfigürasyon-yığma)
+12b. [Gürültü altındaki zayıf harmoniği ayıklamak: CLEAN](#12b-gürültü-altındaki-zayıf-harmoniği-ayıklamak-neler-i̇şe-yaramaz-clean-ne-yapar)
 13. [Nerede duruyoruz? Fiziksel bir değerlendirme](#13-nerede-duruyoruz)
 14. [Bu donanımla başka ne ölçülebilir?](#14-bu-donanımla-başka-ne-ölçülebilir)
 15. [Depo yapısı ve hızlı başlangıç](#15-depo-yapısı-ve-hızlı-başlangıç)
@@ -569,6 +570,87 @@ eklemek bu paraziti azaltmıyor. Rank ve SNR iki ayrı sorundur:
 
 ---
 
+## 12b. Gürültü Altındaki Zayıf Harmoniği Ayıklamak: Neler İşe Yaramaz, CLEAN Ne Yapar?
+
+§10–11'de gördük: büyük k=4,6,8 harmonikleri varken küçük k=2'yi
+ölçmek SNR sorunu yaratıyor. Doğal bir refleks: "sinyal işleme
+hilelerinden biri bunu kurtarabilir mi?" Önce neden bazı bariz
+yöntemlerin **işe yaramadığını**, sonra neyin denenmeye değer olduğunu
+açıklayalım.
+
+### Neden doğrudan FFT çalışmaz?
+
+Elimizdeki ölçüm $\Delta y$ değil, $\Delta R \cdot \Delta y$'dir:
+
+$$\Delta\mathbf{y}_\text{ölçülen} = \Delta R \, \Delta q$$
+
+$\Delta R$, Fourier modlarını **birbirine karıştıran** bir matris.
+$\Delta q$ saf k=2 olsa bile $\Delta R\,\Delta q$ tek bir Fourier moduna
+karşılık gelmez — tune frekansı çevresine yayılmış bir desendir (§10
+Sorun 2). Dolayısıyla $\Delta\mathbf{y}$'nin FFT'si $\Delta q$'nun
+FFT'si **değil**; araya $\Delta R$ girmiş. $\Delta R$ birim matris
+olsaydı FFT mükemmel olurdu — ama değil.
+
+### Neden sinyali katlayıp (folding) ortalama almak çalışmaz?
+
+Periyodik katlama, **farklı periyottaki** rassal gürültüyü bastırmak
+için kullanılır. Ama k=4, 6, 8 hepsi **k=2'nin tam katı** harmonikleri:
+periyotları sırasıyla k=2'nin 1/2, 1/3, 1/4'ü. k=2 periyodunda katlarsan
+bu harmonikler tam sayıda dönem tamamlar → **iptal olmaz, güçlenerek
+kalır.** Katlama kendi harmoniklerini süzemez.
+
+### Neden MUSIC / ESPRIT gibi yüksek-çözünürlük yöntemleri doğrudan çalışmaz?
+
+Bu yöntemler veri $z = \sum_k A_k e^{i 2\pi f_k t}$ gibi **saf frekans
+bileşenleri** içerdiğinde güçlüdür. Bizim $\Delta\mathbf{y}$'miz bu
+form değil — $\Delta R$ bir konvolüsyon değil, tam matris çarpımı.
+MUSIC $\Delta\mathbf{y}$'deki baskın yapıyı bulur ama bu $\Delta R$'nin
+kendi tekil vektörlerine karşılık gelir, $\Delta q$'daki k=2'ye değil.
+
+### CLEAN: dominant kaynağı soy, kalanı ölç
+
+Radyo astronomisindeki **CLEAN** algoritmasının fiziği burada anlamlı:
+en parlak kaynağı bul, çıkar, tekrarla. Bizim problemde:
+
+```
+artık r = Δy
+döngü (her tur):
+  her aday k için: r'yi yalnız k ile fit et, ne kadar düşürür?
+  en çok düşüreni seç (örn. ilk turda büyük k=6)
+  r ← r − gain · ΔR·F_k·â_k          (kesirli çıkarım, gain<1)
+  biriktir: â_toplam[k] += gain · â_k
+büyük harmonikler soyulunca artıkta zayıf k=2 ortaya çıkar
+```
+
+**CLEAN ≠ greedy.** Greedy bir harmoniği seçip onu tam taahhüt eder.
+CLEAN ise **loop gain < 1** (tipik 0.1–0.3) ile her adımda dominant
+harmoniğin yalnız bir kesrini çıkarır. Böylece bir moda erkenden tam
+bağlanmaz; sonraki turlarda geri dönüp düzeltebilir. Mode-mixing olan
+$\Delta R$ için bu daha sağlamdır.
+
+### Önemli dürüstlük notu: CLEAN rank EKLEMEZ
+
+CLEAN bir sihir değil. Ölçümün taşımadığı bilgiyi yaratamaz. Sınırlar:
+
+- **Tam rankta** ($\Delta R$ tüm modları görüyorsa): CLEAN k=2'yi
+  mükemmel ayıklar (sentetik testte 9.98 μm / gerçek 10 μm).
+- **Rank yetersizken** (3-konfig → rank 4, 8 bilinmeyen): CLEAN de
+  joint lstsq de fundamental sınıra çarpar. Hiçbir algoritma 4 bağımsız
+  denklemle 8 bilinmeyeni çözemez.
+
+CLEAN'in asıl faydası şu senaryoda: **rank büyük harmonikleri ayırmaya
+yetiyor** ama joint fit minimum-norm ile bilgiyi tüm katsayılara
+saçıyorsa. CLEAN büyükleri temiz soyup zayıf olanı artıkta bırakır.
+Eğer rank büyükleri bile ayıramıyorsa CLEAN da çaresizdir.
+
+> **Sonuç:** CLEAN, "önce gürültüyü modelle-çıkar, sonra sinyali ölç"
+> stratejisinin disiplinli halidir. SNR sorununa kısmi çare olabilir —
+> **ancak yalnızca rank büyük harmonikleri ayırmaya yetiyorsa.** Asıl
+> darboğaz hâlâ rank: §12'deki çok-konfig yığma ile rank artırılmadan
+> CLEAN tek başına yeterli değil.
+
+---
+
 ## 13. Nerede Duruyoruz? Fiziksel Bir Değerlendirme
 
 ### Sonuçların özeti
@@ -655,7 +737,8 @@ her BPM'in kazanç hatası tahmin edilebilir. Gradyan modülasyonu
 | `integrator.py` | Python/ctypes sarmalayıcı |
 | `build_response_matrix.py` | R₁, R₂ ve ΔR matrislerini hesaplar |
 | `test_kmod_reconstruction.py` | Simülasyon + rekonstrüksiyon karşılaştırması |
-| `reconstruction.py` | Hedefli, Greedy, LASSO, çok-konfig rekonstrüksiyon |
+| `reconstruction.py` | Hedefli, Greedy, LASSO, çok-konfig rekonstrüksiyon (tam çıktı) |
+| `fourier_reconstruct.py` | Temiz Fourier kalite raporu: hedefli fit + CLEAN (LASSO/greedy yok) |
 | `scan_j2.py` | En iyi j₂ quad çiftini tara |
 | `show_response.py` | Tepki matrisi görselleştirme |
 | `FOURIER_REKONSTRUKSIYON.md` | Fourier yönteminin pedagojik derinlemesine anlatımı |
@@ -712,6 +795,30 @@ testi) için `params.json`'a şu satırı ekle:
 Bu, veride k=4,6,8 olsa bile rekonstrüksiyon bazını yalnız k=2'den kurar.
 `reconstruction.py` çıktısında "UYARI: baz ≠ gerçek harmonikler" görünür
 ve k=2 katsayısının büyük arka plandan ne kadar etkilendiği raporlanır.
+
+### Temiz kalite raporu + CLEAN
+
+Karmaşık `reconstruction.py` çıktısı yerine sade bir genlik/faz/hata
+tablosu için:
+
+```bash
+python3 fourier_reconstruct.py
+```
+
+Bu script LASSO/greedy basmaz; yalnız (1) hedefli Fourier fit, (2) varsa
+sızıntı testi, (3) CLEAN hiyerarşik çıkarımı tablolar. Her k için
+tahmin genliği/fazı, gerçek değer, %hata ve faz farkını gösterir.
+
+CLEAN parametreleri (`params.json`, opsiyonel):
+
+```json
+"clean_gain": 0.2,
+"clean_max_iter": 200,
+"clean_candidates_dy": [2, 4, 6, 8]
+```
+
+`clean_gain` loop gain (0.1–0.3 tipik). `clean_candidates_dy` verilmezse
+gerçek harmonikler aday kümesi olur.
 
 ### Çok-konfigürasyon yığma
 
@@ -773,6 +880,9 @@ Beklenen: yığılmış sistem rank ~3, k=0+k=2 birlikte ayrıştırılır.
 | `greedy_residual_threshold` | Minimum oransal rezidüel düşüşü (tipik: 0.01–0.05) |
 | `max_harmonics` | Greedy maksimum harmonik sayısı |
 | `lasso_lambda` | LASSO L1 ceza katsayısı |
+| `clean_gain` | (`fourier_reconstruct.py`) CLEAN loop gain, tipik 0.1–0.3 |
+| `clean_max_iter` | CLEAN maksimum iterasyon sayısı |
+| `clean_candidates_dy` | CLEAN aday harmonik kümesi; yoksa = truth harmonikleri |
 
 ### Ek hata kaynakları
 

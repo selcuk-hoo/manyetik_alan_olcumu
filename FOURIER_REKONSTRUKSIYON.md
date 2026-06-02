@@ -692,6 +692,89 @@ ama o zaman k=4,6,8 katkıları sızıntı yaratır (§11 Sorun 2 aynısı).
 
 ---
 
+## 13b. En Küçük Kareler İteratif mi? Ve Gürültü Altında Zayıf Harmonik
+
+### Yanlış bir sezgi: "lstsq iterasyonla hatayı azaltır"
+
+Yaygın bir yanılgı: en küçük karelerin "uygula, hataya bak, sonraki
+iterasyona geç" şeklinde döngülü çalıştığı. Hayır. `np.linalg.lstsq`
+**tek adımda, kapalı formülle** çözer:
+
+$$
+M = \Delta R \cdot F, \qquad
+\hat{a} = (M^T M)^{-1} M^T \Delta\mathbf{y}
+$$
+
+Geometrik anlamı: $\Delta\mathbf{y}$ vektörünü $M$'nin sütunlarının
+gerdiği alt uzaya **dik izdüşümle** düşürür. "En küçük kare hatayı veren
+nokta" o alt uzaydaki dik izdüşüm noktasıdır ve analitik formülü vardır.
+İterasyon yok.
+
+İteratif olanlar bunun üzerine kurulu sarmalayıcılardır:
+- **Greedy**: her adımda yeni bir $k$ ekleyip lstsq'yi tekrar çağırır.
+- **CLEAN** (aşağıda): dominant harmoniği bulup kesirli çıkarır, tekrarlar.
+- **LASSO/ADMM**: gerçek anlamda iteratif konveks optimizasyon.
+
+### Gürültü altındaki zayıf harmonik: ne işe yaramaz?
+
+§11 Sorun 2'de gördük: büyük k=4,6,8 varken küçük k=2'yi ölçmek zor.
+Birkaç bariz fikrin neden işe yaramadığını netleştirelim.
+
+**Doğrudan FFT.** Elimizdeki ölçüm $\Delta\mathbf{y} = \Delta R\,\Delta q$,
+yani $\Delta q$ değil. $\Delta R$ Fourier modlarını karıştırır; saf k=2
+girişi bile tune frekansı çevresine yayılmış bir çıkış verir (§ Tune-Fourier).
+$\Delta\mathbf{y}$'nin FFT'si $\Delta q$'nun FFT'si değildir.
+
+**Periyodik katlama (folding).** Katlama farklı periyottaki rassal
+gürültüyü bastırır. Ama k=4,6,8 hepsi k=2'nin tam kat harmonikleri;
+k=2 periyodunda katlandığında tam sayıda dönem tamamlayıp **iptal olmaz,
+güçlenir.** Kendi harmoniklerini süzemez.
+
+**MUSIC/ESPRIT.** Bu yöntemler veri saf frekans bileşenlerinin toplamı
+olduğunda güçlüdür. $\Delta\mathbf{y}$ bu form değil — $\Delta R$ matris
+çarpımıdır, konvolüsyon değil. Baskın yapı $\Delta R$'nin tekil
+vektörleridir, $\Delta q$'nun harmonikleri değil.
+
+### CLEAN: dominant kaynağı soy, kalanı ölç
+
+Radyo astronomisindeki CLEAN'in fiziği uygundur: en parlak kaynağı bul,
+çıkar, tekrarla.
+
+$$
+\begin{aligned}
+&\mathbf{r} \leftarrow \Delta\mathbf{y} \\
+&\textbf{döngü:} \\
+&\quad \text{her aday } k:\ \hat{a}_k = \text{lstsq}(\Delta R\cdot F_k,\ \mathbf{r}) \\
+&\quad \text{en çok düşüreni seç } (k^\star) \\
+&\quad \mathbf{r} \leftarrow \mathbf{r} - g\cdot \Delta R\,F_{k^\star}\hat{a}_{k^\star}
+       \quad (g = \text{loop gain} < 1) \\
+&\quad \hat{a}_\text{toplam}[k^\star] \mathrel{+}= g\cdot\hat{a}_{k^\star}
+\end{aligned}
+$$
+
+**Greedy'den farkı** kesirli çıkarımdır ($g<1$). Greedy bir moda tam
+taahhüt eder; CLEAN her turda yalnız bir kesrini çıkardığı için sonraki
+turlarda geri dönüp düzeltebilir — mode-mixing'e daha sağlam.
+
+**Dürüstlük notu — CLEAN rank eklemez.** Ölçümün taşımadığı bilgiyi
+yaratamaz:
+
+| Durum | CLEAN sonucu |
+|-------|--------------|
+| Tam rank $\Delta R$ | k=2'yi mükemmel ayıklar (9.98 / 10 μm — sentetik test) |
+| Rank yetersiz (4 denklem, 8 bilinmeyen) | Joint lstsq gibi sınıra çarpar |
+
+CLEAN'in faydası şu senaryoyla sınırlı: **rank büyük harmonikleri
+ayırmaya yetiyor** ama joint fit bilgiyi minimum-norm ile saçıyorsa.
+Büyükleri temiz soyup zayıfı artıkta bırakır. Rank büyükleri bile
+ayıramıyorsa CLEAN da çaresizdir. Asıl darboğaz hep rank: §13'teki
+çok-konfig yığma ile rank artırılmadan CLEAN tek başına yetmez.
+
+Uygulama: `fourier_reconstruct.py` (sade kalite raporu; `clean_gain`,
+`clean_candidates_dy` parametreleriyle).
+
+---
+
 ## 14. Pratik Rehber ve Açık Sorular
 
 ### Hangi yöntem hangi durumda kullanılmalı?
@@ -767,6 +850,11 @@ ama o zaman k=4,6,8 katkıları sızıntı yaratır (§11 Sorun 2 aynısı).
      Greedy       ←  veri-güdümlü harmonik tespiti
      LASSO        ←  L1 cezalı seyrek rekonstrüksiyon
      Çok-konfig   ←  yığılmış sistem (R_dy_1_c0.npy varsa)
+
+5. fourier_reconstruct.py   (sade kalite raporu, LASSO/greedy yok)
+     Hedefli fit  ←  genlik/faz/hata tablosu
+     Sızıntı testi←  recon_k_list_dy verilirse baz ≠ truth
+     CLEAN        ←  dominant harmonikleri kesirli soyma (loop gain)
 ```
 
 Fourier seçimi üç satır:
