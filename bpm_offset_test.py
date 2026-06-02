@@ -335,6 +335,123 @@ def model_error_sweep(bpm_offset_sigma=100e-6,
     print("       δK/K>0 → model hatası + BPM ofset birlikte")
 
 
+def clean_orbit(R, y, candidate_ks, antisym=True,
+                gain=0.2, max_iter=300, tol=1e-4):
+    """CLEAN: tek orbit y = R·Δq + b üzerinde harmonik keşfi.
+
+    Aday k kümesi verilir (hangi k'ların var olduğu bilinmez).
+    Her turda artığı en çok düşüren k seçilip kesirli çıkarılır.
+    b beyaz gürültü olduğu için R·F_k'ya projeksiyon yaparken doğal
+    olarak bastırılır — kmod'a gerek yok.
+
+    Döndürür: {k: a_katsayı_vektörü} birikmiş katsayılar.
+    """
+    n_q = R.shape[0]
+    # Tüm aday bazları önceden hesapla
+    bases = {}
+    for k in candidate_ks:
+        F_k, _ = fodo_basis(n_q, [k], antisym)
+        bases[k] = (F_k, R @ F_k)        # (F_k, M_k = R·F_k)
+
+    r = y.astype(float).copy()
+    r0_norm = np.linalg.norm(r)
+    accum = {k: np.zeros(2) for k in candidate_ks}
+
+    for _ in range(max_iter):
+        best_k, best_red, best_a, best_M = None, 0.0, None, None
+        r_norm_sq = float(np.dot(r, r))
+        for k, (F_k, M_k) in bases.items():
+            a_k, *_ = np.linalg.lstsq(M_k, r, rcond=1e-3)
+            red = r_norm_sq - float(np.dot(r - M_k @ a_k, r - M_k @ a_k))
+            if red > best_red:
+                best_red, best_k, best_a, best_M = red, k, a_k, M_k
+        if best_k is None or best_red <= 0:
+            break
+        r -= gain * (best_M @ best_a)
+        accum[best_k] += gain * best_a
+        if np.linalg.norm(r) / r0_norm < tol:
+            break
+
+    return accum
+
+
+def clean_test(bpm_offset_sigma=100e-6, n_trials=50, seed=0,
+               candidate_ks=None, gain=0.2, max_iter=300):
+    """CLEAN ile tek orbit ölçümünden k=2 çekme testi.
+
+    Aday k kümesi oracle değil: hangi harmoniklerin var olduğu bilinmez.
+    CLEAN kendi keşfeder, biz sadece k=2 sonucuna bakırız.
+    """
+    with open("params.json") as f:
+        config = json.load(f)
+
+    R, _ = load_matrices()
+    n_q     = R.shape[0]
+    antisym = config.get("smooth_antisym_fodo", True)
+    dy_true = make_truth_dy(config, n_q, add_random=False)
+
+    # k=2 gerçeği
+    F_k2, _ = fodo_basis(n_q, [2], antisym)
+    a2t, *_ = np.linalg.lstsq(F_k2, dy_true, rcond=None)
+    amp_true = np.sqrt(a2t[0]**2 + a2t[1]**2)
+    phi_true = np.arctan2(a2t[1], a2t[0])
+
+    if candidate_ks is None:
+        # Geniş aday kümesi — oracle değil
+        candidate_ks = list(range(1, 13))   # k=1..12
+
+    present_ks = sorted(set(h["k"] for h in config["dy_harmonics"]))
+
+    print("=" * 64)
+    print(f"  CLEAN tek-orbit testi   σ_b = {bpm_offset_sigma*1e6:.0f} μm   ({n_trials} deneme)")
+    print(f"  Gerçek k=2: {amp_true*1e6:.2f} μm @ ∠{phi_true:.3f} rad")
+    print(f"  Gerçek harmonikler: {present_ks}   (algoritmaya söylenmedi)")
+    print(f"  Aday k kümesi: {candidate_ks}")
+    print(f"  gain={gain}  max_iter={max_iter}")
+    print("=" * 64)
+
+    rng = np.random.default_rng(seed)
+    k2_amps, k2_phis, found_ks_all = [], [], []
+
+    for _ in range(n_trials):
+        b = rng.normal(0, bpm_offset_sigma, n_q)
+        y = R @ dy_true + b
+
+        accum = clean_orbit(R, y, candidate_ks, antisym, gain, max_iter)
+
+        # k=2 katsayısı
+        a2 = accum.get(2, np.zeros(2))
+        k2_amps.append(np.sqrt(a2[0]**2 + a2[1]**2))
+        k2_phis.append(np.arctan2(a2[1], a2[0]))
+
+        # Hangi k'lar baskın çıktı?
+        found = sorted(k for k, a in accum.items()
+                       if np.linalg.norm(a)*1e6 > 1.0)   # >1 μm eşiği
+        found_ks_all.append(found)
+
+    mean_amp  = np.mean(k2_amps) * 1e6
+    std_amp   = np.std(k2_amps)  * 1e6
+    dphi      = np.abs(np.array(k2_phis) - phi_true)
+    dphi      = np.minimum(dphi, 2*np.pi - dphi)
+    mean_dphi = np.mean(dphi)
+    amp_err   = abs(mean_amp - amp_true*1e6) / (amp_true*1e6) * 100
+
+    print(f"\n  k=2 sonucu ({n_trials} deneme ortalaması):")
+    print(f"    Bulunan genlik : {mean_amp:.2f} ± {std_amp:.2f} μm")
+    print(f"    Gerçek genlik  : {amp_true*1e6:.2f} μm")
+    print(f"    Genlik hatası  : {amp_err:.1f}%")
+    print(f"    Faz hatası     : {mean_dphi:.3f} rad")
+
+    # Tipik bir denemede hangi k'lar bulundu?
+    from collections import Counter
+    all_found_flat = [k for trial in found_ks_all for k in trial]
+    freq = Counter(all_found_flat)
+    print(f"\n  Hangi k'lar >1 μm bulundu (kaç denemede / {n_trials}):")
+    for k in sorted(freq):
+        bar = '█' * int(freq[k] / n_trials * 20)
+        print(f"    k={k:2d}: {freq[k]:3d}/{n_trials}  {bar}")
+
+
 if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
@@ -346,8 +463,18 @@ if __name__ == "__main__":
                    help="Model hatası süpürmesi çalıştır")
     p.add_argument("--random", action="store_true",
                    help="dy_random_RMS ekle (Fourier bazı dışı bileşen)")
+    p.add_argument("--clean", action="store_true",
+                   help="CLEAN tek-orbit testi: aday k=1..12, oracle yok")
+    p.add_argument("--gain", type=float, default=0.2,
+                   help="CLEAN loop gain (varsayılan 0.2)")
+    p.add_argument("--max-k", type=int, default=12,
+                   help="CLEAN aday k üst sınırı (varsayılan 12)")
     args = p.parse_args()
-    if args.sweep:
+    if args.clean:
+        clean_test(bpm_offset_sigma=args.sigma, n_trials=args.trials,
+                   seed=args.seed, gain=args.gain,
+                   candidate_ks=list(range(1, args.max_k + 1)))
+    elif args.sweep:
         model_error_sweep(bpm_offset_sigma=args.sigma,
                           n_trials=args.trials, seed=args.seed,
                           add_random=args.random)
