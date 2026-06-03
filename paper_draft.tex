@@ -247,9 +247,11 @@ $\|M_k\|$  & 43.0 & \textbf{167}  & 43.6 &  16 & 5.5 & 2.9  \\
 Although the contaminants are $20$--$30\times$ larger in misalignment,
 the amplification gap narrows or reverses the hierarchy once mapped to
 orbit space (Table~\ref{tab:orbit}). The \SI{10}{\micro\meter} $k=2$
-misalignment produces a \SI{1669}{\micro\meter} orbit norm---comparable
-to $k=6$ and larger than $k=8$---so $k=2$ is no longer a buried weak
-signal but one of the leading orbit components.
+misalignment produces a \SI{1669}{\micro\meter} orbit norm---this is simply
+$\|M_{k=2}\|\times a_{k=2}=167\times\SI{10}{\micro\meter}$, i.e.\ the column
+norm times the misalignment amplitude. The orbit norm is comparable to $k=6$
+and larger than $k=8$, so $k=2$ is no longer a buried weak signal but one
+of the leading orbit components.
 
 \begin{table}[t]
 \centering
@@ -343,7 +345,12 @@ estimate by \emph{any} deterministic offset is
 \end{equation}
 where $\hat{m}_{k=2}=M_{k=2}/\|M_{k=2}\|$ is the unit vector along the
 $k=2$ column of $M$. No assumption about the distribution of $\mathbf{b}$
-enters Eq.~(\ref{eq:bias}).
+enters Eq.~(\ref{eq:bias}). Strictly, this expression is exact only when the
+columns of $M$ are mutually orthogonal; the general result is
+$\delta\hat{a}=(M^TM)^{-1}M^T\mathbf{b}$.
+Because $|\langle RF_2,RF_k\rangle|<0.01$ for all $k\neq2$ (Section~\ref{sec:results}),
+Eq.~(\ref{eq:bias}) is an excellent approximation—the cross-correlation
+correction to the $k=2$ estimate is below 1\%.
 
 To stress-test this we set $\mathbf{b}=A\hat{m}_{k=2}$, the worst-case
 fully $k=2$-orbit-aligned offset. Table~\ref{tab:whiteness} shows that
@@ -435,9 +442,8 @@ of the harmonic orbit responses that prevents contaminant leakage.
 Critically, the method makes no assumption about the statistical structure
 of the BPM offset: even if the full \SI{300}{\micro\meter} offset is
 entirely aligned with the $k=2$ orbit pattern (worst case), the induced
-bias is only \SI{1.80}{\micro\meter}; the safe limit is
-$\SI{1669}{\micro\meter}$, 5.6$\times$ above the realistic value
-(Section~\ref{sec:whiteness}).
+bias is only \SI{1.80}{\micro\meter}; the idealized worst-case limit is $\SI{1669}{\micro\meter}$,
+5.6$\times$ above the realistic value (Section~\ref{sec:whiteness}).
 We also documented and corrected a $10^3$ unit-scaling error in the
 response-matrix pipeline. The principal open problem is discriminating
 genuine harmonics from offset-induced spurious ones without prior knowledge;
