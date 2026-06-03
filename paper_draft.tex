@@ -17,9 +17,8 @@
 
 \begin{frontmatter}
 
-\title{Single-orbit reconstruction of quadrupole misalignments in a
-frozen-spin storage ring: resolving a weak low-order harmonic in the
-presence of large beam-position-monitor offsets}
+\title{Targeted single-orbit estimation of the false-EDM-dominant
+quadrupole-misalignment harmonic in a proton frozen-spin storage ring}
 
 \author[inst1]{S.~Hac\i\"omero\u{g}lu\corref{cor1}}
 \cortext[cor1]{Corresponding author}
@@ -37,8 +36,9 @@ monitors (BPMs) carry static electronic offsets of $\sim\SI{300}{\micro
 $K$-modulation (kmod), differences two lattice configurations to cancel
 the offset but pays a steep rank/conditioning penalty when only a few
 quadrupoles can be modulated. We show that, for the specific goal of
-extracting the low-order Fourier harmonic of the misalignment pattern
-that dominates the false EDM ($k=2$ for our lattice), a single closed-orbit
+estimating the dominant false-EDM-driving harmonic of the misalignment
+pattern ($k=2$ for our lattice)---without attempting a full reconstruction
+of the 48-dimensional misalignment vector---a single closed-orbit
 measurement analysed with a response-matrix Fourier basis recovers the
 target harmonic to $0.6\%$ in amplitude and \SI{0.046}{\radian} in phase
 under a \SI{100}{\micro\meter} BPM offset, with no gradient modulation.
@@ -108,15 +108,18 @@ first order $\delta R = -R\,\mathrm{diag}(\delta K)\,R$), the condition
 number rises to $\sim10^6$, and the reconstruction degrades severely.
 
 In this work we step back from kmod and ask a narrower, physically
-motivated question. The false EDM is not driven equally by all 48 degrees
-of freedom of $\Delta q$; it is dominated by the low-order Fourier
-harmonics of the misalignment pattern, and for our lattice the leading
-contribution is the $k=2$ harmonic---a fact we confirm directly by spin
-tracking in Sec.~\ref{sec:falseedm}, consistent with the $N=2$ peak of
-Omarov \emph{et al.}~\cite{omarov}. We therefore target $k=2$ directly
-and show that it can be extracted from a \emph{single} orbit measurement
-governed by Eq.~(\ref{eq:model}), keeping $\mathbf{b}$ in the model rather
-than cancelling it. The key realisation is that the fitting-matrix column norm $\|M_{k=2}\|=167$
+motivated question. \textbf{The goal is not a full reconstruction of the
+48-dimensional misalignment vector $\Delta q$, but rather to estimate the
+single dominant false-EDM-driving harmonic ($k=2$), which can then be
+compensated by dedicated correction elements.} The false EDM is not driven
+equally by all 48 degrees of freedom of $\Delta q$; it is dominated by the
+low-order Fourier harmonics of the misalignment pattern, and for our lattice
+the leading contribution is the $k=2$ harmonic---a fact we confirm directly
+by spin tracking in Sec.~\ref{sec:falseedm}, qualitatively consistent with
+the $N=2$ peak of Omarov \emph{et al.}~\cite{omarov}. We therefore target
+$k=2$ directly and show that it can be extracted from a \emph{single} orbit
+measurement governed by Eq.~(\ref{eq:model}), keeping $\mathbf{b}$ in the
+model rather than cancelling it. The key realisation is that the fitting-matrix column norm $\|M_{k=2}\|=167$
 is 10.6$\times$ larger than $\|M_{k=4}\|=16$, so the $k=2$ estimate is
 inherently less contaminated by any $\mathbf{b}$---regardless of its
 statistical structure---than the $k=4$ estimate.
@@ -235,14 +238,14 @@ sampling-rate choice.
 Table~\ref{tab:falseedm} shows the outcome. The false EDM peaks sharply at
 $k=2$, exceeding $k=1$ by $2.9\times$ and $k=3$ by $2.2\times$, and tracks
 the closed-orbit amplitude (both maximal at $k=2$, the harmonic nearest the
-vertical tune $Q_y\approx2.68$). This reproduces---by an independent
-mechanism (quadrupole misalignment rather than an imposed field harmonic)---the
+vertical tune $Q_y\approx2.68$). This is qualitatively consistent with the
 $N=2$ peak reported by Omarov \emph{et al.}~\cite{omarov} (their
-Figs.~7--8). There the low-harmonic rates were quoted only as statistical
-upper limits, because the exact precession rate could not be determined from
-the simulation; this is precisely the oscillation-contamination problem that
-the closed-orbit\,/\,stroboscopic method removes here, returning the actual
-rates.
+Figs.~7--8), though the two rings differ in lattice design and the
+comparison is not direct. There the low-harmonic rates were quoted only as
+statistical upper limits, because the exact precession rate could not be
+determined from the simulation; this is precisely the
+oscillation-contamination problem that the closed-orbit\,/\,stroboscopic
+method removes here, returning the actual rates.
 
 \begin{table}[t]
 \centering
@@ -465,14 +468,15 @@ CLEAN (\si{\micro\meter}) & lstsq (\si{\micro\meter}) \\
 The single-orbit, response-matrix reconstruction trades the offset-cancelling
 guarantee of kmod for a structural separation that is effective precisely
 for the low-order, tune-amplified harmonic that matters for the false EDM.
-For $k=2$ it outperforms the best kmod variant tested ($0.6\%$ vs.\ $\sim43\%$
-amplitude error) while requiring only one orbit measurement and no gradient
-modulation.
+It is important to recall the framing stated in the Introduction: this is
+not a general-purpose alignment tool but a targeted estimator for a single
+physical observable---the $k=2$ amplitude that drives the false EDM.
 A note on kmod: with \emph{uniform} modulation of all 48 quadrupoles
 simultaneously, $\Delta R=\varepsilon R$ and $\kappa(\Delta R)=\kappa(R)\approx249$,
-so in principle kmod achieves the same conditioning. In practice, 48
-simultaneous precision gradient steps are operationally demanding;
-the single-orbit method requires no active manipulation.
+so in principle full-ring kmod achieves equivalent conditioning without the
+BPM-offset problem. In practice, 48 simultaneous precision gradient steps
+are operationally demanding; the single-orbit method requires only one
+standard orbit measurement and no active gradient manipulation.
 The following items remain open.
 
 \begin{itemize}
