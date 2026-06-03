@@ -141,12 +141,14 @@ def _run_one_k(task):
     mode = F_k[:, 0]
     quad_dy = amp_coef * mode
 
+    # R-tabanlı ‖RF_k‖ SADECE referans amaçlı (fizik için gerekmez; bu
+    # simülasyon saf demet/spin dinamiğidir). Dosya yoksa ya da bayat/sıfır
+    # ise atlanır — gerçek rezonans aşağıda entegre yörüngeden ölçülür.
     R = np.load("R_dy_1.npy") if os.path.exists("R_dy_1.npy") else None
-    if R is not None:
+    if R is not None and np.linalg.norm(R) > 1e-12:
         RFk = float(np.linalg.norm(R @ (mode / np.linalg.norm(mode))))
-        orbit_norm = float(np.linalg.norm(R @ quad_dy) * 1e3)
     else:
-        RFk, orbit_norm = np.nan, np.nan
+        RFk = None
 
     t0 = time.time()
     hist, _, _ = integrate_particle(
@@ -154,8 +156,10 @@ def _run_one_k(task):
         quad_dy=quad_dy)
     t_array = np.arange(hist.shape[0]) * (t2 / hist.shape[0])
     slope = float(measure_dSy_dt(hist, t_array))
+    # R-bağımsız orbit teşhisi: entegre edilen dikey yörünge genliği [mm]
+    y_orbit_mm = float(np.std(hist[:, 1]) * 1e3)
     dt_run = time.time() - t0
-    return {"k": k, "RFk": RFk, "orbit_norm": orbit_norm,
+    return {"k": k, "RFk": RFk, "orbit_mm": y_orbit_mm,
             "dSy_dt": slope, "runtime": dt_run}
 
 
@@ -194,10 +198,15 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None):
     wall = time.time() - t_wall
 
     results.sort(key=lambda r: r["k"])
-    print(f"  {'k':>3}  {'‖RF_k‖':>9}  {'orbit norm':>12}  {'dS_y/dt [rad/s]':>18}")
+    has_R = any(r["RFk"] is not None for r in results)
+    print(f"  {'k':>3}  {'‖RF_k‖':>9}  {'y-orbit (sim)':>14}  {'dS_y/dt [rad/s]':>18}")
     for r in results:
-        print(f"  {r['k']:>3}  {r['RFk']:>9.3f}  {r['orbit_norm']:>10.1f}mm  "
+        rfk_s = f"{r['RFk']:>9.3f}" if r["RFk"] is not None else f"{'—':>9}"
+        print(f"  {r['k']:>3}  {rfk_s}  {r['orbit_mm']:>12.3f}mm  "
               f"{r['dSy_dt']:>18.3e}   ({r['runtime']:.0f}s)")
+    if not has_R:
+        print("  (‖RF_k‖ referansı atlandı: R_dy_1.npy yok/sıfır — fizik için "
+              "gerekmez; y-orbit sütunu R-bağımsız rezonans göstergesidir)")
     print(f"  toplam duvar-saati: {wall:.0f}s  "
           f"(seri tahmini ~{sum(r['runtime'] for r in results):.0f}s)")
 
@@ -211,7 +220,9 @@ def plot_results(results, amp_coef):
 
     ks   = np.array([r["k"] for r in results])
     dsy  = np.array([abs(r["dSy_dt"]) for r in results])
-    rfk  = np.array([r["RFk"] for r in results])
+    # R-bağımsız karşılaştırma: simülasyondan entegre edilen y-orbit genliği.
+    # (‖RF_k‖ varsa onu da gösterebiliriz ama gerekmez.)
+    orbit = np.array([r["orbit_mm"] for r in results])
 
     fig, ax1 = plt.subplots(figsize=(7, 4.5))
     color1 = "tab:red"
@@ -224,9 +235,9 @@ def plot_results(results, amp_coef):
 
     ax2 = ax1.twinx()
     color2 = "tab:blue"
-    ax2.plot(ks, rfk, "o-", color=color2, lw=2, ms=7,
-             label=r"orbit gain $\|RF_k\|$")
-    ax2.set_ylabel(r"orbit gain $\|RF_k\|$", color=color2)
+    ax2.plot(ks, orbit, "o-", color=color2, lw=2, ms=7,
+             label=r"integrated $y$-orbit amplitude")
+    ax2.set_ylabel(r"$y$-orbit amplitude [mm] (from tracking)", color=color2)
     ax2.tick_params(axis="y", labelcolor=color2)
 
     ax1.set_title(f"False EDM resonance at $k=2$ "
@@ -248,7 +259,7 @@ if __name__ == "__main__":
     p.add_argument("--t2", type=float, default=5e-4, help="simülasyon süresi [s]")
     p.add_argument("--steps", type=int, default=5000)
     p.add_argument("--nproc", type=int, default=None,
-                   help="paralel süreç sayısı (varsayılan: min(k sayısı, CPU))")
+                   help="paralel süreç sayısı (varsayılan: mod sayısı = kmax+1)")
     args = p.parse_args()
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
