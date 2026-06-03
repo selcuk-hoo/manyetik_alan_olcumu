@@ -123,10 +123,10 @@ $\mathbf{b}$ bilinmiyor. $R^{-1}\mathbf{y}$ deneseydik, sonuç
 $R^{-1}\mathbf{b}$ kirliliği taşırdı ve bu kirliliğin büyüklüğü
 $\|\Delta q\|_\text{aranan}$'dan çok daha büyük.
 
-$R$'nin kondisyon sayısı ~160'tır. "Kondisyon sayısı" sezgisel olarak
+$R$'nin kondisyon sayısı ~249'dur. "Kondisyon sayısı" sezgisel olarak
 şu anlama gelir: girişteki küçük bir belirsizlik çıkışta kaç kat
-büyütülür? 1 μm BPM gürültüsü → ~14 μm tahmin hatası. Bu kabul
-edilebilir. Ama 300 μm BPM ofseti → ~4 mm kirliliği: tamamen kabul
+büyütülür? 1 μm BPM gürültüsü → ~4 μm tahmin hatası. Bu kabul
+edilebilir. Ama 300 μm BPM ofseti → ~1.2 mm kirliliği: tamamen kabul
 edilemez.
 
 **Anahtar soru:** BPM ofsetini iptal edecek bir ölçüm tasarımı mümkün mü?
@@ -154,7 +154,7 @@ $\Delta R$'nin ne kadar iyi koşullanmış olduğuna bağlı.
 
 **İlk deneme:** Tüm 48 quad'ın gradyanı aynı anda %2 artırılır.
 Bu durumda $\Delta R \approx 0.02 \times R$, dolayısıyla
-$\kappa(\Delta R) \approx \kappa(R) \approx 160$. Kondisyon sayısı
+$\kappa(\Delta R) \approx \kappa(R) \approx 249$. Kondisyon sayısı
 $R$ kadar iyi, gürültü büyütmesi küçük.
 
 **Sonuç:** Hata ~6.6 μm RMS, korelasyon ≈ 1.000. 10 μm hedefine
@@ -177,7 +177,7 @@ $$\delta q(t) = R^{-1}\bigl(\mathbf{y}(t) - \mathbf{y}_0\bigr)$$
 
 Referans orbit $\mathbf{y}_0$ sabit bir anda ölçülür. Sonraki her
 ölçümde BPM ofseti aynı kaldığından fark alındığında iptal olur.
-$R$'nin kondisyon sayısı ~160 olduğundan gürültü büyütmesi küçük.
+$R$'nin kondisyon sayısı ~249 olduğundan gürültü büyütmesi küçük.
 
 **Sonuç:** Hata ~6.5 μm RMS, korelasyon ≈ 1.000. Uniform kmod
 kadar iyi ve çok daha kolay uygulanabilir.
@@ -234,10 +234,10 @@ katkı yapıyor:
 | 3 | ~3 | daha düşük |
 | 4 | ~4 | daha da düşük |
 | … | … | … |
-| 48 (uniform) | ~48 | ~160 |
+| 48 (uniform) | ~48 | ~249 |
 
 Kondisyon sayısı, quad sayısı arttıkça iki-quad'ın ~10⁶'sından uniform
-kmod'un ~160'ına doğru iniyor. Tam değer konfigürasyona (hangi quad'lar,
+kmod'un ~249'una doğru iniyor. Tam değer konfigürasyona (hangi quad'lar,
 hangi FODO fazlarında) bağlı ama eğilim açık: **daha çok bağımsız ölçüm
 = daha yüksek rank = daha düşük κ = daha çözülebilir sistem.**
 

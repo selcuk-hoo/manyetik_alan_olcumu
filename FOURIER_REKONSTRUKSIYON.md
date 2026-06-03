@@ -134,7 +134,7 @@ $$
 Burada $\beta_{i,j}$ beta fonksiyonu, $\phi_{i,j}$ faz ilerleme,
 $Q$ tune, $K_j L_j$ quad'ın integre kick gücü.
 
-**Kondisyon sayısı $\kappa(R) \approx 160$** — bu çok iyidir.
+**Kondisyon sayısı $\kappa(R) \approx 249$** — bu çok iyidir.
 $R$'yi "terslemek" (tüm 48 quad hatasını aynı anda bulmak) pratikte
 mümkündür, **eğer** BPM ofseti olmasa.
 
@@ -181,18 +181,13 @@ $$
 $\mathbf{b}$ iptal oldu. Şimdi $\Delta R\,\Delta q = \Delta\mathbf{y}$
 denklemini çözmek gerekiyor.
 
-Ama bir sorun var: $\Delta R$, $R$'den çok daha kötü koşullanmış.
-Neden? Çünkü iki konfigürasyon arasındaki fark küçük — gradyanları %2
-değiştirince $\Delta R \approx \varepsilon R$ ($\varepsilon = 0.02$),
-dolayısıyla $\kappa(\Delta R) \approx \kappa(R)/\varepsilon \approx
-160/0.02 = 8000$. Pratikte **~27.000** çıkıyor.
+**Uniform kmod için:** $\Delta R = \varepsilon R$ ($\varepsilon = 0.02$),
+dolayısıyla $\kappa(\Delta R) = \kappa(R) \approx 249$. Kondisyon sayısı
+$R$ kadar iyi — uniform kmod işe yarar (§5 → §7'de sayısal doğrulama).
 
-Bu sayı ne demek: $\Delta R$'yi ters çevirmek, $R$'yi ters çevirmekten
-~170 kat daha çok gürültü büyütür. 1 μm gürültü → 170 μm hata.
-Bu da 10 μm hedefini aşıyor.
-
-Ama bu, **tüm 48 quad birlikte modüle edildiğinde** geçerlidir.
-Ya yalnız 1 veya 2 quad modüle edilirse?
+Sorun şu: **tüm 48 quad'ı aynı anda hassas biçimde modüle etmek pratikte
+çok zordur.** Gerçekçi senaryo: yalnız 1 ya da 2 quad modüle edilir.
+Bu durumda ne olur?
 
 ---
 
@@ -309,9 +304,9 @@ amplifikasyon.
 
 | Matris | $\kappa$ | 1 μm BPM gürültüsü → tahmin hatası |
 |--------|----------|--------------------------------------|
-| $R$ | ~160 | ~14 μm |
-| $\Delta R$ (uniform kmod) | ~160 | ~14 μm |
-| $\Delta R$ (iki-quad kmod) | ~10⁶ | ~10⁶ μm → anlamsız |
+| $R$ | ~249 | ~4 μm |
+| $\Delta R$ (uniform kmod, 48 quad) | ~249 | ~6 μm (√2 gürültü artışı) |
+| $\Delta R$ (iki-quad kmod) | ~10⁶ (etkin) | ~10⁶ μm → anlamsız |
 | $\Delta R \cdot F$ (geniş Fourier) | ~13.000 | ~13 mm |
 | $\Delta R \cdot F$ (sıkı Fourier) | ~186 | ~26 μm |
 
@@ -981,7 +976,7 @@ hızla bozuluyor.
 |-------|----------------|-------|
 | Hangi harmonikler var bilinmiyor | Çok-konfig + greedy (rank ≥ 3 ile) | Greedy rank-2'de yanlış seçim yapar |
 | Harmonikler fizikten tahmin edilebilir | Targeted Fourier | Baz doğruysa en düşük κ |
-| Operasyonel drift izleme | Drift modu $R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ | Ofset iptal, κ(R)=160 yeterli |
+| Operasyonel drift izleme | Drift modu $R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ | Ofset iptal, κ(R)=249 yeterli |
 | Mutlak hizalama | LOCO/BBA (harici) | k-mod tabanlı yöntemler ofset-gürültü dualitesiyle sınırlı |
 
 ### Targeted Fourier'ı uygulamadan önce sorulması gereken sorular
