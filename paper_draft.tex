@@ -17,8 +17,8 @@
 
 \begin{frontmatter}
 
-\title{Targeted single-orbit estimation of the false-EDM-dominant
-quadrupole-misalignment harmonic in a proton frozen-spin storage ring}
+\title{Single-orbit estimation of the dominant false-EDM harmonic
+in a frozen-spin proton storage ring}
 
 \author[inst1]{S.~Hac\i\"omero\u{g}lu\corref{cor1}}
 \cortext[cor1]{Corresponding author}
@@ -184,7 +184,7 @@ $\kappa(R)=248.7$; all matrices were rebuilt and the results below use the
 corrected $R$.
 
 %==============================================================
-\section{Method: single-orbit response-matrix reconstruction}
+\section{Method: Fourier-response projection}
 \label{sec:method}
 
 We parametrise the misalignment by a FODO-aware Fourier basis. Because the
@@ -198,24 +198,23 @@ Eq.~(\ref{eq:model}) becomes
 \begin{equation}
 \mathbf{y} = \underbrace{R F}_{M}\,\hat{a} + \mathbf{b} + \boldsymbol{\eta}.
 \end{equation}
-Rather than cancelling $\mathbf{b}$, we fit $\hat{a}$ directly by least
-squares. The offset $\mathbf{b}$ is uncorrelated across BPMs (white),
-while the columns of $M=RF$ are structured; the projection of $\mathbf{b}$
-onto any single column is therefore small, and the well-conditioned,
-resonantly amplified columns dominate the fit.
+Rather than cancelling $\mathbf{b}$, we fit $\hat{a}$ directly. The core
+operation is a projection of the orbit onto the columns of $M=RF$: because
+the $k=2$ column norm $\|M_{k=2}\|=167$ is resonantly amplified (Section~\ref{sec:results}),
+the projection is robust to the BPM offset $\mathbf{b}$ regardless of its
+statistical structure, as shown by Eq.~(\ref{eq:bias}). In the targeted
+scenario where $k=2$ is known in advance, a single weighted projection
+$\hat{a}_{k=2}=M_{k=2}^T\mathbf{y}/\|M_{k=2}\|^2$ is sufficient.
 
-To avoid presupposing which harmonics are present, we wrap the fit in a
-CLEAN iteration borrowed from radio astronomy~\cite{clean}. With residual
-$\mathbf{r}\leftarrow\mathbf{y}$ and a candidate set $k\in\{1,\dots,12\}$
-(no oracle knowledge of the true harmonics), each iteration fits every
-candidate to $\mathbf{r}$, selects the one that reduces the residual most,
-subtracts a fraction $g\,R F_{k^\star}\hat{a}_{k^\star}$ ($g=0.2$), and
-accumulates $\hat{a}_{k^\star}$. The fractional gain prevents premature
-commitment to a single mode and is robust against the residual mode-mixing
-in $M$. For white $\mathbf{b}$, CLEAN and direct least squares give
-statistically identical results ($k=2$ error ratio 1.0$\times$;
-$N=200$ Monte-Carlo); the advantage of CLEAN is oracle-free mode
-discovery, not noise reduction.
+For oracle-free operation---where no prior knowledge of which harmonics are
+present is assumed---we employ a CLEAN iteration borrowed from radio
+astronomy~\cite{clean}. With residual $\mathbf{r}\leftarrow\mathbf{y}$ and
+a candidate set $k\in\{1,\dots,12\}$, each iteration projects $\mathbf{r}$
+onto every candidate column of $M$, selects the largest, subtracts a
+fraction $g=0.2$ of the match, and accumulates the amplitude.
+CLEAN and direct least squares are statistically identical for the targeted
+$k=2$ estimate ($k=2$ error ratio 1.0$\times$; $N=200$ Monte-Carlo):
+the CLEAN wrapping adds oracle-free candidate selection at no cost to accuracy.
 
 %==============================================================
 \section{Results}
@@ -367,8 +366,9 @@ $k=4,6,8$ amplitudes do not leak into the $k=2$ estimate. This is the
 converse of the kmod situation, where the small-difference matrix
 $\Delta R$ mixes the modes.
 
-Together with the whiteness of $\mathbf{b}$---whose projection onto the
-$k=2$ pattern is small---these properties yield the reconstruction below.
+Together, these three properties ensure that the projection of $\mathbf{b}$
+onto the $k=2$ column of $M$ is small relative to the signal---regardless
+of the statistical structure of $\mathbf{b}$ (see Section~\ref{sec:whiteness})---and yield the reconstruction below.
 
 \subsection{Reconstruction performance and diagnostics}
 
@@ -401,10 +401,16 @@ $\sim\SI{2}{\micro\meter}$, still within the \SI{10}{\micro\meter} target.
 
 In a real ring $R$ is known only approximately. Modelling a gradient
 error $R_\mathrm{model}=R\,\mathrm{diag}(1+\varepsilon)$ with
-$\varepsilon\sim\mathcal{N}(0,\sigma_\mathrm{model})$, the $k=2$ error
+$\varepsilon\sim\mathcal{N}(0,\sigma_\mathrm{model})$, the $k=2$ amplitude
+estimate acquires a relative error that scales as
+$\delta A_{k=2}/A_{k=2}\sim\sigma_\mathrm{model}\times\kappa_2$, where
+$\kappa_2$ is the effective condition number of the $k=2$ column of $M$
+under gradient perturbations. Numerically, the $k=2$ error
 stays within the \SI{10}{\micro\meter} target for
 $\sigma_\mathrm{model}=\delta K/K\lesssim3\text{--}4\%$, a tolerance
 achievable with a beta-beat / LOCO-type calibration.
+\todo{Add figure: $k=2$ amplitude error vs.\ $\sigma_\mathrm{model}$, confirming
+the 3--4\% tolerance numerically.}
 
 \subsection{Scope: targeted estimation, not harmonic discovery}
 
