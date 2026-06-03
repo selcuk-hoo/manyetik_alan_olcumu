@@ -158,9 +158,11 @@ def _run_one_k(task):
     slope = float(measure_dSy_dt(hist, t_array))
     # R-bağımsız orbit teşhisi: entegre edilen dikey yörünge genliği [mm]
     y_orbit_mm = float(np.std(hist[:, 1]) * 1e3)
+    sy = hist[:, 7].copy()   # S_y zaman serisi (grafik için)
     dt_run = time.time() - t0
     return {"k": k, "RFk": RFk, "orbit_mm": y_orbit_mm,
-            "dSy_dt": slope, "runtime": dt_run}
+            "dSy_dt": slope, "runtime": dt_run,
+            "sy": sy, "t_array": t_array}
 
 
 def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None):
@@ -251,6 +253,57 @@ def plot_results(results, amp_coef):
     print("\n  -> false_edm_mode_scan.png kaydedildi")
 
 
+def plot_sy_timeseries(results, amp_coef):
+    """Her k modu için S_y zaman serisini 2×3 grid halinde çizer."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    res = sorted(results, key=lambda x: x["k"])
+    ncols = 3
+    nrows = (len(res) + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols, figsize=(12, 3.8 * nrows))
+    axes = np.array(axes).flatten()
+
+    for i, r in enumerate(res):
+        ax = axes[i]
+        k  = r["k"]
+        sy = np.asarray(r["sy"])
+        t_s = np.asarray(r["t_array"])
+        t_ms = t_s * 1e3
+
+        ax.plot(t_ms, sy, lw=0.4, alpha=0.45, color="gray")
+
+        win = (len(sy) // 4) * 2 + 1
+        sy_f = _savgol_or_movavg(sy, win)
+        ax.plot(t_ms, sy_f, lw=1.4, color="tab:blue", label="smoothed")
+
+        n_pts = len(sy)
+        trim = int(n_pts * 0.1)
+        tt = t_s[trim:-trim] if trim > 0 and n_pts - 2*trim > 10 else t_s
+        yy = sy_f[trim:-trim] if trim > 0 and n_pts - 2*trim > 10 else sy_f
+        coef = np.polyfit(tt, yy, 1)
+        ax.plot(t_ms, np.polyval(coef, t_s), "--", lw=1.4, color="tab:red",
+                label=f"{r['dSy_dt']:.2e} rad/s")
+
+        ax.set_title(f"k = {k}  |  orbit {r['orbit_mm']:.3f} mm", fontsize=10)
+        ax.set_xlabel("t [ms]", fontsize=9)
+        ax.set_ylabel(r"$S_y$", fontsize=9)
+        ax.legend(fontsize=7, loc="upper left")
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
+
+    for j in range(len(res), len(axes)):
+        axes[j].set_visible(False)
+
+    fig.suptitle(
+        rf"$S_y$ zaman serisi — Fourier modu taraması  "
+        f"($A$ = {amp_coef*1e6:.0f} μm, EDMSwitch=0)",
+        fontsize=12)
+    fig.tight_layout()
+    fig.savefig("false_edm_sy_traces.png", dpi=140)
+    print("  -> false_edm_sy_traces.png kaydedildi")
+
+
 if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
@@ -267,6 +320,7 @@ if __name__ == "__main__":
     results, config = run_scan(k_list, amp_coef=args.amp, t2=args.t2,
                                return_steps=args.steps, nproc=args.nproc)
     plot_results(results, args.amp)
+    plot_sy_timeseries(results, args.amp)
 
     # özet
     dsy = {r["k"]: abs(r["dSy_dt"]) for r in results}
