@@ -469,6 +469,32 @@ deviation is $\sigma_b/\|M_{k=2}\|=\sigma_b/167$; at the realistic
 $\sigma_b=\SI{300}{\micro\meter}$ this gives $\lesssim\SI{1.8}{\micro\meter}$,
 fully within target.
 
+Three distinct amplitude scales, shown in Fig.~\ref{fig:bpm_fourier},
+quantify the robustness end-to-end:
+\begin{enumerate}
+\item \textbf{Signal orbit ($\SI{1670}{\micro\meter}$).}
+  A $\SI{10}{\micro\meter}$ $k=2$ misalignment passes through $R$ and is
+  resonantly amplified: $A\|M_{k=2}\|=10\times167=\SI{1670}{\micro\meter}$
+  in BPM space.
+\item \textbf{BPM-offset Fourier level ($\approx\SI{77}{\micro\meter}$).}
+  Because $\mathbf{b}$ bypasses $R$ entirely and is white, its projection
+  onto any FODO-antisymmetric mode $F_k$ has r.m.s.\
+  $\sigma_b\sqrt{\pi/48}\approx\SI{77}{\micro\meter}$---distributed equally
+  across all $k$, with no peak at $k=2$.
+  The signal orbit ($\SI{1670}{\micro\meter}$) is already $22\times$ larger than
+  this raw Fourier level.
+\item \textbf{Estimator contamination floor ($\approx\SI{1.8}{\micro\meter}$).}
+  The estimator projects $\mathbf{b}$ onto the $k=2$ column of $M=RF$
+  (not onto $F_{k=2}$ directly), dividing by $\|M_{k=2}\|=167$ a second
+  time: $\sigma_b/\|M_{k=2}\|=\SI{300}{\micro\meter}/167\approx\SI{1.8}{\micro\meter}$.
+\end{enumerate}
+The hierarchy
+$\SI{1670}{\micro\meter}\gg\SI{77}{\micro\meter}\gg\SI{1.8}{\micro\meter}$
+shows that the orbit amplification of $\|M_{k=2}\|$ works doubly in
+the estimator's favour: it enlarges the genuine signal in BPM space
+while simultaneously suppressing the offset contribution in the
+estimate.
+
 The key intuition is that \emph{the estimator does not measure how large the
 orbit is---it measures how closely the orbit resembles the $k=2$ fingerprint.}
 A genuine $k=2$ signal shares exactly that fingerprint, so the element-wise

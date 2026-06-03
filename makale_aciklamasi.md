@@ -61,6 +61,11 @@ doğrudan çözülürdü. Ne yazık ki bilinmiyor.
 
 ## 2. Neden BPM ofsetleri her şeyi bozuyor? <a name="2-bpm-ofseti"></a>
 
+> **Kritik ayrım:** Quad kaçıklığı $R$ üzerinden BPM'lere *geçer* ve k=2'de
+> 167× kuvvetlenir. BPM elektronik ofseti ise $R$'yi *bypass eder* ve
+> doğrudan ölçüme eklenir — hiç kuvvetlendirilmez. Bu asimetri yöntemin
+> temelidir (Bölüm 8).
+
 ### Koşullanma sayısı (condition number)
 
 $\mathbf{b}$'yi bilmeden sadece $\mathbf{y}$'yi ters çevirdiğimizde
@@ -277,6 +282,38 @@ $$A_{k=2} = 9.94 \pm 0.66\,\mu\text{m} \quad (\text{gerçek: } 10), \qquad \Delt
 ---
 
 ## 8. BPM ofseti sağlamlığı — beyazlık varsayımı gerekmez <a name="8-ofset-saglamligi"></a>
+
+### Üç genlik seviyesi (fig3)
+
+BPM ofseti sağlamlığını anlamanın en doğrudan yolu, sistemin ürettiği
+üç farklı genlik ölçeğini karşılaştırmaktır:
+
+**1. Sinyal yörüngesi — 1670 μm**
+10 μm'lik bir $k=2$ quad kaçıklığı, tepki matrisi $R$ üzerinden BPM'lere
+yansır ve rezonant kuvvetlendirme nedeniyle $A \cdot \|M_{k=2}\| = 10 \times 167 = 1670\,\mu$m
+genliğinde bir kapalı yörünge oluşturur. Kaçıklık $R$'den *geçer*,
+167× büyür.
+
+**2. BPM ofseti Fourier seviyesi — ~77 μm**
+BPM ofseti $\mathbf{b}$, tepki matrisinden *geçmez* — doğrudan ölçüme
+eklenir. $\mathbf{b}$ beyaz gürültü olduğundan FODO-antisimetrik Fourier
+bazındaki her moda eşit enerji dağılır:
+
+$$|a_k(b)| \approx \sigma_b\sqrt{\pi/48} \approx 77\,\mu\text{m}, \quad \text{tüm } k \text{ için}$$
+
+k=2'de özel bir yığılma yoktur. Ve bu 77 μm, sinyal yörüngesi olan
+1670 μm'nin yanında zaten **22× küçüktür**.
+
+**3. Estimatör çıkışındaki kirlenme — ~1.8 μm**
+Estimatör $F_k$'ya değil, $M_k = R \cdot F_k$'ya yansıtır.
+Bu, ofseti bir kez daha $\|M_{k=2}\| = 167$'ye böler:
+
+$$\delta\hat{a}_{k=2} = \frac{\sigma_b}{\|M_{k=2}\|} = \frac{300}{167} \approx 1.8\,\mu\text{m}$$
+
+**Hiyerarşi: $1670 \gg 77 \gg 1.8\,\mu$m**
+
+$\|M_{k=2}\|$'nin kuvvetlendirmesi iki kez işe yarar:
+gerçek sinyali BPM uzayında büyütür, ofsetin kestirime sızmasını ise bastırır.
 
 ### Anahtar sezgi: "parmak izi" eşleştirmesi
 
