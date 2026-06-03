@@ -377,26 +377,31 @@ def plot_sy_timeseries(results, amp_coef):
         t_s = np.asarray(r["t_array"])
         t_ms = t_s * 1e3
 
-        # Sürekli S_y: tur-içi ~1e-5 salınım (bağlam, gri)
-        ax.plot(t_ms, sy, lw=0.4, alpha=0.35, color="gray",
-                label="sürekli (tur-içi salınım)")
+        # Sol eksen (gri): sürekli S_y — tur-içi ~1e-5 salınım (ham bağlam)
+        ax.plot(t_ms, sy, lw=0.4, alpha=0.30, color="gray")
+        ax.set_ylabel(r"$S_y$ (sürekli)", fontsize=8, color="gray")
+        ax.tick_params(axis="y", labelcolor="gray", labelsize=7)
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
 
-        # Stroboskopik S_y: sabit azimutta tur-başına → tur-içi salınım çıkar,
-        # geriye TEMİZ seküler false-EDM driftı kalır (birincil ölçüm).
+        # Sağ eksen (mavi/kırmızı): stroboskopik S_y, DC ofset (fit kesişimi)
+        # çıkarılmış → SEKÜLER DRIFT artık kendi ölçeğinde GÖRÜNÜR.
         if r.get("sy_strobe") is not None:
             ts = np.asarray(r["t_strobe"]); ss = np.asarray(r["sy_strobe"])
-            ax.plot(ts*1e3, ss, ".", ms=2.5, color="tab:blue",
-                    label="stroboskopik (tur-başına)")
-            fit = np.polyfit(ts, ss, 1)
-            ax.plot(ts*1e3, np.polyval(fit, ts), "-", lw=1.6, color="tab:red",
-                    label=f"eğim {r['dSy_dt']:.2e} rad/s")
+            fit = np.polyfit(ts, ss, 1)               # [slope, intercept]
+            axr = ax.twinx()
+            axr.plot((ts*1e3), (ss - fit[1]) * 1e9, ".", ms=2.6,
+                     color="tab:blue", label="stroboskopik − DC")
+            axr.plot((ts*1e3), (np.polyval(fit, ts) - fit[1]) * 1e9, "-",
+                     lw=1.8, color="tab:red",
+                     label=f"eğim {r['dSy_dt']:.2e} rad/s")
+            axr.set_ylabel(r"$\Delta S_y$ stroboskopik [$\times10^{-9}$]",
+                           fontsize=8, color="tab:red")
+            axr.tick_params(axis="y", labelcolor="tab:red", labelsize=7)
+            axr.legend(fontsize=6.5, loc="lower right")
 
         ax.set_title(f"k = {k}  |  CO {r['co_off_mm']:.3f} mm  "
                      f"|  resid β {r['resid_beta_mm']:.1e} mm", fontsize=9)
         ax.set_xlabel("t [ms]", fontsize=9)
-        ax.set_ylabel(r"$S_y$", fontsize=9)
-        ax.legend(fontsize=6.5, loc="upper left")
-        ax.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
 
     for j in range(len(res), len(axes)):
         axes[j].set_visible(False)
