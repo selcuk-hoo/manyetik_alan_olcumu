@@ -305,14 +305,15 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
 
     results.sort(key=lambda r: r["k"])
     print(f"  {'k':>3}  {'CO ofset':>10}  {'kalan betatron':>16}  "
-          f"{'dS_y/dt [rad/s]':>18}")
+          f"{'dS_y/dt strobe':>16}  {'(SG, güvenilmez)':>16}")
     for r in results:
         print(f"  {r['k']:>3}  {r['co_off_mm']:>8.3f}mm  "
               f"{r['resid_beta_mm']:>14.2e}mm  "
-              f"{r['dSy_dt']:>18.3e}   ({r['runtime']:.0f}s)")
+              f"{r['dSy_dt']:>16.3e}  {r.get('dSy_dt_sg', float('nan')):>16.2e}"
+              f"   ({r['runtime']:.0f}s)")
     if do_co:
-        print("  (CO ofset = bulunan kapalı-yörünge fırlatma noktası genliği;"
-              "  kalan betatron ~0 ise temiz fırlatma başarılı)")
+        print("  (dS_y/dt strobe = sabit-azimut tur-başına örneklemeden seküler "
+              "eğim [rad/s]; SG sütunu eski sürekli yöntem, örnekleme-bağımlı)")
     print(f"  toplam duvar-saati: {wall:.0f}s  "
           f"(seri tahmini ~{sum(r['runtime'] for r in results):.0f}s)")
 
@@ -376,25 +377,25 @@ def plot_sy_timeseries(results, amp_coef):
         t_s = np.asarray(r["t_array"])
         t_ms = t_s * 1e3
 
-        ax.plot(t_ms, sy, lw=0.4, alpha=0.45, color="gray")
+        # Sürekli S_y: tur-içi ~1e-5 salınım (bağlam, gri)
+        ax.plot(t_ms, sy, lw=0.4, alpha=0.35, color="gray",
+                label="sürekli (tur-içi salınım)")
 
-        win = (len(sy) // 4) * 2 + 1
-        sy_f = _savgol_or_movavg(sy, win)
-        ax.plot(t_ms, sy_f, lw=1.4, color="tab:blue", label="smoothed")
-
-        n_pts = len(sy)
-        trim = int(n_pts * 0.1)
-        tt = t_s[trim:-trim] if trim > 0 and n_pts - 2*trim > 10 else t_s
-        yy = sy_f[trim:-trim] if trim > 0 and n_pts - 2*trim > 10 else sy_f
-        coef = np.polyfit(tt, yy, 1)
-        ax.plot(t_ms, np.polyval(coef, t_s), "--", lw=1.4, color="tab:red",
-                label=f"{r['dSy_dt']:.2e} rad/s")
+        # Stroboskopik S_y: sabit azimutta tur-başına → tur-içi salınım çıkar,
+        # geriye TEMİZ seküler false-EDM driftı kalır (birincil ölçüm).
+        if r.get("sy_strobe") is not None:
+            ts = np.asarray(r["t_strobe"]); ss = np.asarray(r["sy_strobe"])
+            ax.plot(ts*1e3, ss, ".", ms=2.5, color="tab:blue",
+                    label="stroboskopik (tur-başına)")
+            fit = np.polyfit(ts, ss, 1)
+            ax.plot(ts*1e3, np.polyval(fit, ts), "-", lw=1.6, color="tab:red",
+                    label=f"eğim {r['dSy_dt']:.2e} rad/s")
 
         ax.set_title(f"k = {k}  |  CO {r['co_off_mm']:.3f} mm  "
                      f"|  resid β {r['resid_beta_mm']:.1e} mm", fontsize=9)
         ax.set_xlabel("t [ms]", fontsize=9)
         ax.set_ylabel(r"$S_y$", fontsize=9)
-        ax.legend(fontsize=7, loc="upper left")
+        ax.legend(fontsize=6.5, loc="upper left")
         ax.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
 
     for j in range(len(res), len(axes)):
