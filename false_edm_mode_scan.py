@@ -143,8 +143,9 @@ def find_closed_orbit(fields, p_mag, direction, quad_dy, dt, T_rev,
             print(f"    [CO iter {it}] resid betatron rms = {rms:.3e} m, "
                   f"y={yc:.6e} y'={ypc:.6e}")
         sy *= 0.2; syp *= 0.2        # min'e yaklaşınca daha küçük fark adımı
+    resid_rms = np.sqrt(max(var2(yc, ypc), 0.0))   # sabit-azimut betatron RMS
     fields.poincare_quad_index = -1.0   # ana koşum için Poincaré'yi kapat
-    return np.array([0.0, yc, 0.0, ypc])
+    return np.array([0.0, yc, 0.0, ypc]), float(resid_rms)
 
 
 def _savgol_or_movavg(sig, win):
@@ -224,25 +225,26 @@ def _run_one_k(task):
     t0 = time.time()
     # ── Kapalı yörünge fırlatması (betatron salınımını yok eder) ──
     if do_co:
-        v_co = find_closed_orbit(fields, p_mag, direction, quad_dy, dt, T_rev,
-                                 n_turns=co_turns)
+        v_co, resid_rms = find_closed_orbit(fields, p_mag, direction, quad_dy,
+                                            dt, T_rev, n_turns=co_turns)
         y_launch = _make_state(v_co, p_mag, direction, [0.0, 0.0, direction])
         co_off_mm = float(np.hypot(v_co[0], v_co[1]) * 1e3)
+        resid_beta_mm = resid_rms * 1e3   # sabit-azimut kalan betatron [mm]
     else:
         y_launch = y0
         co_off_mm = 0.0
+        resid_beta_mm = float("nan")
 
     hist, _, _ = integrate_particle(
         y_launch, 0.0, t2, dt, fields=fields, return_steps=return_steps,
         quad_dy=quad_dy)
     t_array = np.arange(hist.shape[0]) * (t2 / hist.shape[0])
     slope = float(measure_dSy_dt(hist, t_array))
-    # Kalan dikey betatron salınımı [mm] — kapalı yörünge başarısının ölçütü.
-    # Kapalı yörünge üzerinde fırlatıldıysa bu ~0 olmalı (orbit sabit).
-    y_orbit_mm = float(np.std(hist[:, 1]) * 1e3)
     sy = hist[:, 7].copy()   # S_y zaman serisi (grafik için)
     dt_run = time.time() - t0
-    return {"k": k, "co_off_mm": co_off_mm, "orbit_mm": y_orbit_mm,
+    # resid_beta_mm: sabit azimutta kalan betatron RMS (CO aramasından).
+    # Kapalı yörünge üzerinde fırlatıldıysa ~0 (≪ CO ofseti) → temiz fırlatma.
+    return {"k": k, "co_off_mm": co_off_mm, "resid_beta_mm": resid_beta_mm,
             "dSy_dt": slope, "runtime": dt_run,
             "sy": sy, "t_array": t_array}
 
@@ -285,11 +287,11 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
     wall = time.time() - t_wall
 
     results.sort(key=lambda r: r["k"])
-    print(f"  {'k':>3}  {'CO ofset':>10}  {'kalan betatron':>15}  "
+    print(f"  {'k':>3}  {'CO ofset':>10}  {'kalan betatron':>16}  "
           f"{'dS_y/dt [rad/s]':>18}")
     for r in results:
         print(f"  {r['k']:>3}  {r['co_off_mm']:>8.3f}mm  "
-              f"{r['orbit_mm']:>13.4f}mm  "
+              f"{r['resid_beta_mm']:>14.2e}mm  "
               f"{r['dSy_dt']:>18.3e}   ({r['runtime']:.0f}s)")
     if do_co:
         print("  (CO ofset = bulunan kapalı-yörünge fırlatma noktası genliği;"
@@ -372,7 +374,7 @@ def plot_sy_timeseries(results, amp_coef):
                 label=f"{r['dSy_dt']:.2e} rad/s")
 
         ax.set_title(f"k = {k}  |  CO {r['co_off_mm']:.3f} mm  "
-                     f"|  resid β {r['orbit_mm']:.4f} mm", fontsize=9)
+                     f"|  resid β {r['resid_beta_mm']:.1e} mm", fontsize=9)
         ax.set_xlabel("t [ms]", fontsize=9)
         ax.set_ylabel(r"$S_y$", fontsize=9)
         ax.legend(fontsize=7, loc="upper left")
