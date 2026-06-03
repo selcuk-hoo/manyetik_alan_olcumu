@@ -23,6 +23,7 @@
 11. [Targeted Fourier: ne zaman çalışır, ne zaman çalışmaz?](#11-targeted-fourier)
 12. [Rank kısıtı: "sayım prensibi"](#12-rank-kısıtı)
 13. [Çok-konfigürasyon yığma: çözüm yolu](#13-çok-konfigürasyon-yığma)
+13c. [Tek orbit, R-tabanlı CLEAN: kmod olmadan BPM ofsetini aşmak](#13c-tek-orbit-r-tabanlı-clean)
 14. [Pratik rehber ve açık sorular](#14-pratik-rehber)
 
 ---
@@ -133,7 +134,7 @@ $$
 Burada $\beta_{i,j}$ beta fonksiyonu, $\phi_{i,j}$ faz ilerleme,
 $Q$ tune, $K_j L_j$ quad'ın integre kick gücü.
 
-**Kondisyon sayısı $\kappa(R) \approx 160$** — bu çok iyidir.
+**Kondisyon sayısı $\kappa(R) \approx 249$** — bu çok iyidir.
 $R$'yi "terslemek" (tüm 48 quad hatasını aynı anda bulmak) pratikte
 mümkündür, **eğer** BPM ofseti olmasa.
 
@@ -180,18 +181,13 @@ $$
 $\mathbf{b}$ iptal oldu. Şimdi $\Delta R\,\Delta q = \Delta\mathbf{y}$
 denklemini çözmek gerekiyor.
 
-Ama bir sorun var: $\Delta R$, $R$'den çok daha kötü koşullanmış.
-Neden? Çünkü iki konfigürasyon arasındaki fark küçük — gradyanları %2
-değiştirince $\Delta R \approx \varepsilon R$ ($\varepsilon = 0.02$),
-dolayısıyla $\kappa(\Delta R) \approx \kappa(R)/\varepsilon \approx
-160/0.02 = 8000$. Pratikte **~27.000** çıkıyor.
+**Uniform kmod için:** $\Delta R = \varepsilon R$ ($\varepsilon = 0.02$),
+dolayısıyla $\kappa(\Delta R) = \kappa(R) \approx 249$. Kondisyon sayısı
+$R$ kadar iyi — uniform kmod işe yarar (§5 → §7'de sayısal doğrulama).
 
-Bu sayı ne demek: $\Delta R$'yi ters çevirmek, $R$'yi ters çevirmekten
-~170 kat daha çok gürültü büyütür. 1 μm gürültü → 170 μm hata.
-Bu da 10 μm hedefini aşıyor.
-
-Ama bu, **tüm 48 quad birlikte modüle edildiğinde** geçerlidir.
-Ya yalnız 1 veya 2 quad modüle edilirse?
+Sorun şu: **tüm 48 quad'ı aynı anda hassas biçimde modüle etmek pratikte
+çok zordur.** Gerçekçi senaryo: yalnız 1 ya da 2 quad modüle edilir.
+Bu durumda ne olur?
 
 ---
 
@@ -336,9 +332,9 @@ amplifikasyon.
 
 | Matris | $\kappa$ | 1 μm BPM gürültüsü → tahmin hatası |
 |--------|----------|--------------------------------------|
-| $R$ | ~160 | ~14 μm |
-| $\Delta R$ (uniform kmod) | ~160 | ~14 μm |
-| $\Delta R$ (iki-quad kmod) | ~10⁶ | ~10⁶ μm → anlamsız |
+| $R$ | ~249 | ~4 μm |
+| $\Delta R$ (uniform kmod, 48 quad) | ~249 | ~6 μm (√2 gürültü artışı) |
+| $\Delta R$ (iki-quad kmod) | ~10⁶ (etkin) | ~10⁶ μm → anlamsız |
 | $\Delta R \cdot F$ (geniş Fourier) | ~13.000 | ~13 mm |
 | $\Delta R \cdot F$ (sıkı Fourier) | ~186 | ~26 μm |
 
@@ -883,6 +879,190 @@ tek bir kontaminantı bile tam null'layamaz. Tek kaçış: k=4,6,8'i dış
 
 ---
 
+## 13c. Tek Orbit, R-Tabanlı CLEAN
+
+Bu bölüm §5–13b'deki k-modülasyon çerçevesini tamamen terk ediyor.
+Amaç: **gradyan değiştirmeden, tek bir orbit ölçümüyle** quad
+hizalama hatalarını çekmek.
+
+### Temel denklem ve neden çalışır
+
+BPM ölçümü:
+
+$$\mathbf{y} = R\,\Delta q + \mathbf{b}$$
+
+kmod'da b'yi fark alarak iptal ediyorduk. Burada b'yi tutuyoruz.
+$\Delta q = F\hat{a}$ koyarsak:
+
+$$\mathbf{y} = \underbrace{R\,F}_{M}\,\hat{a} + \mathbf{b}$$
+
+$\mathbf{b}$ beyaz (her BPM bağımsız ~300 μm), $M\hat{a}$ ise tune
+rezonansıyla güçlenmiş, yapısal bir desen. En küçük kareler $\hat{a}$'yı
+$\mathbf{b}$'den doğal olarak ayırır **eğer** sinyalin ofsetten çok
+büyük olduğu frekanslar varsa.
+
+k=2 için tam da bu geçerli. $Q \approx 2.68$, k=2 modu $Q$'ya yakın.
+Courant-Snyder yanıtı:
+
+$$R_{ij} \propto \frac{\sqrt{\beta_i\beta_j}}{2\sin(\pi Q)}\cos(|\phi_i-\phi_j|-\pi Q)$$
+
+k=2'nin halka boyunca faz ilerlemesi $2\pi\cdot 2/48 \approx 0.262$
+rad/quad iken tune'un faz ilerlemesi $2\pi\cdot 2.68/48 \approx 0.350$
+rad/quad. Yakınlık → R'nin k=2 Fourier moduna büyük projeksiyon yapması
+→ büyük tekil değer → rezonant güçlenme **~34×**.
+
+### Mekanizma analizi: k=2 neden büyük k'ların yanında çözülür?
+
+Bu yöntemin "too good to be true" görünmesinin altında **üç bağımsız
+mekanizma** yatıyor. Üçü de doğrudan R matrisinden hesaplanabilir.
+
+#### Mekanizma 1: Tune rezonansı modları seçici güçlendiriyor
+
+Her Fourier modu R altında farklı kazançla orbite dönüşür. Birim-norm
+$F_k$ vektörünün orbit normu $\|R F_k\|$ ("R kazancı"):
+
+| k | R kazancı | k | R kazancı |
+|---|-----------|---|-----------|
+| 1 | 8.77 | 7 | 0.79 |
+| **2** | **34.08** | 8 | 0.59 |
+| 3 | 8.90 | 9 | 0.46 |
+| 4 | 3.20 | 10 | 0.39 |
+| 5 | 1.75 | 11 | 0.34 |
+| 6 | 1.12 | 12 | 0.33 |
+
+k=2 (tune'a en yakın) k=4'ten **10×**, k=8'den **58×** daha güçlü orbit
+üretir. Kazanç k arttıkça hızla düşer — yüksek-k modları R "görmez".
+
+#### Mekanizma 2: Güçlenme genlik dezavantajını siliyor
+
+Gerçek senaryoda k=2 = 10 μm ama k=4,6,8 = 200–300 μm (20–30× büyük).
+Misalignment'tan orbite geçince:
+
+| k | misalignment | → orbit normu | R kazancı |
+|---|--------------|---------------|-----------|
+| 2 | 10 μm | **1669 μm** | 34.08 |
+| 4 | 300 μm | 4707 μm | 3.20 |
+| 6 | 300 μm | 1651 μm | 1.12 |
+| 8 | 200 μm | 577 μm | 0.59 |
+
+k=4 misalignment k=2'nin 30× büyük, ama orbit katkısı yalnız ~2.8×;
+k=8'in 20× büyük misalignment'ı k=2'den **küçük** orbit veriyor.
+Orbitte k=2 artık gömülü zayıf sinyal değil — en büyük üç bileşenden biri.
+
+#### Mekanizma 3: Modlar R altında dik → karışmıyorlar
+
+Normalize edilmiş orbit desenlerinin çapraz korelasyonu
+$|\langle RF_j, RF_k\rangle|$:
+
+|  | k=2 | k=4 | k=6 | k=8 |
+|--|-----|-----|-----|-----|
+| **k=2** | 1.00 | 0.01 | 0.01 | 0.01 |
+| **k=4** | 0.01 | 1.00 | 0.00 | 0.00 |
+| **k=6** | 0.01 | 0.00 | 1.00 | 0.00 |
+| **k=8** | 0.01 | 0.00 | 0.00 | 1.00 |
+
+$RF_2$, $RF_{4,6,8}$'e neredeyse tam dik. En küçük kareler bu sayede
+k=2'yi diğerlerinden temiz ayırır: **k=4,6,8 ne kadar büyük olursa olsun
+k=2 kestirimine sızmaz.** Bu, §11 Sorun 2'deki kmod sızıntısının tam
+tersi — orada $\Delta R$ modları karıştırıyordu, burada $R$ ayırıyor.
+
+#### Sentez
+
+| Mekanizma | Etki | k=2 için sonuç |
+|-----------|------|----------------|
+| Tune rezonansı | k=2 kazancı 34× | Orbit sinyali büyük |
+| Genlik telafisi | 30× misalignment farkı silindi | k=2 orbitte baskın |
+| Diklik (kor.≈0.01) | Modlar karışmaz | k=4,6,8 sızmaz |
+| Beyaz b | Tek moda az projeksiyon | TANI 2: sahte k=2 = 0.72 μm |
+
+Dördü birlikte: k=2 = 9.94 ± 0.66 μm (gerçek 10), %0.6 hata,
+0.046 rad faz — 100 μm BPM ofseti altında, kmod olmadan, tek orbitle.
+
+### Kritik birim hatası (keşfedilen ve düzeltilen)
+
+R matrisi `build_response_matrix.py` ile hesaplanıyor. Analiz sırasında
+kritik bir birim hatası keşfedildi:
+
+- **Kaynak:** `integrator.cpp` satır 533–534 orbit verisini milimetre
+  cinsinden yazıyor (`×1000`, başlık: `x_mm, y_mm`)
+- **Hata:** `read_cod_quads` fonksiyonu mm değerlerini m olarak okuyordu
+- **Sonuç:** R = orbit[mm] / misalign[m] → R **1000× şişmiş**
+
+```
+Öncesi:  max|R| ≈ 1950,  σ_max ≈ 34729  (fiziksel anlamsız — kazanç[mm/m]?)
+Sonrası: max|R| ≈ 1.95,  σ_max ≈ 34.73  (boyutsuz kazanç [m/m], doğru)
+```
+
+κ(R) ≈ 249 her iki durumda da **aynı** (ölçek-bağımsız). kmod sonuçları
+etkilenmedi (1000× hem δy hem R'de iptal olur). Ama BPM ofseti testleri
+tamamen yanlış ölçekteydi: düzeltme öncesi R·Δq/b oranı ~8600× (anlamsız),
+sonrası ~8.6× (gerçekçi).
+
+**Düzeltme:** `read_cod_quads` içine `cd[:, 1:3] *= 1e-3` eklendi.
+Bütün `.npy` matrisleri yeniden hesaplandı.
+
+### Sayısal doğrulama: `bpm_offset_test.py`
+
+Test: 48 BPM, σ_b=100 μm rastgele ofset, gerçek misalignment k=2 (10 μm)
++ k=4,6,8 (200–300 μm). CLEAN aday kümesi k=1..12 (oracle bilgisi yok).
+50 Monte Carlo deneyi.
+
+**Güç dengesi:**
+
+$$\|R\cdot\Delta q\| = 5268\;\mu\text{m}, \quad
+\|b\| = 611\;\mu\text{m}, \quad
+\|R\cdot\Delta q_{k=2}\| = 1668\;\mu\text{m}$$
+
+k=2 tek başına BPM ofset normundan 2.7× büyük.
+
+**TANI 2 — saf b'den sahte k=2:**
+
+$$\hat{A}_{k=2}|_{\Delta q=0} = 0.722 \pm 0.410\;\mu\text{m}$$
+
+b sızıyor ama 10 μm gerçek sinyale karşı küçük düzeyde.
+
+**Ana sonuç:**
+
+```
+k=2: 9.992 ± 0.578 μm  (gerçek: 10.000 μm)
+     %0.08 genlik hatası,  0.055 rad faz hatası
+```
+
+**TANI 3 — σ_b taraması:** Hata σ_b ile doğrusal ölçekliyor.
+300 μm mekanik BPM ofsetinde bile k=2 hatası ~2 μm (10 μm hedefin altında).
+
+### Sınır: sahte harmonikler
+
+CLEAN k=1..12 çalışırken b gürültüsü tüm frekanslara eşit güç verir.
+Sonuç: CLEAN **gerçek ve sahte harmonikleri ayırt edemiyor**:
+
+```
+Bulunan k'lar (>1 μm eşiği): k = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+```
+
+k=2,4,6,8 gerçek; k=1,3,5,7,9–12 sahte (b'den). Oracle bilgisi olmadan
+bunları ayırmak için TANI 2 kalibrasyonu veya fiziksel ön bilgi (uzun
+dalgalı bozulmalar → düşük k baskın) kullanılabilir. Sistematik çözüm
+açık sorundur.
+
+### Model hatası etkisi
+
+R'nin gradyan doğruluğu: δK/K ≲ 3–4% olduğunda 10 μm per-quad
+doğruluğu sağlanıyor. Daha büyük β-beat tahmin hatasında doğruluk
+hızla bozuluyor.
+
+### kmod ile özet karşılaştırma
+
+| | kmod CLEAN (§13b) | R-tabanlı CLEAN (bu bölüm) |
+|--|-------------------|---------------------------|
+| Ölçüm sayısı | 2 (nominal + pert.) | **1** |
+| Gradyan değişimi | Gerekli | **Yok** |
+| BPM ofseti | Tamamen iptal | Tune güçlenmesiyle ayrışıyor |
+| k=2 hatası | ~%43 (14.3 μm) | **%0.08 (9.99 μm)** |
+| Sahte harmonik | Kontrol edilebilir | Tüm k=1..12 görünüyor |
+
+---
+
 ## 14. Pratik Rehber ve Açık Sorular
 
 ### Hangi yöntem hangi durumda kullanılmalı?
@@ -891,7 +1071,7 @@ tek bir kontaminantı bile tam null'layamaz. Tek kaçış: k=4,6,8'i dış
 |-------|----------------|-------|
 | Hangi harmonikler var bilinmiyor | Çok-konfig + greedy (rank ≥ 3 ile) | Greedy rank-2'de yanlış seçim yapar |
 | Harmonikler fizikten tahmin edilebilir | Targeted Fourier | Baz doğruysa en düşük κ |
-| Operasyonel drift izleme | Drift modu $R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ | Ofset iptal, κ(R)=160 yeterli |
+| Operasyonel drift izleme | Drift modu $R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ | Ofset iptal, κ(R)=249 yeterli |
 | Mutlak hizalama | LOCO/BBA (harici) | k-mod tabanlı yöntemler ofset-gürültü dualitesiyle sınırlı |
 
 ### Targeted Fourier'ı uygulamadan önce sorulması gereken sorular

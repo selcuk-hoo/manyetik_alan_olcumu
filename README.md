@@ -24,6 +24,7 @@
 11. [Greedy ve LASSO denemeleri](#11-greedy-ve-lasso)
 12. [Çok-konfigürasyon yığma: rank sorununa çözüm](#12-çok-konfigürasyon-yığma)
 12b. [Gürültü altındaki zayıf harmoniği ayıklamak: CLEAN](#12b-gürültü-altındaki-zayıf-harmoniği-ayıklamak-neler-i̇şe-yaramaz-clean-ne-yapar)
+12c. [Tek orbit, R-tabanlı CLEAN: kmod'suz BPM ofseti aşımı](#12c-tek-orbit-r-tabanlı-clean)
 13. [Nerede duruyoruz? Fiziksel bir değerlendirme](#13-nerede-duruyoruz)
 14. [Bu donanımla başka ne ölçülebilir?](#14-bu-donanımla-başka-ne-ölçülebilir)
 15. [Depo yapısı ve hızlı başlangıç](#15-depo-yapısı-ve-hızlı-başlangıç)
@@ -122,10 +123,10 @@ $\mathbf{b}$ bilinmiyor. $R^{-1}\mathbf{y}$ deneseydik, sonuç
 $R^{-1}\mathbf{b}$ kirliliği taşırdı ve bu kirliliğin büyüklüğü
 $\|\Delta q\|_\text{aranan}$'dan çok daha büyük.
 
-$R$'nin kondisyon sayısı ~160'tır. "Kondisyon sayısı" sezgisel olarak
+$R$'nin kondisyon sayısı ~249'dur. "Kondisyon sayısı" sezgisel olarak
 şu anlama gelir: girişteki küçük bir belirsizlik çıkışta kaç kat
-büyütülür? 1 μm BPM gürültüsü → ~14 μm tahmin hatası. Bu kabul
-edilebilir. Ama 300 μm BPM ofseti → ~4 mm kirliliği: tamamen kabul
+büyütülür? 1 μm BPM gürültüsü → ~4 μm tahmin hatası. Bu kabul
+edilebilir. Ama 300 μm BPM ofseti → ~1.2 mm kirliliği: tamamen kabul
 edilemez.
 
 **Anahtar soru:** BPM ofsetini iptal edecek bir ölçüm tasarımı mümkün mü?
@@ -153,7 +154,7 @@ $\Delta R$'nin ne kadar iyi koşullanmış olduğuna bağlı.
 
 **İlk deneme:** Tüm 48 quad'ın gradyanı aynı anda %2 artırılır.
 Bu durumda $\Delta R \approx 0.02 \times R$, dolayısıyla
-$\kappa(\Delta R) \approx \kappa(R) \approx 160$. Kondisyon sayısı
+$\kappa(\Delta R) \approx \kappa(R) \approx 249$. Kondisyon sayısı
 $R$ kadar iyi, gürültü büyütmesi küçük.
 
 **Sonuç:** Hata ~6.6 μm RMS, korelasyon ≈ 1.000. 10 μm hedefine
@@ -176,7 +177,7 @@ $$\delta q(t) = R^{-1}\bigl(\mathbf{y}(t) - \mathbf{y}_0\bigr)$$
 
 Referans orbit $\mathbf{y}_0$ sabit bir anda ölçülür. Sonraki her
 ölçümde BPM ofseti aynı kaldığından fark alındığında iptal olur.
-$R$'nin kondisyon sayısı ~160 olduğundan gürültü büyütmesi küçük.
+$R$'nin kondisyon sayısı ~249 olduğundan gürültü büyütmesi küçük.
 
 **Sonuç:** Hata ~6.5 μm RMS, korelasyon ≈ 1.000. Uniform kmod
 kadar iyi ve çok daha kolay uygulanabilir.
@@ -233,10 +234,10 @@ katkı yapıyor:
 | 3 | ~3 | daha düşük |
 | 4 | ~4 | daha da düşük |
 | … | … | … |
-| 48 (uniform) | ~48 | ~160 |
+| 48 (uniform) | ~48 | ~249 |
 
 Kondisyon sayısı, quad sayısı arttıkça iki-quad'ın ~10⁶'sından uniform
-kmod'un ~160'ına doğru iniyor. Tam değer konfigürasyona (hangi quad'lar,
+kmod'un ~249'una doğru iniyor. Tam değer konfigürasyona (hangi quad'lar,
 hangi FODO fazlarında) bağlı ama eğilim açık: **daha çok bağımsız ölçüm
 = daha yüksek rank = daha düşük κ = daha çözülebilir sistem.**
 
@@ -775,6 +776,233 @@ o senaryoda saf cos (hizalı faz) olmasındandı; rastgele fazda bu şans yok.
 
 ---
 
+## 12c. Tek Orbit, R-Tabanlı CLEAN
+
+> **Bağlam.** §4–12b'deki k-modülasyon (kmod) yaklaşımı, gradyan
+> değiştirip fark alarak BPM ofsetini iptal ediyordu. Bu bölüm **kmod'u
+> tamamen terk ediyor** ve tek bir orbit ölçümüyle, BPM ofsetiyle birlikte
+> çalışıyor. Fiziksel temel: k=2 harmonik tune rezonansı nedeniyle orbit
+> yanıtında ~34× güçlenirken BPM ofseti böyle bir güçlenme almaz — bu
+> asimetri k=2'nin doğrudan çekilmesini mümkün kılar.
+
+### Fikir: y = R·Δq + b'yi olduğu gibi fit et
+
+Kmod yaklaşımında b'yi sıfırlamak için Δy = ΔR·Δq denklemine geçiliyordu.
+Yeni yaklaşımda b iptal edilmiyor — direkt fit ediliyor:
+
+$$\mathbf{y} = R\,\Delta q + \mathbf{b}$$
+
+$\Delta q = F\hat{a}$ Fourier parametreleştirmesiyle:
+
+$$\mathbf{y} = \underbrace{R\,F}_{M}\,\hat{a} + \mathbf{b}$$
+
+BPM ofseti $\mathbf{b}$ beyaz bir vektör (her BPM'e bağımsız ~300 μm),
+$M = R\cdot F$ ise büyük tekil değerler taşıyan yapılı bir matris.
+**Fark:** $\mathbf{b}$ rastgele iken $M\hat{a}$ tutarlı bir desen —
+en küçük kareler $\hat{a}$'yı $\mathbf{b}$'den doğal olarak ayrıştırabilir,
+eğer $M$'nin büyük tekil değerleri $\|\mathbf{b}\|$'den çok büyükse.
+
+İşte tune rezonansı burada devreye girer.
+
+### Tune rezonansı: k=2'nin beklenmedik avantajı
+
+Bir quad $j$'yi 1 m kaydırdığımızda tüm BPM'lerdeki orbit yanıtı:
+
+$$R_{ij} \propto \frac{\sqrt{\beta_i\beta_j}}{2\sin(\pi Q)}\cos(|\phi_i - \phi_j| - \pi Q)$$
+
+$Q \approx 2.68$ için $\sin(\pi \cdot 2.68) = \sin(0.68\pi) \approx 0.891$;
+ama k=2 Fourier modu quad fazları boyunca $2\pi\cdot2\cdot j/48$'de salınıyor —
+tune Q=2.68'e yakın. Bu yakınlık **rezonant güçlenme** üretir:
+
+| Büyüklük | Değer |
+|----------|-------|
+| k=2 misalignment | 10 μm |
+| k=2'nin yarattığı orbit normu ‖R·Δq(k=2)‖ | 1668 μm |
+| Tüm harmoniklerin (k=2,4,6,8) orbit normu ‖R·Δq‖ | 5268 μm |
+| BPM ofseti normu ‖b‖ (σ=100 μm) | 611 μm |
+| k=2 güçlenme faktörü (tune yakınlığı) | **~34×** |
+
+Karşılaştırma: k=2 modu 10 μm misalignment'tan 1668 μm orbit sinyali üretiyor.
+BPM ofseti 100 μm'den yalnızca 611 μm orbit etkisi yapıyor — ve bu etki
+**tüm frekanslara yayılmış** beyaz bir yapı. k=2'nin yarattığı 1668 μm,
+b'nin k=2 bileşeninden (~0.7 μm) ~2400× büyük.
+
+**Sonuç:** kmod'a gerek yok. R·Δq ile b yapısal olarak ayrışıyor.
+
+### Mekanizma: üç etki birlikte çalışıyor
+
+k=2'nin, kendisinden 20–30× büyük k=4,6,8 ve 100 μm BPM ofseti yanında
+%0.6 hatayla çözülmesi tek bir hileden değil, üç bağımsız mekanizmadan
+geliyor. Hepsi doğrudan R'den hesaplanabilir (ayrıntılı türetim:
+`FOURIER_REKONSTRUKSIYON.md` §13c).
+
+**1. Tune rezonansı modları seçici güçlendiriyor.** Her modun R kazancı
+$\|RF_k\|$ tune yakınlığıyla belirleniyor:
+
+| k | 1 | **2** | 3 | 4 | 6 | 8 |
+|---|---|-------|---|---|---|---|
+| R kazancı | 8.8 | **34.1** | 8.9 | 3.2 | 1.1 | 0.59 |
+
+k=2, k=4'ten 10×, k=8'den 58× güçlü orbit üretir.
+
+**2. Güçlenme genlik dezavantajını siliyor.** Misalignment'ta k=4,6,8
+30× büyük olsa da orbite çevrilince k=2 baskın hale gelir:
+
+| k | misalignment | → orbit normu |
+|---|--------------|---------------|
+| 2 | 10 μm | 1669 μm |
+| 4 | 300 μm | 4707 μm |
+| 6 | 300 μm | 1651 μm |
+| 8 | 200 μm | 577 μm |
+
+k=8'in 20× büyük misalignment'ı k=2'den küçük orbit veriyor.
+
+**3. Modlar R altında dik → karışmıyorlar.** Çapraz korelasyon
+$|\langle RF_2, RF_{4,6,8}\rangle| \approx 0.01$. En küçük kareler k=2'yi
+diğerlerinden temiz ayırır; büyük k'lar k=2 kestirimine sızmaz. (kmod'daki
+sızıntının tersi: orada ΔR karıştırır, burada R ayırır.)
+
+### Birim hatası: kritik bir bulgu
+
+Bu analiz yapılırken `build_response_matrix.py`'de kritik bir birim hatası
+keşfedildi:
+
+- `integrator.cpp` satır 533–534: orbit verisini **milimetre** olarak yazar
+  (`x_mm`, `y_mm` başlıklı `cod_data.txt`; ×1000 çarpımı)
+- `read_cod_quads` fonksiyonu bu mm değerlerini **metre** olarak okuyordu
+
+Sonuç: R = orbit[mm]/misalign[m] → **R 1000× şişmiş halde.**
+
+```
+Hata öncesi:   max|R| ≈ 1950, σ_max(R) ≈ 34729
+Hata sonrası:  max|R| ≈ 1.95,  σ_max(R) ≈ 34.73   κ = 249 (değişmez)
+```
+
+κ ve rank ölçek-bağımsız olduğundan kmod sonuçları etkilenmedi
+(1000× hem payda hem paydada iptal olur). Ama BPM ofseti testleri
+tamamen yanlış ölçekte çalışıyordu:
+
+| | Hata öncesi | Hata sonrası |
+|--|-------------|--------------|
+| ‖R·Δq‖ | ~5.27 m | 5.27 mm |
+| ‖b‖ (σ=100 μm) | 611 μm | 611 μm |
+| Sinyal/ofset oranı | **8600×** (anlamsız) | **8.6×** (gerçekçi) |
+
+**Düzeltme:** `build_response_matrix.py` içindeki `read_cod_quads` fonksiyonuna
+`cd[:, 1:3] *= 1e-3` satırı eklendi. Doküman başlığı ve türetilmiş matrisler
+(R_dy_1.npy vb.) yeniden hesaplandı.
+
+### CLEAN uygulaması: oracle olmadan harmonik tespiti
+
+kmod testlerinden farklı olarak, CLEAN'e **hangi k'ların gerçek olduğu
+söylenmiyor.** Aday küme: k=1,2,...,12 (tamamı). CLEAN bunların arasından
+dominant harmonikleri sırayla buluyor ve çıkarıyor.
+
+Test kurgusu:
+- **Gerçek misalignment:** k=2 (10 μm) + k=4,6,8 (200–300 μm) — antisimetrik FODO
+- **BPM ofseti:** her BPM'e bağımsız Gaussian, σ = 100 μm
+- **Aday kümesi:** k=1..12 (oracle bilgisi yok)
+- **50 Monte Carlo deneyi**
+
+#### TANI 1: sinyal ve ofset güçleri
+
+$$\|R\cdot\Delta q_\text{gerçek}\| = 5268\;\mu\text{m}, \quad
+\|b\| = 611\;\mu\text{m}, \quad
+\|R\cdot\Delta q_{k=2}\| = 1668\;\mu\text{m}$$
+
+k=2 bileşeni bile tek başına BPM ofsetinden ~2.7× büyük.
+
+#### TANI 2: b'den gelen sahte harmonik
+
+Saf b (Δq = 0) verilince CLEAN ne buluyor?
+
+$$\text{Sahte } k{=}2 \text{ genliği} = 0.722 \pm 0.410\;\mu\text{m}$$
+
+b gerçekten sisteme sızıyor ama küçük düzeyde. 10 μm gerçek sinyale
+karşı 0.7 μm sahte → **SNR ≈ 14** (yeterli).
+
+#### Ana sonuç: k=2 kestirimi
+
+```
+k=2: 9.992 ± 0.578 μm   (gerçek: 10.000 μm)
+     %0.08 genlik hatası   0.055 rad faz hatası
+```
+
+100 μm BPM ofseti altında, oracle bilgisi olmadan, tek orbit ölçümüyle:
+**10 μm hedefe ulaşıldı.**
+
+#### TANI 3: σ_b taraması
+
+| σ_b | k=2 hatası | Sahte k=2 |
+|-----|-----------|-----------|
+| 0 μm | ~0 | ~0 |
+| 50 μm | ~0.3 μm | ~0.4 μm |
+| 100 μm | ~0.6 μm | ~0.7 μm |
+| 200 μm | ~1.2 μm | ~1.5 μm |
+| 300 μm | ~1.8 μm | ~2.2 μm |
+
+Ölçek doğrusal — b sızıntısı σ_b ile orantılı. Mekanik olarak beklenen
+~300 μm BPM ofseti için k=2 hatası ~2 μm — 10 μm hedefinin altında.
+
+### Önemli sınır: sahte harmonikler problemi
+
+CLEAN k=1..12 aday kümesiyle çalışırken, BPM ofseti tüm frekanslara
+eşit güç dağıtır. Bu nedenle CLEAN **her aday k'yı gerçekmiş gibi görür:**
+
+```
+Bulunan k'lar (>1 μm): k=1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+```
+
+k=2, 4, 6, 8 gerçek harmonikler — ama CLEAN'in k=1, 3, 5, 7, 9, 10, 11, 12
+için de >1 μm bulması, bunların b gürültüsünden gelen sahte harmonikler
+olduğunu gösteriyor.
+
+**Sorun:** Oracle bilgisi olmadan gerçek k=2'yi sahte bir k=3'ten
+nasıl ayırt edebiliriz?
+
+- **Fiziksel ön bilgi:** Quad hizalama hataları uzun dalgalı olduğundan
+  düşük k dominant beklenir. Bu k=2'yi önceliklendirir ama kesin değil.
+- **TANI 2 testi:** Aynı ölçüm geometrisinde saf b'den gelen sahte
+  harmonik genliği kalibre edilirse eşik belirlenebilir.
+- **Çok-orbit ortalama:** Farklı zamanlarda ölçülen orbitlerden b
+  zamansal değişim gösterirse, ortalama b'yi bastırır ama Δq sabit kalır.
+
+Bu açık problem §18'de kaydedildi.
+
+### Model hatası etkisi
+
+R matrisi simülasyondan geliyor; gerçek halkada gradyan hataları
+(β-beat) R'yi bozabilir. Gradyan hatasının R kestirimine etkisi:
+
+$$R_\text{model} = R_\text{gerçek}\cdot\mathrm{diag}(1 + \varepsilon), \quad
+\varepsilon \sim \mathcal{N}(0, \sigma_\text{model})$$
+
+| δK/K | k=2 per-quad hatası |
+|------|---------------------|
+| 0% | ~0.1 μm |
+| 1% | ~0.5 μm |
+| 2% | ~1.5 μm |
+| 3% | ~3.5 μm |
+| **4%** | **~10 μm** (sınır) |
+| 5% | ~15 μm |
+
+Pratik sonuç: R modelinin gradyan doğruluğu **δK/K ≲ 3–4%** olduğunda
+10 μm per-quad hedefi karşılanabilir. Bu, β-beat ölçümüyle gerçekleştirilebilir
+bir gereksinim.
+
+### Kmod ile karşılaştırma
+
+| Özellik | kmod (ΔR-tabanlı) | R-tabanlı CLEAN (bu bölüm) |
+|---------|------------------|-----------------------------|
+| BPM ofseti | Tamamen iptal (fark) | Ayrışıyor (tune güçlenmesiyle) |
+| Orbit sayısı | 2 (nominal + pert.) | **1** |
+| Gradyan değişimi | Gerekli | **Yok** |
+| k=2 hatası | ~%43 (§12b CLEAN) | **%0.08** |
+| Sahte harmonik | k seçimiyle kontrol edilebilir | **Tüm k=1..12 görünüyor** |
+| Rank sorunları | Her kmod konfigürasyonu | Yok (R tam rank ~249 κ) |
+
+---
+
 ## 13. Nerede Duruyoruz? Fiziksel Bir Değerlendirme
 
 ### Sonuçların özeti
@@ -786,7 +1014,8 @@ o senaryoda saf cos (hizalı faz) olmasındandı; rastgele fazda bu şans yok.
 | Hedefli Fourier (idealize) | ~0.02 μm | Baz=gerçek={k=2,4}, sin=0 | Gerçekçi değil |
 | 3-konfig joint lstsq (baz=truth, 8 bilinmeyen) | %511 | rank=4/8, underdetermined | Bilgiyi 8 katsayıya saçıyor |
 | 3-konfig sızıntı (baz={k=2}) | %95 genlik, Δφ=0.11 | κ=1.43, tam belirli | Genlik şişer, faz iyi |
-| **3-konfig CLEAN** | **%43 genlik, Δφ=0.18** | gain=0.2 | k=2 için en iyi, kor=0.26 |
+| **3-konfig CLEAN** | **%43 genlik, Δφ=0.18** | gain=0.2 | k=2 için en iyi (kmod yöntemi) |
+| **R-tabanlı CLEAN (tek orbit)** | **%0.08, Δφ=0.055 rad** | σ_b=100 μm, k=1..12 aday | Kmod yok; sahte harmonik sorunu var |
 
 ### Falso EDM sinyali ve beta fonksiyonu
 
@@ -866,6 +1095,7 @@ her BPM'in kazanç hatası tahmin edilebilir. Gradyan modülasyonu
 | `fourier_reconstruct.py` | Temiz Fourier kalite raporu: hedefli fit + CLEAN (LASSO/greedy yok) |
 | `scan_j2.py` | En iyi j₂ quad çiftini tara |
 | `show_response.py` | Tepki matrisi görselleştirme |
+| `bpm_offset_test.py` | R-tabanlı CLEAN testi: BPM ofseti altında tek orbit ölçümü (§12c) |
 | `FOURIER_REKONSTRUKSIYON.md` | Fourier yönteminin pedagojik derinlemesine anlatımı |
 | `PROJE_ANALIZI_VE_ONERILER.md` | Analiz ve beyin fırtınası |
 | `YÖNTEM.md` | Detaylı matematiksel türetimler |
@@ -1072,3 +1302,19 @@ Bu bir yazılım hatası değil, yöntemin fiziksel sınırı.
   seçiyor mu? Sistematik test yapılmadı.
 
 - **Bootstrap hata çubukları:** Katsayı belirsizliği nasıl ölçülür?
+
+- **R-tabanlı CLEAN sahte harmonik ayrımı (§12c):** CLEAN k=1..12 aday
+  kümesiyle çalışırken b gürültüsü tüm frekanslara sahte harmonik sızıntısı
+  yapıyor. Gerçek (k=2,4,6,8) ile sahte (b'den gelen k=1,3,5,...) arasında
+  oracle bilgisi olmadan güvenilir bir ayrım yapılabilir mi? TANI 2 testi
+  (saf b altında sahte genlik kalibrasyonu) bir eşik belirleme yolu sunuyor
+  ama sistematik doğrulama yapılmadı.
+
+- **Çok-orbit R-tabanlı yöntem:** Farklı zamanlarda ölçülen birden çok
+  orbit verisini birleştirmek b'nin zamansal değişimini kullanarak ofseti
+  bastırabilir. Δq sabit kalırken b değişirse, ortalama b etkisini azaltır.
+  Bu yaklaşım §12c CLEAN ile birleştirilmemiş.
+
+- **R model doğruluğu alt sınırı:** §12c'de δK/K ≲ 3–4% eşiği saptandı.
+  Gerçek halkada β-beat ölçümünden R'yi ne kadar iyi kalibrasyon yapılabilir?
+  LOCO benzeri yöntemlerle R kalibrasyonu henüz uygulanmadı.
