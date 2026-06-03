@@ -59,6 +59,12 @@ simulasyon_sonuclari.png
 *.dwarf2
 *.final
 *.dfinish
+fig1_falseedm_scan.png
+fig2_orbit_gain.png
+fig3_offset_scaling.png
+fig4_sigma_model.png
+table2_gain.txt
+table3_orbit.txt
 build_rm.log
 leakage_test.log
 false_edm_scan.log
