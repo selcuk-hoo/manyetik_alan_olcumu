@@ -63,9 +63,15 @@ def setup_fields(config):
 
     p_mag = gamma0 * M1 * C * beta0
     direction = f.direction
-    y0 = [config.get("dev0", 1e-5), config.get("y0", 1e-5), 0.0,
+    # Başlangıç koşulu: IDEAL kapalı yörünge (x=y=0, spin boylamsal frozen).
+    # params.json'daki dev0/y0 değerleri KULLANILMIYOR — onlar genel simülasyon
+    # için; burada amacımız misalignment'tan gelen saf false-EDM sinyalini ölçmek.
+    # Herhangi bir x/y sapması, misalignmentsiz lattisin COD'ından bağımsız bir
+    # betatron titreşimi yaratır ve dSy/dt'ye arka plan katkı ekler (tüm k için
+    # aynı → modlar ayırt edilemez). x=y=0 ile bu arka plan sıfırlanır.
+    y0 = [0.0, 0.0, 0.0,
           0.0, 0.0, p_mag * direction,
-          0.0, 0.0, direction]   # spin başlangıç: boylamsal (frozen)
+          0.0, 0.0, direction]   # spin başlangıç: boylamsal frozen (Sy=0)
     return f, y0, beta0, R0
 
 
