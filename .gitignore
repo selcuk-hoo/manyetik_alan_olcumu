@@ -61,4 +61,6 @@ simulasyon_sonuclari.png
 *.dfinish
 build_rm.log
 leakage_test.log
+false_edm_scan.log
+false_edm_mode_scan.png
 params.json.bak
