@@ -225,6 +225,7 @@ print("table2_gain.txt  ✓")
 C_ring = 2 * np.pi * 95.49                           # circumference ≈ 600 m
 s_bpm  = np.linspace(0, C_ring, N_Q, endpoint=False) # BPM s-positions [m]
 
+A_demo3  = 10e-6          # 10 μm misalignment amplitude (for signal orbit reference)
 sigma_b3 = 300e-6
 N_MC3    = 2000
 rng3     = np.random.default_rng(42)
@@ -258,39 +259,53 @@ ax3a.set_ylabel(r"BPM offset $b\;[\mu\mathrm{m}]$")
 ax3a.set_title(fr"(a) White BPM offset ($\sigma_b = {sigma_b3*1e6:.0f}\,\mu$m)")
 
 # ── right: Fourier amplitude spectrum ─────────────────────────────────────────
+# ── right: Fourier amplitude spectrum — log scale, three reference levels ─────
 xpos3  = np.arange(len(k_show))
 colors3 = [RED if k == 2 else BLUE for k in k_show]
 ax3b.bar(xpos3, means3, color=colors3, width=0.6, alpha=0.75,
          edgecolor="white", linewidth=0.8)
 ax3b.errorbar(xpos3, means3, yerr=stds3,
               fmt="none", color="k", capsize=4, linewidth=1.0)
-ax3b.axhline(theory3, color=GRAY, ls="--", lw=1.2,
-             label=fr"Theory $\sigma_b\sqrt{{\pi/48}} = {theory3:.0f}\,\mu$m")
+
+# — k=2 signal orbit amplitude: A * ||M_k2||  (what BPMs actually read)
+signal_orbit_um = A_demo3 * 1e6 * Mk2_norm       # 10 μm × 167 = 1670 μm
+ax3b.axhline(signal_orbit_um, color=RED, ls="-", lw=1.8,
+             label=fr"$k=2$ signal orbit: $A\|M_{{k=2}}\|={signal_orbit_um:.0f}\,\mu$m")
+
+# — estimator residual: σ_b / ||M_k2||
+est_floor = sigma_b3 * 1e6 / Mk2_norm       # ≈ 1.8 μm
+ax3b.axhline(est_floor, color=GREEN, ls="--", lw=1.4,
+             label=fr"Estimator floor: $\sigma_b/\|M_{{k=2}}\|={est_floor:.1f}\,\mu$m")
+
+# — theoretical BPM offset Fourier level
+ax3b.axhline(theory3, color=GRAY, ls=":", lw=1.2,
+             label=fr"BPM offset $F_k$ level: $\approx{theory3:.0f}\,\mu$m")
+
+ax3b.set_yscale("log")
+ax3b.set_ylim(0.5, signal_orbit_um * 4)
 ax3b.set_xticks(xpos3)
 ax3b.set_xticklabels([f"$k={k}$" for k in k_show])
-ax3b.set_ylabel(r"Fourier amplitude $|a_k|\;[\mu\mathrm{m}]$")
-ax3b.set_title("(b) Flat spectrum: all modes equally populated")
-ax3b.legend(frameon=False)
-# annotate k=2 bar
-k2_idx = k_show.index(2)
-ax3b.text(k2_idx, means3[k2_idx] + stds3[k2_idx] + 8,
-          "no $k=2$\nenhancement", ha="center", va="bottom",
-          fontsize=8.5, color=RED)
+ax3b.set_ylabel(r"Amplitude [$\mu$m]  (log scale)")
+ax3b.set_title("(b) Three scales: orbit signal ≫ offset $F_k$ level ≫ estimator floor")
+ax3b.legend(frameon=False, fontsize=8.5)
 
 fig3.suptitle(
-    r"BPM offset $\mathbf{b}$ bypasses $R$ and is white in the Fourier basis — "
-    r"it has no preferred mode"  "\n"
-    r"Contrast: a $k=2$ quad misalignment of $A=10\,\mu$m "
-    r"is amplified by $\|M_{k=2}\|=167$ through $R$ "
-    r"before reaching the BPMs",
+    r"BPM offset $\mathbf{b}$ is white in the Fourier basis ($\approx77\,\mu$m/mode), "
+    r"but the $k=2$ signal orbit is $A\|M_{k=2}\|=1670\,\mu$m — "
+    r"$22\times$ larger"  "\n"
+    r"The estimator further divides the offset by $\|M_{k=2}\|=167$, "
+    r"leaving only $\approx1.8\,\mu$m contamination",
     fontsize=9.5, y=1.03)
 fig3.tight_layout()
 fig3.savefig("fig3_mode_patterns.png", bbox_inches="tight")
 plt.close(fig3)
 print("fig3_mode_patterns.png  ✓")
+k2_idx3 = k_show.index(2)
 print(f"  k=2 Fourier amplitude of white offset: "
-      f"{means3[k2_idx]:.1f} ± {stds3[k2_idx]:.1f} μm  "
+      f"{means3[k2_idx3]:.1f} ± {stds3[k2_idx3]:.1f} μm  "
       f"(theory: {theory3:.1f} μm)")
+print(f"  k=2 signal orbit: {signal_orbit_um:.0f} μm  "
+      f"({signal_orbit_um/means3[k2_idx3]:.0f}× larger than offset F_k level)")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FIGURE 4 — Error budget: gradient model error vs BPM offset noise
