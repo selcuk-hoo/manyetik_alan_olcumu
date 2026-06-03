@@ -166,7 +166,19 @@ yok). Ölçümlerde bu oran k=0 için 1.00, k=1 için 0.94 çıkar — yani t2=2
 
 ## 7. Sonuç: k=2 rezonansı <a name="7-sonuç"></a>
 
-<!-- TABLO-ANA: doldurulacak -->
+**Tarama sonucu** (A=10 μm, t2=2 ms ≈ 440 tur, EDMSwitch=0):
+
+| k | CO genliği [mm] | kalan betatron [m] | dS_y/dt [rad/s] | \|·\|/\|k=2\| | eski SG (güvenilmez) |
+|---|-----------------|--------------------|-----------------| ------------|----------------------|
+| 0 | 0.058 | 1.2e‑14 | +1.80e‑10 | 0.13 | +1.05e‑07 |
+| 1 | 0.070 | 2.0e‑15 | +4.93e‑10 | 0.34 | −3.53e‑06 |
+| **2** | **0.198** | 4.7e‑15 | **+1.44e‑09** | **1.00** | −6.85e‑06 |
+| 3 | 0.088 | 2.8e‑15 | −6.64e‑10 | 0.46 | +4.17e‑06 |
+| 4 | 0.028 | 2.8e‑15 | −1.98e‑10 | 0.14 | −1.07e‑06 |
+| 5 | 0.014 | 4.1e‑14 | −9.92e‑11 | 0.07 | −2.15e‑07 |
+
+k₂/k₁ = 2.9×, k₂/k₃ = 2.2×. Stroboskopik (gerçek) değerler eski sürekli-SG
+değerlerinin (~10⁻⁶, artefakt) ~3000 kat altında.
 
 Temiz yöntemle (kapalı-yörünge fırlatması + stroboskopik örnekleme)
 false EDM sinyali **k=2'de zirve yapar** ve **kapalı-yörünge genliğiyle
