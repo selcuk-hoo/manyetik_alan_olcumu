@@ -883,6 +883,73 @@ rad/quad iken tune'un faz ilerlemesi $2\pi\cdot 2.68/48 \approx 0.350$
 rad/quad. Yakınlık → R'nin k=2 Fourier moduna büyük projeksiyon yapması
 → büyük tekil değer → rezonant güçlenme **~34×**.
 
+### Mekanizma analizi: k=2 neden büyük k'ların yanında çözülür?
+
+Bu yöntemin "too good to be true" görünmesinin altında **üç bağımsız
+mekanizma** yatıyor. Üçü de doğrudan R matrisinden hesaplanabilir.
+
+#### Mekanizma 1: Tune rezonansı modları seçici güçlendiriyor
+
+Her Fourier modu R altında farklı kazançla orbite dönüşür. Birim-norm
+$F_k$ vektörünün orbit normu $\|R F_k\|$ ("R kazancı"):
+
+| k | R kazancı | k | R kazancı |
+|---|-----------|---|-----------|
+| 1 | 8.77 | 7 | 0.79 |
+| **2** | **34.08** | 8 | 0.59 |
+| 3 | 8.90 | 9 | 0.46 |
+| 4 | 3.20 | 10 | 0.39 |
+| 5 | 1.75 | 11 | 0.34 |
+| 6 | 1.12 | 12 | 0.33 |
+
+k=2 (tune'a en yakın) k=4'ten **10×**, k=8'den **58×** daha güçlü orbit
+üretir. Kazanç k arttıkça hızla düşer — yüksek-k modları R "görmez".
+
+#### Mekanizma 2: Güçlenme genlik dezavantajını siliyor
+
+Gerçek senaryoda k=2 = 10 μm ama k=4,6,8 = 200–300 μm (20–30× büyük).
+Misalignment'tan orbite geçince:
+
+| k | misalignment | → orbit normu | R kazancı |
+|---|--------------|---------------|-----------|
+| 2 | 10 μm | **1669 μm** | 34.08 |
+| 4 | 300 μm | 4707 μm | 3.20 |
+| 6 | 300 μm | 1651 μm | 1.12 |
+| 8 | 200 μm | 577 μm | 0.59 |
+
+k=4 misalignment k=2'nin 30× büyük, ama orbit katkısı yalnız ~2.8×;
+k=8'in 20× büyük misalignment'ı k=2'den **küçük** orbit veriyor.
+Orbitte k=2 artık gömülü zayıf sinyal değil — en büyük üç bileşenden biri.
+
+#### Mekanizma 3: Modlar R altında dik → karışmıyorlar
+
+Normalize edilmiş orbit desenlerinin çapraz korelasyonu
+$|\langle RF_j, RF_k\rangle|$:
+
+|  | k=2 | k=4 | k=6 | k=8 |
+|--|-----|-----|-----|-----|
+| **k=2** | 1.00 | 0.01 | 0.01 | 0.01 |
+| **k=4** | 0.01 | 1.00 | 0.00 | 0.00 |
+| **k=6** | 0.01 | 0.00 | 1.00 | 0.00 |
+| **k=8** | 0.01 | 0.00 | 0.00 | 1.00 |
+
+$RF_2$, $RF_{4,6,8}$'e neredeyse tam dik. En küçük kareler bu sayede
+k=2'yi diğerlerinden temiz ayırır: **k=4,6,8 ne kadar büyük olursa olsun
+k=2 kestirimine sızmaz.** Bu, §11 Sorun 2'deki kmod sızıntısının tam
+tersi — orada $\Delta R$ modları karıştırıyordu, burada $R$ ayırıyor.
+
+#### Sentez
+
+| Mekanizma | Etki | k=2 için sonuç |
+|-----------|------|----------------|
+| Tune rezonansı | k=2 kazancı 34× | Orbit sinyali büyük |
+| Genlik telafisi | 30× misalignment farkı silindi | k=2 orbitte baskın |
+| Diklik (kor.≈0.01) | Modlar karışmaz | k=4,6,8 sızmaz |
+| Beyaz b | Tek moda az projeksiyon | TANI 2: sahte k=2 = 0.72 μm |
+
+Dördü birlikte: k=2 = 9.94 ± 0.66 μm (gerçek 10), %0.6 hata,
+0.046 rad faz — 100 μm BPM ofseti altında, kmod olmadan, tek orbitle.
+
 ### Kritik birim hatası (keşfedilen ve düzeltilen)
 
 R matrisi `build_response_matrix.py` ile hesaplanıyor. Analiz sırasında

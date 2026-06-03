@@ -806,6 +806,39 @@ b'nin k=2 bileşeninden (~0.7 μm) ~2400× büyük.
 
 **Sonuç:** kmod'a gerek yok. R·Δq ile b yapısal olarak ayrışıyor.
 
+### Mekanizma: üç etki birlikte çalışıyor
+
+k=2'nin, kendisinden 20–30× büyük k=4,6,8 ve 100 μm BPM ofseti yanında
+%0.6 hatayla çözülmesi tek bir hileden değil, üç bağımsız mekanizmadan
+geliyor. Hepsi doğrudan R'den hesaplanabilir (ayrıntılı türetim:
+`FOURIER_REKONSTRUKSIYON.md` §13c).
+
+**1. Tune rezonansı modları seçici güçlendiriyor.** Her modun R kazancı
+$\|RF_k\|$ tune yakınlığıyla belirleniyor:
+
+| k | 1 | **2** | 3 | 4 | 6 | 8 |
+|---|---|-------|---|---|---|---|
+| R kazancı | 8.8 | **34.1** | 8.9 | 3.2 | 1.1 | 0.59 |
+
+k=2, k=4'ten 10×, k=8'den 58× güçlü orbit üretir.
+
+**2. Güçlenme genlik dezavantajını siliyor.** Misalignment'ta k=4,6,8
+30× büyük olsa da orbite çevrilince k=2 baskın hale gelir:
+
+| k | misalignment | → orbit normu |
+|---|--------------|---------------|
+| 2 | 10 μm | 1669 μm |
+| 4 | 300 μm | 4707 μm |
+| 6 | 300 μm | 1651 μm |
+| 8 | 200 μm | 577 μm |
+
+k=8'in 20× büyük misalignment'ı k=2'den küçük orbit veriyor.
+
+**3. Modlar R altında dik → karışmıyorlar.** Çapraz korelasyon
+$|\langle RF_2, RF_{4,6,8}\rangle| \approx 0.01$. En küçük kareler k=2'yi
+diğerlerinden temiz ayırır; büyük k'lar k=2 kestirimine sızmaz. (kmod'daki
+sızıntının tersi: orada ΔR karıştırır, burada R ayırır.)
+
 ### Birim hatası: kritik bir bulgu
 
 Bu analiz yapılırken `build_response_matrix.py`'de kritik bir birim hatası
