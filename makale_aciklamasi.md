@@ -278,6 +278,36 @@ $$A_{k=2} = 9.94 \pm 0.66\,\mu\text{m} \quad (\text{gerçek: } 10), \qquad \Delt
 
 ## 8. BPM ofseti sağlamlığı — beyazlık varsayımı gerekmez <a name="8-ofset-saglamligi"></a>
 
+### Anahtar sezgi: "parmak izi" eşleştirmesi
+
+Algoritma yörüngenin **ne kadar büyük** olduğunu ölçmüyor;
+yörüngenin **tek bir özel desene** ($k=2$ parmak izine)
+**ne kadar benzediğini** ölçüyor.
+
+Gerçek $k=2$ sinyali tam o desenin kendisi → tam uyuyor.
+Rastgele BPM ofseti ise o desene benzemeyen bir karmaşa → neredeyse hiç uymuyor,
+o yüzden "görünmez" kalıyor.
+
+### Grafikle anlatım (fig6)
+
+Algoritma aslında şunu yapar — her BPM noktasında ölçümü ($y_j$) bir
+**şablonla** ($\hat{m}_{k=2,j}$ — k=2 yörünge parmak izi) çarpar ve toplar.
+Bu işleme "projeksiyon" veya "eşleşme skoru" denir:
+
+$$\hat{a}_{k=2} = \frac{\sum_j y_j \cdot \hat{m}_{k=2,j}}{\|M_{k=2}\|}$$
+
+**Gerçek $k=2$ sinyali** durumunda (fig6 üst satır):
+Yörünge zaten k=2 parmak izini taşıdığından, her $y_j$ ile $\hat{m}_{k=2,j}$
+**aynı işarette** → çarpımlar hep pozitif → toplam büyük → sinyal görülür.
+
+**Rastgele BPM ofseti** durumunda (fig6 alt satır):
+Ofsetin şablonla ilgisi yoktur → çarpımların yarısı pozitif, yarısı negatif
+→ **birbirini götürür** → toplam ≈ 0 → ofset görünmez.
+
+Sayısal örnek ($\sigma_b = 300\,\mu$m):
+- Gerçek $k=2$ sinyali (10 μm misalignment): **kestirilen 10.0 μm** ← mükemmel
+- Rastgele ofset: **kestirilen ~1.3 μm** ← 167× bastırılmış
+
 ### Temel eşitsizlik
 
 $M = RF$ uyum matrisi için **herhangi bir** deterministik ofset $\mathbf{b}$,
@@ -286,13 +316,20 @@ $k=2$ genlik kestirimine şu kadar kirletme katar:
 $$\delta a_{k=2} = \frac{\mathbf{b} \cdot \hat{m}_{k=2}}{\|M_{k=2}\|} = \frac{\mathbf{b} \cdot \hat{m}_{k=2}}{167}$$
 
 Bu formülde $\mathbf{b}$'nin dağılımı hakkında **hiçbir varsayım** yoktur.
-Tüm $|\delta a_{k=2}| < 10\,\mu$m koşulunun yeterli olduğu güvenli limit:
-$\|\mathbf{b}_\parallel\| < 1669\,\mu$m (gerçekçi değerin 5.6× üstü).
+Güvenli limit: $\|\mathbf{b}_\parallel\| < 1669\,\mu$m (gerçekçi değerin 5.6×'ı).
+
+### White ofset spektrumu (fig5)
+
+fig5 ise şunu gösteriyor: $\sigma_b = 300\,\mu$m'lik rastgele bir ofset,
+estimatörden geçince **tüm harmoniklerde düz ve geniş-bantlı bir taban** üretir —
+hiçbir $k$'da sahte tepe yok. Ve taban **tam k=2'de en düşük** (2.2 μm),
+çünkü $\|M_{k=2}\| = 167$ en büyük sütun normu. Yanlış EDM'i besleyen mod,
+ofset kontaminasyonuna karşı en korunaklı olandır.
 
 ### En kötü durum testi
 
-$\mathbf{b} = A\hat{m}_{k=2}$ (ofset tam olarak $k=2$ yörünge deseniyle
-hizalı — en kötü durum). Teori: $\delta a = A/167$.
+$\mathbf{b} = A\hat{m}_{k=2}$ (ofset tam k=2 yörünge deseniyle hizalı — en kötü durum).
+Teori: $\delta a = A/167$.
 
 | A [μm] | Teori [μm] | CLEAN [μm] | lstsq [μm] |
 |--------|-----------|-----------|-----------|
@@ -315,10 +352,19 @@ pertürbasyon:
 $$R_\text{model} = R\,\text{diag}(1 + \varepsilon)$$
 
 $k=2$ genlik hatası $\delta A_{k=2}/A_{k=2} \sim \sigma_\text{model} \times \kappa_2$
-ile ölçeklenir. Sayısal sonuç:
+ile ölçeklenir.
 
-- $\sigma_\text{model} \lesssim 3$–$4\%$ için hata <10 μm hedefinin içinde kalır.
-- Bu tolerans, beta-beat / LOCO-tipi kalibrasyon ile ulaşılabilirdir.
+**Sayısal hata bütçesi (fig4)** — üç BPM ofseti düzeyi karşılaştırması:
+
+| Senaryo | σ_model = 0% | σ_model = 5% | σ_model = 10% |
+|---------|------------|------------|--------------|
+| σ_b = 0 (model hatası yalnız) | ~0 μm | ~0 μm | ~0 μm |
+| σ_b = 100 μm | ~0.6 μm | ~0.6 μm | ~0.7 μm |
+| σ_b = 300 μm | ~1.8 μm | ~1.8 μm | ~2.0 μm |
+
+Temel çıkarım: **hata tamamen BPM ofseti tarafından belirlenir, model hatası etkisizdir.**
+$\sigma_b = 300\,\mu$m bile $\sigma_\text{model} \lesssim 10\%$'de 10 μm hedefinin içindedir.
+Bu tolerans, beta-beat / LOCO-tipi kalibrasyon ile kolaylıkla ulaşılabilirdir.
 
 ---
 
@@ -349,4 +395,5 @@ kapsam tercihidir:
 | $R$ kalibrasyonu gerçek halkada ($\delta K/K$ → $k=2$ hata bütçesi) | Yapılacak |
 | $\Delta q_{k=2}$ → spin-düzeyi sistematik bağlantısı | Yapılacak |
 | Yatay düzlem ve skew kuplaj (quad tilt) | Yapılacak |
-| $\sigma_\text{model}$ vs $k=2$ hatası grafik onayı | Yapılacak |
+| $\sigma_\text{model}$ vs $k=2$ hatası grafik onayı | **Tamamlandı** (fig4) |
+| BPM ofseti dayanıklılığı — parmak izi eşleştirme sezgisi | **Tamamlandı** (fig5, fig6) |

@@ -10,6 +10,8 @@ Output files:
   fig4_sigma_model.png     – k=2 error budget: model uncertainty vs BPM offset
   fig5_offset_whiteness.png– white BPM offset → broadband recovered spectrum
                              (no spurious peak; lowest at k=2)
+  fig6_matched_filter.png  – why offset is invisible: element-wise product
+                             y_j × m̂_{k=2,j} cancels for offset, sums for signal
   table2_gain.txt          – Table 2 raw numbers
   table3_orbit.txt         – Table 3 raw numbers
 
@@ -427,6 +429,107 @@ with open("table3_orbit.txt", "w") as f:
         gain   = orb_nm / (A * 1e6)
         f.write(f"  {k:3d}  {A*1e6:>18.0f}  {orb_nm:>16.0f}  {gain:>6.1f}\n")
 print("table3_orbit.txt  ✓")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FIGURE 6 — Matched-filter intuition: why BPM offset is nearly invisible
+#
+# The estimator does NOT measure how large the orbit is.
+# It measures how closely the orbit RESEMBLES the k=2 fingerprint.
+#
+#   â_{k=2} = (y · m̂_{k=2}) / ||M_{k=2}||
+#
+# Left:   orbit measurement y(s) — signal orbit or random offset
+# Middle: k=2 template m̂_{k=2}(s) = M_{k=2}/||M_{k=2}||  (same for both rows)
+# Right:  element-wise product y_j × m̂_j — fills area above/below zero
+#         → all positive for signal (large sum) → alternates for offset (cancels)
+# ══════════════════════════════════════════════════════════════════════════════
+
+A6      = 10e-6
+Mc_raw  = R @ Fcos(2, N_Q)
+Mc_norm = np.linalg.norm(Mc_raw)
+m_hat6  = Mc_raw / Mc_norm                                  # unit-norm template
+
+# True k=2 signal orbit (all products positive)
+y_sig_um = A6 * Mc_raw * 1e6                                # μm
+prod_sig  = y_sig_um * m_hat6                               # μm (all ≥ 0)
+est_sig   = np.sum(prod_sig) / Mc_norm                      # μm ≈ 10
+
+# Random white BPM offset (products alternate → cancel)
+b6_um    = np.random.default_rng(7).normal(0, 300e-6, N_Q) * 1e6  # μm
+prod_off  = b6_um * m_hat6                                  # μm (mixed sign)
+est_off   = np.sum(prod_off) / Mc_norm                      # μm ≈ small
+
+cases = [
+    (y_sig_um,  prod_sig, est_sig, RED,
+     fr"True $k=2$ signal orbit  (peak $\approx{np.max(np.abs(y_sig_um)):.0f}\,\mu$m)"),
+    (b6_um,     prod_off, est_off, GRAY,
+     fr"Random BPM offset  ($\sigma_b = 300\,\mu$m)"),
+]
+
+fig6, axes6 = plt.subplots(2, 3, figsize=(12, 6))
+fig6.subplots_adjust(hspace=0.52, wspace=0.38)
+
+for row, (y_in, prod, est, col, input_title) in enumerate(cases):
+
+    # ── left: input y(s) ────────────────────────────────────────────────────
+    ax = axes6[row, 0]
+    ax.fill_between(s_bpm, y_in, alpha=0.25, color=col)
+    ax.plot(s_bpm, y_in, "-", color=col, lw=1.0)
+    ax.axhline(0, color="k", lw=0.4)
+    ax.set_ylabel(r"[$\mu$m]", fontsize=9)
+    ax.set_title(input_title, fontsize=9)
+    ax.tick_params(labelsize=8)
+
+    # ── middle: template m̂_{k=2} (same for both rows) ───────────────────────
+    ax = axes6[row, 1]
+    ax.fill_between(s_bpm, m_hat6, alpha=0.15, color=BLUE)
+    ax.plot(s_bpm, m_hat6, "-", color=BLUE, lw=1.3)
+    ax.axhline(0, color="k", lw=0.4)
+    ax.set_ylabel(r"$\hat{m}_{k=2}$ [a.u.]", fontsize=9)
+    ax.tick_params(labelsize=8)
+    if row == 0:
+        ax.set_title(r"$k=2$ fingerprint  $\hat{m}_{k=2} = M_{k=2}/\|M_{k=2}\|$",
+                     fontsize=9)
+    else:
+        ax.set_title("Same fingerprint", fontsize=9)
+
+    # ── right: element-wise product y_j × m̂_j ───────────────────────────────
+    ax = axes6[row, 2]
+    ax.fill_between(s_bpm, prod, 0,
+                    where=(prod >= 0), color=GREEN, alpha=0.70, label="positive")
+    ax.fill_between(s_bpm, prod, 0,
+                    where=(prod < 0),  color=RED,   alpha=0.70, label="negative")
+    ax.plot(s_bpm, prod, "k-", lw=0.4)
+    ax.axhline(0, color="k", lw=0.5)
+    ax.set_ylabel(r"$y_j\,\hat{m}_j\;[\mu$m]", fontsize=9)
+    ax.tick_params(labelsize=8)
+    if row == 0:
+        ax.set_title("Products: all positive → large sum", fontsize=9)
+        ax.legend(frameon=False, fontsize=8, loc="lower right")
+    else:
+        ax.set_title("Products: alternating → nearly cancel", fontsize=9)
+    ax.text(0.97, 0.97, fr"$\hat{{a}}_{{k=2}} = {est:.1f}\,\mu$m",
+            transform=ax.transAxes, ha="right", va="top", fontsize=10,
+            color=GREEN if abs(est) > 5 else "0.3",
+            bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.6", alpha=0.92))
+
+# x-labels on bottom row only
+for c in range(3):
+    axes6[1, c].set_xlabel(r"Ring position $s$ [m]", fontsize=9)
+
+fig6.suptitle(
+    r"The estimator does not ask \textit{how large} is the orbit — "
+    r"it asks \textit{how closely does the orbit resemble the $k=2$ fingerprint?}"  "\n"
+    r"A genuine $k=2$ signal matches perfectly (products all positive). "
+    r"A random offset does not match (products cancel). "
+    r"That is why BPM offset is nearly invisible.",
+    fontsize=9.5, y=1.02)
+
+fig6.savefig("fig6_matched_filter.png", bbox_inches="tight")
+plt.close(fig6)
+print("fig6_matched_filter.png  ✓")
+print(f"  Signal estimate : {est_sig:.2f} μm  (true: {A6*1e6:.1f} μm)")
+print(f"  Offset estimate : {est_off:.3f} μm  (floor: {300e-6*1e6/Mc_norm:.3f} μm)")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Summary

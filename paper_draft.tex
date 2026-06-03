@@ -409,8 +409,14 @@ under gradient perturbations. Numerically, the $k=2$ error
 stays within the \SI{10}{\micro\meter} target for
 $\sigma_\mathrm{model}=\delta K/K\lesssim3\text{--}4\%$, a tolerance
 achievable with a beta-beat / LOCO-type calibration.
-\todo{Add figure: $k=2$ amplitude error vs.\ $\sigma_\mathrm{model}$, confirming
-the 3--4\% tolerance numerically.}
+Figure~\ref{fig:model_error} quantifies the full error budget.
+Three BPM-offset levels ($\sigma_b = 0$, $100$, $300\,\mu$m) are overlaid:
+offset noise dominates at any realistic model accuracy, and model error
+alone is negligible across the entire $0$--$10\%$ range.
+The \SI{10}{\micro\meter} target is met for $\sigma_\mathrm{model}\lesssim10\%$
+even at the worst-case $\sigma_b=\SI{300}{\micro\meter}$,
+confirming that the tolerance is driven by BPM offsets, not by imperfect
+knowledge of $R$.
 
 \subsection{Scope: targeted estimation, not harmonic discovery}
 
@@ -462,6 +468,20 @@ For white $\mathbf{b}$ with r.m.s.\ $\sigma_b$, the $k=2$ estimate standard
 deviation is $\sigma_b/\|M_{k=2}\|=\sigma_b/167$; at the realistic
 $\sigma_b=\SI{300}{\micro\meter}$ this gives $\lesssim\SI{1.8}{\micro\meter}$,
 fully within target.
+
+The key intuition is that \emph{the estimator does not measure how large the
+orbit is---it measures how closely the orbit resembles the $k=2$ fingerprint.}
+A genuine $k=2$ signal shares exactly that fingerprint, so the element-wise
+product $y_j\hat{m}_{k=2,j}$ is everywhere positive and the sum is large.
+A random BPM offset carries no such structure: its products with
+$\hat{m}_{k=2}$ alternate in sign and nearly cancel.
+Figure~\ref{fig:matched_filter} illustrates this directly for a
+$\sigma_b=\SI{300}{\micro\meter}$ offset alongside a $\SI{10}{\micro\meter}$
+$k=2$ signal, recovering $\hat{a}_{k=2}=10.0\,\mu$m and $1.3\,\mu$m respectively.
+Figure~\ref{fig:whiteness_spec} confirms that the recovered-amplitude spectrum
+of a white offset is flat and broadband, with no spurious peak, and the floor
+is lowest precisely at $k=2$ ($\SI{2.2}{\micro\meter}$) because $\|M_{k=2}\|=167$
+is the largest column norm.
 
 \begin{table}[t]
 \centering
