@@ -235,18 +235,35 @@ def _run_one_k(task):
         co_off_mm = 0.0
         resid_beta_mm = float("nan")
 
-    hist, _, _ = integrate_particle(
+    # Sabit azimutta tur-başına örnekleme (STROBOSKOPİK). CO fırlatmasıyla
+    # tur-başına spin haritası sabit bir dönme → bu azimutta her tur AYNI
+    # faz → tur-içi (~1e-5) salınım TAMAMEN çıkar; geriye seküler false-EDM
+    # driftı (+ yavaş spin-tune dalgası) kalır. SG/örnekleme-oranı yok.
+    fields.poincare_quad_index = 0.0
+    hist, poin, poin_t = integrate_particle(
         y_launch, 0.0, t2, dt, fields=fields, return_steps=return_steps,
         quad_dy=quad_dy)
     t_array = np.arange(hist.shape[0]) * (t2 / hist.shape[0])
-    slope = float(measure_dSy_dt(hist, t_array))
-    sy = hist[:, 7].copy()   # S_y zaman serisi (grafik için)
+
+    # Birincil ölçüm: stroboskopik S_y(tur) doğrusal eğimi [rad/s].
+    sy_strobe = np.asarray(poin[:, 7], float) if poin is not None and len(poin) > 5 else None
+    if sy_strobe is not None:
+        ts = np.asarray(poin_t, float)
+        slope = float(np.polyfit(ts, sy_strobe, 1)[0])
+    else:
+        ts = None
+        slope = float("nan")
+    # Karşılaştırma: eski sürekli-SG yöntemi (örnekleme-bağımlı, güvenilmez)
+    slope_sg = float(measure_dSy_dt(hist, t_array))
+    sy = hist[:, 7].copy()   # sürekli S_y (hızlı salınım bağlamı için)
     dt_run = time.time() - t0
     # resid_beta_mm: sabit azimutta kalan betatron RMS (CO aramasından).
     # Kapalı yörünge üzerinde fırlatıldıysa ~0 (≪ CO ofseti) → temiz fırlatma.
     return {"k": k, "co_off_mm": co_off_mm, "resid_beta_mm": resid_beta_mm,
-            "dSy_dt": slope, "runtime": dt_run,
-            "sy": sy, "t_array": t_array}
+            "dSy_dt": slope, "dSy_dt_sg": slope_sg, "runtime": dt_run,
+            "sy": sy, "t_array": t_array,
+            "sy_strobe": (sy_strobe.copy() if sy_strobe is not None else None),
+            "t_strobe": (ts.copy() if ts is not None else None)}
 
 
 def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
