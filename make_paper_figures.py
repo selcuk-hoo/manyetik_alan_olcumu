@@ -8,6 +8,8 @@ Output files:
                              M_k = R@F_k along the ring, for k=1,2,3,4
                              (4 rows × 2 columns)
   fig4_sigma_model.png     – k=2 error budget: model uncertainty vs BPM offset
+  fig5_offset_whiteness.png– white BPM offset → broadband recovered spectrum
+                             (no spurious peak; lowest at k=2)
   table2_gain.txt          – Table 2 raw numbers
   table3_orbit.txt         – Table 3 raw numbers
 
@@ -331,6 +333,85 @@ plt.close(fig4)
 print("fig4_sigma_model.png  ✓")
 if tol_300 is not None:
     print(f"  Tolerance (sigma_b=300 μm, 10 μm target): ~{tol_300:.1f}%")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FIGURE 5 — BPM-offset whiteness / robustness
+#   (a) one realization of a white BPM offset b(s) vs s.
+#   (b) harmonic amplitude spectrum recovered by the estimator â = M⁺ y:
+#       a white offset gives a broadband floor with NO spurious peak — and it
+#       is LOWEST exactly at k=2 (largest ||M_k||), whereas a true k=2
+#       misalignment recovers as a clean line standing above the floor.
+# ══════════════════════════════════════════════════════════════════════════════
+
+KMAX = 12
+cols5 = [Fcos(0, N_Q)]
+for k in range(1, KMAX + 1):
+    cols5.append(Fcos(k, N_Q))
+    cols5.append(Fsin(k, N_Q))
+F_full = np.column_stack(cols5)
+M_full = R @ F_full
+M_pinv = np.linalg.pinv(M_full, rcond=1e-3)
+
+def amp_spectrum(ahat):
+    """Collapse [a0, c1, s1, c2, s2, ...] into amplitude per harmonic k=0..KMAX."""
+    out = [abs(ahat[0])]
+    for k in range(1, KMAX + 1):
+        out.append(np.hypot(ahat[1 + 2 * (k - 1)], ahat[2 + 2 * (k - 1)]))
+    return np.array(out)
+
+sigma_b5 = 300e-6
+A_sig5   = 10e-6
+rng5     = np.random.default_rng(1)
+
+# true k=2 signal (Δq = 10 μm in mode 2) → recovered spectrum
+a_sig = amp_spectrum(M_pinv @ (R @ (A_sig5 * Fcos(2, N_Q)))) * 1e6
+
+# pure white offset (Δq = 0), many realizations → recovered spectrum
+N_TR5 = 400
+specs = np.array([amp_spectrum(M_pinv @ rng5.normal(0, sigma_b5, N_Q)) * 1e6
+                  for _ in range(N_TR5)])
+off_mean, off_std = specs.mean(0), specs.std(0)
+b_example = np.random.default_rng(7).normal(0, sigma_b5, N_Q) * 1e6
+
+theory_floor = np.array([np.nan] + [sigma_b5 * 1e6 / M_col_norm(R, k)
+                                    for k in range(1, KMAX + 1)])
+kk = np.arange(0, KMAX + 1)
+
+fig5, (axA, axB) = plt.subplots(1, 2, figsize=(11, 4.2))
+
+# (a) example white-offset realization vs s
+axA.plot(s_bpm, b_example, "o-", color=GRAY, ms=3, lw=0.8)
+axA.axhline(0, color="k", lw=0.4)
+axA.set_xlabel(r"Ring position $s$ [m]")
+axA.set_ylabel(r"BPM offset $b$ [$\mu$m]")
+axA.set_title(fr"(a) White BPM offset ($\sigma_b={sigma_b5*1e6:.0f}\,\mu$m)")
+
+# (b) recovered harmonic spectrum: offset floor vs true k=2 signal
+ks = kk[1:9]
+axB.errorbar(ks, off_mean[1:9], yerr=off_std[1:9], fmt="o", color=BLUE,
+             capsize=3, ms=5, label=r"White offset (recovered, mean $\pm1\sigma$)")
+axB.plot(ks, theory_floor[1:9], "--", color=GRAY, lw=1.0,
+         label=r"Theory floor $\sigma_b/\|M_k\|$")
+axB.plot([2], [a_sig[2]], "*", color=RED, ms=16,
+         label=fr"True $k=2$ signal (${a_sig[2]:.0f}\,\mu$m)")
+axB.axhline(A_sig5 * 1e6, color=RED, ls=":", lw=0.8, alpha=0.5)
+axB.set_yscale("log")
+axB.set_xlabel(r"Fourier mode $k$")
+axB.set_ylabel(r"Recovered amplitude $|\hat a_k|$ [$\mu$m]")
+axB.set_title(r"(b) Offset is broadband; $k=2$ signal stands clear")
+axB.set_xticks(ks)
+axB.legend(frameon=False, fontsize=8, loc="upper left")
+
+fig5.suptitle(
+    r"BPM-offset robustness: a white offset produces no spurious harmonic peak "
+    r"and is lowest at $k=2$ (largest $\|M_k\|$)",
+    fontsize=10, y=1.02)
+fig5.tight_layout()
+fig5.savefig("fig5_offset_whiteness.png", bbox_inches="tight")
+plt.close(fig5)
+print("fig5_offset_whiteness.png  ✓")
+print(f"  k=2: signal {a_sig[2]:.1f} μm  vs  offset floor "
+      f"{off_mean[2]:.2f} ± {off_std[2]:.2f} μm")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TABLE 3 — Misalignment amplitude vs orbit norm
