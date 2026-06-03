@@ -267,14 +267,15 @@ def _run_one_k(task):
 
 
 def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
-             do_co=True, co_turns=60):
+             do_co=True, co_turns=60, dt=None):
     with open("params.json") as f:
         config = json.load(f)
     fields, y0, beta0, R0, p_mag, direction = setup_fields(config)
 
     circ = 2*np.pi*R0 + 4*fields.nFODO*fields.driftLen + 2*fields.nFODO*fields.quadLen
     T_rev = circ / (beta0 * C)
-    dt = config.get("dt", 1e-11)
+    if dt is None:                       # --dt verilmezse config'ten al
+        dt = config.get("dt", 1e-11)
 
     if nproc is None:
         # mod başına bir süreç: tüm k'lar tek dalgada paralel koşsun
@@ -286,7 +287,8 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
     print("=" * 72)
     print("  FALSE EDM — FOURIER MODU TARAMASI")
     print(f"  amplitude (cos katsayısı) = {amp_coef*1e6:.1f} μm  (tüm modlar eşit)")
-    print(f"  t2 = {t2:.1e} s  (~{t2/T_rev:.0f} tur),  EDMSwitch = 0 (gerçek EDM yok)")
+    print(f"  t2 = {t2:.1e} s  (~{t2/T_rev:.0f} tur),  dt = {dt:.1e} s,  "
+          f"EDMSwitch = 0 (gerçek EDM yok)")
     print(f"  kapalı yörünge fırlatması = {'AÇIK' if do_co else 'KAPALI'}"
           f"{f' ({co_turns} tur prob)' if do_co else ''}")
     print(f"  paralel süreç sayısı = {nproc}")
@@ -429,12 +431,16 @@ if __name__ == "__main__":
                         "betatron salınımı sinyali domine eder)")
     p.add_argument("--co-turns", type=int, default=60,
                    help="kapalı yörünge arama probu için tur sayısı")
+    p.add_argument("--dt", type=float, default=None,
+                   help="entegrasyon adımı [s] (varsayılan: params.json'dan). "
+                        "dt-yakınsama testi için override")
     args = p.parse_args()
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     k_list = list(range(0, args.kmax + 1))
     results, config = run_scan(k_list, amp_coef=args.amp, t2=args.t2,
                                return_steps=args.steps, nproc=args.nproc,
+                               dt=args.dt,
                                do_co=not args.no_co, co_turns=args.co_turns)
     plot_results(results, args.amp)
     plot_sy_timeseries(results, args.amp)
