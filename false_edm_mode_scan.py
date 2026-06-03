@@ -163,7 +163,11 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None):
     dt = config.get("dt", 1e-11)
 
     if nproc is None:
-        nproc = min(len(k_list), os.cpu_count() or 1)
+        # mod başına bir süreç: tüm k'lar tek dalgada paralel koşsun
+        # (kmax=5 → 6 mod → 6 süreç). Bağımsız C++ işleri, az sayıda mod
+        # olduğundan hafif aşırı-abonelik sorun değil. CPU sayısıyla
+        # sınırlamak istersen --nproc ile elle ver.
+        nproc = len(k_list)
 
     print("=" * 68)
     print("  FALSE EDM — FOURIER MODU TARAMASI")
