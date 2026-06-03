@@ -204,61 +204,66 @@ with open("table2_gain.txt", "w") as f:
 print("table2_gain.txt  ✓")
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FIGURE 3 — Misalignment pattern F_k and orbit response M_k = R@F_k
-#             for k = 1, 2, 3, 4  (4 rows × 2 columns)
+# FIGURE 3 — Mode-k quad misalignment: horizontal-field drive and orbit response
+#   Left  : coherent horizontal field B_x ∝ G·Δy that drives the orbit.
+#           The F/D gradient sign (-1)^j and the (-1)^j displacement sign of the
+#           FODO-antisymmetric mode cancel, leaving a smooth cos(2πk·m/24) drive.
+#   Right : closed-orbit response M_k = R·F_k (the measured orbit), vs s.
+#   Rows k = 1,2,3,4; k=2 sits closest to Q_y≈2.68 and is resonantly amplified.
 # ══════════════════════════════════════════════════════════════════════════════
 
-A_demo  = 10e-6         # 10 μm demonstration amplitude (cosine phase, φ=0)
+A_demo  = 10e-6                                       # 10 μm misalignment amplitude
+C_ring  = 2 * np.pi * 95.49                           # ring circumference ≈ 600 m
+s_bpm   = np.linspace(0, C_ring, N_Q, endpoint=False) # quad/BPM s-positions [m]
 k_vals3 = [1, 2, 3, 4]
-j_arr   = np.arange(N_Q)
 
-fig3, axes3 = plt.subplots(4, 2, figsize=(9, 10))
-fig3.subplots_adjust(hspace=0.60, wspace=0.40)
+def drive_field(k, n_q=N_Q):
+    """Coherent horizontal field B_x ∝ G·Δy for a mode-k vertical misalignment.
+    Gradient sign (-1)^j and displacement sign (-1)^j cancel → smooth cosine."""
+    m = np.arange(n_q) // 2
+    if k == 0:
+        return np.ones(n_q)
+    return np.cos(2 * np.pi * k * m / (n_q // 2))
+
+fig3, axes3 = plt.subplots(4, 2, figsize=(9.5, 10))
+fig3.subplots_adjust(hspace=0.55, wspace=0.38)
 
 for row, k in enumerate(k_vals3):
-    Fc       = Fcos(k, N_Q)
-    Mk       = R @ Fc                  # orbit response (unnormalized columns)
-    pattern  = A_demo * Fc  * 1e6     # misalignment input  [μm]
-    response = A_demo * Mk  * 1e6     # orbit response      [μm]
-    col_k    = RED if k == 2 else BLUE
-    mk_norm  = M_col_norm(R, k)
+    drive   = drive_field(k)                       # normalized B_x pattern (±1)
+    orbit   = A_demo * (R @ Fcos(k, N_Q)) * 1e6    # orbit response [μm]
+    col_k   = RED if k == 2 else BLUE
+    mk_norm = M_col_norm(R, k)
 
-    # ── left: misalignment input pattern ─────────────────────────────────────
+    # ── left: coherent horizontal-field drive ────────────────────────────────
     ax_L = axes3[row, 0]
-    ax_L.vlines(j_arr, 0, pattern, color=col_k, linewidth=0.8, alpha=0.75)
-    ax_L.scatter(j_arr, pattern, color=col_k, s=6, zorder=3)
+    ax_L.plot(s_bpm, drive, "o-", color=col_k, ms=4, lw=1.2)
     ax_L.axhline(0, color="k", linewidth=0.4)
-    ax_max = np.max(np.abs(pattern)) * 1.35
-    ax_L.set_ylim(-ax_max, ax_max)
-    ax_L.set_ylabel(r"$\Delta q\;[\mu\mathrm{m}]$", fontsize=9)
-    ax_L.set_title(fr"$k={k}$  Input: $F_{k}$   ($A=10\,\mu$m, $\phi=0$)",
-                   fontsize=9)
+    ax_L.set_ylim(-1.35, 1.35)
+    ax_L.set_ylabel(r"$B_x$ drive [arb.]", fontsize=9)
+    ax_L.set_title(fr"$k={k}$   Horizontal-field drive (coherent)", fontsize=9)
     ax_L.tick_params(labelsize=8)
 
-    # ── right: orbit response ─────────────────────────────────────────────────
+    # ── right: closed-orbit response ──────────────────────────────────────────
     ax_R = axes3[row, 1]
-    ax_R.vlines(j_arr, 0, response, color=col_k, linewidth=0.8, alpha=0.75)
-    ax_R.scatter(j_arr, response, color=col_k, s=6, zorder=3)
+    ax_R.plot(s_bpm, orbit, "o-", color=col_k, ms=4, lw=1.2)
     ax_R.axhline(0, color="k", linewidth=0.4)
-    ax_maxR = np.max(np.abs(response)) * 1.35
+    ax_maxR = np.max(np.abs(orbit)) * 1.35
     ax_R.set_ylim(-ax_maxR, ax_maxR)
     ax_R.set_ylabel(r"Orbit $[\mu\mathrm{m}]$", fontsize=9)
-    ax_R.set_title(
-        fr"$k={k}$  Response: $M_{k}=RF_{k}$  "
-        fr"$(\|M_{{k={k}}}\|={mk_norm:.0f})$",
-        fontsize=9)
+    ax_R.set_title(fr"$k={k}$   Orbit response  ($\|M_k\|={mk_norm:.0f}$)",
+                   fontsize=9)
     ax_R.tick_params(labelsize=8)
 
 # x-labels on the bottom row only
 for col in range(2):
-    axes3[3, col].set_xlabel("BPM index $j$", fontsize=10)
+    axes3[3, col].set_xlabel(r"Ring position $s$ [m]", fontsize=10)
 
 fig3.suptitle(
-    r"FODO-antisymmetric modes: misalignment $F_k$ (left) "
-    r"and orbit response $M_k = RF_k$ (right)"   "\n"
-    r"$k=2$ is resonantly amplified: "
-    r"$\|M_{k=2}\|\approx 167\gg\|M_{k\neq 2}\|\lesssim 12$",
-    fontsize=10, y=1.01)
+    r"Mode-$k$ quad misalignment ($A=10\,\mu$m): coherent horizontal-field "
+    r"drive (left) and closed-orbit response (right)"   "\n"
+    r"$k=2$ yields the largest orbit ($\|M_{k=2}\|=167$, "
+    r"$\sim\!4\times$ the neighbouring modes)",
+    fontsize=10, y=1.005)
 fig3.savefig("fig3_mode_patterns.png", bbox_inches="tight")
 plt.close(fig3)
 print("fig3_mode_patterns.png  ✓")
