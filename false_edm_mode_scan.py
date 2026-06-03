@@ -63,16 +63,88 @@ def setup_fields(config):
 
     p_mag = gamma0 * M1 * C * beta0
     direction = f.direction
-    # Başlangıç koşulu: IDEAL kapalı yörünge (x=y=0, spin boylamsal frozen).
-    # params.json'daki dev0/y0 değerleri KULLANILMIYOR — onlar genel simülasyon
-    # için; burada amacımız misalignment'tan gelen saf false-EDM sinyalini ölçmek.
-    # Herhangi bir x/y sapması, misalignmentsiz lattisin COD'ından bağımsız bir
-    # betatron titreşimi yaratır ve dSy/dt'ye arka plan katkı ekler (tüm k için
-    # aynı → modlar ayırt edilemez). x=y=0 ile bu arka plan sıfırlanır.
+    # Başlangıç koşulu: spin boylamsal frozen (Sy=0). Yörünge başlangıcı
+    # AŞAĞIDA find_closed_orbit ile kaymış kapalı yörüngeye oturtulur
+    # (betatron salınımını yok etmek için — bkz. measure_dSy_dt notu).
     y0 = [0.0, 0.0, 0.0,
           0.0, 0.0, p_mag * direction,
           0.0, 0.0, direction]   # spin başlangıç: boylamsal frozen (Sy=0)
-    return f, y0, beta0, R0
+    return f, y0, beta0, R0, p_mag, direction
+
+
+def _make_state(v, p_mag, direction, spin):
+    """(x0, y0, x', y') faz-uzayı noktasından 9-bileşenli yerel başlangıç durumu.
+    Açılar boyutsuz (x'=px/pz); momentuma p_mag·direction ile çevrilir."""
+    return [v[0], v[1], 0.0,
+            p_mag * direction * v[2], p_mag * direction * v[3], p_mag * direction,
+            spin[0], spin[1], spin[2]]
+
+
+def find_closed_orbit(fields, p_mag, direction, quad_dy, dt, T_rev,
+                      n_turns=48, n_iter=2, verbose=False):
+    """Kaymış kapalı yörüngenin dikey fırlatma noktasını (y0, y') bulur.
+
+    NEDEN: quad misalignment kapalı yörüngeyi kaydırır. İdeal y=0'dan
+    fırlatırsak parçacık yeni kapalı yörünge etrafında betatron salınımı yapar
+    (genlik ~ kapalı-yörünge ofseti ~0.2mm). Bu salınımın S_y'ye katkısı (~1e-5)
+    aradığımız seküler false-EDM driftinden (~1e-8) ~1000× büyük ve hiçbir
+    estimator onu ayıramaz. Çözüm: parçacığı kapalı yörünge ÜZERİNDE fırlat →
+    betatron yok → S_y saf seküler drift.
+
+    YÖNTEM: sabit azimutta (Poincaré, tur-başına) betatron VARYANSI,
+    fırlatma noktasının kapalı-yörüngeden sapmasının tam KUADRATİK formudur
+    (sextSwitch=0 → lineer lattis). 2B (y, y') faz-uzayında varyans bir eğik
+    elips (çapraz terim Hyp≠0) → koordinat-bazlı iniş bu vadide YAVAŞ ilerler.
+    Bunun yerine sonlu-fark Hessian'ı (çapraz terim dahil) kurup tek Newton
+    adımıyla minimuma (= kapalı yörünge) atlanır; lineer lattis için 1 adım
+    yeterli, varyans dalgalanmasına karşı 1-2 yineleme ile sağlamlaştırılır.
+    Quad_dy düz halkada SADECE dikey yörüngeyi kaydırır (x ile kuplaj yok,
+    quad_tilt=0) → yatay düzlem y=0'da bırakılır.
+    Azimut-bağımsız: betatron aksiyonu J→0 olunca parçacık HER azimutta
+    kapalı yörünge üzerindedir.
+    """
+    from integrator import integrate_particle
+    spin = [0.0, 0.0, direction]
+    fields.poincare_quad_index = 0.0   # cell-0 ARC1 girişi: tur-başına 1 örnek
+    t_probe = n_turns * T_rev
+
+    def var2(yc, ypc):
+        """Sabit azimutta tur-başına dikey konumun VARYANSI [m²].
+        Kapalı yörüngede sabit → 0; sapmada ∝ sapma² (kuadratik)."""
+        st = _make_state([0.0, yc, 0.0, ypc], p_mag, direction, spin)
+        _, poin, _ = integrate_particle(st, 0.0, t_probe, dt, fields=fields,
+                                        return_steps=10, quad_dy=quad_dy)
+        if poin is None or len(poin) < 5:
+            return 1e30
+        return float(np.var(poin[:, 1]))
+
+    yc, ypc = 0.0, 0.0
+    sy, syp = 2e-4, 2e-5         # finite-fark adımları (y [m], y' [rad])
+    for it in range(n_iter):
+        f0   = var2(yc,      ypc)
+        fp_y = var2(yc + sy, ypc);  fm_y = var2(yc - sy, ypc)
+        fp_p = var2(yc, ypc + syp); fm_p = var2(yc, ypc - syp)
+        fpp  = var2(yc + sy, ypc + syp)
+        gy = (fp_y - fm_y) / (2*sy)
+        gp = (fp_p - fm_p) / (2*syp)
+        Hyy = (fp_y - 2*f0 + fm_y) / (sy*sy)
+        Hpp = (fp_p - 2*f0 + fm_p) / (syp*syp)
+        Hyp = (fpp - fp_y - fp_p + f0) / (sy*syp)
+        det = Hyy*Hpp - Hyp*Hyp
+        if det <= 0 or Hyy <= 0:     # pozitif-tanımlı değil → güvenli çık
+            if verbose:
+                print(f"    [CO iter {it}] Hessian pos-def değil, durdu")
+            break
+        dy = -( Hpp*gy - Hyp*gp) / det
+        dp = -(-Hyp*gy + Hyy*gp) / det
+        yc += dy; ypc += dp
+        if verbose:
+            rms = np.sqrt(max(var2(yc, ypc), 0.0))
+            print(f"    [CO iter {it}] resid betatron rms = {rms:.3e} m, "
+                  f"y={yc:.6e} y'={ypc:.6e}")
+        sy *= 0.2; syp *= 0.2        # min'e yaklaşınca daha küçük fark adımı
+    fields.poincare_quad_index = -1.0   # ana koşum için Poincaré'yi kapat
+    return np.array([0.0, yc, 0.0, ypc])
 
 
 def _savgol_or_movavg(sig, win):
@@ -94,14 +166,18 @@ def _savgol_or_movavg(sig, win):
 def measure_dSy_dt(hist, t_array):
     """S_y'nin sekuler (false-EDM) eğimi [rad/s].
 
-    Proje standardı (plot_results.py / run_simulation.py): büyük pencereli
-    Savitzky-Golay (pencere = N/4) ile hızlı g-2 ve betatron salınımları
-    alçak-geçirenle bastırılır, kenarların %10'u atılıp doğru fit edilir.
-    Salınımın çok sayıda periyodu olduğunda (UZUN simülasyon) sekuler eğim
-    baskın hale gelir ve kestirim kararlılaşır.
+    KRİTİK ÖN KOŞUL — parçacık KAPALI YÖRÜNGE üzerinde fırlatılmalı
+    (find_closed_orbit). Aksi halde betatron salınımı (genlik ~1e-5) seküler
+    drift'i (~1e-8) ~1000× domine eder; salınımın lineer fite sızması işaret
+    ve büyüklük olarak ÇIKTI örneklemesine göre değişir → ölçüm anlamsız.
+    Bu, betatron amplitüdünün C, tur sayısının N olduğu durumda sızma tabanı
+    ~C/N ≈ 5e-9 rad/tur ≫ sinyal 5e-12 rad/tur olmasından kaynaklanır:
+    hiçbir estimator betatron varken sinyali çıkaramaz. Kapalı yörünge
+    üzerinde fırlatılırsa betatron yok → S_y düz seküler çizgi.
 
-    DİKKAT — turda-bir (Poincaré) örnekleme ALIASING yaratır (Q_y≈0.68 ile
-    sahte yavaş salınım); bu yüzden SÜREKLİ veri kullanılır.
+    Proje standardı (plot_results.py / run_simulation.py): büyük pencereli
+    Savitzky-Golay (pencere = N/4) ile kalan hızlı g-2 salınımı bastırılır,
+    kenarların %10'u atılıp düz çizgi fit edilir.
     """
     sy = np.asarray(hist[:, 7], float)
     t  = np.asarray(t_array, float)
@@ -123,7 +199,7 @@ def _run_one_k(task):
     Her alt-süreç integrator'ı (ctypes lib) yeniden yükler → C++ çağrıları
     süreçler arası paylaşımsız, güvenle paralel çalışır.
     """
-    k, amp_coef, t2, return_steps, dt = task
+    k, amp_coef, t2, return_steps, dt, do_co, co_turns = task
     # worker içinde taze import (multiprocessing 'spawn' güvenliği)
     import os, json, time
     import numpy as np
@@ -133,7 +209,7 @@ def _run_one_k(task):
 
     with open("params.json") as f:
         config = json.load(f)
-    fields, y0, beta0, R0 = setup_fields(config)
+    fields, y0, beta0, R0, p_mag, direction = setup_fields(config)
     n_q = 2 * int(fields.nFODO)
     antisym = config.get("smooth_antisym_fodo", True)
 
@@ -141,34 +217,41 @@ def _run_one_k(task):
     mode = F_k[:, 0]
     quad_dy = amp_coef * mode
 
-    # R-tabanlı ‖RF_k‖ SADECE referans amaçlı (fizik için gerekmez; bu
-    # simülasyon saf demet/spin dinamiğidir). Dosya yoksa ya da bayat/sıfır
-    # ise atlanır — gerçek rezonans aşağıda entegre yörüngeden ölçülür.
-    R = np.load("R_dy_1.npy") if os.path.exists("R_dy_1.npy") else None
-    if R is not None and np.linalg.norm(R) > 1e-12:
-        RFk = float(np.linalg.norm(R @ (mode / np.linalg.norm(mode))))
-    else:
-        RFk = None
+    circ = (2*np.pi*R0 + 4*fields.nFODO*fields.driftLen
+            + 2*fields.nFODO*fields.quadLen)
+    T_rev = circ / (beta0 * C)
 
     t0 = time.time()
+    # ── Kapalı yörünge fırlatması (betatron salınımını yok eder) ──
+    if do_co:
+        v_co = find_closed_orbit(fields, p_mag, direction, quad_dy, dt, T_rev,
+                                 n_turns=co_turns)
+        y_launch = _make_state(v_co, p_mag, direction, [0.0, 0.0, direction])
+        co_off_mm = float(np.hypot(v_co[0], v_co[1]) * 1e3)
+    else:
+        y_launch = y0
+        co_off_mm = 0.0
+
     hist, _, _ = integrate_particle(
-        y0, 0.0, t2, dt, fields=fields, return_steps=return_steps,
+        y_launch, 0.0, t2, dt, fields=fields, return_steps=return_steps,
         quad_dy=quad_dy)
     t_array = np.arange(hist.shape[0]) * (t2 / hist.shape[0])
     slope = float(measure_dSy_dt(hist, t_array))
-    # R-bağımsız orbit teşhisi: entegre edilen dikey yörünge genliği [mm]
+    # Kalan dikey betatron salınımı [mm] — kapalı yörünge başarısının ölçütü.
+    # Kapalı yörünge üzerinde fırlatıldıysa bu ~0 olmalı (orbit sabit).
     y_orbit_mm = float(np.std(hist[:, 1]) * 1e3)
     sy = hist[:, 7].copy()   # S_y zaman serisi (grafik için)
     dt_run = time.time() - t0
-    return {"k": k, "RFk": RFk, "orbit_mm": y_orbit_mm,
+    return {"k": k, "co_off_mm": co_off_mm, "orbit_mm": y_orbit_mm,
             "dSy_dt": slope, "runtime": dt_run,
             "sy": sy, "t_array": t_array}
 
 
-def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None):
+def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
+             do_co=True, co_turns=60):
     with open("params.json") as f:
         config = json.load(f)
-    fields, y0, beta0, R0 = setup_fields(config)
+    fields, y0, beta0, R0, p_mag, direction = setup_fields(config)
 
     circ = 2*np.pi*R0 + 4*fields.nFODO*fields.driftLen + 2*fields.nFODO*fields.quadLen
     T_rev = circ / (beta0 * C)
@@ -181,14 +264,16 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None):
         # sınırlamak istersen --nproc ile elle ver.
         nproc = len(k_list)
 
-    print("=" * 68)
+    print("=" * 72)
     print("  FALSE EDM — FOURIER MODU TARAMASI")
     print(f"  amplitude (cos katsayısı) = {amp_coef*1e6:.1f} μm  (tüm modlar eşit)")
     print(f"  t2 = {t2:.1e} s  (~{t2/T_rev:.0f} tur),  EDMSwitch = 0 (gerçek EDM yok)")
+    print(f"  kapalı yörünge fırlatması = {'AÇIK' if do_co else 'KAPALI'}"
+          f"{f' ({co_turns} tur prob)' if do_co else ''}")
     print(f"  paralel süreç sayısı = {nproc}")
-    print("=" * 68)
+    print("=" * 72)
 
-    tasks = [(k, amp_coef, t2, return_steps, dt) for k in k_list]
+    tasks = [(k, amp_coef, t2, return_steps, dt, do_co, co_turns) for k in k_list]
     t_wall = time.time()
     if nproc > 1:
         import multiprocessing as mp
@@ -200,15 +285,15 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None):
     wall = time.time() - t_wall
 
     results.sort(key=lambda r: r["k"])
-    has_R = any(r["RFk"] is not None for r in results)
-    print(f"  {'k':>3}  {'‖RF_k‖':>9}  {'y-orbit (sim)':>14}  {'dS_y/dt [rad/s]':>18}")
+    print(f"  {'k':>3}  {'CO ofset':>10}  {'kalan betatron':>15}  "
+          f"{'dS_y/dt [rad/s]':>18}")
     for r in results:
-        rfk_s = f"{r['RFk']:>9.3f}" if r["RFk"] is not None else f"{'—':>9}"
-        print(f"  {r['k']:>3}  {rfk_s}  {r['orbit_mm']:>12.3f}mm  "
+        print(f"  {r['k']:>3}  {r['co_off_mm']:>8.3f}mm  "
+              f"{r['orbit_mm']:>13.4f}mm  "
               f"{r['dSy_dt']:>18.3e}   ({r['runtime']:.0f}s)")
-    if not has_R:
-        print("  (‖RF_k‖ referansı atlandı: R_dy_1.npy yok/sıfır — fizik için "
-              "gerekmez; y-orbit sütunu R-bağımsız rezonans göstergesidir)")
+    if do_co:
+        print("  (CO ofset = bulunan kapalı-yörünge fırlatma noktası genliği;"
+              "  kalan betatron ~0 ise temiz fırlatma başarılı)")
     print(f"  toplam duvar-saati: {wall:.0f}s  "
           f"(seri tahmini ~{sum(r['runtime'] for r in results):.0f}s)")
 
@@ -222,9 +307,9 @@ def plot_results(results, amp_coef):
 
     ks   = np.array([r["k"] for r in results])
     dsy  = np.array([abs(r["dSy_dt"]) for r in results])
-    # R-bağımsız karşılaştırma: simülasyondan entegre edilen y-orbit genliği.
-    # (‖RF_k‖ varsa onu da gösterebiliriz ama gerekmez.)
-    orbit = np.array([r["orbit_mm"] for r in results])
+    # Orbit rezonans göstergesi: bulunan kapalı-yörünge fırlatma ofseti
+    # (parçacık bunun üzerine oturtulduğu için kalan betatron ~0'dır).
+    orbit = np.array([r["co_off_mm"] for r in results])
 
     fig, ax1 = plt.subplots(figsize=(7, 4.5))
     color1 = "tab:red"
@@ -238,8 +323,8 @@ def plot_results(results, amp_coef):
     ax2 = ax1.twinx()
     color2 = "tab:blue"
     ax2.plot(ks, orbit, "o-", color=color2, lw=2, ms=7,
-             label=r"integrated $y$-orbit amplitude")
-    ax2.set_ylabel(r"$y$-orbit amplitude [mm] (from tracking)", color=color2)
+             label=r"closed-orbit amplitude")
+    ax2.set_ylabel(r"closed-orbit amplitude [mm]", color=color2)
     ax2.tick_params(axis="y", labelcolor=color2)
 
     ax1.set_title(f"False EDM resonance at $k=2$ "
@@ -286,7 +371,8 @@ def plot_sy_timeseries(results, amp_coef):
         ax.plot(t_ms, np.polyval(coef, t_s), "--", lw=1.4, color="tab:red",
                 label=f"{r['dSy_dt']:.2e} rad/s")
 
-        ax.set_title(f"k = {k}  |  orbit {r['orbit_mm']:.3f} mm", fontsize=10)
+        ax.set_title(f"k = {k}  |  CO {r['co_off_mm']:.3f} mm  "
+                     f"|  resid β {r['orbit_mm']:.4f} mm", fontsize=9)
         ax.set_xlabel("t [ms]", fontsize=9)
         ax.set_ylabel(r"$S_y$", fontsize=9)
         ax.legend(fontsize=7, loc="upper left")
@@ -313,12 +399,18 @@ if __name__ == "__main__":
     p.add_argument("--steps", type=int, default=5000)
     p.add_argument("--nproc", type=int, default=None,
                    help="paralel süreç sayısı (varsayılan: mod sayısı = kmax+1)")
+    p.add_argument("--no-co", action="store_true",
+                   help="kapalı yörünge fırlatmasını KAPAT (eski davranış; "
+                        "betatron salınımı sinyali domine eder)")
+    p.add_argument("--co-turns", type=int, default=60,
+                   help="kapalı yörünge arama probu için tur sayısı")
     args = p.parse_args()
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     k_list = list(range(0, args.kmax + 1))
     results, config = run_scan(k_list, amp_coef=args.amp, t2=args.t2,
-                               return_steps=args.steps, nproc=args.nproc)
+                               return_steps=args.steps, nproc=args.nproc,
+                               do_co=not args.no_co, co_turns=args.co_turns)
     plot_results(results, args.amp)
     plot_sy_timeseries(results, args.amp)
 
