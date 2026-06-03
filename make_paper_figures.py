@@ -4,9 +4,8 @@
 Output files:
   fig1_falseedm_scan.png   – false-EDM rate vs k, bar chart (Table 1)
   fig2_orbit_gain.png      – ||RF_k|| orbit gain vs k (Table 2)
-  fig3_mode_patterns.png   – misalignment pattern F_k and orbit response
-                             M_k = R@F_k along the ring, for k=1,2,3,4
-                             (4 rows × 2 columns)
+  fig3_mode_patterns.png   – white BPM offset: flat FODO-antisymmetric Fourier
+                             spectrum (k=0..5), showing no k=2 enhancement
   fig4_sigma_model.png     – k=2 error budget: model uncertainty vs BPM offset
   fig5_offset_whiteness.png– white BPM offset → broadband recovered spectrum
                              (no spurious peak; lowest at k=2)
@@ -208,71 +207,90 @@ with open("table2_gain.txt", "w") as f:
 print("table2_gain.txt  ✓")
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FIGURE 3 — Mode-k quad misalignment: horizontal-field drive and orbit response
-#   Left  : coherent horizontal field B_x ∝ G·Δy that drives the orbit.
-#           The F/D gradient sign (-1)^j and the (-1)^j displacement sign of the
-#           FODO-antisymmetric mode cancel, leaving a smooth cos(2πk·m/24) drive.
-#   Right : closed-orbit response M_k = R·F_k (the measured orbit), vs s.
-#   Rows k = 1,2,3,4; k=2 sits closest to Q_y≈2.68 and is resonantly amplified.
+# FIGURE 3 — White BPM offset: flat FODO-antisymmetric Fourier spectrum
+#
+# BPM electronic offsets enter the measurement directly (y = R·Δq + b),
+# NOT through the response matrix R.  Because b is uncorrelated white noise,
+# its projection onto any FODO-antisymmetric Fourier mode F_k is equally
+# small — there is no k=2 enhancement.  This is why the method is robust:
+# the response-matrix path amplifies the genuine k=2 signal by ||M_2||≈167,
+# while b bypasses R entirely and contributes only its (unenhanced) projection.
+#
+# Left : one realisation of b(s) — random, structureless
+# Right: Fourier amplitude |a_k| = sqrt(a_c²+a_s²) for k=0..5
+#        over N_MC realisations.  All modes get ≈ σ_b√(π/48) ≈ 77 μm —
+#        no k=2 peak, confirming b is white in the Fourier basis.
 # ══════════════════════════════════════════════════════════════════════════════
 
-A_demo  = 10e-6                                       # 10 μm misalignment amplitude
-C_ring  = 2 * np.pi * 95.49                           # ring circumference ≈ 600 m
-s_bpm   = np.linspace(0, C_ring, N_Q, endpoint=False) # quad/BPM s-positions [m]
-k_vals3 = [1, 2, 3, 4]
+C_ring = 2 * np.pi * 95.49                           # circumference ≈ 600 m
+s_bpm  = np.linspace(0, C_ring, N_Q, endpoint=False) # BPM s-positions [m]
 
-def drive_field(k, n_q=N_Q):
-    """Coherent horizontal field B_x ∝ G·Δy for a mode-k vertical misalignment.
-    Gradient sign (-1)^j and displacement sign (-1)^j cancel → smooth cosine."""
-    m = np.arange(n_q) // 2
-    if k == 0:
-        return np.ones(n_q)
-    return np.cos(2 * np.pi * k * m / (n_q // 2))
+sigma_b3 = 300e-6
+N_MC3    = 2000
+rng3     = np.random.default_rng(42)
+k_show   = [0, 1, 2, 3, 4, 5]
 
-fig3, axes3 = plt.subplots(4, 2, figsize=(9.5, 10))
-fig3.subplots_adjust(hspace=0.55, wspace=0.38)
+amp_mc = {k: [] for k in k_show}
+for _ in range(N_MC3):
+    b = rng3.normal(0, sigma_b3, N_Q)
+    for k in k_show:
+        Fc = Fcos(k, N_Q);  ac = Fc @ b / (Fc @ Fc)
+        if k == 0:
+            A_k = abs(ac)
+        else:
+            Fs = Fsin(k, N_Q);  as_ = Fs @ b / (Fs @ Fs)
+            A_k = np.hypot(ac, as_)
+        amp_mc[k].append(A_k * 1e6)
 
-for row, k in enumerate(k_vals3):
-    drive   = drive_field(k)                       # normalized B_x pattern (±1)
-    orbit   = A_demo * (R @ Fcos(k, N_Q)) * 1e6    # orbit response [μm]
-    col_k   = RED if k == 2 else BLUE
-    mk_norm = M_col_norm(R, k)
+means3 = np.array([np.mean(amp_mc[k]) for k in k_show])
+stds3  = np.array([np.std(amp_mc[k])  for k in k_show])
+theory3 = sigma_b3 * 1e6 * np.sqrt(np.pi / 48)   # Rayleigh mean for k≥1 [μm]
 
-    # ── left: coherent horizontal-field drive ────────────────────────────────
-    ax_L = axes3[row, 0]
-    ax_L.plot(s_bpm, drive, "o-", color=col_k, ms=4, lw=1.2)
-    ax_L.axhline(0, color="k", linewidth=0.4)
-    ax_L.set_ylim(-1.35, 1.35)
-    ax_L.set_ylabel(r"$B_x$ drive [arb.]", fontsize=9)
-    ax_L.set_title(fr"$k={k}$   Horizontal-field drive (coherent)", fontsize=9)
-    ax_L.tick_params(labelsize=8)
+b_ex3 = np.random.default_rng(7).normal(0, sigma_b3, N_Q) * 1e6  # example [μm]
 
-    # ── right: closed-orbit response ──────────────────────────────────────────
-    ax_R = axes3[row, 1]
-    ax_R.plot(s_bpm, orbit, "o-", color=col_k, ms=4, lw=1.2)
-    ax_R.axhline(0, color="k", linewidth=0.4)
-    ax_maxR = np.max(np.abs(orbit)) * 1.35
-    ax_R.set_ylim(-ax_maxR, ax_maxR)
-    ax_R.set_ylabel(r"Orbit $[\mu\mathrm{m}]$", fontsize=9)
-    ax_R.set_title(fr"$k={k}$   Orbit response  ($\|M_k\|={mk_norm:.0f}$)",
-                   fontsize=9)
-    ax_R.tick_params(labelsize=8)
+fig3, (ax3a, ax3b) = plt.subplots(1, 2, figsize=(10, 4.2))
 
-# x-labels on the bottom row only
-for col in range(2):
-    axes3[3, col].set_xlabel(r"Ring position $s$ [m]", fontsize=10)
+# ── left: example BPM offset realisation ──────────────────────────────────────
+ax3a.plot(s_bpm, b_ex3, "o-", color=GRAY, ms=3, lw=0.8)
+ax3a.axhline(0, color="k", lw=0.4)
+ax3a.set_xlabel(r"Ring position $s$ [m]")
+ax3a.set_ylabel(r"BPM offset $b\;[\mu\mathrm{m}]$")
+ax3a.set_title(fr"(a) White BPM offset ($\sigma_b = {sigma_b3*1e6:.0f}\,\mu$m)")
+
+# ── right: Fourier amplitude spectrum ─────────────────────────────────────────
+xpos3  = np.arange(len(k_show))
+colors3 = [RED if k == 2 else BLUE for k in k_show]
+ax3b.bar(xpos3, means3, color=colors3, width=0.6, alpha=0.75,
+         edgecolor="white", linewidth=0.8)
+ax3b.errorbar(xpos3, means3, yerr=stds3,
+              fmt="none", color="k", capsize=4, linewidth=1.0)
+ax3b.axhline(theory3, color=GRAY, ls="--", lw=1.2,
+             label=fr"Theory $\sigma_b\sqrt{{\pi/48}} = {theory3:.0f}\,\mu$m")
+ax3b.set_xticks(xpos3)
+ax3b.set_xticklabels([f"$k={k}$" for k in k_show])
+ax3b.set_ylabel(r"Fourier amplitude $|a_k|\;[\mu\mathrm{m}]$")
+ax3b.set_title("(b) Flat spectrum: all modes equally populated")
+ax3b.legend(frameon=False)
+# annotate k=2 bar
+k2_idx = k_show.index(2)
+ax3b.text(k2_idx, means3[k2_idx] + stds3[k2_idx] + 8,
+          "no $k=2$\nenhancement", ha="center", va="bottom",
+          fontsize=8.5, color=RED)
 
 fig3.suptitle(
-    r"Mode-$k$ quad misalignment ($A=10\,\mu$m): coherent horizontal-field "
-    r"drive (left) and closed-orbit response (right)"   "\n"
-    r"$k=2$ yields the largest orbit ($\|M_{k=2}\|=167$, "
-    r"$\sim\!4\times$ the neighbouring modes)",
-    fontsize=10, y=1.005)
+    r"BPM offset $\mathbf{b}$ bypasses $R$ and is white in the Fourier basis — "
+    r"it has no preferred mode"  "\n"
+    r"Contrast: a $k=2$ quad misalignment of $A=10\,\mu$m "
+    r"is amplified by $\|M_{k=2}\|=167$ through $R$ "
+    r"before reaching the BPMs",
+    fontsize=9.5, y=1.03)
+fig3.tight_layout()
 fig3.savefig("fig3_mode_patterns.png", bbox_inches="tight")
 plt.close(fig3)
 print("fig3_mode_patterns.png  ✓")
-for k in k_vals3:
-    print(f"  k={k}: ||M_k|| = {M_col_norm(R, k):.1f}")
+print(f"  k=2 Fourier amplitude of white offset: "
+      f"{means3[k2_idx]:.1f} ± {stds3[k2_idx]:.1f} μm  "
+      f"(theory: {theory3:.1f} μm)")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FIGURE 4 — Error budget: gradient model error vs BPM offset noise
