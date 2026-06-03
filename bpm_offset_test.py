@@ -491,6 +491,155 @@ def clean_test(bpm_offset_sigma=100e-6, n_trials=50, seed=0,
         print(f"    k={k:2d}: {freq[k]:3d}/{n_trials}  {bar}")
 
 
+def bpm_whiteness_test(n_trials=200, seed=0, gain=0.2, max_iter=300):
+    """BPM ofseti 'beyazlık' testi.
+
+    k=2 tahminini bozan şey b'nin toplam normu değil, yalnızca b'nin k=2
+    orbit yönü v_k2 = RF_2/‖RF_2‖ üzerindeki bileşeni b_∥ = b·v_k2'dir:
+
+        δa_k2 = b_∥ / ‖M_{k2}‖   (direct lstsq; CLEAN ≈ lstsq, γ≈1)
+
+    burada ‖M_{k2}‖ = ‖R @ F_k2[:,0]‖ = √24 · ‖RF_2‖ ≈ 167
+    (normalize edilmemiş Fourier sütunu normu — sadece ‖RF_2‖=34.1 değil!)
+
+    Üç senaryo:
+    1. b = beyaz(σ=100μm)         — referans
+    2. b = A · v_k2              — saf yapısal (worst case, deterministic)
+    3. b = beyaz(σ=100μm) + A·v_k2 — karma
+    """
+    with open("params.json") as f:
+        config = json.load(f)
+
+    R, _ = load_matrices()
+    n_q     = R.shape[0]
+    antisym = config.get("smooth_antisym_fodo", True)
+    dy_true = make_truth_dy(config, n_q, add_random=False)
+
+    # k=2 gerçek genlik
+    F_k2, _ = fodo_basis(n_q, [2], antisym)
+    a2t, *_ = np.linalg.lstsq(F_k2, dy_true, rcond=None)
+    amp_true = np.sqrt(a2t[0]**2 + a2t[1]**2)
+    phi_true = np.arctan2(a2t[1], a2t[0])
+
+    # k=2 orbit yönü (BPM uzayında birim vektör)
+    Fc2 = F_k2[:, 0] / np.linalg.norm(F_k2[:, 0])
+    orbit_k2  = R @ Fc2
+    RF2_norm  = np.linalg.norm(orbit_k2)         # ‖RF_2‖ = 34.1  (normaliz. girdi)
+    M_k2_norm = np.linalg.norm(R @ F_k2[:, 0])  # ‖M_{k2}‖ = √24·‖RF_2‖ ≈ 167
+    v_k2      = orbit_k2 / RF2_norm              # birim k=2 orbit vektörü
+
+    # Direct lstsq için tam M matrisi (k=1..12)
+    candidate_ks = list(range(1, 13))
+    F_all, meta_all = fodo_basis(n_q, candidate_ks, antisym)
+    M = R @ F_all
+    idx2 = [i for i,(k,_) in enumerate(meta_all) if k == 2]
+
+    y_signal = R @ dy_true
+    rng = np.random.default_rng(seed)
+    sigma_white = 100e-6
+
+    print("=" * 70)
+    print("  BPM OFSETİ BEYAZLIK TESTİ")
+    print(f"  ‖RF_2‖  = {RF2_norm:.3f}  (k=2 orbit kazancı, normaliz. girdi)")
+    print(f"  ‖M_k2‖  = {M_k2_norm:.3f}  (M sütun normu = √24·‖RF_2‖)")
+    print(f"  k=2 gerçek genlik: {amp_true*1e6:.2f} μm")
+    print("=" * 70)
+
+    # ── Teorik limit ──────────────────────────────────────────────────────
+    print("\n  [TEORİ] Saf yapısal b = A·v_k2 için δa_k2 = A/‖M_k2‖")
+    print(f"  {'A (μm)':>8}  {'Teorik bias (μm)':>18}  {'Limit (10μm) için A_max':>24}")
+    A_max = 10e-6 * M_k2_norm
+    for A_um in [50, 100, 200, 300, int(A_max*1e6)]:
+        print(f"  {A_um:>8}  {A_um/M_k2_norm:>18.2f}  {'← limit' if A_um >= int(A_max*1e6) else ''}")
+    print(f"  → 10μm hedefi için b_∥ < {A_max*1e6:.0f} μm")
+
+    # ── Senaryo 1: Beyaz b ───────────────────────────────────────────────
+    print(f"\n  [SENARYO 1] b = beyaz(σ={sigma_white*1e6:.0f}μm)  —  referans")
+    print(f"  Teorik lstsq: std(δa_k2) = σ/‖M_k2‖ = {sigma_white/M_k2_norm*1e6:.2f} μm")
+
+    errs_c, errs_l = [], []
+    b_par_vals = []
+    for _ in range(n_trials):
+        b = rng.normal(0, sigma_white, n_q)
+        b_par_vals.append(abs(float(b @ v_k2)) / M_k2_norm * 1e6)  # δa_k2 = b_∥/‖M_k2‖
+        y = y_signal + b
+        # CLEAN
+        acc = clean_orbit(R, y, candidate_ks, antisym, gain, max_iter)
+        a2 = acc.get(2, np.zeros(2))
+        errs_c.append(np.sqrt(a2[0]**2+a2[1]**2)*1e6 - amp_true*1e6)
+        # Direct lstsq
+        a_l, *_ = np.linalg.lstsq(M, y, rcond=1e-3)
+        a2l = np.array([a_l[idx2[0]], a_l[idx2[1]]])
+        errs_l.append(np.sqrt(a2l[0]**2+a2l[1]**2)*1e6 - amp_true*1e6)
+
+    print(f"  b_∥/‖M_k2‖ (tahmini k=2 hata): ort {np.mean(b_par_vals):.2f} ± "
+          f"{np.std(b_par_vals):.2f} μm")
+    print(f"  CLEAN k=2 hatası   : {np.mean(errs_c):+.3f} ± {np.std(errs_c):.3f} μm")
+    print(f"  Direct lstsq hatası: {np.mean(errs_l):+.3f} ± {np.std(errs_l):.3f} μm")
+    ratio = np.std(errs_l) / np.std(errs_c) if np.std(errs_c) > 0 else np.nan
+    print(f"  CLEAN bastırma faktörü vs lstsq: {ratio:.1f}×")
+
+    # ── Senaryo 2: Saf yapısal b = A·v_k2 ────────────────────────────────
+    print(f"\n  [SENARYO 2] b = A·v_k2  —  saf yapısal, deterministik")
+    print(f"  {'A (μm)':>8}  {'Teorik bias':>13}  {'CLEAN hata':>12}  {'lstsq hata':>12}")
+    for A_um in [0, 50, 100, 200, 300, 341]:
+        A = A_um * 1e-6
+        b_s = A * v_k2
+        theor = A / M_k2_norm * 1e6
+        y = y_signal + b_s
+        # CLEAN (deterministik: tek deneme yeterli)
+        acc = clean_orbit(R, y, candidate_ks, antisym, gain, max_iter)
+        a2 = acc.get(2, np.zeros(2))
+        c_err = np.sqrt(a2[0]**2+a2[1]**2)*1e6 - amp_true*1e6
+        # Direct lstsq
+        a_l, *_ = np.linalg.lstsq(M, y, rcond=1e-3)
+        a2l = np.array([a_l[idx2[0]], a_l[idx2[1]]])
+        l_err = np.sqrt(a2l[0]**2+a2l[1]**2)*1e6 - amp_true*1e6
+        limit_str = "← 10μm limit" if abs(theor - 10.0) < 0.5 else ""
+        print(f"  {A_um:>8}  {theor:>11.2f}μm  {c_err:>+10.2f}μm  {l_err:>+10.2f}μm  {limit_str}")
+
+    # ── Senaryo 3: Karma ─────────────────────────────────────────────────
+    print(f"\n  [SENARYO 3] b = beyaz(σ={sigma_white*1e6:.0f}μm) + A·v_k2  —  karma")
+    print(f"  {'A (μm)':>8}  {'CLEAN ort':>12}  {'CLEAN std':>10}  {'lstsq ort':>12}  {'lstsq std':>10}")
+    rng2 = np.random.default_rng(seed + 42)
+    for A_um in [0, 50, 100, 200, 300]:
+        A = A_um * 1e-6
+        ec, el = [], []
+        for _ in range(n_trials):
+            b = rng2.normal(0, sigma_white, n_q) + A * v_k2
+            y = y_signal + b
+            acc = clean_orbit(R, y, candidate_ks, antisym, gain, max_iter)
+            a2 = acc.get(2, np.zeros(2))
+            ec.append(np.sqrt(a2[0]**2+a2[1]**2)*1e6 - amp_true*1e6)
+            a_l, *_ = np.linalg.lstsq(M, y, rcond=1e-3)
+            a2l = np.array([a_l[idx2[0]], a_l[idx2[1]]])
+            el.append(np.sqrt(a2l[0]**2+a2l[1]**2)*1e6 - amp_true*1e6)
+        print(f"  {A_um:>8}  {np.mean(ec):>+10.3f}μm  {np.std(ec):>8.3f}μm  "
+              f"{np.mean(el):>+10.3f}μm  {np.std(el):>8.3f}μm")
+
+    # ── Spektrum: b'nin Fourier spektrumu ────────────────────────────────
+    print(f"\n  [SPEKTRUM] Beyaz b'nin k=2..8 Fourier projeksiyon gücü")
+    print(f"  (‖RF_k‖ büyükse k=2 etkisi büyür)")
+    print(f"  {'k':>4}  {'‖RF_k‖(norm)':>14}  {'‖M_k‖=√24·‖RF_k‖':>18}  {'σ/‖M_k‖ (μm)':>14}")
+    for k_test in range(1, 9):
+        Fk, _ = fodo_basis(n_q, [k_test], antisym)
+        Fkc = Fk[:, 0] / np.linalg.norm(Fk[:, 0])
+        RF_k_norm = np.linalg.norm(R @ Fkc)          # normalized gain
+        M_k_norm  = np.linalg.norm(R @ Fk[:, 0])    # actual M column norm
+        theory_std = sigma_white / M_k_norm * 1e6
+        print(f"  {k_test:>4}  {RF_k_norm:>14.3f}  {M_k_norm:>18.3f}  {theory_std:>12.2f}")
+
+    print()
+    print("  ÖZET:")
+    print(f"  • k=2 tahminini etkileyen yalnızca b'nin v_k2 yönündeki bileşeni")
+    print(f"  • Saf yapısal b=A·v_k2: δa_k2 = A/‖M_k2‖ = A/{M_k2_norm:.1f}")
+    print(f"    → 10μm hata için A < {M_k2_norm*10:.0f} μm gerekir (tipik 300μm << bu sınır)")
+    print(f"  • Beyaz b(σ): beklenen lstsq hata std ≈ σ/‖M_k2‖ = σ/{M_k2_norm:.1f}")
+    print(f"    CLEAN ≈ lstsq (γ≈{ratio:.1f}×); CLEAN avantajı: oracle gerektirmez")
+    print(f"  • 300μm tamamen k=2-orbit-hizalı ofset: bias = 300/{M_k2_norm:.1f} "
+          f"= {300/M_k2_norm:.2f}μm (10μm hedefin altında)")
+
+
 if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
@@ -504,6 +653,8 @@ if __name__ == "__main__":
                    help="dy_random_RMS ekle (Fourier bazı dışı bileşen)")
     p.add_argument("--clean", action="store_true",
                    help="CLEAN tek-orbit testi: aday k=1..12, oracle yok")
+    p.add_argument("--whiteness", action="store_true",
+                   help="BPM ofseti beyazlık testi: yapısal vs beyaz b")
     p.add_argument("--gain", type=float, default=0.2,
                    help="CLEAN loop gain (varsayılan 0.2)")
     p.add_argument("--max-k", type=int, default=12,
@@ -513,6 +664,9 @@ if __name__ == "__main__":
         clean_test(bpm_offset_sigma=args.sigma, n_trials=args.trials,
                    seed=args.seed, gain=args.gain,
                    candidate_ks=list(range(1, args.max_k + 1)))
+    elif args.whiteness:
+        bpm_whiteness_test(n_trials=args.trials, seed=args.seed,
+                           gain=args.gain, max_iter=300)
     elif args.sweep:
         model_error_sweep(bpm_offset_sigma=args.sigma,
                           n_trials=args.trials, seed=args.seed,

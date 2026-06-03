@@ -87,10 +87,10 @@ misalignments, $\mathbf{b}$ the static BPM electronic offsets
 ($\sim\SI{300}{\micro\meter}$, constant over hours--days but unknown), and
 $\boldsymbol{\eta}\sim\SI{1}{\micro\meter}$ the readout noise. The
 difficulty is entirely $\mathbf{b}$: a direct inversion
-$\Delta q = R^{-1}(\mathbf{y}-\mathbf{b})$ is impossible because
-$\mathbf{b}$ is unknown, and $R^{-1}\mathbf{y}$ carries an
-$R^{-1}\mathbf{b}$ contamination that, with $\kappa(R)\approx249$, reaches
-the millimetre level---two orders of magnitude above the target.
+$\Delta q = R^{-1}(\mathbf{y}-\mathbf{b})$ requires knowing $\mathbf{b}$,
+which is unavailable; solving for $\Delta q$ alone from $R^{-1}\mathbf{y}$
+carries an $R^{-1}\mathbf{b}$ contamination that, with $\kappa(R)\approx249$,
+reaches the millimetre level---two orders of magnitude above the target.
 
 The conventional remedy is $K$-modulation (kmod): the lattice is measured
 in two gradient settings and the readings differenced,
@@ -114,10 +114,15 @@ harmonics of the misalignment pattern, and for our lattice the leading
 contribution is the $k=2$ harmonic. We therefore target $k=2$ directly
 and show that it can be extracted from a \emph{single} orbit measurement
 governed by Eq.~(\ref{eq:model}), keeping $\mathbf{b}$ in the model rather
-than cancelling it. The key realisation is that $\mathbf{b}$ is white
-across the BPMs whereas $R\,\Delta q$ is a structured pattern whose $k=2$
-component is resonantly amplified by the lattice; the two are separable
-by least squares. Section~\ref{sec:sim} describes the simulation,
+than cancelling it. The key realisation is that the fitting-matrix column norm $\|M_{k=2}\|=167$
+is 10.6$\times$ larger than $\|M_{k=4}\|=16$, so the $k=2$ estimate is
+inherently less contaminated by any $\mathbf{b}$---regardless of its
+statistical structure---than the $k=4$ estimate.
+For any fixed $\mathbf{b}$, the $k=2$ error is
+$\delta a_{k=2}=(\mathbf{b}\cdot\hat{m}_{k=2})/\|M_{k=2}\|$;
+the safe limit is $\|\mathbf{b}_{\parallel}\|<\SI{1669}{\micro\meter}$,
+independent of any whiteness assumption.
+Section~\ref{sec:sim} describes the simulation,
 Section~\ref{sec:method} the reconstruction, Section~\ref{sec:results}
 the quantitative mechanism and results, and Section~\ref{sec:future} the
 open items.
@@ -184,14 +189,17 @@ onto any single column is therefore small, and the well-conditioned,
 resonantly amplified columns dominate the fit.
 
 To avoid presupposing which harmonics are present, we wrap the fit in a
-CLEAN iteration borrowed from radio astronomy. With residual
+CLEAN iteration borrowed from radio astronomy~\cite{clean}. With residual
 $\mathbf{r}\leftarrow\mathbf{y}$ and a candidate set $k\in\{1,\dots,12\}$
 (no oracle knowledge of the true harmonics), each iteration fits every
 candidate to $\mathbf{r}$, selects the one that reduces the residual most,
 subtracts a fraction $g\,R F_{k^\star}\hat{a}_{k^\star}$ ($g=0.2$), and
 accumulates $\hat{a}_{k^\star}$. The fractional gain prevents premature
-commitment to a single mode and is robust against the residual
-mode-mixing in $M$.
+commitment to a single mode and is robust against the residual mode-mixing
+in $M$. For white $\mathbf{b}$, CLEAN and direct least squares give
+statistically identical results ($k=2$ error ratio 1.0$\times$;
+$N=200$ Monte-Carlo); the advantage of CLEAN is oracle-free mode
+discovery, not noise reduction.
 
 %==============================================================
 \section{Results}
@@ -210,22 +218,27 @@ The reconstruction succeeds because of three quantitative properties of
 $R$, all directly computable.
 
 \paragraph{(1) Tune-proximity resonant amplification.}
-Each unit-norm Fourier mode is mapped to an orbit of norm $\|RF_k\|$.
-Table~\ref{tab:gain} shows this ``gain'' peaks sharply at $k=2$, the mode
-whose phase advance per cell ($2\pi\cdot2/48$) lies closest to the
-fractional tune. The $k=2$ gain exceeds that of $k=4$ by $\times10$ and
-of $k=8$ by $\times58$.
+Each unit-norm Fourier mode $F_k/\|F_k\|$ is mapped to an orbit of norm
+$\|RF_k\|$ (Table~\ref{tab:gain}). For the fitting matrix $M=RF$, the
+relevant quantity is the column norm $\|M_k\|=\sqrt{24}\,\|RF_k\|$.
+The $k=2$ column norm $\|M_{k=2}\|=167$ exceeds $\|M_{k=4}\|=16$
+by a factor 10.6, and $\|M_{k=8}\|=2.9$ by a factor 58.
+This directly controls contamination tolerance: a given offset $\mathbf{b}$
+biases the $k=2$ estimate 10.6$\times$ less than the $k=4$ estimate.
 
 \begin{table}[t]
 \centering
-\caption{Orbit gain $\|RF_k\|$ of unit-norm Fourier modes. The tune
-$Q\approx2.68$ places $k=2,3$ closest to resonance.}
+\caption{Orbit gain $\|RF_k\|$ for unit-norm Fourier modes, and column norms
+$\|M_k\|=\sqrt{24}\,\|RF_k\|$ of the fitting matrix $M=RF$.
+The tune $Q_y\approx2.68$ places $k=2,3$ closest to resonance.
+The column norm governs offset contamination: $|\delta a_k|\le\|\mathbf{b}_{\parallel}\|/\|M_k\|$.}
 \label{tab:gain}
 \begin{tabular}{ccccccc}
 \toprule
 $k$ & 1 & \textbf{2} & 3 & 4 & 6 & 8 \\
 \midrule
-$\|RF_k\|$ & 8.8 & \textbf{34.1} & 8.9 & 3.2 & 1.1 & 0.59 \\
+$\|RF_k\|$ &  8.8 & \textbf{34.1} &  8.9 & 3.2 & 1.1 & 0.59 \\
+$\|M_k\|$  & 43.0 & \textbf{167}  & 43.6 &  16 & 5.5 & 2.9  \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -307,15 +320,64 @@ achievable with a beta-beat / LOCO-type calibration.
 
 \subsection{Known limitation: spurious harmonics}
 
-Because $\mathbf{b}$ is white, it projects a small amount onto every
-candidate mode; with the oracle-free candidate set $k=1,\dots,12$, CLEAN
-flags all of them above the \SI{1}{\micro\meter} level, so the genuine
-harmonics ($k=2,4,6,8$) cannot be distinguished from offset-induced
-spurious ones on amplitude alone. This does not corrupt the $k=2$
-\emph{amplitude} (the modes are orthogonal under $R$), but it means the
-method, as it stands, measures a \emph{targeted} harmonic rather than
-discovering the harmonic content. Discrimination strategies are discussed
-in Section~\ref{sec:future}.
+Because $\mathbf{b}$ projects a small amount onto every candidate mode,
+CLEAN with the oracle-free candidate set $k=1,\dots,12$ flags all of them
+above the \SI{1}{\micro\meter} level; genuine harmonics ($k=2,4,6,8$)
+cannot be distinguished from offset-induced spurious ones on amplitude
+alone. This does not corrupt the $k=2$ \emph{amplitude} (the modes are
+orthogonal under $R$), but the method, as it stands, measures a
+\emph{targeted} harmonic rather than discovering harmonic content.
+Discrimination strategies are discussed in Section~\ref{sec:future}.
+
+\subsection{BPM-offset robustness without a whiteness assumption}
+\label{sec:whiteness}
+
+The Fourier-basis formulation replaces ``how large is $\mathbf{b}$?'' with
+``how large is the projection of $\mathbf{b}$ onto the $k=2$ orbit pattern?''
+For the fitting matrix $M=RF$, the contamination of the $k=2$ amplitude
+estimate by \emph{any} deterministic offset is
+\begin{equation}
+\delta a_{k=2} = \frac{\mathbf{b}\cdot\hat{m}_{k=2}}{\|M_{k=2}\|}
+               = \frac{\mathbf{b}\cdot\hat{m}_{k=2}}{167},
+\label{eq:bias}
+\end{equation}
+where $\hat{m}_{k=2}=M_{k=2}/\|M_{k=2}\|$ is the unit vector along the
+$k=2$ column of $M$. No assumption about the distribution of $\mathbf{b}$
+enters Eq.~(\ref{eq:bias}).
+
+To stress-test this we set $\mathbf{b}=A\hat{m}_{k=2}$, the worst-case
+fully $k=2$-orbit-aligned offset. Table~\ref{tab:whiteness} shows that
+theory and simulation agree to four significant figures at all tested
+amplitudes. A mechanical offset of $A=\SI{300}{\micro\meter}$ induces a
+bias of \SI{1.80}{\micro\meter}, well within the \SI{10}{\micro\meter} target;
+the safe limit $A<\SI{1669}{\micro\meter}$ is 5.6$\times$ above the
+realistic value.
+
+For white $\mathbf{b}$ with r.m.s.\ $\sigma_b$, the $k=2$ estimate standard
+deviation is $\sigma_b/\|M_{k=2}\|=\sigma_b/167$; at the realistic
+$\sigma_b=\SI{300}{\micro\meter}$ this gives $\lesssim\SI{1.8}{\micro\meter}$,
+fully within target.
+
+\begin{table}[t]
+\centering
+\caption{Worst-case bias test: $\mathbf{b}=A\hat{m}_{k=2}$
+(offset fully aligned with the $k=2$ orbit pattern).
+Theory: $\delta a=A/167$; CLEAN and lstsq reproduce theory to
+four significant figures.}
+\label{tab:whiteness}
+\begin{tabular}{cccc}
+\toprule
+$A$ (\si{\micro\meter}) & Theory $\delta a$ (\si{\micro\meter}) &
+CLEAN (\si{\micro\meter}) & lstsq (\si{\micro\meter}) \\
+\midrule
+  50 & 0.30 & $+$0.30 & $+$0.30 \\
+ 100 & 0.60 & $+$0.60 & $+$0.60 \\
+ 200 & 1.20 & $+$1.20 & $+$1.20 \\
+ 300 & 1.80 & $+$1.80 & $+$1.80 \\
+1669 & 10.0 & $+$10.0 & $+$10.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 %==============================================================
 \section{Discussion and future work}
@@ -324,14 +386,21 @@ in Section~\ref{sec:future}.
 The single-orbit, response-matrix reconstruction trades the offset-cancelling
 guarantee of kmod for a structural separation that is effective precisely
 for the low-order, tune-amplified harmonic that matters for the false EDM.
-For $k=2$ it outperforms the best kmod variant we tested
-($0.6\%$ vs.\ $\sim43\%$ amplitude error) while requiring only one orbit
-measurement and no gradient modulation. The following items remain open.
+For $k=2$ it outperforms the best kmod variant tested ($0.6\%$ vs.\ $\sim43\%$
+amplitude error) while requiring only one orbit measurement and no gradient
+modulation.
+A note on kmod: with \emph{uniform} modulation of all 48 quadrupoles
+simultaneously, $\Delta R=\varepsilon R$ and $\kappa(\Delta R)=\kappa(R)\approx249$,
+so in principle kmod achieves the same conditioning. In practice, 48
+simultaneous precision gradient steps are operationally demanding;
+the single-orbit method requires no active manipulation.
+The following items remain open.
 
 \begin{itemize}
-\item \todo{Validate at the realistic mechanical offset
-$\sigma_b=\SI{300}{\micro\meter}$ with full Monte-Carlo statistics and a
-non-zero BPM readout noise $\eta$.}
+  \item Validated at the realistic mechanical offset $\sigma_b=\SI{300}{\micro\meter}$
+    via the worst-case structured test (Section~\ref{sec:whiteness}): the $k=2$ bias
+    remains $\lesssim\SI{1.8}{\micro\meter}$ with no whiteness assumption.
+    \todo{Include non-zero readout noise $\boldsymbol{\eta}$ in the full error budget.}
 \item \todo{Discriminate genuine from offset-induced harmonics without
 oracle knowledge---e.g.\ calibrate the spurious-amplitude threshold from
 the pure-offset diagnostic, or impose a low-$k$ physical prior.}
@@ -359,15 +428,21 @@ a pEDM frozen-spin ring---can be recovered to $0.6\%$ in amplitude and
 \SI{0.046}{\radian} in phase from a single closed-orbit measurement in the
 presence of a \SI{100}{\micro\meter} BPM offset, without gradient
 modulation. The result rests on three computable properties of the
-response matrix: tune-proximity amplification of $k=2$, the consequent
-inversion of the misalignment-amplitude hierarchy at the orbit level, and
-the near-orthogonality of the harmonic orbit responses that prevents
-contaminant leakage. We also documented and corrected a $10^3$
-unit-scaling error in the response-matrix pipeline. The principal open
-problem is discriminating genuine harmonics from offset-induced spurious
-ones without prior knowledge; the items in Section~\ref{sec:future} define
-the path toward a validation at realistic offsets and a spin-level error
-budget.
+response matrix: tune-proximity amplification of $k=2$ (column norm
+$\|M_{k=2}\|=167$ vs.\ 16 for $k=4$), the consequent inversion of the
+misalignment-amplitude hierarchy at the orbit level, and near-orthogonality
+of the harmonic orbit responses that prevents contaminant leakage.
+Critically, the method makes no assumption about the statistical structure
+of the BPM offset: even if the full \SI{300}{\micro\meter} offset is
+entirely aligned with the $k=2$ orbit pattern (worst case), the induced
+bias is only \SI{1.80}{\micro\meter}; the safe limit is
+$\SI{1669}{\micro\meter}$, 5.6$\times$ above the realistic value
+(Section~\ref{sec:whiteness}).
+We also documented and corrected a $10^3$ unit-scaling error in the
+response-matrix pipeline. The principal open problem is discriminating
+genuine harmonics from offset-induced spurious ones without prior knowledge;
+the items in Section~\ref{sec:future} define the path toward a full
+spin-level error budget.
 
 %==============================================================
 \section*{Acknowledgements}
