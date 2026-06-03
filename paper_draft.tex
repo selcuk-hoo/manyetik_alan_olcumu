@@ -111,7 +111,9 @@ In this work we step back from kmod and ask a narrower, physically
 motivated question. The false EDM is not driven equally by all 48 degrees
 of freedom of $\Delta q$; it is dominated by the low-order Fourier
 harmonics of the misalignment pattern, and for our lattice the leading
-contribution is the $k=2$ harmonic. We therefore target $k=2$ directly
+contribution is the $k=2$ harmonic---a fact we confirm directly by spin
+tracking in Sec.~\ref{sec:falseedm}, consistent with the $N=2$ peak of
+Omarov \emph{et al.}~\cite{omarov}. We therefore target $k=2$ directly
 and show that it can be extracted from a \emph{single} orbit measurement
 governed by Eq.~(\ref{eq:model}), keeping $\mathbf{b}$ in the model rather
 than cancelling it. The key realisation is that the fitting-matrix column norm $\|M_{k=2}\|=167$
@@ -204,6 +206,76 @@ discovery, not noise reduction.
 %==============================================================
 \section{Results}
 \label{sec:results}
+
+\subsection{Direct confirmation that $k=2$ dominates the false EDM}
+\label{sec:falseedm}
+
+The premise of this work---that $k=2$ is the harmonic worth resolving---rests
+on a physical claim: among equal-amplitude misalignment harmonics, $k=2$
+produces the largest false EDM. We verify this directly by spin tracking,
+independently of any reconstruction. For each $k=0,\dots,5$ we set
+$\Delta y_j=A\,F_k[j]$ at equal amplitude $A=\SI{10}{\micro\meter}$, switch
+off the true EDM, and measure the secular vertical-spin precession rate
+$dS_y/dt$, which is the false-EDM observable.
+
+Resolving $dS_y/dt$ is delicate: the secular drift ($\sim\!10^{-9}$\,rad/s)
+is buried under an in-turn spin oscillation of order $10^{-5}$ in $S_y$.
+A continuous Savitzky--Golay slope is then sampling-dependent and even
+sign-unstable, so we remove the contamination at its source.
+\emph{(i)}~The particle is launched on the distorted closed orbit, located
+by a single Newton step that minimises the fixed-azimuth betatron variance
+(an exact quadratic form for the linear lattice); this drives the residual
+betatron amplitude to $\sim\!10^{-14}$\,m, so the orbit---and hence the
+in-turn spin precession---is exactly periodic. \emph{(ii)}~$S_y$ is then
+sampled \emph{stroboscopically}, once per turn at a fixed azimuth, where the
+periodic part cancels identically and only the secular drift survives. The
+rate follows from a straight-line fit, with no smoothing and no
+sampling-rate choice.
+
+Table~\ref{tab:falseedm} shows the outcome. The false EDM peaks sharply at
+$k=2$, exceeding $k=1$ by $2.9\times$ and $k=3$ by $2.2\times$, and tracks
+the closed-orbit amplitude (both maximal at $k=2$, the harmonic nearest the
+vertical tune $Q_y\approx2.68$). This reproduces---by an independent
+mechanism (quadrupole misalignment rather than an imposed field harmonic)---the
+$N=2$ peak reported by Omarov \emph{et al.}~\cite{omarov} (their
+Figs.~7--8). There the low-harmonic rates were quoted only as statistical
+upper limits, because the exact precession rate could not be determined from
+the simulation; this is precisely the oscillation-contamination problem that
+the closed-orbit\,/\,stroboscopic method removes here, returning the actual
+rates.
+
+\begin{table}[t]
+\centering
+\caption{False-EDM secular rate $dS_y/dt$ from a pure single-harmonic
+quadrupole misalignment ($A=\SI{10}{\micro\meter}$, true EDM off), measured
+by stroboscopic spin tracking on the closed orbit. The closed-orbit
+amplitude and the false EDM both peak at $k=2$.}
+\label{tab:falseedm}
+\begin{tabular}{cccc}
+\toprule
+$k$ & CO amplitude [mm] & $dS_y/dt$ [rad/s] & $|dS_y/dt|/|dS_y/dt|_{k=2}$ \\
+\midrule
+0 & 0.058 & $+1.80\times10^{-10}$ & 0.13 \\
+1 & 0.070 & $+4.93\times10^{-10}$ & 0.34 \\
+\textbf{2} & \textbf{0.198} & $\mathbf{+1.44\times10^{-9}}$ & \textbf{1.00} \\
+3 & 0.088 & $-6.64\times10^{-10}$ & 0.46 \\
+4 & 0.028 & $-1.98\times10^{-10}$ & 0.14 \\
+5 & 0.014 & $-9.92\times10^{-11}$ & 0.07 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The measurement is numerically robust. A null run ($A=0$) returns $dS_y/dt$
+identically zero, so there is no spurious background. The response is exactly
+odd under $\Delta y\to-\Delta y$ (ratio $-1.000$), confirming a clean
+first-order coupling; the spin norm is conserved to $10^{-12}$ over the run;
+the result reproduces across independent machines to better than $1\%$; and
+halving the integration step ($10^{-11}\!\to\!5\times10^{-12}$\,s) shifts the
+$k=2$ rate by only $2.7\%$ while leaving the $k_2/k_n$ ratios---and the
+$k=2$ peak---unchanged. The closed-orbit-launch and stroboscopic procedure
+is documented in \texttt{false\_edm\_yontemi.md}.
+
+\subsection{Reconstruction test case}
 
 We test against a structured truth: $k=2$ at \SI{10}{\micro\meter}
 (the target) accompanied by large contaminants $k=4,6,8$ at
@@ -455,9 +527,11 @@ spin-level error budget.
 \todo{acknowledgements / funding}
 
 \begin{thebibliography}{9}
-\bibitem{omarov} Z.~Omarov et al., \emph{Comprehensive symmetric-hybrid
+\bibitem{omarov} Z.~Omarov, H.~Davoudiasl, S.~Hac\i\"omero\u{g}lu,
+V.~Lebedev, W.~M.~Morse, Y.~K.~Semertzidis, A.~J.~Silenko,
+E.~J.~Stephenson, and R.~Suleiman, \emph{Comprehensive symmetric-hybrid
 ring design for a proton EDM experiment at below $10^{-29}\,e\cdot$cm},
-Phys.\ Rev.\ D \textbf{105} (2022) 032001. \todo{verify reference}
+Phys.\ Rev.\ D \textbf{105} (2022) 032001.
 \bibitem{clean} J.~A.~H\"ogbom, \emph{Aperture Synthesis with a
 Non-Regular Distribution of Interferometer Baselines}, Astron.\ Astrophys.\
 Suppl.\ \textbf{15} (1974) 417.
