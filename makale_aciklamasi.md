@@ -144,6 +144,55 @@ CLEAN ve doğrudan en küçük kareler, $k=2$ kestirimi için istatistiksel
 olarak özdeştir (200 Monte Carlo'da hata oranı 1.0×). CLEAN yalnızca
 oracle bilgisi gerektirmemesi açısından avantajlıdır.
 
+### Tepki matrisinin fiziksel yapısı: R = G · diag(K_j)
+
+Tepki matrisi $R$'yi iki faktöre ayırmak, hem "neden BPM ofseti bypass
+eder" hem de "neden k=2 özel" sorularını tek seferde yanıtlar:
+
+$$R = G \cdot \mathrm{diag}(K_j).$$
+
+**Birinci faktör: diag(K_j) — kaçıklık→kick kazancı**
+
+$K_j = k_j\ell_j$, $j$'inci quadupolun normalize gradyanı ile efektif
+uzunluğunun çarpımıdır; yani "1 m kaçıklık ne kadar açısal kick yaratır"
+sorusunun yanıtıdır. QF quadupoller pozitif, QD quadupoller negatif kick
+verir. Bu QF/QD işareti değişimi $(-1)^j$ faktörüyle Fourier bazımıza
+zaten gömülü olduğundan, $\mathrm{diag}(K_j)$ sadece mekanik bir kazanç
+katsayısıdır — optik içinde hiçbir yayılma yoktur.
+
+**İkinci faktör: G — betatron Green fonksiyonu (kick→yörünge)**
+
+$G$, $j$'inci elemanda uygulanan ince bir açısal kick'in $i$'inci BPM'de
+yarattığı kapalı yörünge kaymasını verir:
+
+$$G_{ij} = \frac{\sqrt{\beta_i\,\beta_j}}{2\sin\pi Q_y}
+           \cos\!\bigl(|\mu_i-\mu_j|-\pi Q_y\bigr).$$
+
+Burada $\beta_i$ Courant–Snyder genlik fonksiyonu, $\mu_i$ faz ilerleme
+miktarı ve $Q_y \approx 2.68$ dikey tune'dur. Bu formül, tek-tur harita
+denkleminin analitik çözümünden gelir. Dikkat edilecek en önemli nokta:
+$G$ \emph{neredeyse simetrik}tir ($G_{ij}\approx G_{ji}$, sayısal
+asimetri 0.005) — yani kick'in "hangi taraftan" uygulandığı neredeyse
+fark etmez.
+
+$R$'yi bu şekilde yazdığımızda, tepki matrisini
+**"örgü boyunca manyetik alanların BPM'ler üzerindeki kazanç fonksiyonu"**
+olarak okuyabiliriz: $\mathrm{diag}(K_j)$ fiziksel kaçıklığı açısal
+kick'e çevirir, $G$ ise bu kick'i optik yapı aracılığıyla BPM gözlemine
+yayar.
+
+**Bu ayrışımın iki kritik sonucu**
+
+| Soru | Cevap (R = G · diag(K_j) perspektifinden) |
+|------|------------------------------------------|
+| **Neden BPM ofseti R'yi bypass eder?** | $\mathbf{b}$, ölçüm uzayına eklenir — $G$'den *sonra*. Zincirleme $\Delta q \to K_j\Delta q \to G \to \text{yörünge}$ içinde hiç yer almaz; çıkışa doğrudan eklenen bir ölçüm saçılması olarak kalır ve $G$'nin yarattığı hiçbir yükseltime maruz kalmaz. |
+| **Neden k=2 rezonant?** | $(-1)^j K_j$ FODO işaret değişimi, pürüzsüz $k$-harmonik kaçıklığı $G$'ye $Q_y$'ye yakın uzaysal frekansta bir kick örüntüsü olarak aktarır. $G$, rezonans frekansına ($Q_y$'ye) en yakın drive'ı en çok kuvvetlendirir. $Q_y\approx2.68$ için bu frekans $k=2$'dir — işte bu yüzden $\|M_{k=2}\|=167$, $\|M_{k=4}\|=16$ (10× fark), ve BPM ofseti sağlamlığı hiyerarşisi bu 10× üzerine kurulur. |
+
+Kısaca: quad kaçıklığı $R$ zinciri boyunca ilerler ve $G$'nin rezonans
+davranışına göre kuvvetlenir ya da zayıflar. BPM elektronik ofseti ise
+bu zincirin tamamen dışındadır — sinyal işleme açısından bambaşka bir
+yerde durur.
+
 ---
 
 ## 5. Neden k=2? — Spin takibiyle doğrudan kanıt <a name="5-k2-kanit"></a>
