@@ -252,17 +252,28 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
     //
     // Inside an arc the particle's local angle atan2(Y,X) advances 0→Φ_def, so
     // the true ring azimuth is θ = θ_e + atan2(Y,X); on straights atan2(Y,X)≈0.
-    // The field is added along the local radial direction (≈ +X in the
-    // rotating frame), uniformly across the element — the same hard-edge,
-    // ∇·B = 0 preserving convention used for the deflector b_tilt term above.
-    // This reproduces Omarov 2022 (PRD 105, 032001) Fig. 8: dS_y/dt vs. the
-    // N-th harmonic of a radial B field around the ring.
+    // The field is applied in the TRUE LOCAL RADIAL direction (always pointing
+    // radially outward), decomposed into global (X,Y) components:
+    //   B_X_global = A_r · cos(N·θ) · cos(θ)
+    //   B_Y_global = A_r · cos(N·θ) · sin(θ)
+    // where cos(θ) = X/R, sin(θ) = Y/R.
+    // Previously only B[0] was set (≈ global X), which is correct only at the
+    // entry of each element after rotate_all (Y≈0, so local radial ≈ global X).
+    // Applying only B[0] throughout the arc makes N=0 behave as a fixed lab-frame
+    // field (always in +X), not as a field always pointing radially — causing a
+    // spuriously large secular dSy/dt for N=0. The correct two-component form
+    // ensures the field is truly local-radial and reproduces Omarov 2022
+    // (PRD 105, 032001) Fig. 8: dS_y/dt vs. the N-th harmonic of a radial B field.
     double Br_harm_amp = field_params[21];
     if (Br_harm_amp != 0.0) {
         double Br_harm_N = field_params[22];
         double theta_e   = field_params[29];
         double theta     = theta_e + ((R > 1e-6) ? std::atan2(Y, X) : 0.0);
-        B[0] += Br_harm_amp * std::cos(Br_harm_N * theta);
+        double B_rad     = Br_harm_amp * std::cos(Br_harm_N * theta);
+        double cos_az    = (R > 1e-6) ? X / R : 1.0;
+        double sin_az    = (R > 1e-6) ? Y / R : 0.0;
+        B[0] += B_rad * cos_az;
+        B[1] += B_rad * sin_az;
     }
 }
 
