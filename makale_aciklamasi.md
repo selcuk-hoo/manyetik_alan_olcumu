@@ -251,6 +251,54 @@ Bu üç mülk birlikte, BPM ofseti $\mathbf{b}$'nin istatistiksel yapısından
 **bağımsız olarak** $k=2$ sütununa olan projeksiyonunun küçük kalmasını
 garantiler (bkz. Bölüm 8).
 
+### Lineer cebir özü: matched filter ve koşullanma
+
+> **Soru:** Tepki matrisi k=2'yi aşırı kuvvetlendirirken, ters-projeksiyon onu
+> aşırı bastırıyor. Bu nasıl aynı anda olabilir?
+>
+> **Cevap:** İkisi aynı olgunun iki yüzüdür. Estimatör, tek bir sütunun
+> Moore–Penrose sözde-tersidir:
+>
+> $$\hat{a}_{k=2} = \frac{M_{k=2}^T y}{\|M_{k=2}\|^2} = M_{k=2}^{+}\,y, \qquad \|M_{k=2}^{+}\| = \frac{1}{\|M_{k=2}\|} = \frac{1}{167}$$
+>
+> Bir vektörün sözde-tersinin normu, normunun tersidir → ileri kazanç ne kadar
+> büyükse, geri kazanç o kadar küçük.
+
+**Karşılıklılık (reciprocity).** Sinyal ve ofset veri yoluna farklı
+noktalardan girer, dolayısıyla farklı net kazanç görür:
+
+| | yol | net kazanç |
+|---|---|---|
+| **Sinyal** ($\Delta q = A F_2$) | $\xrightarrow{\times R}$ ölçüm $\xrightarrow{\times M_2^{+}}$ kestirim | $M_2^{+}(A M_2) = A$ → **1** |
+| **Ofset** ($b$) | doğrudan ölçüme $\xrightarrow{\times M_2^{+}}$ kestirim | $\|M_2^{+}b\| \le \|b\|/167$ → **1/167** |
+
+Sinyal $R$'den hem ileri (×167) hem geri (×1/167) geçer → birbirini götürür →
+birim kazanç. Ofset sadece geri yoldan geçer → 167'ye bölünür.
+
+**SVD resmi.** $R = U\Sigma V^T$ ile $\sigma_{\max} = 34.7$, $\sigma_{\min} = 0.14$,
+$\kappa = 249$. k=2 misalignment yönü $f_2$'nin **%91'i en büyük tekil yöndedir**
+($\|Rf_2\| = 34.1 \approx \sigma_{\max}$) — yani k=2, $Q_y \approx 2.68$ rezonansına
+en yakın olduğundan $R$ spektrumunun **tepesine** oturur.
+
+- **Naif tam ters** $R^{-1} = V\Sigma^{-1}U^T$ tehlikelidir çünkü $1/\sigma_{\min}$ ile
+  küçük tekil yönleri patlatır → ofseti $\kappa = 249$ kat büyütür.
+- **Tek-mod projeksiyon** ise büyük-$\sigma$ alt-uzayında çalışır; orada sözde-ters
+  gürültüyü **bastırır**.
+
+| | koşullanma sayısı |
+|---|---|
+| Tam 48-boyutlu ters | 249 (kötü) |
+| Tek-sütun projeksiyon | **1.000** (mükemmel) |
+
+**Matched filter kazancı.** Estimatör, şablonu k=2 yörünge parmak izi $M_{k=2}$
+olan bir eşleşmiş filtredir; SNR kazancı $\|M_{k=2}\|$'dir:
+
+$$\text{SNR}_\text{çıkış} = \frac{A\,\|M_{k=2}\|}{\sigma_b} = \frac{10 \times 167}{300} \approx 5.6$$
+
+Yani yanlış-EDM'i en çok besleyen modun aynı zamanda en gürültü-dayanıklı mod
+olması tesadüf değil — ikisi de $\|M_{k=2}\| = 167$'nin $R$ spektrumunun tepesine
+oturmasının sonucudur.
+
 ---
 
 ## 7. Geri çatım performansı <a name="7-performans"></a>

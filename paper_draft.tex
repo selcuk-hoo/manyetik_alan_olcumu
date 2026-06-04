@@ -370,6 +370,61 @@ Together, these three properties ensure that the projection of $\mathbf{b}$
 onto the $k=2$ column of $M$ is small relative to the signal---regardless
 of the statistical structure of $\mathbf{b}$ (see Section~\ref{sec:whiteness})---and yield the reconstruction below.
 
+\subsection{A matched-filter / conditioning view}
+\label{sec:matchedfilter}
+
+The three properties above have a compact linear-algebra interpretation that
+explains why the same resonance that makes $k=2$ the dominant false-EDM driver
+also makes it the most offset-robust harmonic to estimate. The single-mode
+estimator is the Moore--Penrose pseudoinverse of one column,
+\begin{equation}
+\hat a_{k=2} = \frac{M_{k=2}^T\,\mathbf{y}}{\|M_{k=2}\|^2}
+             = M_{k=2}^{+}\,\mathbf{y},
+\qquad
+M_{k=2}^{+} = \frac{M_{k=2}^T}{\|M_{k=2}\|^2},
+\end{equation}
+and the operator norm of the pseudoinverse of a vector is the reciprocal of
+its norm, $\|M_{k=2}^{+}\|=1/\|M_{k=2}\|=1/167$.
+
+\paragraph{Reciprocity.} Signal and offset enter the data at different points,
+so they experience different net gains. A genuine $k=2$ misalignment
+$\Delta q=A\,F_{k=2}$ propagates \emph{forward} through $R$ (gain
+$\|M_{k=2}\|$) and is then back-projected through $M_{k=2}^{+}$ (gain
+$1/\|M_{k=2}\|$); the two cancel exactly, $M_{k=2}^{+}(A\,M_{k=2})=A$. The BPM
+offset $\mathbf{b}$ never passes forward through $R$---it is added directly in
+measurement space---so it experiences \emph{only} the back-projection:
+$|M_{k=2}^{+}\mathbf{b}|\le\|\mathbf{b}\|/\|M_{k=2}\|$. Whatever traverses $R$
+both ways is recovered at unit gain; whatever enters only on the measurement
+side is suppressed by $\|M_{k=2}\|$.
+
+\paragraph{Conditioning.} In SVD terms $R=U\Sigma V^T$ with
+$\sigma_{\max}=34.7$, $\sigma_{\min}=0.14$, $\kappa(R)=249$. The $k=2$
+misalignment direction is almost entirely aligned with the leading
+right-singular vector ($91\%$ of $\|F_{k=2}\|^2$, and $\|RF_{k=2}\|=34.1\approx
+\sigma_{\max}$): $k=2$ sits at the \emph{top} of the spectrum of $R$ because it
+is the mode closest to the $Q_y\approx2.68$ resonance. A naive full inversion
+$R^{-1}=V\Sigma^{-1}U^T$ is dangerous precisely because it is dominated by
+$1/\sigma_{\min}$ and amplifies any offset by up to $\kappa=249$ (the
+millimetre-level contamination of Section~\ref{sec:intro}). Targeting a single
+resonant mode replaces that ill-conditioned $48$-dimensional inversion with a
+one-dimensional projection of condition number $1$, operating in the
+large-singular-value subspace where the pseudoinverse \emph{contracts} rather
+than amplifies the offset.
+
+\paragraph{Matched-filter gain.} Equivalently, the estimator is a matched
+filter whose template is the $k=2$ orbit fingerprint $M_{k=2}$; its
+signal-to-noise gain is $\|M_{k=2}\|$, giving
+\begin{equation}
+\mathrm{SNR}_{\mathrm{out}}
+= \frac{A\,\|M_{k=2}\|}{\sigma_b}
+= \frac{\SI{10}{\micro\meter}\times167}{\SI{300}{\micro\meter}}
+\approx 5.6 .
+\end{equation}
+The resonant amplification thus works doubly in the estimator's favour: it
+enlarges the genuine $k=2$ signal in BPM space ($A\|M_{k=2}\|=\SI{1670}{\micro
+\meter}$) while simultaneously dividing the offset contribution by the same
+$\|M_{k=2}\|=167$.
+
 \subsection{Reconstruction performance and diagnostics}
 
 Under $\sigma_b=\SI{100}{\micro\meter}$ the CLEAN reconstruction returns
