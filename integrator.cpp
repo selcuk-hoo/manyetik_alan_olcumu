@@ -240,6 +240,30 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         B[1] = 0.0;
         B[2] = B_quad_z;
     }
+
+    // ------------------------------------------------------------------------
+    // Harmonic RADIAL magnetic field B_x(θ) = A_r · cos(N·θ), applied to EVERY
+    // element around the ring (deflectors, drifts and quads alike).
+    //
+    //   field_params[21] = A_r   amplitude [T]   (e.g. 1e-9 = 1 nT)
+    //   field_params[22] = N     azimuthal harmonic number
+    //   field_params[29] = θ_e   geometric ring azimuth at this element's
+    //                            entry [rad], supplied by run_integration.
+    //
+    // Inside an arc the particle's local angle atan2(Y,X) advances 0→Φ_def, so
+    // the true ring azimuth is θ = θ_e + atan2(Y,X); on straights atan2(Y,X)≈0.
+    // The field is added along the local radial direction (≈ +X in the
+    // rotating frame), uniformly across the element — the same hard-edge,
+    // ∇·B = 0 preserving convention used for the deflector b_tilt term above.
+    // This reproduces Omarov 2022 (PRD 105, 032001) Fig. 8: dS_y/dt vs. the
+    // N-th harmonic of a radial B field around the ring.
+    double Br_harm_amp = field_params[21];
+    if (Br_harm_amp != 0.0) {
+        double Br_harm_N = field_params[22];
+        double theta_e   = field_params[29];
+        double theta     = theta_e + ((R > 1e-6) ? std::atan2(Y, X) : 0.0);
+        B[0] += Br_harm_amp * std::cos(Br_harm_N * theta);
+    }
 }
 
 // Equations of motion — right-hand side of the ODE system.
@@ -549,13 +573,22 @@ void run_integration(double* y_init, const double* field_params,
             // field_params_local[26] = dipole_tilt runtime override
             // field_params_local[27] = quad_tilt runtime override (skew quad coupling)
             // field_params_local[28] = quad_dG runtime override (fractional gradient deviation)
-            double field_params_local[29];
+            // field_params_local[29] = θ_e : geometric ring azimuth at element entry [rad]
+            //                                (for the harmonic radial-B field, params 21/22)
+            double field_params_local[30];
             for (int fp = 0; fp < 25; ++fp) field_params_local[fp] = field_params[fp];
             field_params_local[23] = 0.0;  // quad_dy
             field_params_local[25] = 0.0;  // quad_dx
             field_params_local[26] = 0.0;  // dipole_tilt
             field_params_local[27] = 0.0;  // quad_tilt
             field_params_local[28] = 0.0;  // quad_dG
+
+            // Geometric ring azimuth at this element's entry: cumulative bending
+            // of the arcs traversed so far.  Within a FODO cell, ARC1 (elem 0)
+            // and ARC2 (elem 4) each bend by Phi_def; drifts/quads do not bend.
+            int arcs_done = (elem == 0) ? 0 : ((elem <= 4) ? 1 : 2);
+            field_params_local[29] = current_fodo * 2.0 * Phi_def
+                                   + arcs_done * Phi_def;
 
             if (elem == 2) {               // QF
                 int qidx = 2 * current_fodo;

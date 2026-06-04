@@ -73,6 +73,10 @@ class FieldParams:
         self.quadModF = 0.0
         self.quadVertOffset = 0.0  # dikey quad merkez kayması [m] (çalışma zamanı override)
         self.quadG0 = 0.0
+        # Halka boyunca N-harmonikli radyal manyetik alan B_x(θ) = A_r·cos(N·θ)
+        # (Omarov 2022 Fig.8 analog). Tüm elemanlara uygulanır.
+        self.B0rad_harm_amp = 0.0  # A_r genliği [T] (ör. 1e-9 = 1 nT)
+        self.B0rad_harm_N   = 0.0  # azimut harmonik numarası N
 
     def to_c_array(self):
         """
@@ -88,8 +92,8 @@ class FieldParams:
             self.nFODO, self.quadLen,
             self.poincare_quad_index,
             self.rfSwitch, self.rfVoltage, self.h, self.driftLen,
-            self.quadModA, self.quadModF, 0.0,
-            0.0, self.quadVertOffset, self.quadG0
+            self.quadModA, self.quadModF, self.B0rad_harm_amp,
+            self.B0rad_harm_N, self.quadVertOffset, self.quadG0
         ]
         return (ctypes.c_double * len(params))(*params)
 
