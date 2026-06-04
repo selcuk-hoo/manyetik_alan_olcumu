@@ -87,24 +87,6 @@ mpf = importlib.util.module_from_spec(spec); spec.loader.exec_module(mpf)
 R = mpf._load_R()
 n_q = R.shape[0]
 
-def Mk_norm(k):
-    Mc = R @ Fcos(k, n_q); Ms = R @ Fsin(k, n_q)
-    if k == 0: return float(np.linalg.norm(Mc))
-    return float(np.sqrt(np.linalg.norm(Mc)**2 + np.linalg.norm(Ms)**2))
-
-print()
-print("=" * 65)
-print("1 nT ölçüm hassasiyeti için gereken BPM sistematik ofseti:")
-print()
-for k_tgt in [2, 3, 4]:
-    Mk = Mk_norm(k_tgt)
-    # σAk = σ_off / Mk  →  σ_off = σAk × Mk
-    # B_x = G × σAk = 1 nT  →  σAk = 1e-9 / G
-    sigma_Ak_m = 1e-9 / G   # 1 nT → kaçıklık çözünürlüğü [m]
-    sigma_off_needed = sigma_Ak_m * Mk
-    sigma_off_um = sigma_off_needed * 1e6
-    print(f"  k={k_tgt}:  σAk = {sigma_Ak_m*1e9:.1f} nm  →  σ_offset gerekli = {sigma_off_um:.2f} μm")
-
 # ── B_x profili: tüm test modları ────────────────────────────────────────────
 print()
 print("=" * 65)
@@ -170,39 +152,13 @@ plt.close()
 print()
 print("bx_profile.png  ✓")
 
-# ── Özet tablo: nm → nT dönüşümü ─────────────────────────────────────────────
+# ── KRİTİK UYARI: lokal alan ≠ spin-eşdeğer alan ─────────────────────────────
 print()
 print("=" * 65)
-print("ÖZET: Ölçüm hassasiyeti (BPM sistematik ofseti limiti)")
+print("UYARI: Yukarıdaki değerler LOKAL alan (quad içi, G·δy).")
+print("  Spin entegre alana tepki verir; quadlar halkanın yalnızca")
+print(f"  ~%{f_fill*100:.1f}'ini doldurduğundan spin-eşdeğer alan ~{int(1/f_fill)}× daha küçüktür.")
 print()
-print(f"  {'σ_offset':>10}  {'k=2 [nm]':>10}  {'B_x,k=2 [nT]':>14}  "
-      f"{'k=3 [nm]':>10}  {'B_x,k=3 [nT]':>14}")
-print("  " + "-"*65)
-
-# Test 2 sonuçlarından (mode_tolerance_analysis.py)
-t2_data = {
-    10:  (90.3,   322.8),
-    50:  (430.3,  1665.6),
-    100: (857.3,  3262.8),
-    200: (1727.9, 6414.7),
-    500: (4186.3, 16854.1),
-}
-for sig_um, (rms2_nm, rms3_nm) in t2_data.items():
-    Bx2 = G * rms2_nm * 1e-9 * 1e9  # nT = G [T/m] × nm × 1e-9 m/nm × 1e9 nT/T
-    Bx3 = G * rms3_nm * 1e-9 * 1e9
-    print(f"  {sig_um:>6} μm  →  {rms2_nm:>10.1f}  {Bx2:>14.1f}  "
-          f"{rms3_nm:>10.1f}  {Bx3:>14.1f}")
-
-print()
-print("  KAYNAKLAR: BPM ofseti → yörünge → kaçıklık → B_x (lokal, quad içi)")
-print("  1 nT için gereken σ_offset (Tablo 2'deki Mk normları ile):")
-for k_tgt in [2, 3]:
-    Mk = Mk_norm(k_tgt)
-    sigma_Ak_m = 1e-9 / G
-    sigma_off_um = sigma_Ak_m * Mk * 1e6
-    print(f"    k={k_tgt}: σ_offset ≲ {sigma_off_um:.1f} μm")
-print()
-print("  NOT: 'Spin-eşdeğer B_x' (harici sinüsoidal alan ile karşılaştırma)")
-print("  compare_field_harmonics.py çıktısı (R_B) gerektirir:")
-print("  B_x_eff = dSy/dt(quad) / R_B [nT]")
-print("  (R_B değeri Mac'te çalıştırılacak simülasyondan gelecek)")
+print("  Ölçüm hassasiyetinin nT cinsinden DOĞRU dönüşümü için bkz:")
+print("     bx_equivalent_conversion.py")
+print("  (spin-takibi R_q/R_B oranı ≈ 6 nT/μm kullanır, lokal 210 nT/μm DEĞİL)")
