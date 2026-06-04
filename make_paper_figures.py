@@ -251,12 +251,16 @@ plt.close(fig)
 print("fig2_orbit_gain.png  ✓")
 
 # table output
+# kappa_spin: empirical dSy/dt / orbit_amplitude ratio from false_edm_mode_scan (k=1..5)
+KAPPA_SPIN = 7e-6   # rad/s / m
 with open("table2_gain.txt", "w") as f:
-    f.write("% Table 2: Fourier mode orbit gain\n")
-    f.write(f"% {'k':>3}  {'||RF_k||':>10}  {'||M_k||':>10}\n")
+    f.write("% Table 2: Fourier mode orbit gain and false-EDM rate per 1 μm misalignment\n")
+    f.write(f"% {'k':>3}  {'||RF_k||':>10}  {'||M_k||':>10}  {'dSy/dt [rad/s]':>16}\n")
+    f.write(f"% {'':>3}  {'':>10}  {'':>10}  {'per 1 um ampl.':>16}\n")
     for k, rf, m in zip(k_list, rf_norms, m_norms):
+        dsydt = KAPPA_SPIN * m * 1e-6   # 1 μm = 1e-6 m amplitude
         tag = "  % <-- dominant" if k == 2 else ""
-        f.write(f"  {k:3d}  {rf:10.3f}  {m:10.1f}{tag}\n")
+        f.write(f"  {k:3d}  {rf:10.3f}  {m:10.1f}  {dsydt:16.3e}{tag}\n")
 print("table2_gain.txt  ✓")
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -507,13 +511,18 @@ print(f"  k=2: signal {a_sig[2]:.1f} μm  vs  offset floor "
 
 truth = {2: (10e-6, 0.3), 4: (300e-6, 0.7), 6: (300e-6, 1.2), 8: (200e-6, 2.1)}
 with open("table3_orbit.txt", "w") as f:
-    f.write("% Table 3: Misalignment amplitude vs orbit norm contribution\n")
-    f.write(f"  {'k':>3}  {'Misalignment [um]':>18}  {'Orbit norm [um]':>16}  {'Gain':>6}\n")
+    f.write("% Table 3: Misalignment amplitude vs orbit norm and false-EDM contribution\n")
+    f.write(f"  {'k':>3}  {'Misalignment':>14}  {'Orbit norm':>12}  "
+            f"{'Gain':>6}  {'dSy/dt':>14}\n")
+    f.write(f"  {'':>3}  {'[um]':>14}  {'[um]':>12}  "
+            f"{'':>6}  {'[rad/s]':>14}\n")
     for k, (A, _) in sorted(truth.items()):
         dq_k   = A * Fcos(k, N_Q)
-        orb_nm = np.linalg.norm(R @ dq_k) * 1e6
-        gain   = orb_nm / (A * 1e6)
-        f.write(f"  {k:3d}  {A*1e6:>18.0f}  {orb_nm:>16.0f}  {gain:>6.1f}\n")
+        orb_um = np.linalg.norm(R @ dq_k) * 1e6
+        gain   = orb_um / (A * 1e6)
+        dsydt  = KAPPA_SPIN * orb_um * 1e-6
+        f.write(f"  {k:3d}  {A*1e6:>14.0f}  {orb_um:>12.0f}  "
+                f"{gain:>6.1f}  {dsydt:>14.3e}\n")
 print("table3_orbit.txt  ✓")
 
 # ══════════════════════════════════════════════════════════════════════════════
