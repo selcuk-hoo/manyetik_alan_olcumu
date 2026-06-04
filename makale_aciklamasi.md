@@ -231,8 +231,10 @@ veya örnekleme hızı seçimi olmadan doğrudan doğrusal fite uyar.
 | 3 | 0.088           | −6.64×10⁻¹⁰          | 0.46 |
 | 4 | 0.028           | −1.98×10⁻¹⁰          | 0.14 |
 | 5 | 0.014           | −9.92×10⁻¹¹          | 0.07 |
+| 6 | 0.008           | −5.92×10⁻¹¹          | 0.041 |
+| 7 | 0.005           | −4.73×10⁻¹¹          | 0.033 |
 
-k=2 baskındır: k=1'den 2.9×, k=3'ten 2.2× büyük. Bu Omarov et al.
+k=2 baskındır: k=1'den 2.9×, k=3'ten 2.2× büyük. k=6,7'de tepe değerin %4'üne iniyor. Bu Omarov et al.
 (PRD 105, 032001, 2022) Şekil 7-8'deki N=2 tepe noktasıyla nitelik
 olarak tutarlıdır (halka tasarımları farklı; doğrudan karşılaştırma yoktur).
 
@@ -256,14 +258,14 @@ Dikey tune $Q_y \approx 2.68$ ile $k=2$ modu (hücre başına 2 tam dönme)
 rezonansa en yakın moddur. Bu, tepki matrisi $R$ ile $k=2$ Fourier modunun
 haritalandığı yörünge normunun 34× büyümesi anlamına gelir:
 
-| k | \|\|RF_k\|\| | \|\|M_k\|\| = √24 × \|\|RF_k\|\| |
-|---|------------|----------------------------------|
-| 1 | 8.8        | 43.0                             |
-| **2** | **34.1** | **167**                        |
-| 3 | 8.9        | 43.6                             |
-| 4 | 3.2        | 16                               |
-| 6 | 1.1        | 5.5                              |
-| 8 | 0.59       | 2.9                              |
+| k | \|\|RF_k\|\| | \|\|M_k\|\| | dSy/dt [rad/s] |
+|---|------------|---------|----------------|
+| 1 | 8.8        | 43.0    | 4.9×10⁻¹¹      |
+| **2** | **34.1** | **167** | **1.4×10⁻¹⁰** |
+| 3 | 8.9        | 43.6    | 6.6×10⁻¹¹      |
+| 4 | 3.2        | 16      | 2.0×10⁻¹¹      |
+| 6 | 1.1        | 5.5     | 5.9×10⁻¹²      |
+| 8 | 0.59       | 2.9     | 4.7×10⁻¹²      |
 
 $\|M_{k=2}\| = 167$ demek: BPM ofseti $\mathbf{b}$'nin $k=2$ kestirimine
 kirletme etkisi $\delta a_{k=2} = (\mathbf{b} \cdot \hat{m}_{k=2}) / 167$
@@ -388,7 +390,7 @@ BPM ofseti sağlamlığını anlamanın en doğrudan yolu, sistemin ürettiği
 **1. Sinyal yörüngesi — 1670 μm**
 10 μm'lik bir $k=2$ quad kaçıklığı, tepki matrisi $R$ üzerinden BPM'lere
 yansır ve rezonant kuvvetlendirme nedeniyle $A \cdot \|M_{k=2}\| = 10 \times 167 = 1670\,\mu$m
-genliğinde bir kapalı yörünge oluşturur. Kaçıklık $R$'den *geçer*,
+genliğinde bir kapalı yörünge oluşturur. Bu değer pik BPM sapması (~384 μm) değil, tüm BPM'lerin RMS normudur; pik BPM sapması 384 μm'dır. κ(R)=249 koşullanma sayısı ile karıştırılmamalıdır — koşullanma sayısı yörünge kazancı değil, R matrisinin en büyük ve en küçük tekil değerlerinin oranıdır. Kaçıklık $R$'den *geçer*,
 167× büyür.
 
 **2. BPM ofseti Fourier seviyesi — ~77 μm**
@@ -531,3 +533,49 @@ kapsam tercihidir:
 | Yatay düzlem ve skew kuplaj (quad tilt) | Yapılacak |
 | $\sigma_\text{model}$ vs $k=2$ hatası grafik onayı | **Tamamlandı** (fig4) |
 | BPM ofseti dayanıklılığı — parmak izi eşleştirme sezgisi | **Tamamlandı** (fig5, fig6) |
+
+---
+
+## 12. Spin-eşdeğer radyal manyetik alan [nT] <a name="12-nT"></a>
+
+### Dönüşüm mantığı
+
+Quad hizalama hataları yerine doğrudan **halka boyunca yayılan radyal manyetik alan** dili kullanmak istiyorsak, iki bağımsız spin-takibi taramasının oranını kullanabiliriz:
+
+- **(A) Harici harmonik:** B_x(θ) = A_r cos(Nθ), A_r = 1 nT → dSy/dt_ext(N)
+- **(B) Quad kaçıklığı:** Δy_j = A·F_k[j], A = 10 μm → dSy/dt_quad(k)
+
+Dönüşüm faktörü:
+
+$$c_k = \frac{R_q(k)}{R_B(k)} = \frac{dS_y/dt_\text{quad}(k)/\mu m}{dS_y/dt_\text{ext}(k)/nT} \approx 6~\text{nT/μm}$$
+
+Bu faktör k=1..7 için ±%17 içinde **neredeyse sabittir**. Fiziksel anlam: spin entegre alana (yörünge başına toplam radyal impulse) tepki verir; quadlar halkanın ~%3'ünü doldurduğundan lokal pik alan (~210 nT/μm) spin-eşdeğer alandan ~34× büyüktür.
+
+### Sinyal modları
+
+| Mod | Kaçıklık | Spin-eşdeğer B_x |
+|-----|----------|-----------------|
+| k=2 | 10 μm | **54 nT** harici 2-harmonik |
+| k=3 | 8 μm | **46 nT** harici 3-harmonik |
+
+(Lokal quad alanı 2100 nT ve 1680 nT olurdu — ama spin buna tepki vermez.)
+
+### Ölçüm hassasiyeti [nT cinsinden]
+
+BPM sistematik ofsetinden kaynaklanan k=2,3 modlarındaki belirsizlik:
+
+$$\sigma(B_{x,\text{eq}}^{(k)}) \approx \frac{c_k \cdot \sigma_b}{\|M_k\|}$$
+
+| σ_offset | k=2 [nT] | k=3 [nT] |
+|----------|----------|----------|
+| 5 μm (BBA hedefi) | 0.16 | 0.69 |
+| 20 μm (BBA tipik) | 0.65 | 2.8 |
+| 100 μm (BBA öncesi) | 3.3 | 14 |
+
+**1 nT eşdeğer hassasiyet için gereken BPM sistematik ofseti:**
+- k=2: σ_offset ≲ **21 μm** (BBA sonrası ulaşılabilir)
+- k=3: σ_offset ≲ **5 μm** (BBA hedefi gerekir)
+
+### Özet cümle (makale için)
+
+> "Quad'lar ve diğer manyetik alan kaynakları ~20 μm düzeyine hizalanırsa, halka boyunca yayılan radyal manyetik alanın k=2 harmonik bileşeni ~1 nT hassasiyetle ölçülebilir; k=3 için ~4 nT hassasiyet BBA hedefiyle (σ_offset~5 μm) 1 nT'ye indirilebilir."

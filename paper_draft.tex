@@ -299,7 +299,8 @@ sampling-rate choice.
 Table~\ref{tab:falseedm} shows the outcome. The false EDM peaks sharply at
 $k=2$, exceeding $k=1$ by $2.9\times$ and $k=3$ by $2.2\times$, and tracks
 the closed-orbit amplitude (both maximal at $k=2$, the harmonic nearest the
-vertical tune $Q_y\approx2.68$). This is qualitatively consistent with the
+vertical tune $Q_y\approx2.68$). The rate falls monotonically for $k\ge3$,
+reaching $4\%$ of the $k=2$ peak at $k=6{,}7$. This is qualitatively consistent with the
 $N=2$ peak reported by Omarov \emph{et al.}~\cite{omarov} (their
 Figs.~7--8), though the two rings differ in lattice design and the
 comparison is not direct. There the low-harmonic rates were quoted only as
@@ -325,6 +326,8 @@ $k$ & CO amplitude [mm] & $dS_y/dt$ [rad/s] & $|dS_y/dt|/|dS_y/dt|_{k=2}$ \\
 3 & 0.088 & $-6.64\times10^{-10}$ & 0.46 \\
 4 & 0.028 & $-1.98\times10^{-10}$ & 0.14 \\
 5 & 0.014 & $-9.92\times10^{-11}$ & 0.07 \\
+6 & 0.008 & $-5.92\times10^{-11}$ & 0.041 \\
+7 & 0.005 & $-4.73\times10^{-11}$ & 0.033 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -449,7 +452,12 @@ both ways is recovered at unit gain; whatever enters only on the measurement
 side is suppressed by $\|M_{k=2}\|$.
 
 \paragraph{Conditioning.} In SVD terms $R=U\Sigma V^T$ with
-$\sigma_{\max}=34.7$, $\sigma_{\min}=0.14$, $\kappa(R)=249$. The $k=2$
+$\sigma_{\max}=34.7$, $\sigma_{\min}=0.14$, $\kappa(R)=249$. Crucially, the
+two leading right singular vectors of $R$ are almost exactly the $k=2$ cosine
+and sine Fourier modes (verified by projecting each $V[:,i]$ onto all $F_k$,
+$k=0,\ldots,12$, with $>99.5\%$ of norm captured at $k=2$), confirming that
+$k=2$ sits at the top of the singular spectrum because it is the mode closest
+to the tune $Q_y\approx2.68$ resonance. The $k=2$
 misalignment direction is almost entirely aligned with the leading
 right-singular vector ($91\%$ of $\|F_{k=2}\|^2$, and $\|RF_{k=2}\|=34.1\approx
 \sigma_{\max}$): $k=2$ sits at the \emph{top} of the spectrum of $R$ because it
@@ -475,6 +483,51 @@ The resonant amplification thus works doubly in the estimator's favour: it
 enlarges the genuine $k=2$ signal in BPM space ($A\|M_{k=2}\|=\SI{1670}{\micro
 \meter}$) while simultaneously dividing the offset contribution by the same
 $\|M_{k=2}\|=167$.
+
+\subsection{Spin-equivalent external radial field}
+\label{sec:bxequiv}
+
+The misalignment picture can be translated into an equivalent external field
+language that connects directly to Omarov \emph{et al.}~\cite{omarov}.
+Define the spin-equivalent radial field $B_{x,\mathrm{eq}}^{(k)}$ as the
+amplitude of a ring-wide harmonic $B_x(\theta)=B_{x,\mathrm{eq}}\cos(k\theta)$
+that would produce the same $dS_y/dt$ as the $k$-th misalignment harmonic.
+From two independent spin-tracking scans---one measuring $R_B(k)=[dS_y/dt]/A_r$
+for external fields (compare\_field\_harmonics), the other measuring
+$R_q(k)=[dS_y/dt]/A_q$ for quad misalignments (false\_edm\_mode\_scan)---we
+form the conversion factor
+\begin{equation}
+c_k = \frac{R_q(k)}{R_B(k)} \quad [\mathrm{nT}\,\mu\mathrm{m}^{-1}].
+\label{eq:ck}
+\end{equation}
+Numerically, $c_k \approx 6\,\mathrm{nT}\,\mu\mathrm{m}^{-1}$ for $k=1,\ldots,7$,
+to within $\pm17\%$.  This near-independence of $k$ is physically natural: the
+spin couples to the ring-average radial impulse rather than the local
+peak, and the FODO fill factor $\sim3\%$ sets the overall scale
+($c_k \approx G\,\ell_\mathrm{eff}\,f_\mathrm{fill}/L_\mathrm{ring}$ with
+$G=0.21\,\mathrm{T/m}$). The local quad-centre field is therefore
+$\sim34\times$ larger than the spin-equivalent value, making spin tracking
+the correct reference.
+
+For the test signal modes ($k=2$: \SI{10}{\micro\meter}; $k=3$: \SI{8}{\micro\meter}),
+the spin-equivalent amplitudes are
+$c_2\times\SI{10}{\micro\meter}\approx\SI{54}{\nano\tesla}$ and
+$c_3\times\SI{8}{\micro\meter}\approx\SI{46}{\nano\tesla}$, respectively.
+
+Combining Eq.~(\ref{eq:ck}) with the BPM-offset sensitivity
+$\sigma(A_k)\approx\sigma_b/\|M_k\|$ (Section~\ref{sec:whiteness}) gives a
+measurement floor expressed directly in nT:
+\begin{equation}
+\sigma(B_{x,\mathrm{eq}}^{(k)}) \approx \frac{c_k\,\sigma_b}{\|M_k\|}.
+\label{eq:bxsens}
+\end{equation}
+At $\sigma_b=\SI{100}{\micro\meter}$: $\sigma(B_{x,\mathrm{eq}}^{(2)})\approx
+c_2\times\SI{0.6}{\micro\meter}\approx\SI{3.3}{\nano\tesla}$; at
+$\sigma_b=\SI{20}{\micro\meter}$ (post-BBA): $\approx\SI{0.65}{\nano\tesla}$.
+For $k=3$ the higher Fourier noise ($\|M_3\|=43.6$ versus $\|M_2\|=167$) demands
+$\sigma_b\lesssim\SI{5}{\micro\meter}$ to reach $\SI{1}{\nano\tesla}$;
+$\sigma_b\approx\SI{20}{\micro\meter}$ (post-BBA) gives
+$\approx\SI{4}{\nano\tesla}$.
 
 \subsection{Reconstruction performance and diagnostics}
 
