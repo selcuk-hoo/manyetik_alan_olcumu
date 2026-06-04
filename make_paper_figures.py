@@ -283,7 +283,7 @@ C_ring = 2 * np.pi * 95.49                           # circumference ≈ 600 m
 s_bpm  = np.linspace(0, C_ring, N_Q, endpoint=False) # BPM s-positions [m]
 
 A_demo3  = 10e-6          # 10 μm misalignment amplitude (for signal orbit reference)
-sigma_b3 = 300e-6
+sigma_b3 = 100e-6
 N_MC3    = 2000
 rng3     = np.random.default_rng(42)
 k_show   = [0, 1, 2, 3, 4, 5]
@@ -373,16 +373,16 @@ A_true   = 10e-6
 phi_true = 0.3
 N_MC     = 300
 
-# Three BPM-offset scenarios: no offset, moderate, severe
+# Three BPM-offset scenarios: no offset, post-BBA, pre-BBA
 b_scenarios = [
     (0.0,    r"No BPM offset ($\sigma_b = 0$)",     BLUE),
-    (100e-6, r"$\sigma_b = 100\,\mu$m",             GREEN),
-    (300e-6, r"$\sigma_b = 300\,\mu$m",             RED),
+    (20e-6,  r"$\sigma_b = 20\,\mu$m (post-BBA)",   GREEN),
+    (100e-6, r"$\sigma_b = 100\,\mu$m",             RED),
 ]
 
 fig4, ax4 = plt.subplots(figsize=(7, 4.5))
 
-tol_300 = None
+tol_100 = None
 for b_sig, label, color in b_scenarios:
     rng4 = np.random.default_rng(99)
     means4, stds4 = [], []
@@ -403,15 +403,15 @@ for b_sig, label, color in b_scenarios:
     ax4.errorbar(sigma_m_vals * 100, means4, yerr=stds4,
                  fmt="o-", color=color, capsize=3, markersize=4,
                  linewidth=1.5, label=label)
-    if b_sig == 300e-6:
-        # tolerance where the 300-μm curve crosses the 10-μm target
-        tol_300 = float(np.interp(10.0, means4, sigma_m_vals * 100))
+    if b_sig == 100e-6:
+        # tolerance where the 100-μm curve crosses the 10-μm target
+        tol_100 = float(np.interp(10.0, means4, sigma_m_vals * 100))
 
 ax4.axhline(10, color=ORANGE, linestyle=":", linewidth=1.2,
             label=r"$10\,\mu$m target")
-if tol_300 is not None and tol_300 < 10.0:
-    ax4.axvline(tol_300, color=GRAY, linestyle="--", linewidth=0.9,
-                label=fr"Tolerance ($\sigma_b=300\,\mu$m) $\approx{tol_300:.1f}$%")
+if tol_100 is not None and tol_100 < 10.0:
+    ax4.axvline(tol_100, color=GRAY, linestyle="--", linewidth=0.9,
+                label=fr"Tolerance ($\sigma_b=100\,\mu$m) $\approx{tol_100:.1f}$%")
 
 ax4.set_xlabel(r"Gradient model error $\sigma_\mathrm{model} = \delta K/K$ [%]")
 ax4.set_ylabel(r"$k=2$ amplitude error $[\mu\mathrm{m}]$")
@@ -423,8 +423,8 @@ fig4.tight_layout()
 fig4.savefig("fig4_sigma_model.png", bbox_inches="tight")
 plt.close(fig4)
 print("fig4_sigma_model.png  ✓")
-if tol_300 is not None:
-    print(f"  Tolerance (sigma_b=300 μm, 10 μm target): ~{tol_300:.1f}%")
+if tol_100 is not None:
+    print(f"  Tolerance (sigma_b=100 μm, 10 μm target): ~{tol_100:.1f}%")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FIGURE 5 — BPM-offset whiteness / robustness
@@ -451,7 +451,7 @@ def amp_spectrum(ahat):
         out.append(np.hypot(ahat[1 + 2 * (k - 1)], ahat[2 + 2 * (k - 1)]))
     return np.array(out)
 
-sigma_b5 = 300e-6
+sigma_b5 = 100e-6
 A_sig5   = 10e-6
 rng5     = np.random.default_rng(1)
 
@@ -550,7 +550,7 @@ prod_sig  = y_sig_um * m_hat6                               # μm (all ≥ 0)
 est_sig   = np.sum(prod_sig) / Mc_norm                      # μm ≈ 10
 
 # Random white BPM offset (products alternate → cancel)
-b6_um    = np.random.default_rng(7).normal(0, 300e-6, N_Q) * 1e6  # μm
+b6_um    = np.random.default_rng(7).normal(0, 100e-6, N_Q) * 1e6  # μm
 prod_off  = b6_um * m_hat6                                  # μm (mixed sign)
 est_off   = np.sum(prod_off) / Mc_norm                      # μm ≈ small
 
@@ -558,7 +558,7 @@ cases = [
     (y_sig_um,  prod_sig, est_sig, RED,
      fr"True $k=2$ signal orbit  (peak $\approx{np.max(np.abs(y_sig_um)):.0f}\,\mu$m)"),
     (b6_um,     prod_off, est_off, GRAY,
-     fr"Random BPM offset  ($\sigma_b = 300\,\mu$m)"),
+     fr"Random BPM offset  ($\sigma_b = 100\,\mu$m)"),
 ]
 
 fig6, axes6 = plt.subplots(2, 3, figsize=(12, 6))
@@ -624,7 +624,7 @@ fig6.savefig("fig6_matched_filter.png", bbox_inches="tight")
 plt.close(fig6)
 print("fig6_matched_filter.png  ✓")
 print(f"  Signal estimate : {est_sig:.2f} μm  (true: {A6*1e6:.1f} μm)")
-print(f"  Offset estimate : {est_off:.3f} μm  (floor: {300e-6*1e6/Mc_norm:.3f} μm)")
+print(f"  Offset estimate : {est_off:.3f} μm  (floor: {100e-6*1e6/Mc_norm:.3f} μm)")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Summary

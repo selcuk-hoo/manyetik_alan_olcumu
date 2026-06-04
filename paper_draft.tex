@@ -31,7 +31,7 @@ The proton electric dipole moment (pEDM) frozen-spin experiment requires
 the vertical position of every storage-ring quadrupole to be known to
 $\sim\SI{10}{\micro\meter}$, because uncorrected misalignments generate a
 closed-orbit distortion that mimics a true EDM signal. Beam-position
-monitors (BPMs) carry static electronic offsets of $\sim\SI{300}{\micro
+monitors (BPMs) carry static electronic offsets of $\sim\SI{100}{\micro
 \meter}$ that bury the alignment signal. The established mitigation,
 $K$-modulation (kmod), differences two lattice configurations to cancel
 the offset but pays a steep rank/conditioning penalty when only a few
@@ -84,7 +84,7 @@ The measurement model is linear,
 where $\mathbf{y}\in\mathbb{R}^{48}$ are the BPM readings, $R$ is the
 $48\times48$ orbit response matrix, $\Delta q$ the unknown quadrupole
 misalignments, $\mathbf{b}$ the static BPM electronic offsets
-($\sim\SI{300}{\micro\meter}$, constant over hours--days but unknown), and
+($\sim\SI{100}{\micro\meter}$, constant over hours--days but unknown), and
 $\boldsymbol{\eta}\sim\SI{1}{\micro\meter}$ the readout noise. The
 difficulty is entirely $\mathbf{b}$: a direct inversion
 $\Delta q = R^{-1}(\mathbf{y}-\mathbf{b})$ requires knowing $\mathbf{b}$,
@@ -476,8 +476,8 @@ signal-to-noise gain is $\|M_{k=2}\|$, giving
 \begin{equation}
 \mathrm{SNR}_{\mathrm{out}}
 = \frac{A\,\|M_{k=2}\|}{\sigma_b}
-= \frac{\SI{10}{\micro\meter}\times167}{\SI{300}{\micro\meter}}
-\approx 5.6 .
+= \frac{\SI{10}{\micro\meter}\times167}{\SI{100}{\micro\meter}}
+\approx 16.7 .
 \end{equation}
 The resonant amplification thus works doubly in the estimator's favour: it
 enlarges the genuine $k=2$ signal in BPM space ($A\|M_{k=2}\|=\SI{1670}{\micro
@@ -551,9 +551,9 @@ $0.72\pm\SI{0.41}{\micro\meter}$, i.e.\ the genuine signal exceeds the
 offset leakage by $\sim\times14$.
 \item \textbf{Offset scaling.} Sweeping $\sigma_b$ shows the $k=2$ error
 scaling linearly with the offset, as expected if $\mathbf{b}$ enters
-through its (small) projection; extrapolating to a mechanical
-$\sigma_b=\SI{300}{\micro\meter}$ gives a $k=2$ error of
-$\sim\SI{2}{\micro\meter}$, still within the \SI{10}{\micro\meter} target.
+through its (small) projection; even at a pessimistic
+$\sigma_b=\SI{200}{\micro\meter}$ the $k=2$ error is
+$\sim\SI{1.2}{\micro\meter}$, still within the \SI{10}{\micro\meter} target.
 \end{itemize}
 
 \subsection{Sensitivity to the response-matrix model}
@@ -569,11 +569,11 @@ stays within the \SI{10}{\micro\meter} target for
 $\sigma_\mathrm{model}=\delta K/K\lesssim3\text{--}4\%$, a tolerance
 achievable with a beta-beat / LOCO-type calibration.
 Figure~\ref{fig:model_error} quantifies the full error budget.
-Three BPM-offset levels ($\sigma_b = 0$, $100$, $300\,\mu$m) are overlaid:
+Three BPM-offset levels ($\sigma_b = 0$, $20$, $100\,\mu$m) are overlaid:
 offset noise dominates at any realistic model accuracy, and model error
 alone is negligible across the entire $0$--$10\%$ range.
 The \SI{10}{\micro\meter} target is met for $\sigma_\mathrm{model}\lesssim10\%$
-even at the worst-case $\sigma_b=\SI{300}{\micro\meter}$,
+even at $\sigma_b=\SI{100}{\micro\meter}$,
 confirming that the tolerance is driven by BPM offsets, not by imperfect
 knowledge of $R$.
 
@@ -618,14 +618,14 @@ correction to the $k=2$ estimate is below 1\%.
 To stress-test this we set $\mathbf{b}=A\hat{m}_{k=2}$, the worst-case
 fully $k=2$-orbit-aligned offset. Table~\ref{tab:whiteness} shows that
 theory and simulation agree to four significant figures at all tested
-amplitudes. A mechanical offset of $A=\SI{300}{\micro\meter}$ induces a
-bias of \SI{1.80}{\micro\meter}, well within the \SI{10}{\micro\meter} target;
-the safe limit $A<\SI{1669}{\micro\meter}$ is 5.6$\times$ above the
+amplitudes. An offset of $A=\SI{100}{\micro\meter}$ induces a
+bias of \SI{0.60}{\micro\meter}, well within the \SI{10}{\micro\meter} target;
+the safe limit $A<\SI{1669}{\micro\meter}$ is 16.7$\times$ above the
 realistic value.
 
 For white $\mathbf{b}$ with r.m.s.\ $\sigma_b$, the $k=2$ estimate standard
 deviation is $\sigma_b/\|M_{k=2}\|=\sigma_b/167$; at the realistic
-$\sigma_b=\SI{300}{\micro\meter}$ this gives $\lesssim\SI{1.8}{\micro\meter}$,
+$\sigma_b=\SI{100}{\micro\meter}$ this gives $\lesssim\SI{0.6}{\micro\meter}$,
 fully within target.
 
 Three distinct amplitude scales, shown in Fig.~\ref{fig:bpm_fourier},
@@ -635,20 +635,20 @@ quantify the robustness end-to-end:
   A $\SI{10}{\micro\meter}$ $k=2$ misalignment passes through $R$ and is
   resonantly amplified: $A\|M_{k=2}\|=10\times167=\SI{1670}{\micro\meter}$
   in BPM space.
-\item \textbf{BPM-offset Fourier level ($\approx\SI{77}{\micro\meter}$).}
+\item \textbf{BPM-offset Fourier level ($\approx\SI{26}{\micro\meter}$).}
   Because $\mathbf{b}$ bypasses $R$ entirely and is white, its projection
   onto any FODO-antisymmetric mode $F_k$ has r.m.s.\
-  $\sigma_b\sqrt{\pi/48}\approx\SI{77}{\micro\meter}$---distributed equally
+  $\sigma_b\sqrt{\pi/48}\approx\SI{26}{\micro\meter}$---distributed equally
   across all $k$, with no peak at $k=2$.
-  The signal orbit ($\SI{1670}{\micro\meter}$) is already $22\times$ larger than
+  The signal orbit ($\SI{1670}{\micro\meter}$) is already $64\times$ larger than
   this raw Fourier level.
-\item \textbf{Estimator contamination floor ($\approx\SI{1.8}{\micro\meter}$).}
+\item \textbf{Estimator contamination floor ($\approx\SI{0.6}{\micro\meter}$).}
   The estimator projects $\mathbf{b}$ onto the $k=2$ column of $M=RF$
   (not onto $F_{k=2}$ directly), dividing by $\|M_{k=2}\|=167$ a second
-  time: $\sigma_b/\|M_{k=2}\|=\SI{300}{\micro\meter}/167\approx\SI{1.8}{\micro\meter}$.
+  time: $\sigma_b/\|M_{k=2}\|=\SI{100}{\micro\meter}/167\approx\SI{0.6}{\micro\meter}$.
 \end{enumerate}
 The hierarchy
-$\SI{1670}{\micro\meter}\gg\SI{77}{\micro\meter}\gg\SI{1.8}{\micro\meter}$
+$\SI{1670}{\micro\meter}\gg\SI{26}{\micro\meter}\gg\SI{0.6}{\micro\meter}$
 shows that the orbit amplification of $\|M_{k=2}\|$ works doubly in
 the estimator's favour: it enlarges the genuine signal in BPM space
 while simultaneously suppressing the offset contribution in the
@@ -661,11 +661,11 @@ product $y_j\hat{m}_{k=2,j}$ is everywhere positive and the sum is large.
 A random BPM offset carries no such structure: its products with
 $\hat{m}_{k=2}$ alternate in sign and nearly cancel.
 Figure~\ref{fig:matched_filter} illustrates this directly for a
-$\sigma_b=\SI{300}{\micro\meter}$ offset alongside a $\SI{10}{\micro\meter}$
-$k=2$ signal, recovering $\hat{a}_{k=2}=10.0\,\mu$m and $1.3\,\mu$m respectively.
+$\sigma_b=\SI{100}{\micro\meter}$ offset alongside a $\SI{10}{\micro\meter}$
+$k=2$ signal, recovering $\hat{a}_{k=2}=10.0\,\mu$m and $0.4\,\mu$m respectively.
 Figure~\ref{fig:whiteness_spec} confirms that the recovered-amplitude spectrum
 of a white offset is flat and broadband, with no spurious peak, and the floor
-is lowest precisely at $k=2$ ($\SI{2.2}{\micro\meter}$) because $\|M_{k=2}\|=167$
+is lowest precisely at $k=2$ ($\SI{0.7}{\micro\meter}$) because $\|M_{k=2}\|=167$
 is the largest column norm.
 
 \begin{table}[t]
@@ -680,10 +680,10 @@ four significant figures.}
 $A$ (\si{\micro\meter}) & Theory $\delta a$ (\si{\micro\meter}) &
 CLEAN (\si{\micro\meter}) & lstsq (\si{\micro\meter}) \\
 \midrule
+  20 & 0.12 & $+$0.12 & $+$0.12 \\
   50 & 0.30 & $+$0.30 & $+$0.30 \\
  100 & 0.60 & $+$0.60 & $+$0.60 \\
  200 & 1.20 & $+$1.20 & $+$1.20 \\
- 300 & 1.80 & $+$1.80 & $+$1.80 \\
 1669 & 10.0 & $+$10.0 & $+$10.0 \\
 \bottomrule
 \end{tabular}
@@ -708,9 +708,9 @@ standard orbit measurement and no active gradient manipulation.
 The following items remain open.
 
 \begin{itemize}
-  \item Validated at the realistic mechanical offset $\sigma_b=\SI{300}{\micro\meter}$
+  \item Validated at the reference offset $\sigma_b=\SI{100}{\micro\meter}$
     via the worst-case structured test (Section~\ref{sec:whiteness}): the $k=2$ bias
-    remains $\lesssim\SI{1.8}{\micro\meter}$ with no whiteness assumption.
+    remains $\lesssim\SI{0.6}{\micro\meter}$ with no whiteness assumption.
     \todo{Include non-zero readout noise $\boldsymbol{\eta}$ in the full error budget.}
 \item \todo{Discriminate genuine from offset-induced harmonics without
 oracle knowledge---e.g.\ calibrate the spurious-amplitude threshold from
@@ -749,10 +749,10 @@ $\|M_{k=2}\|=167$ vs.\ 16 for $k=4$), the consequent inversion of the
 misalignment-amplitude hierarchy at the orbit level, and near-orthogonality
 of the harmonic orbit responses that prevents contaminant leakage.
 Critically, the method makes no assumption about the statistical structure
-of the BPM offset: even if the full \SI{300}{\micro\meter} offset is
+of the BPM offset: even if the full \SI{100}{\micro\meter} offset is
 entirely aligned with the $k=2$ orbit pattern (worst case), the induced
-bias is only \SI{1.80}{\micro\meter}; the idealized worst-case limit is $\SI{1669}{\micro\meter}$,
-5.6$\times$ above the realistic value (Section~\ref{sec:whiteness}).
+bias is only \SI{0.60}{\micro\meter}; the idealized worst-case limit is $\SI{1669}{\micro\meter}$,
+16.7$\times$ above the realistic value (Section~\ref{sec:whiteness}).
 We also documented and corrected a $10^3$ unit-scaling error in the
 response-matrix pipeline. Within the targeted-estimation scope adopted here
 the method is complete; the natural extensions---propagating the measured

@@ -55,7 +55,7 @@ kullanarak quad konumlarını ölçmek.
 
 Halka 24 FODO hücresi × 2 quad = **48 kuadrupol** içeriyor. Her
 quad'ın yanında bir BPM (Beam Position Monitor) var. Problem şu: BPM
-okumaları ~300 μm elektronik ofset taşıyor ve aradığımız sinyal yalnızca
+okumaları ~100 μm elektronik ofset taşıyor ve aradığımız sinyal yalnızca
 ~10 μm. Sinyal arka planın 30 katı altında gömülü.
 
 Bu çalışma, bu problemi çözmek için bir dizi yöntemi sistematik biçimde
@@ -115,7 +115,7 @@ $$\mathbf{y} = R\,\Delta q + \mathbf{b} + \boldsymbol{\eta}$$
 
 $R$ tepki matrisi bilinebilir (simülasyon veya ölçümden). BPM gürültüsü
 $\boldsymbol{\eta} \sim 1$ μm ihmal edilebilir. Sorun $\mathbf{b}$:
-her BPM'in elektronik sıfır noktasının mekanik merkezden ~300 μm
+her BPM'in elektronik sıfır noktasının mekanik merkezden ~100 μm
 sapması. Bu ofset **saatler-günler boyunca sabit kalır, ama bilinmez.**
 
 Doğrudan $\Delta q = R^{-1}(\mathbf{y} - \mathbf{b})$ çözemeyiz çünkü
@@ -126,7 +126,7 @@ $\|\Delta q\|_\text{aranan}$'dan çok daha büyük.
 $R$'nin kondisyon sayısı ~249'dur. "Kondisyon sayısı" sezgisel olarak
 şu anlama gelir: girişteki küçük bir belirsizlik çıkışta kaç kat
 büyütülür? 1 μm BPM gürültüsü → ~4 μm tahmin hatası. Bu kabul
-edilebilir. Ama 300 μm BPM ofseti → ~1.2 mm kirliliği: tamamen kabul
+edilebilir. Ama 100 μm BPM ofseti → ~0.4 mm kirliliği: tamamen kabul
 edilemez.
 
 **Anahtar soru:** BPM ofsetini iptal edecek bir ölçüm tasarımı mümkün mü?
@@ -796,7 +796,7 @@ $\Delta q = F\hat{a}$ Fourier parametreleştirmesiyle:
 
 $$\mathbf{y} = \underbrace{R\,F}_{M}\,\hat{a} + \mathbf{b}$$
 
-BPM ofseti $\mathbf{b}$ beyaz bir vektör (her BPM'e bağımsız ~300 μm),
+BPM ofseti $\mathbf{b}$ beyaz bir vektör (her BPM'e bağımsız ~100 μm),
 $M = R\cdot F$ ise büyük tekil değerler taşıyan yapılı bir matris.
 **Fark:** $\mathbf{b}$ rastgele iken $M\hat{a}$ tutarlı bir desen —
 en küçük kareler $\hat{a}$'yı $\mathbf{b}$'den doğal olarak ayrıştırabilir,
@@ -939,10 +939,10 @@ k=2: 9.992 ± 0.578 μm   (gerçek: 10.000 μm)
 | 50 μm | ~0.3 μm | ~0.4 μm |
 | 100 μm | ~0.6 μm | ~0.7 μm |
 | 200 μm | ~1.2 μm | ~1.5 μm |
-| 300 μm | ~1.8 μm | ~2.2 μm |
+| 100 μm | ~0.6 μm | ~0.7 μm |
 
 Ölçek doğrusal — b sızıntısı σ_b ile orantılı. Mekanik olarak beklenen
-~300 μm BPM ofseti için k=2 hatası ~2 μm — 10 μm hedefinin altında.
+~100 μm BPM ofseti için k=2 hatası ~0.6 μm — 10 μm hedefinin altında.
 
 ### Önemli sınır: sahte harmonikler problemi
 

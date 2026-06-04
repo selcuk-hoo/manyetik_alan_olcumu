@@ -633,11 +633,11 @@ def bpm_whiteness_test(n_trials=200, seed=0, gain=0.2, max_iter=300):
     print("  ÖZET:")
     print(f"  • k=2 tahminini etkileyen yalnızca b'nin v_k2 yönündeki bileşeni")
     print(f"  • Saf yapısal b=A·v_k2: δa_k2 = A/‖M_k2‖ = A/{M_k2_norm:.1f}")
-    print(f"    → 10μm hata için A < {M_k2_norm*10:.0f} μm gerekir (tipik 300μm << bu sınır)")
+    print(f"    → 10μm hata için A < {M_k2_norm*10:.0f} μm gerekir (tipik 100μm << bu sınır)")
     print(f"  • Beyaz b(σ): beklenen lstsq hata std ≈ σ/‖M_k2‖ = σ/{M_k2_norm:.1f}")
     print(f"    CLEAN ≈ lstsq (γ≈{ratio:.1f}×); CLEAN avantajı: oracle gerektirmez")
-    print(f"  • 300μm tamamen k=2-orbit-hizalı ofset: bias = 300/{M_k2_norm:.1f} "
-          f"= {300/M_k2_norm:.2f}μm (10μm hedefin altında)")
+    print(f"  • 100μm tamamen k=2-orbit-hizalı ofset: bias = 100/{M_k2_norm:.1f} "
+          f"= {100/M_k2_norm:.2f}μm (10μm hedefin altında)")
 
 
 if __name__ == "__main__":

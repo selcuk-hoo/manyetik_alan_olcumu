@@ -105,7 +105,7 @@ y^{\text{ölçülen}} = R \cdot dy + b + n
 $$
 
 $b$ statiktir (zamanla değişmez) ama bilinmez ve büyüktür:
-tipik olarak ~300 μm; oysa quad hizalama sapmasının yörüngeye katkısı
+tipik olarak ~100 μm; oysa quad hizalama sapmasının yörüngeye katkısı
 ~10 μm. Ofset sinyali boğar; $R \cdot dy = y - b$ çözülemez.
 
 ### Hile: aynı $b$, farklı $R$

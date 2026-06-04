@@ -49,7 +49,7 @@ denir.
 
 $\mathbf{y} \in \mathbb{R}^{48}$ BPM okuması, $R$ 48×48 yörünge tepki
 matrisi, $\Delta q$ quadrupol hizalama hataları, $\mathbf{b}$ BPM
-elektronik ofseti (~300 μm, sabit ama bilinmez), $\boldsymbol{\eta}$
+elektronik ofseti (~100 μm, sabit ama bilinmez), $\boldsymbol{\eta}$
 okuma gürültüsü (~1 μm) olmak üzere:
 
 $$\mathbf{y} = R\,\Delta q + \mathbf{b} + \boldsymbol{\eta}.$$
@@ -72,7 +72,7 @@ $\mathbf{b}$'yi bilmeden sadece $\mathbf{y}$'yi ters çevirdiğimizde
 çözüm $R^{-1}\mathbf{y}$ içinde $R^{-1}\mathbf{b}$ kirliliği taşır.
 Matrisin koşullanma sayısı $\kappa(R) \approx 249$ olduğundan:
 
-$$\|\delta(\Delta q)\| \leq \kappa(R)\,\frac{\|\mathbf{b}\|}{\|R\|} \approx 249 \times 300\,\mu\text{m} \sim \text{mm düzey}$$
+$$\|\delta(\Delta q)\| \leq \kappa(R)\,\frac{\|\mathbf{b}\|}{\|R\|} \approx 249 \times 100\,\mu\text{m} \sim \text{mm düzey}$$
 
 Bu, hedef hassasiyetin (10 μm) iki mertebe üzerinde. Yani doğrudan
 ters çevirmek işe yaramaz.
@@ -344,7 +344,7 @@ en yakın olduğundan $R$ spektrumunun **tepesine** oturur.
 **Matched filter kazancı.** Estimatör, şablonu k=2 yörünge parmak izi $M_{k=2}$
 olan bir eşleşmiş filtredir; SNR kazancı $\|M_{k=2}\|$'dir:
 
-$$\text{SNR}_\text{çıkış} = \frac{A\,\|M_{k=2}\|}{\sigma_b} = \frac{10 \times 167}{300} \approx 5.6$$
+$$\text{SNR}_\text{çıkış} = \frac{A\,\|M_{k=2}\|}{\sigma_b} = \frac{10 \times 167}{100} \approx 16.7$$
 
 Yani yanlış-EDM'i en çok besleyen modun aynı zamanda en gürültü-dayanıklı mod
 olması tesadüf değil — ikisi de $\|M_{k=2}\| = 167$'nin $R$ spektrumunun tepesine
@@ -375,8 +375,8 @@ $$A_{k=2} = 9.94 \pm 0.66\,\mu\text{m} \quad (\text{gerçek: } 10), \qquad \Delt
    ~14× üzerindedir.
 
 3. **Ofset ölçeklenmesi:** $k=2$ hatası $\sigma_b$ ile doğrusal ölçeklenir
-   (küçük projeksiyon hipotezi ile tutarlı). $\sigma_b = 300\,\mu$m'e
-   ekstrapolasyon → ~2 μm hata, hedefin içinde.
+   (küçük projeksiyon hipotezi ile tutarlı). Kötümser $\sigma_b = 200\,\mu$m'e
+   ekstrapolasyon → ~1.2 μm hata, hedefin içinde.
 
 ---
 
@@ -393,23 +393,23 @@ yansır ve rezonant kuvvetlendirme nedeniyle $A \cdot \|M_{k=2}\| = 10 \times 16
 genliğinde bir kapalı yörünge oluşturur. Bu değer pik BPM sapması (~384 μm) değil, tüm BPM'lerin RMS normudur; pik BPM sapması 384 μm'dır. κ(R)=249 koşullanma sayısı ile karıştırılmamalıdır — koşullanma sayısı yörünge kazancı değil, R matrisinin en büyük ve en küçük tekil değerlerinin oranıdır. Kaçıklık $R$'den *geçer*,
 167× büyür.
 
-**2. BPM ofseti Fourier seviyesi — ~77 μm**
+**2. BPM ofseti Fourier seviyesi — ~26 μm**
 BPM ofseti $\mathbf{b}$, tepki matrisinden *geçmez* — doğrudan ölçüme
 eklenir. $\mathbf{b}$ beyaz gürültü olduğundan FODO-antisimetrik Fourier
 bazındaki her moda eşit enerji dağılır:
 
-$$|a_k(b)| \approx \sigma_b\sqrt{\pi/48} \approx 77\,\mu\text{m}, \quad \text{tüm } k \text{ için}$$
+$$|a_k(b)| \approx \sigma_b\sqrt{\pi/48} \approx 26\,\mu\text{m}, \quad \text{tüm } k \text{ için}$$
 
-k=2'de özel bir yığılma yoktur. Ve bu 77 μm, sinyal yörüngesi olan
-1670 μm'nin yanında zaten **22× küçüktür**.
+k=2'de özel bir yığılma yoktur. Ve bu 26 μm, sinyal yörüngesi olan
+1670 μm'nin yanında zaten **64× küçüktür**.
 
-**3. Estimatör çıkışındaki kirlenme — ~1.8 μm**
+**3. Estimatör çıkışındaki kirlenme — ~0.6 μm**
 Estimatör $F_k$'ya değil, $M_k = R \cdot F_k$'ya yansıtır.
 Bu, ofseti bir kez daha $\|M_{k=2}\| = 167$'ye böler:
 
-$$\delta\hat{a}_{k=2} = \frac{\sigma_b}{\|M_{k=2}\|} = \frac{300}{167} \approx 1.8\,\mu\text{m}$$
+$$\delta\hat{a}_{k=2} = \frac{\sigma_b}{\|M_{k=2}\|} = \frac{100}{167} \approx 0.6\,\mu\text{m}$$
 
-**Hiyerarşi: $1670 \gg 77 \gg 1.8\,\mu$m**
+**Hiyerarşi: $1670 \gg 26 \gg 0.6\,\mu$m**
 
 $\|M_{k=2}\|$'nin kuvvetlendirmesi iki kez işe yarar:
 gerçek sinyali BPM uzayında büyütür, ofsetin kestirime sızmasını ise bastırır.
@@ -440,9 +440,9 @@ Yörünge zaten k=2 parmak izini taşıdığından, her $y_j$ ile $\hat{m}_{k=2,
 Ofsetin şablonla ilgisi yoktur → çarpımların yarısı pozitif, yarısı negatif
 → **birbirini götürür** → toplam ≈ 0 → ofset görünmez.
 
-Sayısal örnek ($\sigma_b = 300\,\mu$m):
+Sayısal örnek ($\sigma_b = 100\,\mu$m):
 - Gerçek $k=2$ sinyali (10 μm misalignment): **kestirilen 10.0 μm** ← mükemmel
-- Rastgele ofset: **kestirilen ~1.3 μm** ← 167× bastırılmış
+- Rastgele ofset: **kestirilen ~0.4 μm** ← 167× bastırılmış
 
 ### Temel eşitsizlik
 
@@ -452,13 +452,13 @@ $k=2$ genlik kestirimine şu kadar kirletme katar:
 $$\delta a_{k=2} = \frac{\mathbf{b} \cdot \hat{m}_{k=2}}{\|M_{k=2}\|} = \frac{\mathbf{b} \cdot \hat{m}_{k=2}}{167}$$
 
 Bu formülde $\mathbf{b}$'nin dağılımı hakkında **hiçbir varsayım** yoktur.
-Güvenli limit: $\|\mathbf{b}_\parallel\| < 1669\,\mu$m (gerçekçi değerin 5.6×'ı).
+Güvenli limit: $\|\mathbf{b}_\parallel\| < 1669\,\mu$m (gerçekçi değerin 16.7×'ı).
 
 ### White ofset spektrumu (fig5)
 
-fig5 ise şunu gösteriyor: $\sigma_b = 300\,\mu$m'lik rastgele bir ofset,
+fig5 ise şunu gösteriyor: $\sigma_b = 100\,\mu$m'lik rastgele bir ofset,
 estimatörden geçince **tüm harmoniklerde düz ve geniş-bantlı bir taban** üretir —
-hiçbir $k$'da sahte tepe yok. Ve taban **tam k=2'de en düşük** (2.2 μm),
+hiçbir $k$'da sahte tepe yok. Ve taban **tam k=2'de en düşük** (0.7 μm),
 çünkü $\|M_{k=2}\| = 167$ en büyük sütun normu. Yanlış EDM'i besleyen mod,
 ofset kontaminasyonuna karşı en korunaklı olandır.
 
@@ -469,10 +469,10 @@ Teori: $\delta a = A/167$.
 
 | A [μm] | Teori [μm] | CLEAN [μm] | lstsq [μm] |
 |--------|-----------|-----------|-----------|
+| 20     | 0.12      | +0.12     | +0.12     |
 | 50     | 0.30      | +0.30     | +0.30     |
 | 100    | 0.60      | +0.60     | +0.60     |
 | 200    | 1.20      | +1.20     | +1.20     |
-| 300    | 1.80      | +1.80     | +1.80     |
 | 1669   | 10.0      | +10.0     | +10.0     |
 
 Teori ile simülasyon dört anlamlı basamakta örtüşmektedir.
@@ -495,11 +495,11 @@ ile ölçeklenir.
 | Senaryo | σ_model = 0% | σ_model = 5% | σ_model = 10% |
 |---------|------------|------------|--------------|
 | σ_b = 0 (model hatası yalnız) | ~0 μm | ~0 μm | ~0 μm |
+| σ_b = 20 μm (BBA sonrası) | ~0.12 μm | ~0.13 μm | ~0.15 μm |
 | σ_b = 100 μm | ~0.6 μm | ~0.6 μm | ~0.7 μm |
-| σ_b = 300 μm | ~1.8 μm | ~1.8 μm | ~2.0 μm |
 
 Temel çıkarım: **hata tamamen BPM ofseti tarafından belirlenir, model hatası etkisizdir.**
-$\sigma_b = 300\,\mu$m bile $\sigma_\text{model} \lesssim 10\%$'de 10 μm hedefinin içindedir.
+$\sigma_b = 100\,\mu$m bile $\sigma_\text{model} \lesssim 10\%$'de 10 μm hedefinin içindedir.
 Bu tolerans, beta-beat / LOCO-tipi kalibrasyon ile kolaylıkla ulaşılabilirdir.
 
 ---

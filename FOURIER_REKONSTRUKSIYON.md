@@ -69,7 +69,7 @@ QF → drift → arc → drift → QD → drift → arc → drift → (tekrar)
 
 24 FODO × 2 quad = **48 kuadrupol**. Her quad'ın yanında bir **BPM**
 (Beam Position Monitor) vardır: toplam 48 BPM. BPM, demeti dikey ve
-yatay olarak okur; çözünürlük ~1 μm, ama elektronik ofset ~300 μm
+yatay olarak okur; çözünürlük ~1 μm, ama elektronik ofset ~100 μm
 (bkz. §4).
 
 Tune değerleri: $Q_y \approx 2.68$ (dikey), $Q_x \approx 2.68$ (yatay).
@@ -120,7 +120,7 @@ $$
 - $\mathbf{y}$ (48 boyutlu): BPM okumaları.
 - $R$ (48×48): tepki matrisi.
 - $\Delta q$ (48 boyutlu): quad hizalama hataları — **aranan**.
-- $\mathbf{b}$ (48 boyutlu): BPM elektronik ofsetleri — bilinmez, ~300 μm.
+- $\mathbf{b}$ (48 boyutlu): BPM elektronik ofsetleri — bilinmez, ~100 μm.
 - $\boldsymbol{\eta}$ (48 boyutlu): BPM ölçüm gürültüsü — ~1 μm.
 
 $R_{ij}$ elemanı şu anlama gelir: "*j* numaralı quad 1 m kaydırılırsa
@@ -149,12 +149,12 @@ y_i^\text{ölçülen} = y_i^\text{gerçek} + b_i + \eta_i
 $$
 
 $b_i$: elektronik ofset — BPM'in "sıfır" noktasının mekanik merkezden
-sapması. Tipik değer: **~300 μm**. Zaman içinde değişmez (saatler-günler
+sapması. Tipik değer: **~100 μm**. Zaman içinde değişmez (saatler-günler
 boyunca sabit), ama bilinmez.
 
 Hizalama hatası kaynaklı orbit sapması: **~10 μm**.
 
-Aradığınız sinyal (10 μm), arka plan (300 μm) tarafından **30 kat**
+Aradığınız sinyal (10 μm), arka plan (100 μm) tarafından **10 kat**
 bastırılmış durumda. Doğrudan $\Delta q = R^{-1}\mathbf{y}$ çözümü
 $R^{-1}\mathbf{b}$ ofset kirliliğini taşır ve 10 μm hassasiyet hedefini
 tamamen bozar.
@@ -896,7 +896,7 @@ $\Delta q = F\hat{a}$ koyarsak:
 
 $$\mathbf{y} = \underbrace{R\,F}_{M}\,\hat{a} + \mathbf{b}$$
 
-$\mathbf{b}$ beyaz (her BPM bağımsız ~300 μm), $M\hat{a}$ ise tune
+$\mathbf{b}$ beyaz (her BPM bağımsız ~100 μm), $M\hat{a}$ ise tune
 rezonansıyla güçlenmiş, yapısal bir desen. En küçük kareler $\hat{a}$'yı
 $\mathbf{b}$'den doğal olarak ayırır **eğer** sinyalin ofsetten çok
 büyük olduğu frekanslar varsa.
@@ -1029,7 +1029,7 @@ k=2: 9.992 ± 0.578 μm  (gerçek: 10.000 μm)
 ```
 
 **TANI 3 — σ_b taraması:** Hata σ_b ile doğrusal ölçekliyor.
-300 μm mekanik BPM ofsetinde bile k=2 hatası ~2 μm (10 μm hedefin altında).
+100 μm mekanik BPM ofsetinde bile k=2 hatası ~0.6 μm (10 μm hedefin altında).
 
 ### Sınır: sahte harmonikler
 

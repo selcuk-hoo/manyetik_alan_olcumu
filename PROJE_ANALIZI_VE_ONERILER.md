@@ -16,7 +16,7 @@ $$
 $$
 
 - $R$ (48×48): Courant-Snyder tepki matrisi, $\kappa(R) \approx 160$
-- $\mathbf{b}$: BPM elektronik ofsetleri, statik ama bilinmez (~300 μm)
+- $\mathbf{b}$: BPM elektronik ofsetleri, statik ama bilinmez (~100 μm)
 - $\boldsymbol{\eta}$: BPM gürültüsü (~1 μm)
 - Hedef hassasiyet: **10 μm** (Omarov vd., PRD 2021)
 

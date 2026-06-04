@@ -4,7 +4,7 @@ compute_snr_rank.py  —  Taslaktaki sayısal iddiaların doğrulanması
 
 Doğrular:
   1. k=2 yörünge genliği (BPM uzayı): 10 μm kaçıklık → ? mm
-  2. Beyaz BPM ofseti (300 μm) → k=2 Fourier genliği → SNR
+  2. Beyaz BPM ofseti (100 μm) → k=2 Fourier genliği → SNR
   3. R'nin tekil değer spektrumu: rank, koşul sayısı, hangi k en iyi koşullu
   4. k-modülasyon için ΔR rank argümanı (≈ quad sayısı)
 """
@@ -29,7 +29,7 @@ def Fsin(k, n=n_q):
 def fourier_amp(vec, k):
     """vec'in k modundaki FİZİKSEL genliği (katsayı konvansiyonu):
        vec ≈ Σ a_k cos_k + b_k sin_k,  a_k = <vec,cos_k>/||cos_k||²
-       (make_paper_figures fig5 ile aynı: beyaz 300μm → ~77μm)"""
+       (make_paper_figures fig5 ile aynı: beyaz 100μm → ~26μm)"""
     fc = Fcos(k); fs = Fsin(k)
     ac = (vec @ fc) / (fc @ fc)
     if np.allclose(fs, 0):   # k=0 ve k=12: sin yok
@@ -67,7 +67,7 @@ A_sig = 10e-6                      # gerçek kaçıklık genliği
 print(f"  Sinyal k=2 yörünge genliği (katsayı): {sig_amp_k2*1e6:.1f} μm")
 print(f"  (gerçek kaçıklık 10 μm; eşleşmiş-filtre bunu A=10μm olarak geri verir)")
 print()
-for off_um in [100, 300]:
+for off_um in [20, 100]:
     off = off_um*1e-6
     amps = np.array([fourier_amp(rng.normal(0, off, n_q), 2) for _ in range(5000)])
     off_k2 = amps.mean()
