@@ -242,38 +242,36 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
     }
 
     // ------------------------------------------------------------------------
-    // Harmonic RADIAL magnetic field B_x(θ) = A_r · cos(N·θ), applied to EVERY
-    // element around the ring (deflectors, drifts and quads alike).
+    // Harmonic radial magnetic field: B_r(θ) = A_r · cos(N · 2π · i_fodo / nFODO)
     //
-    //   field_params[21] = A_r   amplitude [T]   (e.g. 1e-9 = 1 nT)
-    //   field_params[22] = N     azimuthal harmonic number
-    //   field_params[29] = θ_e   geometric ring azimuth at this element's
-    //                            entry [rad], supplied by run_integration.
+    //   field_params[21] = A_r    amplitude [T]
+    //   field_params[22] = N      azimuthal harmonic number
+    //   field_params[29] = θ_e   ring azimuth at element entry [rad]
+    //   field_params[12] = nFODO  number of FODO cells
     //
-    // Inside an arc the particle's local angle atan2(Y,X) advances 0→Φ_def, so
-    // the true ring azimuth is θ = θ_e + atan2(Y,X); on straights atan2(Y,X)≈0.
-    // The field is applied in the TRUE LOCAL RADIAL direction (always pointing
-    // radially outward), decomposed into global (X,Y) components:
-    //   B_X_global = A_r · cos(N·θ) · cos(θ)
-    //   B_Y_global = A_r · cos(N·θ) · sin(θ)
-    // where cos(θ) = X/R, sin(θ) = Y/R.
-    // Previously only B[0] was set (≈ global X), which is correct only at the
-    // entry of each element after rotate_all (Y≈0, so local radial ≈ global X).
-    // Applying only B[0] throughout the arc makes N=0 behave as a fixed lab-frame
-    // field (always in +X), not as a field always pointing radially — causing a
-    // spuriously large secular dSy/dt for N=0. The correct two-component form
-    // ensures the field is truly local-radial and reproduces Omarov 2022
-    // (PRD 105, 032001) Fig. 8: dS_y/dt vs. the N-th harmonic of a radial B field.
+    // The amplitude is CONSTANT within each FODO cell (index i_fodo), varying
+    // only from cell to cell.  Inside a DEFLECTOR the local radial direction
+    // rotates as the particle traverses the arc, so both X and Y components are
+    // needed; theta_local = atan2(Y,X) is the angle traversed since arc entry
+    // (rotate_all ensures Y=0 at each element boundary).  In straight sections
+    // (drifts, quads) the local radial direction is always +X, so only B[0]
+    // is set.
     double Br_harm_amp = field_params[21];
     if (Br_harm_amp != 0.0) {
         double Br_harm_N = field_params[22];
         double theta_e   = field_params[29];
-        double theta     = theta_e + ((R > 1e-6) ? std::atan2(Y, X) : 0.0);
-        double B_rad     = Br_harm_amp * std::cos(Br_harm_N * theta);
-        double cos_az    = (R > 1e-6) ? X / R : 1.0;
-        double sin_az    = (R > 1e-6) ? Y / R : 0.0;
-        B[0] += B_rad * cos_az;
-        B[1] += B_rad * sin_az;
+        double nFODO_d   = field_params[12];
+        int    i_fodo    = (int)(theta_e * nFODO_d / (2.0 * M_PI));
+        double B_r0      = Br_harm_amp * std::cos(Br_harm_N * 2.0 * M_PI * i_fodo / nFODO_d);
+        if (element_type == 0) {
+            // Deflector: field tracks arc traversal angle
+            double theta_local = (R > 1e-6) ? std::atan2(Y, X) : 0.0;
+            B[0] += B_r0 * std::cos(theta_local);
+            B[1] += B_r0 * std::sin(theta_local);
+        } else {
+            // Straight (drift, quad): local radial = +X in rotated frame
+            B[0] += B_r0;
+        }
     }
 }
 
