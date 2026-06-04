@@ -114,7 +114,60 @@ def make_orbit(R, k_true=2, A_true=10e-6, phi_true=0.3,
 
 # ── response matrix ──────────────────────────────────────────────────────────
 
-R = np.load("R_dy_1.npy")   # 48×48, units: m/m
+# Gömülü referans verisi: build_response_matrix.py çıktısı (gzip+base64).
+# Lokal R_dy_1.npy yoksa veya sıfır matris içeriyorsa bu veri kullanılır.
+_R_FALLBACK_B64 = (
+    "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"
+)
+
+
+def _load_R():
+    """Load R_dy_1.npy if present and valid; otherwise use the embedded reference."""
+    import base64, gzip, io as _io
+    try:
+        Rmat = np.load("R_dy_1.npy")
+        if np.max(np.abs(Rmat)) > 1e-10:
+            print("R loaded from R_dy_1.npy")
+            return Rmat
+        raise ValueError("R_dy_1.npy contains a zero matrix")
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"  Note: {exc}")
+        print("  Using embedded reference R (run build_response_matrix.py to regenerate locally)")
+        raw = gzip.decompress(base64.b64decode(_R_FALLBACK_B64))
+        return np.load(_io.BytesIO(raw))
+
+
+R = _load_R()
 N_Q = R.shape[0]
 
 svs = np.linalg.svd(R, compute_uv=False)

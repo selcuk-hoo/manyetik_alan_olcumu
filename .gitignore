@@ -2,13 +2,6 @@ __pycache__/
 *.pyc
 *.npy
 *.npz
-# response matrices are small and required — keep them tracked
-!R_dy_1.npy
-!R_dy_2.npy
-!R_dx_1.npy
-!R_dx_2.npy
-!dR_dy.npy
-!dR_dx.npy
 *.csv
 scan_quad_tilt.png
 simulation_data.txt
