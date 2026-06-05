@@ -333,12 +333,14 @@ def plot_results(results, amp_coef):
     # (parçacık bunun üzerine oturtulduğu için kalan betatron ~0'dır).
     orbit = np.array([r["co_off_mm"] for r in results])
 
-    fig, ax1 = plt.subplots(figsize=(7, 4.5))
+    fig, ax1 = plt.subplots(figsize=(8, 5))
     color1 = "tab:red"
-    ax1.bar(ks, dsy, width=0.55, color=color1, alpha=0.75,
-            label=r"$|dS_y/dt|$ (false EDM)")
-    ax1.set_xlabel("Fourier mode $k$ of quad misalignment")
-    ax1.set_ylabel(r"$|dS_y/dt|$  [rad/s]  (false EDM signal)", color=color1)
+    ax1.plot(ks, dsy, "o-", color=color1, lw=1.8, ms=8, mfc="white",
+             mew=2, label=r"$|dS_y/dt|$ (false EDM)")
+    ax1.set_yscale("log")
+    ax1.set_xlabel("Fourier mode $k$ of quad misalignment", fontsize=12)
+    ax1.set_ylabel(r"$|dS_y/dt|$  [rad/s]  (false EDM signal)", color=color1,
+                   fontsize=11)
     ax1.tick_params(axis="y", labelcolor=color1)
     ax1.set_xticks(ks)
 
