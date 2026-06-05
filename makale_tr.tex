@@ -12,7 +12,7 @@
 \usepackage{xcolor}
 \newcommand{\todo}[1]{{\color{red}\textbf{(YAPILACAK: #1)}}}
 
-\journal{Nuclear Instruments and Methods in Physics Research A}
+\journal{Physical Review Accelerators and Beams}
 
 \begin{document}
 
@@ -202,8 +202,29 @@ düzeyleri gözlemlemiştir.
 \textbf{Bu rank kısıtı, mevcut çalışmanın birincil motivasyonudur}:
 tam $\Delta q$'yu kurtarmak yerine yalnızca sahte-EDM açısından kritik
 Fourier harmoniklerini ($k=1,2,3$) hedefleyerek rank sorununu yapısal
-olarak aşıyoruz. Bunun yanı sıra aşağıda açıklanan ortak körlük
-her iki yaklaşım için de geçerlidir.
+olarak aşıyoruz (Şekil~\ref{fig:kmod_rank}). Bunun yanı sıra aşağıda
+açıklanan ortak körlük her iki yaklaşım için de geçerlidir.
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.78\textwidth}{\centering\vspace{2cm}
+\textbf{[ŞEKİL 7]} \\
+Sol: $k=2$ genlik tahmin hatası (\%) vs modüle edilen kuadrupol sayısı $N_\mathrm{mod}$,
+kirletici modlar ($k=4\ldots10$, $100$--$300\,\mu$m) mevcut.
+Yatay kesikli çizgi: tek yörünge CLEAN referansı ($\approx5\%$).
+Sağ: $k=2$ sinyal yakalama oranı vs $N_\mathrm{mod}$.
+Gerçek $N_\mathrm{mod}=3$ (dikey noktalı çizgi): hata $\approx4300\%$, yakalama $\approx7\%$.
+\vspace{2cm}}}
+\caption{Kısmi k-modülasyonunun rank kısıtı.
+$N_\mathrm{mod}<48$ kuadrupol modüle edildiğinde $k=2$ sinyalinin yalnızca
+$N_\mathrm{mod}/48$ fraksiyonu örneklenir ve kirleticiler mevcut olduğunda
+tahmin hatası $>1000\%$'e fırlar.
+Tam halka k-modu ($N_\mathrm{mod}=48$) hata $\approx1\%$ verir,
+ancak 48 kuadrupolün eş zamanlı hassas modülasyonunu gerektirir.
+Tek yörünge CLEAN yaklaşımı ise gradyan modülasyonuna gerek kalmadan
+$\approx5\%$ hata düzeyinde kalır.}
+\label{fig:kmod_rank}
+\end{figure}
 
 \subsection{Hem LOCO hem k-modülasyonunun ortak körlüğü}
 
