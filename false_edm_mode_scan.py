@@ -249,9 +249,13 @@ def _run_one_k(task):
     sy_strobe = np.asarray(poin[:, 7], float) if poin is not None and len(poin) > 5 else None
     if sy_strobe is not None:
         ts = np.asarray(poin_t, float)
-        coeffs, cov = np.polyfit(ts, sy_strobe, 1, cov=True)
-        slope = float(coeffs[0])
-        slope_err = float(np.sqrt(cov[0, 0]))
+        # Linear estimate (fast, unbiased only when d2≈0)
+        slope = float(np.polyfit(ts, sy_strobe, 1)[0])
+        # Quadratic fit: Sy = a·t² + d1·t + d0
+        # std-err of d1 accounts for the d2·t² curvature that biases
+        # the linear slope — gives physically meaningful error bars.
+        coeffs2, cov2 = np.polyfit(ts, sy_strobe, 2, cov=True)
+        slope_err = float(np.sqrt(cov2[1, 1]))
     else:
         ts = None
         slope = float("nan")
