@@ -242,28 +242,34 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
     }
 
     // ------------------------------------------------------------------------
-    // Harmonic radial magnetic field: B_r(θ) = A_r · cos(N · θ)
+    // Harmonic radial magnetic field: B_r(θ) = A_r · cos(N · 2π · i_fodo / nFODO)
     //
     //   field_params[21] = A_r    amplitude [T]
     //   field_params[22] = N      azimuthal harmonic number
     //   field_params[29] = θ_e   ring azimuth at element entry [rad]
+    //   field_params[12] = nFODO  number of FODO cells
     //
-    // θ is the current ring azimuth (global horizontal angle):
-    //   • Deflectors: θ = atan2(Y,X) — tracks the actual arc position
-    //   • Straight sections: θ = θ_e — constant throughout the element
-    // The radial direction at θ is (cos θ, sin θ) in global X/Y.
-    // For straight sections B[0] is the local radial (+X) direction.
+    // The amplitude is CONSTANT within each FODO cell (index i_fodo), varying
+    // only from cell to cell.  Inside a DEFLECTOR the local radial direction
+    // rotates as the particle traverses the arc, so both X and Y components are
+    // needed; theta_local = atan2(Y,X) is the angle traversed since arc entry
+    // (rotate_all ensures Y=0 at each element boundary).  In straight sections
+    // (drifts, quads) the local radial direction is always +X, so only B[0]
+    // is set.
     double Br_harm_amp = field_params[21];
     if (Br_harm_amp != 0.0) {
         double Br_harm_N = field_params[22];
         double theta_e   = field_params[29];
-        if (element_type == 0 && R > 1e-6) {
-            double phi  = std::atan2(Y, X);
-            double B_r0 = Br_harm_amp * std::cos(Br_harm_N * phi);
-            B[0] += B_r0 * std::cos(phi);
-            B[1] += B_r0 * std::sin(phi);
+        double nFODO_d   = field_params[12];
+        int    i_fodo    = (int)(theta_e * nFODO_d / (2.0 * M_PI));
+        double B_r0      = Br_harm_amp * std::cos(Br_harm_N * 2.0 * M_PI * i_fodo / nFODO_d);
+        if (element_type == 0) {
+            // Deflector: field tracks arc traversal angle
+            double theta_local = (R > 1e-6) ? std::atan2(Y, X) : 0.0;
+            B[0] += B_r0 * std::cos(theta_local);
+            B[1] += B_r0 * std::sin(theta_local);
         } else {
-            double B_r0 = Br_harm_amp * std::cos(Br_harm_N * theta_e);
+            // Straight (drift, quad): local radial = +X in rotated frame
             B[0] += B_r0;
         }
     }
