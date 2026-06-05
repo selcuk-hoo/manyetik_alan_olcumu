@@ -118,7 +118,7 @@ düzeyinde kalmaktadır.}
 burada $\mathbf{y}\in\mathbb{R}^{48}$ BPM okumaları, $R$ $48\times48$ yörünge
 tepki matrisi, $\Delta q$ bilinmeyen kuadrupol kaçıklıkları, $\mathbf{b}$
 statik BPM elektronik ofsetleri ($\sim\SI{100}{\micro\meter}$, saatler-günler
-boyunca sabit fakat bilinmez) ve $\boldsymbol{\eta}\sim\SI{1}{\micro\meter}$
+boyunca sabit fakat belirlenemeyen) ve $\boldsymbol{\eta}\sim\SI{1}{\micro\meter}$
 okuma gürültüsüdür. Güçlük tamamen $\mathbf{b}$'dedir: $R^{-1}\mathbf{y}$
 üzerinden $\Delta q$'yu çözmek $R^{-1}\mathbf{b}$ kirletmesini taşır ve
 $\kappa(R)\approx249$ ile bu kirletme milimetre mertebesine çıkar — hedefin
@@ -322,7 +322,18 @@ değerin $16{,}7\times$ üzerindedir.
 \section{CLEAN algoritması ile geri çatım}
 \label{sec:clean}
 
-\subsection{Algoritmanın çalışma prensibi}
+\subsection{Algoritmanın çalışma prensibi ve neden CLEAN?}
+
+Hizalama hatası spektrumunda hedef modlar ($k=1,2,3$; $10$--$30\,\mu$m) ile
+kirletici modlar ($k=4\ldots10$; $100$--$300\,\mu$m) arasında $10$--$30\times$
+genlik farkı vardır. Bu koşulda doğrudan en küçük kareler çözümü (lstsq) işe
+yarar; fakat gürültülü ya da az belirlenmiş problemlerde büyük kirleticilerden
+sızan hata küçük modları bozar. CLEAN, bu sorunu iteratif olarak çözer:
+\textit{her adımda en baskın bileşeni artıktan önce ayıklar, ardından bir
+sonrakine geçer.} Büyük kirleticiler ilk olarak temizlendiğinden küçük hedef
+modlar kirletici gölgesinde kalmaz. Bu sıralama, örtük en küçük karelerde
+olmayan bir "kirlilik izolasyonu" sağlar ve özellikle BPM gürültüsünün yüksek
+olduğu senaryolarda lstsq'ya göre üstün performans verir.
 
 CLEAN, temel olarak radyo astronomi görüntüleme alanından uyarlanan
 iteratif bir bileşen soyutlama algoritmasıdır. Bu çalışmada aşağıdaki
@@ -362,7 +373,7 @@ büyük genliklilerin gölgesinde kaybolmamaktadır.
 \begin{figure}[ht]
 \centering
 \fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
-\textbf{[ŞEKİL 4]} \\
+\textbf{[ŞEKİL 4]} \textit{(Geri çatım kıyası)} \\
 Üç yöntemle geri çatılan $k=1,2,3$ genlikleri. \\
 Gerçek değerler: k=1: 30~μm, k=2: 10~μm, k=3: 25~μm. \\
 Kirleticiler: k=4..10, her biri 100--300~μm.
@@ -371,6 +382,23 @@ Kirleticiler: k=4..10, her biri 100--300~μm.
 CLEAN (C). Kısmi baz kirletici sızıntısı nedeniyle sapma gösterirken
 tam baz ve CLEAN her üç modu da başarıyla kurtarır.}
 \label{fig:reconstruction}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
+\textbf{[ŞEKİL 5]} \\
+CLEAN iterasyon basamakları görseli. \\
+Üst sol: başlangıç artık yörüngesi (tüm modlar mevcut). \\
+Sonraki paneller: her iterasyonda en baskın bileşen (k=6, k=8, \ldots, k=2) \\
+ayrıştırıldıkça artığın nasıl küçüldüğü. \\
+Son panel: artık $<1\,\mu$m eşiğinde, $k=1,2,3$ tahminleri yerleşmiş.
+\vspace{2cm}}}
+\caption{CLEAN iterasyon adımları. Büyük kirletici bileşenler ($k=4\ldots10$)
+ilk olarak ayrıştırılır; küçük hedef modlar ($k=1,2,3$) ancak kirleticiler
+temizlendikten sonra net biçimde ortaya çıkar. Bu sıralama, lstsq'nun
+yetersiz kaldığı gürültülü koşullarda CLEAN'i üstün kılar.}
+\label{fig:clean_iterations}
 \end{figure}
 
 \subsection{Fiziksel yorum}
@@ -470,7 +498,7 @@ $\sigma_G\lesssim0{,}2\%$ kalibrasyonuyla kombinat belirsizlik $\sim2\%$'ye iner
 \begin{figure}[ht]
 \centering
 \fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
-\textbf{[ŞEKİL 5]} \\
+\textbf{[ŞEKİL 6]} \textit{(Kombinat hata bütçesi)} \\
 $k=1,2,3$ için kombinat sistematik hata çubuk grafiği. \\
 Her panel bir mod; yatay eksen: hata kaynağı (BPM gürültüsü, ofset, rulo, gradyan, kombinat). \\
 Dikey eksen: $\Delta A/A$ [\%] (ortalama ± 1σ). N=200 MC.
@@ -511,6 +539,13 @@ neredeyse $k$'dan bağımsızdır; spin, lokal pik alan yerine halka genelindeki
 ortalama impulse tepki verdiğinden FODO dolgu faktörü $f_\mathrm{fill}\sim3\%$
 ve gradyan $G=\SI{0{,}21}{\tesla\per\meter}$ genel ölçeği belirler.
 Lokal kuadrupol-merkezi alanı $B_{x,\mathrm{eq}}$'nun $\sim\!34\times$'idir.
+
+\textbf{Dayanıklılık notu.} $c_k$'nın $k$'dan bağımsızlığı pratik açıdan
+kritik bir özelliktir: hangi mod ölçülürse ölçülsün ($k=1,2$ veya $3$),
+aynı $\approx6\,\mathrm{nT}\,\mu\mathrm{m}^{-1}$ dönüşüm katsayısı
+kullanılabilir. Bu, modele özgü kalibrasyona gerek olmadığı ve çerçevenin
+kafes değişikliklerine ve farklı deney koşullarına karşı güçlü olduğu
+anlamına gelir.
 
 \subsection{Ölçüm hassasiyeti}
 
@@ -553,10 +588,15 @@ Aşağıdaki konular sonraki çalışmalar için açık kalmaktadır:
   \item \textbf{Tepki matrisi kalibrasyonu.}
     $R$'nin LOCO/beta-BBA ile ne kadar iyi ölçülebildiği ve kalan
     $\delta K/K$'nın $k=2$ hata bütçesine yayılması incelenmelidir.
-  \item \textbf{Gradyan kalibrasyonu.}
-    Monte Carlo analizinde $\sigma_G=0{,}5\%$ baskın belirsizlik kaynağıdır.
-    $\sigma_G\lesssim0{,}2\%$'ye indirilmesi kombinat belirsizliği $\sim2\%$'ye
-    çekecektir.
+  \item \textbf{Gradyan kalibrasyonu — en yüksek öncelikli donanımsal iyileştirme.}
+    Monte Carlo analizinde $\sigma_G=0{,}5\%$, üç mod için de baskın belirsizlik
+    kaynağıdır ($k=2$'de $\pm3{,}9\%$, kombinat $\pm5{,}4\%$). Buna karşın BPM
+    ofseti ve kuadrupol rulosu yeterince küçük tutulsa bile tek başına gradyan
+    hatası bu sınırlamayı koruyacaktır. LOCO/beta-BBA tabanlı in-situ gradyan
+    kalibrasyonu ile $\sigma_G\lesssim0{,}2\%$'ye ulaşılırsa kombinat belirsizlik
+    $\sim2\%$'ye iner ve alan hassasiyeti de buna bağlı olarak $\sim3\times$
+    iyileşir. Bu, deney grubunun en yüksek getiri sağlayacağı tek kalibrasyon
+    adımıdır.
   \item \textbf{Yatay düzlem ve kuadrupol tilti.}
     Halihazırda oluşturulan yatay tepki matrisi $R_x$ kullanılarak yatay
     düzleme ve skew kuplaja genişleme yapılabilir.
