@@ -250,9 +250,23 @@ def _run_one_k(task):
     if sy_strobe is not None:
         ts = np.asarray(poin_t, float)
         slope = float(np.polyfit(ts, sy_strobe, 1)[0])
+        # Richardson integration-error estimate: re-run at 2·dt (same y_launch,
+        # no CO redo — half the steps, ~50% extra wall time per k).
+        # |slope(dt) - slope(2dt)| ≈ leading-order truncation error of slope(dt).
+        _, poin_c, poin_t_c = integrate_particle(
+            y_launch, 0.0, t2, 2*dt, fields=fields, return_steps=return_steps,
+            quad_dy=quad_dy)
+        sy_c = (np.asarray(poin_c[:, 7], float)
+                if poin_c is not None and len(poin_c) > 5 else None)
+        if sy_c is not None:
+            slope_c = float(np.polyfit(np.asarray(poin_t_c, float), sy_c, 1)[0])
+            slope_err = abs(slope - slope_c)
+        else:
+            slope_err = float("nan")
     else:
         ts = None
         slope = float("nan")
+        slope_err = float("nan")
     # Karşılaştırma: eski sürekli-SG yöntemi (örnekleme-bağımlı, güvenilmez)
     slope_sg = float(measure_dSy_dt(hist, t_array))
     sy = hist[:, 7].copy()   # sürekli S_y (hızlı salınım bağlamı için)
@@ -260,7 +274,8 @@ def _run_one_k(task):
     # resid_beta_mm: sabit azimutta kalan betatron RMS (CO aramasından).
     # Kapalı yörünge üzerinde fırlatıldıysa ~0 (≪ CO ofseti) → temiz fırlatma.
     return {"k": k, "co_off_mm": co_off_mm, "resid_beta_mm": resid_beta_mm,
-            "dSy_dt": slope, "dSy_dt_sg": slope_sg, "runtime": dt_run,
+            "dSy_dt": slope, "dSy_dt_err": slope_err,
+            "dSy_dt_sg": slope_sg, "runtime": dt_run,
             "sy": sy, "t_array": t_array,
             "sy_strobe": (sy_strobe.copy() if sy_strobe is not None else None),
             "t_strobe": (ts.copy() if ts is not None else None)}
@@ -327,16 +342,19 @@ def plot_results(results, amp_coef):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    ks   = np.array([r["k"] for r in results])
-    dsy  = np.array([abs(r["dSy_dt"]) for r in results])
+    ks      = np.array([r["k"] for r in results])
+    dsy     = np.array([abs(r["dSy_dt"]) for r in results])
+    dsy_err = np.array([r.get("dSy_dt_err", 0.0) for r in results])
     # Orbit rezonans göstergesi: bulunan kapalı-yörünge fırlatma ofseti
     # (parçacık bunun üzerine oturtulduğu için kalan betatron ~0'dır).
     orbit = np.array([r["co_off_mm"] for r in results])
 
     fig, ax1 = plt.subplots(figsize=(8, 5))
     color1 = "tab:red"
-    ax1.plot(ks, dsy, "o-", color=color1, lw=1.8, ms=8, mfc="white",
-             mew=2, label=r"$|dS_y/dt|$ (false EDM)")
+    ax1.errorbar(ks, dsy, yerr=dsy_err, fmt="o-", color=color1, lw=1.8,
+                 ms=8, mfc="white", mew=2, capsize=4, capthick=1.5,
+                 elinewidth=1.3,
+                 label=r"$|dS_y/dt|$  [err: Richardson $\Delta t$ convergence]")
     ax1.set_yscale("log")
     ax1.set_xlabel("Fourier mode $k$ of quad misalignment", fontsize=12)
     ax1.set_ylabel(r"$|dS_y/dt|$  [rad/s]  (false EDM signal)", color=color1,

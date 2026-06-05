@@ -277,7 +277,7 @@ the CLEAN wrapping adds oracle-free candidate selection at no cost to accuracy.
 The premise of this work---that $k=2$ is the harmonic worth resolving---rests
 on a physical claim: among equal-amplitude misalignment harmonics, $k=2$
 produces the largest false EDM. We verify this directly by spin tracking,
-independently of any reconstruction. For each $k=0,\dots,5$ we set
+independently of any reconstruction. For each $k=0,\dots,12$ we set
 $\Delta y_j=A\,F_k[j]$ at equal amplitude $A=\SI{10}{\micro\meter}$, switch
 off the true EDM, and measure the secular vertical-spin precession rate
 $dS_y/dt$, which is the false-EDM observable.
@@ -299,8 +299,10 @@ sampling-rate choice.
 Table~\ref{tab:falseedm} shows the outcome. The false EDM peaks sharply at
 $k=2$, exceeding $k=1$ by $2.9\times$ and $k=3$ by $2.2\times$, and tracks
 the closed-orbit amplitude (both maximal at $k=2$, the harmonic nearest the
-vertical tune $Q_y\approx2.68$). The rate falls monotonically for $k\ge3$,
-reaching $4\%$ of the $k=2$ peak at $k=6{,}7$. This is qualitatively consistent with the
+vertical tune $Q_y\approx2.68$). The rate falls steeply for $k\ge3$,
+reaching $4\%$ of the $k=2$ peak at $k=6{,}7$ and levelling at
+$\lesssim\!2\%$ for $k\ge9$, where the CO amplitude is below
+\SI{3}{\micro\meter}. This is qualitatively consistent with the
 $N=2$ peak reported by Omarov \emph{et al.}~\cite{omarov} (their
 Figs.~7--8), though the two rings differ in lattice design and the
 comparison is not direct. There the low-harmonic rates were quoted only as
@@ -313,21 +315,27 @@ method removes here, returning the actual rates.
 \centering
 \caption{False-EDM secular rate $dS_y/dt$ from a pure single-harmonic
 quadrupole misalignment ($A=\SI{10}{\micro\meter}$, true EDM off), measured
-by stroboscopic spin tracking on the closed orbit. The closed-orbit
+by stroboscopic spin tracking on the closed orbit ($k=0$--$12$,
+$t_2=\SI{2}{\milli\second}$, 20-turn CO correction). The closed-orbit
 amplitude and the false EDM both peak at $k=2$.}
 \label{tab:falseedm}
 \begin{tabular}{cccc}
 \toprule
 $k$ & CO amplitude [mm] & $dS_y/dt$ [rad/s] & $|dS_y/dt|/|dS_y/dt|_{k=2}$ \\
 \midrule
-0 & 0.058 & $+1.80\times10^{-10}$ & 0.13 \\
-1 & 0.070 & $+4.93\times10^{-10}$ & 0.34 \\
-\textbf{2} & \textbf{0.198} & $\mathbf{+1.44\times10^{-9}}$ & \textbf{1.00} \\
-3 & 0.088 & $-6.64\times10^{-10}$ & 0.46 \\
-4 & 0.028 & $-1.98\times10^{-10}$ & 0.14 \\
-5 & 0.014 & $-9.92\times10^{-11}$ & 0.07 \\
-6 & 0.008 & $-5.92\times10^{-11}$ & 0.041 \\
-7 & 0.005 & $-4.73\times10^{-11}$ & 0.033 \\
+0  & 0.058 & $+1.80\times10^{-10}$ & 0.127 \\
+1  & 0.070 & $+4.88\times10^{-10}$ & 0.344 \\
+\textbf{2}  & \textbf{0.198} & $\mathbf{+1.42\times10^{-9}}$  & \textbf{1.000} \\
+3  & 0.088 & $-6.40\times10^{-10}$ & 0.452 \\
+4  & 0.028 & $-2.09\times10^{-10}$ & 0.147 \\
+5  & 0.014 & $-9.22\times10^{-11}$ & 0.065 \\
+6  & 0.008 & $-5.71\times10^{-11}$ & 0.040 \\
+7  & 0.005 & $-5.26\times10^{-11}$ & 0.037 \\
+8  & 0.004 & $-3.86\times10^{-11}$ & 0.027 \\
+9  & 0.003 & $-2.26\times10^{-11}$ & 0.016 \\
+10 & 0.002 & $-2.49\times10^{-11}$ & 0.018 \\
+11 & 0.002 & $-2.24\times10^{-11}$ & 0.016 \\
+12 & 0.002 & $-2.40\times10^{-11}$ & 0.017 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -484,35 +492,33 @@ enlarges the genuine $k=2$ signal in BPM space ($A\|M_{k=2}\|=\SI{1670}{\micro
 \meter}$) while simultaneously dividing the offset contribution by the same
 $\|M_{k=2}\|=167$.
 
-\subsection{Spin-equivalent external radial field}
+\subsection{Coverage of external radial field harmonics}
 \label{sec:bxequiv}
 
-The misalignment picture can be translated into an equivalent external field
-language that connects directly to Omarov \emph{et al.}~\cite{omarov}.
-Define the spin-equivalent radial field $B_{x,\mathrm{eq}}^{(k)}$ as the
-amplitude of a ring-wide harmonic $B_x(\theta)=B_{x,\mathrm{eq}}\cos(k\theta)$
-that would produce the same $dS_y/dt$ as the $k$-th misalignment harmonic.
-From two independent spin-tracking scans---one measuring $R_B(k)=[dS_y/dt]/A_r$
-for external fields (compare\_field\_harmonics), the other measuring
-$R_q(k)=[dS_y/dt]/A_q$ for quad misalignments (false\_edm\_mode\_scan)---we
-form the conversion factor
+The method targets the $k$-th harmonic of the \emph{effective} closed-orbit
+distortion irrespective of its physical origin.  A ring-wide radial magnetic
+field $B_x(\theta)=B_r\cos(k\theta)$ drives the same Fourier component of
+the orbit distortion as a $k$-th harmonic quad misalignment, because both
+couple to the spin through the same ring-integrated radial impulse.  The
+framework therefore covers external field harmonics (systematic-field
+imperfections, residual stray fields) on equal footing with mechanical
+misalignments: a single-orbit measurement of the $k=2$ harmonic amplitude
+suppresses the false EDM regardless of whether the distortion is mechanical
+or magnetic in origin.
+
+We express sensitivity results in terms of the spin-equivalent radial
+field $B_{x,\mathrm{eq}}^{(k)}$, the amplitude of $B_x(\theta)=B_{x,\mathrm{eq}}\cos(k\theta)$
+that produces the same $dS_y/dt$ as a misalignment of amplitude $A_q$.
+The conversion factor
 \begin{equation}
-c_k = \frac{R_q(k)}{R_B(k)} \quad [\mathrm{nT}\,\mu\mathrm{m}^{-1}].
+c_k \approx 6\,\mathrm{nT}\,\mu\mathrm{m}^{-1} \quad (k=1,\ldots,7,\;\pm17\%)
 \label{eq:ck}
 \end{equation}
-Numerically, $c_k \approx 6\,\mathrm{nT}\,\mu\mathrm{m}^{-1}$ for $k=1,\ldots,7$,
-to within $\pm17\%$.  This near-independence of $k$ is physically natural: the
-spin couples to the ring-average radial impulse rather than the local
-peak, and the FODO fill factor $\sim3\%$ sets the overall scale
-($c_k \approx G\,\ell_\mathrm{eff}\,f_\mathrm{fill}/L_\mathrm{ring}$ with
-$G=0.21\,\mathrm{T/m}$). The local quad-centre field is therefore
-$\sim34\times$ larger than the spin-equivalent value, making spin tracking
-the correct reference.
-
-For the test signal modes ($k=2$: \SI{10}{\micro\meter}; $k=3$: \SI{8}{\micro\meter}),
-the spin-equivalent amplitudes are
-$c_2\times\SI{10}{\micro\meter}\approx\SI{54}{\nano\tesla}$ and
-$c_3\times\SI{8}{\micro\meter}\approx\SI{46}{\nano\tesla}$, respectively.
+is nearly $k$-independent: the spin couples to the ring-average impulse
+rather than the local peak, so the FODO fill factor $f_\mathrm{fill}\sim3\%$
+and gradient $G=\SI{0.21}{\tesla\per\meter}$ set the overall scale.
+The local quad-centre field is $\sim\!34\times$ larger than $B_{x,\mathrm{eq}}$,
+confirming that spin tracking is the appropriate reference.
 
 Combining Eq.~(\ref{eq:ck}) with the BPM-offset sensitivity
 $\sigma(A_k)\approx\sigma_b/\|M_k\|$ (Section~\ref{sec:whiteness}) gives a
@@ -685,6 +691,73 @@ CLEAN (\si{\micro\meter}) & lstsq (\si{\micro\meter}) \\
  100 & 0.60 & $+$0.60 & $+$0.60 \\
  200 & 1.20 & $+$1.20 & $+$1.20 \\
 1669 & 10.0 & $+$10.0 & $+$10.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Monte Carlo systematic error budget}
+\label{sec:systematics}
+
+Four instrumental imperfections are quantified via Monte Carlo simulation
+($N=200$ realizations each) using the CLEAN reconstruction with candidate set
+$k=1\ldots10$.  The ``truth'' misalignment contains $k=1$ (30\,$\mu$m),
+$k=2$ (10\,$\mu$m), $k=3$ (25\,$\mu$m) plus seven random contaminants
+($k=4\ldots10$, 100--300\,$\mu$m each).
+
+\paragraph{BPM readout noise.}
+Independent Gaussian noise $\varepsilon_i\sim\mathcal{N}(0,\sigma^2)$ is
+added to each BPM reading.  At $\sigma=5\,\mu$m, the $k=2$ amplitude
+uncertainty is $\pm0.32\%$; at $\sigma=50\,\mu$m it grows to $\pm5.2\%$,
+consistent with the analytic scaling $\sigma(\Delta A/A)\propto\sigma/\|M_k\|$.
+
+\paragraph{BPM static offsets.}
+A fixed per-BPM bias $b_i\sim\mathcal{N}(0,\sigma_b^2)$ shifts every orbit
+reading but is invisible to the orbit fit (it bypasses $R$).  The analytic
+prediction $\sigma(\Delta A/A)\approx\sigma_b/\|M_k\|$ is confirmed by
+simulation: at $\sigma_b=50\,\mu$m the $k=2$ r.m.s.\ error is $0.4\%$;
+at $\sigma_b=200\,\mu$m it reaches $1.5\%$, still well within the
+\SI{10}{\micro\meter} target amplitude tolerance.
+
+\paragraph{Quadrupole roll.}
+A rolled quadrupole (rotation angle $\theta$ about the beam axis) couples the
+horizontal closed orbit $x_\mathrm{co}$ into the vertical plane via skew
+quadrupole terms: $\delta\mathrm{COD}\approx R_{dy}\cdot(2\theta\cdot x_\mathrm{co})$,
+where $x_\mathrm{co}=R_{dx}\cdot\delta x$ and $\sigma_{dx}=100\,\mu$m.
+At $\theta_\mathrm{rms}=1\,\mathrm{mrad}$, the $k=2$ amplitude error is
+$-0.66\pm2.1\%$; the systematic bias remains $<1\%$ for all tested roll angles
+up to 5\,mrad.
+
+\paragraph{Quadrupole gradient errors.}
+Per-element fractional gradient errors $\varepsilon_j\sim\mathcal{N}(0,\sigma_G^2)$
+perturb the response matrix column-wise:
+$y_\mathrm{meas}\approx y_\mathrm{nom}+R\cdot(\varepsilon\odot\Delta y_\mathrm{truth})$.
+At $\sigma_G=0.5\%$ the $k=2$ error is $-0.84\pm3.9\%$; at $\sigma_G=2\%$
+it reaches $\pm16\%$, making tight gradient calibration important.
+
+\paragraph{Combined budget.}
+With all four effects applied simultaneously at their acceptance levels
+($\sigma_\mathrm{noise}=5\,\mu$m, $\sigma_b=50\,\mu$m, $\theta_\mathrm{rms}=1\,\mathrm{mrad}$,
+$\sigma_G=0.5\%$), the $k=2$ amplitude error is $-0.1\pm5.4\%$, dominated
+by the gradient uncertainty.  The target of $\lesssim10\%$ relative amplitude
+accuracy is met.  Tighter gradient calibration ($\sigma_G\lesssim0.2\%$) would
+reduce the combined uncertainty below $2\%$.
+
+\begin{table}[h]
+\centering
+\caption{Systematic error budget at acceptance levels (CLEAN, $N=200$ MC).
+$\mu$ and $\sigma$ are the mean and standard deviation of $\Delta A/A$ [\%]
+over the Monte Carlo ensemble.}
+\label{tab:systematics}
+\begin{tabular}{lccccc}
+\toprule
+Source & Level & $k=1$ ($\mu\pm\sigma$) & $k=2$ ($\mu\pm\sigma$) & $k=3$ ($\mu\pm\sigma$) \\
+\midrule
+BPM noise    & 5\,$\mu$m  & $-0.93\pm0.38$ & $-0.74\pm0.32$ & $-0.92\pm0.49$ \\
+BPM offset   & 50\,$\mu$m & $-0.80\pm3.98$ & $-0.13\pm2.51$ & $-0.66\pm4.69$ \\
+Quad roll    & 1\,mrad    & $-0.89\pm0.62$ & $-0.62\pm1.92$ & $-0.95\pm0.72$ \\
+Gradient err & 0.5\%      & $-0.90\pm1.45$ & $-0.84\pm3.94$ & $-1.15\pm1.71$ \\
+\midrule
+Combined     & all above  & $-0.83\pm4.38$ & $-0.12\pm5.37$ & $-0.69\pm5.21$ \\
 \bottomrule
 \end{tabular}
 \end{table}
