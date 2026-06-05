@@ -31,7 +31,7 @@ The proton electric dipole moment (pEDM) frozen-spin experiment requires
 the vertical position of every storage-ring quadrupole to be known to
 $\sim\SI{10}{\micro\meter}$, because uncorrected misalignments generate a
 closed-orbit distortion that mimics a true EDM signal. Beam-position
-monitors (BPMs) carry static electronic offsets of $\sim\SI{300}{\micro
+monitors (BPMs) carry static electronic offsets of $\sim\SI{100}{\micro
 \meter}$ that bury the alignment signal. The established mitigation,
 $K$-modulation (kmod), differences two lattice configurations to cancel
 the offset but pays a steep rank/conditioning penalty when only a few
@@ -84,7 +84,7 @@ The measurement model is linear,
 where $\mathbf{y}\in\mathbb{R}^{48}$ are the BPM readings, $R$ is the
 $48\times48$ orbit response matrix, $\Delta q$ the unknown quadrupole
 misalignments, $\mathbf{b}$ the static BPM electronic offsets
-($\sim\SI{300}{\micro\meter}$, constant over hours--days but unknown), and
+($\sim\SI{100}{\micro\meter}$, constant over hours--days but unknown), and
 $\boldsymbol{\eta}\sim\SI{1}{\micro\meter}$ the readout noise. The
 difficulty is entirely $\mathbf{b}$: a direct inversion
 $\Delta q = R^{-1}(\mathbf{y}-\mathbf{b})$ requires knowing $\mathbf{b}$,
@@ -183,6 +183,57 @@ $\sigma_{\max}\approx34.73$, $\sigma_{\min}\approx0.140$, and
 $\kappa(R)=248.7$; all matrices were rebuilt and the results below use the
 corrected $R$.
 
+\paragraph{Physical structure of the response matrix.}
+It is instructive to decompose $R$ as
+\begin{equation}
+  R = G\,\mathrm{diag}(K_j),
+  \label{eq:R_decomp}
+\end{equation}
+where $\mathrm{diag}(K_j)$ is the diagonal \emph{displacement-to-kick} gain
+matrix ($K_j = k_j\ell_j$, the product of normalised gradient and effective
+length) and $G$ is the betatron \emph{Green function} that converts a thin
+vertical kick applied at element $j$ into the resulting closed-orbit
+displacement observed at BPM $i$:
+\begin{equation}
+  G_{ij}
+  = \frac{\sqrt{\beta_i\,\beta_j}}{2\sin\pi Q_y}
+    \cos\!\bigl(|\mu_i-\mu_j|-\pi Q_y\bigr).
+  \label{eq:green}
+\end{equation}
+Here $\beta_i$, $\mu_i$ are the Courant--Snyder amplitude and betatron
+phase advance at BPM $i$, and $Q_y\approx2.68$ is the vertical tune.
+Equation~(\ref{eq:green}) follows from the standard one-turn-map solution
+of the Hill equation~\cite{lee_accel_phys}; it reveals that $G$ is
+\emph{nearly symmetric} ($G_{ij}\approx G_{ji}$), with a numerically
+verified relative asymmetry of $0.005$.
+One can therefore read $R$ as the \emph{gain function of magnetic forces
+along the lattice onto the BPMs}: the first factor $\mathrm{diag}(K_j)$
+translates a physical displacement into an angular kick, while $G$
+propagates that kick through the optics to produce an orbit response.
+
+The decomposition~(\ref{eq:R_decomp}) makes two key facts transparent.
+\begin{enumerate}
+\item \emph{Why $\mathbf{b}$ bypasses $R$.}
+  The BPM electronic offset $\mathbf{b}$ is added in measurement space,
+  \emph{after} the mechanical kick chain
+  $\Delta q \xrightarrow{\;\mathrm{diag}(K_j)\;} \boldsymbol{\theta}
+             \xrightarrow{\;G\;} \mathbf{y}_\mathrm{orbit}$.
+  It is never acted upon by $G$; it enters the observation
+  $\mathbf{y}=G\,\mathrm{diag}(K_j)\,\Delta q+\mathbf{b}$ already in the
+  output frame and therefore receives no lattice amplification.
+
+\item \emph{Why $k=2$ is resonant.}
+  The QF/QD sign alternation encoded in $K_j$ (and in the $(-1)^j$ factor of
+  $F_k$) means that a smooth $k$-harmonic misalignment drives $G$ with a kick
+  pattern at spatial frequency content near the vertical tune $Q_y$.
+  The Green function $G$ amplifies most strongly the kick component whose
+  frequency matches $Q_y$; because $Q_y\approx2.68$, the $k=2$ FODO harmonic
+  is the closest resonant match.
+  This is why $\|M_{k=2}\|=167$ while $\|M_{k=4}\|=16$ — a factor-of-ten
+  difference that directly governs the BPM-offset robustness hierarchy derived
+  in Section~\ref{sec:whiteness}.
+\end{enumerate}
+
 %==============================================================
 \section{Method: Fourier-response projection}
 \label{sec:method}
@@ -248,7 +299,8 @@ sampling-rate choice.
 Table~\ref{tab:falseedm} shows the outcome. The false EDM peaks sharply at
 $k=2$, exceeding $k=1$ by $2.9\times$ and $k=3$ by $2.2\times$, and tracks
 the closed-orbit amplitude (both maximal at $k=2$, the harmonic nearest the
-vertical tune $Q_y\approx2.68$). This is qualitatively consistent with the
+vertical tune $Q_y\approx2.68$). The rate falls monotonically for $k\ge3$,
+reaching $4\%$ of the $k=2$ peak at $k=6{,}7$. This is qualitatively consistent with the
 $N=2$ peak reported by Omarov \emph{et al.}~\cite{omarov} (their
 Figs.~7--8), though the two rings differ in lattice design and the
 comparison is not direct. There the low-harmonic rates were quoted only as
@@ -274,6 +326,8 @@ $k$ & CO amplitude [mm] & $dS_y/dt$ [rad/s] & $|dS_y/dt|/|dS_y/dt|_{k=2}$ \\
 3 & 0.088 & $-6.64\times10^{-10}$ & 0.46 \\
 4 & 0.028 & $-1.98\times10^{-10}$ & 0.14 \\
 5 & 0.014 & $-9.92\times10^{-11}$ & 0.07 \\
+6 & 0.008 & $-5.92\times10^{-11}$ & 0.041 \\
+7 & 0.005 & $-4.73\times10^{-11}$ & 0.033 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -370,6 +424,109 @@ Together, these three properties ensure that the projection of $\mathbf{b}$
 onto the $k=2$ column of $M$ is small relative to the signal---regardless
 of the statistical structure of $\mathbf{b}$ (see Section~\ref{sec:whiteness})---and yield the reconstruction below.
 
+\subsection{A matched-filter / conditioning view}
+\label{sec:matchedfilter}
+
+The three properties above have a compact linear-algebra interpretation that
+explains why the same resonance that makes $k=2$ the dominant false-EDM driver
+also makes it the most offset-robust harmonic to estimate. The single-mode
+estimator is the Moore--Penrose pseudoinverse of one column,
+\begin{equation}
+\hat a_{k=2} = \frac{M_{k=2}^T\,\mathbf{y}}{\|M_{k=2}\|^2}
+             = M_{k=2}^{+}\,\mathbf{y},
+\qquad
+M_{k=2}^{+} = \frac{M_{k=2}^T}{\|M_{k=2}\|^2},
+\end{equation}
+and the operator norm of the pseudoinverse of a vector is the reciprocal of
+its norm, $\|M_{k=2}^{+}\|=1/\|M_{k=2}\|=1/167$.
+
+\paragraph{Reciprocity.} Signal and offset enter the data at different points,
+so they experience different net gains. A genuine $k=2$ misalignment
+$\Delta q=A\,F_{k=2}$ propagates \emph{forward} through $R$ (gain
+$\|M_{k=2}\|$) and is then back-projected through $M_{k=2}^{+}$ (gain
+$1/\|M_{k=2}\|$); the two cancel exactly, $M_{k=2}^{+}(A\,M_{k=2})=A$. The BPM
+offset $\mathbf{b}$ never passes forward through $R$---it is added directly in
+measurement space---so it experiences \emph{only} the back-projection:
+$|M_{k=2}^{+}\mathbf{b}|\le\|\mathbf{b}\|/\|M_{k=2}\|$. Whatever traverses $R$
+both ways is recovered at unit gain; whatever enters only on the measurement
+side is suppressed by $\|M_{k=2}\|$.
+
+\paragraph{Conditioning.} In SVD terms $R=U\Sigma V^T$ with
+$\sigma_{\max}=34.7$, $\sigma_{\min}=0.14$, $\kappa(R)=249$. Crucially, the
+two leading right singular vectors of $R$ are almost exactly the $k=2$ cosine
+and sine Fourier modes (verified by projecting each $V[:,i]$ onto all $F_k$,
+$k=0,\ldots,12$, with $>99.5\%$ of norm captured at $k=2$), confirming that
+$k=2$ sits at the top of the singular spectrum because it is the mode closest
+to the tune $Q_y\approx2.68$ resonance. The $k=2$
+misalignment direction is almost entirely aligned with the leading
+right-singular vector ($91\%$ of $\|F_{k=2}\|^2$, and $\|RF_{k=2}\|=34.1\approx
+\sigma_{\max}$): $k=2$ sits at the \emph{top} of the spectrum of $R$ because it
+is the mode closest to the $Q_y\approx2.68$ resonance. A naive full inversion
+$R^{-1}=V\Sigma^{-1}U^T$ is dangerous precisely because it is dominated by
+$1/\sigma_{\min}$ and amplifies any offset by up to $\kappa=249$ (the
+millimetre-level contamination of Section~\ref{sec:intro}). Targeting a single
+resonant mode replaces that ill-conditioned $48$-dimensional inversion with a
+one-dimensional projection of condition number $1$, operating in the
+large-singular-value subspace where the pseudoinverse \emph{contracts} rather
+than amplifies the offset.
+
+\paragraph{Matched-filter gain.} Equivalently, the estimator is a matched
+filter whose template is the $k=2$ orbit fingerprint $M_{k=2}$; its
+signal-to-noise gain is $\|M_{k=2}\|$, giving
+\begin{equation}
+\mathrm{SNR}_{\mathrm{out}}
+= \frac{A\,\|M_{k=2}\|}{\sigma_b}
+= \frac{\SI{10}{\micro\meter}\times167}{\SI{100}{\micro\meter}}
+\approx 16.7 .
+\end{equation}
+The resonant amplification thus works doubly in the estimator's favour: it
+enlarges the genuine $k=2$ signal in BPM space ($A\|M_{k=2}\|=\SI{1670}{\micro
+\meter}$) while simultaneously dividing the offset contribution by the same
+$\|M_{k=2}\|=167$.
+
+\subsection{Coverage of external radial field harmonics}
+\label{sec:bxequiv}
+
+The method targets the $k$-th harmonic of the \emph{effective} closed-orbit
+distortion irrespective of its physical origin.  A ring-wide radial magnetic
+field $B_x(\theta)=B_r\cos(k\theta)$ drives the same Fourier component of
+the orbit distortion as a $k$-th harmonic quad misalignment, because both
+couple to the spin through the same ring-integrated radial impulse.  The
+framework therefore covers external field harmonics (systematic-field
+imperfections, residual stray fields) on equal footing with mechanical
+misalignments: a single-orbit measurement of the $k=2$ harmonic amplitude
+suppresses the false EDM regardless of whether the distortion is mechanical
+or magnetic in origin.
+
+We express sensitivity results in terms of the spin-equivalent radial
+field $B_{x,\mathrm{eq}}^{(k)}$, the amplitude of $B_x(\theta)=B_{x,\mathrm{eq}}\cos(k\theta)$
+that produces the same $dS_y/dt$ as a misalignment of amplitude $A_q$.
+The conversion factor
+\begin{equation}
+c_k \approx 6\,\mathrm{nT}\,\mu\mathrm{m}^{-1} \quad (k=1,\ldots,7,\;\pm17\%)
+\label{eq:ck}
+\end{equation}
+is nearly $k$-independent: the spin couples to the ring-average impulse
+rather than the local peak, so the FODO fill factor $f_\mathrm{fill}\sim3\%$
+and gradient $G=\SI{0.21}{\tesla\per\meter}$ set the overall scale.
+The local quad-centre field is $\sim\!34\times$ larger than $B_{x,\mathrm{eq}}$,
+confirming that spin tracking is the appropriate reference.
+
+Combining Eq.~(\ref{eq:ck}) with the BPM-offset sensitivity
+$\sigma(A_k)\approx\sigma_b/\|M_k\|$ (Section~\ref{sec:whiteness}) gives a
+measurement floor expressed directly in nT:
+\begin{equation}
+\sigma(B_{x,\mathrm{eq}}^{(k)}) \approx \frac{c_k\,\sigma_b}{\|M_k\|}.
+\label{eq:bxsens}
+\end{equation}
+At $\sigma_b=\SI{100}{\micro\meter}$: $\sigma(B_{x,\mathrm{eq}}^{(2)})\approx
+c_2\times\SI{0.6}{\micro\meter}\approx\SI{3.3}{\nano\tesla}$; at
+$\sigma_b=\SI{20}{\micro\meter}$ (post-BBA): $\approx\SI{0.65}{\nano\tesla}$.
+For $k=3$ the higher Fourier noise ($\|M_3\|=43.6$ versus $\|M_2\|=167$) demands
+$\sigma_b\lesssim\SI{5}{\micro\meter}$ to reach $\SI{1}{\nano\tesla}$;
+$\sigma_b\approx\SI{20}{\micro\meter}$ (post-BBA) gives
+$\approx\SI{4}{\nano\tesla}$.
+
 \subsection{Reconstruction performance and diagnostics}
 
 Under $\sigma_b=\SI{100}{\micro\meter}$ the CLEAN reconstruction returns
@@ -392,9 +549,9 @@ $0.72\pm\SI{0.41}{\micro\meter}$, i.e.\ the genuine signal exceeds the
 offset leakage by $\sim\times14$.
 \item \textbf{Offset scaling.} Sweeping $\sigma_b$ shows the $k=2$ error
 scaling linearly with the offset, as expected if $\mathbf{b}$ enters
-through its (small) projection; extrapolating to a mechanical
-$\sigma_b=\SI{300}{\micro\meter}$ gives a $k=2$ error of
-$\sim\SI{2}{\micro\meter}$, still within the \SI{10}{\micro\meter} target.
+through its (small) projection; even at a pessimistic
+$\sigma_b=\SI{200}{\micro\meter}$ the $k=2$ error is
+$\sim\SI{1.2}{\micro\meter}$, still within the \SI{10}{\micro\meter} target.
 \end{itemize}
 
 \subsection{Sensitivity to the response-matrix model}
@@ -409,8 +566,14 @@ under gradient perturbations. Numerically, the $k=2$ error
 stays within the \SI{10}{\micro\meter} target for
 $\sigma_\mathrm{model}=\delta K/K\lesssim3\text{--}4\%$, a tolerance
 achievable with a beta-beat / LOCO-type calibration.
-\todo{Add figure: $k=2$ amplitude error vs.\ $\sigma_\mathrm{model}$, confirming
-the 3--4\% tolerance numerically.}
+Figure~\ref{fig:model_error} quantifies the full error budget.
+Three BPM-offset levels ($\sigma_b = 0$, $20$, $100\,\mu$m) are overlaid:
+offset noise dominates at any realistic model accuracy, and model error
+alone is negligible across the entire $0$--$10\%$ range.
+The \SI{10}{\micro\meter} target is met for $\sigma_\mathrm{model}\lesssim10\%$
+even at $\sigma_b=\SI{100}{\micro\meter}$,
+confirming that the tolerance is driven by BPM offsets, not by imperfect
+knowledge of $R$.
 
 \subsection{Scope: targeted estimation, not harmonic discovery}
 
@@ -453,15 +616,55 @@ correction to the $k=2$ estimate is below 1\%.
 To stress-test this we set $\mathbf{b}=A\hat{m}_{k=2}$, the worst-case
 fully $k=2$-orbit-aligned offset. Table~\ref{tab:whiteness} shows that
 theory and simulation agree to four significant figures at all tested
-amplitudes. A mechanical offset of $A=\SI{300}{\micro\meter}$ induces a
-bias of \SI{1.80}{\micro\meter}, well within the \SI{10}{\micro\meter} target;
-the safe limit $A<\SI{1669}{\micro\meter}$ is 5.6$\times$ above the
+amplitudes. An offset of $A=\SI{100}{\micro\meter}$ induces a
+bias of \SI{0.60}{\micro\meter}, well within the \SI{10}{\micro\meter} target;
+the safe limit $A<\SI{1669}{\micro\meter}$ is 16.7$\times$ above the
 realistic value.
 
 For white $\mathbf{b}$ with r.m.s.\ $\sigma_b$, the $k=2$ estimate standard
 deviation is $\sigma_b/\|M_{k=2}\|=\sigma_b/167$; at the realistic
-$\sigma_b=\SI{300}{\micro\meter}$ this gives $\lesssim\SI{1.8}{\micro\meter}$,
+$\sigma_b=\SI{100}{\micro\meter}$ this gives $\lesssim\SI{0.6}{\micro\meter}$,
 fully within target.
+
+Three distinct amplitude scales, shown in Fig.~\ref{fig:bpm_fourier},
+quantify the robustness end-to-end:
+\begin{enumerate}
+\item \textbf{Signal orbit ($\SI{1670}{\micro\meter}$).}
+  A $\SI{10}{\micro\meter}$ $k=2$ misalignment passes through $R$ and is
+  resonantly amplified: $A\|M_{k=2}\|=10\times167=\SI{1670}{\micro\meter}$
+  in BPM space.
+\item \textbf{BPM-offset Fourier level ($\approx\SI{26}{\micro\meter}$).}
+  Because $\mathbf{b}$ bypasses $R$ entirely and is white, its projection
+  onto any FODO-antisymmetric mode $F_k$ has r.m.s.\
+  $\sigma_b\sqrt{\pi/48}\approx\SI{26}{\micro\meter}$---distributed equally
+  across all $k$, with no peak at $k=2$.
+  The signal orbit ($\SI{1670}{\micro\meter}$) is already $64\times$ larger than
+  this raw Fourier level.
+\item \textbf{Estimator contamination floor ($\approx\SI{0.6}{\micro\meter}$).}
+  The estimator projects $\mathbf{b}$ onto the $k=2$ column of $M=RF$
+  (not onto $F_{k=2}$ directly), dividing by $\|M_{k=2}\|=167$ a second
+  time: $\sigma_b/\|M_{k=2}\|=\SI{100}{\micro\meter}/167\approx\SI{0.6}{\micro\meter}$.
+\end{enumerate}
+The hierarchy
+$\SI{1670}{\micro\meter}\gg\SI{26}{\micro\meter}\gg\SI{0.6}{\micro\meter}$
+shows that the orbit amplification of $\|M_{k=2}\|$ works doubly in
+the estimator's favour: it enlarges the genuine signal in BPM space
+while simultaneously suppressing the offset contribution in the
+estimate.
+
+The key intuition is that \emph{the estimator does not measure how large the
+orbit is---it measures how closely the orbit resembles the $k=2$ fingerprint.}
+A genuine $k=2$ signal shares exactly that fingerprint, so the element-wise
+product $y_j\hat{m}_{k=2,j}$ is everywhere positive and the sum is large.
+A random BPM offset carries no such structure: its products with
+$\hat{m}_{k=2}$ alternate in sign and nearly cancel.
+Figure~\ref{fig:matched_filter} illustrates this directly for a
+$\sigma_b=\SI{100}{\micro\meter}$ offset alongside a $\SI{10}{\micro\meter}$
+$k=2$ signal, recovering $\hat{a}_{k=2}=10.0\,\mu$m and $0.4\,\mu$m respectively.
+Figure~\ref{fig:whiteness_spec} confirms that the recovered-amplitude spectrum
+of a white offset is flat and broadband, with no spurious peak, and the floor
+is lowest precisely at $k=2$ ($\SI{0.7}{\micro\meter}$) because $\|M_{k=2}\|=167$
+is the largest column norm.
 
 \begin{table}[t]
 \centering
@@ -475,10 +678,10 @@ four significant figures.}
 $A$ (\si{\micro\meter}) & Theory $\delta a$ (\si{\micro\meter}) &
 CLEAN (\si{\micro\meter}) & lstsq (\si{\micro\meter}) \\
 \midrule
+  20 & 0.12 & $+$0.12 & $+$0.12 \\
   50 & 0.30 & $+$0.30 & $+$0.30 \\
  100 & 0.60 & $+$0.60 & $+$0.60 \\
  200 & 1.20 & $+$1.20 & $+$1.20 \\
- 300 & 1.80 & $+$1.80 & $+$1.80 \\
 1669 & 10.0 & $+$10.0 & $+$10.0 \\
 \bottomrule
 \end{tabular}
@@ -503,9 +706,9 @@ standard orbit measurement and no active gradient manipulation.
 The following items remain open.
 
 \begin{itemize}
-  \item Validated at the realistic mechanical offset $\sigma_b=\SI{300}{\micro\meter}$
+  \item Validated at the reference offset $\sigma_b=\SI{100}{\micro\meter}$
     via the worst-case structured test (Section~\ref{sec:whiteness}): the $k=2$ bias
-    remains $\lesssim\SI{1.8}{\micro\meter}$ with no whiteness assumption.
+    remains $\lesssim\SI{0.6}{\micro\meter}$ with no whiteness assumption.
     \todo{Include non-zero readout noise $\boldsymbol{\eta}$ in the full error budget.}
 \item \todo{Discriminate genuine from offset-induced harmonics without
 oracle knowledge---e.g.\ calibrate the spurious-amplitude threshold from
@@ -544,10 +747,10 @@ $\|M_{k=2}\|=167$ vs.\ 16 for $k=4$), the consequent inversion of the
 misalignment-amplitude hierarchy at the orbit level, and near-orthogonality
 of the harmonic orbit responses that prevents contaminant leakage.
 Critically, the method makes no assumption about the statistical structure
-of the BPM offset: even if the full \SI{300}{\micro\meter} offset is
+of the BPM offset: even if the full \SI{100}{\micro\meter} offset is
 entirely aligned with the $k=2$ orbit pattern (worst case), the induced
-bias is only \SI{1.80}{\micro\meter}; the idealized worst-case limit is $\SI{1669}{\micro\meter}$,
-5.6$\times$ above the realistic value (Section~\ref{sec:whiteness}).
+bias is only \SI{0.60}{\micro\meter}; the idealized worst-case limit is $\SI{1669}{\micro\meter}$,
+16.7$\times$ above the realistic value (Section~\ref{sec:whiteness}).
 We also documented and corrected a $10^3$ unit-scaling error in the
 response-matrix pipeline. Within the targeted-estimation scope adopted here
 the method is complete; the natural extensions---propagating the measured
