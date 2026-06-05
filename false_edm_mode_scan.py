@@ -249,13 +249,20 @@ def _run_one_k(task):
     sy_strobe = np.asarray(poin[:, 7], float) if poin is not None and len(poin) > 5 else None
     if sy_strobe is not None:
         ts = np.asarray(poin_t, float)
-        # Linear estimate (fast, unbiased only when d2≈0)
         slope = float(np.polyfit(ts, sy_strobe, 1)[0])
-        # Quadratic fit: Sy = a·t² + d1·t + d0
-        # std-err of d1 accounts for the d2·t² curvature that biases
-        # the linear slope — gives physically meaningful error bars.
-        coeffs2, cov2 = np.polyfit(ts, sy_strobe, 2, cov=True)
-        slope_err = float(np.sqrt(cov2[1, 1]))
+        # Richardson integration-error estimate: re-run at 2·dt (same y_launch,
+        # no CO redo — half the steps, ~50% extra wall time per k).
+        # |slope(dt) - slope(2dt)| ≈ leading-order truncation error of slope(dt).
+        _, poin_c, poin_t_c = integrate_particle(
+            y_launch, 0.0, t2, 2*dt, fields=fields, return_steps=return_steps,
+            quad_dy=quad_dy)
+        sy_c = (np.asarray(poin_c[:, 7], float)
+                if poin_c is not None and len(poin_c) > 5 else None)
+        if sy_c is not None:
+            slope_c = float(np.polyfit(np.asarray(poin_t_c, float), sy_c, 1)[0])
+            slope_err = abs(slope - slope_c)
+        else:
+            slope_err = float("nan")
     else:
         ts = None
         slope = float("nan")
@@ -346,7 +353,8 @@ def plot_results(results, amp_coef):
     color1 = "tab:red"
     ax1.errorbar(ks, dsy, yerr=dsy_err, fmt="o-", color=color1, lw=1.8,
                  ms=8, mfc="white", mew=2, capsize=4, capthick=1.5,
-                 elinewidth=1.3, label=r"$|dS_y/dt|$ (false EDM)")
+                 elinewidth=1.3,
+                 label=r"$|dS_y/dt|$  [err: Richardson $\Delta t$ convergence]")
     ax1.set_yscale("log")
     ax1.set_xlabel("Fourier mode $k$ of quad misalignment", fontsize=12)
     ax1.set_ylabel(r"$|dS_y/dt|$  [rad/s]  (false EDM signal)", color=color1,
