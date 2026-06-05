@@ -277,7 +277,7 @@ the CLEAN wrapping adds oracle-free candidate selection at no cost to accuracy.
 The premise of this work---that $k=2$ is the harmonic worth resolving---rests
 on a physical claim: among equal-amplitude misalignment harmonics, $k=2$
 produces the largest false EDM. We verify this directly by spin tracking,
-independently of any reconstruction. For each $k=0,\dots,5$ we set
+independently of any reconstruction. For each $k=0,\dots,12$ we set
 $\Delta y_j=A\,F_k[j]$ at equal amplitude $A=\SI{10}{\micro\meter}$, switch
 off the true EDM, and measure the secular vertical-spin precession rate
 $dS_y/dt$, which is the false-EDM observable.
@@ -299,8 +299,10 @@ sampling-rate choice.
 Table~\ref{tab:falseedm} shows the outcome. The false EDM peaks sharply at
 $k=2$, exceeding $k=1$ by $2.9\times$ and $k=3$ by $2.2\times$, and tracks
 the closed-orbit amplitude (both maximal at $k=2$, the harmonic nearest the
-vertical tune $Q_y\approx2.68$). The rate falls monotonically for $k\ge3$,
-reaching $4\%$ of the $k=2$ peak at $k=6{,}7$. This is qualitatively consistent with the
+vertical tune $Q_y\approx2.68$). The rate falls steeply for $k\ge3$,
+reaching $4\%$ of the $k=2$ peak at $k=6{,}7$ and levelling at
+$\lesssim\!2\%$ for $k\ge9$, where the CO amplitude is below
+\SI{3}{\micro\meter}. This is qualitatively consistent with the
 $N=2$ peak reported by Omarov \emph{et al.}~\cite{omarov} (their
 Figs.~7--8), though the two rings differ in lattice design and the
 comparison is not direct. There the low-harmonic rates were quoted only as
@@ -313,21 +315,27 @@ method removes here, returning the actual rates.
 \centering
 \caption{False-EDM secular rate $dS_y/dt$ from a pure single-harmonic
 quadrupole misalignment ($A=\SI{10}{\micro\meter}$, true EDM off), measured
-by stroboscopic spin tracking on the closed orbit. The closed-orbit
+by stroboscopic spin tracking on the closed orbit ($k=0$--$12$,
+$t_2=\SI{2}{\milli\second}$, 20-turn CO correction). The closed-orbit
 amplitude and the false EDM both peak at $k=2$.}
 \label{tab:falseedm}
 \begin{tabular}{cccc}
 \toprule
 $k$ & CO amplitude [mm] & $dS_y/dt$ [rad/s] & $|dS_y/dt|/|dS_y/dt|_{k=2}$ \\
 \midrule
-0 & 0.058 & $+1.80\times10^{-10}$ & 0.13 \\
-1 & 0.070 & $+4.93\times10^{-10}$ & 0.34 \\
-\textbf{2} & \textbf{0.198} & $\mathbf{+1.44\times10^{-9}}$ & \textbf{1.00} \\
-3 & 0.088 & $-6.64\times10^{-10}$ & 0.46 \\
-4 & 0.028 & $-1.98\times10^{-10}$ & 0.14 \\
-5 & 0.014 & $-9.92\times10^{-11}$ & 0.07 \\
-6 & 0.008 & $-5.92\times10^{-11}$ & 0.041 \\
-7 & 0.005 & $-4.73\times10^{-11}$ & 0.033 \\
+0  & 0.058 & $+1.80\times10^{-10}$ & 0.127 \\
+1  & 0.070 & $+4.88\times10^{-10}$ & 0.344 \\
+\textbf{2}  & \textbf{0.198} & $\mathbf{+1.42\times10^{-9}}$  & \textbf{1.000} \\
+3  & 0.088 & $-6.40\times10^{-10}$ & 0.452 \\
+4  & 0.028 & $-2.09\times10^{-10}$ & 0.147 \\
+5  & 0.014 & $-9.22\times10^{-11}$ & 0.065 \\
+6  & 0.008 & $-5.71\times10^{-11}$ & 0.040 \\
+7  & 0.005 & $-5.26\times10^{-11}$ & 0.037 \\
+8  & 0.004 & $-3.86\times10^{-11}$ & 0.027 \\
+9  & 0.003 & $-2.26\times10^{-11}$ & 0.016 \\
+10 & 0.002 & $-2.49\times10^{-11}$ & 0.018 \\
+11 & 0.002 & $-2.24\times10^{-11}$ & 0.016 \\
+12 & 0.002 & $-2.40\times10^{-11}$ & 0.017 \\
 \bottomrule
 \end{tabular}
 \end{table}
