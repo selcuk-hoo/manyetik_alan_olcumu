@@ -1,0 +1,611 @@
+%% Türkçe makale taslağı
+%% Derleme: pdflatex makale_tr.tex  (elsarticle.cls gerektirir)
+%% Grafikler için yer tutucular [SEKIL X] biçiminde işaretlenmiştir.
+
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage[turkish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\newcommand{\todo}[1]{{\color{red}\textbf{(YAPILACAK: #1)}}}
+
+\journal{Nuclear Instruments and Methods in Physics Research A}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Dondurulmuş-spin proton depolama halkasında sahte EDM'ye yol açan
+baskın harmonik bileşenin tek-yörünge tahmini}
+
+\author[inst1]{S.~Hac\i\"omero\u{g}lu\corref{cor1}}
+\cortext[cor1]{Sorumlu yazar}
+\ead{selcuk.haciomeroglu@gmail.com}
+
+\address[inst1]{\todo{kurum bilgisi}}
+
+\begin{abstract}
+Proton elektrik dipol momenti (pEDM) dondurulmuş-spin deneyi, depolama
+halkasındaki her kuadrupol mıknatısın düşey konumunun $\sim\SI{10}{\micro\meter}$
+hassasiyetle bilinmesini gerektirmektedir; düzeltilmemiş hizalama hataları gerçek
+bir EDM sinyalini taklit eden kapalı-yörünge bozunumuna (KYB) yol açar.
+Işın konum monitörleri (BPM) $\sim\SI{100}{\micro\meter}$ mertebesinde statik
+elektronik ofset taşır ve bu durum hizalama sinyalini gömebilir.
+Yerleşik çözüm olan $K$-modülasyonu (k-mod) iki kafes yapılandırmasının farkını
+alarak ofseti tam olarak giderir; ancak yalnızca birkaç kuadrupol modüle
+edilebildiğinde tepki matrisinin rank'ı ve koşullanması ciddi biçimde bozulur.
+Bu çalışmada, 48 boyutlu hizalama vektörünü tam olarak geri çatmak yerine, yalnızca
+baskın sahte-EDM harmonik bileşenini ($k=2$) tahmin etmeyi hedefleyen
+bir yöntem sunulmaktadır. Tek bir kapalı-yörünge ölçümü, tepki matrisi Fourier
+tabanında CLEAN algoritmasıyla çözümlenerek $k=1,2,3$ modları \SI{100}{\micro\meter}
+BPM ofseti altında $\sim5\%$ göreli genlik doğruluğuyla kurtarılmaktadır; gradyan
+modülasyonuna gerek yoktur. Bu başarı tepki matrisinin $R$ üç nicel özelliğine
+dayanmaktadır: (i)~ayar frekansına yakınlıktan doğan rezonans kuvvetlenmesi
+($\|RF_{k=2}\|$ kafes ortalamasının $\sim34$ katı), (ii)~bunun sonucu olarak
+yörünge düzeyinde hizalama genliği hiyerarşisinin tersine dönmesi ve
+(iii)~farklı harmoniklerin yörünge tepkilerinin neredeyse dikeyliği, bu sayede
+büyük kirletici harmonikler $k=2$ tahminine sızmamaktadır.
+Yöntem, kuadrupol kaynaklı hatalar kadar harici manyetik alan harmoniklerini de
+aynı çerçevede kapsamakta; BBA sonrası $\sigma_b\lesssim\SI{20}{\micro\meter}$
+koşulunda $k=2$ bileşeni $\sim\SI{1}{\nano\tesla}$ hassasiyetle ölçülebilmektedir.
+\end{abstract}
+
+\begin{keyword}
+depolama halkası \sep elektrik dipol momenti \sep kapalı-yörünge bozunumu \sep
+kuadrupol hizalaması \sep tepki matrisi \sep ışın konum monitörü \sep CLEAN algoritması
+\end{keyword}
+
+\end{frontmatter}
+
+%==============================================================
+\section{Giriş}
+\label{sec:giris}
+
+\subsection{Kuadrupol hizalama hatası ve sahte EDM mekanizması}
+
+Proton elektrik dipol momenti (pEDM) arayışı dondurulmuş-spin modunda
+çalıştırılır: düzlem içi spin presesyonu sıfırlanır ve gerçek bir EDM,
+yavaş birikimli bir düşey spin dönmesine yol açar. Bu düzenekteki baskın
+sistematik sınırlama, kuadrupol mıknatısların düşey kapalı yörünge bozunumudur
+(KYB). $j$'inci kuadrupol $\Delta y_j$ kadar düşey yer değiştirirse ışını
+yönlendirir; oluşan KYB, bir proton gerçek EDM'ye sahipmiş gibi spini döndüren
+radyal alanlar örnekler.
+
+Sayısal olarak, bu sahte sinyalin hedef hassasiyetin altında tutulması için
+her kuadrupolün düşey konumunun $\sim\SI{10}{\micro\meter}$ düzeyinde bilinmesi
+gerekir; bu hassasiyet mekanik ölçümün çok ötesinde olduğundan ışın-tabanlı
+bir belirleme zorunludur.
+
+Sahte EDM oranı ile hizalama hatası hızı arasındaki bağıntı doğrusal ve zamandan
+bağımsızdır:
+\begin{equation}
+  \frac{dS_y}{dt} = \mathcal{F}\!\left[\{\Delta y_j\}\right],
+\end{equation}
+burada $\mathcal{F}$ tepki matrisinden ve halka optiklerinden türetilen
+bir fonksiyoneldır. Önemli olan, bu fonksiyonelin $k=2$
+Fourier harmonik bileşenine ($N=24$ FODO hücreli bir halkada)
+bağımlılığının diğer tüm bileşenlerden bir mertebe fazla olmasıdır.
+Şekil~\ref{fig:falseedm}'de görüldüğü gibi $dS_y/dt$ spektrumu $k=2$'de keskin bir
+tepe sergilemekte, $k=1$'i $2{,}9$ kat, $k=3$'ü $2{,}2$ kat aşmaktadır.
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
+\textbf{[ŞEKİL 1]} \\
+$k = 0$--$12$ için $|dS_y/dt|$ tarama sonuçları (Richardson hata barlarıyla). \\
+Her veri noktası: tek harmonik kaçıklık $A=\SI{10}{\micro\meter}$,
+stroboskopik spin takibi, $t_2=\SI{2}{\milli\second}$. \\
+$k=2$'de belirgin tepe; kapalı-yörünge genliği (ikincil eksen) de $k=2$'de tepe.
+\vspace{2cm}}}
+\caption{Sahte-EDM oranı $|dS_y/dt|$ ile kapalı-yörünge genliğinin $k$'ya göre taraması.
+Her ölçümde yalnızca ilgili $k$ bileşeni sıfırdan farklıdır ($A=\SI{10}{\micro\meter}$).
+Oran $k=2$'de tepe yapar: $k=2$'de $dS_y/dt = 1{,}42\times10^{-9}$~rad/s;
+$k\ge9$'da kapalı-yörünge genliği $<\SI{3}{\micro\meter}$'e inerek $\lesssim\!2\%$
+düzeyinde kalmaktadır.}
+\label{fig:falseedm}
+\end{figure}
+
+\subsection{Temel ölçüm denklemi ve BPM ofseti sorunu}
+
+Ölçüm modeli doğrusaldır:
+\begin{equation}
+  \mathbf{y} = R\,\Delta q + \mathbf{b} + \boldsymbol{\eta},
+  \label{eq:model}
+\end{equation}
+burada $\mathbf{y}\in\mathbb{R}^{48}$ BPM okumaları, $R$ $48\times48$ yörünge
+tepki matrisi, $\Delta q$ bilinmeyen kuadrupol kaçıklıkları, $\mathbf{b}$
+statik BPM elektronik ofsetleri ($\sim\SI{100}{\micro\meter}$, saatler-günler
+boyunca sabit fakat bilinmez) ve $\boldsymbol{\eta}\sim\SI{1}{\micro\meter}$
+okuma gürültüsüdür. Güçlük tamamen $\mathbf{b}$'dedir: $R^{-1}\mathbf{y}$
+üzerinden $\Delta q$'yu çözmek $R^{-1}\mathbf{b}$ kirletmesini taşır ve
+$\kappa(R)\approx249$ ile bu kirletme milimetre mertebesine çıkar — hedefin
+iki mertebe üstünde.
+
+\subsection{Mevcut yaklaşımlar: LOCO ve $K$-modülasyonu}
+
+\paragraph{LOCO (Lineer Optik Kapalı-Yörüngeden).}
+LOCO, BPM'lerden ölçülen yörünge tepki matrisini kafes modeline iteratif
+olarak uyduran standart bir algoritmadır~\cite{todo-loco}. Güçlü yönü
+kuadrupol güçlenme hatalarını ($\delta K/K$) tek bir ölçüm setiyle
+yakalayabilmesidir. Kısıtlamaları şunlardır:
+\begin{itemize}
+  \item \textbf{BPM ofseti:} $\mathbf{b}$ tüm yörünge ölçümlerine girer
+    ve BPM kazanç/faz kalibrasyonu yapılmadan kaldırılamaz; bu durum
+    hizalama doğruluğunu sınırlar.
+  \item \textbf{BPM tilti:} Açısal hizalama hataları ölçüm matrisine
+    sistematik sapma ekler ve tam olarak giderilmesi için ek çalışma
+    gerektirir.
+  \item \textbf{Ölçüm süresi:} Kapsamlı bir LOCO analizi birden fazla
+    yörünge ölçümü ve veri seti gerektirir; gerçek zamanlı izleme için
+    pratik kısıt oluşturur.
+\end{itemize}
+
+\paragraph{$K$-modülasyonu (k-mod).}
+K-modülasyonda iki kafes yapılandırması ölçülür ve fark alınır:
+\begin{equation}
+  \Delta\mathbf{y} = \mathbf{y}_2 - \mathbf{y}_1
+  = (R_2 - R_1)\,\Delta q + (\boldsymbol{\eta}_2 - \boldsymbol{\eta}_1)
+  \equiv \Delta R\,\Delta q + \text{gürültü}.
+\end{equation}
+Bu işlem $\mathbf{b}$'yi tam olarak eler. Avantajları:
+BPM ofseti artık sorun değildir; fark alma sonrası BPM tilti etkisi de
+azalır. Kısıtlamalar ise şunlardır:
+
+\begin{itemize}
+  \item \textbf{Tüm kuadrupoller birlikte modüle edilmelidir.}
+    Yalnızca birkaç kuadrupol modüle edilirse $\Delta R$'nin sütunları
+    birbirine çok benzediğinden rank düşer ve koşullanma sayısı $\sim10^6$'ya
+    fırlar; geri çatım ciddi biçimde bozulur. Buna karşın, tüm 48 kuadrupol
+    birlikte modüle edildiğinde $\Delta R = \varepsilon R$ ve
+    $\kappa(\Delta R) = \kappa(R) \approx 249$ olur — tam-halka k-modu
+    kötü koşullanma sorununu yaratmaz. Bu, SVD analizi ile gösterilmiştir
+    (Şekil~\ref{fig:svd}).
+  \item \textbf{Operasyonel yük:} 48 kuadrupolün aynı anda hassas gradyan
+    adımıyla modüle edilmesi gerçek bir işletme zorluğu oluşturur.
+  \item \textbf{Süre kısıtı:} İki ayrı denge noktasında ölçüm almak ve
+    veriyi işlemek zaman alır.
+\end{itemize}
+
+Dikkatli veri analiziyle tüm kuadrupoller eş zamanlı modüle edilerek
+yöntem uygulanabilir kılınabilir; ancak aşağıda açıklanan temel kısıtlama
+her iki yaklaşım için de geçerlidir.
+
+\subsection{Hem LOCO hem k-modülasyonunun ortak körlüğü}
+
+LOCO ve k-modülasyonu ikisi de geometrik faz etkisini ve rezonans kaynaklı
+sahte EDM sinyalini önemli ölçüde bastırabilir. Öte yandan her iki yöntem de
+\textit{harici manyetik alan harmoniklerine karşı kördür}: halka boyunca yayılan
+$B_x(\theta)=B_r\cos(k\theta)$ biçimindeki bir dış radyal alan, aynı Fourier
+bileşeninde yörünge bozunumu yaratır ve kuadrupol hizalama hatasından
+ayırt edilemez. Bu nedenle örgü boyunca genel $k=2$ modunun ölçülmesi ayrı bir
+önem taşımaktadır: söz konusu ölçüm, mekanik hizalama hatalarını ve harici
+alan harmoniklerini aynı çerçevede bir arada kapsar.
+
+%==============================================================
+\section{Fourier bileşen analizi ve tepki matrisi kazancı}
+\label{sec:fourier}
+
+\subsection{Hizalama hatası spektrumu ve $k=2$'nin baskınlığı}
+
+Gerçek halkalarda kuadrupol hizalama hataları istatistiksel olarak dağılmıştır;
+herhangi bir Fourier bileşeni diğerlerinden sistematik olarak büyük olmamaktadır.
+Bununla birlikte \textit{ölçüm stratejisi} açısından $k=2$'ye odaklanmak
+güçlü bir gerekçeye dayanmaktadır:
+
+\begin{enumerate}
+  \item Şekil~\ref{fig:falseedm}'de gösterildiği gibi sahte-EDM oranı $k=2$'de
+    keskin biçimde tepe yapar; diğer bileşenlerin katkısı en az bir mertebe
+    küçüktür. Sonraki en büyük bileşen $k=1$'dir ve yaklaşık dörtte biri
+    kadardır.
+  \item $k=2$ bileşeni tespit edildikten sonra halka boyunca dağılmış
+    dipol düzeltici mıknatıslarıyla bastırılabilir; bu düzeltme planının
+    tasarımı ayrı bir çalışma konusudur ve burada ele alınmamaktadır.
+\end{enumerate}
+
+\subsection{Tepki matrisi, eşleşmiş filtre kazancı ve SVD analizi}
+
+Belirli bir $k$ bileşenindeki hizalama hatası, tepki matrisi üzerinden her
+BPM'e Green fonksiyonu ağırlıklarıyla yansır:
+\begin{equation}
+  \mathbf{y}^{(k)} = R\,F_k\,\mathbf{a}_k,
+\end{equation}
+burada $F_k\in\mathbb{R}^{48\times2}$ FODO-antisimetrik Fourier tabanı ve
+$\mathbf{a}_k=(a_{k,c},\,a_{k,s})^T$ cos/sin katsayılarıdır.
+$k$'ıncı harmonik için eşleşmiş-filtre kazancı $\|M_k\|=\|RF_k[:,0]\|$
+olarak tanımlanır.
+
+\textbf{Kritik sayısal değer:} $\|M_{k=2}\|=167$, kafes ortalamasının
+$\sim\!34$ katıdır. Bu, $k=2$'nin dikey ayar frekansına yakınlığından
+($Q_y\approx2{,}68$) doğan rezonans kuvvetlenmesinin doğrudan
+bir yansımasıdır.
+
+Tepki matrisinin $\kappa(R)\approx249$ koşullanma sayısı bu yörünge kazancıyla
+karıştırılmamalıdır. SVD analizi,
+\begin{equation}
+  R = U\,\Sigma\,V^T,
+\end{equation}
+$R$'nin en büyük iki tekil vektörünün tam olarak $k=2$ cos ve sin
+modları olduğunu ortaya koymaktadır (Şekil~\ref{fig:svd}). Bu,
+$k=2$'nin halkanın "doğal modu" olduğunun cebirsel kanıtıdır.
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
+\textbf{[ŞEKİL 2]} \\
+Sol: $R$ tepki matrisinin SVD tekil değerleri ($\sigma_1,\ldots,\sigma_{48}$). \\
+Sağ: En büyük iki sağ tekil vektör ($v_1$, $v_2$) —
+her ikisi de tam $k=2$ cos/sin örüntüsüyle örtüşmektedir. \\
+\vspace{2cm}}}
+\caption{Tepki matrisi SVD analizi. En büyük iki tekil değer diğerlerinden
+belirgin biçimde ayrışır; karşılık gelen tekil vektörler $k=2$ FODO-antisimetrik
+modlarıdır. $\kappa(R)=\sigma_1/\sigma_{48}\approx249$ koşullanma sayısıdır;
+bu rakam yörünge kazancı değildir.}
+\label{fig:svd}
+\end{figure}
+
+\subsection{Üç genlik ölçeği ve BPM ofseti bastırımı}
+
+$\SI{10}{\micro\meter}$'lik $k=2$ hizalama hatasını $\sigma_b=\SI{100}{\micro\meter}$
+BPM ofseti arka planına karşı ölçmek için birbirinden farklı üç genlik ölçeği
+devreye girmektedir (Şekil~\ref{fig:amplitudes}):
+
+\begin{enumerate}
+\item \textbf{Sinyal yörüngesi ($\SI{1669}{\micro\meter}$).}
+  $A=\SI{10}{\micro\meter}$'lik $k=2$ hizalama hatası $R$ üzerinden
+  rezonans kuvvetlenmesiyle $A\|M_{k=2}\|=10\times167=\SI{1669}{\micro\meter}$
+  yörünge normuna dönüşür. Pik BPM genliği $\approx\SI{384}{\micro\meter}$'dir.
+
+\item \textbf{BPM ofseti ham Fourier seviyesi ($\approx\SI{26}{\micro\meter}$).}
+  $\mathbf{b}$ vektörü $R$'yi tamamen atlayarak BPM ölçümlerine doğrudan girer
+  ve beyaz dağılımlıdır. Bunun FODO-antisimetrik $F_k$ moduna projeksiyonu
+  $\sigma_b\sqrt{\pi/48}\approx\SI{26}{\micro\meter}$ r.m.s.\ değerinde olup
+  tüm $k$'lara eşit dağılır; $k=2$'de özel bir tepe yoktur.
+  Sinyal yörüngesi ($\SI{1669}{\micro\meter}$) bu ham Fourier seviyesinin
+  zaten $64\times$ üzerindedir.
+
+\item \textbf{Tahminleyici kirletme tabanı ($\approx\SI{0{,}6}{\micro\meter}$).}
+  Tahminleyici $\mathbf{b}$'yi $F_{k=2}$'ye değil, $M_{k=2}=RF_{k=2}$'ye
+  (yani $R$'nin $k=2$ sütununa) yansıtır ve $\|M_{k=2}\|=167$'ye böler:
+  $\sigma_b/\|M_{k=2}\|=\SI{100}{\micro\meter}/167\approx\SI{0{,}6}{\micro\meter}$.
+\end{enumerate}
+
+Bu üç ölçek arasındaki hiyerarşi
+\begin{equation}
+  \SI{1669}{\micro\meter}\;\gg\;\SI{26}{\micro\meter}\;\gg\;\SI{0{,}6}{\micro\meter}
+\end{equation}
+yörünge kuvvetlenmesinin tahminleyici için çift yönlü çalıştığını göstermektedir:
+gerçek sinyali BPM uzayında büyütürken ofseti $\|M_{k=2}\|$ ile bölerek baskılar.
+
+Eşleşmiş-filtre SNR'si $\sigma_b=\SI{100}{\micro\meter}$ için:
+\begin{equation}
+  \mathrm{SNR} = \frac{A\cdot\|M_{k=2}\|}{\sigma_b}
+               = \frac{10\times167}{100} \approx 16{,}7.
+\end{equation}
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
+\textbf{[ŞEKİL 3]} \\
+Üç genlik ölçeği: sinyal yörüngesi 1669~μm, ham Fourier ofseti ~26~μm,
+tahminleyici kirletme tabanı ~0.6~μm. \\
+Sol panel: BPM okumaları ($k=2$ sinyal + $\sigma_b=100$~μm ofset).
+Sağ panel: eşleşmiş-filtre projeksiyonu — sinyal ve ofset ayrımı.
+\vspace{2cm}}}
+\caption{BPM ofseti bastırımının üç ölçeği. Eşleşmiş-filtre yapısı,
+$\mathbf{b}$ vektörünü $k=2$ yörünge desenine yansıtarak ofseti
+$\|M_{k=2}\|=167$ kat bastırır. Sinyali $\mathbf{b}$'den ayırt eden
+özellik büyüklük değil; $k=2$ ``parmak izi'' ile örtüşme derecesidir.}
+\label{fig:amplitudes}
+\end{figure}
+
+\textbf{BPM ofsetine karşı dayanıklılık (beyazlık varsayımsız).}
+Fourier-tabanlı formülasyon ``$\mathbf{b}$ ne kadar büyük?'' sorusunu
+``$\mathbf{b}$'nin $k=2$ yörünge desenine projeksiyonu ne kadar büyük?'' sorusuna
+dönüştürür. $M=RF$ uyum matrisi için $\mathbf{b}$'nin $k=2$ genlik tahminini
+bozması:
+\begin{equation}
+  \delta a_{k=2} = \frac{\mathbf{b}\cdot\hat{m}_{k=2}}{\|M_{k=2}\|}
+                 = \frac{\mathbf{b}\cdot\hat{m}_{k=2}}{167},
+  \label{eq:bias}
+\end{equation}
+burada $\hat{m}_{k=2}=M_{k=2}/\|M_{k=2}\|$ birim vektördür. Denklem~(\ref{eq:bias})'e
+$\mathbf{b}$'nin istatistiksel yapısına dair hiçbir varsayım girmez. En kötü durum
+olan $\mathbf{b}=A\hat{m}_{k=2}$ (ofsetin tamamı $k=2$ yörünge deseniyle hizalı)
+senaryosunda bile $A=\SI{100}{\micro\meter}$ için sapma yalnızca $\SI{0{,}60}{\micro\meter}$'dir;
+güvenli limit $\|\mathbf{b}_\parallel\|<\SI{1669}{\micro\meter}$ ise gerçekçi
+değerin $16{,}7\times$ üzerindedir.
+
+%==============================================================
+\section{CLEAN algoritması ile geri çatım}
+\label{sec:clean}
+
+\subsection{Algoritmanın çalışma prensibi}
+
+CLEAN, temel olarak radyo astronomi görüntüleme alanından uyarlanan
+iteratif bir bileşen soyutlama algoritmasıdır. Bu çalışmada aşağıdaki
+uyarlanmış biçimiyle kullanılmaktadır:
+
+\begin{enumerate}
+  \item Aday $k$ değerleri kümesi belirlenir ($k=1,\ldots,10$).
+  \item Her iterasyonda, mevcut artık yörünge $\mathbf{r}$ ile en yüksek
+    korelasyona sahip olan $k$ bileşeni tespit edilir:
+    $k^* = \arg\max_k \|M_k^T \mathbf{r}\| / \|M_k\|^2$.
+  \item $k^*$ katkısının bir kısmı ($\gamma=0{,}1$ kazanç faktörü) artıktan
+    çıkarılır ve birikimli katsayı listesine eklenir.
+  \item Artık \SI{1}{\micro\meter} eşiğinin altına düşene veya maksimum
+    iterasyon sayısına ulaşılana kadar tekrarlanır.
+  \item Son katsayılardan her $k$ için genlik ve faz hesaplanır.
+\end{enumerate}
+
+Bu yaklaşımın temel avantajı, büyük kirletici bileşenleri ($k=4\ldots10$,
+genellikle $100$--$300\,\mu$m) küçük hedef bileşenlerden ($k=1,2,3$;
+$10$--$30\,\mu$m) önce ayrıştırmasıdır. Böylece küçük genlikli modlar,
+büyük genliklilerin gölgesinde kaybolmamaktadır.
+
+\subsection{CLEAN, tam baz ve kısmi baz kıyası}
+
+Üç geri çatım stratejisi kıyaslanmıştır:
+\begin{description}
+  \item[(A) Kısmi baz ($k=1,2,3$):] Yalnızca üç Fourier modunu içeren
+    baz ile en küçük kareler çözümü. Büyük $k=4\ldots10$ kirleticileri
+    kısmi baza sızar; $k=2$'de $+1{,}34\%$ sistematik sapma oluşur.
+  \item[(B) Tam baz ($k=1\ldots10$) lstsq:] Tüm modları kapsayan en küçük
+    kareler çözümü. Kirletici sızıntısı yoktur, $k=2$ için $\approx0\%$ hata.
+  \item[(C) CLEAN ($k=1\ldots10$ aday):] İteratif bileşen soyutlama.
+    Kirletici sızıntısı yoktur; gürültülü koşullarda lstsq'ya göre üstündür
+    çünkü büyük bileşenleri önce izole eder.
+\end{description}
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
+\textbf{[ŞEKİL 4]} \\
+Üç yöntemle geri çatılan $k=1,2,3$ genlikleri. \\
+Gerçek değerler: k=1: 30~μm, k=2: 10~μm, k=3: 25~μm. \\
+Kirleticiler: k=4..10, her biri 100--300~μm.
+\vspace{2cm}}}
+\caption{Geri çatım kalitesi karşılaştırması: kısmi baz (A), tam baz lstsq (B),
+CLEAN (C). Kısmi baz kirletici sızıntısı nedeniyle sapma gösterirken
+tam baz ve CLEAN her üç modu da başarıyla kurtarır.}
+\label{fig:reconstruction}
+\end{figure}
+
+\subsection{Fiziksel yorum}
+
+Alan kaynağı yalnızca kuadrupol hizalama hatalarıysa, $k$'ıncı Fourier
+bileşenini tespit etmek tüm o $k$'ya karşılık gelen kuadrupol kaçıklıklarını
+tespit etmeye eşdeğerdir. Rezonans $k=2$--$3$ civarında olduğundan, yüksek
+$k$'ları kabaca, $k=1,2,3$'ü ise hassas biçimde bilmek yeterlidir: sahte
+EDM'ye katkı $k\ge4$'ten giderek azalmaktadır (Şekil~\ref{fig:falseedm}).
+
+%==============================================================
+\section{Monte Carlo sistematik hata analizi}
+\label{sec:hatalar}
+
+Dört ayrı enstrümantal hata kaynağının $k=1,2,3$ modları üzerindeki etkisi
+Monte Carlo simülasyonu ($N=200$ realizasyon) ile sayısal olarak incelenmiştir.
+Gerçek hizalama deseni: $k=1$ ($30\,\mu$m), $k=2$ ($10\,\mu$m), $k=3$ ($25\,\mu$m)
+artı $k=4\ldots10$ rastgele kirleticiler ($100$--$300\,\mu$m). Tüm geri çatımlar
+CLEAN algoritması ile $k=1\ldots10$ aday setiyle yapılmıştır.
+
+\subsection{BPM okuma gürültüsü}
+
+Her ölçümde bağımsız Gaussian gürültü:
+$\varepsilon_i\sim\mathcal{N}(0,\sigma^2)$.
+$\sigma=5\,\mu$m'de $k=2$ genlik belirsizliği $\pm0{,}32\%$;
+$\sigma=50\,\mu$m'de $\pm5{,}2\%$'ye ulaşır.
+Analitik ölçekleme $\sigma(\Delta A/A)\propto\sigma/\|M_k\|$ simülasyonla
+doğrulanmıştır.
+
+\subsection{BPM statik ofseti}
+
+Her BPM'e ölçümden ölçüme sabit, BPM'den BPM'e rastgele önyargı:
+$b_i\sim\mathcal{N}(0,\sigma_b^2)$.
+Analitik öngörü $\sigma(\Delta A/A)\approx\sigma_b/\|M_k\|$ simülasyonca
+onaylanır: $\sigma_b=50\,\mu$m için $k=2$'de r.m.s.\ hata $0{,}4\%$,
+$\sigma_b=200\,\mu$m için $1{,}5\%$.
+
+\subsection{Kuadrupol rulosu}
+
+$\theta$ açısıyla yuvarlanan bir kuadrupol, skew-quad terimi aracılığıyla
+yatay kapalı yörüngeyi düşeye karıştırır:
+$\delta\mathrm{KYB}\approx R_{dy}\cdot(2\theta\cdot x_\mathrm{co})$,
+$x_\mathrm{co}=R_{dx}\cdot\delta x$, $\sigma_{dx}=100\,\mu$m.
+$\theta_\mathrm{rms}=1\,\mathrm{mrad}$'da $k=2$ genlik hatası $-0{,}66\pm2{,}1\%$.
+
+\subsection{Kuadrupol gradyan hataları}
+
+Element başına fraksiyonel gradyan hataları $\varepsilon_j\sim\mathcal{N}(0,\sigma_G^2)$,
+sütun ölçekleme modeliyle tepki matrisini bozar:
+$\mathbf{y}_\mathrm{ölç}\approx\mathbf{y}_\mathrm{nom}+R\cdot(\varepsilon\odot\Delta y_\mathrm{gerçek})$.
+$\sigma_G=0{,}5\%$'de $k=2$ hatası $-0{,}84\pm3{,}9\%$;
+$\sigma_G=2\%$'de $\pm16\%$'ya çıkar, bu nedenle sıkı gradyan kalibrasyonu önem taşır.
+
+\subsection{Kombinat hata bütçesi}
+
+Dört etki kabul edilebilir seviyelerinde ($\sigma_\mathrm{gürültü}=5\,\mu$m,
+$\sigma_b=50\,\mu$m, $\theta_\mathrm{rms}=1\,\mathrm{mrad}$,
+$\sigma_G=0{,}5\%$) eş zamanlı uygulandığında, Tablo~\ref{tab:hatalar}'da
+özetlenen sonuçlar elde edilir.
+
+\begin{table}[h]
+\centering
+\caption{Kabul edilebilir seviyelerde sistematik hata bütçesi (CLEAN, $N=200$ MC).
+$\mu$ ve $\sigma$: Monte Carlo topluluğu üzerinden $\Delta A/A$ [\%]'nin
+ortalama ve standart sapması.}
+\label{tab:hatalar}
+\begin{tabular}{lccc}
+\toprule
+Kaynak & Seviye & $k=1$ ($\mu\pm\sigma$) & $k=2$ ($\mu\pm\sigma$) \\
+\midrule
+BPM gürültüsü  & $5\,\mu$m   & $-0{,}93\pm0{,}38$ & $-0{,}74\pm0{,}32$ \\
+BPM ofseti     & $50\,\mu$m  & $-0{,}80\pm3{,}98$ & $-0{,}13\pm2{,}51$ \\
+Kuadrupol rulosu & $1\,\mathrm{mrad}$ & $-0{,}89\pm0{,}62$ & $-0{,}62\pm1{,}92$ \\
+Gradyan hatası & $0{,}5\%$   & $-0{,}90\pm1{,}45$ & $-0{,}84\pm3{,}94$ \\
+\midrule
+Kombinat       & tümü        & $-0{,}83\pm4{,}38$ & $-0{,}12\pm5{,}37$ \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lc}
+\toprule
+Kaynak & $k=3$ ($\mu\pm\sigma$) \\
+\midrule
+BPM gürültüsü  & $-0{,}92\pm0{,}49$ \\
+BPM ofseti     & $-0{,}66\pm4{,}69$ \\
+Kuadrupol rulosu & $-0{,}95\pm0{,}72$ \\
+Gradyan hatası & $-1{,}15\pm1{,}71$ \\
+\midrule
+Kombinat       & $-0{,}69\pm5{,}21$ \\
+\bottomrule
+\end{tabular}
+\caption*{$k=1,2,3$ için kombinat belirsizlik $\pm4$--$5\%$ düzeyinde;
+$\lesssim10\%$ göreli genlik doğruluğu hedefi karşılanmaktadır.
+Baskın kaynak: BPM ofseti ($k=1,3$ için) ve gradyan hatası ($k=2$ için).
+$\sigma_G\lesssim0{,}2\%$ kalibrasyonuyla kombinat belirsizlik $\sim2\%$'ye iner.}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox{0.75\textwidth}{\centering\vspace{2cm}
+\textbf{[ŞEKİL 5]} \\
+$k=1,2,3$ için kombinat sistematik hata çubuk grafiği. \\
+Her panel bir mod; yatay eksen: hata kaynağı (BPM gürültüsü, ofset, rulo, gradyan, kombinat). \\
+Dikey eksen: $\Delta A/A$ [\%] (ortalama ± 1σ). N=200 MC.
+\vspace{2cm}}}
+\caption{Sistematik hata katkıları, $k=1,2,3$ modları için ayrı ayrı.
+Her çubuk: o hata kaynağının tek başına oluşturduğu etki; son çubuk kombinattır.}
+\label{fig:sistematics}
+\end{figure}
+
+%==============================================================
+\section{Harici radyal alan harmoniklerine genişleme}
+\label{sec:haricalan}
+
+\subsection{Yöntemin kapsamı}
+
+Bu yöntem, kapalı-yörünge bozunumunun $k$'ıncı harmonikini \textit{kökeninden
+bağımsız} olarak ölçer. Halka boyunca yayılan harici bir radyal manyetik alan
+$B_x(\theta)=B_r\cos(k\theta)$, $k$'ıncı harmonik kuadrupol kaçıklığıyla tamamen
+aynı Fourier bileşeninde yörünge bozunumu yaratır; çünkü ikisi de spini aynı
+mekanizma üzerinden etkiler: halka genelinde toplanan radyal impuls.
+Dolayısıyla yöntem, mekanik hizalama hatalarını ve harici manyetik alan
+harmoniklerini (sistematik alan kusurları, artık saçak alanlar vb.) aynı
+çerçevede kapsayarak ölçer.
+
+\subsection{Spin-eşdeğer radyal alan ve dönüşüm faktörü}
+
+Duyarlılık sonuçlarını fiziksel alan birimi cinsinden ifade etmek için
+spin-eşdeğer radyal alan $B_{x,\mathrm{eq}}^{(k)}$ tanımlanır:
+$A_q$ genlikli $k$'ıncı harmonik kaçıklıkla aynı $dS_y/dt$'yi üretecek
+$B_x(\theta)=B_{x,\mathrm{eq}}\cos(k\theta)$ genliği.
+Dönüşüm faktörü:
+\begin{equation}
+  c_k \approx 6\,\mathrm{nT}\,\mu\mathrm{m}^{-1}
+  \quad (k=1,\ldots,7,\;\pm17\%)
+  \label{eq:ck}
+\end{equation}
+neredeyse $k$'dan bağımsızdır; spin, lokal pik alan yerine halka genelindeki
+ortalama impulse tepki verdiğinden FODO dolgu faktörü $f_\mathrm{fill}\sim3\%$
+ve gradyan $G=\SI{0{,}21}{\tesla\per\meter}$ genel ölçeği belirler.
+Lokal kuadrupol-merkezi alanı $B_{x,\mathrm{eq}}$'nun $\sim\!34\times$'idir.
+
+\subsection{Ölçüm hassasiyeti}
+
+BPM sistematik ofsetinden kaynaklanan alan belirsizliği:
+\begin{equation}
+  \sigma(B_{x,\mathrm{eq}}^{(k)}) \approx
+  \frac{c_k\,\sigma_b}{\|M_k\|}.
+\end{equation}
+
+1~nT hassasiyet için gereken BPM ofseti:
+\begin{itemize}
+  \item $k=2$: $\sigma_b\lesssim\SI{21}{\micro\meter}$ (BBA sonrası ulaşılabilir)
+  \item $k=3$: $\sigma_b\lesssim\SI{5}{\micro\meter}$ (BBA hedefi)
+\end{itemize}
+
+Kuadrupoller ve diğer manyetik alan kaynakları $\sim\SI{20}{\micro\meter}$
+düzeyine hizalandığında (BBA sonrası), $k=2$ bileşeni $\sim\SI{1}{\nano\tesla}$,
+$k=3$ bileşeni ise $\sim\SI{4}{\nano\tesla}$ hassasiyetle ölçülebilmektedir.
+
+%==============================================================
+\section{Tartışma ve sonraki çalışmalar}
+\label{sec:tartisma}
+
+Sunulan yöntem, k-modülasyonunun ofset-sıfırlama garantisi ile tek-yörünge
+basitliğini özellikle baskın sahte-EDM harmonik için etkin olan yapısal
+bir ayrıştırmayla takas eder. Çalışmanın kapsamı kasıtlı olarak hedeflidir:
+tam hizalama vektörünü geri çatmak değil, tek fiziksel gözlenebiliri
+($k=2$ genliği ile birlikte $k=1$ ve $k=3$) ölçmek.
+
+Aşağıdaki konular sonraki çalışmalar için açık kalmaktadır:
+
+\begin{itemize}
+  \item \textbf{Gerçek kafes parametreleriyle doğrulama.}
+    Bu çalışmada idealize edilmiş $N_\mathrm{FODO}=24$ halkası kullanılmıştır.
+    Brookhaven ya da Jülich pEDM tasarımı gibi gerçek bir kafes ile aynı
+    analizin tekrarlanması iddianın gücünü artıracaktır.
+  \item \textbf{Çoklu yörünge ortalaması.}
+    Farklı zamanlarda alınan yörüngelerin birleştirilmesi, yavaş değişen
+    $\mathbf{b}$'yi azaltırken $\Delta q$'yu sabit tutar; ofseti daha da bastırır.
+  \item \textbf{Tepki matrisi kalibrasyonu.}
+    $R$'nin LOCO/beta-BBA ile ne kadar iyi ölçülebildiği ve kalan
+    $\delta K/K$'nın $k=2$ hata bütçesine yayılması incelenmelidir.
+  \item \textbf{Gradyan kalibrasyonu.}
+    Monte Carlo analizinde $\sigma_G=0{,}5\%$ baskın belirsizlik kaynağıdır.
+    $\sigma_G\lesssim0{,}2\%$'ye indirilmesi kombinat belirsizliği $\sim2\%$'ye
+    çekecektir.
+  \item \textbf{Yatay düzlem ve kuadrupol tilti.}
+    Halihazırda oluşturulan yatay tepki matrisi $R_x$ kullanılarak yatay
+    düzleme ve skew kuplaja genişleme yapılabilir.
+  \item \textbf{Harmoniğin spin düzeyine bağlanması.}
+    Ölçülen $\Delta q_{k=2}$'nin yanlış-EDM fonksiyoneline
+    $\Phi_\mathrm{spin}\propto\sum_j K_jL_j(y_\mathrm{KY}(s_j)-\Delta y_j)$
+    oranlanması ve kapatma toleransının tanımlanması gerekmektedir.
+\end{itemize}
+
+%==============================================================
+\section{Sonuç}
+\label{sec:sonuc}
+
+Bu çalışmada, pEDM dondurulmuş-spin halkasında sahte EDM'ye yol açan baskın
+hizalama hatası harmoniklerinin ($k=1,2,3$) tek bir kapalı-yörünge ölçümünden
+CLEAN algoritması kullanılarak $\sim5\%$ göreli genlik doğruluğuyla
+kurtarılabildiği simülasyonla gösterilmiştir.
+
+Yöntemin temel dayanağı, tepki matrisinin üç özelliğidir:
+\begin{itemize}
+  \item $k=2$ için rezonans kuvvetlenmesi: $\|M_{k=2}\|=167$, kafes
+    ortalamasının $\sim34$ katı; bu sayede $\SI{10}{\micro\meter}$'lik
+    hizalama hatası BPM uzayında $\SI{1669}{\micro\meter}$ yörünge normuna dönüşür.
+  \item Eşleşmiş-filtre yapısı, $\SI{100}{\micro\meter}$'lik BPM ofsetini
+    $\SI{0{,}6}{\micro\meter}$ kirletme tabanına bastırır —
+    $\mathbf{b}$'nin istatistiksel yapısına dair herhangi bir varsayım olmaksızın.
+  \item Farklı Fourier modlarının yörünge tepkilerinin neredeyse dikeyliği,
+    büyük kirletici harmoniklerin ($k=4\ldots10$, $100$--$300\,\mu$m) küçük
+    hedef modlarına ($k=1,2,3$, $10$--$30\,\mu$m) sızmasını engeller.
+\end{itemize}
+
+Monte Carlo sistematik analizi, makul inşaat hataları koşullarında
+($\sigma_b\lesssim50\,\mu$m, $\theta_\mathrm{rms}\lesssim1\,\mathrm{mrad}$,
+$\sigma_G\lesssim0{,}5\%$) $\lesssim10\%$ göreli genlik doğruluğu hedefinin
+üç mod için de karşılandığını doğrulamıştır. BBA sonrası
+$\sigma_b\lesssim\SI{20}{\micro\meter}$ koşulunda $k=2$ moduna karşılık gelen
+radyal alan harmonik bileşeni $\sim\SI{1}{\nano\tesla}$ hassasiyetle
+ölçülebilmektedir.
+
+%==============================================================
+\section*{Teşekkür}
+\todo{teşekkür / finansman}
+
+\begin{thebibliography}{9}
+\bibitem{omarov} Z.~Omarov et al., \emph{Comprehensive symmetric-hybrid
+ring design for a proton EDM experiment at below $10^{-29}\,e\cdot$cm},
+Phys.\ Rev.\ D \textbf{105}, 032001 (2022).
+\bibitem{todo-loco} \todo{LOCO referansı}
+\bibitem{todo-pEDM} \todo{pEDM deney önerisi referansı}
+\end{thebibliography}
+
+\end{document}
