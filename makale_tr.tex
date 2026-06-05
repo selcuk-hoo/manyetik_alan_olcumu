@@ -36,7 +36,9 @@ Işın konum monitörleri (BPM) $\sim\SI{100}{\micro\meter}$ mertebesinde statik
 elektronik ofset taşır ve bu durum hizalama sinyalini gömebilir.
 Yerleşik çözüm olan $K$-modülasyonu (k-mod) iki kafes yapılandırmasının farkını
 alarak ofseti tam olarak giderir; ancak yalnızca birkaç kuadrupol modüle
-edilebildiğinde tepki matrisinin rank'ı ve koşullanması ciddi biçimde bozulur.
+edilebildiğinde fark matrisi $\Delta R$'nin rank'ı $N_\mathrm{mod}$'a
+düşer ve koşullanma sayısı $\kappa(\Delta R)\sim10^6$'ya fırlar —
+geri çatımı pratikte olanaksız kılar.
 Bu çalışmada, 48 boyutlu hizalama vektörünü tam olarak geri çatmak yerine, yalnızca
 baskın sahte-EDM harmonik bileşenini ($k=2$) tahmin etmeyi hedefleyen
 bir yöntem sunulmaktadır. Tek bir kapalı-yörünge ölçümü, tepki matrisi Fourier
@@ -101,6 +103,15 @@ diğer tüm bileşenlerden bir mertebe fazla olmasıdır;
 bunun nedeni $k=2$'nin rezonansa yakınlığıdır (bkz. Bölüm~\ref{sec:fourier}).
 Şekil~\ref{fig:falseedm}'de görüldüğü gibi $dS_y/dt$ spektrumu $k=2$'de keskin bir
 tepe sergilemekte, $k=1$'i $2{,}9$ kat, $k=3$'ü $2{,}2$ kat aşmaktadır.
+
+Bu çalışmadaki tüm sayısal simülasyonlar, Omarov et al.~\cite{omarov}'deki
+kapsamlı pEDM halka tasarımını esas almaktadır: $N_\mathrm{hücre}=24$ FODO
+hücresi, yarıçap $R_0=\SI{95{,}49}{\meter}$, nominal kuadrupol gradyanı
+$G=\SI{0{,}21}{\tesla\per\meter}$, $Q_y=2{,}68$.
+Beta fonksiyonları, faz ilerlemesi ve tepki matrisi bu kafesin doğrusal optik
+çözümünden sayısal olarak elde edilmiştir; pEDM tasarım çalışmasına özgü kafes
+geometrisi kullanıldığından bu çalışmanın bulguları doğrudan o tasarıma
+uygulanabilir niteliktedir.
 
 \begin{figure}[ht]
 \centering
@@ -180,8 +191,18 @@ azalır. Kısıtlamalar ise şunlardır:
     veriyi işlemek zaman alır.
 \end{itemize}
 
-Dikkatli veri analiziyle tüm kuadrupoller eş zamanlı modüle edilerek
-yöntem uygulanabilir kılınabilir; ancak aşağıda açıklanan temel kısıtlama
+Sonuç olarak k-modülasyonu ile tam hizalama vektörünü kurtarmak ya \emph{tüm}
+48 kuadrupolün eş zamanlı hassas modülasyonunu --- büyük operasyonel yük ---
+ya da $\kappa(\Delta R)\sim10^6$ koşullanma cezasını göze almayı gerektirir.
+Bu ikilemin somut karşılığı: modüle edilen kuadrupol sayısı $N_\mathrm{mod}<48$
+olduğunda $\mathrm{rank}(\Delta R)\le N_\mathrm{mod}$; sistem eksik belirlenir
+ve geri çatım bütünüyle çöker. Bu çalışmanın yazarları tam da bu sorunla
+karşılaşmış, $N_\mathrm{mod}=4\ldots12$ için $\kappa(\Delta R)>10^6$
+düzeyleri gözlemlemiştir.
+\textbf{Bu rank kısıtı, mevcut çalışmanın birincil motivasyonudur}:
+tam $\Delta q$'yu kurtarmak yerine yalnızca sahte-EDM açısından kritik
+Fourier harmoniklerini ($k=1,2,3$) hedefleyerek rank sorununu yapısal
+olarak aşıyoruz. Bunun yanı sıra aşağıda açıklanan ortak körlük
 her iki yaklaşım için de geçerlidir.
 
 \subsection{Hem LOCO hem k-modülasyonunun ortak körlüğü}
@@ -589,10 +610,13 @@ orantılı olarak küçülse de BPM-ofset bastırımı mekanizması değişmez.
 Aşağıdaki konular sonraki çalışmalar için açık kalmaktadır:
 
 \begin{itemize}
-  \item \textbf{Gerçek kafes parametreleriyle doğrulama.}
-    Bu çalışmada idealize edilmiş $N_\mathrm{FODO}=24$ halkası kullanılmıştır.
-    Brookhaven ya da Jülich pEDM tasarımı gibi gerçek bir kafes ile aynı
-    analizin tekrarlanması iddianın gücünü artıracaktır.
+  \item \textbf{Gerçek makine verileriyle doğrulama.}
+    Bu çalışmada Omarov et al.~\cite{omarov} pEDM halka tasarım kafesi
+    ($N_\mathrm{FODO}=24$, $Q_y=2{,}68$, $G=\SI{0{,}21}{\tesla\per\meter}$,
+    $R_0=\SI{95{,}49}{\meter}$) kullanılmıştır; dolayısıyla ``idealize FODO''
+    itirazı büyük ölçüde geçersizdir.
+    Açık kalan doğrulama adımı, bir prototip ya da gerçek pEDM depolama
+    halkasından alınan BPM verileriyle yöntemin deneysel olarak sınanmasıdır.
   \item \textbf{Çoklu yörünge ortalaması.}
     Farklı zamanlarda alınan yörüngelerin birleştirilmesi, yavaş değişen
     $\mathbf{b}$'yi azaltırken $\Delta q$'yu sabit tutar; ofseti daha da bastırır.
