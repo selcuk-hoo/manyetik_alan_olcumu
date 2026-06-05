@@ -249,10 +249,13 @@ def _run_one_k(task):
     sy_strobe = np.asarray(poin[:, 7], float) if poin is not None and len(poin) > 5 else None
     if sy_strobe is not None:
         ts = np.asarray(poin_t, float)
-        slope = float(np.polyfit(ts, sy_strobe, 1)[0])
+        coeffs, cov = np.polyfit(ts, sy_strobe, 1, cov=True)
+        slope = float(coeffs[0])
+        slope_err = float(np.sqrt(cov[0, 0]))
     else:
         ts = None
         slope = float("nan")
+        slope_err = float("nan")
     # Karşılaştırma: eski sürekli-SG yöntemi (örnekleme-bağımlı, güvenilmez)
     slope_sg = float(measure_dSy_dt(hist, t_array))
     sy = hist[:, 7].copy()   # sürekli S_y (hızlı salınım bağlamı için)
@@ -260,7 +263,8 @@ def _run_one_k(task):
     # resid_beta_mm: sabit azimutta kalan betatron RMS (CO aramasından).
     # Kapalı yörünge üzerinde fırlatıldıysa ~0 (≪ CO ofseti) → temiz fırlatma.
     return {"k": k, "co_off_mm": co_off_mm, "resid_beta_mm": resid_beta_mm,
-            "dSy_dt": slope, "dSy_dt_sg": slope_sg, "runtime": dt_run,
+            "dSy_dt": slope, "dSy_dt_err": slope_err,
+            "dSy_dt_sg": slope_sg, "runtime": dt_run,
             "sy": sy, "t_array": t_array,
             "sy_strobe": (sy_strobe.copy() if sy_strobe is not None else None),
             "t_strobe": (ts.copy() if ts is not None else None)}
@@ -327,18 +331,22 @@ def plot_results(results, amp_coef):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    ks   = np.array([r["k"] for r in results])
-    dsy  = np.array([abs(r["dSy_dt"]) for r in results])
+    ks      = np.array([r["k"] for r in results])
+    dsy     = np.array([abs(r["dSy_dt"]) for r in results])
+    dsy_err = np.array([r.get("dSy_dt_err", 0.0) for r in results])
     # Orbit rezonans göstergesi: bulunan kapalı-yörünge fırlatma ofseti
     # (parçacık bunun üzerine oturtulduğu için kalan betatron ~0'dır).
     orbit = np.array([r["co_off_mm"] for r in results])
 
-    fig, ax1 = plt.subplots(figsize=(7, 4.5))
+    fig, ax1 = plt.subplots(figsize=(8, 5))
     color1 = "tab:red"
-    ax1.bar(ks, dsy, width=0.55, color=color1, alpha=0.75,
-            label=r"$|dS_y/dt|$ (false EDM)")
-    ax1.set_xlabel("Fourier mode $k$ of quad misalignment")
-    ax1.set_ylabel(r"$|dS_y/dt|$  [rad/s]  (false EDM signal)", color=color1)
+    ax1.errorbar(ks, dsy, yerr=dsy_err, fmt="o-", color=color1, lw=1.8,
+                 ms=8, mfc="white", mew=2, capsize=4, capthick=1.5,
+                 elinewidth=1.3, label=r"$|dS_y/dt|$ (false EDM)")
+    ax1.set_yscale("log")
+    ax1.set_xlabel("Fourier mode $k$ of quad misalignment", fontsize=12)
+    ax1.set_ylabel(r"$|dS_y/dt|$  [rad/s]  (false EDM signal)", color=color1,
+                   fontsize=11)
     ax1.tick_params(axis="y", labelcolor=color1)
     ax1.set_xticks(ks)
 
