@@ -573,3 +573,125 @@ $$\sigma(B_{x,\text{eq}}^{(k)}) \approx \frac{c_k \cdot \sigma_b}{\|M_k\|}$$
 ### Özet cümle (makale için)
 
 > "Quad'lar ve diğer manyetik alan kaynakları ~20 μm düzeyine hizalanırsa, halka boyunca yayılan radyal manyetik alanın k=2 harmonik bileşeni ~1 nT hassasiyetle ölçülebilir; k=3 için ~4 nT hassasiyet BBA hedefiyle (σ_offset~5 μm) 1 nT'ye indirilebilir."
+
+---
+
+## 13. Test betiklerinin çalışma prensipleri <a name="13-testler"></a>
+
+Bu bölüm, hata bütçesi analizinde kullanılan yedi test betiğinin fiziksel modelini ve çalışma prensibini açıklar. Tüm betikler CLEAN algoritmasını kullanır (k-modülasyon yöntemi terk edilmiştir).
+
+---
+
+### 13.1 `plot_misalignment_pattern.py` — Hizalama hatası örüntüsü
+
+**Ne yapar:** Quad hizalama hatalarını halka boyunca görselleştirir ve Fourier spektrumunu çizer.
+
+**Fiziksel model:** Belirlenmiş bir gerçek misalignment vektörü `dy[j]` oluşturulur:
+- k=1 (30 μm, φ=0.80 rad), k=2 (10 μm, φ=1.50 rad), k=3 (25 μm, φ=0.30 rad)
+- k=4..10: 100–300 μm aralığında rastgele kirletici modlar
+
+**FODO antisimetrik baz:** `F_k[j] = (-1)^j · cos(2πk·⌊j/2⌋/N)` ve sinüs karşılığı. Bu baz, q ve d (odaklayan-dağıtan) quad'ların zıt yönlere kaçmasını doğru tanımlar.
+
+**Neden önemli:** Gerçek halkalarda k=1..3 küçük modlar gözlenmek istenir; ancak k=4..10 modlar 10–30× daha büyük olabilir. CLEAN algoritmasının bu kirletici modları baskılaması kritiktir.
+
+---
+
+### 13.2 `test_reconstruction_quality.py` — Geri çatım kalitesi
+
+**Ne yapar:** Üç geri çatım yöntemini kıyaslar: (A) yalnızca k=1,2,3 baz; (B) k=1..10 tam baz lstsq; (C) CLEAN.
+
+**Neden önemli:** Yalnızca k=1,2,3 baz kullanmak (A), büyük k=4..10 kirleticilerin sızmasına yol açar (+1.34% k=2 hatası). Tam baz lstsq (B) ve CLEAN (C) ise k=2'yi <1% hata ile kurtarır, CLEAN özellikle gürültüde üstündür.
+
+---
+
+### 13.3 `test_bpm_noise.py` — BPM okuma gürültüsü etkisi
+
+**Fiziksel model:** Her ölçümde bağımsız Gaussian gürültü:
+```
+y_ölçüm,i = y_gerçek,i + ε_i,    ε_i ~ N(0, σ²)
+```
+
+**σ taraması:** 1, 5, 20, 50 μm (N=200 MC her seviye için).
+
+**Analitik beklenti:** Gürültü beyaz olduğundan $k=2$ genlik belirsizliği:
+$$\sigma(\Delta A/A) \approx \frac{\sigma}{\|M_{k=2}\| \cdot A_{k=2}} = \frac{\sigma}{167 \times 10\,\mu\text{m}}$$
+
+σ=5 μm'de %0.32, σ=50 μm'de %5.2 belirsizlik elde edilir; bunlar σ ile lineer ölçeklenir (log-log eğimi ≈1).
+
+---
+
+### 13.4 `test_bpm_offset.py` — BPM sistematik ofseti etkisi
+
+**Fiziksel model:** Her BPM'e ölçümden ölçüme sabit ama BPM'den BPM'e rastgele bir önyargı:
+```
+y_ölçüm,i = y_gerçek,i + b_i,    b_i ~ N(0, σ_offset²)
+```
+Gürültüden farkı: `b_i` her yeni ölçümde değişmez (kalibrasyon hatası).
+
+**σ_offset taraması:** 10, 50, 200, 500 μm (N=100 MC).
+
+**Analitik referans:** `σ(ΔA/A) ≈ σ_b / ‖M_k‖`. Bu, offset vektörü $\mathbf{b}$'nin $k=2$ orbit desenine yansıtılmasını ifade eder; $\|M_{k=2}\|=167$ büyüklüğü sinyali amplify ederken ofseti baskılar.
+
+**Neden önemli:** BPM ofseti, tepki matrisini tamamen atlayarak BPM okumasını doğrudan bozar. Ancak Fourier baz projektörü, beyaz bir ofseti tüm modlara eşit dağıtarak etkiyi $\|M_k\|$ ile böler — bu geometrik bir çökme (matched filter kazancı).
+
+---
+
+### 13.5 `test_quad_tilt.py` — Quad rulosu (s-ekseni rotasyonu) etkisi
+
+**Fiziksel model:** Bir quad $\theta$ açısıyla yuvarlandığında skew-quad terimi oluşur; bu yatay kapalı yörüngeyi dikeye karıştırır:
+```
+δy_CO ≈ R_dy · (2·θ · x_co)    [element-wise çarpım]
+x_co = R_dx · δx,               δx ~ N(0, σ_dx²)
+```
+
+Yatay hizalama hatalarından (σ_dx=100 μm) oluşan x_co ≈ 364 μm RMS'dir.
+
+**θ_rms taraması:** 0.1, 0.5, 1, 2, 5 mrad (N=50 MC).
+
+**Sonuç:** 1 mrad rulo'da k=2 hatası -0.66 ± 2.1%. Rulo etkisi, iki parametrenin (θ ve x_co) çarpımına bağlı olduğundan doğrusal değil — büyük θ'da quadratik büyüme gözlenir.
+
+---
+
+### 13.6 `test_quad_gradient.py` — Quad gradyan hatası etkisi
+
+**Fiziksel model:** Her quad'ın nominal gradyanına bağımsız fraksiyonel hata eklenir:
+```
+G_j_gerçek = G_j_nominal · (1 + ε_j),    ε_j ~ N(0, σ_G²)
+```
+Tepki matrisi sütun ölçekleme modeli ile bozulan COD:
+```
+y_bozulmuş = y_nom + R · (ε ⊙ Δy_gerçek)
+```
+Ekstra terim `R · (ε ⊙ Δy)`, her quad'ın hem hizalama katkısını hem de gradyan hatasını içerir.
+
+**σ_G taraması:** 0.1%, 0.5%, 2%, 5% (N=200 MC).
+
+**Sonuç:** σ_G=0.5%'de k=2 hatası -0.84 ± 3.9%. Bu, dört sistematik içinde en büyük ikinci kaynaktır. Sıkı gradyan kalibrasyonu (σ_G ≲ 0.2%) kombinat belirsizliği %2 altına indirir.
+
+---
+
+### 13.7 `test_combined_systematics.py` — Kombinat sistematik hata
+
+**Fiziksel model:** Tüm hatalar aynı anda uygulanır:
+```
+y_ölçüm = y_nom + ε_gürültü + b_ofset + δy_rulo + δy_gradyan
+```
+Beş senaryo: dört hata kaynağı ayrı ayrı + tümünün kombinasyonu.
+
+**Kabul edilebilir seviyeler:** σ_noise=5 μm, σ_offset=50 μm, θ_rms=1 mrad, σ_G=0.5%.
+
+**Kombinat sonuç:** k=2 hatası -0.1 ± 5.4%, k=1 -0.8 ± 4.4%, k=3 -0.7 ± 5.2%. %10 göreli genlik doğruluğu hedefi karşılanır; baskın kaynaklar BPM ofseti ve gradyan hatasıdır.
+
+**Not:** k-modülasyon yöntemi terk edilmiştir; tüm betikler tek bir orbit ölçümünden CLEAN geri çatımını kullanır.
+
+---
+
+### Özet tablo
+
+| Betik | Hata kaynağı | Kabul seviyesi | k=2 belirsizliği |
+|-------|-------------|----------------|-----------------|
+| `test_bpm_noise.py` | BPM gürültüsü | σ=5 μm | ±0.32% |
+| `test_bpm_offset.py` | BPM ofseti | σ_b=50 μm | ±0.40% |
+| `test_quad_tilt.py` | Quad rulosu | θ=1 mrad | ±2.1% |
+| `test_quad_gradient.py` | Gradyan hatası | σ_G=0.5% | ±3.9% |
+| `test_combined_systematics.py` | Tümü | kabul seviyeleri | ±5.4% |
