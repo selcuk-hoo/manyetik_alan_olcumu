@@ -79,15 +79,26 @@ her kuadrupolün düşey konumunun $\sim\SI{10}{\micro\meter}$ düzeyinde bilinm
 gerekir; bu hassasiyet mekanik ölçümün çok ötesinde olduğundan ışın-tabanlı
 bir belirleme zorunludur.
 
-Sahte EDM oranı ile hizalama hatası hızı arasındaki bağıntı doğrusal ve zamandan
-bağımsızdır:
+Sahte EDM oranı ile hizalama hatası arasındaki bağıntı doğrusal ve zamandan
+bağımsızdır. Dondurulmuş-spin geometrisinde, $j$'inci kuadrupolün yaptığı katkı
+yerel kapalı-yörünge konumu $y_\mathrm{co}(s_j)$ ile orantılıdır:
 \begin{equation}
-  \frac{dS_y}{dt} = \mathcal{F}\!\left[\{\Delta y_j\}\right],
+  \frac{dS_y}{dt} \propto
+  \sum_j K_j L_j \left[y_\mathrm{co}(s_j) - \Delta y_j\right],
+  \label{eq:spinrate}
 \end{equation}
-burada $\mathcal{F}$ tepki matrisinden ve halka optiklerinden türetilen
-bir fonksiyoneldır. Önemli olan, bu fonksiyonelin $k=2$
-Fourier harmonik bileşenine ($N=24$ FODO hücreli bir halkada)
-bağımlılığının diğer tüm bileşenlerden bir mertebe fazla olmasıdır.
+burada $K_j$ ve $L_j$ $j$'inci kuadrupolün efektif gradyanı ve uzunluğu,
+$y_\mathrm{co}(s_j)$ kapalı-yörünge konumu ve $\Delta y_j$ mekanik kaçıklığıdır.
+$y_\mathrm{co}$ da $\Delta y_j$'ye bağlı olduğundan bu ifade $\Delta q$'da
+gerçekte ikinci dereceye kadar gider; ancak küçük kaçıklıklar için lineer
+yaklaşım yeterlidir ve $\Delta q$'nun Fourier bileşenleri cinsinden ayrışır.
+$k$'ıncı Fourier bileşeni $\hat{a}_k$ ise Denklem~(\ref{eq:spinrate})'e
+$\|\hat{a}_k\|$ ile orantılı katkı verir.
+Önemli olan, bu katkının $k=2$
+Fourier harmonik bileşeni için ($N_\mathrm{hücre}=24$ FODO hücreli halkada,
+toplam $N_Q=2N_\mathrm{hücre}=48$ kuadrupol, düşey tune $Q_y\approx2{,}68$)
+diğer tüm bileşenlerden bir mertebe fazla olmasıdır;
+bunun nedeni $k=2$'nin rezonansa yakınlığıdır (bkz. Bölüm~\ref{sec:fourier}).
 Şekil~\ref{fig:falseedm}'de görüldüğü gibi $dS_y/dt$ spektrumu $k=2$'de keskin bir
 tepe sergilemekte, $k=1$'i $2{,}9$ kat, $k=3$'ü $2{,}2$ kat aşmaktadır.
 
@@ -128,7 +139,7 @@ iki mertebe üstünde.
 
 \paragraph{LOCO (Lineer Optik Kapalı-Yörüngeden).}
 LOCO, BPM'lerden ölçülen yörünge tepki matrisini kafes modeline iteratif
-olarak uyduran standart bir algoritmadır~\cite{todo-loco}. Güçlü yönü
+olarak uyduran standart bir algoritmadır~\cite{safranek1997}. Güçlü yönü
 kuadrupol güçlenme hatalarını ($\delta K/K$) tek bir ölçüm setiyle
 yakalayabilmesidir. Kısıtlamaları şunlardır:
 \begin{itemize}
@@ -279,7 +290,11 @@ Bu üç ölçek arasındaki hiyerarşi
 yörünge kuvvetlenmesinin tahminleyici için çift yönlü çalıştığını göstermektedir:
 gerçek sinyali BPM uzayında büyütürken ofseti $\|M_{k=2}\|$ ile bölerek baskılar.
 
-Eşleşmiş-filtre SNR'si $\sigma_b=\SI{100}{\micro\meter}$ için:
+Eşleşmiş-filtre SNR'si\footnote{Bu hesapta $\sigma_b=\SI{100}{\micro\meter}$
+kullanılmıştır; bu değer BBA öncesi tipik BPM ofseti büyüklüğüdür.
+Bölüm~\ref{sec:hatalar}'daki sistematik hata analizinde kabul edilebilir
+seviye olarak $\sigma_b=\SI{50}{\micro\meter}$ (BBA sonrası) alınmıştır;
+bu durumda SNR $\approx 33{,}3$'e çıkar.} $\sigma_b=\SI{100}{\micro\meter}$ için:
 \begin{equation}
   \mathrm{SNR} = \frac{A\cdot\|M_{k=2}\|}{\sigma_b}
                = \frac{10\times167}{100} \approx 16{,}7.
@@ -465,28 +480,16 @@ $\sigma_G=0{,}5\%$) eş zamanlı uygulandığında, Tablo~\ref{tab:hatalar}'da
 $\mu$ ve $\sigma$: Monte Carlo topluluğu üzerinden $\Delta A/A$ [\%]'nin
 ortalama ve standart sapması.}
 \label{tab:hatalar}
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-Kaynak & Seviye & $k=1$ ($\mu\pm\sigma$) & $k=2$ ($\mu\pm\sigma$) \\
+Kaynak & Seviye & $k=1$ ($\mu\pm\sigma$) & $k=2$ ($\mu\pm\sigma$) & $k=3$ ($\mu\pm\sigma$) \\
 \midrule
-BPM gürültüsü  & $5\,\mu$m   & $-0{,}93\pm0{,}38$ & $-0{,}74\pm0{,}32$ \\
-BPM ofseti     & $50\,\mu$m  & $-0{,}80\pm3{,}98$ & $-0{,}13\pm2{,}51$ \\
-Kuadrupol rulosu & $1\,\mathrm{mrad}$ & $-0{,}89\pm0{,}62$ & $-0{,}62\pm1{,}92$ \\
-Gradyan hatası & $0{,}5\%$   & $-0{,}90\pm1{,}45$ & $-0{,}84\pm3{,}94$ \\
+BPM gürültüsü    & $5\,\mu$m            & $-0{,}93\pm0{,}38$ & $-0{,}74\pm0{,}32$ & $-0{,}92\pm0{,}49$ \\
+BPM ofseti       & $50\,\mu$m           & $-0{,}80\pm3{,}98$ & $-0{,}13\pm2{,}51$ & $-0{,}66\pm4{,}69$ \\
+Kuadrupol rulosu & $1\,\mathrm{mrad}$   & $-0{,}89\pm0{,}62$ & $-0{,}62\pm1{,}92$ & $-0{,}95\pm0{,}72$ \\
+Gradyan hatası   & $0{,}5\%$            & $-0{,}90\pm1{,}45$ & $-0{,}84\pm3{,}94$ & $-1{,}15\pm1{,}71$ \\
 \midrule
-Kombinat       & tümü        & $-0{,}83\pm4{,}38$ & $-0{,}12\pm5{,}37$ \\
-\bottomrule
-\end{tabular}
-\begin{tabular}{lc}
-\toprule
-Kaynak & $k=3$ ($\mu\pm\sigma$) \\
-\midrule
-BPM gürültüsü  & $-0{,}92\pm0{,}49$ \\
-BPM ofseti     & $-0{,}66\pm4{,}69$ \\
-Kuadrupol rulosu & $-0{,}95\pm0{,}72$ \\
-Gradyan hatası & $-1{,}15\pm1{,}71$ \\
-\midrule
-Kombinat       & $-0{,}69\pm5{,}21$ \\
+Kombinat         & tümü                 & $-0{,}83\pm4{,}38$ & $-0{,}12\pm5{,}37$ & $-0{,}69\pm5{,}21$ \\
 \bottomrule
 \end{tabular}
 \caption*{$k=1,2,3$ için kombinat belirsizlik $\pm4$--$5\%$ düzeyinde;
@@ -575,6 +578,14 @@ bir ayrıştırmayla takas eder. Çalışmanın kapsamı kasıtlı olarak hedefl
 tam hizalama vektörünü geri çatmak değil, tek fiziksel gözlenebiliri
 ($k=2$ genliği ile birlikte $k=1$ ve $k=3$) ölçmek.
 
+\textbf{Yöntemin operasyonel sınırı.}
+Bu yöntem $k=1,2,3$ harmonik genliklerini \emph{ölçer}; bunların düzeltici
+mıknatıslarla bastırılmasını ise kapsamaz. Pratikte ölçüm-düzeltme döngüsü
+tekrarlanacaktır: $k=2$ düzeltildikten sonra biriken artık harmonik, bir
+sonraki orbit ölçümüyle izlenebilir. Yeterince küçük artık için aynı
+çerçeve geçerliliğini korur; çünkü eşleşmiş-filtre SNR'si artık büyüklüğüyle
+orantılı olarak küçülse de BPM-ofset bastırımı mekanizması değişmez.
+
 Aşağıdaki konular sonraki çalışmalar için açık kalmaktadır:
 
 \begin{itemize}
@@ -644,7 +655,9 @@ radyal alan harmonik bileşeni $\sim\SI{1}{\nano\tesla}$ hassasiyetle
 \bibitem{omarov} Z.~Omarov et al., \emph{Comprehensive symmetric-hybrid
 ring design for a proton EDM experiment at below $10^{-29}\,e\cdot$cm},
 Phys.\ Rev.\ D \textbf{105}, 032001 (2022).
-\bibitem{todo-loco} \todo{LOCO referansı}
+\bibitem{safranek1997} J.~Safranek, \emph{Experimental determination of storage
+ring optics using orbit response measurements},
+Nucl.\ Instrum.\ Methods Phys.\ Res.\ A \textbf{388}, 27 (1997).
 \bibitem{todo-pEDM} \todo{pEDM deney önerisi referansı}
 \end{thebibliography}
 
