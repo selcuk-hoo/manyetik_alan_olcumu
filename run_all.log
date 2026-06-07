@@ -1,0 +1,1531 @@
+Waiting for make_fig1.py to finish (if it's still running)...
+Running make_fig2.py...
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig2.py:34: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  ax.legend(frameon=False)
+R loaded from R_dy_1.npy
+fig2_orbit_gain.png generated at /home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/fig2_orbit_gain.png
+Running make_fig3.py...
+R loaded from R_dy_1.npy
+Running 2000 MC iterations using 12 cores...
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig3.py:94: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  ax3b.legend(frameon=False, fontsize=8.5, loc='center left', bbox_to_anchor=(1, 0.5))
+fig3_mode_patterns.png generated at /home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/fig3_mode_patterns.png
+Running make_fig4.py...
+Running systematic gradient simulations using 12 cores...
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3999 ms  |  %40
+  t = 0.2000 ms  |  %20
+  t = 0.3999 ms  |  %40
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.4999 ms  |  %50
+  t = 0.3000 ms  |  %30
+  t = 0.4999 ms  |  %50
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.6999 ms  |  %70
+  t = 0.4999 ms  |  %50
+  t = 0.6999 ms  |  %70
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.7999 ms  |  %80
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.7999 ms  |  %80
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+fig4_sigma_model.png generated at /home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/fig4_sigma_model.png
+Running make_fig5.py...
+R loaded from R_dy_1.npy
+Running 400 MC iterations using 12 cores...
+fig5_offset_whiteness.png generated at /home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/fig5_offset_whiteness.png
+Running make_fig6.py...
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+Running full beam dynamics MC (50 iterations) for Combined Systematics...
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py:219: SyntaxWarning: invalid escape sequence '\D'
+  ax.set_ylabel("Amplitude Error $\Delta A/A$ [%]")
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+                    ~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/multiprocessing/pool.py", line 48, in mapstar
+    return list(map(*args))
+  File "/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py", line 99, in _simulate_mc_iteration
+    "Gradyan":  dict(q_dy=dy_truth, q_dG=dg),
+                                         ^^
+NameError: name 'dg' is not defined. Did you mean: 'dx'?
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py", line 239, in <module>
+    make_fig6()
+    ~~~~~~~~~^^
+  File "/home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/make_fig6.py", line 171, in make_fig6
+    mc_results = pool.map(_simulate_mc_iteration, tasks)
+  File "/usr/lib/python3.13/multiprocessing/pool.py", line 367, in map
+    return self._map_async(func, iterable, mapstar, chunksize).get()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/multiprocessing/pool.py", line 774, in get
+    raise self._value
+NameError: name 'dg' is not defined
+All figures generated.
+Running make_fig7.py...
+Running systematic Quadrupole Tilt simulations using 12 cores...
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8999 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.1000 ms  |  %10
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.2000 ms  |  %20
+  t = 0.3000 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.2999 ms  |  %30
+  t = 0.3000 ms  |  %30
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.3999 ms  |  %40
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.4999 ms  |  %50
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.5999 ms  |  %60
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.6999 ms  |  %70
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.7999 ms  |  %80
+  t = 0.8998 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.8999 ms  |  %90
+  t = 0.8998 ms  |  %90
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+  t = 0.9998 ms  |  %100
+target_quad: 999, p_saved: 0
+  t = 1.0000 ms  |  %100
+fig7_tilt_model.png generated at /home/selcuk/projeler/manyetik_alan_olcumu/manyetik_alan_olcumu/fig7_tilt_model.png
