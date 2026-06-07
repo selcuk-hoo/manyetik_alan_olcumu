@@ -23,6 +23,16 @@ Tüm yöntemlerde aynı R orbit tepki matrisi kullanılır.
 kmod avantajı YALNIZCA BPM sistematik ofsetinin iptalinden gelir:
   Tek yörünge : y_obs = R·q + b + ε     (b bozar; σ_b=100 μm >> 10 μm)
   kmod        : y_obs = R·q + ε          (b iptal; gürültü tabanı √2 μm)
+
+kmod ŞEMASI — ÖNEMLİ:  Burada modellenen kmod, TÜM quadlara üniform
+fraksiyonel ε gradyen modülasyonudur (g → g(1±ε), her quad).  Bu durumda
+fark matrisi ΔR = R(g(1+ε)) − R(g) ≈ ε·R TAM KERTELİDİR; ε'ya bölününce
+R·q geri gelir, yani aynı R yapısı korunur.  BPM ofseti b iki ölçümde de
+aynı olduğundan farkta tam iptal olur.
+  • TEK quad modülasyonu (params.json kmod_configs: j2=−1) ise ΔR rank-EKSİK
+    olur (yalnız o quadın sütunu değişir) → CLEAN harmonikleri ayıramaz.
+    "fig_7_kmod_rank.png" tam da bu tek-quad rank yetersizliğini gösterir.
+  • Bu betikte 'sadece R kullan' yaklaşımı = üniform tüm-quad kmod varsayımı.
 """
 
 import json, math, os, sys
@@ -49,7 +59,9 @@ KL      = G * L_Q / Brho         # m⁻¹  (QF = QD, aynı büyüklük)
 
 # ── R matrisi (nominal tam-kerteli orbit tepki) ───────────────────────────────
 R1 = np.load("R_dy_1.npy")          # 48×48, tam kerteli
-# kmod da aynı R1'i kullanır; avantaj sadece BPM ofset iptalinden gelir
+# kmod (TÜM quadlara üniform ε modülasyon) da aynı R1 yapısını verir:
+#   ΔR = R(g(1+ε)) − R(g) ≈ ε·R  → ε'ya bölününce R·q.
+# Avantaj sadece BPM ofset iptalinden gelir, R yapısı değişmez.
 
 # ── β_y (FFT Q_y = 1.732) ────────────────────────────────────────────────────
 Q_y      = 1.732
@@ -94,19 +106,37 @@ def direct_ls_k2(y_obs: np.ndarray) -> float:
     return float(np.sqrt(a[0]**2 + a[1]**2))
 
 
-# ── Yöntem 3: kmod + CLEAN ────────────────────────────────────────────────────
-# kmod sinyal: y_kmod = R1·q + ε,  BPM ofseti tam iptal (b=0)
-def kmod_clean_k2(y_kmod: np.ndarray) -> float:
-    """kmod + CLEAN: R1·F·a = y_kmod (ofset iptali, aynı R1 kullanılır)."""
+# ── Yöntem 3/4: CLEAN (kmod'lu ve kmod'suz) ──────────────────────────────────
+# Aynı CLEAN rutini; tek fark girdideki BPM ofsetinin (b) olup olmaması.
+def clean_k2(y_in: np.ndarray) -> float:
+    """CLEAN: R1·F·a = y_in, iteratif harmonik soyma, k=2 genlik [m]."""
     accum, _, _ = clean_reconstruct(
-        [R1], [y_kmod], CANDIDATE_KS, antisym=True,
+        [R1], [y_in], CANDIDATE_KS, antisym=True,
         gain=0.2, max_iter=300, tol=1e-4)
     a2 = accum[2]
     return float(np.sqrt(a2[0]**2 + a2[1]**2))
 
 
+# ── GÜRÜLTÜSÜZ içsel baz sapması (b=0, ε=0; sadece nuisance var) ──────────────
+# Her yöntemin "ideal" durumdaki yapısal yanlılığını gösterir:
+#   Bozoki: √β-normalize azimut bazı FODO-antisim orbit yapısına UYMAZ → büyük sapma
+#   R-tabanlı (Direkt LS / CLEAN): doğru ileri model → sapma ≈ 0
+A_diag = 10e-6
+dq_d  = F_k2 @ np.array([A_diag, 0.0]) + dq_nuisance
+y_d   = R1 @ dq_d
+print("="*60)
+print(f"  GÜRÜLTÜSÜZ içsel baz sapması (A_k2={A_diag*1e6:.0f} μm, b=0, ε=0):")
+print(f"    Bozoki LS (η=y/√β, azimut)   : {bozoki_k2(y_d)*1e6:6.1f} μm  "
+      f"→ %{abs(bozoki_k2(y_d)-A_diag)/A_diag*100:.0f} hata (SADECE baz uyumsuzluğu)")
+print(f"    Direkt R-LS (R·F_k2 fit)     : {direct_ls_k2(y_d)*1e6:6.2f} μm  "
+      f"→ %{abs(direct_ls_k2(y_d)-A_diag)/A_diag*100:.1f} hata")
+print(f"    CLEAN (R, iteratif)          : {clean_k2(y_d)*1e6:6.2f} μm  "
+      f"→ %{abs(clean_k2(y_d)-A_diag)/A_diag*100:.1f} hata")
+print(f"  → Bozoki'nin hatası gürültüden DEĞİL, bazın FODO örgüsüne uymamasından.")
+print("="*60)
+
 # ── Monte Carlo taraması ──────────────────────────────────────────────────────
-print("Monte Carlo başlıyor...")
+print("\nMonte Carlo başlıyor...")
 RNG         = np.random.default_rng(42)
 N_TRIALS    = 80
 SIGMA_BPM   = 100e-6   # 100 μm sistematik BPM ofseti
@@ -114,9 +144,10 @@ SIGMA_NOISE =   1e-6   #   1 μm ölçüm gürültüsü
 
 A_range = np.logspace(-7, -3.5, 20)   # 0.1 μm → 316 μm
 
-err_boz = np.zeros((len(A_range), N_TRIALS))
-err_dir = np.zeros((len(A_range), N_TRIALS))
-err_cln = np.zeros((len(A_range), N_TRIALS))
+err_boz = np.zeros((len(A_range), N_TRIALS))   # Bozoki LS (tek yörünge)
+err_dir = np.zeros((len(A_range), N_TRIALS))   # Direkt R LS (tek yörünge)
+err_cnk = np.zeros((len(A_range), N_TRIALS))   # CLEAN, kmod YOK (tek yörünge, b var)
+err_cln = np.zeros((len(A_range), N_TRIALS))   # CLEAN + kmod (b iptal)
 
 for ia, A_k2 in enumerate(A_range):
     dq    = F_k2 @ np.array([A_k2, 0.0]) + dq_nuisance   # k=2 + nuisance
@@ -129,28 +160,31 @@ for ia, A_k2 in enumerate(A_range):
         y_obs   = y_sig + b + eps          # tek yörünge: sinyal + BPM ofseti + gürültü
         y_kmod  = y_sig + eps              # kmod: BPM ofseti iptal, sadece gürültü
 
-        err_boz[ia, it] = abs(bozoki_k2(y_obs)       - A_k2) / A_k2
-        err_dir[ia, it] = abs(direct_ls_k2(y_obs)    - A_k2) / A_k2
-        err_cln[ia, it] = abs(kmod_clean_k2(y_kmod)  - A_k2) / A_k2
+        err_boz[ia, it] = abs(bozoki_k2(y_obs)     - A_k2) / A_k2
+        err_dir[ia, it] = abs(direct_ls_k2(y_obs)  - A_k2) / A_k2
+        err_cnk[ia, it] = abs(clean_k2(y_obs)      - A_k2) / A_k2   # CLEAN, kmod yok
+        err_cln[ia, it] = abs(clean_k2(y_kmod)     - A_k2) / A_k2   # CLEAN + kmod
 
     snr = A_k2 / SIGMA_BPM
     print(f"  A={A_k2*1e6:7.2f} μm  SNR={snr:.4f}  "
           f"Bozoki={np.median(err_boz[ia])*100:6.1f}%  "
           f"DirLS={np.median(err_dir[ia])*100:6.1f}%  "
-          f"CLEAN={np.median(err_cln[ia])*100:6.1f}%")
+          f"CLEAN-kmodsuz={np.median(err_cnk[ia])*100:6.1f}%  "
+          f"CLEAN+kmod={np.median(err_cln[ia])*100:6.1f}%")
 
 # ── Tablo yazdır ──────────────────────────────────────────────────────────────
-print(f"\n{'='*72}")
+print(f"\n{'='*90}")
 print(f"  {'A_k2 [μm]':>10}  {'SNR':>6}  "
-      f"{'Bozoki LS':>12}  {'Direkt LS':>12}  {'kmod+CLEAN':>12}")
-print(f"  {'-'*10}  {'-'*6}  {'-'*12}  {'-'*12}  {'-'*12}")
+      f"{'Bozoki LS':>12}  {'Direkt LS':>12}  {'CLEAN-kmodsuz':>14}  {'CLEAN+kmod':>12}")
+print(f"  {'-'*10}  {'-'*6}  {'-'*12}  {'-'*12}  {'-'*14}  {'-'*12}")
 for ia, A_k2 in enumerate(A_range):
     snr = A_k2 / SIGMA_BPM
     print(f"  {A_k2*1e6:10.2f}  {snr:6.4f}  "
           f"{np.median(err_boz[ia])*100:11.1f}%  "
           f"{np.median(err_dir[ia])*100:11.1f}%  "
+          f"{np.median(err_cnk[ia])*100:13.1f}%  "
           f"{np.median(err_cln[ia])*100:11.1f}%")
-print(f"{'='*72}")
+print(f"{'='*90}")
 print(f"  σ_BPM={SIGMA_BPM*1e6:.0f} μm,  σ_noise={SIGMA_NOISE*1e6:.0f} μm,  "
       f"N_Q={N_Q},  N_trials={N_TRIALS}")
 print(f"  Nuisance: k=4,6,8 genlik ≈ 300 μm  (tek yörünge sinyalini bastırır)")
@@ -162,9 +196,10 @@ fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 snr_vals = A_range / SIGMA_BPM
 
 METHODS = [
-    ('bozoki', err_boz, 'Bozoki LS\n(tek yörünge, η=y/√β)',    '#d62728', '--'),
-    ('direct', err_dir, 'R-matris LS\n(tek yörünge, R·F·a=y)', '#ff7f0e', ':'),
-    ('clean',  err_cln, 'kmod + CLEAN\n(ofset iptali, R·F·a=y)', '#2ca02c', '-'),
+    ('bozoki', err_boz, 'Bozoki LS\n(tek yörünge, η=y/√β)',        '#d62728', '--'),
+    ('direct', err_dir, 'R-matris LS\n(tek yörünge, k=2 fit)',     '#ff7f0e', ':'),
+    ('clean_nokmod', err_cnk, 'CLEAN (kmod YOK)\n(tek yörünge, b var)', '#1f77b4', '-.'),
+    ('clean',  err_cln, 'CLEAN + kmod\n(ofset iptali, b=0)',       '#2ca02c', '-'),
 ]
 
 # ── Sol panel: hata vs SNR ────────────────────────────────────────────────────
@@ -251,13 +286,48 @@ for _, err, label, color, ls in METHODS:
     else:
         print(f"  {label.split(chr(10))[0]:35s}  — hiçbir noktada %10 altında —")
 print(f"{'='*55}")
+# ── ADİL KARŞILAŞTIRMA: Bozoki vs kmodsuz CLEAN (ikisi de TEK YÖRÜNGE) ────────
+i_pedm = int(np.argmin(np.abs(A_range - A_k2_true * 1e-6)))
+print(f"\n{'='*60}")
+print(f"  ADİL KARŞILAŞTIRMA — aynı tek-yörünge verisi (b var, A_k2≈{A_range[i_pedm]*1e6:.0f} μm):")
+print(f"    Bozoki LS  (η=y/√β, azimut baz)      : {np.median(err_boz[i_pedm])*100:6.1f}%")
+print(f"    R-matris LS (R·F_k2, sadece baz)     : {np.median(err_dir[i_pedm])*100:6.1f}%"
+      f"   ← doğru ileri-model bazın etkisi")
+print(f"    CLEAN (kmod YOK, iteratif)           : {np.median(err_cnk[i_pedm])*100:6.1f}%"
+      f"   ← + iteratif nuisance soyma")
+print(f"  → Bozoki→CLEAN kazancı BAZ'dan gelir (kmod gerekmeden).")
+print(f"{'-'*60}")
+print(f"  AYRICA — kmod EKLENİRSE (ofset iptali, b=0):")
+print(f"    CLEAN + kmod                         : {np.median(err_cln[i_pedm])*100:6.1f}%"
+      f"   ← BPM ofset iptalinin ek katkısı")
+print(f"{'='*60}")
 print(f"""
-Sonuç:
-  • Bozoki / direkt LS: BPM ofseti (σ={SIGMA_BPM*1e6:.0f} μm) k=2 sinyalini
-    bastırır; A_k2 ≫ σ_BPM olmadan doğru tahmin mümkün değil.
-  • kmod+CLEAN: BPM ofseti tam iptal edilir (y=R·q+ε, b=0);
-    nuisance CLEAN ile soyulur; gürültü tabanı ≈ √2·σ_noise = {noise_floor_kmod*1e6:.1f} μm.
-  • pEDM'deki A_k2 = {A_k2_true:.0f} μm kmod+CLEAN ile başarıyla kestirilebilir.
+Sonuç (kullanıcının iki sorusuna yanıt):
+
+[1] BOZOKI vs KMODSUZ CLEAN (adil, ikisi de tek yörünge, b var):
+  • Bozoki LS: √β-normalize azimut bazı (cos2θ/sin2θ) FODO örgüsünün
+    antisimetrik k=2 orbit yapısına UYMAZ.  Gürültüsüz bile ~%300 sapma
+    (içsel baz uyumsuzluğu); üstüne BPM ofseti → hiçbir genlikte çalışmaz.
+  • CLEAN (kmod yok): aynı tek yörüngeyi DOĞRU ileri modelle (R·F, FODO-
+    antisim baz) çözer → A_k2≈10 μm'de ~%{np.median(err_cnk[i_pedm])*100:.0f} hata.
+  → Bozoki'yi kmodsuz CLEAN yenmesinin nedeni KMOD DEĞİL, doğru BAZ/ileri model.
+
+[2] R-MATRİS LS ORADA NE YAPIYOR:
+  • R-matris LS = CLEAN'in iterasyonsuz, yalnız-k=2 çekirdeği.  Doğru ileri
+    modeli (R·F_k2) kullanır ama nuisance'ı modellemez.
+  • Nuisance k=4,6,8 R-uzayında k=2'ye ZATEN ortogonal (çapraz-kor. <0.012),
+    bu yüzden R-matris LS tek başına nuisance'ı reddeder → CLEAN ile
+    neredeyse aynı sonuç ({np.median(err_dir[i_pedm])*100:.1f}% vs {np.median(err_cnk[i_pedm])*100:.1f}%).
+  • Yani R-matris LS, "Bozoki→CLEAN kazancının kaynağı BAZ'dır, iterasyon
+    değil" tezini gösteren köprü/tanı eğrisidir.  (Nuisance ortogonal
+    OLMASAYDI iteratif CLEAN belirgin üstün olurdu.)
+
+[3] kmod AYRI ve DİK bir iyileştirme:
+  • CLEAN + kmod: b TAM iptal (y=R·q+ε); gürültü tabanı √2·σ_noise =
+    {noise_floor_kmod*1e6:.1f} μm → ~%{np.median(err_cln[i_pedm])*100:.1f} hata.  kmod katkısı yalnızca BPM
+    ofset iptalinden gelir; BAZ kazancından bağımsızdır.
+  → kmod, CLEAN ile
+    AYRI ve TAMAMLAYICI iyileştirmelerdir.
   • Bozoki 1989'daki k=1 baskın harmonik kendi SNR'ı yüksek olduğu için
     tek yörünge yöntemi çalışmıştı; bizim zayıf k=2 durumumuzda çalışmaz.
 """)
