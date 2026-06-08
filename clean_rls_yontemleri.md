@@ -126,14 +126,52 @@ kick'teki $(-1)^j$ işaretinin nasıl iptal olduğuyla ilgilidir.
 Doğru baz $F_k$'dir. Kaçıklıkları $dy=\sum_k F_k\,a_k$ ile yazıyoruz
 ($F_k\in\mathbb{R}^{48\times2}$, $a_k=[a_k^c,a_k^s]^\top$).
 
+### 2.4 "Bu Desen Yapay Değil mi?" — SVD Kanıtı
+
+Haklı bir itiraz: simülasyonda biz **bilerek** aynı FODO'daki QF ve
+QD'yi zıt yönde oynatıyoruz ($(-1)^j$ çarpanı). O hâlde "kick işaret
+iptali" açıklaması, kendi kurduğumuz deseni tarif etmekten ibaret
+değil mi? Gerçek bir makinede kaçıklıklar rasgeledir, antisimetrik
+değil.
+
+Cevap, tepki matrisinin **tekil değer ayrışımında** (SVD) gizli.
+$R = U\Sigma V^\top$ yazalım. Sağ singular vektörler $v_i$, kaçıklık
+desenleridir; karşılık gelen $\sigma_i$ ne kadar büyükse o desen
+orbit'i o kadar çok üretir (o kadar **gözlenebilir**). Her desen için
+"antisimetri skoru" tanımlayalım: komşu QF/QD ne kadar zıt hareket
+ediyor (+1 = tam zıt/antisim, −1 = aynı yön/pürüzsüz).
+
+| Mod grubu | tekil değer | antisimetri skoru |
+|-----------|-------------|--------------------|
+| En gözlenebilir 12 mod | 34,7 … 8,9 | **+0,90** |
+| En az gözlenebilir 12 mod | ≈ 0,14 | **−0,90** |
+
+Tekil değer oranı ≈ **250 kat**. Yani:
+
+- R'nin **en gözlenebilir modları kendiliğinden FODO-antisimetriktir** —
+  bunu biz dayatmadık, lattice'in alternating-gradient yapısı dayatıyor.
+- Pürüzsüz (azimutal) kaçıklıklar R'nin **en az gözlenebilir** modlarıdır;
+  orbit'e 250 kat daha az yansırlar, pratikte gürültüye gömülürler.
+
+Dolayısıyla simülasyonda antisimetrik desen enjekte etmemizin sebebi
+"k=2'yi vurgulamak" değil — **orbit'ten geri çatılabilen tek alt-uzay
+budur.** Gerçek bir makinedeki rasgele kaçıklığın da yalnızca
+antisimetrik bileşeni ölçülebilir; pürüzsüz bileşeni neredeyse
+görünmezdir. "Kick işaret iptali", bu gözlenebilirlik farkının
+**mekanizmasıdır**: antisimetrik kaçıklık → pürüzsüz kick → tune'a
+yakın → büyük tekil değer.
+
 ---
 
 ## 3. Çalışacağımız Senaryo
 
-- **Sinyal:** alçak modlar $k=1,2,3$, her biri **10 μm** — ölçmek
+- **Sinyal:** alçak modlar $k=1,2,3$, her biri **5 μm** — ölçmek
   istediğimiz hizalama hataları.
 - **Gürültü/arka plan:** yüksek modlar $k=4,5,6,7,8$, her biri rasgele
   fazlı **~100 μm** — büyük ama ilgilenmediğimiz yapısal kaçıklıklar.
+
+Sinyal/gürültü oranı bu senaryoda zorlu: arka plan modları sinyalin
+20 katı genlikte.
 
 Kritik kısıt: **Ölçüm anında hangi modlarda hata olduğunu bilmiyoruz.**
 Bu yüzden aday olarak $k=1$'den $k=10$'a tüm modları hesaba katıp,
@@ -158,15 +196,17 @@ Orbit'e gerçek katkı **genlik × yanıt gücü**dür:
 
 | Mod | Genlik | $\|M_k\|$ | Orbit katkısı |
 |-----|--------|-----------|---------------|
-| $k=2$ (sinyal) | 10 μm | 236,0 | **0,0024** |
-| $k=4$ (gürültü) | 100 μm | 22,2 | 0,0022 |
-| $k=1$ (sinyal) | 10 μm | 60,7 | 0,0006 |
+| $k=4$ (gürültü) | 100 μm | 22,2 | **0,0022** |
+| $k=2$ (sinyal) | 5 μm | 236,0 | 0,0012 |
 | $k=6$ (gürültü) | 100 μm | 7,8 | 0,0008 |
+| $k=1$ (sinyal) | 5 μm | 60,7 | 0,0003 |
 
-Çarpıcı olan: $k=2$ sinyali, genliği 10 kat küçük olsa da güçlü
-yanıtı sayesinde orbit'e $k=4$ gürültüsünden fazla katkı yapıyor.
-"Büyük genlikli mod = orbit'e en çok katkı yapan mod" demek değildir.
-Bu, CLEAN'in seçim sırasını anlamak için kritik.
+Çarpıcı olan: $k=2$ sinyali, genliği 20 kat küçük olmasına rağmen
+güçlü yanıtı sayesinde orbit'e $k=6$ gürültüsünden bile fazla katkı
+yapıyor. "Büyük genlikli mod = orbit'e en çok katkı yapan mod" demek
+değildir. Ayrıca dikkat: 10 μm yerine 5 μm sinyalde $k=2$'nin katkısı
+artık $k=4$'ün altına düştü — bu, CLEAN'in seçim sırasını
+değiştirecek (Bölüm 6.4).
 
 ---
 
@@ -185,36 +225,21 @@ için bu yeterliydi — orbit harmoniği doğrudan okunabiliyordu.
 
 ### 4.2 Senaryoda Bozoki
 
-$\eta = y/\sqrt{\beta}$'nın azimutal harmonik genlikleri (×$10^{-6}$):
-
-| $k$ | $\eta$-harmonik genliği | beklenen (sinyal) |
-|-----|--------------------------|--------------------|
-| 1 | 10,6 | 10 ✓ kabaca |
-| 2 | **41,1** | 10 ✗ (4× şişik) |
-| 3 | 10,8 | 10 ✓ kabaca |
-| 4 | **38,7** | — ✗ (sahte) |
-| 5 | 21,1 | — ✗ (sahte) |
-
-Bozoki k=1 ve k=3'ü kabaca yakalıyor ama k=2'yi 4 kat şişiriyor ve
-gerçekte var olmayan k=4, k=5 harmonikleri üretiyor. Sebep: orbit
-FODO-antisimetrik yapıdadır; azimutal baza yansıtılınca **harmonikler
-birbirine karışır** (basis mismatch).
-
-### 4.3 μm Cinsinden Adil Karşılaştırma
-
 Bozoki'yi diğerleriyle aynı birime (kaçıklık μm) getirmek için tek
 farkı baz olacak şekilde kuralım: aynı tepki matrisi $R$, ama azimutal
 bazla forward model ($R\cdot G_k\cdot a = y$, $G_k$ azimutal):
 
 | Mod | Gerçek | Azimutal-baz LS | Hata |
 |-----|--------|-----------------|------|
-| $k=1$ | 10 μm | 63,0 μm | **530 %** |
-| $k=2$ | 10 μm | 50,6 μm | **406 %** |
-| $k=3$ | 10 μm | 39,5 μm | **295 %** |
+| $k=1$ | 5 μm | 31,4 μm | **529 %** |
+| $k=2$ | 5 μm | 25,2 μm | **404 %** |
+| $k=3$ | 5 μm | 19,6 μm | **293 %** |
 
 Yalnızca bazı değiştirdik (FODO-antisim. yerine azimutal); hata
-%300–500'e fırladı. Bu, baz seçiminin tek başına ne kadar belirleyici
-olduğunun en net kanıtıdır.
+%300–500'e fırladı. Hata yüzdesi sinyal genliğinden bağımsız (10 μm'de
+de aynıydı) — çünkü baz uyuşmazlığı **sistematik**tir, sinyalle orantılı
+büyür. Bu, baz seçiminin tek başına ne kadar belirleyici olduğunun en
+net kanıtıdır.
 
 ---
 
@@ -239,13 +264,15 @@ yok sayarak:
 
 | Mod | Gerçek | R-LS | Hata |
 |-----|--------|------|------|
-| $k=1$ | 10,0 μm | 10,0 μm | 0,4 % |
-| $k=2$ | 10,0 μm | 10,0 μm | 0,5 % |
-| $k=3$ | 10,0 μm | 9,9 μm | 0,7 % |
+| $k=1$ | 5,0 μm | 4,96 μm | 0,8 % |
+| $k=2$ | 5,0 μm | 4,95 μm | 0,9 % |
+| $k=3$ | 5,0 μm | 4,93 μm | 1,3 % |
 
-Gürültü modlarını hiç modellemediğimiz halde hata %1'in altında —
+Gürültü modlarını hiç modellemediğimiz halde hata ~%1 —
 çünkü FODO-antisimetrik harmonikler R-uzayında neredeyse **ortogonal**;
-$k=4..8$ gürültüsünün $k=1,2,3$'e sızıntısı küçük.
+$k=4..8$ gürültüsünün $k=1,2,3$'e sızıntısı küçük. (10 μm sinyalde hata
+~%0,5'ti; sinyal yarıya inince sabit sızıntının göreli payı arttığı için
+biraz büyüdü.)
 
 ### 5.3 Sınırı
 
@@ -295,28 +322,30 @@ düzeltme şansı verir.
 
 | iter | seçilen $k$ | kalan $\|r\|/\|r_0\|$ |
 |------|-------------|------------------------|
-| 1 | **2** | 0,925 |
-| 2 | 4 | 0,853 |
-| 3 | **2** | 0,797 |
-| 4 | 4 | 0,744 |
-| 5 | **2** | 0,702 |
-| 6 | 4 | 0,664 |
-| 7 | 5 | 0,634 |
-| 8 | **2** | 0,603 |
+| 1 | **4** | 0,897 |
+| 2 | **4** | 0,825 |
+| 3 | **4** | 0,775 |
+| 4 | 5 | 0,736 |
+| 5 | 2 | 0,697 |
+| 6 | 4 | 0,659 |
+| 7 | 5 | 0,630 |
+| 8 | 2 | 0,601 |
 
 **Dikkat:** CLEAN "$k=10$'dan $k=1$'e" sırayla inmiyor; **orbit'e en
-çok katkı yapan modu** seçiyor — bu da $k=2$ (en güçlü yanıt) ve $k=4$
-(en büyük gürültü) arasında salınıyor. Bölüm 3.2'deki "genlik ≠
-görünürlük" burada kendini gösteriyor: $k=2$ sinyali 10 μm olsa da
-güçlü yanıtı yüzünden ilk seçilen mod.
+çok katkı yapan modu** seçiyor. Üstelik bu sıra senaryoya bağlı:
+sinyal 10 μm iken ilk seçilen mod $k=2$ idi; ama **5 μm'e indirince
+ilk seçilen $k=4$ oldu** (Bölüm 3.2'deki katkı tablosu: $k=4$ gürültüsü
+0,0022 > $k=2$ sinyali 0,0012). $k=2$ ancak 5. iterasyonda gelebiliyor.
+"Genlik ≠ görünürlük" ilkesinin canlı bir örneği — sinyali yarıya
+indirince görünürlük sırası değişti.
 
-### 6.5 Sonuç (318 iterasyonda yakınsar)
+### 6.5 Sonuç (316 iterasyonda yakınsar)
 
 | $k$ | gerçek | CLEAN | hata | tür |
 |-----|--------|-------|------|-----|
-| 1 | 10,0 μm | 10,0 μm | 0,0 % | sinyal |
-| 2 | 10,0 μm | 10,0 μm | 0,0 % | sinyal |
-| 3 | 10,0 μm | 10,0 μm | 0,0 % | sinyal |
+| 1 | 5,0 μm | 5,00 μm | 0,0 % | sinyal |
+| 2 | 5,0 μm | 5,00 μm | 0,0 % | sinyal |
+| 3 | 5,0 μm | 5,00 μm | 0,0 % | sinyal |
 | 4 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
 | 5 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
 | 6 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
@@ -333,12 +362,12 @@ söylemeden**; algoritma keşfetti.
 
 ## 7. Üç Yöntemin Karşılaştırması
 
-Aynı senaryo (sinyal $k=1,2,3$ @ 10 μm), $k=1$ kaçıklığını geri çatma:
+Aynı senaryo (sinyal $k=1,2,3$ @ 5 μm), $k=1$ kaçıklığını geri çatma:
 
 | Yöntem | Baz | $R$ kullanır mı? | $k=1$ hatası |
 |--------|-----|------------------|--------------|
-| Bozoki | azimutal | hayır (model-free) | ~530 % |
-| R-matris LS | FODO-antisim. | evet | 0,4 % |
+| Bozoki | azimutal | hayır (model-free) | ~529 % |
+| R-matris LS | FODO-antisim. | evet | 0,8 % |
 | CLEAN | FODO-antisim. | evet | 0,0 % |
 
 | Özellik | Bozoki | R-LS | CLEAN |
