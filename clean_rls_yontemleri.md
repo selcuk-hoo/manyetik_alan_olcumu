@@ -1,501 +1,388 @@
-# Kuadrupol Hizalama Hatalarının Orbit Tabanlı Ölçümü:
-# R-Matris En Küçük Kareler ve CLEAN Yöntemleri
+# Hizalama Hatalarının Orbit'ten Geri Çatımı:
+# Bozoki, R-Matris LS ve CLEAN
 
 ---
 
 ## Önsöz
 
-Bu belge, pEDM halkasında kuadrupol hizalama hatalarını orbit ölçümlerinden
-geri çatmak için geliştirilen iki yöntemi — R-matris en küçük kareler
-(R-LS) ve CLEAN — anlatıyor. Fizik altyapısı olan ama bu yöntemlere
-yabancı olan bir okuyucu hedefleniyor: formüller türetimsiz sunulmayacak,
-her adımda *neden bu yolu seçtik* sorusunun cevabı verilecek.
+Bir hızlandırıcı halkasında kuadrupol mıknatıslar ideal eksenlerinden
+küçük miktarlarda kaçıktır. Bu kaçıklıklar demetin kapalı yörüngesini
+(closed orbit) bozar. Ters problem şudur: **ölçülen orbit'ten, onu
+yaratan hizalama hatalarını geri çatabilir miyiz?**
 
-Yapının tamamı, temel bir gözlemden inşa ediliyor:
+Bu belge üç yöntemi anlatıyor ve hepsini aynı somut senaryoda
+çalıştırıp karşılaştırıyor:
 
-> **Bir kuadrupol kaçık durduğunda demet onu tam merkezden göremez;
-> bunun yarattığı orbit sapması, geometrinin bize verdiği en değerli
-> ölçüm verisidir.**
+- **Bozoki (1989):** klasik, model-bağımsız azimutal harmonik fiti.
+- **R-matris en küçük kareler (R-LS):** tepki matrisini kullanan
+  tek-adım çözüm.
+- **CLEAN:** dominant bileşenleri sırayla soyan iteratif çözüm.
 
----
-
-## 1. Problem: Ne Ölçmek İstiyoruz?
-
-pEDM halkası 48 kuadrupol mıknatıs içeriyor; bunlar 24 FODO hücresine
-birer odaklayıcı (QF) ve birer saçtırıcı (QD) olarak dizilmiş.
-İdeal durumda her kuadrupol manyetik merkezi üzerinden geçer;
-gerçekte her biri dikeyde $dy_j$ kadar kaçıktır.
-
-Mekanik anket bu kaçıklıkları ~100 μm hassasiyetle ölçebilir.
-Hedefimiz ise **~10 μm mertebesinde** bir Fourier harmoniğini
-(k=2, halka boyunca iki tam sinüs dalgası) demet ölçümlerinden
-geri çatmak. Mekanik yeterli değil; demet tabanlı yönteme ihtiyaç var.
-
-### 1.1 Kaçık Kuadropolün Orbit Üzerindeki Etkisi
-
-Gradyent alanlı bir kuadrupol, kendi ekseninden $dy_j$ uzaklıkta geçen
-bir demet parçacığına $\Delta y'_j = -K_j \, dy_j$ büyüklüğünde
-dikey bir açısal sapma (kick) uygular; burada
-
-$$K_j = \frac{1}{B\rho}\,\frac{\partial B_x}{\partial y}\,L_q$$
-
-integre kick gücüdür ($B\rho$ rijidite, $L_q$ uzunluk).
-QF'de $K_j > 0$, QD'de $K_j < 0$'dır — bu, FODO yapısının temel
-işaret dönüşümüdür.
-
-Tüm 48 quad'ın bu küçük kick'leri birikir ve halkada kalıcı bir
-orbit sapması (kapalı yörünge bozulması, COD) yaratır.
-BPM $i$'deki sapma Courant–Snyder formülüyle verilir:
-
-$$y_i^{\rm CO} =
-  \frac{\sqrt{\beta_i}}{2\sin\pi\nu}
-  \sum_j \sqrt{\beta_j}\,
-  \cos\!\bigl(\pi\nu - |\phi_i - \phi_j|\bigr)\cdot \Delta y'_j$$
-
-Bu denklem lineerdir — tüm $dy_j$'ler $y_i$'ye doğrusal katkı verir.
-Matris formuna geçersek:
-
-$$\boxed{\;y \;=\; R\,dy\;}$$
-
-$R \in \mathbb{R}^{48\times48}$ **tepki matrisi** (orbit response matrix,
-ORM), $R_{ij} = K_j\sqrt{\beta_i\beta_j}\,\cos(\pi\nu-|\phi_i-\phi_j|)/(2\sin\pi\nu)$.
-
-### 1.2 Neden Doğrudan $R^{-1}y$ Yapmıyoruz?
-
-İki nedeni var.
-
-**Birincisi, BPM sistematik ofsetleri.** Her BPM'in elektronik sıfır
-noktası ideal konumdan kaçıktır; bunu $b_i$ ile gösterelim.
-Gerçek ölçüm:
-
-$$y_{\rm ölç} = R\,dy + b + \varepsilon$$
-
-$\sigma_b \approx 100\,\mu\text{m}$ iken hedef sinyal sadece 10 μm'dir.
-$R^{-1}y_{\rm ölç}$ hesaplarsak çözümü $b$ baskılar;
-asıl $dy$'yi göremeyiz.
-
-**İkincisi, 48 quad'ı tek tek kestirmek istiyorsak çok
-parametre var.** Ölçüm gürültüsü ve koşulsallık (condition number)
-sorunları doğrudan tersini almayı güvensiz kılar.
-
-Bu iki sorunu aşmak için iki farklı fikir kullanıyoruz: *parametreyi
-azalt* (Fourier harmonik modeli) ve *ölçümü değiştir* (k-modülasyon farkı).
+Hedef okuyucu, hızlandırıcı fiziğinin temellerini bilen ama bu
+diagnostik yöntemlere yabancı olan kişidir. Her adımda *neden bu yol*
+sorusunu da yanıtlamaya çalışacağız.
 
 ---
 
-## 2. Fourier Modeli: 48 Parametreyi Kaça İndir?
+## 1. Problemin Kuruluşu
 
-### 2.1 Fikir
+### 1.1 Kaçık Kuadrupol Orbit'i Nasıl Bozar?
 
-Fizikte genellikle bilinmeyeni *parçalara ayırmak* yerine
-*uygun bir baza açmak* problemi basitleştirir.
-Kuadrupol hizalama hatalarını şöyle yazalım:
+48 kuadrupollü, 24 FODO hücreli örnek bir halka düşünelim. Her hücrede
+bir odaklayıcı (QF) ve bir saçtırıcı (QD) kuadrupol vardır.
+Kuadrupol $j$, ekseninden $dy_j$ kadar kaçıksa, oradan geçen demet
+ek bir dipol-benzeri açısal sapma (kick) alır:
 
-$$dy_j = \sum_k \bigl[\,a_k^c\,F_{j,k}^{\rm cos}
-               + a_k^s\,F_{j,k}^{\rm sin}\bigr]$$
+$$\Delta y'_j = -K_j \, dy_j$$
 
-$F_{j,k}$ baz fonksiyonları, $a_k$ ise bilinmeyen katsayılar.
-Birkaç harmoniği modellemek yeteriyse (örn. k = 2, 4, 6, 8),
-48 bilinmeyenden 8'e iniyoruz. Hem istatistiksel güç artar,
-hem de BPM offset sorunuyla daha kolay başa çıkılır.
+Buradaki $K_j$ kuadrupolün integre odaklama gücüdür. **Çok önemli bir
+ayrıntı:** QF'lerde $K_j > 0$, QD'lerde $K_j < 0$. Yani art arda gelen
+kuadrupollerde $K_j$ işaret değiştirir — kabaca $K_j \propto (-1)^j$.
+Bu, FODO yapısının (alternating gradient) tanımıdır ve birazdan
+yöntemleri şekillendirecek.
 
-Ama hangi baz fonksiyonları?
+Tüm quad'ların kick'leri birikip halkada kalıcı bir orbit bozulması
+yaratır. BPM $i$'deki sapma klasik Courant–Snyder formülüyle:
 
-### 2.2 Azimutal Baz ve FODO Yapısının Çelişkisi
+$$y_i = \frac{\sqrt{\beta_i}}{2\sin\pi\nu}
+        \sum_j \sqrt{\beta_j}\,
+        \cos\!\bigl(\pi\nu - |\phi_i - \phi_j|\bigr)\cdot \Delta y'_j$$
 
-Sezgisel tercih, "halkayı $\theta$ ile dolanıp
-$\cos(k\theta)$, $\sin(k\theta)$ yazmak" olurdu.
-Bu, Bozoki (1989)'nun BNL-NSLS makinesinde kullandığı yaklaşımdır
-ve o makinede işe yaramıştır.
+Doğrusal olduğu için matris biçiminde yazılır:
 
-Neden işe yaradığını anlamak için NSLS ile pEDM arasındaki farka
-bakmak gerekir.
+$$\boxed{\;y = R\,dy\;}$$
 
-NSLS'te hedef harmonik k=1'di: halkayı bir kez dolanan, yani
-dalga boyu $\lambda = 2\pi R \approx 100\,\text{m}$ olan bir sinüs.
-Makinenin FODO hücresi uzunluğu ~3 m'dir. Yani hücre boyu,
-k=1 dalgasının yüzde üçü — FODO'nun QF/QD işaret dönüşümü,
-bu uzun dalga üzerinde küçük bir titreşim bırakır.
-Azimutal $\cos(\theta)$ bu titreşimi görmezden gelebilir,
-k=1'i makul biçimde tanımlar.
+$R \in \mathbb{R}^{48\times48}$ **tepki matrisi** (orbit response matrix).
+Sütun $j$, "tek başına $j$ kuadrupolünü 1 birim oynatınca tüm BPM'lerde
+oluşan orbit"tir.
 
-pEDM'de ise 24 FODO hücresi var ve hedef k=2.
-Bir k=2 harmoniğinin yarım periyodu $\lambda/2 = \pi R / 2 \approx 75\,\text{m}$;
-bu, tam olarak 12 FODO hücresi uzunluğu.
-Yani **k=2 dalgasının bir tam periyodu, iki FODO hücresini kapsıyor.**
-QF ve QD'nin işaret farkı artık küçük bir pertürbasyon değil;
-k=2 modunun yapısını tanımlayan temel özellik.
+### 1.2 Hedef: Harmonik İçerik
 
-Bu farkı görmek için bir örnek verelim.
-Azimutal k=2 baz vektörü:
-
-$$f_j^{\rm azim} = \cos\!\left(\frac{2\pi \cdot 2 \cdot j}{48}\right)
-= \cos\!\left(\frac{\pi j}{12}\right)$$
-
-Bu vektörde quad j=0 ve j=1 (aynı hücrenin QF ve QD'si)
-farklı değerler alır: $f_0 = 1$, $f_1 = \cos(\pi/12) \approx 0{,}97$.
-Aralarında *neredeyse aynı işaret* var; hücreler farklılaşmıyor.
-
-FODO-antisimetrik k=2 baz vektörü:
-
-$$F_{j,2}^{\rm cos} = (-1)^j\,\cos\!\left(\frac{2\pi \cdot 2 \cdot \lfloor j/2\rfloor}{24}\right)$$
-
-Burada j=0 için $(-1)^0 = +1$, j=1 için $(-1)^1 = -1$:
-**QF ve QD ters işaret taşıyor.** Bu, FODO gradyanının
-($K_{\rm QF} = -K_{\rm QD}$) yarattığı fiziksel gerçeği yansıtıyor.
-
-Sonuç: eğer gerçek hizalama hatası FODO-antisimetrik yapıda ise,
-onu azimutal baza sığdırmaya çalışmak sistematik bir önyargı üretir.
-Simülasyonda bunu ölçtük: gürültüsüz ve parazitsiz ortamda bile
-azimutal tabanlı Bozoki yöntemi k=2 için ~%312 hata veriyor.
-
-### 2.3 FODO-Antisimetrik Fourier Bazı
-
-Doğru baz şöyle tanımlanıyor:
-
-$$\boxed{
-F_{j,k}^{\rm cos} = (-1)^j\,\cos\!\!\left(\frac{2\pi k\,\lfloor j/2\rfloor}{N}\right),
-\qquad
-F_{j,k}^{\rm sin} = (-1)^j\,\sin\!\!\left(\frac{2\pi k\,\lfloor j/2\rfloor}{N}\right)
-}$$
-
-$j = 0,\ldots,47$ quad indeksi, $N = 24$ FODO hücresi sayısı,
-$\lfloor j/2 \rfloor$ quad'ın hangi hücreye ait olduğu.
-
-**Fiziksel okunuşu:** Her hücre bir "harmonik genlik" alıyor
-($\cos$ veya $\sin$ ile belirlenen), ama o hücre içindeki QF ve QD
-ters işaretli. Bu tam olarak FODO'nun alternating gradient yapısını
-yansıtıyor.
+48 kaçıklığı tek tek $dy = R^{-1}y$ ile çözmek mümkün ama gürültüye
+aşırı duyarlıdır; ayrıca genellikle 48 ayrı sayı değil, kaçıklıkların
+**harmonik içeriği** ilgilendirir bizi. Kaçıklıkları birkaç Fourier
+harmoniğiyle ifade edip parametre sayısını düşürürüz. Soru şu:
+hangi baz fonksiyonları?
 
 ---
 
-## 3. R-Matris En Küçük Kareler (R-LS)
+## 2. Doğru Bazı Seçmek: Neden FODO-Antisimetrik?
 
-### 3.1 Ölçüm Operatörü
+### 2.1 İki Aday Baz
 
-k harmoniği için $dy^{(k)} = F_k\,a_k$ yazarsak
-($F_k \in \mathbb{R}^{48\times2}$, $a_k = [a_c,\,a_s]^\top$)
-ve bunu tepki denklemine koyarsak:
+**Azimutal baz** (Bozoki'nin kullandığı): halkayı açı $\theta$ ile
+dolanıp düz sinüzoidler.
 
-$$y = R\,F_k\,a_k + \cdots = M_k\,a_k + \cdots$$
+$$\cos(k\theta_j),\ \sin(k\theta_j),\qquad \theta_j = 2\pi j/48$$
 
-$M_k = R\,F_k \in \mathbb{R}^{48\times2}$ **ölçüm operatörü**dür:
-"k harmoniğindeki bir hizalama hatasının ölçüm uzayındaki
-izini" temsil eder.
+**FODO-antisimetrik baz:** her sinüzoide $(-1)^j$ çarpanı ekli.
 
-### 3.2 Geometrik Yorum
+$$F_{j,k}^{\rm cos} = (-1)^j\cos\!\left(\tfrac{2\pi k\lfloor j/2\rfloor}{N}\right),
+\quad
+F_{j,k}^{\rm sin} = (-1)^j\sin\!\left(\tfrac{2\pi k\lfloor j/2\rfloor}{N}\right)$$
 
-$M_k$'yı bir mercek gibi düşünebiliriz: $dy^{(k)}$ uzayı
-(2-boyutlu, $a_c$ ve $a_s$ ile parametrelenmiş) bu mercekten
-geçince 48-boyutlu ölçüm uzayında 2-boyutlu bir *iz* bırakıyor.
-R-LS, ölçülen $y$'yi bu ize en yakın noktaya projekte ediyor:
+Hangisi doğru? Bir deneyle görelim.
 
-$$\hat{a}_k = M_k^\dagger\,y
-= (M_k^\top M_k)^{-1}\,M_k^\top\,y$$
+### 2.2 Kritik Deney: Hangi Kaçıklık Büyük Orbit Üretir?
 
-Genlik ve faz:
-$$\hat{A}_k = \|\hat{a}_k\|_2,
-\qquad
-\hat{\phi}_k = \arctan\!\left(\hat{a}_s / \hat{a}_c\right)$$
+Aynı normda iki kaçıklık deseni alıp ürettikleri orbit'i ölçelim:
 
-### 3.3 Ölçüm Gücü: Harmonikler Eşit Değil
+| Kaçıklık deseni | $\|dy\|$ | Ürettiği $\|y\|$ |
+|-----------------|----------|------------------|
+| Azimutal $\cos(2\theta_j)$ | 4,90 | **24,5** |
+| FODO-antisimetrik $(-1)^j\cos(\cdots)$ | 4,90 | **166,9** |
 
-Tepki matrisi $R$ her harmoniği farklı kuvvetle yükseltir.
-$\|M_k\|_F$ normu bize k harmoniğinin ölçüm uzayındaki "büyüklüğünü"
-veriyor:
+Aynı büyüklükteki kaçıklık, FODO-antisimetrik desende **~7 kat** daha
+büyük orbit üretiyor. Halka, azimutal desene neredeyse kör.
+Niçin?
 
-| k | $\|M_k\|_F$ |
-|---|-------------|
-| 2 | 236,0 |
-| 4 | 22,2 |
-| 6 | 7,8 |
-| 8 | 4,1 |
+### 2.3 Açıklama: Kick'in İşareti Zaten Alternatif
 
-k=2 sinyali, k=8'e göre 60 kat daha güçlü yanıt veriyor.
-Bu asimetri CLEAN için de önemli olacak.
+Kick $\Delta y'_j = -K_j\,dy_j$ ve $K_j \propto (-1)^j$. Kick deseni,
+kaçıklık ile $K_j$'nin çarpımıdır:
 
-### 3.4 R-Uzayında Ortonormallik ve Sabit Kontaminasyon
+- **Azimutal (pürüzsüz) kaçıklık:** kick
+  $\propto (-1)^j\times(\text{pürüzsüz})$ → **dişli/alternatif** desen.
+  Baskın Fourier bileşeni yüksek harmonikte (48 üzerinden ~22.),
+  betatron tune'undan ($Q_y\approx1{,}73$) çok uzak. Kapalı yörünge
+  tune'a yakın harmonikleri rezonant yükseltir ($\propto1/(\nu^2-p^2)$),
+  uzakları bastırır → küçücük orbit.
 
-Ölçüm uzayında iki harmonik birbirine ne kadar benzer?
-Bunu şu normalize iç çarpımla ölçüyoruz:
+- **FODO-antisimetrik kaçıklık** $(-1)^j\times(\text{pürüzsüz})$: kick
+  $\propto (-1)^j(-1)^j(\text{pürüzsüz}) = (\text{pürüzsüz})$. İki
+  alternasyon birbirini götürür. Baskın bileşen alçak harmonikte
+  (2.), tam tune'un yanında → rezonant yükseltme → büyük orbit.
 
-$$\rho(k, m) = \frac{\langle M_k,\,M_m\rangle_F}{\|M_k\|_F\,\|M_m\|_F}
-= \frac{\operatorname{tr}(M_k^\top M_m)}{\|M_k\|_F\,\|M_m\|_F}$$
+Doğrulama (kick'in baskın laboratuvar harmoniği):
 
-Bu, iki matrisi birer 96-boyutlu vektör gibi düşünüp aralarındaki
-açının kosinüsü. Eğer $\rho = 0$ ise, k ve m harmonikleri ölçüm
-uzayında ortogonal — birinin katsayısı diğerini etkilemiyor.
-Eğer $\rho = 1$ ise tam örtüşme, ayırt etmek imkânsız.
+| Kaçıklık | Kick'in baskın harmoniği | Tune'a göre |
+|----------|--------------------------|-------------|
+| Azimutal | 22 | uzak → bastırılır |
+| FODO-antisim. | 2 | $Q_y\approx1{,}73$'e yakın → yükseltilir |
 
-Sayısal sonuçlar:
-
-| Harmonik çifti | $\rho$ |
-|----------------|--------|
-| k=2 vs k=4 | −0,0073 |
-| k=2 vs k=6 | −0,0102 |
-| k=2 vs k=8 | −0,0122 |
-
-Bu değerler çok küçük — harmonikler R-uzayında neredeyse ortogonal.
-Bu FODO-antisimetrik bazın güzel bir özelliği: doğru baz seçildiğinde
-harmonikler iyi ayrışıyor.
-
-Ama "neredeyse" kelimesi önemli. $\rho = -0{,}012$ sıfır değil.
-Bu küçük örtüşme, arka plan harmoniklerinin k=2 kesitimine sızdığı
-**sabit kontaminasyona** (sistematik önyargıya) yol açıyor:
-
-$$\text{bias}_{k=2} = M_2^\dagger \sum_{m \neq 2} M_m\,a_m^{\rm true}$$
-
-params.json senaryosu (k=4@300 μm, k=6@300 μm, k=8@200 μm):
-
-| Kaynak | k=2'ye sızdırdığı |
-|--------|-------------------|
-| k=4 @ 300 μm | 0,191 μm |
-| k=6 @ 300 μm | 0,119 μm |
-| k=8 @ 200 μm | 0,071 μm |
-| **Toplam** | **0,381 μm** |
-
-Bu sabit kontaminasyon, k=2 sinyali ne kadar küçük olursa o kadar
-baskın: $A_2 = 10\,\mu$m'de %3,8 hata iken, $A_2 = 3\,\mu$m'de %13
-olur. R-LS bu tabanı tek başına aşamaz.
+**Sonuç:** Orbit'ten geri çatabildiğimiz kaçıklıklar FODO-antisimetrik
+olanlardır. Bu, dalga boyu ya da hücre sayısıyla ilgili değil; tamamen
+kick'teki $(-1)^j$ işaretinin nasıl iptal olduğuyla ilgilidir.
+Doğru baz $F_k$'dir. Kaçıklıkları $dy=\sum_k F_k\,a_k$ ile yazıyoruz
+($F_k\in\mathbb{R}^{48\times2}$, $a_k=[a_k^c,a_k^s]^\top$).
 
 ---
 
-## 4. CLEAN: İteratif Harmonik Soyma
+## 3. Çalışacağımız Senaryo
 
-### 4.1 Radyo Astronomi'den Gelen Fikir
+- **Sinyal:** alçak modlar $k=1,2,3$, her biri **10 μm** — ölçmek
+  istediğimiz hizalama hataları.
+- **Gürültü/arka plan:** yüksek modlar $k=4,5,6,7,8$, her biri rasgele
+  fazlı **~100 μm** — büyük ama ilgilenmediğimiz yapısal kaçıklıklar.
 
-CLEAN algoritması, 1974'te Jan Högbom'un radyo astronomi
-görüntülemesi için geliştirdiği bir yöntemdir. Problem benzer:
-teleskop, gerçek gökyüzü görüntüsünü "bulanık" bir biçimde ölçer;
-dominant kaynakların izini adım adım çıkararak zayıf kaynakları
-görünür kılmak gerekir.
+Kritik kısıt: **Ölçüm anında hangi modlarda hata olduğunu bilmiyoruz.**
+Bu yüzden aday olarak $k=1$'den $k=10$'a tüm modları hesaba katıp,
+hangilerinin gerçekten var olduğunu yöntemin çözmesini bekliyoruz.
 
-Bizdeki amaç: ölçüm sinyalinden dominant harmoniklerin (k=6, k=4)
-izini adım adım ayıklamak, zayıf hedef harmoniğin (k=2) temiz bir
-artıkta kestirilebilmesini sağlamak.
+### 3.1 Mod Yanıt Güçleri ($\|M_k\|=\|R F_k\|$)
 
-### 4.2 Neden Tek Adımlı Fit Yetmiyor?
+| $k$ | $\|M_k\|$ | | $k$ | $\|M_k\|$ |
+|-----|-----------|---|-----|-----------|
+| 1 | 60,7 | | 6 | 7,8 |
+| 2 | **236,0** | | 7 | 5,5 |
+| 3 | 61,6 | | 8 | 4,1 |
+| 4 | 22,2 | | 9 | 3,2 |
+| 5 | 12,1 | | 10 | 2,7 |
 
-Yalnız k=2'yi fit edersek, $M_2^\dagger y$ hesaplıyoruz; bu,
-k=6 @ 300 μm'den gelen sinyalin k=2 "görüntüsünü" de kapsamak
-zorunda — işte sabit kontaminasyon budur.
+$k=2$ en güçlü (laboratuvar harmoniği tam tune'un yanına düşer).
+Alçak modlar (1,2,3) yüksek modlardan çok daha güçlü yanıt verir.
 
-Alternatif olarak tüm harmonikleri (k=2,4,6,8) aynı anda fit edebiliriz.
-Bu da çalışır, ama pratikte k=6 ve k=8 sinyalleri çok zayıf
-kesitimlere ($\|M_6\| = 7{,}8$, $\|M_8\| = 4{,}1$) düşüyor;
-tek adımlı çözüm bu zayıf sütunlara güvenmek zorunda,
-gürültüye karşı hassas hale geliyor.
+### 3.2 Önemli Sonuç: Genlik ≠ Görünürlük
 
-CLEAN ise *büyük olanı önce, küçük olanı sonra* felsefesini izler.
+Orbit'e gerçek katkı **genlik × yanıt gücü**dür:
 
-### 4.3 Algoritmanın Adım Adım Okunuşu
+| Mod | Genlik | $\|M_k\|$ | Orbit katkısı |
+|-----|--------|-----------|---------------|
+| $k=2$ (sinyal) | 10 μm | 236,0 | **0,0024** |
+| $k=4$ (gürültü) | 100 μm | 22,2 | 0,0022 |
+| $k=1$ (sinyal) | 10 μm | 60,7 | 0,0006 |
+| $k=6$ (gürültü) | 100 μm | 7,8 | 0,0008 |
 
-Başlangıç olarak $r = y$ (artık = tam ölçüm).
-Biriken katsayılar $\text{acc}[k] = 0$ her $k$ için.
+Çarpıcı olan: $k=2$ sinyali, genliği 10 kat küçük olsa da güçlü
+yanıtı sayesinde orbit'e $k=4$ gürültüsünden fazla katkı yapıyor.
+"Büyük genlikli mod = orbit'e en çok katkı yapan mod" demek değildir.
+Bu, CLEAN'in seçim sırasını anlamak için kritik.
+
+---
+
+## 4. Yöntem 1 — Bozoki (1989)
+
+### 4.1 Fikir
+
+Bozoki'nin yöntemi **model-bağımsızdır**: tepki matrisi $R$'yi
+kullanmaz. Orbit'i $\beta$ fonksiyonuna göre normalize edip
+($\eta_i = y_i/\sqrt{\beta_i}$) doğrudan azimutal harmoniklere fit eder:
+
+$$\eta_i \approx \sum_k \bigl[a_k\cos(k\theta_i) + b_k\sin(k\theta_i)\bigr]$$
+
+NSLS gibi makinelerde, tune'a yakın **tek bir dominant harmonik**
+için bu yeterliydi — orbit harmoniği doğrudan okunabiliyordu.
+
+### 4.2 Senaryoda Bozoki
+
+$\eta = y/\sqrt{\beta}$'nın azimutal harmonik genlikleri (×$10^{-6}$):
+
+| $k$ | $\eta$-harmonik genliği | beklenen (sinyal) |
+|-----|--------------------------|--------------------|
+| 1 | 10,6 | 10 ✓ kabaca |
+| 2 | **41,1** | 10 ✗ (4× şişik) |
+| 3 | 10,8 | 10 ✓ kabaca |
+| 4 | **38,7** | — ✗ (sahte) |
+| 5 | 21,1 | — ✗ (sahte) |
+
+Bozoki k=1 ve k=3'ü kabaca yakalıyor ama k=2'yi 4 kat şişiriyor ve
+gerçekte var olmayan k=4, k=5 harmonikleri üretiyor. Sebep: orbit
+FODO-antisimetrik yapıdadır; azimutal baza yansıtılınca **harmonikler
+birbirine karışır** (basis mismatch).
+
+### 4.3 μm Cinsinden Adil Karşılaştırma
+
+Bozoki'yi diğerleriyle aynı birime (kaçıklık μm) getirmek için tek
+farkı baz olacak şekilde kuralım: aynı tepki matrisi $R$, ama azimutal
+bazla forward model ($R\cdot G_k\cdot a = y$, $G_k$ azimutal):
+
+| Mod | Gerçek | Azimutal-baz LS | Hata |
+|-----|--------|-----------------|------|
+| $k=1$ | 10 μm | 63,0 μm | **530 %** |
+| $k=2$ | 10 μm | 50,6 μm | **406 %** |
+| $k=3$ | 10 μm | 39,5 μm | **295 %** |
+
+Yalnızca bazı değiştirdik (FODO-antisim. yerine azimutal); hata
+%300–500'e fırladı. Bu, baz seçiminin tek başına ne kadar belirleyici
+olduğunun en net kanıtıdır.
+
+---
+
+## 5. Yöntem 2 — R-Matris En Küçük Kareler (R-LS)
+
+### 5.1 Fikir
+
+$k$ harmoniği için $dy^{(k)}=F_k a_k$ koyunca:
+
+$$y = R\,dy = \sum_k \underbrace{R F_k}_{M_k} a_k$$
+
+İlgilendiğimiz modları bir araya koyup tek doğrusal sistem kurarız ve
+en küçük kareyle çözeriz:
+
+$$\hat{a} = M^\dagger y,\qquad M=[M_1\,M_2\,M_3],\quad
+\hat{A}_k=\|\hat{a}_k\|_2$$
+
+### 5.2 Senaryoda R-LS
+
+Yalnız sinyal modlarını ($k=1,2,3$) modelleyip gürültü modlarını
+yok sayarak:
+
+| Mod | Gerçek | R-LS | Hata |
+|-----|--------|------|------|
+| $k=1$ | 10,0 μm | 10,0 μm | 0,4 % |
+| $k=2$ | 10,0 μm | 10,0 μm | 0,5 % |
+| $k=3$ | 10,0 μm | 9,9 μm | 0,7 % |
+
+Gürültü modlarını hiç modellemediğimiz halde hata %1'in altında —
+çünkü FODO-antisimetrik harmonikler R-uzayında neredeyse **ortogonal**;
+$k=4..8$ gürültüsünün $k=1,2,3$'e sızıntısı küçük.
+
+### 5.3 Sınırı
+
+R-LS hızlı ve basit (tek matris çözümü). Ama **hangi modları fit
+edeceğini önceden bilmen gerekir.** Yukarıda "sinyal $k=1,2,3$" dedik;
+gerçekte bunu bilmeyiz. Yanlış mod kümesi → bozuk kestirim. CLEAN bu
+boşluğu doldurur: hangi modların var olduğunu kendisi keşfeder.
+
+---
+
+## 6. Yöntem 3 — CLEAN
+
+### 6.1 Fikir ve Kökeni
+
+CLEAN, 1974'te radyo astronomide (Högbom) bulanık görüntülerden gerçek
+kaynakları çıkarmak için geliştirildi. Mantığı:
+
+> Orbit'e en çok katkı yapan modu bul, küçük bir kesrini çıkar,
+> kalanı tekrar incele. Yeterince tekrarla.
+
+Hangi modların gerçek olduğunu önceden bilmesi gerekmez.
+
+### 6.2 Algoritma
+
+Başlangıç: artık $r=y$, biriken katsayılar $\text{acc}[k]=0$.
 
 ```
 döngü t = 1, 2, ..., max_iter:
-
-    (1) Her aday k için artığı en çok azaltacak katsayıyı bul:
-          â_k = M_k⁺ r          (en küçük kareler adımı)
-
-    (2) En iyi harmoniği seç:
-          k* = argmax_k [ ‖r‖² − ‖r − M_k â_k‖² ]
-
-    (3) Artıktan bu harmoniğin küçük bir payını çıkar:
-          r ← r − g · M_{k*} â_{k*}
-
-    (4) Biriktir:
-          acc[k*] ← acc[k*] + g · â_{k*}
-
-    (5) Dur: ‖r‖/‖r₀‖ < ε ise ya da max_iter'e ulaşıldıysa
+    (1) her aday k için:  â_k = M_k⁺ r
+        azalma_k = ‖r‖² − ‖r − M_k â_k‖²
+    (2) en çok azaltanı seç:  k* = argmax_k azalma_k
+    (3) küçük payını çıkar:   r ← r − g · M_{k*} â_{k*}
+    (4) biriktir:             acc[k*] ← acc[k*] + g · â_{k*}
+    (5) dur: ‖r‖/‖r₀‖ < ε  ya da  max_iter
 ```
 
-Burada $g = 0{,}2$ **döngü kazancı** (loop gain).
+$g$ **döngü kazancı** (loop gain), tipik $0{,}1$–$0{,}3$; biz $0{,}2$.
 
-### 4.4 Döngü Kazancı Neden 1 Değil?
+### 6.3 Neden Tüm Modu Birden Çıkarmıyoruz? ($g<1$)
 
-$g = 1$ olsaydı, her adımda seçilen harmoniğin *tamamını* çıkarırdık.
-Ama harmonikler tam ortogonal değil ($\rho \neq 0$); bir harmoniği
-tam çıkarmak, bir sonraki adımda başka bir harmoniği seçimi
-bozabilir. Küçük bir pay ($g = 0{,}2$) çıkarmak, algoritmanın
-birkaç turda aynı harmoniğe dönmesine izin verir ve bu salınım
-zamanla hepsinin doğru tahminini ortaya çıkarır.
+$g=1$ olsa seçilen modun tamamını çıkarırdık. Ama modlar tam ortogonal
+değil; bir modu tam çıkarmak sonraki adımda başka modun seçimini
+bozabilir. Küçük pay, algoritmaya aynı moda dönüp tahmini kademeli
+düzeltme şansı verir.
 
-Radyo astronomi deneyimi $g \in [0{,}1, 0{,}3]$ aralığının
-iyi çalıştığını gösteriyor; biz $g = 0{,}2$ kullanıyoruz.
+### 6.4 Somut Çalışma: İlk Sekiz İterasyon
 
-### 4.5 Seçim Sırası: Güçlüden Zayıfa
+| iter | seçilen $k$ | kalan $\|r\|/\|r_0\|$ |
+|------|-------------|------------------------|
+| 1 | **2** | 0,925 |
+| 2 | 4 | 0,853 |
+| 3 | **2** | 0,797 |
+| 4 | 4 | 0,744 |
+| 5 | **2** | 0,702 |
+| 6 | 4 | 0,664 |
+| 7 | 5 | 0,634 |
+| 8 | **2** | 0,603 |
 
-İlk yinelemede hangi harmonik seçilir?
-Artık başlangıçta tüm harmonikleri barındırıyor.
-k=6 @ 300 μm, $\|M_6\,a_6\|$ açısından büyük bir sinyal,
-ama $\|M_6\| = 7{,}8$ küçük. k=4 @ 300 μm, $\|M_4\| = 22{,}2$
-ile çok daha güçlü.
+**Dikkat:** CLEAN "$k=10$'dan $k=1$'e" sırayla inmiyor; **orbit'e en
+çok katkı yapan modu** seçiyor — bu da $k=2$ (en güçlü yanıt) ve $k=4$
+(en büyük gürültü) arasında salınıyor. Bölüm 3.2'deki "genlik ≠
+görünürlük" burada kendini gösteriyor: $k=2$ sinyali 10 μm olsa da
+güçlü yanıtı yüzünden ilk seçilen mod.
 
-Algoritma artığı en çok azaltan harmoniği seçiyor.
-Gerçek seçim sırasını hesaplarsak:
+### 6.5 Sonuç (318 iterasyonda yakınsar)
 
-```
-iter  1 → k=6  (artık oran: 0,68)
-iter  2 → k=4  (artık oran: 0,42)
-iter  5 → k=8  (artık oran: 0,21)
-iter 12 → k=2  (artık oran: 0,08)
-iter 40 → ...  (artık oran: 0,004)  → yakınsama
-```
+| $k$ | gerçek | CLEAN | hata | tür |
+|-----|--------|-------|------|-----|
+| 1 | 10,0 μm | 10,0 μm | 0,0 % | sinyal |
+| 2 | 10,0 μm | 10,0 μm | 0,0 % | sinyal |
+| 3 | 10,0 μm | 10,0 μm | 0,0 % | sinyal |
+| 4 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
+| 5 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
+| 6 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
+| 7 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
+| 8 | 100,0 μm | 100,0 μm | 0,0 % | gürültü |
+| 9 | — | 0,0 μm | — | yok |
+| 10 | — | 0,0 μm | — | yok |
 
-k=6 ve k=4 temizlendikten sonra k=2, artık içinde görünür hale gelir
-ve seçilmeye başlar. Sonuçta k=2 katsayısının tahmini, arka plan
-harmoniklerinin sızdırdığı 0,38 μm'den belirgin biçimde küçük
-bir hataya ulaşır.
-
----
-
-## 5. k-Modülasyon: BPM Ofseti Nasıl İptal Olur?
-
-### 5.1 Temel Gözlem
-
-BPM ofseti $b$ hem R-LS hem CLEAN'in önündeki en büyük engel.
-$\sigma_b \approx 100\,\mu\text{m}$ iken hedef sinyal 10 μm —
-ofset sinyalden 10 kat büyük.
-
-Tek ölçümde $y = R\,dy + b + \varepsilon$; $b$ ve $R\,dy$'yi
-birbirinden ayırmak mümkün değil. Ama şunu fark edelim:
-BPM'nin elektroniği fiziksel konumundan gelmiyor, ölçüm
-referans noktasından geliyor. Bu referans, gradient değişince
-değişmiyor. Yani **iki farklı gradient ayarında ölçüm yaparsak**:
-
-$$y_1 = R_1\,dy + b + \varepsilon_1$$
-$$y_2 = R_2\,dy + b + \varepsilon_2$$
-
-$$\Delta y = y_2 - y_1 = (R_2 - R_1)\,dy + (\varepsilon_2 - \varepsilon_1)$$
-
-$b$ tamamen iptal oldu.
-
-### 5.2 Tüm Quadlara Tek Tip Modülasyon
-
-$g_1 \to g_1(1+\varepsilon)$ şeklinde tüm quadlara %2 gradient
-değişimi uygularsak:
-
-$$R_2 \approx (1 + \varepsilon)\,R_1
-\quad\Rightarrow\quad
-\Delta R = R_2 - R_1 \approx \varepsilon\,R_1$$
-
-$R_1$ tam rankı 48 olduğundan $\Delta R = \varepsilon R_1$ de tam rankı
-koruyor. CLEAN ve R-LS ölçüm matrisleri $M_k^{\rm kmod} = \Delta R \cdot F_k$
-hesaplanabilir, harmonik ayrışma bozulmuyor.
-
-### 5.3 Tek-Quad Kmod Neden Başarısız?
-
-Eğer yalnız 1–2 quad modüle edilirse, $\Delta R = R_2 - R_1$ yalnız
-o quad'ların sütunlarından oluşuyor. Bu matrisin rankı sadece 2
-(ya da modüle edilen quad sayısı kadar). Tekil değerlere bakarsak:
-
-$$\sigma_1 = 3{,}73,\quad \sigma_2 = 3{,}31,\quad
-\sigma_3 = 0{,}021,\quad \sigma_4 = 0{,}015,\,\ldots$$
-
-Üçüncü tekil değer, ikincinin yüzde birinden küçük — etkin rank 2.
-Bu 2-boyutlu bir uzaydan 48 harmoniği ayrıştırmak imkânsız.
-Bu durumda $\Delta R$ yerine $\varepsilon\,R_1$ kullanmak gerekir:
-fiziksel karşılığı uniform modülasyon, matematiksel avantajı
-tam rank korunması.
-
-### 5.4 CLEAN + kmod Birleşimi
-
-$r \leftarrow \Delta y$, $M_k \leftarrow \varepsilon\,R_1\,F_k$
-başlangıcıyla standart CLEAN çalıştırılır.
-BPM ofsetinden kaynaklanan her türlü sistematik hata iptal olmuştur;
-yalnız gürültü $\varepsilon_{\rm diff} = \varepsilon_2 - \varepsilon_1$
-(tek ölçüm gürültüsünden $\sqrt{2}$ kat büyük) kalmaktadır.
+CLEAN tüm modları doğru çatıyor — sinyal, gürültü ve var olmayan
+$k=9,10$ dahil. Üstelik **hangi modların gerçek olduğunu önceden
+söylemeden**; algoritma keşfetti.
 
 ---
 
-## 6. Dört Yöntemi Karşılaştırmak
+## 7. Üç Yöntemin Karşılaştırması
 
-### 6.1 Yöntemlerin Özellik Tablosu
+Aynı senaryo (sinyal $k=1,2,3$ @ 10 μm), $k=1$ kaçıklığını geri çatma:
 
-| Yöntem | Baz | BPM ofseti | Sabit kontam. |
-|--------|-----|------------|---------------|
-| Bozoki LS | Azimutal cos/sin | var | ~%312 intrinsik |
-| R-matris LS | FODO-antisim. | var | 0,38 μm |
-| CLEAN (kmodsuz) | FODO-antisim. | var | azaltılır |
-| CLEAN + kmod | FODO-antisim. | **iptal** | azaltılır |
+| Yöntem | Baz | $R$ kullanır mı? | $k=1$ hatası |
+|--------|-----|------------------|--------------|
+| Bozoki | azimutal | hayır (model-free) | ~530 % |
+| R-matris LS | FODO-antisim. | evet | 0,4 % |
+| CLEAN | FODO-antisim. | evet | 0,0 % |
 
-### 6.2 $A_2 = 10\,\mu$m'de Beklenen Hata
+| Özellik | Bozoki | R-LS | CLEAN |
+|---------|--------|------|-------|
+| Çözüm tarzı | tek-adım fit | tek-adım | iteratif |
+| Doğru baz mı? | **hayır** | evet | evet |
+| Mod kümesi | sabit | önceden verilir | keşfedilir |
+| Hız | hızlı | hızlı | yavaş (yüzlerce iter) |
+| Tipik hata | %300–500 | <%1 | ~%0 |
 
-Sayısal benzetimden (params.json arka planı, 80 Monte Carlo):
+### Okunuşu
 
-| Yöntem | Ortalama hata |
-|--------|---------------|
-| Bozoki LS | ~%305 |
-| R-matris LS | ~%4 |
-| CLEAN (kmodsuz) | ~%3,5 |
-| CLEAN + kmod | ~%0 |
+- **Bozoki** tarihsel önem taşır ve tune'a yakın **tek** dominant
+  harmonik için tasarlandı. Çoklu-harmonik, FODO-antisimetrik yapıda
+  azimutal bazı yüzünden başarısız: harmonikler birbirine karışır.
 
-### 6.3 Hangi Yöntem Ne Zaman?
+- **R-LS**, doğru bazı tepki matrisiyle birleştirir; hangi modları
+  çözeceğini *sen söylersin*, tek adımda yüksek doğrulukla çözer.
 
-**Bozoki yöntemi** tarihsel önem taşır; uzun dalga boylu
-(küçük k) harmoniklerde ve büyük SNR'de makul çalışır.
-pEDM'in FODO yapısı ve k=2 hedefinde yetersiz.
-
-**R-matris LS** tek ölçümle hızlı sonuç. BPM ofseti sorunuyla
-başa çıkılamıyor ama FODO-antisimetrik baz sayesinde Bozoki'nin
-önyargısından kurtarılmış. Sabit kontaminasyon tabanı: 0,38 μm.
-
-**CLEAN (kmodsuz)** arka plan harmonikleri dominant olduğunda
-R-LS'ye küçük bir avantaj sağlar; $A_2 < 5\,\mu$m bölgesinde
-kontaminasyon tabanını kısmen giderir.
-
-**CLEAN + kmod** maksimum doğruluk için. BPM ofseti tamamen
-iptal; arka plan harmonikleri iteratif ayıklanmış.
-Dezavantajı: iki orbit ölçümü gerekiyor ve fark sinyalinin
-gürültüsü $\sqrt{2}$ kat artar.
-
-### 6.4 Kontaminasyon Tabanı ve Hata Sınırı
-
-R-LS'nin 0,38 μm sabit kontaminasyonu, $A_2$'nin göreli
-hatasına şöyle yansır:
-
-| $A_2$ | Beklenen R-LS hatası |
-|--------|----------------------|
-| 100 μm | %0,38 |
-| 30 μm | %1,3 |
-| 10 μm | %3,8 |
-| 3 μm | %12,7 |
-| 1 μm | %38 |
-
-%10 altında kalmak için R-LS ile $A_2 \gtrsim 4\,\mu$m gerekiyor.
-CLEAN bu sınırı ~2–3 kat düşürebilir; kmod ise BPM
-ofsetini tamamen kaldırdığı için bu kısıtlamayı sadece
-gürültü sınırına taşır.
+- **CLEAN**, aynı doğru bazı iteratif kullanır; hangi modların var
+  olduğunu *kendisi keşfeder*. Mod kümesini bilmediğimiz ya da gürültü
+  sızıntısının önemli olduğu durumlarda en güvenli seçenektir.
 
 ---
 
-## 7. Özet
+## 8. Özet
 
-İki yöntem de aynı temel fikri paylaşıyor: FODO-antisimetrik Fourier
-baz fonksiyonları, 48 kuadropolün hizalama hatasını fiziğe uygun
-biçimde parametreliyor ve tepki matrisi $R$ aracılığıyla bu
-parametrelerden ölçüm uzayına doğrusal bir dönüşüm kuruyor.
+Üç yöntem de aynı ters problemi çözmeye çalışır: orbit $y$'den
+kaçıklık $dy$'yi geri çatmak. Belirleyici iki unsur:
 
-**R-matris LS**, bu doğrusal sistemi tek adımda çözer.
-Hızlı, yorumlanması kolay, ancak arka plandan gelen sabit
-kontaminasyon tabanı var.
+1. **Tepki matrisi** $R$: kaçıklıkları orbit'e bağlayan doğrusal harita.
+   Bozoki bunu kullanmaz (ve bu onun zayıflığıdır); R-LS ve CLEAN kullanır.
 
-**CLEAN**, aynı doğrusal sistemi iteratif biçimde çözer.
-Her adımda dominant harmoniği kısmen ayıklayarak zayıf
-hedef harmoniği daha temiz bir artıkta ölçer.
-Contaminasyon tabanını kısmen giderir; kmod ile birleşince
-BPM ofseti de iptal olur.
+2. **FODO-antisimetrik baz** $F_k$: kick'teki $(-1)^j$ işaret yapısını
+   nötrleyerek, halkanın gerçekten duyarlı olduğu kaçıklık modlarını
+   yakalar. Azimutal baz (Bozoki) bunu kaçırır ve %300+ hata üretir.
 
-Her iki yöntemin başarısı, doğru baza dayanıyor. Baz yanlış seçilirse
-— örneğin FODO'nun işaret yapısını görmezden gelen azimutal harmonikler —
-hiçbir istatistiksel teknik sistematik önyargıyı gidemez.
+Doğru baz + tepki matrisi seçildiğinde hem R-LS hem CLEAN hizalama
+hatalarını yüksek doğrulukla geri çatar. İkisi arasında tercih,
+mod kümesini önceden bilip bilmediğimize bağlıdır: biliyorsak R-LS'in
+hızı, bilmiyorsak CLEAN'in keşif gücü öne çıkar.
 
 ---
 
-*Simülasyon parametreleri: $N_Q = 48$, $n_{\rm FODO} = 24$,
-$R_0 = 95{,}49\,\text{m}$, $g_1 = 0{,}21\,\text{T/m}$,
-$L_q = 0{,}4\,\text{m}$.
-Referans dosyalar: `params.json`, `fourier_reconstruct.py`,
-`R_dy_1.npy`.*
+*Örnek halka: 48 kuadrupol, 24 FODO hücresi, $Q_y \approx 1{,}73$.
+Tüm sayısal sonuçlar `R_dy_1.npy` tepki matrisi ve
+`fourier_reconstruct.py` (FODO baz + CLEAN) ile üretilmiştir.*
