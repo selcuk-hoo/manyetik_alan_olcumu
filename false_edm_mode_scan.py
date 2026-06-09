@@ -282,9 +282,11 @@ def _run_one_k(task):
 
 
 def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
-             do_co=True, co_turns=60, dt=None):
+             do_co=None, co_turns=60, dt=None):
     with open("params.json") as f:
         config = json.load(f)
+    if do_co is None:
+        do_co = bool(config.get("use_closed_orbit", True))
     fields, y0, beta0, R0, p_mag, direction = setup_fields(config)
 
     circ = 2*np.pi*R0 + 4*fields.nFODO*fields.driftLen + 2*fields.nFODO*fields.quadLen
@@ -458,10 +460,12 @@ if __name__ == "__main__":
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     k_list = list(range(0, args.kmax + 1))
+    # --no-co bayrağı verilmemişse params.json'daki use_closed_orbit anahtarı kullanılır
+    do_co_flag = False if args.no_co else None
     results, config = run_scan(k_list, amp_coef=args.amp, t2=args.t2,
                                return_steps=args.steps, nproc=args.nproc,
                                dt=args.dt,
-                               do_co=not args.no_co, co_turns=args.co_turns)
+                               do_co=do_co_flag, co_turns=args.co_turns)
     plot_results(results, args.amp)
     plot_sy_timeseries(results, args.amp)
 

@@ -72,6 +72,7 @@
     "dy_random_seed": 42,
     "dx_random_seed": 43,
     "smooth_antisym_fodo": true,
+    "use_closed_orbit": true,
 
     "k_search_max": 12,
     "greedy_residual_threshold": 0.15,
