@@ -93,14 +93,19 @@ def _combo_worker(task):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_single_mode_scan(config, use_co, t2, steps):
-    """k=1..10, her biri 100μm cos → CO genliği ve |dSy/dt|."""
+    """k=1..24, her biri 100μm cos → CO genliği ve |dSy/dt|.
+
+    k=13..24 = k=11..1'in kopyası (antisimetrik FODO bazında N=24 aliasing).
+    k=22 = k=2, k=26 = k=2 gibi; 'yeni' mod k=11, k=12 (Nyquist).
+    """
     print("\n" + "="*68)
-    print("  BÖLÜM 1 — TEK-MOD TARAMASI  k=1..10,  A=100 μm cos")
+    print("  BÖLÜM 1 — TEK-MOD TARAMASI  k=1..24,  A=100 μm cos")
     print(f"  use_closed_orbit = {use_co}")
+    print("  (k=13..24 aliasing kontrolü: beklenen k=11..1 tekrarı)")
     print("="*68)
 
     results, _ = run_scan(
-        k_list=list(range(1, 11)),
+        k_list=list(range(1, 25)),
         amp_coef=A100,
         t2=t2,
         return_steps=steps,
@@ -218,6 +223,10 @@ def make_plots(scan_results, combos, combo_results):
         ax.set_ylabel("Kapalı yörünge genliği [mm]", color=color1, fontsize=10)
         ax.tick_params(axis="y", labelcolor=color1)
         ax.set_xticks(ks)
+        # k=13..24 aliasing bölgesi gri arka plan
+        if max(ks) >= 13:
+            ax.axvspan(12.5, max(ks) + 0.5, color="lightgray", alpha=0.4,
+                       label="aliasing (k=N-k)")
 
         ax2 = ax.twinx()
         ax2.plot(ks, edm, "o-", color=color2, lw=2, ms=7, label="|dSy/dt|")
@@ -297,7 +306,7 @@ def make_plots(scan_results, combos, combo_results):
 def main():
     import argparse
     par = argparse.ArgumentParser()
-    par.add_argument("--t2",    type=float, default=5e-4)
+    par.add_argument("--t2",    type=float, default=1e-3)
     par.add_argument("--steps", type=int,   default=5000)
     args = par.parse_args()
 
