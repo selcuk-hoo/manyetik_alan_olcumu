@@ -640,6 +640,256 @@ düzeyine hizalandığında (BBA sonrası), $k=2$ bileşeni $\sim\SI{1}{\nano\te
 $k=3$ bileşeni ise $\sim\SI{4}{\nano\tesla}$ hassasiyetle ölçülebilmektedir.
 
 %==============================================================
+\section{Harmonik trim ile sahte EDM iptali: ölç--trimle döngüsü}
+\label{sec:trim}
+
+Önceki bölümler hizalama hatasının baskın harmonik bileşenlerini
+\emph{ölçmeye} odaklanmıştı. Bu bölümde tamamlayıcı soruyu ele alıyoruz:
+ölçülen (ya da hiç ölçülmeyen) hizalama hatasının ürettiği sahte EDM,
+kafese bilinçli olarak eklenen küçük harmonik ``trim''lerle doğrudan
+iptal edilebilir mi? Aşağıda gösterileceği üzere yanıt olumludur ve ortaya
+çıkan yöntem, hizalama desenini bilmeyi \emph{gerektirmeyen}, yalnızca
+spin tabanlı $dS_y/dt$ ölçümüne dayanan bir ölç--trimle döngüsüne
+indirgenebilmektedir. Bu bölümdeki tüm simülasyonlar üniform
+$G=\SI{0.2}{\tesla\per\meter}$ FODO kafesinde (48 kuadrupol,
+$Q_y\approx2{,}68$), kapalı-yörünge fırlatma koşulunda (CO=True) ve
+$T=\SI{0.5}{\milli\second}$ spin takibiyle yapılmıştır.
+
+\subsection{Çalışma mantığı: rezonans işaret kuralı ve doğrusallık}
+\label{sec:trim-mantik}
+
+Yöntem iki sayısal gözleme dayanır. Birincisi, sahte EDM hızı tek tek
+harmonik genliklerde \emph{doğrusaldır}: hizalama deseni
+$\Delta y_j = \sum_k a_k F_{k,j}$ Fourier modlarına ayrıştırıldığında
+\begin{equation}
+  \frac{dS_y}{dt} \;\approx\; \sum_k c_k\, a_k,
+  \label{eq:trim-lineer}
+\end{equation}
+burada $c_k$ kafese (ayar frekansına) ait katsayılardır. İkincisi, bu
+katsayıların işareti basit bir rezonans kuralına uyar: dikey betatron ayarı
+$Q_y\approx2{,}68$ olduğundan, paydası $1/(k^2-Q_y^2)$ biçiminde davranan
+yörünge tepkisi $k<Q_y$ modları ($k=1,2$) için \emph{pozitif},
+$k>Q_y$ modları ($k=3,4,\ldots$) için \emph{negatif} işaretli sahte EDM
+üretir. Zıt işaretli modların varlığı, bir modun katkısının başka bir modla
+\emph{telafi edilebileceği} anlamına gelir:
+\begin{equation}
+  c_k a_k + c_{k'} A^*_{k'} = 0
+  \quad\Longrightarrow\quad
+  A^*_{k'} = -\frac{c_k}{c_{k'}}\,a_k .
+  \label{eq:trim-recete}
+\end{equation}
+
+Katsayılar tek tek ölçüldü: her $k$ için $A=\SI{10}{\micro\meter}$
+genlikli saf cos modu kafese yerleştirilip $dS_y/dt$ kaydedildi
+(Tablo~\ref{tab:ck}). Tablo üç önemli yapıyı gösterir:
+(i)~işaret kuralı doğrulanmıştır;
+(ii)~$k=2$, rezonansa en yakın mod olarak $|c_k|$ bakımından diğerlerinin
+4--10 katıdır;
+(iii)~$k\ge3$ için $|c_k|$ yaklaşık $1/k^2$ ile azalır.
+
+\begin{table}[h]
+\centering
+\caption{Ölçülen sahte-EDM mod katsayıları $c_k$ (cos fazı,
+$A=\SI{10}{\micro\meter}$ prob, CO=True). Son sütun: $A=\SI{10}{\micro\meter}$
+genlikli tek modun ürettiği sahte EDM hızı.}
+\label{tab:ck}
+\begin{tabular}{cccc}
+\toprule
+$k$ & $c_k$ [rad/s/m] & işaret & $dS_y/dt$ ($A{=}10\,\mu$m) [rad/s] \\
+\midrule
+1  & $+4{,}57\times10^{-5}$ & $+$ & $+4{,}57\times10^{-10}$ \\
+2  & $+1{,}97\times10^{-4}$ & $+$ & $+1{,}97\times10^{-9}$ \\
+3  & $-4{,}80\times10^{-5}$ & $-$ & $-4{,}80\times10^{-10}$ \\
+4  & $-1{,}63\times10^{-5}$ & $-$ & $-1{,}63\times10^{-10}$ \\
+5  & $-9{,}10\times10^{-6}$ & $-$ & $-9{,}10\times10^{-11}$ \\
+6  & $-5{,}65\times10^{-6}$ & $-$ & $-5{,}65\times10^{-11}$ \\
+7  & $-3{,}99\times10^{-6}$ & $-$ & $-3{,}99\times10^{-11}$ \\
+8  & $-3{,}08\times10^{-6}$ & $-$ & $-3{,}08\times10^{-11}$ \\
+9  & $-2{,}45\times10^{-6}$ & $-$ & $-2{,}45\times10^{-11}$ \\
+10 & $-2{,}09\times10^{-6}$ & $-$ & $-2{,}09\times10^{-11}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Katsayı taraması $k=24$'e kadar genişletildiğinde beklenmedik fakat
+geriye dönük olarak açık bir simetri ortaya çıkmıştır:
+$c_k = c_{24-k}$ \emph{tam olarak} sağlanır (örneğin
+$c_{22}=c_2=+1{,}974\times10^{-4}$). Nedeni örnekleme (alias)
+özdeşliğidir: $N_\mathrm{FODO}=24$ hücreli kafeste
+$\cos(2\pi k n/24) = \cos\!\big(2\pi(24-k)n/24\big)$ olduğundan $k$ ve
+$24-k$ modları kuadrupol konumlarında \emph{aynı fiziksel desendir}.
+Dolayısıyla bağımsız mod sayısı 24 değil 12'dir; spektrum $k=12$
+çevresinde simetrik bir ``V'' çizer ve en zayıf kaldıraç
+$|c_{12}|\approx1{,}85\times10^{-6}$~rad/s/m ile $k\approx12$
+civarındadır. Pratik sonuç: harmonik trim tasarımında yalnızca
+$k=1\ldots12$ bandını taramak yeterlidir.
+
+\subsection{Tekil mod telafileri: hangi mod hangi modu bastırır?}
+\label{sec:trim-ortak}
+
+Denklem~(\ref{eq:trim-recete}) ile her mod çifti için telafi genliği
+hesaplanıp gerçek simülasyonla doğrulanmıştır. $k=2$ hedefi için sonuçlar
+(hedef genlik $a_2=\SI{10}{\micro\meter}$, sahte EDM
+$+1{,}97\times10^{-9}$~rad/s):
+
+\begin{table}[h]
+\centering
+\caption{$k=2$ modunu ($a_2=\SI{10}{\micro\meter}$) telafi eden tekil
+ortak modlar. $A^*$: denklem~(\ref{eq:trim-recete}) ile hesaplanan telafi
+genliği; artık: birleşik desenin simülasyonla ölçülen sahte EDM'si.}
+\label{tab:k2ortak}
+\begin{tabular}{cccc}
+\toprule
+ortak $k'$ & $A^*$ [$\mu$m] & artık [rad/s] & bastırma \\
+\midrule
+3  & 41{,}2  & $-1{,}59\times10^{-10}$ & $12\times$ \\
+4  & 121{,}2 & $+8{,}26\times10^{-11}$ & $24\times$ \\
+5  & 217{,}0 & $-3{,}23\times10^{-10}$ & $6\times$  \\
+6  & 349{,}7 & $-6{,}22\times10^{-10}$ & $3\times$  \\
+7--10 & 494--945 & büyür & $1$--$2\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+İki ders çıkmaktadır. Birincisi, doğrusal model güvenilirdir: en iyi ortak
+($k'=4$) için $A^*$ çevresinde yapılan ince tarama, gerçek sıfır geçişini
+$\SI{125.0}{\micro\meter}$'de bulmuştur — doğrusal kestirimden yalnızca
+$\%3{,}1$ sapma. İkincisi, $c_2$ baskın olduğundan $k=2$'yi tek bir zayıf
+modla silmek hedef genliğin 4--12 katı telafi genliği gerektirir; bu,
+hizalama bütçesi açısından verimsizdir. Ters yön ise ucuzdur: katsayılar
+dengeli ya da hedef mod zayıf olduğunda telafi genliği küçük kalır
+(Tablo~\ref{tab:k13ortak}). Örneğin $k=3$'teki \SI{10}{\micro\meter}'lik
+bir bileşen yalnızca \SI{2.4}{\micro\meter}'lik $k=2$ trimi ile
+silinebilmektedir.
+
+\begin{table}[h]
+\centering
+\caption{$k=1$ ve $k=3$ hedefleri için tekil ortak telafileri
+(hedef genliği \SI{10}{\micro\meter}).}
+\label{tab:k13ortak}
+\begin{tabular}{ccccc}
+\toprule
+hedef & ortak $k'$ & $A^*$ [$\mu$m] & artık [rad/s] & bastırma \\
+\midrule
+$k=1$ & 3 & $+9{,}5$  & $+1{,}72\times10^{-11}$ & $27\times$ \\
+$k=1$ & 4 & $+28{,}0$ & $-7{,}30\times10^{-12}$ & $63\times$ \\
+$k=3$ & 1 & $+10{,}5$ & $+1{,}81\times10^{-11}$ & $27\times$ \\
+$k=3$ & 2 & $+2{,}4$  & $-3{,}40\times10^{-11}$ & $14\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Birleşik bastırma ve trim bölüştürme}
+\label{sec:trim-birlesik}
+
+Gerçek hizalama hatası tek mod değildir. Doğrusal modelin gücü tam burada
+ortaya çıkar: toplam sahte EDM tek bir skaler kısıt
+($\sum_k c_k a_k = 0$) olduğundan, kuramsal olarak \emph{tek} serbest
+trim modu tüm karışımı iptal etmeye yeter. Bu, $a_1=a_2=a_3=\SI{10}{\micro\meter}$
+karışımı üzerinde sınanmıştır:
+
+\begin{itemize}
+  \item Doğrusal kestirim $\sum_k c_k a_k = +1{,}951\times10^{-9}$~rad/s;
+    ölçülen telafisiz değer $+2{,}050\times10^{-9}$~rad/s — model birleşik
+    desende de $\%5$ doğrulukla geçerlidir.
+  \item Tek modla trim ($k=3$'e $+\SI{40.7}{\micro\meter}$):
+    artık $-2{,}9\times10^{-11}$~rad/s, bastırma $70\times$.
+  \item Trim iki moda bölüştürüldüğünde ($k=3$ ve $k=4$'e
+    $+\SI{30.4}{\micro\meter}$'er, $c_3+c_4$ ile çözülür):
+    artık $-4{,}4\times10^{-12}$~rad/s, bastırma $\mathbf{468\times}$.
+\end{itemize}
+
+Bölüştürmenin tek moda göre yaklaşık $7$ kat daha derin bastırması
+dikkat çekicidir: tekil trim genlikleri küçüldükçe desen doğrusal bölgede
+kalır ve doğrusal-ötesi artıklar bastırılır. Trim bütçesini birden çok
+zayıf moda yaymak hem hizalama bütçesini korur hem iptali derinleştirir.
+
+\subsection{Telafi haritasının evrenselliği}
+\label{sec:trim-evrensellik}
+
+Tüm trim reçeteleri $c_k$ vektöründen türetildiğinden kritik soru şudur:
+$c_k$ makinenin o anki hizalama konfigürasyonuna mı, yoksa yalnızca kafese
+mi aittir? Doğrusal sistemde $24\times24$ telafi haritası
+$M_{kk'}=-c_k/c_{k'}$ \emph{rank-1}'dir; bu nedenle evrensellik, $c_k$
+vektörünü farklı arka planlar üzerinde ölçerek sınanabilir (576 çift
+simülasyonu yerine 64 simülasyon). Üç arka plan kullanılmıştır: boş kafes,
+ve iki bağımsız rastgele hizalama deseni (RMS \SI{10}{\micro\meter},
+taban sahte EDM'leri sırasıyla $+6{,}75\times10^{-11}$ ve
+$-8{,}11\times10^{-10}$~rad/s). Her arka plan $P$ üzerinde
+$c_k^\mathrm{eff} = [f(P + A F_k) - f(P)]/A$ ölçülmüştür.
+
+Sonuçlar:
+\begin{itemize}
+  \item korelasyon (boş $\leftrightarrow$ desen-1): $0{,}9999$;
+  \item korelasyon (desen-1 $\leftrightarrow$ desen-2): $0{,}9984$;
+  \item iki desen arasındaki bağıl RMS sapma: $\%7{,}2$.
+\end{itemize}
+
+Sahte EDM'nin büyük kısmını taşıyan baskın modlarda ($k=1\ldots4$) sapma
+$\%3$--$10$ bandındadır. Daha büyük bağıl sapmalar yalnızca
+$|c_k|\sim3\times10^{-6}$~rad/s/m olan zayıf modlarda görülür; bu modlarda
+prob yanıtı ($\sim3\times10^{-11}$~rad/s) taban-çıkarma ve eğim-fit
+gürültüsü mertebesindedir, dolayısıyla sapma fiziksel değil ölçümseldir.
+Sonuç: \textbf{telafi haritası kafese aittir ve bir kez kalibre edilir};
+ölçülen $c_k$ herhangi bir bilinmeyen hizalama deseninin üzerinde
+$\%3$--$10$ doğrulukla geçerlidir.
+
+\subsection{İteratif ölç--trimle döngüsü}
+\label{sec:trim-iteratif}
+
+$\%3$--$10$'luk katsayı belirsizliği tek atışlık trimin bastırmasını
+$\sim10$--$30\times$ ile sınırlar. Ancak döngü kapatılabilir: trim
+uygulandıktan sonra kalan $dS_y/dt$ yeniden ölçülür ve küçük bir ek trim
+hesaplanır. Bu şemanın deneysel açıdan belirleyici özelliği, hizalama
+deseni hakkında \emph{hiçbir bilgi gerektirmemesidir} — döngünün tek
+girdisi spin tabanlı $dS_y/dt$ ölçümü, tek kalibrasyonu $c_k$ vektörüdür:
+\begin{equation}
+  A^{(n)}_\mathrm{trim} = -\,\frac{f^{(n-1)}_\mathrm{ölçülen}}{c_\mathrm{trim}} .
+  \label{eq:trim-dongu}
+\end{equation}
+
+Döngü, kalibrasyonun hiç görmediği taze bir rastgele desen üzerinde
+(RMS \SI{10}{\micro\meter}, taban $f_0=-2{,}405\times10^{-10}$~rad/s)
+iki kolla sınanmıştır: (A)~trim yalnızca $k=3$'te; (B)~trim $k=3$ ve
+$k=4$'e bölüştürülmüş. Sonuçlar Tablo~\ref{tab:iteratif}'tedir.
+
+\begin{table}[h]
+\centering
+\caption{İteratif ölç--trimle döngüsü (taze desen, desen bilgisi
+kullanılmadan). Adım~0 trimsiz taban; her adımda trim genliği
+denklem~(\ref{eq:trim-dongu}) ile yalnızca bir önceki ölçümden hesaplanır.}
+\label{tab:iteratif}
+\begin{tabular}{ccccc}
+\toprule
+adım & kol A ($k{=}3$) [rad/s] & bastırma & kol B ($k{=}3{+}4$) [rad/s] & bastırma \\
+\midrule
+0 & $-2{,}405\times10^{-10}$ & --- & $-2{,}405\times10^{-10}$ & --- \\
+1 & $-1{,}09\times10^{-11}$ & $22\times$ & $-7{,}87\times10^{-12}$ & $31\times$ \\
+2 & $+2{,}5\times10^{-14}$ & $9574\times$ & $+3{,}3\times10^{-13}$ & $719\times$ \\
+3 & $-2{,}8\times10^{-13}$ & $872\times$ & $-1{,}7\times10^{-13}$ & $1412\times$ \\
+\bottomrule
+\end{tabular}
+\caption*{Adım~1 bastırması ($22$--$31\times$), harita belirsizliğinden
+beklenen $10$--$30\times$ penceresiyle birebir uyumludur. Adım~2'de kalan
+sinyal $10^{-13}$--$10^{-14}$~rad/s ile bu simülasyon süresinin eğim-fit
+tabanına iner; adım~3'ün trim genlikleri $\sim\SI{0.01}{\micro\meter}$'ye
+düştüğünden artık gürültü trimlenmektedir ve değerler taban çevresinde
+salınır. Toplam trim bütçesi: kol~A \SI{5.2}{\micro\meter},
+kol~B \SI{7.7}{\micro\meter}.}
+\end{table}
+
+Üç sonuç öne çıkar. Birincisi, iki ölçüm-trim turu, $\sim10^3\times$
+bastırma için yeterlidir ve sınırı yöntem değil $dS_y/dt$ ölçüm tabanı
+koyar — deneyde daha uzun spin ölçümü doğrudan daha derin iptal demektir.
+İkincisi, gereken trim bütçesi (5--8~$\mu$m) zaten var olan
+\SI{10}{\micro\meter}'lik hizalama toleransı mertebesindedir; yöntem
+kafese kayda değer yeni bozulma eklemez. Üçüncüsü, döngü
+Bölüm~\ref{sec:tartisma}'da önerilen ``$dS_y/dt=0$ tarama stratejisi''nin
+somutlaşmış hâlidir: harmonik genlik geri çatımı, BPM kalibrasyonu ve
+yörünge rekonstrüksiyonu döngünün hiçbir adımında gerekmez; bunlar yalnızca
+$c_k$ kalibrasyonunun bağımsız doğrulamasında rol oynar.
+
+%==============================================================
 \section{Tartışma ve sonraki çalışmalar}
 \label{sec:tartisma}
 
