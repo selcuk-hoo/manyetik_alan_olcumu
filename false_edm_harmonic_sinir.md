@@ -575,6 +575,40 @@ bandında. Büyük bağıl sapmalar yalnızca |c_k| ~ 3×10⁻⁶ olan zayıf mo
 3. Harita çalışmalarında k>12 kullanmaya gerek yok — alias. Telafi bütçesi
    k=3..12 negatif bandına dağıtılabilir; k=12 civarı en zayıf kaldıraç.
 
+### 12.6 İteratif ölç-trimle döngüsü: desen bilgisi olmadan ~1000× bastırma
+
+**Dosyalar:** `test_b_iterative_trim.py`, `test_b_iterative_trim.png`
+
+Deneysel olarak gerçekçi şema: hizalama deseni **hiç bilinmeden**, yalnızca
+ölçülen dSy/dt ve bir kez kalibre edilmiş c_k ile trim genliği hesaplanır:
+A_trim = −f_ölçülen/c_trim. Taze desen (seed 99, haritanın hiç görmediği
+konfigürasyon, RMS 10 μm), iki kol: (A) trim k=3 tek mod, (B) k=3+k=4
+bölüşmüş.
+
+| adım | kol A (k=3) | bastırma | kol B (k=3+4) | bastırma |
+|---|---|---|---|---|
+| 0 (trimsiz) | −2.405×10⁻¹⁰ | 1× | −2.405×10⁻¹⁰ | 1× |
+| 1 | −1.09×10⁻¹¹ | 22× | −7.87×10⁻¹² | 31× |
+| 2 | +2.5×10⁻¹⁴ | **9574×** | +3.3×10⁻¹³ | 719× |
+| 3 | −2.8×10⁻¹³ | 872× | −1.7×10⁻¹³ | 1412× |
+
+Bulgular:
+
+1. **1. atış öngörüyle birebir uyumlu:** 22–31× — c_k'nin %3–10 evrensellik
+   belirsizliği sınırı (§12.5 öngörüsü 10–30×).
+2. **2. atış ölçüm tabanına iner:** kalan |f| ~ 10⁻¹³–10⁻¹⁴; bu seviye eğim
+   fit gürültüsü tabanıdır (3. adım trimleri ~0.01 μm — artık gürültü
+   trimleniyor, değerler taban etrafında salınıyor). Pratik bastırma sınırı
+   bu konfigürasyonda ~**10³×**, yöntem değil ölçüm tabanı belirliyor.
+3. **Genlik bütçesi ihmal edilebilir:** toplam trim 5–8 μm — hizalama
+   bütçesi mertebesinde, onu aşmıyor.
+
+**Strateji özeti:** c_k vektörünü bir kez kalibre et (24 simülasyon /
+deneyde 12 prob ölçümü); her yeni makine konfigürasyonunda 2 ölçüm-trim
+turu → sahte EDM ~1000× bastırılır, desen bilgisi ve yörünge
+rekonstrüksiyonu gerekmeden. Daha derine inmek için tek gereken daha uzun
+ölçüm (daha düşük dSy/dt tabanı).
+
 ---
 
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*
