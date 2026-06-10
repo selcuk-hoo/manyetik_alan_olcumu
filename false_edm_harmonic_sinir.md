@@ -20,6 +20,8 @@
 7. [k=1,2,3 Düzeltmesinin %30 Etkinliği — Sayısal Kanıt](#7-yuzde30)
 8. [Yatay-Dikey Çapraz Terim (Yeni Bulgu)](#8-capraz-terim)
 9. [Makale Revizyonu İçin Çıkarımlar](#9-makale)
+10. [Üç Açık Sorunun Sayısal Yanıtı](#10-uc-soru)
+11. [Planlanan Testler: Kick Düzeltmesi ve Harmonik İptal](#11-planlanan-testler)
 
 ---
 
@@ -279,4 +281,150 @@ almıyorsa bunu açıkça sınırlamak gerekmektedir.
 
 ---
 
-*Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-09*
+---
+
+## 11. Planlanan Testler: Kick Düzeltmesi ve Harmonik İptal <a name="11-planlanan-testler"></a>
+
+> §10'daki sayısal bulgulardan çıkan iki somut test fikri. Her ikisi de
+> mevcut simülasyon altyapısıyla (`harmonic_orbit_correction.py`,
+> `false_edm_mode_scan.py`, `test_cross_correlation.py`) yapılabilir.
+
+---
+
+### 11.1 Test A — Kick Sayısı vs False EDM: Kaç Korrektör Yeterli?
+
+**Motivasyon:** CO=True / CO=False arasında 10⁵× fark var (§10.1). Gerçek
+hızlandırıcıda tam CO=True koşulu, ring boyunca dağıtık korrektör sistemi
+gerektirir. Ama kaç korrektör "yeterli"? Bu test, gerekli korrektör sayısını
+ve yerleşimini sayısal olarak belirler.
+
+**Fikrin özü:** Önce bilinen bir hizalama deseni için ideal kick profili
+hesaplanır, ardından aynı kick vektörü farklı (rassal) parçacıklara
+uygulanarak ne kadar false EDM bastırımı sağlandığı ölçülür.
+
+#### Adım 1 — İdeal parçacık için optimal kick vektörü
+
+Verilen bir k=2 hizalama deseni (A=10μm cos) için minimum sayıda korrektör
+kickiyle kapalı yörüngeyi sağlamak:
+
+```
+Hedef: ||y_betatron||² → minimum, N korrektör kullanarak
+```
+
+1. Hizalama desenini uygula → kapalı yörüngeyi hesapla (tepki matrisi ile).
+2. N korrektör konumu dene (eşit aralıklı, sonra optimize edilmiş).
+3. Her N için en küçük kareler kick vektörü bul:
+   `θ* = argmin ||R_corr · θ − y_CO||²`
+   burada `R_corr` korrektörlerden BPM'lere tepki matrisi.
+4. Artık orbit normu: `||y_CO − R_corr · θ*||` hesapla.
+
+#### Adım 2 — Artık false EDM ölçümü
+
+Kick vektörü `θ*` uygulanmış haldeyken parçacığı başlat ve dSy/dt ölç:
+
+| N_korrektör | Artık |y_CO| [μm] | dSy/dt [rad/s] | CO=True'ya göre oran |
+|-------------|-------|--------------|-----------------|----------------------|
+| 0 (CO=False) | ~200 | ~10⁻⁴ | 1 |
+| 2 | ? | ? | ? |
+| 4 | ? | ? | ? |
+| 8 | ? | ? | ? |
+| 24 | ? | ? | ? |
+| 48 (CO=True) | ~0.2 | ~10⁻⁹ | 10⁻⁵ |
+
+**Beklenti:** k=2 modunu bastırmak için teorik minimum 2 korrektör
+(cos ve sin bileşeni için 2 serbestlik derecesi). Ama gürültü ve diğer
+modların varlığında pratik eşik daha yüksek olabilir.
+
+#### Adım 3 — Genelleştirme: rassal hizalama desenleri
+
+Adım 1-2'yi `M=50` rassal hizalama deseni üzerinde tekrar et:
+- `quad_dy` ~ N(0, σ=10μm) her kuadrupol için bağımsız
+- Her seferinde aynı N korrektör konumunu kullan (onceden belirlenmiş)
+- dSy/dt dağılımını kaydet
+
+Amaç: kick konumları tek bir (ideal) desene göre seçilmişken, farklı
+desenlerde ne kadar etkin?
+
+**Beklenen çıktı dosyası:** `test_kick_correction.py`
+
+**Anahtar parametre:**
+```python
+N_corr_list  = [2, 4, 8, 12, 24, 48]   # denenecek korrektör sayıları
+n_realiz     = 50                        # rassal desen sayısı
+A_mismatch   = 1e-5                      # 10μm RMS hizalama hatası
+```
+
+---
+
+### 11.2 Test B — Harmonik Kombinasyon ile False EDM İptali
+
+**Motivasyon:** k=2 pozitif (+1.4×10⁻⁹ rad/s), k=3 negatif (−6.3×10⁻¹⁰ rad/s)
+false EDM üretiyor (§10.2). Bilerek k=3 bileşeni ekleyerek k=2 katkısını
+kısmen iptal etmek mümkün mü? Bu, "k=2 yörüngesini sıfırla" yerine
+"dSy/dt = 0 olacak şekilde k=3 amplitüdünü ayarla" stratejisinin somut testidir.
+
+#### Adım 1 — Temel iptal eğrisi
+
+Sabit k=2 misalignment (A₂=10μm) ile k=3 korrektör genliği A₃ taranır:
+
+```python
+A2_fixed = 1e-5       # k=2 misalignment, sabit
+A3_scan  = np.linspace(-2e-5, 2e-5, 20)   # k=3 korrektör genliği taraması
+```
+
+Her (A₂, A₃) kombinasyonu için dSy/dt ölç → dSy/dt vs A₃ eğrisi.
+
+Lineer modelden beklenen sıfır geçişi:
+$$A_3^* = -\frac{c_2}{c_3} A_2 = -\frac{+13.84}{-6.16} \times 10^{-5}
+\approx 2.25 \times 10^{-5} \text{ m}$$
+
+Sayısal sıfır geçişini $A_3^*$ ile karşılaştır.
+
+#### Adım 2 — İptal hassasiyeti
+
+İptal noktası $A_3 = A_3^*$ etrafında küçük pertürbasyon $\delta A_3$ uygula:
+
+$$\left.\frac{d(dS_y/dt)}{dA_3}\right|_{A_3^*} = c_{23} \cdot A_2$$
+
+Bu eğim biliniyorsa, $\delta A_3 = 1\mu$m pertürbasyonu kaç rad/s hata
+üretir? Tolerans analizi için kritik.
+
+#### Adım 3 — Rassal hizalama deseni ile kararlılık
+
+k=2 dominant ama k=4..10 da mevcut olan rassal bir hizalama deseninde:
+1. k=2 bileşenini ölç (CLEAN ile geri çatım)
+2. Tahmin edilen $A_3^* = -(c_2/c_3) \hat{A}_2$ ile k=3 korrektörü ayarla
+3. Gerçek dSy/dt'yi ölç — tahmin ne kadar tuttu?
+
+Amaç: k=4..10 kirleticileri varken k=2–k=3 iptal stratejisi ne kadar sağlam?
+
+**Beklenen çıktı dosyası:** `test_harmonic_cancellation.py`
+
+**Anahtar parametre:**
+```python
+A2      = 1e-5              # k=2 misalignment
+c_ratio = 13.84 / 6.16     # ≈2.25 (cross-correlation matrisinden)
+t2      = 8e-4              # 0.8 ms spin takibi
+co_turns = 36               # kapalı yörünge arama dönüşü
+```
+
+---
+
+### 11.3 İki Testin Karşılaştırmalı Değeri
+
+| | Test A (kick sayısı) | Test B (harmonik iptal) |
+|---|---|---|
+| **Pratik hedef** | Korrektör sistemi tasarımı | dSy/dt=0 tarama stratejisi |
+| **Bağımsız değişken** | N_korrektör | A₃ (k=3 genliği) |
+| **Gözlenen büyüklük** | Artık dSy/dt vs N | dSy/dt vs A₃ |
+| **CO gerekliliği** | Her testte CO aranıyor | Her testte CO aranıyor |
+| **Önkoşul** | Tepki matrisi (mevcut) | Cross-corr katsayıları (§10) |
+| **Yeni kod** | `test_kick_correction.py` | `test_harmonic_cancellation.py` |
+| **Süre tahmini** | ~4-6 saat (50 rassal × N tarama) | ~1-2 saat (A₃ taraması) |
+
+Test B daha hızlı ve teorik tahminle doğrudan karşılaştırılabilir olduğu
+için önce yapılması önerilir.
+
+---
+
+*Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*
