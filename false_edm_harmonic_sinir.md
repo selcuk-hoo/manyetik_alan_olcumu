@@ -454,4 +454,79 @@ bul; ardından yeterli korrektör sayısını Test A sonuçlarından seç.
 
 ---
 
+## 12. Test B Sonuçları: Ortak-Mod Arama ve Birleşik Bastırma <a name="12-test-b"></a>
+
+**Dosyalar:** `test_b_partner_search.py`, `test_b_combined.py`,
+`test_b_ck_table.json` (ölçülen katsayılar)
+**Kafes:** üniform 0.2 T/m (g0=g1=0.2), CO=True, T2=0.5 ms
+
+### 12.1 c_k tablosu k=1..10 (ilk geniş tarama)
+
+| k | c_k [rad/s/m] | işaret |
+|---|---|---|
+| 1 | +4.566×10⁻⁵ | + |
+| 2 | **+1.974×10⁻⁴** | + (baskın) |
+| 3 | −4.796×10⁻⁵ | − |
+| 4 | −1.629×10⁻⁵ | − |
+| 5 | −9.10×10⁻⁶ | − |
+| 6 | −5.65×10⁻⁶ | − |
+| 7 | −3.99×10⁻⁶ | − |
+| 8 | −3.08×10⁻⁶ | − |
+| 9 | −2.45×10⁻⁶ | − |
+| 10 | −2.09×10⁻⁶ | − |
+
+İşaret kuralı doğrulandı: k < Q_y ≈ 2.68 → pozitif; k > Q_y → negatif.
+k ≥ 3 için |c_k| kabaca 1/k² ile azalır (rezonans paydası 1/(k²−Q_y²)).
+
+### 12.2 k=2 ortağı: tekil mod telafisi verimsiz
+
+| ortak k' | A* (lineer) | gerçek artık | bastırma |
+|---|---|---|---|
+| 3 | 41.2 μm | −1.6×10⁻¹⁰ | 12× |
+| **4** | **121.2 μm** | **+8.3×10⁻¹¹** | **24×** |
+| 5..10 | 217–945 μm | büyür | 1–6× |
+
+İnce tarama (k'=4): gerçek sıfır geçişi 125.0 μm — lineer tahminden yalnızca
+%3.1 sapma → lineer model güvenilir. Ancak **c₂ baskın olduğundan k=2'yi tek
+zayıf modla silmek 4–12× büyük telafi genliği ister** — hizalama bütçesi
+açısından pratik değil. Ters yön ucuz: k=3'teki 10 μm, sadece 2.4 μm'lik
+k=2 ile silinir.
+
+### 12.3 k=1 ve k=3 ortakları: dengeli çiftler pratik
+
+| hedef | ortak k' | A* | artık | bastırma |
+|---|---|---|---|---|
+| k=1 (10μm) | 3 | +9.5 μm | +1.7×10⁻¹¹ | 27× |
+| k=1 (10μm) | 4 | +28.0 μm | −7.3×10⁻¹² | **63×** |
+| k=3 (10μm) | 1 | +10.5 μm | +1.8×10⁻¹¹ | 27× |
+| k=3 (10μm) | 2 | +2.4 μm | −3.4×10⁻¹¹ | 14× |
+
+|c| büyüklükleri dengeli çiftlerde (k=1↔k=3) telafi genliği hedef
+genlikle aynı mertebede → uygulanabilir.
+
+### 12.4 Birleşik bastırma: a₁=a₂=a₃=10 μm
+
+| durum | dSy/dt [rad/s] | bastırma |
+|---|---|---|
+| lineer tahmin Σc_k·a_k | +1.951×10⁻⁹ | — |
+| (a) telafisiz (gerçek) | +2.050×10⁻⁹ | — |
+| (b) k=3 trim (+40.7 μm) | −2.9×10⁻¹¹ | 70× |
+| (c) k=3 + k=4 bölüşmüş (+30.4 μm her biri) | **−4.4×10⁻¹²** | **468×** |
+
+Bulgular:
+
+1. **Lineerlik:** tahmin/gerçek farkı %5 — Σc_k·a_k modeli birleşik desende
+   de geçerli.
+2. **Tek serbest mod matematiksel olarak yeterli** (tek kısıt denklemi),
+   70× bastırma sağlar.
+3. **İki moda bölüştürme hem genlik bütçesini korur hem bastırmayı
+   derinleştirir** (468×): küçük tekil genlikler lineer bölgede kalır,
+   lineer-ötesi artıklar küçülür.
+
+**Sonraki adım:** rastgele desenlerde (ölçülen â_k projeksiyonlarından
+hesaplanan trim ile) evrensellik testi; ardından k_targets={1,2,3} +
+bölüşmüş trim stratejisinin BPM gürültüsü altındaki sağlamlığı.
+
+---
+
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*
