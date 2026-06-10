@@ -657,6 +657,36 @@ sıfırlar. Farklı başlangıç koşullu parçacıklar için c_k(fırlatma)
 katsayıları farklı olabilir → demet ortalamasında artık ne kadar?
 (Sonraki test adayı.)
 
+### 12.8 BPM ofseti/gürültüsünün trim döngüsüne etkisi: sınırlamaz
+
+**Dosyalar:** `test_b_trim_bpm.py`, `test_b_trim_bpm.png` (CO=False)
+
+Döngünün tek girdisi spin ölçümü → BPM verisi doğrudan kullanılmaz;
+gerçekçi koşulda oturtma adımı da olmadığından "yanlış yörüngeye oturtma"
+kanalı tanım gereği yok. Kalan iki dolaylı kanal test edildi:
+
+**Kanal A — dSy/dt ölçüm gürültüsü** (σ_ε = 0.1·|f₀| = 1.5×10⁻⁵):
+adım 1 ve 2 artıklarının σ_ε'a oranı tam **1.000** — döngü tabanı = σ_ε,
+gürültü birikmez (her adım son gerçekleşmeyi trimler). Nihai derinlik
+polarimetre istatistiğiyle ölçeklenir.
+
+**Kanal B — statik aktüasyon hatası** (trim BPM-referanslı tümsekle
+uygulanırsa; b₃ = 20μm ≈ σ_b=100μm'nin k=3 bileşeni):
+
+| adım | dSy/dt [rad/s] | not |
+|---|---|---|
+| 0 | −1.508×10⁻⁴ | trimsiz |
+| 1 | −4.507×10⁻⁴ | 3.0× kötüleşme (= c₃·b₃ tam) |
+| 2 | +2.55×10⁻¹¹ | 5.9×10⁶× bastırma (diferansiyel) |
+| 3 | +2.85×10⁻¹² | 5.3×10⁷× bastırma |
+
+Statik hata kendini ele verir: döngü büyüyen sinyali ölçüp artımsal
+trimle temizler (artımda statik ofset iptal). Maliyet: 1 ek tur.
+
+**Sonuç:** BPM ofseti/gürültüsü trim yöntemini sınırlamaz — yörünge
+rekonstrüksiyonunun aksine. İki yöntem tamamlayıcı: rekonstrüksiyon
+hizalama hatasının *tanısı*, trim döngüsü BPM'lerden bağımsız *tedavisi*.
+
 ---
 
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*

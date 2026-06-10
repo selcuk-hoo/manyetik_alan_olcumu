@@ -960,6 +960,75 @@ başlangıç koşullu parçacıklardan oluşan gerçek demet ortalamasında ne
 kadar artık bıraktığıdır; $c_k$'nin fırlatma koşuluna bağımlılığı sonraki
 çalışmanın konusudur.
 
+\subsection{BPM ofseti ve gürültüsünün etkisi}
+\label{sec:trim-bpm}
+
+Bu makalenin yörünge-rekonstrüksiyon yönteminde BPM ofseti merkezi hata
+kaynağıdır (Bölüm~\ref{sec:tartisma} öncesi analizler). Trim döngüsü için
+durum yapısal olarak farklıdır: döngünün tek girdisi spin tabanlı
+$dS_y/dt$ ölçümü olduğundan \emph{BPM verisi döngüde doğrudan hiç
+kullanılmaz}. Gerçekçi koşulda (Bölüm~\ref{sec:trim-gercekci}) yörünge
+düzeltme adımı da bulunmadığından, BPM hatalarının ``demeti yanlış
+yörüngeye oturtma'' kanalı tanım gereği ortadan kalkar. Geriye iki dolaylı
+kanal kalır; ikisi de sayısal olarak sınanmıştır (taze desen,
+$f_0=-1{,}508\times10^{-4}$~rad/s, trim modu $k=3$).
+
+\textbf{Kanal A — $dS_y/dt$ ölçüm gürültüsü (polarimetre istatistiği).}
+Her ölçüme $f_\mathrm{ölçülen}=f_\mathrm{gerçek}+\varepsilon$ biçiminde
+gürültü eklendi ($\sigma_\varepsilon = 0{,}1|f_0| = 1{,}5\times10^{-5}$).
+Sistem tam doğrusal olduğundan kuramsal beklenti kesindir: $n$'inci adım
+sonrası artık $= -\varepsilon_{n-1}$, yani döngü tabanı
+$=\sigma_\varepsilon$. Simülasyon bunu makine hassasiyetinde doğrular:
+adım~1 ve adım~2 artıklarının $\sigma_\varepsilon$'a oranı tam
+$1{,}000$'dir. Gürültü \emph{birikmez} — her adım yalnızca son gürültü
+gerçekleşmesini trimler. Pratik sonuç: nihai iptal derinliği doğrudan
+polarimetre istatistiğiyle ölçeklenir; daha uzun spin ölçümü tabanı
+orantılı düşürür.
+
+\textbf{Kanal B — trim aktüasyon hatası (BPM-referanslı tümsek senaryosu).}
+Trimler mekanik kuadrupol kaydırıcılarla uygulanırsa BPM'ler hiç devreye
+girmez. Alternatif olarak trim, BPM okumalarına referanslı bir kapalı
+yörünge tümseğiyle gerçekleştirilirse, statik BPM ofseti $\sigma_b$
+tümseğin $k$'inci harmonik genliğine $b_k\approx\sigma_b/\sqrt{24}$
+büyüklüğünde hata bindirir; $\sigma_b=\SI{100}{\micro\meter}$ için
+$b_3\approx\SI{20}{\micro\meter}$ — bu, hesaplanan trim genliğinin
+($6{,}7~\mu$m) üç katıdır. Simülasyonda ilk trime bu hata kasıtlı olarak
+eklendi:
+
+\begin{table}[h]
+\centering
+\caption{Kanal B: ilk trime $b_3=\SI{20}{\micro\meter}$ statik aktüasyon
+hatası eklenmiş döngü. Sonraki adımlar artımsal (diferansiyel)
+aktüasyonla uygulanır; statik ofset artımda iptal olur.}
+\label{tab:trim-bpm}
+\begin{tabular}{ccc}
+\toprule
+adım & $dS_y/dt$ [rad/s] & $f_0$'a göre \\
+\midrule
+0 & $-1{,}508\times10^{-4}$ & --- \\
+1 & $-4{,}507\times10^{-4}$ & $3{,}0\times$ \emph{kötüleşme} \\
+2 & $+2{,}55\times10^{-11}$ & $5{,}9\times10^{6}\times$ bastırma \\
+3 & $+2{,}85\times10^{-12}$ & $5{,}3\times10^{7}\times$ bastırma \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Adım~1'deki ölçülen kötüleşme ($-4{,}507\times10^{-4}$) kuramsal değeri
+($c_3 b_3 = -4{,}5\times10^{-4}$) birebir doğrular. Kritik nokta statik
+hatanın \emph{kendini ele vermesidir}: döngü adım~1'de büyüyen sinyali
+ölçer ve adım~2'de artımsal trimle temizler — artımsal aktüasyonda statik
+ofset farkta iptal olur. Kalıcı hasar yoktur; maliyet bir ek ölçüm-trim
+turudur.
+
+\textbf{Özet.} BPM ofseti ve gürültüsü trim yönteminin etkinliğini
+\emph{sınırlamaz}: ölçüm gürültüsü kanalında taban polarimetre
+istatistiğidir ve uzun ölçümle düşer; aktüasyon kanalında statik hatalar
+döngünün kendini onarma özelliğiyle temizlenir. Bu, BPM ofsetinin baskın
+sistematik olduğu yörünge-rekonstrüksiyon yaklaşımıyla keskin bir
+karşıtlık oluşturur ve iki yöntemin tamamlayıcılığını güçlendirir:
+rekonstrüksiyon hizalama hatasının \emph{tanısını}, trim döngüsü ise
+BPM'lerden bağımsız \emph{tedavisini} sağlar.
+
 %==============================================================
 \section{Tartışma ve sonraki çalışmalar}
 \label{sec:tartisma}
