@@ -609,6 +609,54 @@ turu → sahte EDM ~1000× bastırılır, desen bilgisi ve yörünge
 rekonstrüksiyonu gerekmeden. Daha derine inmek için tek gereken daha uzun
 ölçüm (daha düşük dSy/dt tabanı).
 
+### 12.7 Gerçekçi koşul: COD'ye oturtma olmadan (CO=False) — kesin sonuçlar
+
+**Dosyalar:** `test_b_trim_realistic.py`, `test_b_mode_map_cofalse.py`,
+`test_b_ck_cofalse.json`, `test_b_mode_map_cofalse.json`
+
+Kick ile COD'ye oturtmanın pratik olmadığına karar verildiğinden
+(injection_kick_raporu.md), tüm trim makinesi gerçekçi koşula taşındı:
+parçacık **eksenden fırlatılır**, kapalı yörünge hiç aranmaz. Betatron
+salınımı ölçümün doğal parçasıdır. Sonuçlar idealize koşuldan **daha iyi**:
+
+**c_k tablosu (CO=False, k=1..12):** işaret yapısı aynen korunur
+(k=1,2 pozitif; k≥3 negatif), değerler ~6 mertebe büyüktür çünkü gözlenebilir
+artık betatron×misalignment kuplajının sürdüğü toplam dSy/dt'dir:
+
+| k | c_k [rad/s/m] | | k | c_k [rad/s/m] |
+|---|---|---|---|---|
+| 1 | +23.46 | | 7 | −1.477 |
+| 2 | +88.80 | | 8 | −0.983 |
+| 3 | −22.54 | | 9 | −0.683 |
+| 4 | −7.703 | | 10 | −0.502 |
+| 5 | −3.937 | | 11 | −0.405 |
+| 6 | −2.324 | | 12 | −0.374 |
+
+**Tam doğrusallık:** k=2'de A=5/10/20 μm → f/A yayılımı **%0.0**.
+Boş kafes tabanı tam 0 (eksen = ideal kafesin kapalı yörüngesi).
+
+**Tam evrensellik:** c_k üç arka planda (boş / seed-7 / seed-21) ölçüldü:
+tüm k'larda oran **1.000**, korelasyonlar **1.0000**, bağıl RMS sapma
+**%0.00**. CO=True'da görülen %3–10 sapmanın kaynağı fizik değil,
+Newton kapalı-yörünge bulucusunun sayısal gürültüsüymüş. CO=False
+gözlenebiliri dy'de **tam lineerdir** → süperpozisyon kesin geçerli.
+
+**Trim döngüsü (taze desen seed-99, f0 = −1.508×10⁻⁴):**
+
+| adım | kol A (k=3) | bastırma | kol B (k=3+4) | bastırma |
+|---|---|---|---|---|
+| 1 | −7.7×10⁻¹² | **2.0×10⁷×** | −8.0×10⁻¹² | 1.9×10⁷× |
+| 2 | +3.6×10⁻¹³ | 4.2×10⁸× | −9.5×10⁻¹³ | 1.6×10⁸× |
+| 3 | +1.2×10⁻¹² | taban | +1.1×10⁻¹² | taban |
+
+**Tek atışta 2×10⁷× bastırma** (CO=True'da 22–31× idi); 2. adım eğim-fit
+tabanına (~10⁻¹²) iner. Trim bütçesi 6.7–10 μm.
+
+**Açık soru:** trim, tek bir fırlatma koşulunun (eksen) dSy/dt'sini
+sıfırlar. Farklı başlangıç koşullu parçacıklar için c_k(fırlatma)
+katsayıları farklı olabilir → demet ortalamasında artık ne kadar?
+(Sonraki test adayı.)
+
 ---
 
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*

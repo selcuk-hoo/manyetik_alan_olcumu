@@ -650,10 +650,16 @@ kafese bilinçli olarak eklenen küçük harmonik ``trim''lerle doğrudan
 iptal edilebilir mi? Aşağıda gösterileceği üzere yanıt olumludur ve ortaya
 çıkan yöntem, hizalama desenini bilmeyi \emph{gerektirmeyen}, yalnızca
 spin tabanlı $dS_y/dt$ ölçümüne dayanan bir ölç--trimle döngüsüne
-indirgenebilmektedir. Bu bölümdeki tüm simülasyonlar üniform
+indirgenebilmektedir. Tüm simülasyonlar üniform
 $G=\SI{0.2}{\tesla\per\meter}$ FODO kafesinde (48 kuadrupol,
-$Q_y\approx2{,}68$), kapalı-yörünge fırlatma koşulunda (CO=True) ve
-$T=\SI{0.5}{\milli\second}$ spin takibiyle yapılmıştır.
+$Q_y\approx2{,}68$) yapılmıştır. Yöntem önce idealize kapalı-yörünge
+fırlatma koşulunda (CO=True, $T=\SI{0.5}{\milli\second}$;
+Bölüm~\ref{sec:trim-mantik}--\ref{sec:trim-iteratif}) geliştirilmiş,
+ardından gerçekçi koşulda --- parçacık eksenden fırlatılır, kapalı
+yörünge hiç aranmaz/oturtulmaz (CO=False, $T=\SI{1}{\milli\second}$;
+Bölüm~\ref{sec:trim-gercekci}) --- doğrulanmıştır. Aşağıda görüleceği
+üzere gerçekçi koşulda yöntem idealize koşuldan \emph{daha iyi} çalışır:
+gözlenebilir tam doğrusal hale gelir ve tek ölçüm-trim turu yeterli olur.
 
 \subsection{Çalışma mantığı: rezonans işaret kuralı ve doğrusallık}
 \label{sec:trim-mantik}
@@ -888,6 +894,71 @@ Bölüm~\ref{sec:tartisma}'da önerilen ``$dS_y/dt=0$ tarama stratejisi''nin
 somutlaşmış hâlidir: harmonik genlik geri çatımı, BPM kalibrasyonu ve
 yörünge rekonstrüksiyonu döngünün hiçbir adımında gerekmez; bunlar yalnızca
 $c_k$ kalibrasyonunun bağımsız doğrulamasında rol oynar.
+
+\subsection{Gerçekçi koşul: kapalı yörüngeye oturtma olmadan}
+\label{sec:trim-gercekci}
+
+Önceki alt bölümlerde parçacık, betatron kirlenmesinden arınmış seküler
+sahte EDM'yi izole etmek için kapalı yörünge üzerinde fırlatılmıştı.
+Ancak ayrı bir çalışmada gösterildiği üzere bu koşul gerçek deneyde
+uygulanabilir değildir: tek bir injection kick yalnızca demet
+ağırlık merkezini oturtabilir, sonlu emittanslı demetin her parçacığı
+kendi betatron genliğiyle salınır ve mikron-altı oturtma toleransı
+pratikte erişilemez. Bu nedenle tüm trim makinesi gerçekçi koşulda
+yeniden sınanmıştır: parçacık \emph{eksenden} fırlatılır, kapalı yörünge
+hiç aranmaz ve betatron salınımı ölçümün doğal parçasıdır.
+
+Bu koşulda gözlenebilir, kapalı-yörünge bozulmasının sürdüğü toplam
+$dS_y/dt$'dir; betatron$\times$hizalama kuplajı baskın bileşendir ve
+hizalama vektöründe \emph{tam doğrusaldır}. Sayısal sonuçlar bunu kesin
+biçimde doğrular:
+
+\begin{table}[h]
+\centering
+\caption{CO=False (eksenden fırlatma) mod katsayıları, $k=1\ldots12$.
+Aliasing özdeşliği ($c_k=c_{24-k}$, baz vektörlerinin eşitliği) nedeniyle
+$k>12$ taranmamıştır. İşaret yapısı CO=True ile aynıdır; mutlak değerler
+betatron kuplajı baskın olduğundan $\sim$6 mertebe büyüktür.}
+\label{tab:ck-cofalse}
+\begin{tabular}{cc|cc}
+\toprule
+$k$ & $c_k$ [rad/s/m] & $k$ & $c_k$ [rad/s/m] \\
+\midrule
+1 & $+23{,}46$ & 7  & $-1{,}477$ \\
+2 & $+88{,}80$ & 8  & $-0{,}983$ \\
+3 & $-22{,}54$ & 9  & $-0{,}683$ \\
+4 & $-7{,}703$ & 10 & $-0{,}502$ \\
+5 & $-3{,}937$ & 11 & $-0{,}405$ \\
+6 & $-2{,}324$ & 12 & $-0{,}374$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{Tam doğrusallık:} $k=2$ için $A=5/10/20~\mu$m
+    taramasında $f/A$ yayılımı $\%0{,}0$ ölçülmüştür; boş kafes tabanı
+    tam sıfırdır (eksen, ideal kafesin kapalı yörüngesidir).
+  \item \textbf{Tam evrensellik:} $c_k$ vektörü üç arka planda (boş,
+    seed-7, seed-21; RMS \SI{10}{\micro\meter}) ölçülmüş; tüm modlarda
+    oran $1{,}000$, korelasyonlar $1{,}0000$, bağıl RMS sapma
+    $\%0{,}00$ bulunmuştur. Geriye dönük bakıldığında, CO=True
+    koşulundaki $\%3$--$10$ sapmanın kaynağı fizik değil, kapalı-yörünge
+    Newton bulucusunun sayısal gürültüsüdür.
+  \item \textbf{Tek atışta iptal:} kalibrasyonun hiç görmediği taze
+    rastgele desende ($f_0=-1{,}508\times10^{-4}$~rad/s) tek ölçüm-trim
+    turu artığı $-7{,}7\times10^{-12}$~rad/s'ye indirir —
+    $\mathbf{2{\times}10^7}$ \textbf{kat bastırma} (CO=True'da aynı adım
+    $22$--$31\times$ vermekteydi). İkinci tur eğim-fit tabanına
+    ($\sim10^{-12}$~rad/s) iner. Trim bütçesi $6{,}7$--$10~\mu$m'dir.
+\end{itemize}
+
+Sonuç pratik açıdan güçlüdür: oturtma varsayımının kaldırılması yöntemi
+zayıflatmak şöyle dursun, gözlenebiliri tam doğrusal hale getirerek
+\emph{tek turda} derin iptale olanak tanır. Açık kalan soru, trimin tek
+bir fırlatma koşulu (eksen) için sıfırladığı $dS_y/dt$'nin, farklı
+başlangıç koşullu parçacıklardan oluşan gerçek demet ortalamasında ne
+kadar artık bıraktığıdır; $c_k$'nin fırlatma koşuluna bağımlılığı sonraki
+çalışmanın konusudur.
 
 %==============================================================
 \section{Tartışma ve sonraki çalışmalar}
