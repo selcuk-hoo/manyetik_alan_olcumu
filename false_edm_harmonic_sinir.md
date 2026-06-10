@@ -527,6 +527,54 @@ Bulgular:
 hesaplanan trim ile) evrensellik testi; ardından k_targets={1,2,3} +
 bölüşmüş trim stratejisinin BPM gürültüsü altındaki sağlamlığı.
 
+### 12.5 Mod haritası ve evrensellik: c_k (k=1..24) üç arka planda
+
+**Dosyalar:** `test_b_mode_map.py`, `test_b_mode_map.json`,
+`test_b_mode_map.png`
+
+Tasarım: lineer sistemde 24×24 telafi haritası M[k,k'] = −c_k/c_k'
+**rank-1**'dir — tüm harita tek c_k vektöründen türetilir. Bu yüzden
+evrensellik, c_k vektörünü üç arka planda ölçüp karşılaştırarak test edildi
+(576 çift simülasyonu yerine 64 simülasyon):
+
+- boş arka plan (c_bare),
+- seed-7 rastgele 10 μm RMS hizalama üzerinde (c_eff^A),
+- seed-21 üzerinde (c_eff^B).
+
+Prob: her k için +10 μm cos modu; c_k^eff = [f(P + prob) − f(P)]/A.
+
+**Bulgu 1 — Aliasing simetrisi (yeni):** c_k = c_{24−k} **tam olarak**
+(c₁=c₂₃, c₂=c₂₂=+1.974×10⁻⁴, c₃=c₂₁, …). Nedeni: N=24 FODO hücresinde
+cos(2πkn/24) = cos(2π(24−k)n/24) — k ve 24−k modları quad konumlarında
+**aynı fiziksel desendir**. Bağımsız mod sayısı 24 değil **12'dir**
+(k=1..12; k=24 antisimetrik-DC eşleniği, c₂₄=+1.8×10⁻⁵). Spektrum k=12
+etrafında simetrik bir "V" çizer: |c_k| minimumu k≈12'de (~1.8×10⁻⁶).
+
+**Bulgu 2 — Evrensellik:**
+
+| metrik | değer |
+|---|---|
+| korelasyon c_bare ↔ c_eff(A) | 0.9999 |
+| korelasyon c_eff(A) ↔ c_eff(B) | 0.9984 |
+| bağıl RMS sapma (A−B) | %7.2 |
+
+Baskın modlarda (k=1..4, sahte EDM'nin ~%95'ini taşıyanlar) sapma %3–10
+bandında. Büyük bağıl sapmalar yalnızca |c_k| ~ 3×10⁻⁶ olan zayıf modlarda
+(k=8,9,15,16) görülür — bu modlarda prob yanıtı (~3×10⁻¹¹ rad/s) taban
+çıkarma/eğim-fit gürültüsü mertebesindedir; sapma fizik değil ölçüm tabanıdır.
+
+**Sonuçlar:**
+
+1. Telafi haritası **seed'den bağımsızdır**: boş arka planda ölçülen c_k
+   vektörü, herhangi bir rastgele hizalama deseninin üzerinde %3–10
+   doğrulukla geçerlidir → trim reçetesi makine konfigürasyonuna değil
+   kafese (tune'a) aittir; bir kez kalibre edilir.
+2. %3–10'luk katsayı belirsizliği tek atışta bastırmayı ~10–30× ile
+   sınırlar; daha derini (468× gibi) için ölçtükten sonra **iteratif trim**
+   gerekir (ilk trim → kalan dSy/dt ölç → ikinci küçük trim).
+3. Harita çalışmalarında k>12 kullanmaya gerek yok — alias. Telafi bütçesi
+   k=3..12 negatif bandına dağıtılabilir; k=12 civarı en zayıf kaldıraç.
+
 ---
 
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*
