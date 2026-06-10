@@ -92,17 +92,35 @@ yerel kapalı-yörünge konumu $y_\mathrm{co}(s_j)$ ile orantılıdır:
 burada $K_j$ ve $L_j$ $j$'inci kuadrupolün efektif gradyanı ve uzunluğu,
 $y_\mathrm{co}(s_j)$ kapalı-yörünge konumu ve $\Delta y_j$ mekanik kaçıklığıdır.
 $y_\mathrm{co}$ da $\Delta y_j$'ye bağlı olduğundan bu ifade $\Delta q$'da
-gerçekte ikinci dereceye kadar gider; ancak küçük kaçıklıklar için lineer
-yaklaşım yeterlidir ve $\Delta q$'nun Fourier bileşenleri cinsinden ayrışır.
+teorik olarak ikinci dereceye kadar gider.
+İnce-lens (thin-lens) FODO örgüsünde birinci-derece terim tam olarak sıfırlanır:
+gradyan modulasyonu $G_j=(-1)^j G_0$ ile antisimetrik yörünge bileşeni
+$y_{\mathrm{co},j}\propto(-1)^j\cos(\cdots)$ çarpıldığında $(-1)^{2j}=1$ elde
+edilir ve halka ortalaması kapanır.
+Buna karşın kalın-lens simülasyonunda ($L_\mathrm{quad}=\SI{0{,}4}{\meter}$) bu
+iptal yaklaşıktır: parçacık quad içinde hareket ettiğinden konumu değişir ve tam
+iptal bozulur. Sonuç olarak lineer katkı baskın olarak kalır; sayısal testlerde
+$A_k=5$--$20\,\mu$m aralığında $F(2A)/F(A)\approx2{,}1$ ölçülmüş olup bu değer
+kuadratik ölçeğin ($F(2A)/F(A)=4{,}0$) değil lineer ölçeğin ($2{,}0$) geçerli
+olduğunu doğrulamaktadır.
 $k$'ıncı Fourier bileşeni $\hat{a}_k$ ise Denklem~(\ref{eq:spinrate})'e
-$\|\hat{a}_k\|$ ile orantılı katkı verir.
-Önemli olan, bu katkının $k=2$
-Fourier harmonik bileşeni için ($N_\mathrm{hücre}=24$ FODO hücreli halkada,
+büyüklük olarak $\|\hat{a}_k\|$ ile orantılı katkı verir.
+Önemli olan, $k=2$
+Fourier harmonik bileşeninin ($N_\mathrm{hücre}=24$ FODO hücreli halkada,
 toplam $N_Q=2N_\mathrm{hücre}=48$ kuadrupol, düşey tune $Q_y\approx2{,}68$)
-diğer tüm bileşenlerden bir mertebe fazla olmasıdır;
+diğer tüm bileşenlerden büyüklük olarak fazla olmasıdır;
 bunun nedeni $k=2$'nin rezonansa yakınlığıdır (bkz. Bölüm~\ref{sec:fourier}).
-Şekil~\ref{fig:falseedm}'de görüldüğü gibi $dS_y/dt$ spektrumu $k=2$'de keskin bir
+Şekil~\ref{fig:falseedm}'de görüldüğü gibi $|dS_y/dt|$ spektrumu $k=2$'de keskin bir
 tepe sergilemekte, $k=1$'i $2{,}9$ kat, $k=3$'ü $2{,}2$ kat aşmaktadır.
+Bunun ötesinde, rezonans işaret yapısı gereği $k < Q_y$ modları (bu halkada
+yalnızca $k=2$) \emph{pozitif}, $k > Q_y$ modları ($k=3,4,\ldots$) ise
+\emph{negatif} sahte EDM üretir.
+Sayısal doğrulama: $A=\SI{10}{\micro\meter}$ için $k=2$: $+1{,}40\times10^{-9}$~rad/s,
+$k=3$: $-6{,}3\times10^{-10}$~rad/s, $k=4$: $-1{,}9\times10^{-10}$~rad/s.
+Bu rezonans işaret yapısı, rassal misalignment desenlerinde $k=2$ ve $k=3$
+katkılarının kısmi iptalle birbirini bastırdığını ima eder; öte yandan sistemli
+$k=2$ misalignment bu doğal bastırımdan yararlanamaz ve en tehlikeli senaryoyu
+oluşturur.
 
 Bu çalışmadaki tüm sayısal simülasyonlar, Omarov et al.~\cite{omarov}'deki
 kapsamlı pEDM halka tasarımını esas almaktadır: $N_\mathrm{hücre}=24$ FODO
@@ -123,10 +141,14 @@ stroboskopik spin takibi, $t_2=\SI{2}{\milli\second}$. \\
 $k=2$'de belirgin tepe; kapalı-yörünge genliği (ikincil eksen) de $k=2$'de tepe.
 \vspace{2cm}}}
 \caption{Sahte-EDM oranı $|dS_y/dt|$ ile kapalı-yörünge genliğinin $k$'ya göre taraması.
-Her ölçümde yalnızca ilgili $k$ bileşeni sıfırdan farklıdır ($A=\SI{10}{\micro\meter}$).
-Oran $k=2$'de tepe yapar: $k=2$'de $dS_y/dt = 1{,}42\times10^{-9}$~rad/s;
+Her ölçümde yalnızca ilgili $k$ bileşeni sıfırdan farklıdır ($A=\SI{10}{\micro\meter}$,
+kapalı-yörünge fırlatma koşulu).
+$|dS_y/dt|$, $k=2$'de tepe yapar: $k=2$'de $dS_y/dt = +1{,}42\times10^{-9}$~rad/s;
 $k\ge9$'da kapalı-yörünge genliği $<\SI{3}{\micro\meter}$'e inerek $\lesssim\!2\%$
-düzeyinde kalmaktadır.}
+düzeyinde kalmaktadır.
+Rezonans işaret yapısı: $k=3$ ($-6{,}3\times10^{-10}$~rad/s) ve $k=4$ ($-1{,}9\times10^{-10}$~rad/s)
+negatif değer üretir çünkü bu modlar $Q_y\approx2{,}68$ rezonansının üzerinde kalmaktadır;
+bunların büyüklükleri resimde doğru gösterilmiş olmakla birlikte işaretleri $k=2$'nin tersidir.}
 \label{fig:falseedm}
 \end{figure}
 
@@ -249,10 +271,14 @@ Bununla birlikte \textit{ölçüm stratejisi} açısından $k=2$'ye odaklanmak
 güçlü bir gerekçeye dayanmaktadır:
 
 \begin{enumerate}
-  \item Şekil~\ref{fig:falseedm}'de gösterildiği gibi sahte-EDM oranı $k=2$'de
-    keskin biçimde tepe yapar; diğer bileşenlerin katkısı en az bir mertebe
-    küçüktür. Sonraki en büyük bileşen $k=1$'dir ve yaklaşık dörtte biri
-    kadardır.
+  \item Şekil~\ref{fig:falseedm}'de gösterildiği gibi $|dS_y/dt|$ $k=2$'de
+    keskin biçimde tepe yapar.
+    Kritik nüans: $k=3$ ve $k=4$ modları negatif işaretle katkıda bulunur
+    ($Q_y\approx2{,}68$ rezonansının üzerinde olduklarından); dolayısıyla bu modlar
+    bastırılmadan $k=2$'nin kapatılması sahte EDM'yi azaltmak yerine büyütebilir.
+    Bu rezonans işaret yapısı, düzeltme stratejisinin \emph{$k=2$ yörüngesini
+    sıfırlamak} yerine \emph{spin-türetimli $dS_y/dt$ değerini sıfırlamak}
+    biçiminde kurulmasını gerektirmektedir.
   \item $k=2$ bileşeni tespit edildikten sonra halka boyunca dağılmış
     dipol düzeltici mıknatıslarıyla bastırılabilir; bu düzeltme planının
     tasarımı ayrı bir çalışma konusudur ve burada ele alınmamaktadır.
@@ -462,9 +488,12 @@ yetersiz kaldığı gürültülü koşullarda CLEAN'i üstün kılar.}
 
 Alan kaynağı yalnızca kuadrupol hizalama hatalarıysa, $k$'ıncı Fourier
 bileşenini tespit etmek tüm o $k$'ya karşılık gelen kuadrupol kaçıklıklarını
-tespit etmeye eşdeğerdir. Rezonans $k=2$--$3$ civarında olduğundan, yüksek
-$k$'ları kabaca, $k=1,2,3$'ü ise hassas biçimde bilmek yeterlidir: sahte
-EDM'ye katkı $k\ge4$'ten giderek azalmaktadır (Şekil~\ref{fig:falseedm}).
+tespit etmeye eşdeğerdir. Rezonans işaret yapısı dikkate alındığında, yüksek
+$k$'ların büyüklük olarak küçük katkısını kabaca bilmek, $k=1,2,3$'ü ise
+hassas biçimde bilmek yeterlidir: $|dS_y/dt|$ büyüklüğü $k\ge4$'ten giderek
+azalmaktadır (Şekil~\ref{fig:falseedm}), ancak $k=3$ ve $k=4$ modlarının
+\emph{negatif} işareti, $k=2$'den bağımsız olarak bu modların düzeltme
+stratejisine dahil edilmesini gerektirmektedir.
 
 %==============================================================
 \section{Monte Carlo sistematik hata analizi}
@@ -621,6 +650,14 @@ tam hizalama vektörünü geri çatmak değil, tek fiziksel gözlenebiliri
 ($k=2$ genliği ile birlikte $k=1$ ve $k=3$) ölçmek.
 
 \textbf{Yöntemin operasyonel sınırı.}
+Bu çalışmadaki tüm spin simülasyonları kapalı-yörünge fırlatma koşulunda
+(CO=True: parçacık kapalı yörünge üzerinden başlatılır) gerçekleştirilmiştir;
+bu koşul, halka boyunca dağıtık orbit-korrektör sistemiyle sağlanan denge yörüngesine
+karşılık gelir. Bu koşul sağlanmadan (CO=False) yürütülen ölçümlerde betatron
+kirlenmesi baskın hale gelir ve sahte EDM sinyali $\sim\!10^{-4}$~rad/s seviyesine
+çıkarak hedef $\sim\!10^{-9}$~rad/s'nin dört mertebe üzerinde bulunur;
+bu rejimde yalnızca $k=1,2,3$ düzeltmesi etkisizdir çünkü $k=4\ldots10$ modları
+eşit ağırlıkla katkıda bulunmaktadır.
 Bu yöntem $k=1,2,3$ harmonik genliklerini \emph{ölçer}; bunların düzeltici
 mıknatıslarla bastırılmasını ise kapsamaz. Pratikte ölçüm-düzeltme döngüsü
 tekrarlanacaktır: $k=2$ düzeltildikten sonra biriken artık harmonik, bir
@@ -660,6 +697,15 @@ Aşağıdaki konular sonraki çalışmalar için açık kalmaktadır:
     Ölçülen $\Delta q_{k=2}$'nin yanlış-EDM fonksiyoneline
     $\Phi_\mathrm{spin}\propto\sum_j K_jL_j(y_\mathrm{KY}(s_j)-\Delta y_j)$
     oranlanması ve kapatma toleransının tanımlanması gerekmektedir.
+  \item \textbf{$dS_y/dt = 0$ tarama stratejisi.}
+    Rezonans işaret yapısı ($k=2$ pozitif, $k=3$ negatif) ve lineer ölçekleme
+    ($dS_y/dt \propto A_k$) bir arada düşünüldüğünde, pratik optimizasyon hedefi
+    ``$k=2$ yörüngesini sıfırlamak'' yerine ``spin ölçümüyle $dS_y/dt=0$ noktasını
+    bulmak'' olarak yeniden çerçevelenebilir.
+    $k=2$ orbit korrektör genliğini tarayarak $dS_y/dt$'nin sıfır geçişini yakalamak,
+    $k=3$ ve $k=4$ katkılarını örtük biçimde hesaba katar.
+    Bu strateji 5--7 spin ölçümüyle uygulanabilir ve hesaplanan harmonik genliklerinden
+    bağımsız çalışır.
 \end{itemize}
 
 %==============================================================

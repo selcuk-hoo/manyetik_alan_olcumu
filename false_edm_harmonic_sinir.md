@@ -281,6 +281,119 @@ almıyorsa bunu açıkça sınırlamak gerekmektedir.
 
 ---
 
+## 10. Üç Açık Sorunun Sayısal Yanıtı <a name="10-uc-soru"></a>
+
+> Tüm sonuçlar `test_cross_correlation.py` çıktısından alınmıştır.
+> CO=True simülasyonları: `A = 10 μm`, `t2 = 0.5 ms`, `co_turns = 24`.
+
+### 10.1 CO=True Geçerliliği: Tek Kick Yeterli mi?
+
+| Parametre | CO=True | CO=False |
+|---|---|---|
+| k=2, A=10μm | +1.384e-9 rad/s | +1.458e-4 rad/s |
+| Oran | 1 | **1.1 × 10⁵ ×** |
+
+**CO=True'nun gerçek hızlandırıcıda karşılığı:** Ring boyunca dağıtık BPM
+ölçümü + harmonik analiz + korrektör sistemi. Mevcut yörünge,
+korrektörler aracılığıyla kapalı yörüngeye yaklaştırılır → CO=True koşulu
+pratik olarak sağlanır.
+
+**Tek noktada kick:** Tek bir korrektör kick'i, yalnızca bir harmonik
+bileşeni kısmen değiştirir. Ring'in geri kalanındaki betatron amplitüdü
+azalmaz. CO=True rejimi elde etmek için **en az `2N` korrektör** (N =
+düzeltilecek mod sayısı) gerekir. g-2 deneyindeki "CBO kick" analog değildir:
+buradaki bozunum statik kapalı yörünge sapmasıdır (serbest salınım değil).
+
+### 10.2 Çapraz Korelasyon Matrisi: İşaret Bulgusu
+
+3×3 ölçüm matrisi (k=2, 3, 4 cos bileşenleri, `A = 10 μm`):
+
+```
+         k=2           k=3           k=4
+k=2  +1.384e+01  -3.158e+00  -7.888e-01
+k=3  -3.158e+00  -6.160e+00  -9.115e-01
+k=4  -7.888e-01  -9.115e-01  -1.926e+00
+```
+
+**Kritik bulgu:** köşegenler `c_33 = -6.16`, `c_44 = -1.93` **negatif**.
+n_iter=2, co_turns=36 ile doğrulanan değerler:
+
+| Mod | dSy/dt (A=10μm) | CO ofseti | İşaret |
+|---|---|---|---|
+| k=2 | +1.401e-9 rad/s | 0.198 mm | **Pozitif** |
+| k=3 | -6.320e-10 rad/s | 0.088 mm | **Negatif** |
+| k=4 | -1.951e-10 rad/s | 0.028 mm | **Negatif** |
+
+**Fiziksel açıklama:** Betatron tune'u Q_y ≈ 2.68'dir.
+
+- k=2: Q_y > 2 → rezonansın **altında** → pozitif spin döndürme
+- k=3: Q_y < 3 → rezonansın **üstünde** → negatif spin döndürme
+- k=4: Q_y < 4 → rezonansın üstünde → negatif, daha küçük
+
+Bu, klasik rezonans geçiş işareti dönüşümüdür.
+k = Q_y ≈ 2.68'in altındaki modlar pozitif, üstündekiler negatif false
+EDM üretir.
+
+**Rassal hizalama neden küçük?** k=2 (pozitif) ve k=3, k=4 (negatif)
+katkıları kısmen birbirini götürür:
+
+$$\langle dS_y/dt \rangle_{\text{rassal}} \approx \frac{1}{24}\left[c_2 + c_3 + c_4 + \ldots\right] \cdot A^2 \ll c_2 \cdot A^2$$
+
+Yani rassal hizalamada ~65× bastırım, çoğunlukla modlar arası işaret
+iptali ile açıklanır; bu da k=2 tek başına baskın (koheren) durumun
+özellikle tehlikeli olduğunu doğrular.
+
+**Genlik skalama testi** (§10.3): `dSy/dt ∝ A^1` — lineer.
+
+| Mod | A=5μm | A=10μm | A=20μm | F(2A)/F(A) |
+|---|---|---|---|---|
+| k=2 | 6.32e-10 | 1.39e-9 | 3.09e-9 | **2.21** |
+| k=3 | -2.96e-10 | -6.23e-10 | -1.23e-9 | **2.10, 1.97** |
+
+Lineer ölçek = 2.0, kuadratik = 4.0; ölçülen ≈ 2.1 → **lineer baskın.**
+
+**Fiziksel kaynak:** İnce-lens (thin-lens) teorisinde birinci-dereceden
+sıfırlama tam geçerlidir. Simülasyonda kullanılan kalın-lens (thick-lens,
+$L_{\text{quad}} = 0.4$ m) quaderinde partikülün konumu quad içinde değişir;
+bu değişim sıfır-iptal koşulunu hafifçe bozar → küçük ama ölçülebilir
+birinci-derece katkı:
+$$\frac{dS_y}{dt} \approx c_k^{(1)} \cdot A_k + c_k^{(2)} \cdot A_k^2, \quad c^{(1)} \gg c^{(2)}\cdot A$$
+
+### 10.3 Optimizasyon: Minimum False EDM Konfigürasyonu
+
+Özdeğer ayrışımı:
+
+| Özdeğer λ | Özvektör (k2, k3, k4) | Fiziksel anlam |
+|---|---|---|
+| **-6.86** s⁻¹m⁻² | [+0.16, **+0.97**, +0.20] | k=3 baskın → negatif |
+| -1.74 s⁻¹m⁻² | [+0.01, -0.21, +0.98] | k=4 baskın → negatif |
+| **+14.35** s⁻¹m⁻² | [-0.99, +0.15, +0.04] | k=2 baskın → pozitif |
+
+Doğrulama simülasyonu (A=10μm total):
+- Optimal kombinasyon (λ_min özvektörü): ölçülen **-4.14e-10 rad/s**
+  (teorik: -6.86e-10 rad/s) → k=2 tek modundan **3.3× bastırım**
+- En kötü kombinasyon (λ_max): **-1.45e-9 rad/s**
+
+**Pratik optimizasyon stratejisi:**
+
+$dS_y/dt$ fonksiyonu mod katsayılarında yaklaşık LİNEER:
+$$\frac{dS_y}{dt} \approx \sum_k c_k A_k, \quad c_2 > 0,\; c_3 < 0,\; c_4 < 0.$$
+
+Spin ölçümü ile optimizasyon:
+1. Mevcut hizalama deseni için dSy/dt'yi ölç (baseline)
+2. Orbit korrektörüyle k=2 bileşenini tarar: $A_2 \to A_2 - \delta$
+3. dSy/dt'nin sıfır geçişini yakala → $\delta^* = A_2 + (c_3 A_3 + c_4 A_4)/c_2$
+4. Bu noktada $\sum c_k A_k = 0$ → false EDM sıfırlanmış
+
+**Bu k=2'yi mükemmel kaldırmaktan daha iyi bir hedeftir:** hedef k=2
+orbit sıfırı değil, dSy/dt sıfırıdır.
+
+Gerekli spin ölçümü sayısı: k=2 taraması için 5-7 ölçüm yeterli
+(doğrusal fiti bulmak için). Pratikte bu, ring'in bir deney çalışmasına
+karşılık gelir.
+
+---
+
 ---
 
 ## 11. Planlanan Testler: Kick Düzeltmesi ve Harmonik İptal <a name="11-planlanan-testler"></a>
@@ -322,8 +435,8 @@ Hedef: ||y_betatron||² → minimum, N korrektör kullanarak
 
 Kick vektörü `θ*` uygulanmış haldeyken parçacığı başlat ve dSy/dt ölç:
 
-| N_korrektör | Artık |y_CO| [μm] | dSy/dt [rad/s] | CO=True'ya göre oran |
-|-------------|-------|--------------|-----------------|----------------------|
+| N_korrektör | Artık \|y_CO\| [μm] | dSy/dt [rad/s] | CO=True'ya göre oran |
+|-------------|---------------------|-----------------|----------------------|
 | 0 (CO=False) | ~200 | ~10⁻⁴ | 1 |
 | 2 | ? | ? | ? |
 | 4 | ? | ? | ? |
@@ -339,7 +452,7 @@ modların varlığında pratik eşik daha yüksek olabilir.
 
 Adım 1-2'yi `M=50` rassal hizalama deseni üzerinde tekrar et:
 - `quad_dy` ~ N(0, σ=10μm) her kuadrupol için bağımsız
-- Her seferinde aynı N korrektör konumunu kullan (onceden belirlenmiş)
+- Her seferinde aynı N korrektör konumunu kullan (önceden belirlenmiş)
 - dSy/dt dağılımını kaydet
 
 Amaç: kick konumları tek bir (ideal) desene göre seçilmişken, farklı
@@ -386,7 +499,7 @@ Sayısal sıfır geçişini $A_3^*$ ile karşılaştır.
 
 $$\left.\frac{d(dS_y/dt)}{dA_3}\right|_{A_3^*} = c_{23} \cdot A_2$$
 
-Bu eğim biliniyorsa, $\delta A_3 = 1\mu$m pertürbasyonu kaç rad/s hata
+Bu eğim biliniyorsa, $\delta A_3 = 1\,\mu$m pertürbasyonu kaç rad/s hata
 üretir? Tolerans analizi için kritik.
 
 #### Adım 3 — Rassal hizalama deseni ile kararlılık
