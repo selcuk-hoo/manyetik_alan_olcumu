@@ -20,6 +20,8 @@
 7. [k=1,2,3 Düzeltmesinin %30 Etkinliği — Sayısal Kanıt](#7-yuzde30)
 8. [Yatay-Dikey Çapraz Terim (Yeni Bulgu)](#8-capraz-terim)
 9. [Makale Revizyonu İçin Çıkarımlar](#9-makale)
+10. [Üç Açık Sorunun Sayısal Yanıtı](#10-uc-soru)
+11. [Test Sonuçları: Kick Düzeltmesi ve Harmonik İptal](#11-test-sonuclari)
 
 ---
 
@@ -392,4 +394,64 @@ karşılık gelir.
 
 ---
 
-*Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-09*
+## 11. Test Sonuçları: Kick Düzeltmesi ve Harmonik İptal <a name="11-test-sonuclari"></a>
+
+### 11.1 Test A — Kick Sayısı vs False EDM (`test_kick_correction.py`)
+
+**Yöntem:** k=2 cos hizalama (A=10μm) için N equidistant QF korrektör ile
+analitik Courant-Snyder Green fonksiyonu üzerinden en küçük kareler orbit
+düzeltmesi; ardından tam simülasyon ile dSy/dt ölçümü.
+
+**Sayısal sonuçlar (CO=True, T2=5×10⁻⁴ s):**
+
+| N_corr | dSy/dt [rad/s] | Bastırma | CO artık RMS [μm] |
+|---|---|---|---|
+| 0 | 1.38×10⁻⁹ | 1.00 | 9.13 |
+| 2 | 1.18×10⁻⁹ | 0.85 | 5.80 |
+| 4 | 1.16×10⁻⁹ | 0.84 | 4.68 |
+| 8 | 1.21×10⁻⁹ | 0.87 | 1.29 |
+| 12 | 1.16×10⁻⁹ | 0.84 | 0.66 |
+| 24 | 1.18×10⁻⁹ | 0.85 | 0.46 |
+| 48 | ~0 | ~0 | ~0 |
+
+**Ana bulgu:** N=2..24 korrektör orbiti %50-95 azaltır ama false EDM yalnızca
+~%15 düşer. N=48 (tüm quadlar korrektör, yani tam orbit iptali) → sıfır
+false EDM.
+
+**Fiziksel yorum:** Orbit minimizasyonu ve dSy/dt minimizasyonu farklı
+optimizasyon hedefleridir. Orbit düzeltmesi ile elde edilen artık orbit
+$y_{\text{CO}}^{\text{corr}}$ hâlâ k=2 Fourier bileşeni içerir çünkü
+equidistant QF korrektörler k=2 cos ve sin bileşenlerini aynı anda bastıracak
+şekilde konumlandırılmamıştır (N=8 için cos bileşeni erişilebilir, N=4 için
+yalnızca tek bileşen). False EDM için asıl önemli olan kapalı-yörüngenin
+k=2 Fourier spektrum bileşenidir, toplam amplitude değil.
+
+**Sonuç:** Yörünge tabanlı düzeltme yeterli değildir; spesifik harmonik
+hedefleme (Test B, harmonic cancellation) veya tam yörünge iptali (N=48)
+gereklidir.
+
+### 11.2 Test B — Harmonik Kombinasyon ile False EDM İptali
+**Dosya:** `test_harmonic_cancellation.py` (henüz çalıştırılmadı)
+
+k=3 cos modunu A₃ ≈ 22.5 μm ile ekleyerek k=2 kaynaklı false EDM'yi iptal
+etmek. Test A'nın aksine bu yöntem orbiti büyütür ama dSy/dt'yi hedefler.
+Beklenen A₃ taraması: A₂=10μm sabit, A₃ ∈ [−20, +30] μm, sıfır geçişi
+~22.5 μm'de beklenir.
+
+### 11.3 İki Yaklaşımın Karşılaştırması
+
+| Özellik | Kick düzeltmesi (Test A) | Harmonik iptal (Test B) |
+|---|---|---|
+| Hedef | Orbit → 0 | dSy/dt → 0 |
+| Orbit büyüklüğü sonrası | Azalır (N×) | Büyüyebilir |
+| False EDM bastırımı (az korrektörle) | Zayıf (%15) | Kuvvetli (teorik %100) |
+| Tam düzeltme (N=48) | Evet | — |
+| Gürültü sağlamlığı | Yüksek (LSQ) | A₃ hassasiyetine bağlı |
+| Pratik uygulanabilirlik | Karmaşık (çok korrektör) | Basit (1 mod ekle) |
+
+**Önerilen strateji:** Önce harmonik iptal (Test B) ile dSy/dt ≈ 0 noktasını
+bul; ardından yeterli korrektör sayısını Test A sonuçlarından seç.
+
+---
+
+*Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*
