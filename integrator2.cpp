@@ -1,0 +1,757 @@
+// integrator2.cpp — proton EDM storage-ring particle and spin tracker
+//
+// ==============================================================================
+// 6D PROTON EDM SİMÜLASYONU - C++ HESAPLAMA MOTORU (GL4 ENTEGRATÖRÜ)
+// Yazar: Selcuk H.
+//
+// Bu kütüphane, parçacıkların elektromanyetik alanlardaki kuple (coupled) 6D faz
+// uzayı hareketini ve Thomas-BMT denklemine göre spin vektörünün presesyonunu
+// hesaplar. Yüksek kararlılık (faz uzayı hacmi korunumu) için 4. Dereceden
+// Gauss-Legendre (GL4) Simplektik (Symplectic) Entegrasyon yöntemi kullanılır.
+// ==============================================================================
+//
+// Coordinate system (local rotating frame):
+//   X = radial (outward from ring centre)
+//   Y = azimuthal / tangential (along the nominal orbit)
+//   Z = vertical (out of the median plane)
+//
+// After each lattice element the frame is reset so the particle enters the
+// next element with Y ≈ 0 and X ≈ R0 ("rotating-frame" convention).
+//
+// FODO cell layout v2 (6 elements, repeated nFODO times):
+//   elem 0: QF      (focusing quad; QF_MOD for cell 0 if modulated)
+//   elem 1: DRIFT   (driftLen)
+//   elem 2: QD      (defocusing quad)
+//   elem 3: DRIFT   (driftLen)
+//   elem 4: DEFLECTOR (2*Phi_def — full cell bending in one shot)
+//   elem 5: DRIFT   (2*driftLen)
+//
+// Total cell length = 2*quadLen + 4*driftLen + 2*L_def = same as original.
+// All bending is concentrated in a single deflector after the QF-QD pair.
+//
+// Integrator: 4th-order implicit Gauss-Legendre (GL4), symplectic,
+//             4 fixed-point iterations per step.
+// Spin:       Thomas-BMT equation, optional EDM term.
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <cmath>
+#include <cstdio>
+
+extern "C" {
+
+// Physical constants (SI)
+const double C_LIGHT = 299792458.0;       // speed of light [m/s]
+const double M_P     = 1.672621777e-27;   // proton rest mass [kg]
+const double Q_E     = 1.602176565e-19;   // proton charge [C]
+const double G_P     = 1.792847356;       // proton anomalous magnetic moment G = (g-2)/2
+const double EDM_ETA = 1.88e-15;          // proton EDM sensitivity parameter η
+const double M_PROTON_GEV = 0.938272046;  // proton rest mass [GeV/c²]
+
+inline void cross_product(const double* a, const double* b, double* res) {
+    res[0] = a[1]*b[2] - a[2]*b[1];
+    res[1] = a[2]*b[0] - a[0]*b[2];
+    res[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+inline double dot_product(const double* a, const double* b) {
+    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+}
+
+// Local radial deviation: R - R0 for arc elements, X - R0 for straights.
+inline double radial_dev(const double* y, double R0, int elem) {
+    if (elem == 4)
+        return std::sqrt(y[0]*y[0] + y[1]*y[1]) - R0;
+    return y[0] - R0;
+}
+
+// Rotate position, momentum and spin vectors together around the Z-axis by
+// angle theta.  Called after each arc element with theta = -sign*Phi_def to
+// undo the angular advance of the orbit, keeping X ≈ R0 at every element
+// entry (the rotating-frame convention).
+void rotate_all(double* y, double theta) {
+    double X = y[0], Y = y[1];
+    double Px = y[3], Py = y[4];
+    double Sx = y[6], Sy = y[7];
+
+    double cos_th = std::cos(theta);
+    double sin_th = std::sin(theta);
+
+    y[0] = X * cos_th - Y * sin_th;
+    y[1] = X * sin_th + Y * cos_th;
+
+    y[3] = Px * cos_th - Py * sin_th;
+    y[4] = Px * sin_th + Py * cos_th;
+
+    y[6] = Sx * cos_th - Sy * sin_th;
+    y[7] = Sx * sin_th + Sy * cos_th;
+}
+
+// Compute E and B at position r for the given element type.
+//
+// field_params layout (indices):
+//   [0] R0       ring radius [m]
+//   [1] E0       electric field at R0 [V/m]
+//   [2] n        field index (E_r ∝ (R0/R)^n)
+//   [3] B0ver    uniform vertical B [T]
+//   [4] B0rad    uniform radial B [T]
+//   [5] B0long   uniform longitudinal B [T]
+//   [6] quadG1   quadrupole gradient G1 [T/m]
+//   [7] sextK1   sextupole strength K2 [T/m²]
+//   [9] sextSwitch   1 = sextupole on
+//   [19] quadModA    modulation amplitude (type 4 only)
+//   [20] quadModF    modulation frequency [Hz] (type 4 only)
+//   [21] (unused, reserved 0)
+//   [22] (unused, reserved 0)
+//   [23] quadVertOffset per-element vertical quad centre shift [m] (internal runtime override)
+//        "vert" = local-frame y = global-frame Z
+//
+// element_type: 0 = DEFLECTOR, 1 = DRIFT, 2 = QUAD_F, 3 = QUAD_D, 4 = QUAD_F_MOD
+void get_electromagnetic_fields(double t, const double* r, const double* field_params, int element_type, double* E, double* B) {
+    double R0       = field_params[0];
+    double E0       = field_params[1];
+    double n        = field_params[2];
+    double B0ver    = field_params[3];
+    double B0rad    = field_params[4];
+    double B0long   = field_params[5];
+    double quadG1   = field_params[6];
+    double sextK1   = field_params[7];
+    double quadVertOffset = field_params[23];
+
+    double X = r[0], Y = r[1], Z = r[2];
+    double R = std::sqrt(X*X + Y*Y);
+
+    E[0] = 0.0; E[1] = 0.0; E[2] = 0.0;
+    B[0] = 0.0; B[1] = 0.0; B[2] = 0.0;
+
+    if (element_type == 0) {
+        // DEFLECTOR: cylindrical capacitor, hard-edge (no fringe fields).
+        //
+        // Radial electric field with Z-expansion ensuring ∇·E = 0:
+        //   E_r(R,Z) = E0*(R0/R)^n * [1 - (n²-1)/2*(Z/R)² + ...]
+        //   E_Z(R,Z) = E0*(R0/R)^n * [(n-1)*(Z/R) - ...]
+        // For n=1 the series collapses to E_r = E0*R0/R, E_Z = 0 exactly.
+        //
+        // Stray B fields (B0ver, B0rad, B0long) are included for COD studies.
+        double cos_th = X / R;
+        double sin_th = Y / R;
+        double E_r = 0.0, E_z = 0.0;
+        if (R > 1e-6) {
+            if (n == 1.0) {
+                E_r = E0 * R0 / R;
+            } else {
+                double zR  = Z / R;
+                double zR2 = zR * zR;
+                double pow_n = std::pow(R0/R, n);
+                E_r = E0 * pow_n * (1.0 - 0.5*(n*n-1.0)*zR2 + (n*n-1.0)*(n+1.0)*(n+3.0)*zR2*zR2/24.0);
+                E_z = E0 * pow_n * ((n-1.0)*zR - (n*n-1.0)*(n+1.0)*zR2*zR/6.0);
+            }
+        }
+        E[0] = E_r * cos_th;
+        E[1] = E_r * sin_th;
+        E[2] = E_z;
+
+        // Tilt of the equivalent magnetic deflector around the beam axis (s).
+        // Hard-edge model: the field inside the magnet is UNIFORM (fixed direction
+        // and magnitude).  After rotate_all the particle enters each arc with
+        // X≈R0, Y≈0, so the local radial direction ≈ global X.  A tilt φ around
+        // s rotates B_eq·ẑ into the radial plane: ΔB_r = B_eq·sin(φ).
+        // Adding this as a UNIFORM field (no position-dependent cos/sin factors)
+        // ensures ∇·B = 0 so the GL4 symplectic structure is preserved.
+        double p_magic = M_PROTON_GEV / std::sqrt(G_P);  // [GeV/c]
+        double B_eq    = p_magic * 1e9 / (C_LIGHT * R0); // [T]
+        // b_tilt: uniform radial offset (∇·B = 0 preserved).
+        // A tilt φ around s rotates B_eq·ẑ into the radial plane: ΔB_r = B_eq·sin(φ).
+        // After rotate_all the arc entry is always at X≈R0, Y≈0, so the local
+        // radial direction ≈ global X. Adding b_tilt as a constant X-component
+        // (no cos_th/sin_th factors) keeps the field uniform inside the magnet.
+        double b_tilt  = B_eq * std::sin(field_params[26]);
+        B[0] = -B0rad * cos_th + B0long * sin_th + b_tilt;
+        B[1] = -B0rad * sin_th - B0long * cos_th;
+        B[2] = B0ver;
+    } else if (element_type == 2 || element_type == 3) {
+        // QUADRUPOLE (QF or QD, normal — no time modulation).
+        // Misalignment dipole components:
+        //   dy [m] (field_params[23]): vertical offset   → B_r = K1*(Z-dy)
+        //   dx [m] (field_params[25]): radial offset     → B_Z = K1*(dev-dx)
+        // Pure quadrupole (satisfies ∇·B = 0 and ∇×B = 0):
+        //   B_r =  G1 * (Z - dy)
+        //   B_Z =  G1 * (dev - dx)
+        // QF (type 2): G1 > 0 → horizontally focusing, vertically defocusing.
+        // QD (type 3): G1 → -G1 (sign flip).
+        double quadXOffset = field_params[25];
+        double quad_dG_frac = field_params[28];   // fractional gradient deviation (k-mod single-quad)
+        double current_G1 = (element_type == 2) ? quadG1 : -quadG1;
+        current_G1 *= (1.0 + quad_dG_frac);
+        double dev_quad = X - R0 - quadXOffset;
+
+        double vert_rel = Z - quadVertOffset;
+        double B_quad_r = current_G1 * vert_rel;
+        double B_quad_z = current_G1 * dev_quad;
+
+        // Skew quadrupole component from tilt around s-axis (field_params[27]).
+        // A small rotation φ around s mixes the principal axes: the field of a
+        // quad tilted by φ is (to first order in φ):
+        //   B_r += -2 G φ (X - R0 - dx)   ← x → y coupling
+        //   B_Z += +2 G φ (Z - dy)        ← y → x coupling
+        // Factor 2 from the 4-fold symmetry of quadrupole field (sin 2φ ≈ 2φ).
+        double q_tilt = field_params[27];
+        if (q_tilt != 0.0) {
+            B_quad_r += -2.0 * current_G1 * q_tilt * dev_quad;
+            B_quad_z +=  2.0 * current_G1 * q_tilt * vert_rel;
+        }
+
+        // Optional sextupole overlay.  Maxwell's ∇·B = 0 requires:
+        //   B_r =  K2 * dev * Z
+        //   B_Z = (K2/2) * (dev² - Z²)    ← factor 0.5 is mandatory
+        // QF: K2 = +sextK1 ; QD: K2 = -sextK1
+        double sextSwitch = field_params[9];
+        if (sextSwitch > 0.0) {
+            double current_sK1 = (element_type == 2) ? sextK1 : -sextK1;
+            B_quad_r += current_sK1 * dev_quad * vert_rel;
+            B_quad_z += 0.5 * current_sK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
+        }
+
+        B[0] = B_quad_r;
+        B[1] = 0.0;     // no longitudinal field in an ideal quad
+        B[2] = B_quad_z;
+    } else if (element_type == 4) {
+        // QUAD_F_MOD: focusing quad with time-modulated G1 (cell 0 only).
+        // Used for parametric resonance studies.
+        //   G1_eff(t) = G0 * (1 + A_mod * cos(2π * f_mod * t))
+        double quadG0   = field_params[24];
+        double quadXOffset = field_params[25];
+        double A_mod    = field_params[19];
+        double f_mod    = field_params[20];
+        double G1_eff   = quadG0 * (1.0 + A_mod * std::cos(2.0 * M_PI * f_mod * t));
+
+        double dev_quad = X - R0 - quadXOffset;
+        double vert_rel = Z - quadVertOffset;
+        double B_quad_r = G1_eff * vert_rel;
+        double B_quad_z = G1_eff * dev_quad;
+
+        // Same Maxwell-correct sextupole overlay as in type 2/3
+        double sextSwitch = field_params[9];
+        if (sextSwitch > 0.0) {
+            B_quad_r += sextK1 * dev_quad * vert_rel;
+            B_quad_z += 0.5 * sextK1 * (dev_quad*dev_quad - vert_rel*vert_rel);
+        }
+
+        B[0] = B_quad_r;
+        B[1] = 0.0;
+        B[2] = B_quad_z;
+    }
+
+    // ------------------------------------------------------------------------
+    // Harmonic radial magnetic field: B_r(θ) = A_r · cos(N · θ)
+    //
+    //   field_params[21] = A_r    amplitude [T]
+    //   field_params[22] = N      azimuthal harmonic number
+    //   field_params[29] = θ_e   ring azimuth at element entry [rad]
+    //
+    // θ is the current ring azimuth (global horizontal angle):
+    //   • Deflectors: θ = atan2(Y,X) — tracks the actual arc position
+    //   • Straight sections: θ = θ_e — constant throughout the element
+    // The radial direction at θ is (cos θ, sin θ) in global X/Y.
+    // For straight sections B[0] is the local radial (+X) direction.
+    double Br_harm_amp = field_params[21];
+    if (Br_harm_amp != 0.0) {
+        double Br_harm_N = field_params[22];
+        double theta_e   = field_params[29];
+        if (element_type == 0 && R > 1e-6) {
+            double phi  = std::atan2(Y, X);
+            double B_r0 = Br_harm_amp * std::cos(Br_harm_N * phi);
+            B[0] += B_r0 * std::cos(phi);
+            B[1] += B_r0 * std::sin(phi);
+        } else {
+            double B_r0 = Br_harm_amp * std::cos(Br_harm_N * theta_e);
+            B[0] += B_r0;
+        }
+    }
+}
+
+// Equations of motion — right-hand side of the ODE system.
+//
+// State vector y[9]:
+//   y[0..2] = (X, Y, Z)    position [m]
+//   y[3..5] = (Px, Py, Pz) relativistic 3-momentum [kg·m/s]
+//   y[6..8] = (Sx, Sy, Sz) spin unit vector (|S| = 1)
+//
+//   dr/dt = v = p / (γm)
+//   dp/dt = q(E + v×B)                  [Lorentz force]
+//   dS/dt = Ω × S                        [Thomas-BMT precession]
+//
+// Thomas-BMT angular velocity:
+//   Ω = -(q/m){ [G + 1/γ]B - [Gγ/(γ+1)](β·B)β - [G+1/(γ+1)](β×E)/c }
+//       + EDM term (if EDMSwitch = 1)
+//
+// At magic momentum (G = 1/γ²) the MDM term for an on-energy particle in
+// a pure radial electric field vanishes → horizontal spin is "frozen".
+void compute_rhs(double t, const double* y, const double* field_params, int element_type, double* dydt, int dim) {
+    const double* r = &y[0];
+    const double* p = &y[3];
+    const double* s = &y[6];
+
+    double p_sq  = dot_product(p, p);
+    double mc    = M_P * C_LIGHT;
+    double gamma = std::sqrt(1.0 + p_sq / (mc * mc));
+
+    double v[3], beta[3];
+    for (int i = 0; i < 3; ++i) {
+        v[i]    = p[i] / (gamma * M_P);
+        beta[i] = v[i] / C_LIGHT;
+    }
+
+    double E[3], B[3];
+    get_electromagnetic_fields(t, r, field_params, element_type, E, B);
+
+    double v_cross_B[3];
+    cross_product(v, B, v_cross_B);
+
+    double dpdt[3];
+    for (int i = 0; i < 3; ++i)
+        dpdt[i] = Q_E * (E[i] + v_cross_B[i]);
+
+    double EDMSwitch   = field_params[10];
+    double beta_dot_B  = dot_product(beta, B);
+    double beta_dot_E  = dot_product(beta, E);
+    double beta_cross_E[3], beta_cross_B[3];
+    cross_product(beta, E, beta_cross_E);
+    cross_product(beta, B, beta_cross_B);
+
+    double AMU = G_P;
+    double Omega[3];
+    for (int i = 0; i < 3; ++i) {
+        double mdm_term = (B[i] * (AMU + 1.0/gamma))
+                        - (beta[i] * beta_dot_B * AMU * gamma/(gamma+1.0))
+                        - (beta_cross_E[i] * (AMU + 1.0/(gamma+1.0)) / C_LIGHT);
+        double edm_term = 0.0;
+        if (EDMSwitch > 0.0)
+            edm_term = (beta_cross_B[i] + E[i]/C_LIGHT
+                        - beta[i]*beta_dot_E * gamma/(gamma+1.0)/C_LIGHT) * 0.5 * EDM_ETA;
+        Omega[i] = -(mdm_term + edm_term) * (Q_E / M_P);
+    }
+
+    double dsdt[3];
+    cross_product(Omega, s, dsdt);
+
+    for (int i = 0; i < 3; ++i) {
+        dydt[i]   = v[i];
+        dydt[i+3] = dpdt[i];
+        dydt[i+6] = dsdt[i];
+    }
+}
+
+// Single step of the 4th-order implicit Gauss-Legendre (GL4) symplectic
+// integrator.
+//
+// GL4 Butcher tableau (2-stage implicit Runge-Kutta):
+//   c1 = 1/2 - √3/6    a11 = 1/4          a12 = 1/4 - √3/6
+//   c2 = 1/2 + √3/6    a21 = 1/4 + √3/6   a22 = 1/4
+//                       b1  = 1/2          b2  = 1/2
+//
+// The implicit stage equations are solved by 4 fixed-point iterations,
+// starting from the explicit Euler derivative as the initial guess.
+//
+// GL4 preserves symplecticity: phase-space volume is conserved and |S| = 1
+// is maintained to machine precision over millions of turns.
+//
+// Step size h is NOT adaptive — it equals dt from params.json for every step
+// except the last step within each lattice element, which is shortened to
+// land exactly on the element boundary.
+void gl4_step_element(double t, double* y, const double* field_params, int element_type, double h, int dim) {
+    // GL4 nodes and coupling coefficients
+    const double sq3 = std::sqrt(3.0) / 6.0;
+    const double c1  = 0.5 - sq3, c2 = 0.5 + sq3;
+    const double a11 = 0.25, a12 = 0.25 - sq3;
+    const double a21 = 0.25 + sq3, a22 = 0.25;
+
+    double k1[9], k2[9], y1[9], y2[9];
+
+    // Zeroth iterate: explicit Euler derivative at current point
+    compute_rhs(t, y, field_params, element_type, k1, dim);
+    for (int i = 0; i < dim; ++i) k2[i] = k1[i];
+
+    // Fixed-point iterations to converge the implicit stage values
+    for (int iter = 0; iter < 4; ++iter) {
+        for (int i = 0; i < dim; ++i) {
+            y1[i] = y[i] + h * (a11*k1[i] + a12*k2[i]);
+            y2[i] = y[i] + h * (a21*k1[i] + a22*k2[i]);
+        }
+        compute_rhs(t + c1*h, y1, field_params, element_type, k1, dim);
+        compute_rhs(t + c2*h, y2, field_params, element_type, k2, dim);
+    }
+
+    // Final update with equal weights b1 = b2 = 1/2
+    for (int i = 0; i < dim; ++i)
+        y[i] += h * (0.5*k1[i] + 0.5*k2[i]);
+}
+
+// Main tracking loop — traverses the FODO lattice element by element.
+//
+// NEW 6-element FODO cell topology (v2):
+//   elem 0: QF      (quadLen)            — focusing quad
+//   elem 1: DRIFT   (driftLen)
+//   elem 2: QD      (quadLen)            — defocusing quad
+//   elem 3: DRIFT   (driftLen)
+//   elem 4: DEFLECTOR (2*Phi_def)        — full cell bending in one shot
+//   elem 5: DRIFT   (2*driftLen)
+//
+// All bending is concentrated after the QF-QD pair. Ring circumference
+// is unchanged: 2*quadLen + 4*driftLen + 2*L_def per cell.
+//
+// For each element:
+//   1. Integrate with GL4 until the progress variable reaches its target.
+//   2. Apply frame-reset so the particle enters the next element at Y ≈ 0.
+//
+// Progress variables (how element traversal is measured):
+//   Arc (type 0):     φ = atan2(Y,X),  rate dφ/dt = (X·vy - Y·vx) / R²
+//   Straight (other): Y coordinate,    rate dY/dt  = vy
+//
+// Frame reset after each element:
+//   Arc:      rotate_all(y, -actual_angle)  — undoes the arc rotation
+//   Straight: y[1] -= sign * target_len    — shifts Y back to zero
+//
+// COD (Closed-Orbit Distortion):
+//   Samples x = X - R0 and Z at every element entry from turn 2 onward.
+//   Turn-averaged values are written to cod_data.txt at the end.
+//
+// Poincaré sections:
+//   Recorded at the chosen quadrupole (target_quad ≥ 0) or every cell
+//   entry at DEFLECTOR (target_quad < 0).
+//
+// RF cavity (thin kick, once per turn at cell-0 deflector entry):
+//   Δpy = q·V_RF·sin(φ_RF) / (β·c),  φ_RF = ω_RF·t
+void run_integration(double* y_init, const double* field_params,
+                     double t0, double t_end, double h, int dim,
+                     int return_steps, double* history_out,
+                     int max_poincare, double* poincare_out,
+                     double* poincare_t, int* poincare_count,
+                     const double* quad_dy,     // 2*nFODO: vertical misalignment [m] per quad
+                     const double* quad_dx,     // 2*nFODO: radial misalignment [m] per quad
+                     const double* dipole_tilt, // 2*nFODO: s-axis tilt [rad] per deflector
+                     const double* quad_tilt,   // 2*nFODO: s-axis tilt [rad] per quad
+                     const double* quad_dG)     // 2*nFODO: fractional gradient deviation per quad
+{
+
+    long long total_steps_est = (long long)((t_end - t0) / h);
+    if (total_steps_est <= 0) return;
+    long long save_interval = total_steps_est / return_steps;
+    if (save_interval == 0) save_interval = 1;
+
+    double R0       = field_params[0];
+    int    nFODO    = (int)(field_params[12] + 0.5);
+    double quadLen  = field_params[13];
+    double dir      = field_params[11];
+    double driftLen = field_params[18];
+
+    int    target_quad  = (int)std::round(field_params[14]);
+
+    const bool rf_on = (field_params[15] > 0.0);
+    double V_rf      = field_params[16];
+    double h_rf      = field_params[17];
+
+    double p_magic = M_PROTON_GEV / std::sqrt(G_P);
+    double E_magic = std::sqrt(p_magic*p_magic + M_PROTON_GEV*M_PROTON_GEV);
+    double beta_magic = p_magic / E_magic;
+    double circumference = 2.0 * M_PI * R0 + 4.0 * nFODO * driftLen + 2.0 * nFODO * quadLen;
+    double omega_rf = h_rf * 2.0 * M_PI * beta_magic * C_LIGHT / circumference;
+
+    std::ofstream rf_out;
+    rf_out.open("rf.txt", std::ios::app);
+    if (rf_out.is_open() && rf_out.tellp() == 0)
+        rf_out << "T_sec\tPhi_RF_rad\tdp_over_p\n";
+
+    double t = t0;
+    int save_idx = 0;
+    int p_saved = 0;
+    long long global_step = 0;
+    long long print_interval = total_steps_est / 10;
+    if (print_interval == 0) print_interval = 1;
+
+    double p_tang_ref = 0.0;
+    bool have_ref = false;
+
+    int total_fodo_cells = 0;  // total cells traversed; div nFODO gives revolution index
+    double global_S = 0.0;    // accumulated arc-length along the nominal orbit [m]
+
+    // Half-cell arc extent: each FODO cell now has 1 arc of 2*Phi_def
+    double L_def = (2.0 * M_PI * R0) / (2.0 * nFODO);  // arc length per half-cell [m]
+    double Phi_def = L_def / R0;                          // arc angle per half-cell [rad]
+
+    // Exact s-coordinate at the entry of each of the 6 elements within a FODO cell
+    // Cell: QF(quadLen) | DRIFT(driftLen) | QD(quadLen) | DRIFT(driftLen) | DEFL(2*L_def) | DRIFT(2*driftLen)
+    double cell_len_exact = 2.0*L_def + 4.0*driftLen + 2.0*quadLen;
+    double elem_s_offset[6] = {
+        0.0,                                         // QF
+        quadLen,                                     // DRIFT1
+        quadLen + driftLen,                          // QD
+        2.0*quadLen + driftLen,                      // DRIFT2
+        2.0*quadLen + 2.0*driftLen,                  // DEFLECTOR
+        2.0*quadLen + 2.0*driftLen + 2.0*L_def      // DRIFT3
+    };
+
+    // COD accumulators: sum x and y at each of the nFODO*6 element entries
+    int     n_lat    = nFODO * 6;
+    double* cod_x_sum = new double[n_lat]();   // zero-initialised
+    double* cod_y_sum = new double[n_lat]();
+    int*    cod_cnt   = new int[n_lat]();
+
+    // Staging buffer: filled during each revolution, committed only when the
+    // revolution completes.  Partial last revolution is silently discarded.
+    double* stage_x = new double[n_lat]();
+    double* stage_y = new double[n_lat]();
+    bool past_first_rev = false;
+
+    while (t < t_end) {
+        int current_fodo = total_fodo_cells % nFODO;  // cell index within current revolution
+
+        // 6-element cell loop: elem 0..5
+        const int start_elem = 0;
+        for (int elem_iter = 0; elem_iter < 6; ++elem_iter) {
+            int elem = (start_elem + elem_iter) % 6;
+            if (t >= t_end) break;
+
+            // ---- RF thin kick (once per revolution at cell-0 deflector entry) ----
+            if (current_fodo == 0 && elem == 4) {
+                double phi_rf = omega_rf * t;
+                while (phi_rf >= 2.0*M_PI) phi_rf -= 2.0*M_PI;
+                while (phi_rf <  0.0     ) phi_rf += 2.0*M_PI;
+
+                if (rf_on) {
+                    double p_sq = y_init[3]*y_init[3] + y_init[4]*y_init[4] + y_init[5]*y_init[5];
+                    double E_J  = std::sqrt(p_sq*C_LIGHT*C_LIGHT + M_P*M_P*C_LIGHT*C_LIGHT);
+                    double beta = std::sqrt(p_sq) * C_LIGHT / E_J;
+                    double dp   = Q_E * V_rf * std::sin(phi_rf) / (beta * C_LIGHT);
+
+                    y_init[4] += dp * dir;
+                }
+
+                if (rf_out.is_open()) {
+                    double p_tang = y_init[4];
+                    if (!have_ref) { p_tang_ref = p_tang; have_ref = true; }
+                    double dp_over_p = (std::abs(p_tang_ref) > 1e-40) ? (p_tang - p_tang_ref) / p_tang_ref : 0.0;
+                    rf_out << std::scientific << std::setprecision(16)
+                           << t << "\t" << phi_rf << "\t" << dp_over_p << "\n";
+                }
+            }
+
+            // ---- Poincaré section trigger ----
+            // target_quad < 0 → every DEFLECTOR entry (elem=4), nFODO hits/turn.
+            // target_quad ≥ 0 → specific quad: even=QF(elem0), odd=QD(elem2)
+            bool is_poincare_mark = false;
+            if (target_quad < 0) {
+                if (elem == 4) is_poincare_mark = true;
+            } else {
+                if ((target_quad % 2 == 0) && elem == 0) {
+                    if (current_fodo == (target_quad / 2)) is_poincare_mark = true;
+                } else if ((target_quad % 2 == 1) && elem == 2) {
+                    if (current_fodo == (target_quad / 2)) is_poincare_mark = true;
+                }
+            }
+            if (is_poincare_mark && p_saved < max_poincare) {
+                poincare_t[p_saved] = t;
+                for (int i = 0; i < dim; ++i) poincare_out[p_saved*dim + i] = y_init[i];
+                poincare_out[p_saved*dim + 0] = radial_dev(y_init, R0, elem) + R0;
+                poincare_out[p_saved*dim + 1] = global_S;
+                p_saved++;
+            }
+
+            // ---- COD: stage element-entry position for this revolution ----
+            if (past_first_rev) {
+                int idx = current_fodo * 6 + elem;
+                stage_x[idx] = radial_dev(y_init, R0, elem) * 1000.0;
+                stage_y[idx] = y_init[2] * 1000.0;
+            }
+
+            // Element type and traversal target for 6-element cell
+            // elem 0: QF  (type 2 for normal, type 4 for modulated cell-0)
+            // elem 1: DRIFT
+            // elem 2: QD
+            // elem 3: DRIFT
+            // elem 4: DEFLECTOR (double angle: 2*Phi_def)
+            // elem 5: DRIFT (double length: 2*driftLen)
+            int type = 0;
+            double target_val = 0;
+            if (elem == 0) { type = (current_fodo == 0) ? 4 : 2; target_val = quadLen; }
+            else if (elem == 1) { type = 1; target_val = driftLen; }
+            else if (elem == 2) { type = 3; target_val = quadLen; }
+            else if (elem == 3) { type = 1; target_val = driftLen; }
+            else if (elem == 4) { type = 0; target_val = 2.0 * Phi_def; }
+            else if (elem == 5) { type = 1; target_val = 2.0 * driftLen; }
+
+            // ==============================================================================
+            // field_params_local[25] = quad_dx runtime override
+            // field_params_local[26] = dipole_tilt runtime override
+            // field_params_local[27] = quad_tilt runtime override (skew quad coupling)
+            // field_params_local[28] = quad_dG runtime override (fractional gradient deviation)
+            // field_params_local[29] = θ_e : geometric ring azimuth at element entry [rad]
+            //                                (for the harmonic radial-B field, params 21/22)
+            double field_params_local[30];
+            for (int fp = 0; fp < 25; ++fp) field_params_local[fp] = field_params[fp];
+            field_params_local[23] = 0.0;  // quad_dy
+            field_params_local[25] = 0.0;  // quad_dx
+            field_params_local[26] = 0.0;  // dipole_tilt
+            field_params_local[27] = 0.0;  // quad_tilt
+            field_params_local[28] = 0.0;  // quad_dG
+
+            // Geometric ring azimuth at this element's entry.
+            // In new topology, all bending happens at elem 4.
+            // Elements 0-4 (before/at deflector entry): azimuth = current_fodo * 2*Phi_def
+            // Element 5 (after deflector): azimuth = (current_fodo+1) * 2*Phi_def
+            if (elem <= 4) {
+                field_params_local[29] = current_fodo * 2.0 * Phi_def;
+            } else {
+                field_params_local[29] = (current_fodo + 1) * 2.0 * Phi_def;
+            }
+
+            if (elem == 0) {               // QF
+                int qidx = 2 * current_fodo;
+                field_params_local[23] = quad_dy[qidx];
+                field_params_local[25] = quad_dx[qidx];
+                field_params_local[27] = quad_tilt[qidx];
+                field_params_local[28] = quad_dG[qidx];
+            } else if (elem == 2) {        // QD
+                int qidx = 2 * current_fodo + 1;
+                field_params_local[23] = quad_dy[qidx];
+                field_params_local[25] = quad_dx[qidx];
+                field_params_local[27] = quad_tilt[qidx];
+                field_params_local[28] = quad_dG[qidx];
+            } else if (elem == 4) {        // DEFLECTOR (single, full-cell bending)
+                // Use first slot of dipole_tilt for the consolidated deflector
+                field_params_local[26] = dipole_tilt[2 * current_fodo];
+            }
+
+            double accumulated = 0.0;
+
+            while (accumulated < target_val && t < t_end) {
+                double h_step = h;
+
+                double p_sq = y_init[3]*y_init[3] + y_init[4]*y_init[4] + y_init[5]*y_init[5];
+                double gam = std::sqrt(1.0 + p_sq / (M_P * M_P * C_LIGHT * C_LIGHT));
+                double vx = y_init[3]/(gam*M_P);
+                double vy = y_init[4]/(gam*M_P);
+
+                double val_rate = 0.0;
+                if (type == 0) {
+                    double R2 = y_init[0]*y_init[0] + y_init[1]*y_init[1];
+                    val_rate = (y_init[0]*vy - y_init[1]*vx) / R2;
+                } else {
+                    val_rate = vy;
+                }
+
+                // Shorten the last step to land exactly on the element boundary
+                bool break_after = false;
+                if (std::abs(val_rate) > 1e-12) {
+                    double time_remaining = (target_val - accumulated) / std::abs(val_rate);
+                    if (time_remaining <= h_step) {
+                        h_step = time_remaining;
+                        if (h_step < 0.0) h_step = 0.0;
+                        break_after = true;
+                    }
+                }
+                if (t + h_step > t_end) {
+                    h_step = t_end - t;
+                    break_after = true;
+                }
+
+                double old_metric = (type == 0) ? std::atan2(y_init[1], y_init[0]) : y_init[1];
+
+                gl4_step_element(t, y_init, field_params_local, type, h_step, dim);
+                t += h_step;
+                global_step++;
+                global_S += vy * h_step;
+
+                if (global_step % print_interval == 0) {
+                    int pct = (int)std::round(t * 100.0 / t_end);
+                    std::printf("  t = %.4f ms  |  %%%d\n", t*1000.0, pct);
+                    std::fflush(stdout);
+                }
+
+                if (global_step % save_interval == 0 && save_idx < return_steps) {
+                    for (int i = 0; i < dim; ++i) history_out[save_idx*dim + i] = y_init[i];
+                    history_out[save_idx*dim + 0] = radial_dev(y_init, R0, elem) + R0;
+                    history_out[save_idx*dim + 1] = global_S;
+                    save_idx++;
+                }
+
+                double new_metric = (type == 0) ? std::atan2(y_init[1], y_init[0]) : y_init[1];
+                if (type == 0) {
+                    double dth = new_metric - old_metric;
+                    while(dth < -M_PI) dth += 2.0*M_PI;
+                    while(dth >  M_PI) dth -= 2.0*M_PI;
+                    accumulated += std::abs(dth);
+                } else {
+                    accumulated += std::abs(new_metric - old_metric);
+                }
+
+                if (break_after) break;
+                if (target_val - accumulated <= 1e-11) break;
+            }
+
+            // ---- Frame reset: place origin at start of next element ----
+            if (type == 0) {
+                // Arc: rotate by the actual current angle atan2(Y,X) so that Y
+                // becomes exactly zero regardless of any small overshoot/undershoot.
+                double actual_angle = std::atan2(y_init[1], y_init[0]);
+                rotate_all(y_init, -actual_angle);
+            } else {
+                // Straight: subtract the nominal traversal length.
+                double sign = (y_init[1] >= 0) ? 1.0 : -1.0;
+                y_init[1] -= sign * target_val;
+            }
+        }
+        total_fodo_cells++;
+
+        // Commit staged COD data only when a complete revolution just finished.
+        if (total_fodo_cells % nFODO == 0) {
+            if (!past_first_rev) {
+                past_first_rev = true;
+            } else {
+                for (int i = 0; i < n_lat; i++) {
+                    cod_x_sum[i] += stage_x[i];
+                    cod_y_sum[i] += stage_y[i];
+                    cod_cnt[i]++;
+                }
+            }
+        }
+    }
+
+    delete[] stage_x;
+    delete[] stage_y;
+
+    // ---- Write turn-averaged COD to cod_data.txt ----
+    {
+        FILE* cod_file = std::fopen("cod_data.txt", "w");
+        if (cod_file) {
+            // Header and data format compatible with original (6 elements/cell, not 8)
+            std::fprintf(cod_file, "s_m\tx_mm\ty_mm\n");
+            for (int k = 0; k < nFODO; ++k) {
+                for (int e = 0; e < 6; ++e) {
+                    int idx = k * 6 + e;
+                    double s_here = k * cell_len_exact + elem_s_offset[e];
+                    double avg_x = (cod_cnt[idx] > 0) ? cod_x_sum[idx] / cod_cnt[idx] : 0.0;
+                    double avg_y = (cod_cnt[idx] > 0) ? cod_y_sum[idx] / cod_cnt[idx] : 0.0;
+                    std::fprintf(cod_file, "%.6f\t%.6f\t%.6f\n", s_here, avg_x, avg_y);
+                }
+            }
+
+            // Boundary point at s=circumference
+            double avg_x_end = (cod_cnt[0] > 0) ? cod_x_sum[0] / cod_cnt[0] : 0.0;
+            double avg_y_end = (cod_cnt[0] > 0) ? cod_y_sum[0] / cod_cnt[0] : 0.0;
+            std::fprintf(cod_file, "%.6f\t%.6f\t%.6f\n", circumference, avg_x_end, avg_y_end);
+
+            std::fclose(cod_file);
+        }
+    }
+    delete[] cod_x_sum;
+    delete[] cod_y_sum;
+    delete[] cod_cnt;
+
+    printf("target_quad: %d, p_saved: %d\n", target_quad, p_saved);
+    poincare_count[0] = p_saved;
+    std::printf("  t = %.4f ms  |  %%100\n", t * 1000.0);
+    std::fflush(stdout);
+}
+
+} // extern "C"

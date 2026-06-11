@@ -1,0 +1,217 @@
+import ctypes
+import numpy as np
+import os
+import sys
+
+# ==============================================================================
+# C++ PAYLAŞIMLI KÜTÜPHANE YÜKLEME (CTYPES) — integrator2 (yeni topoloji)
+# Yeni 6-elemanlı FODO hücresi: QF | DRIFT | QD | DRIFT | DEFLECTOR | DRIFT
+# Tüm bükme tek deflektörde toplanmıştır (orijinal 8-elemanlı topolojiden farklı).
+# Linux için lib_integrator2.so, macOS için integrator2.dylib yüklenir.
+# ==============================================================================
+
+try:
+    if sys.platform == "darwin":
+        lib_name = "integrator2.dylib"
+    else:
+        lib_name = "lib_integrator2.so"
+
+    lib_path = os.path.abspath(os.path.join(os.path.dirname(__file__), lib_name))
+    _lib = ctypes.CDLL(lib_path)
+except OSError as e:
+    raise RuntimeError(f"C++ kütüphanesi ({lib_name}) bulunamadı. Lütfen derleyin.")
+
+_lib.run_integration.argtypes = [
+    ctypes.POINTER(ctypes.c_double), # y_init
+    ctypes.POINTER(ctypes.c_double), # field_params
+    ctypes.c_double,                 # t0
+    ctypes.c_double,                 # t_end
+    ctypes.c_double,                 # h
+    ctypes.c_int,                    # dim
+    ctypes.c_int,                    # return_steps
+    ctypes.POINTER(ctypes.c_double), # history_out
+    ctypes.c_int,                    # max_poincare
+    ctypes.POINTER(ctypes.c_double), # poincare_out
+    ctypes.POINTER(ctypes.c_double), # poincare_t_out
+    ctypes.POINTER(ctypes.c_int),    # poincare_count
+    ctypes.POINTER(ctypes.c_double), # quad_dy    [2*nFODO, m]
+    ctypes.POINTER(ctypes.c_double), # quad_dx    [2*nFODO, m]
+    ctypes.POINTER(ctypes.c_double), # dipole_tilt[2*nFODO, rad]
+    ctypes.POINTER(ctypes.c_double), # quad_tilt  [2*nFODO, rad]
+    ctypes.POINTER(ctypes.c_double), # quad_dG    [2*nFODO, fractional]
+]
+_lib.run_integration.restype = None
+
+# ==============================================================================
+# FIZIKSEL PARAMETRE SINIFI (FieldParams)
+# C++ motoruna gönderilecek manyetik alanlar, RF özellikleri ve simülasyon
+# yapılandırmalarını tutan Python nesnesidir. Bu sınıf içindeki değişkenler,
+# C++ tarafındaki `field_params` dizisine aktarılır.
+# ==============================================================================
+class FieldParams:
+    def __init__(self):
+        self.R0 = 95.49
+        self.E0 = 0.0
+        self.E0_power = 1.0
+        self.B0ver = 0.0
+        self.B0rad = 0.0
+        self.B0long = 0.0
+        self.quadG1 = 0.0
+        self.sextK1 = 0.0
+        self.quadSwitch = 1.0
+        self.sextSwitch = 0.0
+        self.EDMSwitch = 0.0
+        self.direction = -1.0
+        self.nFODO = 24.0
+        self.quadLen = 0.4
+        self.driftLen = 2.0
+        self.poincare_quad_index = 0.0
+        self.rfSwitch = 0.0
+        self.rfVoltage = 10000.0
+        self.h = 1.0
+        self.quadModA = 0.0
+        self.quadModF = 0.0
+        self.quadVertOffset = 0.0  # dikey quad merkez kayması [m] (çalışma zamanı override)
+        self.quadG0 = 0.0
+        # Halka boyunca N-harmonikli radyal manyetik alan B_x(θ) = A_r·cos(N·θ)
+        # (Omarov 2022 Fig.8 analog). Tüm elemanlara uygulanır.
+        self.B0rad_harm_amp = 0.0  # A_r genliği [T] (ör. 1e-9 = 1 nT)
+        self.B0rad_harm_N   = 0.0  # azimut harmonik numarası N
+
+    def to_c_array(self):
+        """
+        Sınıf içindeki tüm parametreleri, C++ fonksiyonuna gönderilebilecek
+        formatta (`ctypes.c_double` array) ardışık bir diziye dönüştürür.
+        """
+        params = [
+            self.R0, self.E0, self.E0_power,
+            self.B0ver, self.B0rad, self.B0long,
+            self.quadG1, self.sextK1,
+            self.quadSwitch, self.sextSwitch,
+            self.EDMSwitch, self.direction,
+            self.nFODO, self.quadLen,
+            self.poincare_quad_index,
+            self.rfSwitch, self.rfVoltage, self.h, self.driftLen,
+            self.quadModA, self.quadModF, self.B0rad_harm_amp,
+            self.B0rad_harm_N, self.quadVertOffset, self.quadG0
+        ]
+        return (ctypes.c_double * len(params))(*params)
+
+# ==============================================================================
+# KOORDİNAT DÖNÜŞÜMLERİ
+# C++ tarafında tüm simülasyon Kartezyen global koordinatlarda çözülür.
+# Ancak kullanıcı (analiz) açısından halkanın yerel koordinatları (S, X, Y)
+# daha anlamlıdır. Bu fonksiyon Global -> Yerel (Frenet-Serret) dönüşümünü yapar.
+# ==============================================================================
+def convert_global_to_local_matrix(history_global_np, R0, initial_z):
+    """
+    Global kartezyen (X, Y, Z, Px, Py, Pz, Sx, Sy, Sz) matrisini,
+    yerel ışın izleme koordinatlarına dönüştürür (X_sapma, Y_dikey, S_boylamsal).
+    """
+    X_c  = history_global_np[:, 0]
+    S_c  = history_global_np[:, 1]
+    Z_c  = history_global_np[:, 2]
+
+    Px_c = history_global_np[:, 3]
+    Py_c = history_global_np[:, 4]
+    Pz_c = history_global_np[:, 5]
+
+    Sx_c = history_global_np[:, 6]
+    Sy_c = history_global_np[:, 7]
+    Sz_c = history_global_np[:, 8]
+
+    history_local = np.zeros_like(history_global_np)
+
+    history_local[:, 0] = X_c - R0
+    history_local[:, 1] = Z_c
+    history_local[:, 2] = S_c + initial_z
+
+    history_local[:, 3] = Px_c
+    history_local[:, 4] = Pz_c
+    history_local[:, 5] = Py_c
+
+    history_local[:, 6] = Sx_c
+    history_local[:, 7] = Sz_c
+    history_local[:, 8] = Sy_c
+
+    return history_local
+
+# ==============================================================================
+# ANA ENTEGRASYON ÇAĞRISI
+# ==============================================================================
+def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
+                       quad_dy=None, quad_dx=None, dipole_tilt=None,
+                       quad_tilt=None, quad_dG=None):
+    """
+    Bir parçacığı verilen başlangıç koşulları ve zaman aralığı için C++
+    motorunu (GL4 Simplektik Entegratör, yeni 6-elemanlı FODO topolojisi)
+    kullanarak takip eder.
+
+    Parametreler:
+    - y0_local   : [x, y, z, px, py, pz, sx, sy, sz] yerel faz uzayı
+    - t0, t_end  : başlangıç / bitiş zamanı [s]
+    - h          : zaman adımı [s]
+    - fields     : FieldParams nesnesi
+    - return_steps: kaç adımda bir veri kaydedilsin
+    - quad_dy    : her quad için dikey misalignment [m], boy 2*nFODO
+    - quad_dx    : her quad için radyal misalignment [m], boy 2*nFODO
+    - dipole_tilt: her deflektör için s-ekseni dönme açısı [rad], boy 2*nFODO
+    - quad_tilt  : her quad için s-ekseni dönme açısı [rad], boy 2*nFODO
+                   (skew-quadrupol bileşeni yaratır → x-y kuplajı)
+    - quad_dG    : her quad için fraksiyonel gradyan sapması, boy 2*nFODO
+                   (ör. 0.10 = +%10). Tek-quad k-modülasyonu için kullanılır.
+    """
+    if fields is None: fields = FieldParams()
+    R0 = fields.R0
+
+    x, y, z = y0_local[0:3]
+    px, py, pz = y0_local[3:6]
+    sx, sy, sz = y0_local[6:9]
+
+    theta = z / R0
+    R_G = R0 + x
+    X_G = R_G * np.cos(theta)
+    Y_G = R_G * np.sin(theta)
+
+    y0_global = [X_G, Y_G, y,
+                 px * np.cos(theta) - pz * np.sin(theta),
+                 px * np.sin(theta) + pz * np.cos(theta), py,
+                 sx * np.cos(theta) - sz * np.sin(theta),
+                 sx * np.sin(theta) + sz * np.cos(theta), sy]
+
+    y0_arr = (ctypes.c_double * 9)(*y0_global)
+    field_arr = fields.to_c_array()
+
+    # Hata dizileri: boyut 2*nFODO (QF0,QD0,QF1,QD1,... ve ARC1_0,ARC2_0,...)
+    n_q = 2 * int(fields.nFODO)
+    _qdy = (ctypes.c_double * n_q)(*(quad_dy if quad_dy is not None else np.zeros(n_q)))
+    _qdx = (ctypes.c_double * n_q)(*(quad_dx if quad_dx is not None else np.zeros(n_q)))
+    _dtilt = (ctypes.c_double * n_q)(*(dipole_tilt if dipole_tilt is not None else np.zeros(n_q)))
+    _qtilt = (ctypes.c_double * n_q)(*(quad_tilt if quad_tilt is not None else np.zeros(n_q)))
+    _qdG  = (ctypes.c_double * n_q)(*(quad_dG  if quad_dG  is not None else np.zeros(n_q)))
+
+    # C++ hafıza bloklarının (array) Python tarafında tahsis edilmesi.
+    history_c = (ctypes.c_double * (9 * return_steps))()
+    max_poincare = 200000
+    poincare_c = (ctypes.c_double * (9 * max_poincare))()
+    poincare_count = (ctypes.c_int * 1)(0)
+    poincare_t_c = (ctypes.c_double * max_poincare)()
+
+    # Asıl C++ fonksiyon çağrısı (Performans kritik bölüm)
+    _lib.run_integration(y0_arr, field_arr, t0, t_end, h, 9, return_steps, history_c,
+                         max_poincare, poincare_c, poincare_t_c, poincare_count,
+                         _qdy, _qdx, _dtilt, _qtilt, _qdG)
+
+    # C++ bellek bloklarını numpy dizilerine (array) çevirme
+    num_p = poincare_count[0]
+    poincare_t_np = np.ctypeslib.as_array(poincare_t_c).copy()[:num_p]
+    poincare_np = np.ctypeslib.as_array(poincare_c).reshape((max_poincare, 9))[:num_p]
+
+    history_np = np.ctypeslib.as_array(history_c).reshape((return_steps, 9))
+    hist_local = convert_global_to_local_matrix(history_np, R0, z)
+    if num_p > 0:
+        poin_local = convert_global_to_local_matrix(poincare_np, R0, z)
+    else:
+        poin_local = np.array([])
+
+    return hist_local, poin_local, poincare_t_np
