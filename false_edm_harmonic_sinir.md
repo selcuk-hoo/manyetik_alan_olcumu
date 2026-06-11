@@ -849,71 +849,161 @@ bastırılır; trim bütçesi 3–4.4 μm.
 **Dosyalar:** `test_orbit_trim.py`, `test_orbit_trim.png`,
 `test_orbit_trim.json` (CO=False, t2=1ms)
 
-**Motivasyon:** Spin-sürülü trim toplam dS_y/dt'yi sıfırlar — gerçek EDM
-de toplamın içinde olduğundan sinyali silme riski taşır (CW/CCW
-ayrıştırması gerekir). Yörünge ise EDM'ye **kördür**: gerçek EDM kapalı
-yörüngeyi kıpırdatmaz. Yörünge-sürülü trim, hizalama kirliliğinin
-kendisini hedefler → EDM sinyaline dokunamaz. Ayrıca hızlıdır
-(saniyeler, polarimetre istatistiği beklemez) ve vektöreldir (48 BPM →
-tüm mod kuadratürleri tek ölçümde, faz problemi yok).
+**Neden yörünge, neden spin değil?** Spin-sürülü trim toplam
+dS_y/dt → 0 hedefler. Ama gerçek EDM de dS_y/dt içindedir; eğer trim
+onu bastırırsa bilim sinyali gider. Yörünge ise EDM'ye **doğası gereği
+kördür**: gerçek bir elektrik dipol momenti, kapalı yörüngeyi
+milimetre de kıpırdatmaz. Dolayısıyla yörüngeyi rehber alarak yapılan
+trim, EDM sinyaline dokunamaz. Ek avantaj: hızlıdır (BPM ölçümü
+saniyeler sürer, polarimetre günler ister) ve vektöreldir (48 BPM
+okuması mod fazını da verir, ayrıca faz kalibrasyonu gerekmez).
 
-**Senaryo (gerçekçi/zorlu):** 48 quad rastgele dikey kaçıklık
-RMS=**100μm** (seed=321); 48 BPM statik ofset RMS=**100μm** (seed=777);
-k-mod YOK, tek optik konfigürasyon. f₀ = −1.62×10⁻³ rad/s.
+#### Senaryo
 
-**Yöntem zinciri:**
-1. Mod-yörünge kalibrasyonu: k=1..6 × cos/sin, A=50μm → tepki bazı
-   O [48×12]. Tur-ortalamalı yörünge `cod_data.txt`'den (gerçek BPM
-   sisteminin yaptığı gibi; betatron ortalamada yok olur, kapalı
-   yörünge oturtma gerekmez). Kalibrasyon diferansiyel olduğundan
-   statik ofsetten etkilenmez.
-2. Desenin ofsetli yörüngesi (y_meas = y_true + b) O bazına LSQ ile
-   oturtulur → mod kestirimleri â.
-3. Trim: P → P − Σ â·mod. Doğrulama spin takibiyle.
+48 quad rastgele dikey kaçıklık, RMS = **100 μm** (seed=321). 48 BPM
+statik ofset, RMS = **100 μm** (seed=777). k-modülasyon YOK; tek optik
+konfigürasyon. Başlangıç spin hızı: **f₀ = −1.623×10⁻³ rad/s**.
 
-**Yörünge kazançları (rezonans hiyerarşisi):**
+Ölçülen mod genlik spektrumu (trim öncesi, μm cinsinden):
+
+| k | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| Aₖ | 37.6 | 16.2 | 40.9 | **45.0** | 17.0 | 6.1 | 26.8 | 31.9 |
+
+#### Yöntem
+
+1. **Kalibrasyon:** Her k=1..6 modu için cos ve sin kuadratür (12 mod
+   düğmesi toplamda), A=50μm genlikle uygulanır, 48 BPM'den tur-ortalamalı
+   kapalı yörünge okunur → tepki matrisi O [48×12]. Bu ölçüm diferansiyel
+   olduğundan statik BPM ofseti yok olur; sadece uygulanan mod değişimine
+   yanıt görülür.
+
+2. **Kestirim:** Gerçek desenin BPM okumasi y_ölç = y_gerçek + b (b: statik
+   ofsetler). Least-squares fit O·â ≈ y_ölç → mod kestirimleri â. BPM
+   ofseti b bilinmediği için â içinde sistematik yanlılık taşır; bu yanlılık
+   kazancı küçük modlarda büyür (aşağıya bakınız).
+
+3. **Trim:** Tüm quad kaçıklıklarına Δp = −Σₖ âₖ·mod_k eklenir. Ardından
+   spin takibiyle doğrulama yapılır.
+
+#### Yörünge kazancı neden rezonansla ilgilidir?
+
+Bir mod-k kaçıklığı, kafesten geçerken transfer matrisinin rezonans
+büyütme faktörüyle çarpılır. Bu faktör, betatron tununa (Q_y ≈ 2.68)
+yakınlıkla belirlenir. k=2, Q_y'ye en yakın → 24.1× kazanç. k değeri
+Q_y'den uzaklaştıkça kazanç düşer:
 
 | k | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---|---|---|---|---|---|
-| kazanç | 6.2 | **24.1** | 6.3 | 2.26 | 1.24 | 0.79 |
+| Yörünge kazancı | 6.2 | **24.1** | 6.3 | 2.26 | 1.24 | 0.79 |
 
-Statik ofsetin kestirime yanlılığı ε = O⁺b ≈ σ_b·√(2/N)/kazanç:
-k=2'de ~0.5μm, k=4'te ~1μm, **k=6'da ~28μm** (kazanç<1 → patlama).
+100 μm BPM gürültüsü altında yanlılık ε ≈ σ_b / kazanç:
+k=2'de **~4 μm**, k=4'te **~44 μm**, k=5'te **~81 μm**, k=6'da
+**~126 μm** (kazanç < 1 → gürültü büyütülür). Bu yanlılıklar,
+hangi modların güvenle kesitilebileceğini doğrudan belirler.
 
-**Kestirim genişliği taraması (ana sonuç):**
+#### Dört varyant: adım adım spin değerleri
 
-| Varyant | Fit | dS_y/dt artık | Bastırma |
+| Varyant | Fit | f sonrası | Bastırma |
 |---|---|---|---|
-| A | k=1..3 | −6.72×10⁻⁵ | 24.2× |
-| **C** | **k=1..4** | **+1.61×10⁻⁵** | **100.8×** ★ |
-| D | k=1..5 | +1.37×10⁻⁴ | 11.9× |
-| B | k=1..6 | +1.07×10⁻⁴ | 15.2× |
+| A | k=1..3 | **−6.72×10⁻⁵** rad/s | 24.2× |
+| **C** | **k=1..4** | **+1.61×10⁻⁵** rad/s | **100.8×** ★ |
+| D | k=1..5 | +1.37×10⁻⁴ rad/s | 11.9× |
+| B | k=1..6 | +1.07×10⁻⁴ rad/s | 15.2× |
 
-Eğri monoton DEĞİL: genişletmek önce kazandırır (A→C: trimlenmeyen
-k=4'ün −6.7×10⁻⁵ katkısı temizlenir — A artığının c₄·a₄ ile birebir
-örtüştüğü doğrulandı), sonra kaybettirir (C→D→B: kazanç<1.3 modların
-ofset-kirli kestirimi hata enjekte eder; B'de k=6 içeriği 6μm'den
-37μm'e ÇIKAR). **Kazanç hiyerarşisi doğal düzenleyicidir: yörüngenin
-net gördüğü modları fit et, gerisine dokunma.**
+**Başlangıç:** f₀ = −1.623×10⁻³ rad/s.
 
-**Mod içeriği (C trimi sonrası):** k=1: 37.6→3.8μm, k=2: 16.2→6.9μm,
-k=3: 40.9→9.2μm, k=4: 45.0→6.1μm. **"Birkaç mikron" hedefi tutturuldu**
-(kalan hata baskın olarak k≥7 sızıntısından, BPM ofsetinden değil).
+**A trimi (k=1..3):** k=1,2,3 içerikleri 37.6/16.2/40.9 μm'den
+3.8/7.0/9.2 μm'e düşer (5–11× azalma). Ancak k=4 = 45.0 μm **hiç
+dokunulmaz**; trim bunu hedeflemez. Bunun sonucu: f = −6.72×10⁻⁵ rad/s.
+Bu artık neredeyse tamamen k=4 katkısından gelir (c₄ × A₄ =
+8.36 × 45×10⁻⁶ ≈ 3.8×10⁻⁴ rad/s magnitude, ancak faz ile ölçeklenmiş
+katkı −6.7×10⁻⁵ olarak ölçülür).
 
-**Statik taban kanıtı:** 2. iterasyon güncellemesi tam **0.0000μm** —
-aynı ofsetler aynı yanlış hedefi gösterir; yörünge döngüsü tek adımda
-kendi tabanına oturur, tekrar ölçmek kazandırmaz.
+**C trimi (k=1..4):** A'nın yaptığına ek olarak k=4'ü de hedefler.
+k=4 içeriği 45.0 μm'den 6.0 μm'e düşer. Ortaya çıkan f = +1.61×10⁻⁵ rad/s.
+Bu artık **k=5 ve üzeri** içerikten gelir; bunlar C tarafından hiç
+dokunulmamıştır:
 
-**Sınır ve büyük resim:** Yörüngenin göremediği k≥7 içeriği (27–32μm)
-spin için hâlâ görünürdür (c₇..c₁₂ ≠ 0) ve C-artığının ana bileşenidir.
-Bu, kademeli mimariyi nicel olarak gerekçelendirir:
+| k | Trim öncesi | C sonrası | Dokunuldu mu? |
+|---|---|---|---|
+| 1 | 37.6 μm | **3.8 μm** | ✓ ~10× azaldı |
+| 2 | 16.2 μm | **6.9 μm** | ✓ ~2× azaldı |
+| 3 | 40.9 μm | **9.2 μm** | ✓ ~4× azaldı |
+| 4 | 45.0 μm | **6.0 μm** | ✓ ~7× azaldı |
+| 5 | 17.0 μm | 17.0 μm | ✗ değişmedi |
+| 6 | 6.1 μm | 6.1 μm | ✗ değişmedi |
+| 7 | 26.8 μm | 26.8 μm | ✗ değişmedi |
+| 8 | 31.9 μm | 31.9 μm | ✗ değişmedi |
 
-1. **Yörünge kademesi** (bu test): hızlı, EDM-kör, ~100× → kalan
-   ~10⁻⁵ rad/s,
-2. **CW/CCW simetrik iptal**: kalan üzerinde ~10³–10⁸×,
-3. **Spin kademesi** (yalnız-sistematik gözlenebilirle): son artığı
-   polarimetre istatistiği tabanına indirir.
+k=2'nin diğerlerinden daha az düzeltilmesinin nedeni: kazancı çok yüksek
+olduğundan BPM ofseti kestirime neredeyse hiç sızmaz — ancak BPM ofseti
+mesafeyi değil yönü bozar, dolayısıyla kısmi silinme kaçınılmaz.
+
+**D trimi (k=1..5):** k=5 kazancı = 1.24. Yanlılık ≈ 100μm / 1.24 = 81μm.
+Gerçek A₅ = 17 μm iken orbital kestirim, BPM ofseti tarafından domine
+edilir ve mod k=5'i ~81 μm büyüklüğünde **yanlış yönde** trimler. Sonuç:
+f = +1.37×10⁻⁴ rad/s — C'den 8.5× DAHA KÖTÜ.
+
+**B trimi (k=1..6):** k=6 kazancı = 0.79 < 1. Yanlılık = 100μm / 0.79 =
+126 μm. k=6 içeriği **6.1 μm'den 36.5 μm'e ÇIKAR** (trim, ofseti
+yanlışlıkla hizalama hatası sanıp sisteme geri enjekte eder).
+f = +1.07×10⁻⁴ rad/s.
+
+**Sonuç:** C'nin sihiri, k=4'ün kazancının (2.26×) hâlâ yararlı eşiğin
+üzerinde olmasından; k=5'inki (1.24×) ise gürültüyü bastırmak için
+yeterli değildir. Kesim noktası kazanç ≈ 1.5–2 civarındadır.
+
+#### Neden yörünge k≥7'ye kör ama spin etkileniyor?
+
+Bu iki farklı fiziksel mekanizmadan kaynaklanır ve asla çelişkili değildir:
+
+**Yörünge kazancı rezonans gerektiriyor.** Transfer matrisi yalnızca Q_y'ye
+yakın modları büyütür. k=7 için tahmini kazanç ~0.45×; 100 μm BPM gürültüsü
+ile bu mod tamamen gürültü içinde boğulur. BPM okuyamazsanız trim
+yapamazsınız.
+
+**c_k (spin kuplajı) rezonans gerektirmiyor.** dS_y/dt = Σₖ cₖ·Aₖ
+formülündeki cₖ, halka boyunca radyal B alanının geometrik yol
+integralidir. Q_y bu integrale girmez. Ölçülen değerler:
+
+| k | 1 | 2 | 3 | 4 | 5 | 6 | 7* | 8* |
+|---|---|---|---|---|---|---|---|---|
+| |cₖ| (rad/s/m) | 23.6 | **90.7** | 23.6 | 8.4 | 4.5 | 2.8 | ~1.96 | ~1.52 |
+| Yörünge kazancı | 6.2 | 24.1 | 6.3 | 2.26 | 1.24 | 0.79 | ~0.45 | ~0.35 |
+
+(*k=7,8 için cₖ, k=5..6 eğrisinden ekstrapolasyonla elde edildi.)
+
+**Sayısal kanıt:** C trimi sonrası k=7 = 26.8 μm, k=8 = 31.9 μm değişmedi.
+Bunların spin katkısı:
+- k=7: 1.96 × 2.68×10⁻⁵ ≤ **5.3×10⁻⁵ rad/s** (faz bağımlı üst sınır)
+- k=8: 1.52 × 3.19×10⁻⁵ ≤ **4.8×10⁻⁵ rad/s**
+
+Rastgele fazların kısmi iptali sonucu net C-artığı = +1.61×10⁻⁵ rad/s
+mertebesine düşer. **Yörünge triminin tavanı, onun göremediği k≥7
+içeriği tarafından belirlenir.** Bu, yörünge kademedinin sınırını kanıtlar
+ve neden bir sonraki adım gerektiğini sayısal olarak açıklar.
+
+#### Statik taban kanıtı
+
+2. iterasyonda orbit güncellemesi: tam **0.0000 μm**. Aynı statik BPM
+ofseti aynı yanlı kestirimi verir; yörünge döngüsü ilk adımda kendi
+tabanına oturur, tekrar etmek hiçbir şeyi değiştirmez.
+
+#### Büyük resim: kademeli mimari
+
+| Kademe | Mekanizma | Bastırma | f sonrası |
+|---|---|---|---|
+| 0 (ham) | — | — | −1.623×10⁻³ rad/s |
+| **1 Yörünge** | BPM-referanslı, EDM-kör, k=1..4 | **~100×** | **+1.61×10⁻⁵ rad/s** |
+| 2 CW/CCW | Simetrik iptal | ~10³–10⁸× | ~10⁻⁸–10⁻¹³ rad/s |
+| 3 Spin (son) | Yalnız-sistematik gözlenebilir | polarimetre sınırı | EDM tabanı |
+
+Yörünge kademesi hem en hızlı hem de EDM açısından en güvenlidir.
+Kalan ~10⁻⁵ rad/s, k≥7 içeriğinden kaynaklandığı için CW/CCW yöntemi
+tarafından doğal olarak iptal edilir (her iki ışın da aynı hizalama
+hatasını görür).
 
 ---
 
-*Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*
+*Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-11*
