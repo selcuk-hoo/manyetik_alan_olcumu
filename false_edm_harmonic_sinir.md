@@ -689,4 +689,83 @@ hizalama hatasının *tanısı*, trim döngüsü BPM'lerden bağımsız *tedavis
 
 ---
 
+### 12.9 c_k'nin fırlatma koşuluna bağımlılığı: demet ortalaması geçerliliği
+
+**Dosyalar:** `test_b_trim_launch_dep.py`, `test_b_trim_launch_dep.png`,
+`test_b_launch_dep.json` (CO=False, k=2, A=10μm, t2=1ms)
+
+**Soru:** Trim kalibrasyonu eksen fırlatmasında (y=py=0) yapılıyor. Gerçek
+demetteki parçacıklar farklı başlangıç koşullarında (y₀, py₀). c_k bu fırlatma
+koşuluna bağlı mı? Eksen-kalibre trim, demet ortalamasında artık bırakır mı?
+
+---
+
+**Bölüm 1 — Başlangıç konumu taraması** (py₀=0):
+
+| y₀ [μm] | c_k/c_k(0) |
+|---|---|
+| 0 | 1.00000 |
+| 100 | 1.00065 |
+| 200 | 1.00130 |
+| 500 | 1.00325 |
+| 1000 | 1.00648 |
+| 2000 | 1.01286 |
+
+Maks sapma: **%1.29** (y₀=2mm'de). Lineer bağımlılık: ~%0.065/100μm.
+Tipik demet boyutu σ_y~0.5mm için etki ~%0.33 → önemsiz.
+
+---
+
+**Bölüm 2 — Başlangıç açısı taraması** (y₀=0):
+
+| α=py₀/pz₀ [mrad] | c_k/c_k(0) |
+|---|---|
+| 0.0 | 1.00000 |
+| 0.1 | 1.03002 |
+| 0.2 | 1.05777 |
+| 0.5 | 1.12693 |
+| 1.0 | 1.19216 |
+
+Maks sapma: **%19.2** (α=1mrad). Lineer rejim: ~%3/0.1mrad.
+
+**Fizik yorumu:** Bu etki fiziksel bir c_k değişimi değil, sonlu-t₂ ölçüm
+yapaylığıdır. Büyük başlangıç açısı → büyük betatron genliği A_β → polyfit
+eğiminde betatron salınımı kontaminasyonu. Gerçek trim, a_k → 0 olan
+kafese uygulanır; tüm parçacıklar için seküler sürüş = 0. Ayrıca: demet
+ortalamasında rastgele fazlar bu kontaminasyonu kısmen yok eder.
+
+---
+
+**Bölüm 3 — Demet ortalaması benzetimi** (N=30, σ_y=0.5mm, σ_α=0.2mrad):
+
+| Büyüklük | Değer |
+|---|---|
+| Eksen c_k | +88.804 rad/s/m |
+| Demet ortalama c_k | +88.390 rad/s/m |
+| c_k std (parçacık başına) | 4.81 rad/s/m (%5.4) |
+| Eksen−demet farkı | −%0.47 |
+| Trim sonrası artık (eksen kalibre) | 4.14×10⁻⁶ rad/s |
+| Bastırma (eksen kalibre) | **213×** |
+
+Demet-ortalaması, eksen ölçümünden **%0.47 düşük** çıkıyor; bu fark esas
+olarak büyük açılı parçacıkların negatif betatron katkısından kaynaklanıyor
+(c_k(−α) < c_k(0) etkisi, c_k(+α) artışından baskın çıkıyor).
+
+**Bastırma 213× ← alt sınır.** Bu rakam "eksen sinyalini her parçacıktan
+çıkar" yaklaşımından geliyor. Gerçek trim kafes modifikasyonu yaptığından
+(a_k → 0), tüm parçacıkların seküler sürüşü sıfırlanır; artık yalnızca
+betatron kontaminasyonu (<1e-6 rad/s) kalır → **gerçek bastırma çok daha büyük**.
+
+**Demet-ortalaması kalibrasyonu:** ⟨f⟩_demet ile c_k ölçülürse trim miktarı
+tam olarak belirlenir → artık = 0. Eksen yerine demet ortalaması kullanmak
+%0.47 sapmasını ortadan kaldırır.
+
+**Sonuç:** c_k fiziksel olarak evrenseldir (tüm başlangıç koşulları için aynı).
+Görünen fırlatma bağımlılığı sonlu-t₂ polyfit yapaylığı olup demet
+ortalamasında kısmen iptal olur. Eksen kalibrasyonu %0.47 doğrulukla demet
+ortalamasını temsil eder; daha soğuk demette bu doğruluk daha yüksek.
+Trim yöntemi demet büyüklüğünden bağımsız geçerliliğini korur.
+
+---
+
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*

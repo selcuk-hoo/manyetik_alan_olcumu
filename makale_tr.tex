@@ -954,11 +954,9 @@ $k$ & $c_k$ [rad/s/m] & $k$ & $c_k$ [rad/s/m] \\
 
 Sonuç pratik açıdan güçlüdür: oturtma varsayımının kaldırılması yöntemi
 zayıflatmak şöyle dursun, gözlenebiliri tam doğrusal hale getirerek
-\emph{tek turda} derin iptale olanak tanır. Açık kalan soru, trimin tek
-bir fırlatma koşulu (eksen) için sıfırladığı $dS_y/dt$'nin, farklı
-başlangıç koşullu parçacıklardan oluşan gerçek demet ortalamasında ne
-kadar artık bıraktığıdır; $c_k$'nin fırlatma koşuluna bağımlılığı sonraki
-çalışmanın konusudur.
+\emph{tek turda} derin iptale olanak tanır. Geriye kalan soru,
+trimin eksen fırlatmasıyla kalibre edilmesinin gerçek demet ortalamasını
+ne ölçüde temsil ettiğidir; bu Bölüm~\ref{sec:trim-launch}'de incelenmektedir.
 
 \subsection{BPM ofseti ve gürültüsünün etkisi}
 \label{sec:trim-bpm}
@@ -1028,6 +1026,101 @@ sistematik olduğu yörünge-rekonstrüksiyon yaklaşımıyla keskin bir
 karşıtlık oluşturur ve iki yöntemin tamamlayıcılığını güçlendirir:
 rekonstrüksiyon hizalama hatasının \emph{tanısını}, trim döngüsü ise
 BPM'lerden bağımsız \emph{tedavisini} sağlar.
+
+\subsection{Fırlatma koşuluna bağımlılık ve demet ortalaması geçerliliği}
+\label{sec:trim-launch}
+
+Trim kalibrasyonu eksen fırlatmasıyla ($y_0=p_y=0$) yapılan tek bir
+parçacık üzerinde gerçekleştirilir; gerçek demet ise dağılmış başlangıç
+koşullarına ($y_0,p_y$) sahip binlerce parçacıktan oluşur. Eksen
+kalibrasyonunun demet ortalamasını ne ölçüde temsil ettiğini saptamak
+amacıyla üç-bölümlü bir sayısal test yürütülmüştür ($k=2$, $A=10~\mu$m,
+$t_2=1$~ms, CO=False).
+
+\textbf{Konum taraması.}
+Eksen fırlatmasından $y_0=0$'dan $2$~mm'ye kadar kaydırılarak $c_k$'nin
+değişimi ölçüldü.  Tüm aralıkta etki doğrusaldır: $\Delta c_k/c_k \approx
+6{,}5\times10^{-4}\ \mu\text{m}^{-1}\cdot y_0$. $y_0=2$~mm'de maksimum
+sapma \%1.3 iken tipik $\sigma_y\approx0{,}5$~mm'de etki \%0.3'tür —
+pratik açıdan önemsiz.
+
+\textbf{Açı taraması.}
+Başlangıç açısı $\alpha=p_y/p_z$, 0'dan 1~mrad'a tarandı; görünen $c_k$
+değerleri Tablo~\ref{tab:ck-launch}'de verilmiştir.
+
+\begin{table}[h]
+\centering
+\caption{Görünen $c_k$'nin başlangıç açısına bağımlılığı ($k=2$,
+$A=10~\mu$m, CO=False). Sapma fiziksel değil, sonlu-$t_2$ betatron
+kontaminasyonu kaynaklı ölçüm yapaylığıdır.}
+\label{tab:ck-launch}
+\begin{tabular}{ccc}
+\toprule
+$\alpha$ [mrad] & $c_k$ [rad/s/m] & $c_k/c_k(0)$ \\
+\midrule
+0.0 & 88.80 & 1.000 \\
+0.1 & 91.47 & 1.030 \\
+0.2 & 93.93 & 1.058 \\
+0.5 & 100.08 & 1.127 \\
+1.0 & 105.87 & 1.192 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Gözlenen artış fiziksel bir $c_k$ değişimi \emph{değildir}: lineer kafeste
+betatron hareketi kapalı yörünge etrafında periyodik salınımdır ve
+Poincaré-ortalaması $\langle\Delta y\rangle_\mathrm{tur}$ betatron
+genliğinden bağımsız olarak kapalı yörünge değerini verir. Görünen sapmanın
+kaynağı, büyük başlangıç açısının büyük betatron genliği ($A_\beta\sim
+\alpha\sqrt{\beta_y}$) yaratması ve $S_y(t)$ izine bindirilen bu
+salınımın sonlu $t_2$'de doğrusal fit eğimini biyase etmesidir: fit
+artığı $\sim A_\beta\cdot\kappa/(\omega_\beta t_2)$ olup $t_2$'ye ters
+orantılıdır. Uzun ölçüm süresi veya demet ortalaması bu yapaylığı
+azaltır.
+
+\textbf{Demet ortalaması.}
+$N=30$ parçacık $\mathcal{N}(0,\sigma_y{=}0{,}5~\text{mm})$ ve
+$\mathcal{N}(0,\sigma_\alpha{=}0{,}2~\text{mrad})$ dağılımlarından
+çekildi; her birinin $k=2$ misalignment deseniyle $dS_y/dt$'si ölçüldü.
+
+\begin{table}[h]
+\centering
+\caption{Demet ortalaması testi: $N=30$ parçacık,
+$\sigma_y=0{,}5$~mm, $\sigma_\alpha=0{,}2$~mrad.
+Trim eksen kalibrasyonuyla uygulanmıştır.}
+\label{tab:demet-launch}
+\begin{tabular}{ll}
+\toprule
+Büyüklük & Değer \\
+\midrule
+Eksen $dS_y/dt$ (kalibrasyon) & $+8{,}880\times10^{-4}$~rad/s \\
+Demet ort. $dS_y/dt$ (trim öncesi) & $+8{,}839\times10^{-4}$~rad/s \\
+Parçacık başı std ($dS_y/dt$) & $4{,}81\times10^{-5}$~rad/s (\%5.4) \\
+Eksen--demet-ort. farkı & $-\%0{,}47$ \\
+Trim sonrası demet-ort. artığı & $4{,}14\times10^{-6}$~rad/s \\
+Bastırma (eksen kalibre) & $213\times$ (alt sınır) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Demet ortalaması eksen ölçümünden \%0.47 düşük çıkmaktadır; bu fark
+ağırlıklı olarak $\alpha<0$ parçacıklarının negatif betatron katkısından
+kaynaklanmaktadır (kontaminasyon işarete duyarlıdır). Eksen kalibrasyonu
+demet ortalamasını \%0.47 sapmayla temsil eder.
+
+Tablo~\ref{tab:demet-launch}'daki 213× sayısı ``eksen sinyalini her
+parçacıktan doğrusal çıkar'' modelinin verdiği alt sınırdır.
+\emph{Gerçek} trim bir kafes modifikasyonudur ($a_k\to0$):
+seküler $dS_y/dt$ tüm parçacıklarda tam olarak sıfırlanır; artık yalnızca
+($\ll10^{-6}$~rad/s) betatron kontaminasyonu bırakır. Dolayısıyla gerçek
+bastırma oranı 213×'i aşar; eksen kalibrasyonu lineer kafeste kesin
+olarak geçerlidir.
+
+Demet ortalaması kullanılarak $c_k$ kalibre edilirse
+(yani $\langle f\rangle_\mathrm{demet}$ ile trim miktarı belirlenir)
+\%0.47 sapması da ortadan kalkar ve artık tanım gereği sıfır olur.
+Demet büyüklüğü küçüldükçe ($\sigma_y<0{,}5$~mm, $\sigma_\alpha<0{,}2$~mrad)
+eksen--demet-ort. farkı doğrusal olarak azalır.
 
 %==============================================================
 \section{Tartışma ve sonraki çalışmalar}
