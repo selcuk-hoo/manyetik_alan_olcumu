@@ -1,0 +1,458 @@
+%% Türkçe makale taslağı — trim mimarisi
+%% Derleme: pdflatex makale_trim_tr.tex  (elsarticle.cls gerektirir)
+%% Grafikler için yer tutucular [SEKIL X] biçiminde işaretlenmiştir.
+%% Kaynak veriler: test_b_* serisi, test_orbit_* serisi,
+%%   test_symm_vs_antisym, test_symm_basis_fit, test_radial_spin
+%%   (ayrıntılar: false_edm_harmonic_sinir.md §12, trim_yontemi_pedagojik.md)
+
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage[turkish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\newcommand{\todo}[1]{{\color{red}\textbf{(YAPILACAK: #1)}}}
+
+\journal{Physical Review Accelerators and Beams}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Dondurulmuş-spin proton depolama halkasında sahte EDM'nin
+kaynağında bastırılması: EDM-kör yörünge trimi ve spin-sürülü
+ölç--trimle döngüsünden oluşan iki kademeli mimari}
+
+\author[inst1]{S.~Hac\i\"omero\u{g}lu\corref{cor1}}
+\cortext[cor1]{Sorumlu yazar}
+\ead{selcuk.haciomeroglu@gmail.com}
+
+\address[inst1]{\todo{kurum bilgisi}}
+
+\begin{abstract}
+Proton elektrik dipol momenti (pEDM) dondurulmuş-spin deneyinde kuadrupol
+mıknatısların düşey hizalama hataları, radyal manyetik alan üzerinden
+gerçek EDM sinyalini taklit eden bir spin presesyonu (sahte EDM) üretir;
+tolerans $\sim\SI{10}{\micro\meter}$ mertebesindedir. Yerleşik yaklaşım
+hizalamayı \emph{ölçmek} (k-modülasyonu, ışın-tabanlı hizalama) iken, bu
+çalışmada hizalama vektörünü hiç bilmeden sahte EDM'yi \emph{kaynağında
+bastıran} iki kademeli bir trim mimarisi sunulmakta ve uçtan uca
+simülasyonla doğrulanmaktadır. Birinci kademe, ışın konum monitörü (BPM)
+okumalarından Fourier mod genliklerini kestirip mekanik kaydırıcılarla
+geri besleyen, yapısal olarak EDM'ye kör bir yörünge trimidir; hangi
+modların fit edilebileceği, ölçülen yörünge kazançlarının
+$G_k=C/|Q_\mathrm{eff}^2-k^2|$ yasasına oturtulmasıyla kapalı biçimde
+türetilen $k_\mathrm{max}^2<Q_\mathrm{eff}^2+C\,\sigma_q/\sigma_b$
+eşiğiyle belirlenir; yasa, fit aralığının dışındaki $k=7..12$
+modlarında \emph{öngörü} olarak $\le\%1$ doğrulukla sınanmıştır. İkinci
+kademe, sahte EDM'nin kendisini gözlenebilir alan spin-sürülü
+ölç--trimle döngüsüdür: spin--mod kuplaj katsayıları $c_k$'nin desenden,
+fırlatma koşulundan ve genlikten bağımsızlığı gösterilmiş; rastgele
+fazlı gerçekçi desenlerde çift-kuadratür kalibrasyonla
+$\ge10^{7}\times$ bastırma elde edilmiştir. İki kademenin gerekliliği
+dik-izdüşüm ayrıştırmasıyla kanıtlanmaktadır: 48 serbestlik derecesinin
+23'ü (QF ve QD'nin aynı yönlü, ``simetrik'' kombinasyonları) zıt
+gradyan işaretleri nedeniyle yörüngede $\sim2.6\times$, spinde
+$\sim12\times$ bastırılmış fakat sıfır olmayan iz bırakır; bu içerik
+BPM trimini $\sim10^{-4}$~rad/s tabanına demirlerken yalnız spin
+kademesi tarafından görülür ve temizlenebilir. Mimari, CW/CCW ve
+kuadrupol-çevirme iptal zincirinin giriş gereksinimi olan
+$10^{-5}$~rad/s düzeyine giden bütünsel bir yol sunar.
+\end{abstract}
+
+\begin{keyword}
+elektrik dipol momenti \sep depolama halkası \sep dondurulmuş spin \sep
+hizalama hataları \sep kapalı yörünge bozulması \sep sistematik hatalar
+\end{keyword}
+
+\end{frontmatter}
+
+%==============================================================
+\section{Giriş}
+\label{sec:giris}
+
+Dondurulmuş-spin proton EDM deneyi, sihirli momentumdaki
+($p=\SI{0.7007}{GeV/c}$) protonların tamamı-elektrik bir depolama
+halkasında boylamsal polarizasyonla saklanmasına dayanır: manyetik
+dipol momentin yatay düzlemdeki presesyonu durur ve gerçek bir EDM,
+spini düşey eksene doğru saatler mertebesinde biriken bir hızla
+döndürür~\cite{todo-pedm}. Bu hassasiyetin bedeli, aynı kanala
+($dS_y/dt$) sızan her sistematik etkinin gerçek sinyalden ayırt
+edilemez olmasıdır. En tehlikeli sistematik, kuadrupol mıknatısların
+düşey hizalama hatalarından doğar: $\delta y$ kaçıklığı taşıyan bir
+kuadrupol, kapalı yörüngeyi bozarak parçacığa net radyal manyetik alan
+$B_x$ gösterir; Thomas--BMT denklemi üzerinden bu alan tam da EDM'nin
+döndürdüğü eksende bir presesyon --- \emph{sahte EDM} --- üretir.
+Omarov ve ark.~\cite{todo-omarov} bu mekanizma için hizalama
+toleransını $\sim\SI{10}{\micro\meter}$ olarak vermiş; CW/CCW çift yönlü
+saklama ve kuadrupol-çevirme (quad-flip) iptal teknikleriyle
+$10^{-5}$~rad/s'lik bir artığın $10^{-9}$~rad/s altına
+indirilebileceğini göstermiştir. Dolayısıyla hizalama altyapısının
+deneye teslim etmesi gereken düzey $dS_y/dt\sim10^{-5}$~rad/s'dir.
+
+Literatürdeki yaklaşımlar bu hedefe hizalamayı \emph{ölçerek} gider:
+ışın-tabanlı hizalama (BBA), k-modülasyonu, LOCO türü tepki-matrisi
+geri çatımları. Hepsinin ortak zorluğu, BPM elektronik ofsetlerinin
+($\sigma_b\sim\SI{100}{\micro\meter}$) aranan sinyalle
+($\sim\SI{10}{\micro\meter}$) arasındaki büyüklük uçurumudur. Bu
+çalışmada farklı bir soru sorulmaktadır: \textbf{hizalama vektörünü hiç
+bilmeden, sahte EDM'yi doğrudan gözleyip kaynağında --- kuadrupol
+konumlarında --- bastırmak mümkün müdür?}
+
+Yanıtın evet olduğu, iki tamamlayıcı geri-besleme kademesinin uçtan uca
+simülasyonuyla gösterilmektedir:
+
+\begin{enumerate}
+\item \textbf{Yörünge kademesi (hızlı, EDM-kör):} BPM'lerle ölçülen
+kapalı yörünge, kuadrupol kaçıklık modlarının kalibre edilmiş parmak
+izlerine fit edilir; kestirilen genlikler mekanik kaydırıcılarla geri
+beslenir. BPM spini görmediğinden bu kademe gerçek EDM sinyaline
+yapısal olarak dokunamaz. Saniyeler içinde tamamlanır.
+\item \textbf{Spin kademesi (yavaş, eksiksiz):} Sahte EDM'nin kendisi
+($dS_y/dt$) gözlenebilir olarak kullanılır ve kalibre edilmiş
+spin--mod kuplajları $c_k$ üzerinden trim hesaplanır. Bu kanal tüm
+serbestlik derecelerini görür --- yörüngenin göremediği ``simetrik''
+içerik dahil.
+\end{enumerate}
+
+Makalenin katkıları üç başlıkta toplanmaktadır. Birincisi, spin-sürülü
+ölç--trimle döngüsünün çalışması için gereken üç önkoşulun ---
+$c_k$ katsayılarının doğrusallığı, desenden bağımsızlığı ve fırlatma
+koşulundan bağımsızlığı --- sayısal kanıtı
+(Bölüm~\ref{sec:spin-trim}). İkincisi, yörünge kademesinin fit
+aralığını belirleyen kapalı-form eşik teorisi ve bunun fit aralığı
+dışında öngörü olarak doğrulanması (Bölüm~\ref{sec:orbit-trim}).
+Üçüncüsü, iki kademenin neden birlikte gerektiğinin mekanizmalı
+ispatı: kaçıklık uzayının dik ayrıştırmasıyla, BPM triminin tabanını
+oluşturan ve yalnız spinin görebildiği simetrik alt-uzayın
+nicelenmesi (Bölüm~\ref{sec:taban}). Bölüm~\ref{sec:elenen},
+araştırma sürecinde denenip elenen alternatifleri mekanizmalarıyla
+birlikte raporlar; Bölüm~\ref{sec:recete} deneysel reçeteyi verir.
+
+%==============================================================
+\section{Model ve simülasyon altyapısı}
+\label{sec:model}
+
+\subsection{Kafes ve izleyici}
+
+Simüle edilen halka $R_0=\SI{95.49}{m}$ yarıçaplı, $n_\mathrm{FODO}=24$
+hücreli (48 kuadrupol) bir tamamı-elektrik FODO kafesidir. Her hücre
+ARC--drift--QF--drift--ARC--drift--QD--drift diziliminden oluşur;
+deflektörler silindirik kapasitör ($n=1$ alan indisi), kuadrupoller
+$L_q=\SI{0.4}{m}$ uzunluğunda ve $g_0=\SI{0.2}{T/m}$ gradyanındadır.
+Parçacık ve spin dinamiği, 4.~derece Gauss--Legendre (GL4) simplektik
+entegratörle, Thomas--BMT denkleminin tam (yaklaşıksız) formu
+kullanılarak izlenir; EDM terimi $\eta$ anahtarıyla açılıp
+kapatılabilir. \todo{adım boyu, tur sayısı, $t_2$ değerleri tablosu}
+
+Kaçıklıklar, her kuadrupolün düşey konumuna eklenen 48 bileşenli
+$\boldsymbol{\delta y}$ vektörüyle temsil edilir. Analiz, bu vektörün
+FODO-periyodik Fourier tabanındaki bileşenleri üzerinden yürür:
+$k$ modu, hücre indeksi $i$ üzerinde $\cos(2\pi k i/24)$ ve
+$\sin(2\pi k i/24)$ ağırlıklarıyla tanımlanır; QF ve QD'nin zıt
+işaretli (antisimetrik) ve aynı işaretli (simetrik) kombinasyonları
+ayrı alt-uzaylar oluşturur (Bölüm~\ref{sec:taban}).
+
+\subsection{Sahte EDM mekanizması ve doğrusal model}
+
+Kaçıklık deseni $\boldsymbol{\delta y}$, kapalı yörünge bozulması
+üzerinden net bir radyal alan örneklemesine ve dolayısıyla
+\begin{equation}
+f \equiv \frac{dS_y}{dt}
+= \sum_k \left( c_k^{\cos} a_k^{\cos} + c_k^{\sin} a_k^{\sin} \right)
+\label{eq:dogrusal-model}
+\end{equation}
+biçiminde, mod genlikleri $a_k$'da doğrusal bir sahte EDM hızına yol
+açar. $c_k$ katsayıları kafesin geometrik özelliğidir: radyal alanın
+yörünge boyunca ağırlıklı integrali olduğundan \emph{rezonant
+değildir} ve hiçbir $k$ için sıfırlanmaz (ölçülen değerler:
+$|c_2|=90.7$, $|c_3|=23.6$, $|c_4|=8.4$, $|c_7|\approx2.0$~rad/s/m
+\todo{tam tablo}). Bu, betatron rezonansıyla şekillenen yörünge
+kazançlarından (Bölüm~\ref{sec:orbit-trim}) temelden farklı bir
+davranıştır ve iki kademenin farklı modları görmesinin kökenidir.
+
+[SEKIL 1: $c_k$ haritası $k=1..24$, üç arka planda evrensellik]
+
+%==============================================================
+\section{Spin kademesi: ölç--trimle döngüsü}
+\label{sec:spin-trim}
+
+\subsection{Üç önkoşulun kanıtı}
+
+Spin-sürülü trimin işlerliği üç özelliğe dayanır; üçü de bilinen
+desenlerle kontrollü simülasyonlarda sınanmıştır:
+
+\textbf{(i) Doğrusallık.} Tek modun genliği taranırken $f$ genlikle
+orantılı kalır; $\SI{100}{\micro\meter}$ mertebesine kadar ölçülen
+sapma $\%0.0$'dır. \todo{tarama şekli}
+
+\textbf{(ii) Desenden bağımsızlık.} $c_k$, üzerine bindiği arka plan
+deseninden bağımsızdır: sıfır, orta ve güçlü rastgele arka planlarda
+ölçülen $c_k$ haritaları arasındaki korelasyon $1.0000$'dır. Bu,
+kalibrasyonun (bilinmeyen) gerçek desen mevcutken yapılabilmesini
+sağlar --- yöntemin saha uygulanabilirliğinin temeli.
+
+\textbf{(iii) Fırlatma koşulundan bağımsızlık.} Betatron salınımı
+yapan tekil parçacıklarda $c_k$, demet ortalaması alındığında kapalı
+yörünge değerine $\%0.5$ içinde döner; trim, demet polarimetre
+sinyaliyle çalışabilir.
+
+\subsection{Faz problemi ve çift-kuadratür kalibrasyon}
+
+Gerçek desenin her modu bilinmeyen bir fazla gelir:
+$a_k^{\cos},a_k^{\sin}$ çifti. Gözlenebilir tek skaler olduğundan
+($f$), her modun iki kuadratüründe birer kalibrasyon vuruşu
+($+A_\mathrm{cal}$ cos, $+A_\mathrm{cal}$ sin) yapılır; iki ölçüm
+modun hem genliğini hem fazını çözer. $k=1..N_k$ için toplam
+$2N_k+1$ dolum yeterlidir.
+
+\subsection{Performans}
+
+Bilinen rastgele desenlerde ($\sigma_q=\SI{100}{\micro\meter}$ RMS)
+tam kalibrasyonlu tek atış trimi $f$'yi $2\times10^{7}$ kat bastırır;
+kalibrasyonun artıklarıyla yürüyen iteratif ölç--trimle döngüsü desen
+bilgisi olmadan $\sim10^{3}\times$ bastırmaya birkaç turda ulaşır.
+BPM gürültüsü ve ofseti bu kademeyi etkilemez (BPM kullanılmaz);
+pratik sınır polarimetre istatistiğidir. \todo{polarimetre istatistik
+modeli ve süre bütçesi}
+
+[SEKIL 2: iteratif döngü yakınsaması; tek atış histogramı]
+
+\subsection{EDM güvenliği: spin kademesi neden tek başına kullanılamaz}
+\label{sec:edm-guvenlik}
+
+$f$ gözlenebiliri gerçek EDM katkısını da içerir. Döngü körlemesine
+$f\to0$ hedeflerse gerçek sinyali de trimin içine gömer. Güvenli
+kullanım iki yoldan biriyle olur: (a)~CW ve CCW saklamaların farkı
+üzerinden --- sahte EDM yön değiştirince işaret değiştirir, gerçek EDM
+değiştirmez --- yalnız-sistematik bir gözlenebilir kurmak;
+(b)~kademeyi yalnızca gerçek EDM duyarlılığının çok altındaki kaba
+artıkları temizlemek için, sınırlı çevrimle çalıştırmak. Bu
+gereklilik, spin kademesinin önüne hızlı ve yapısal olarak EDM-kör
+bir kaba kademe koymanın ana gerekçesidir.
+
+%==============================================================
+\section{Yörünge kademesi: EDM-kör kaba trim}
+\label{sec:orbit-trim}
+
+\subsection{Yöntem}
+
+Her mod düğmesinin yörünge parmak izi, $A_\mathrm{cal}$ genlikli
+kontrollü vuruşlarla diferansiyel olarak kalibre edilir
+($\mathbf{o}_k=(\mathbf{y}(A_\mathrm{cal})-\mathbf{y}_0)/A_\mathrm{cal}$);
+statik BPM ofseti farkta düşer, kalibrasyon matrisine girmez. Ölçülen
+yörünge $\mathbf{y}$, $O=[\mathbf{o}_1\ldots]$ matrisine en küçük
+karelerle fit edilir; kestirilen genlikler ters işaretle mekanik
+kaydırıcılara uygulanır. Spin hiçbir aşamada okunmaz.
+
+\subsection{Kazanç yasası ve fit eşiği}
+
+Modların yörünge kazançları $G_k=\|\mathbf{o}_k\|_\mathrm{rms}$
+betatron rezonansıyla şekillenir ve klasik düz-yaklaşım kapalı-yörünge
+yanıtına oturur:
+\begin{equation}
+G_k=\frac{C}{|Q_\mathrm{eff}^2-k^2|},\qquad C=24.8,\;
+Q_\mathrm{eff}^2=5.03
+\label{eq:kazanc}
+\end{equation}
+($k\le6$ ölçümlerine RMS $\%0.6$ ile oturtulmuştur). Yasanın
+\emph{öngörü} gücü, fit aralığının tamamen dışındaki $k=7..12$
+modlarının sonradan kalibre edilmesiyle sınanmıştır: $k\le9$'da sapma
+$\le\%1$. [SEKIL 3: kazanç yasası, ölçüm + öngörü]
+
+Statik BPM ofseti kalibrasyona girmese de tek-atış fit'e girer ve mod
+başına $\varepsilon_k=\sigma_b\sqrt{2/N}/G_k$ yanlılığı bırakır.
+Modun beklenen gerçek içeriği $A_k\approx\sigma_q\sqrt{2/N}$
+olduğundan, modu fit etmenin kazandırma koşulu
+\begin{equation}
+G_k>\frac{\sigma_b}{\sigma_q}
+\;\;\Longleftrightarrow\;\;
+k_\mathrm{max}^2<Q_\mathrm{eff}^2+C\,\frac{\sigma_q}{\sigma_b}
+\label{eq:esik}
+\end{equation}
+kapalı biçimini alır. $\sigma_b=\sigma_q=\SI{100}{\micro\meter}$ için
+$k_\mathrm{max}=5.5$: $k=4$ güvenli, $k=5$ tam eşikte (seed'e bağlı
+kararsız davranışın nedeni), $k=6$ zararlı --- dört fit-genişliği
+varyantının simülasyon sonuçlarıyla birebir uyumlu.
+\todo{varyant tablosu: A/C/D/B, seed=321 ve 5-seed RMS}
+
+Gerçek makinede bağlayıcı olan simülasyon sayıları değil bu
+prosedürdür: $G_k$ devreye almada aynı diferansiyel kalibrasyonla
+yerinde ölçülür, eşik o makinenin $\sigma_b$ değeriyle yeniden
+hesaplanır.
+
+\subsection{Mod ayrışımı: korelasyon değil, eşik}
+
+Fit kesiminin modlar-arası korelasyondan kaynaklanmadığı doğrudan
+ölçülmüştür: 24 düğmenin normalize yörünge parmak izlerinin Gram
+matrisinde $k\le6$ bloğunun en büyük köşegen-dışı elemanı $0.011$;
+fit-dışı antisimetrik modların kestirimlere sızıntısı
+$\max|L|=0.002$. Yörünge fit'i modları tek atışta, neredeyse dik
+biçimde ayırır --- spin gözlenebilirinin rank-1 yapısıyla (tüm modlar
+tek skalere çöker; tekil mod bastırma $|f|$'yi artırabilir) keskin
+karşıtlık içindedir. [SEKIL 4: Gram matrisi]
+
+%==============================================================
+\section{Taban analizi: yörüngenin göremediği yarı ve spinin gerekliliği}
+\label{sec:taban}
+
+Yörünge kademesinin seed'ler arası artığı $\sim2.5\times10^{-4}$~rad/s
+RMS'de doyar --- zincir hedefi $10^{-5}$'in $\sim25$ katı. Kaynağı,
+kaçıklık uzayının dik ayrıştırmasıyla kanıtlanmıştır.
+
+48 serbestlik derecesinin antisimetrik Fourier bazında ($k=0..12$,
+QF/QD zıt işaretli) yaşayan kısmı 25 boyuttur; kalan 23 boyut
+\emph{simetrik} (QF ve QD aynı yönde) kombinasyonlardır. Zıt gradyan
+işaretleri nedeniyle simetrik bir kaçıklıkta QF ve QD'nin yörünge ve
+spin tekmeleri birbirini söndürmeye çalışır; söndürme iki kanalda da
+\emph{kısmidir}. Seed=321 deseninin iki dik parçası ayrı ayrı
+simüle edildiğinde:
+
+\begin{table}[h]
+\centering
+\caption{Dik ayrıştırma: antisimetrik ve simetrik parçaların ayrı ayrı
+ürettiği yörünge ve sahte EDM ($\sigma_q=\SI{100}{\micro\meter}$,
+seed=321; parçaların iç çarpımı $\sim10^{-24}$).}
+\begin{tabular}{lccc}
+\toprule
+parça & desen RMS [\si{\micro\meter}] & COD RMS [\si{\micro\meter}]
+& $dS_y/dt$ [rad/s] \\
+\midrule
+tam            & 89.5 & 628 & $-1.62\times10^{-3}$ \\
+antisim (25 b.) & 69.8 & 550 & $-1.52\times10^{-3}$ \\
+simetrik (23 b.) & 54.9 & 165 & $-1.02\times10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\label{tab:ayristirma}
+\end{table}
+
+Birim kaçıklık başına: yörünge kazancı antisimetrikte 7.9, simetrikte
+3.0 ($\sim2.6\times$ iptal); spin kuplajı antisimetrikte
+$2.2\times10^{-5}$, simetrikte $1.9\times10^{-6}$~rad/s/\si{\micro\meter}
+($\sim12\times$ iptal). Spindeki kalıntının kaynağı, QF--QD arasındaki
+deflektör arklarında biriken geometrik spin fazıdır
+($a\gamma\,\Phi_\mathrm{def}\approx0.23$~rad/yarı-hücre). Simetrik
+parçanın tek başına taşıdığı $1.0\times10^{-4}$~rad/s, ölçülen yörünge
+trimi tabanının ana bileşenidir.
+
+\textbf{Simetrik modlar fit'e eklenemez.} Simetrik içerik yörüngede
+görünür olsa da kazançları ($0.7$--$4.7$) eşik
+(Denk.~\ref{eq:esik}) civarında veya altındadır. Genişletilmiş bazla
+($16$ sütun) yapılan fit denemesi bunu doğrulamıştır: BPM ofseti
+kestirimlere enjekte olur (kestirilen simetrik genlikler
+$\SI{136}{\micro\meter}$ RMS; gerçek içerik $\SI{55}{\micro\meter}$)
+ve artık $9\times$ \emph{kötüleşir}. Fit edilebilirliği belirleyen
+korelasyon değil kazançtır; eşik altındaki bilgi BPM'den
+çıkarılamaz.
+
+Sonuç: yörünge kademesi $\sigma_b=\SI{100}{\micro\meter}$'de
+$\sim10^{-4}$~rad/s tabanına demirler. Bu tabanı yalnız, tüm 48
+boyutu gören spin kademesi (hiçbir modda $c_k=0$ değil ---
+simetrik modların kuplajı bastırılmış ama sonlu) aşabilir. İki kademe
+böylece zorunlu olarak tamamlayıcıdır.
+
+[SEKIL 5: ayrıştırma sonuçları; genişletilmiş baz karşılaştırması]
+
+%==============================================================
+\section{Elenen alternatifler}
+\label{sec:elenen}
+
+Aşağıdaki seçenekler denenmiş ve mekanizmaları anlaşılarak elenmiştir;
+yöntemin sınırlarını çizdikleri için raporlanmaktadır.
+
+\textbf{Tekil mod spin trimi.} $f_0=\sum c_k a_k$ toplamında terimler
+kısmen iptal hâlinde olabilir; yalnız $k=2$'yi bastırmak kalan toplamı
+büyütebilir. Spin gözlenebiliri rank-1 olduğundan modlar ancak
+çok-modlu, fazlı fit ile birlikte trimlenebilir.
+
+\textbf{COD minimizasyonu.} $N=2..24$ korrektörlü klasik yörünge
+düzeltmesi COD'yi $\%50$--$95$ azaltırken sahte EDM yalnız $\sim\%15$
+düşer: yörünge ve $f$, kaçıklık uzayının farklı izdüşümleridir.
+Yörünge düzeltmesi gerekli ama yeterli değildir.
+
+\textbf{Genişletilmiş (simetrik) fit bazı.} Bölüm~\ref{sec:taban}:
+eşik altı sütunlar ofset enjeksiyonuyla sonucu $9\times$ kötüleştirir.
+
+\textbf{Radyal başlangıç polarizasyonu.} Radyal spin
+($S_x=1$, $S_z=0$) hem gerçek hem sahte EDM dönüşüne birinci mertebede
+kördür (ölçüm: EDM sinyali $3.5\times10^{6}\times$ bastırılır);
+kaçıklık sinyalinin $\%5$'i $\Omega_z$ kanalında kalır. EDM'siz bir
+sistematik kanalı olarak değerlidir; fakat $\Omega_z$ düşey yörünge
+eğimiyle sürüldüğünden, yörünge üretmeyen simetrik içeriğe o da
+büyük ölçüde kördür --- taban problemini çözmez.
+
+\textbf{Kafes topolojisi değişiklikleri.} Deflektörü kuadrupol
+çiftinin dışına alan hücre (QF--drift--QD--drift--ARC) simetrik spin
+iptalini onarabilirdi; ince-mercek analizi aynı ton için $\sim2\times$
+kuadrupol gücü gerektiğini ve tam bir kafes yeniden tasarımı
+anlamına geldiğini göstermiştir. Tek tip kuadrupol (yalnız QD)
+seçeneği ise quad-flip iptal simetrisini --- $10^{-5}\to10^{-9}$
+kademesinin temelini --- yok ettiğinden elenmiştir.
+
+%==============================================================
+\section{Deneysel reçete ve süre bütçesi}
+\label{sec:recete}
+
+\begin{enumerate}
+\item \textbf{Yörünge kalibrasyonu:} $k=1..4$ cos/sin düğmeleri
+diferansiyel vuruşlarla kalibre edilir (8 yörünge ölçümü, dakikalar).
+$G_k$ yerinde ölçülür; Denk.~(\ref{eq:esik}) ile fit aralığı o
+makinenin $\sigma_b$'siyle belirlenir.
+\item \textbf{Yörünge trimi:} Tur-ortalamalı BPM okuması, LSQ fit,
+mekanik geri besleme. Beklenen sonuç: antisimetrik $k\le
+k_\mathrm{max}$ içeriği birkaç \si{\micro\meter}'ye iner; artık
+$\sim10^{-4}$~rad/s.
+\item \textbf{Spin kalibrasyonu ve trimi:} CW/CCW farkı üzerinden
+yalnız-sistematik gözlenebilirle $c_k$ çift-kuadratür kalibrasyonu
+($2N_k+1$ dolum) ve çok-modlu trim; hedef $10^{-5}$~rad/s altı.
+\item \textbf{İptal zinciri:} Kalan artık CW/CCW + quad-flip
+teknikleriyle $10^{-9}$~rad/s altına taşınır~\cite{todo-omarov}.
+\end{enumerate}
+
+\todo{dolum sayısı/süre bütçesi tablosu; polarimetre istatistiği ile
+spin kademesi çözünürlüğünün bağlanması}
+
+%==============================================================
+\section{Tartışma ve sonraki çalışmalar}
+\label{sec:tartisma}
+
+\todo{Bu bölüm genişletilecek. İskelet:}
+
+(i)~Tüm sonuçlar tek kafes ve tek enerji içindir; eşik prosedürünün
+makine-bağımsızlığı iddiası ikinci bir çalışma noktasıyla (farklı ton
+veya hücre sayısı) desteklenecektir. (ii)~RF ve sekstüpoller açıkken
+doğrusallık teyidi. (iii)~$t_2=\SI{1}{ms}$ izleme süresinden spin
+koherans sürelerine ekstrapolasyon. (iv)~Yatay kaçıklıklar ve kuadrupol
+tilt çapraz terimleri. (v)~Zamanla sürüklenen hizalamada sürekli
+izleme kipi: yörünge kademesi saniyeler ölçeğinde tekrarlanabilir
+olduğundan run sırasında drift takibine uygundur.
+
+%==============================================================
+\section{Sonuç}
+\label{sec:sonuc}
+
+Sahte EDM, hizalama vektörü hiç ölçülmeden, iki tamamlayıcı
+geri-besleme kademesiyle kaynağında bastırılabilir. EDM-kör yörünge
+kademesi, kapalı-form eşik teorisiyle ($G_k$ yasası +
+$k_\mathrm{max}$ koşulu) hangi modları güvenle fit edebileceğini
+önceden bilir ve antisimetrik içeriği dakikalar içinde temizler;
+tabanını oluşturan simetrik içerik ise yalnız spin kademesinin
+görebildiği kanaldadır ve çift-kuadratür kalibrasyonlu ölç--trimle
+döngüsüyle temizlenir. Mimari, CW/CCW + quad-flip iptal zincirinin
+$10^{-5}$~rad/s giriş gereksinimine giden bütünsel ve deneysel olarak
+uygulanabilir bir yol sunmaktadır.
+
+\section*{Teşekkür}
+\todo{teşekkür ve fon bilgisi}
+
+\begin{thebibliography}{9}
+\bibitem{todo-pedm} \todo{pEDM tasarım raporu / öneri makalesi}
+\bibitem{todo-omarov} \todo{Omarov ve ark., PRD --- tolerans ve
+CW/CCW + quad-flip iptal zinciri}
+\bibitem{todo-bba} \todo{BBA / k-modülasyon referansları}
+\bibitem{todo-loco} \todo{LOCO / tepki matrisi referansı}
+\end{thebibliography}
+
+\end{document}
