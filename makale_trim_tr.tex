@@ -19,6 +19,8 @@
 
 \documentclass[preprint,12pt]{elsarticle}
 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[turkish]{babel}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
@@ -273,7 +275,7 @@ iki kademenin farklı modları görmesinin kökenidir.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=\linewidth]{test_b_mode_map_cofalse.png}
+\includegraphics[width=0.95\textwidth]{test_b_mode_map_cofalse.png}
 \caption{Spin--mod kuplaj haritası ve evrenselliği. Sol: $c_k$
 katsayıları $k=1..24$, üç farklı rastgele arka plan deseni üzerinde
 ölçülmüş (eğriler ayırt edilemez). Orta: büyüklükler logaritmik
@@ -340,7 +342,7 @@ desen spektrumu ve ölç--trimle yakınsaması.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=\linewidth]{test_b_random_trim.png}
+\includegraphics[width=0.95\textwidth]{test_b_random_trim.png}
 \caption{Rastgele fazlı desen üzerinde çift-kuadratür spin trimi.
 Sol üst: cos ve sin kuadratürlerinde kalibre edilen $c_k$
 katsayıları. Sağ üst: faz modelinin doğrulaması --- trim deseninin
@@ -365,7 +367,7 @@ ofseti bu kademeyi hiç etkilemez, çünkü BPM kullanılmaz.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=0.8\linewidth]{test_b_iterative_trim.png}
+\includegraphics[width=0.8\textwidth]{test_b_iterative_trim.png}
 \caption{İteratif ölç--trimle döngüsünün yakınsaması (taze rastgele
 desen). Her adımda $f$ ölçülür, mevcut kalibrasyonla mod kestirimi
 yapılır ve düzeltme uygulanır; desen bilgisi hiçbir adımda
@@ -482,7 +484,7 @@ değil, kafesin kapalı-yörünge dinamiğinin parametrizasyonudur.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=\linewidth]{test_orbit_mode_correlation.png}
+\includegraphics[width=0.95\textwidth]{test_orbit_mode_correlation.png}
 \caption{Yörünge kademesinin yapısal analizi. Sol: 24 mod düğmesinin
 normalize yörünge parmak izlerinin Gram matrisi
 $|\hat{\mathbf{o}}_i\cdot\hat{\mathbf{o}}_j|$; $k\le6$ bloğunda en
@@ -534,7 +536,7 @@ hesaplanır.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=\linewidth]{test_orbit_trim.png}
+\includegraphics[width=0.95\textwidth]{test_orbit_trim.png}
 \caption{Yörünge-sürülü trim. Sol üst: ölçülen mod-yörünge kazançları
 $G_k$ (rezonans hiyerarşisi). Sağ üst: geniş fit'in ($k\le6$) mod
 kestirim hataları --- düşük kazançlı modlarda BPM ofseti kestirime
@@ -559,7 +561,7 @@ Bölüm~\ref{sec:taban}'da kanıtlanır.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=0.85\linewidth]{test_orbit_trim_seeds.png}
+\includegraphics[width=0.85\textwidth]{test_orbit_trim_seeds.png}
 \caption{Fit genişliği varyantlarının beş bağımsız rastgele desendeki
 bastırma oranları. Genişlik haritası ($k\le4$ en iyi) seed'ler arası
 korunur; mutlak bastırma desene bağlıdır ve artık
@@ -636,7 +638,7 @@ artığı değil, fit'in \emph{eriştiği uzayın dışında kalan} içeriktir.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=0.9\linewidth]{test_symm_vs_antisym.png}
+\includegraphics[width=0.9\textwidth]{test_symm_vs_antisym.png}
 \caption{Dik ayrıştırma deneyi. Sol: kapalı yörünge bozulması (COD)
 --- simetrik parça yörüngede $\sim2.6$ kat bastırılmış ama görünür.
 Sağ: sahte EDM --- simetrik parça spinde $\sim12$ kat bastırılmış ama
@@ -666,7 +668,7 @@ altındaki bilgi BPM'den çıkarılamaz.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=\linewidth]{test_symm_basis_fit.png}
+\includegraphics[width=0.95\textwidth]{test_symm_basis_fit.png}
 \caption{Genişletilmiş baz denemesi. Sol: antisimetrik ve simetrik
 modların tek tek ölçülen yörünge kazançları; simetrik kazançlar eşik
 civarında veya altında. Orta: sahte EDM sonuçları --- yalnız
@@ -726,7 +728,7 @@ kaybı olmadan sağladığından tercih edilen yol odur.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=0.9\linewidth]{test_radial_spin.png}
+\includegraphics[width=0.9\textwidth]{test_radial_spin.png}
 \caption{Radyal başlangıç polarizasyonu testi: $S_y(t)$ izleri.
 Radyal hazırlanan spin, EDM dönüşüne birinci mertebede kördür
 (bastırma $3.5\times10^{6}$ kat); kaçıklık sinyalinin yalnız $\%5$'i
