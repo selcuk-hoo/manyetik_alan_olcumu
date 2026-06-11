@@ -831,11 +831,36 @@ Doğrulama / yeniden kalibrasyon & 2 & $\approx7$~dk
 
 Sonuçların kapsamı ve sınırları şöyledir.
 
-(i)~Tüm sayısal sonuçlar tek kafes ve tek enerji içindir. Eşik
-prosedürü (kalibrasyon $\to$ $G_k$ fit'i $\to$
-Denk.~\ref{eq:esik}) tasarım gereği makine-bağımsızdır; ancak bu
-iddianın ikinci bir çalışma noktasıyla (farklı ton veya hücre
-sayısı) desteklenmesi planlanmaktadır.
+(i)~Eşik prosedürünün (kalibrasyon $\to$ $G_k$ fit'i $\to$
+Denk.~\ref{eq:esik}) kafes-bağımsızlığı, $g_0\in\{0.15,\,0.20,\,0.25\}$~T/m
+üç farklı kuadrupol gradyanında doğrulanmıştır (\texttt{test\_g0\_scan.py}).
+Her üç noktada kazanç yasası aynı işlevsel biçimi korumakta ve eşik
+formülü doğru $k_\mathrm{max}$ değerini öngörmektedir (Tablo~\ref{tab:g0scan}).
+$g_0=0.25$~T/m noktası, $Q_\mathrm{eff}\approx2.83\approx\sqrt{8}$ ile
+$k=3$ harmonik rezonansına yakın düşer ($|Q_\mathrm{eff}^2-k^2|=0.98$);
+bu yakınlık $G_3\approx33$ yüksek kazancına ve trim artığının $\sim3\times$
+büyümesine neden olur. Rezonansa yakın çalışmaktan kaçınma koşulu,
+eşik formülünden bağımsız, ayrı bir operasyonel kısıttır.
+
+\begin{table}[htb]
+\centering
+\caption{Üç kuadrupol gradyanında eşik taraması ($N_\mathrm{seed}=50$,
+antisimetrik desen, $t_2=1$~ms). Trim artık RMS, eşik öngörüsündeki
+$k_\mathrm{max}$ fit aralığıyla elde edilmiştir.}
+\label{tab:g0scan}
+\begin{tabular}{ccccccc}
+\toprule
+$g_0$ (T/m) & $C$ & $Q_\mathrm{eff}^2$ & $k_\mathrm{max}$ &
+Orbit oranı & Spin oranı & Trim RMS ($\mu$rad/s) \\
+\midrule
+0.15 & 20.5 & 5.27 & 5 & $4.3\times$ & $5.8\times$  & 516 \\
+0.20 & 25.0 & 5.04 & 5 & $2.7\times$ & $19.3\times$ & 605 \\
+0.25 & 32.0 & 8.02 & 6 & $3.5\times$ & $5.3\times$  & 1633\rlap{${}^*$} \\
+\bottomrule
+\multicolumn{7}{l}{\small ${}^*$ $Q_\mathrm{eff}\approx\sqrt{8}$:
+$k=3$ rezonansına yakın ($G_3\approx33$); rezonansı aşmak önerilir.}
+\end{tabular}
+\end{table}
 
 (ii)~Simülasyonlar RF ve sekstüpoller kapalıyken yapılmıştır;
 doğrusallık önkoşulunun (Bölüm~\ref{sec:onkosullar}) bu elemanlar
