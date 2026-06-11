@@ -21,6 +21,9 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}   % T1'de Türkçe glifleri (ş ğ ı İ) için zorunlu;
+                       % yoksa pdfLaTeX bu karakterleri sessizce düşürür
+\usepackage[margin=2cm]{geometry}
 % Not: Türkçe babel "=", ":", "!" karakterlerini "shorthand" olarak
 % aktifleştirir; bu \includegraphics[width=...] gibi keyval
 % argümanlarını bozar (Package keyval Error: width=\linewidth undefined).
