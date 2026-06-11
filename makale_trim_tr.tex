@@ -21,7 +21,11 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[turkish]{babel}
+% Not: Türkçe babel "=", ":", "!" karakterlerini "shorthand" olarak
+% aktifleştirir; bu \includegraphics[width=...] gibi keyval
+% argümanlarını bozar (Package keyval Error: width=\linewidth undefined).
+% shorthands=off bunu engeller.
+\usepackage[shorthands=off,turkish]{babel}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
