@@ -72,8 +72,10 @@ sistematiği görür ve gerçek sinyale dokunamaz. İki kademenin
 gerekliliği, kaçıklık uzayının dik ayrıştırmasıyla kanıtlanmaktadır:
 48 serbestlik derecesinin 23'ü (odaklayıcı ve dağıtıcı kuadrupollerin
 aynı yönlü, ``simetrik'' kombinasyonları) zıt gradyan işaretleri
-nedeniyle yörüngede $\sim2.6$ kat, spinde $\sim12$ kat bastırılmış
-fakat sıfır olmayan iz bırakır; bu içerik BPM trimini
+nedeniyle yörüngede ve spinde kısmen bastırılmış
+fakat sıfır olmayan iz bırakır (nominal kafes $g_0=0.20$~T/m için
+yörüngede $\sim2.6$ kat, spinde $\sim12$ kat; kafes parametrelerine
+bağlı); bu içerik BPM trimini
 $\sim10^{-4}$~rad/s tabanına demirler ve yalnız spin kademesi
 tarafından temizlenebilir. Mimari, CW/CCW ve kuadrupol-çevirme iptal
 zincirinin giriş gereksinimi olan $10^{-5}$~rad/s düzeyine giden
@@ -494,16 +496,25 @@ Kazançlar betatron rezonansıyla şekillenir ve klasik düz-yaklaşım
 kapalı-yörünge yanıtına oturur:
 \begin{equation}
 G_k=\frac{C}{|Q_\mathrm{eff}^2-k^2|},
-\qquad C=24.8,\quad Q_\mathrm{eff}^2=5.03,
 \label{eq:kazanc-yasa}
 \end{equation}
 burada $Q_\mathrm{eff}$ kafesin etkin düşey betatron tonudur ve $C$
 kafese özgü bir sabittir; ikisi de $k\le6$ kazanç ölçümlerine fit'le
-belirlenmiştir (artık RMS $\%0.6$). Yasanın \emph{öngörü} gücü, fit
-aralığının tamamen dışındaki $k=7..12$ modlarının sonradan kalibre
-edilmesiyle sınanmıştır: $k\le9$'da sapma $\le\%1$
-(Şekil~\ref{fig:gram-kazanc}, orta panel). Yasa bir uydurma eğrisi
-değil, kafesin kapalı-yörünge dinamiğinin parametrizasyonudur.
+belirlenir. Nominal kafes ($g_0=0.20$~T/m) için $C=24.8$,
+$Q_\mathrm{eff}^2=5.03$, fit artık RMS $\%0.6$'dır. Yasanın
+\emph{öngörü} gücü, fit aralığının tamamen dışındaki $k=7..12$
+modlarının sonradan kalibre edilmesiyle sınanmıştır: $k\le9$'da
+sapma $\le\%1$ (Şekil~\ref{fig:gram-kazanc}, orta panel).
+Yasa bir uydurma eğrisi değil, kafesin kapalı-yörünge dinamiğinin
+parametrizasyonudur; $C$ ve $Q_\mathrm{eff}$ her kalibrasyon koşumuyla
+güncellenir. Üç farklı kafes noktasında ($g_0\in\{0.15,0.20,0.25\}$~T/m)
+yapılan taramada düzgün-halka formülü $g_0=0.20$'de mükemmel
+($\le\%1.4$ sapma), $g_0=0.15$'te bazı modlarda bozulmuş ancak
+$k_\mathrm{max}$ tahmini yine de doğru çıkmıştır
+(Tablo~\ref{tab:g0scan}). $Q_\mathrm{eff}$ bir tam sayıya
+($Q_\mathrm{eff}\approx\sqrt{k^2}$) yaklaşınca $G_k\to\infty$
+(rezonans); bu koşuldan kaçınmak kafes tasarımı için ayrı bir
+operasyonel kısıttır.
 
 \begin{figure}[htb]
 \centering
@@ -640,11 +651,14 @@ simetrik (23 boyut) & 54.9 & 165 & $-1.02\times10^{-4}$ \\
 \label{tab:ayristirma}
 \end{table}
 
-Tablo~\ref{tab:ayristirma} ve Şekil~\ref{fig:ayristirma} sonucu
-özetler. Birim kaçıklık başına normalize edildiğinde: yörünge kazancı
-antisimetrik parçada $7.9$, simetrik parçada $3.0$ ($\sim2.6$ kat
-iptal); spin kuplajı antisimetrikte $2.2\times10^{-5}$, simetrikte
-$1.9\times10^{-6}$~rad/s/\si{\micro\meter} ($\sim12$ kat iptal).
+Tablo~\ref{tab:ayristirma} ve Şekil~\ref{fig:ayristirma} sonucu nominal
+kafes ($g_0=0.20$~T/m) için özetler. Birim kaçıklık başına normalize
+edildiğinde: yörünge kazancı antisimetrik parçada $7.9$, simetrik
+parçada $3.0$ ($\sim2.6$ kat iptal); spin kuplajı antisimetrikte
+$2.2\times10^{-5}$, simetrikte $1.9\times10^{-6}$~rad/s/\si{\micro\meter}
+($\sim12$ kat iptal). Bu oranlar kafese özgüdür: üç gradyan noktasındaki
+taramada yörünge bastırması $2.6{-}4.3\times$, spin bastırması ise
+$5{-}19\times$ aralığında çıkmıştır (Tablo~\ref{tab:g0scan}).
 Simetrik kombinasyonda QF ve QD'nin zıt gradyanları yörünge ve spin
 tekmelerini söndürmeye çalışır; ancak söndürme iki kanalda da
 \emph{kısmidir}. Spindeki kalıntının mekanizması bellidir: QF ile QD
@@ -665,8 +679,9 @@ artığı değil, fit'in \emph{eriştiği uzayın dışında kalan} içeriktir.
 \caption{Dik ayrıştırma deneyi. Sol: kapalı yörünge bozulması (COD)
 --- simetrik parça yörüngede $\sim2.6$ kat bastırılmış ama görünür.
 Sağ: sahte EDM --- simetrik parça spinde $\sim12$ kat bastırılmış ama
-$1.0\times10^{-4}$~rad/s taşır; bu, yörünge triminin taban değeriyle
-aynı mertebededir.}
+$1.0\times10^{-4}$~rad/s taşır (nominal kafes $g_0=0.20$~T/m için;
+kafes parametrelerine bağlı). Bu değer yörünge triminin taban
+değeriyle aynı mertebededir.}
 \label{fig:ayristirma}
 \end{figure}
 
@@ -709,8 +724,9 @@ Yörünge kademesi, $\sigma_b=\SI{100}{\micro\meter}$'lik BPM
 ofsetleriyle $\sim10^{-4}$~rad/s tabanına demirlidir ve bu taban fit
 genişletmeyle aşılamaz. Tabanı yalnız, tüm 48 boyutu gören spin
 kademesi aşabilir: Denk.~(\ref{eq:dogrusal-model})'in kuplajları
-hiçbir modda sıfır değildir --- simetrik içeriğin kuplajı $12$ kat
-bastırılmış ama sonludur ve CW$-$CCW fark kanalında
+hiçbir modda sıfır değildir --- simetrik içeriğin kuplajı birkaç ila
+$\sim20$ kat bastırılmış ama sonludur (kafes parametrelerine bağlı;
+bkz.\ Tablo~\ref{tab:g0scan}) ve CW$-$CCW fark kanalında
 (Bölüm~\ref{sec:edm-guvenlik}) güvenle trimlenebilir.
 
 %==============================================================
@@ -893,10 +909,11 @@ kademesi, kapalı-form eşik teorisiyle (kazanç yasası
 Denk.~\ref{eq:kazanc-yasa} $+$ eşik Denk.~\ref{eq:esik}) hangi
 modları güvenle fit edebileceğini önceden bilir ve antisimetrik
 içeriği dakikalar içinde temizler. Tabanını oluşturan simetrik
-içerik --- 48 serbestlik derecesinin yörüngede ve spinde kısmen
-iptal olan, fakat hiçbir kanalda tam kaybolmayan 23 boyutu ---
-yalnız spin kademesinin görebildiği kanaldadır ve çift-kuadratür
-kalibrasyonlu ölç--trimle döngüsüyle temizlenir. Spin kademesinin
+içerik --- 48 serbestlik derecesinin yörüngede birkaç kat, spinde
+birkaç ila $\sim20$ kat bastırılmış (kafes parametrelerine bağlı;
+Tablo~\ref{tab:g0scan}), fakat hiçbir kanalda tam kaybolmayan 23
+boyutu --- yalnız spin kademesinin görebildiği kanaldadır ve
+çift-kuadratür kalibrasyonlu ölç--trimle döngüsüyle temizlenir. Spin kademesinin
 hata sinyali CW$-$CCW farkı üzerinden kurulduğunda gerçek EDM
 katkısı aritmetik özdeşlikle sıfırlandığından, mimarinin iki
 kademesi de yapısal olarak EDM-kördür. Bütün olarak mimari, CW/CCW
