@@ -768,4 +768,80 @@ Trim yöntemi demet büyüklüğünden bağımsız geçerliliğini korur.
 
 ---
 
+### 12.10 Rastgele desen + fazlı çok-modlu trim: faz problemi çözümü
+
+**Dosyalar:** `test_b_random_trim.py`, `test_b_random_trim.png`,
+`test_b_random_trim.json` (CO=False, t2=1ms)
+
+**Senaryo:** Gerçek deneye en yakın durum — 48 kuadrupolde tam rastgele
+hizalama hatası (seed=123, RMS=10μm). Desendeki her k modunun iki
+kuadratürü var: Δy = Σ A_k·cos(2πkn/N − φ_k), φ_k fazları rastgele.
+Şimdiye dek yalnız cos fazı (φ=0) kalibre edilmişti.
+
+---
+
+**Çift kuadratür kalibrasyon** (k=1..6, A=10μm):
+
+| k | c_k^cos | c_k^sin | \|c_k\| | ψ_k [°] |
+|---|---|---|---|---|
+| 1 | +23.46 | −2.41 | 23.58 | −5.87 |
+| 2 | +88.80 | −18.38 | 90.69 | −11.70 |
+| 3 | −22.54 | +7.06 | 23.62 | 162.60 |
+| 4 | −7.70 | +3.26 | 8.36 | 157.09 |
+| 5 | −3.94 | +2.10 | 4.46 | 151.89 |
+| 6 | −2.32 | +1.50 | 2.77 | 147.16 |
+
+**Lineer faz rampası keşfi:** ψ_k ≈ −5.85°·k (mod 180°): −5.87, −11.70,
+180−17.4, 180−22.9, 180−28.1, 180−32.8. Mod başına sabit faz eğimi,
+gözlenebilirin sabit bir azimut referans noktasına (fırlatma/gözlem
+azimutu civarı) ağırlıklandığını gösterir. 180° sıçraması k>Q_y işaret
+değişiminin faza yansımasıdır.
+
+**Faz modeli doğrulaması:** c₂(φ) = |c₂|·cos(φ−ψ₂) modeli, φ=45° ve 135°
+ara ölçümlerinde **%0.000** sapmayla doğrulandı — tam sinüzoid, sistem
+faz uzayında da tamamen lineer.
+
+---
+
+**Rastgele desen spektrumu ve f₀ tahmini:**
+
+Desen k=1..12 modlarına ayrıştırıldı (A_k = 1–4 μm aralığında, fazlar
+rastgele). Ölçülen f₀ = −2.503×10⁻⁴ rad/s. Kalibre k=1..6 katsayılarıyla
+tahmin: −2.694×10⁻⁴ (fark %7.6 — kalibre edilmeyen k≥7 katkısı).
+Baskın katkı k=2'den: −2.56×10⁻⁴ (desenin A₂=2.82μm @ 170.5° içeriği).
+
+---
+
+**Üç trim stratejisi yarışması** (ölç-trimle, 3 iterasyon):
+
+| Strateji | Trim | Adım 1 | Adım 2–3 tabanı | Bütçe |
+|---|---|---|---|---|
+| A | k=2 @ ψ₂=−11.7° | 3.2×10⁷× | ~10⁻¹² rad/s | 2.76 μm |
+| B | k=2+k=3 @ ψ'ler, bölüşmüş | 7.8×10⁷× | **~10⁻¹⁵ rad/s (10¹¹×)** | 4.38 μm |
+| C | k=2 @ φ=0 (faz-cahil) | 1.6×10⁷× | ~4×10⁻¹⁵ rad/s | 2.82 μm |
+
+**Bulgular:**
+
+1. **Tek atış yeter:** Üç strateji de ilk adımda ≥10⁷× bastırır — sistem
+   tam lineer olduğundan ölçülen skalerin iptali kesindir.
+2. **Faz, skaler iptal için kritik DEĞİL:** Faz-cahil strateji C de
+   çalışır; tek bedel bütçenin 1/cos(φ−ψ₂) = 1.02 katına çıkması
+   (ψ₂ küçük olduğu için önemsiz). Faz yalnız ψ_k±90°'ye yaklaşınca
+   tehlikeli olur (trim etkisizleşir, bütçe ıraksar).
+3. **Çift kuadratür kalibrasyonun değeri:** ψ_k'yi bilmek (i) bütçeyi
+   minimize eder, (ii) ölü fazdan kaçınmayı garantiler, (iii) desenin
+   gerçek mod içeriğiyle karşılaştırma sağlar: strateji A trimi
+   (2.76μm @ −11.7°) desenin k=2 içeriğinin (2.82μm @ 170.5°) neredeyse
+   tam anti-paralelidir — trim fiilen k=2 kirliliğini fiziksel olarak
+   söküyor.
+4. **Bölüşmüş trim (B) en derine iner:** 2 mod kullanmak hem bütçe/mod'u
+   düşürür hem ilk adımda en iyi bastırmayı verir.
+
+**Sonuç:** Faz problemi pratikte iki kuadratür kalibrasyonla (mod başına
+2 ölçüm) tamamen çözülür. Rastgele, çok-modlu, rastgele-fazlı gerçekçi
+hizalama hatası tek ölç-trimle adımında ≥10⁷×, ikinci adımda ~10¹¹×
+bastırılır; trim bütçesi 3–4.4 μm.
+
+---
+
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-10*

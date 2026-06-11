@@ -1122,6 +1122,114 @@ Demet ortalaması kullanılarak $c_k$ kalibre edilirse
 Demet büyüklüğü küçüldükçe ($\sigma_y<0{,}5$~mm, $\sigma_\alpha<0{,}2$~mrad)
 eksen--demet-ort. farkı doğrusal olarak azalır.
 
+\subsection{Rastgele hizalama hatası ve faz problemi: çift kuadratür trim}
+\label{sec:trim-faz}
+
+Önceki bölümlerdeki testler tek-modlu, cos-fazlı yapay desenler
+kullanmıştır. Gerçek deneydeki hizalama hatası ise tüm modlara yayılı ve
+\emph{rastgele fazlıdır}:
+\begin{equation}
+\Delta y_j = s_j \sum_k A_k \cos\!\big(2\pi k n_j/N - \phi_k\big),
+\end{equation}
+burada $\phi_k$ fazları öngörülemez. Trim modu da keyfi $\phi$ fazında
+uygulanabilir ve doğrusallık gereği etkinliği
+\begin{equation}
+c_k(\phi) = c_k^{\cos}\cos\phi + c_k^{\sin}\sin\phi
+          = |c_k|\cos(\phi - \psi_k)
+\label{eq:ck-faz}
+\end{equation}
+biçiminde olmalıdır. $\psi_k=\arctan(c_k^{\sin}/c_k^{\cos})$ modun
+\emph{etkin fazıdır}: birim trim genliği başına en güçlü etki bu fazda
+elde edilir; $\phi=\psi_k\pm90^\circ$ ``ölü fazında'' ise trim hiç etki
+etmez. Dolayısıyla pratik kalibrasyon mod başına \emph{iki} ölçüm
+gerektirir ($\phi=0$ ve $\phi=90^\circ$).
+
+\textbf{Çift kuadratür kalibrasyon.}
+$k=1..6$ modları iki kuadratürde kalibre edildi
+(Tablo~\ref{tab:ck-quad}; $A=10~\mu$m, CO=False).
+
+\begin{table}[h]
+\centering
+\caption{Çift kuadratür kalibrasyon: $c_k^{\cos}$, $c_k^{\sin}$, etkin
+büyüklük $|c_k|$ ve etkin faz $\psi_k$. Faz rampası
+$\psi_k\approx-5{,}85^\circ\!\cdot\!k$ (mod $180^\circ$) düzenli yapıyı
+gösterir.}
+\label{tab:ck-quad}
+\begin{tabular}{ccccc}
+\toprule
+$k$ & $c_k^{\cos}$ & $c_k^{\sin}$ & $|c_k|$ & $\psi_k$ [$^\circ$] \\
+\midrule
+1 & $+23{,}46$ & $-2{,}41$  & $23{,}58$ & $-5{,}87$  \\
+2 & $+88{,}80$ & $-18{,}38$ & $90{,}69$ & $-11{,}70$ \\
+3 & $-22{,}54$ & $+7{,}06$  & $23{,}62$ & $162{,}60$ \\
+4 & $-7{,}70$  & $+3{,}26$  & $8{,}36$  & $157{,}09$ \\
+5 & $-3{,}94$  & $+2{,}10$  & $4{,}46$  & $151{,}89$ \\
+6 & $-2{,}32$  & $+1{,}50$  & $2{,}77$  & $147{,}16$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+İki dikkat çekici yapı ortaya çıkmaktadır. Birincisi, etkin fazlar
+$\psi_k \approx -5{,}85^\circ\cdot k$ (mod $180^\circ$) doğrusal
+rampasını izler; bu, gözlenebilirin halka üzerinde sabit bir azimut
+referansına (fırlatma/gözlem noktası civarı) ağırlıklandığının
+işaretidir ($180^\circ$ sıçraması $k>Q_y$ işaret değişiminin faz
+gösterimidir). İkincisi, faz modeli Denk.~(\ref{eq:ck-faz}) ara
+fazlardaki bağımsız ölçümlerle ($\phi=45^\circ,135^\circ$, $k=2$)
+\%0{,}000 sapmayla doğrulanmıştır — sistem faz uzayında da tam
+doğrusaldır.
+
+\textbf{Rastgele desen testi.}
+48 kuadrupole tam rastgele hizalama hatası verildi (RMS $=10~\mu$m;
+spektrum $A_k\approx1$--$4~\mu$m, fazlar rastgele). Ölçülen sahte-EDM
+sinyali $f_0=-2{,}503\times10^{-4}$~rad/s'dir; kalibre $k=1..6$
+katsayılarıyla desen spektrumundan yapılan tahmin
+($-2{,}694\times10^{-4}$) bunu \%7{,}6 doğrulukla öngörür (fark kalibre
+edilmeyen $k\ge7$ modlarından). Baskın katkı, beklendiği gibi $k=2$
+içeriğinden gelir ($A_2=2{,}82~\mu$m, $\phi_2=170{,}5^\circ$
+$\to$ $-2{,}56\times10^{-4}$~rad/s).
+
+\textbf{Üç trim stratejisi.}
+Aynı rastgele desen üzerinde üç ölç--trimle stratejisi yarıştırıldı
+(Tablo~\ref{tab:trim-faz}): (A)~tek mod $k=2$, optimal $\psi_2$ fazında;
+(B)~$k=2$ ve $k=3$ kendi optimal fazlarında, genlik eşit bölüşmüş;
+(C)~$k=2$ yalnız cos fazında — etkin fazı \emph{bilmeyen} kontrol.
+
+\begin{table}[h]
+\centering
+\caption{Rastgele desen üzerinde üç trim stratejisi
+($f_0=-2{,}503\times10^{-4}$~rad/s).}
+\label{tab:trim-faz}
+\begin{tabular}{lcccc}
+\toprule
+Strateji & Adım 1 & Adım 2--3 tabanı & Toplam & Bütçe \\
+\midrule
+A: $k{=}2\,@\,\psi_2$       & $3{,}2\times10^{7}\times$ & $\sim\!10^{-12}$~rad/s & $2{,}1\times10^{8}\times$ & $2{,}76~\mu$m \\
+B: $k{=}2{+}3\,@\,\psi$     & $7{,}8\times10^{7}\times$ & $\sim\!10^{-15}$~rad/s & $1{,}0\times10^{11}\times$ & $4{,}38~\mu$m \\
+C: $k{=}2\,@\,\phi{=}0$     & $1{,}6\times10^{7}\times$ & $\sim\!4\times10^{-15}$~rad/s & $6{,}5\times10^{10}\times$ & $2{,}82~\mu$m \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Üç sonuç öne çıkmaktadır:
+\begin{itemize}
+\item \textbf{Tek atış yeterlidir.} Üç strateji de ilk adımda
+    $\ge10^{7}\times$ bastırır; sistem tam doğrusal olduğundan ölçülen
+    skalerin iptali kesindir. İkinci adım sayısal tabana
+    ($10^{-12}$--$10^{-15}$~rad/s) iner.
+\item \textbf{Faz, skaler iptal için kritik değildir.} Faz-cahil
+    strateji~C de tam başarılıdır; tek bedeli trim bütçesinin
+    $1/\cos(\phi-\psi_2)=1{,}02$ katına çıkmasıdır ($\psi_2$ küçük
+    olduğundan önemsiz). Faz yalnızca ölü faza ($\psi_k\pm90^\circ$)
+    yaklaşıldığında tehlikelidir: trim etkisizleşir ve bütçe ıraksar.
+    Çift kuadratür kalibrasyon bu durumdan kaçınmayı garantiler.
+\item \textbf{Optimal fazlı trim, fiziksel kirliliği söker.}
+    Strateji~A'nın trimi ($2{,}76~\mu$m @ $-11{,}7^\circ$), desenin
+    gerçek $k=2$ içeriğinin ($2{,}82~\mu$m @ $170{,}5^\circ$) neredeyse
+    tam anti-paralelidir: skaleri iptal eden trim, aynı zamanda baskın
+    $k=2$ hizalama kirliliğini de fiziksel olarak temizlemektedir.
+\end{itemize}
+
 %==============================================================
 \section{Tartışma ve sonraki çalışmalar}
 \label{sec:tartisma}
