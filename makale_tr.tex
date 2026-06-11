@@ -1230,6 +1230,87 @@ C: $k{=}2\,@\,\phi{=}0$     & $1{,}6\times10^{7}\times$ & $\sim\!4\times10^{-15}
     $k=2$ hizalama kirliliğini de fiziksel olarak temizlemektedir.
 \end{itemize}
 
+\subsection{Yörünge-sürülü trim: EDM'ye kör kaba kademe}
+\label{sec:trim-orbit}
+
+Spin-sürülü trim döngüsünün yapısal bir riski vardır: gözlenebilir olan
+toplam $dS_y/dt$, gerçek EDM sinyalini de içerir; toplamı sıfıra
+trimlemek sinyali de yok eder. Bu nedenle spin-sürülü döngü ancak
+yalnız-sistematik bir gözlenebilirle (örn.\ CW/CCW kombinasyonu)
+sürülebilir. Buna karşılık \emph{kapalı yörünge} EDM'ye kördür — gerçek
+EDM yörüngeyi etkilemez — dolayısıyla yörünge-sürülü bir trim kademesi
+EDM sinyaline ilkesel olarak dokunamaz. Ek olarak yörünge ölçümü
+hızlıdır (polarimetre istatistiği gerektirmez) ve vektöreldir: 48 BPM
+okuması, tüm mod kuadratürlerini tek ölçümde verir; faz problemi
+(Bölüm~\ref{sec:trim-faz}) kendiliğinden ortadan kalkar.
+
+Bu kademe, $K$-modülasyonu kullanmadan, tek optik konfigürasyonda,
+zorlu bir senaryoda sınandı: 48 kuadrupolde rastgele dikey kaçıklık
+(RMS $=\SI{100}{\micro\meter}$) ve 48 BPM'de rastgele statik ofset
+(RMS $=\SI{100}{\micro\meter}$). Başlangıç sahte-EDM sinyali
+$f_0=-1{,}62\times10^{-3}$~rad/s'dir. Zincir üç adımdan oluşur:
+(i)~mod-yörünge kalibrasyonu — her $k=1..6$ cos/sin düğmesi için
+bilinen genlikte desen uygulanıp tur-ortalamalı yörünge okunur ve
+$48{\times}12$'lik tepki bazı $O$ kurulur (kalibrasyon diferansiyel
+olduğundan statik ofsetlerden etkilenmez); (ii)~desenin ofsetli
+yörüngesi $y_\mathrm{ölç}=y_\mathrm{gerçek}+b$ en küçük karelerle $O$
+bazına oturtulur; (iii)~kestirilen modlar fiziksel trimle geri alınır.
+Ölçülen yörünge kazançları rezonans hiyerarşisini izler: $k=2$ için
+$24{,}1$, $k=1,3$ için $\sim6{,}2$, $k=4$ için $2{,}3$, $k=5$ için
+$1{,}2$, $k=6$ için $0{,}8$. Statik ofsetin kestirim yanlılığı
+$\varepsilon=O^{+}b\sim\sigma_b\sqrt{2/N}/\mathrm{kazanç}$ ölçeğinde
+büyür: $k=2$'de $\sim0{,}5~\mu$m iken $k=6$'da $\sim28~\mu$m'ye patlar.
+
+\begin{table}[h]
+\centering
+\caption{Kestirim genişliği taraması: $k\le k_\mathrm{fit}$ modları
+yörüngeden kestirilip trimlenir; artık sahte-EDM spin takibiyle
+doğrulanır. Desen RMS $=\SI{100}{\micro\meter}$, BPM ofseti
+$\sigma_b=\SI{100}{\micro\meter}$, $f_0=-1{,}62\times10^{-3}$~rad/s.}
+\label{tab:orbit-trim}
+\begin{tabular}{lccc}
+\toprule
+Varyant & Fit aralığı & Artık $dS_y/dt$ [rad/s] & Bastırma \\
+\midrule
+A & $k=1..3$ & $-6{,}72\times10^{-5}$ & $24{,}2\times$ \\
+\textbf{C} & $\mathbf{k=1..4}$ & $\mathbf{+1{,}61\times10^{-5}}$ & $\mathbf{100{,}8\times}$ \\
+D & $k=1..5$ & $+1{,}37\times10^{-4}$ & $11{,}9\times$ \\
+B & $k=1..6$ & $+1{,}07\times10^{-4}$ & $15{,}2\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tablo~\ref{tab:orbit-trim}'deki genişlik taraması yöntemin ana dersini
+verir: bastırma, fit genişliğinde monoton \emph{değildir}. $k=4$'ü
+eklemek kazandırır ($24\times\to101\times$), çünkü A varyantının artığı
+neredeyse tamamen trimlenmeyen $k=4$ içeriğinden gelmektedir (ölçülen
+artık, $c_4^{\cos}a_4^{\cos}+c_4^{\sin}a_4^{\sin}=-6{,}7\times10^{-5}$
+öngörüsüyle birebir örtüşür). $k=5,6$'yı eklemek ise kaybettirir:
+kazancı $\lesssim1$ olan modların ofset-kirli kestirimi gerçek içerikten
+büyük trim hatası enjekte eder — B varyantında $k=6$ içeriği
+$6~\mu$m'den $37~\mu$m'ye \emph{çıkar}. Yörünge kazancı hiyerarşisi
+doğal bir düzenleyici (regularizer) gibi davranır: \emph{yörüngenin net
+gördüğü modlar fit edilmeli, gerisine dokunulmamalıdır.}
+
+Optimal C varyantı, fit kapsamındaki mod içeriklerini
+$37{,}6/16{,}2/40{,}9/45{,}0~\mu$m'den
+$3{,}8/6{,}9/9{,}2/6{,}1~\mu$m'ye indirir — birkaç-mikron hedefi
+$\SI{100}{\micro\meter}$ BPM ofseti altında, $K$-modülasyonsuz
+karşılanır. Kalan kestirim hatasının baskın bileşeni BPM ofseti değil,
+fit dışı $k\ge7$ modlarının yörünge sızıntısıdır. İkinci bir
+ölçüm--trim turu kestirim güncellemesi olarak tam sıfır döndürür
+(aynı statik ofsetler aynı yanlış hedefi gösterir): yörünge kademesi
+tek adımda kendi tabanına oturur.
+
+Bu taban, kademeli mimariyi nicel olarak gerekçelendirir. Yörüngenin
+göremediği ($\mathrm{kazanç}<1$) fakat spinin gördüğü ($c_k\neq0$)
+$k\ge7$ içeriği, C-artığının ana kaynağıdır ve ancak spin-tabanlı bir
+gözlenebilirle temizlenebilir. Önerilen işletme sırası: (1)~yörünge
+kademesi — hızlı, EDM'ye kör, $\sim100\times$; (2)~CW/CCW simetrik
+iptal — kalan üzerinde çalışır, gerçek EDM'yi korur;
+(3)~gerekirse yalnız-sistematik gözlenebilirle sürülen spin kademesi —
+artığı polarimetre istatistiği tabanına indirir.
+
 %==============================================================
 \section{Tartışma ve sonraki çalışmalar}
 \label{sec:tartisma}
