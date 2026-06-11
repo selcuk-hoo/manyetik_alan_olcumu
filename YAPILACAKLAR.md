@@ -30,26 +30,22 @@
 - [x] `false_edm_correction_test.py` — düzeltme stratejisi doğrulaması
 - [x] `test_false_edm_modes.py` — tek-mod + kombinasyon senaryoları
 - [x] `test_cross_correlation.py` — 3×3 c_ij matrisi, rezonans işaret yapısı, lineer ölçekleme
-- [x] `false_edm_harmonic_sinir.md` — §1-10: CO=True/False farkı, betatron kirlenmesi,
+- [x] `false_edm_harmonic_sinir.md` — §1-9: CO=True/False farkı, betatron kirlenmesi,
   eşit-katkı, side band çürütmesi, çapraz korelasyon, optimizasyon stratejisi
 
-### Makale
-- [x] `makale_tr.tex` — tam taslak (Physical Review AB formatı)
-  - Giriş, Fourier analizi, CLEAN, Monte Carlo sistematik, harici alan, tartışma
-  - Revizyon: rezonans işaret yapısı (k=2 pozitif, k≥3 negatif) eklendi
-  - Revizyon: ince-lens iptal teoremi + kalın-lens lineer ölçekleme eklendi
-  - Revizyon: CO=True / CO=False rejim ayrımı ve sinyal mertebeleri eklendi
-  - Revizyon: dSy/dt=0 tarama stratejisi gelecek çalışmalar maddesine eklendi
-- [x] 7 şekil betiği (`fig_1_*.py` … `fig_7_*.py`)
-- [x] `bozoki_ls.py` — Bozoki 1989 vs R-matris vs CLEAN karşılaştırması
+### Yeni testler
+- [x] `test_kick_correction.py` — kick sayısı vs false EDM (Test A)
+  - Ana bulgu: N=2..24 korrektör orbiti %50-95 azaltır ama false EDM yalnızca ~%15 düşer
+  - N=48 (tüm quadlar korrektör) → sıfır false EDM
+  - **Orbit minimizasyonu ≠ dSy/dt minimizasyonu** — farklı optimizasyon hedefleri
 
 ---
 
-## 🔲 Aktif: İki Yeni Test
+## 🔲 Aktif: Sıradaki Test
 
 ### Test B — Harmonik Kombinasyon ile False EDM İptali
 **Dosya:** `test_harmonic_cancellation.py` (henüz yok)
-**Öncelik:** Önce yap — daha kısa (~1-2 saat) ve teorik tahminle doğrudan karşılaştırılabilir.
+**Öncelik:** Şimdiki — kısa (~1-2 saat) ve teorik tahminle doğrudan karşılaştırılabilir.
 
 k=2 (+) ve k=3 (−) işaret farkından yararlanarak bilerek eklenen k=3
 orbit bileşeniyle k=2 kaynaklı false EDM'yi iptal etmek:
@@ -69,32 +65,12 @@ co_turns = 36
 
 ---
 
-### Test A — Kick Sayısı vs False EDM
-**Dosya:** `test_kick_correction.py` (henüz yok)
-**Öncelik:** Test B'den sonra.
-
-Kaç korrektör kicki CO=True'ya ne kadar yaklaşıyor?
-k=2 hizalama deseni için N ∈ {2, 4, 8, 12, 24, 48} korrektör taraması:
-
-- **Adım 1:** N korrektör ile en küçük kareler kick vektörü → artık orbit normu.
-- **Adım 2:** Kick uygulanmış parçacık → dSy/dt ölç (CO=False → CO=True sürekliliği).
-- **Adım 3:** M=50 rassal hizalama deseni → dSy/dt dağılımı; sabit kick konumlarında genelleştirme.
-
-```python
-# Anahtar parametreler
-N_corr_list = [2, 4, 8, 12, 24, 48]
-n_realiz    = 50
-A_mismatch  = 1e-5    # 10 μm RMS
-```
-
-Beklenti: teorik minimum 2 korrektör (k=2 cos + sin için 2 s.d.); pratikte gürültü nedeniyle daha fazlası gerekebilir.
-
----
-
 ## 🔲 Ertelendi
 
 | Madde | Neden ertelendi | Öncelik |
 |---|---|---|
+| Makale revizyonu: rezonans işaret yapısı ve CO=True/False | Yazılmayı bekliyor | Yakın |
+| `false_edm_harmonic_sinir.md` §10-11 ekleme | Yazılmayı bekliyor | Yakın |
 | Kurum bilgisi + teşekkür bölümü (`makale_tr.tex`) | Yazara özgü | Yayın öncesi |
 | Omarov PRD referansı — 10 μm tolerans kaynağı | Kütüphane erişimi gerekiyor | Yayın öncesi |
 | Gerçek makine verisiyle doğrulama | Prototip halka gerekiyor | Uzun vadeli |

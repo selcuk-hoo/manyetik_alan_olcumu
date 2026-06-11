@@ -640,6 +640,678 @@ düzeyine hizalandığında (BBA sonrası), $k=2$ bileşeni $\sim\SI{1}{\nano\te
 $k=3$ bileşeni ise $\sim\SI{4}{\nano\tesla}$ hassasiyetle ölçülebilmektedir.
 
 %==============================================================
+\section{Harmonik trim ile sahte EDM iptali: ölç--trimle döngüsü}
+\label{sec:trim}
+
+Önceki bölümler hizalama hatasının baskın harmonik bileşenlerini
+\emph{ölçmeye} odaklanmıştı. Bu bölümde tamamlayıcı soruyu ele alıyoruz:
+ölçülen (ya da hiç ölçülmeyen) hizalama hatasının ürettiği sahte EDM,
+kafese bilinçli olarak eklenen küçük harmonik ``trim''lerle doğrudan
+iptal edilebilir mi? Aşağıda gösterileceği üzere yanıt olumludur ve ortaya
+çıkan yöntem, hizalama desenini bilmeyi \emph{gerektirmeyen}, yalnızca
+spin tabanlı $dS_y/dt$ ölçümüne dayanan bir ölç--trimle döngüsüne
+indirgenebilmektedir. Tüm simülasyonlar üniform
+$G=\SI{0.2}{\tesla\per\meter}$ FODO kafesinde (48 kuadrupol,
+$Q_y\approx2{,}68$) yapılmıştır. Yöntem önce idealize kapalı-yörünge
+fırlatma koşulunda (CO=True, $T=\SI{0.5}{\milli\second}$;
+Bölüm~\ref{sec:trim-mantik}--\ref{sec:trim-iteratif}) geliştirilmiş,
+ardından gerçekçi koşulda --- parçacık eksenden fırlatılır, kapalı
+yörünge hiç aranmaz/oturtulmaz (CO=False, $T=\SI{1}{\milli\second}$;
+Bölüm~\ref{sec:trim-gercekci}) --- doğrulanmıştır. Aşağıda görüleceği
+üzere gerçekçi koşulda yöntem idealize koşuldan \emph{daha iyi} çalışır:
+gözlenebilir tam doğrusal hale gelir ve tek ölçüm-trim turu yeterli olur.
+
+\subsection{Çalışma mantığı: rezonans işaret kuralı ve doğrusallık}
+\label{sec:trim-mantik}
+
+Yöntem iki sayısal gözleme dayanır. Birincisi, sahte EDM hızı tek tek
+harmonik genliklerde \emph{doğrusaldır}: hizalama deseni
+$\Delta y_j = \sum_k a_k F_{k,j}$ Fourier modlarına ayrıştırıldığında
+\begin{equation}
+  \frac{dS_y}{dt} \;\approx\; \sum_k c_k\, a_k,
+  \label{eq:trim-lineer}
+\end{equation}
+burada $c_k$ kafese (ayar frekansına) ait katsayılardır. İkincisi, bu
+katsayıların işareti basit bir rezonans kuralına uyar: dikey betatron ayarı
+$Q_y\approx2{,}68$ olduğundan, paydası $1/(k^2-Q_y^2)$ biçiminde davranan
+yörünge tepkisi $k<Q_y$ modları ($k=1,2$) için \emph{pozitif},
+$k>Q_y$ modları ($k=3,4,\ldots$) için \emph{negatif} işaretli sahte EDM
+üretir. Zıt işaretli modların varlığı, bir modun katkısının başka bir modla
+\emph{telafi edilebileceği} anlamına gelir:
+\begin{equation}
+  c_k a_k + c_{k'} A^*_{k'} = 0
+  \quad\Longrightarrow\quad
+  A^*_{k'} = -\frac{c_k}{c_{k'}}\,a_k .
+  \label{eq:trim-recete}
+\end{equation}
+
+Katsayılar tek tek ölçüldü: her $k$ için $A=\SI{10}{\micro\meter}$
+genlikli saf cos modu kafese yerleştirilip $dS_y/dt$ kaydedildi
+(Tablo~\ref{tab:ck}). Tablo üç önemli yapıyı gösterir:
+(i)~işaret kuralı doğrulanmıştır;
+(ii)~$k=2$, rezonansa en yakın mod olarak $|c_k|$ bakımından diğerlerinin
+4--10 katıdır;
+(iii)~$k\ge3$ için $|c_k|$ yaklaşık $1/k^2$ ile azalır.
+
+\begin{table}[h]
+\centering
+\caption{Ölçülen sahte-EDM mod katsayıları $c_k$ (cos fazı,
+$A=\SI{10}{\micro\meter}$ prob, CO=True). Son sütun: $A=\SI{10}{\micro\meter}$
+genlikli tek modun ürettiği sahte EDM hızı.}
+\label{tab:ck}
+\begin{tabular}{cccc}
+\toprule
+$k$ & $c_k$ [rad/s/m] & işaret & $dS_y/dt$ ($A{=}10\,\mu$m) [rad/s] \\
+\midrule
+1  & $+4{,}57\times10^{-5}$ & $+$ & $+4{,}57\times10^{-10}$ \\
+2  & $+1{,}97\times10^{-4}$ & $+$ & $+1{,}97\times10^{-9}$ \\
+3  & $-4{,}80\times10^{-5}$ & $-$ & $-4{,}80\times10^{-10}$ \\
+4  & $-1{,}63\times10^{-5}$ & $-$ & $-1{,}63\times10^{-10}$ \\
+5  & $-9{,}10\times10^{-6}$ & $-$ & $-9{,}10\times10^{-11}$ \\
+6  & $-5{,}65\times10^{-6}$ & $-$ & $-5{,}65\times10^{-11}$ \\
+7  & $-3{,}99\times10^{-6}$ & $-$ & $-3{,}99\times10^{-11}$ \\
+8  & $-3{,}08\times10^{-6}$ & $-$ & $-3{,}08\times10^{-11}$ \\
+9  & $-2{,}45\times10^{-6}$ & $-$ & $-2{,}45\times10^{-11}$ \\
+10 & $-2{,}09\times10^{-6}$ & $-$ & $-2{,}09\times10^{-11}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Katsayı taraması $k=24$'e kadar genişletildiğinde beklenmedik fakat
+geriye dönük olarak açık bir simetri ortaya çıkmıştır:
+$c_k = c_{24-k}$ \emph{tam olarak} sağlanır (örneğin
+$c_{22}=c_2=+1{,}974\times10^{-4}$). Nedeni örnekleme (alias)
+özdeşliğidir: $N_\mathrm{FODO}=24$ hücreli kafeste
+$\cos(2\pi k n/24) = \cos\!\big(2\pi(24-k)n/24\big)$ olduğundan $k$ ve
+$24-k$ modları kuadrupol konumlarında \emph{aynı fiziksel desendir}.
+Dolayısıyla bağımsız mod sayısı 24 değil 12'dir; spektrum $k=12$
+çevresinde simetrik bir ``V'' çizer ve en zayıf kaldıraç
+$|c_{12}|\approx1{,}85\times10^{-6}$~rad/s/m ile $k\approx12$
+civarındadır. Pratik sonuç: harmonik trim tasarımında yalnızca
+$k=1\ldots12$ bandını taramak yeterlidir.
+
+\subsection{Tekil mod telafileri: hangi mod hangi modu bastırır?}
+\label{sec:trim-ortak}
+
+Denklem~(\ref{eq:trim-recete}) ile her mod çifti için telafi genliği
+hesaplanıp gerçek simülasyonla doğrulanmıştır. $k=2$ hedefi için sonuçlar
+(hedef genlik $a_2=\SI{10}{\micro\meter}$, sahte EDM
+$+1{,}97\times10^{-9}$~rad/s):
+
+\begin{table}[h]
+\centering
+\caption{$k=2$ modunu ($a_2=\SI{10}{\micro\meter}$) telafi eden tekil
+ortak modlar. $A^*$: denklem~(\ref{eq:trim-recete}) ile hesaplanan telafi
+genliği; artık: birleşik desenin simülasyonla ölçülen sahte EDM'si.}
+\label{tab:k2ortak}
+\begin{tabular}{cccc}
+\toprule
+ortak $k'$ & $A^*$ [$\mu$m] & artık [rad/s] & bastırma \\
+\midrule
+3  & 41{,}2  & $-1{,}59\times10^{-10}$ & $12\times$ \\
+4  & 121{,}2 & $+8{,}26\times10^{-11}$ & $24\times$ \\
+5  & 217{,}0 & $-3{,}23\times10^{-10}$ & $6\times$  \\
+6  & 349{,}7 & $-6{,}22\times10^{-10}$ & $3\times$  \\
+7--10 & 494--945 & büyür & $1$--$2\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+İki ders çıkmaktadır. Birincisi, doğrusal model güvenilirdir: en iyi ortak
+($k'=4$) için $A^*$ çevresinde yapılan ince tarama, gerçek sıfır geçişini
+$\SI{125.0}{\micro\meter}$'de bulmuştur — doğrusal kestirimden yalnızca
+$\%3{,}1$ sapma. İkincisi, $c_2$ baskın olduğundan $k=2$'yi tek bir zayıf
+modla silmek hedef genliğin 4--12 katı telafi genliği gerektirir; bu,
+hizalama bütçesi açısından verimsizdir. Ters yön ise ucuzdur: katsayılar
+dengeli ya da hedef mod zayıf olduğunda telafi genliği küçük kalır
+(Tablo~\ref{tab:k13ortak}). Örneğin $k=3$'teki \SI{10}{\micro\meter}'lik
+bir bileşen yalnızca \SI{2.4}{\micro\meter}'lik $k=2$ trimi ile
+silinebilmektedir.
+
+\begin{table}[h]
+\centering
+\caption{$k=1$ ve $k=3$ hedefleri için tekil ortak telafileri
+(hedef genliği \SI{10}{\micro\meter}).}
+\label{tab:k13ortak}
+\begin{tabular}{ccccc}
+\toprule
+hedef & ortak $k'$ & $A^*$ [$\mu$m] & artık [rad/s] & bastırma \\
+\midrule
+$k=1$ & 3 & $+9{,}5$  & $+1{,}72\times10^{-11}$ & $27\times$ \\
+$k=1$ & 4 & $+28{,}0$ & $-7{,}30\times10^{-12}$ & $63\times$ \\
+$k=3$ & 1 & $+10{,}5$ & $+1{,}81\times10^{-11}$ & $27\times$ \\
+$k=3$ & 2 & $+2{,}4$  & $-3{,}40\times10^{-11}$ & $14\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Birleşik bastırma ve trim bölüştürme}
+\label{sec:trim-birlesik}
+
+Gerçek hizalama hatası tek mod değildir. Doğrusal modelin gücü tam burada
+ortaya çıkar: toplam sahte EDM tek bir skaler kısıt
+($\sum_k c_k a_k = 0$) olduğundan, kuramsal olarak \emph{tek} serbest
+trim modu tüm karışımı iptal etmeye yeter. Bu, $a_1=a_2=a_3=\SI{10}{\micro\meter}$
+karışımı üzerinde sınanmıştır:
+
+\begin{itemize}
+  \item Doğrusal kestirim $\sum_k c_k a_k = +1{,}951\times10^{-9}$~rad/s;
+    ölçülen telafisiz değer $+2{,}050\times10^{-9}$~rad/s — model birleşik
+    desende de $\%5$ doğrulukla geçerlidir.
+  \item Tek modla trim ($k=3$'e $+\SI{40.7}{\micro\meter}$):
+    artık $-2{,}9\times10^{-11}$~rad/s, bastırma $70\times$.
+  \item Trim iki moda bölüştürüldüğünde ($k=3$ ve $k=4$'e
+    $+\SI{30.4}{\micro\meter}$'er, $c_3+c_4$ ile çözülür):
+    artık $-4{,}4\times10^{-12}$~rad/s, bastırma $\mathbf{468\times}$.
+\end{itemize}
+
+Bölüştürmenin tek moda göre yaklaşık $7$ kat daha derin bastırması
+dikkat çekicidir: tekil trim genlikleri küçüldükçe desen doğrusal bölgede
+kalır ve doğrusal-ötesi artıklar bastırılır. Trim bütçesini birden çok
+zayıf moda yaymak hem hizalama bütçesini korur hem iptali derinleştirir.
+
+\subsection{Telafi haritasının evrenselliği}
+\label{sec:trim-evrensellik}
+
+Tüm trim reçeteleri $c_k$ vektöründen türetildiğinden kritik soru şudur:
+$c_k$ makinenin o anki hizalama konfigürasyonuna mı, yoksa yalnızca kafese
+mi aittir? Doğrusal sistemde $24\times24$ telafi haritası
+$M_{kk'}=-c_k/c_{k'}$ \emph{rank-1}'dir; bu nedenle evrensellik, $c_k$
+vektörünü farklı arka planlar üzerinde ölçerek sınanabilir (576 çift
+simülasyonu yerine 64 simülasyon). Üç arka plan kullanılmıştır: boş kafes,
+ve iki bağımsız rastgele hizalama deseni (RMS \SI{10}{\micro\meter},
+taban sahte EDM'leri sırasıyla $+6{,}75\times10^{-11}$ ve
+$-8{,}11\times10^{-10}$~rad/s). Her arka plan $P$ üzerinde
+$c_k^\mathrm{eff} = [f(P + A F_k) - f(P)]/A$ ölçülmüştür.
+
+Sonuçlar:
+\begin{itemize}
+  \item korelasyon (boş $\leftrightarrow$ desen-1): $0{,}9999$;
+  \item korelasyon (desen-1 $\leftrightarrow$ desen-2): $0{,}9984$;
+  \item iki desen arasındaki bağıl RMS sapma: $\%7{,}2$.
+\end{itemize}
+
+Sahte EDM'nin büyük kısmını taşıyan baskın modlarda ($k=1\ldots4$) sapma
+$\%3$--$10$ bandındadır. Daha büyük bağıl sapmalar yalnızca
+$|c_k|\sim3\times10^{-6}$~rad/s/m olan zayıf modlarda görülür; bu modlarda
+prob yanıtı ($\sim3\times10^{-11}$~rad/s) taban-çıkarma ve eğim-fit
+gürültüsü mertebesindedir, dolayısıyla sapma fiziksel değil ölçümseldir.
+Sonuç: \textbf{telafi haritası kafese aittir ve bir kez kalibre edilir};
+ölçülen $c_k$ herhangi bir bilinmeyen hizalama deseninin üzerinde
+$\%3$--$10$ doğrulukla geçerlidir.
+
+\subsection{İteratif ölç--trimle döngüsü}
+\label{sec:trim-iteratif}
+
+$\%3$--$10$'luk katsayı belirsizliği tek atışlık trimin bastırmasını
+$\sim10$--$30\times$ ile sınırlar. Ancak döngü kapatılabilir: trim
+uygulandıktan sonra kalan $dS_y/dt$ yeniden ölçülür ve küçük bir ek trim
+hesaplanır. Bu şemanın deneysel açıdan belirleyici özelliği, hizalama
+deseni hakkında \emph{hiçbir bilgi gerektirmemesidir} — döngünün tek
+girdisi spin tabanlı $dS_y/dt$ ölçümü, tek kalibrasyonu $c_k$ vektörüdür:
+\begin{equation}
+  A^{(n)}_\mathrm{trim} = -\,\frac{f^{(n-1)}_\mathrm{ölçülen}}{c_\mathrm{trim}} .
+  \label{eq:trim-dongu}
+\end{equation}
+
+Döngü, kalibrasyonun hiç görmediği taze bir rastgele desen üzerinde
+(RMS \SI{10}{\micro\meter}, taban $f_0=-2{,}405\times10^{-10}$~rad/s)
+iki kolla sınanmıştır: (A)~trim yalnızca $k=3$'te; (B)~trim $k=3$ ve
+$k=4$'e bölüştürülmüş. Sonuçlar Tablo~\ref{tab:iteratif}'tedir.
+
+\begin{table}[h]
+\centering
+\caption{İteratif ölç--trimle döngüsü (taze desen, desen bilgisi
+kullanılmadan). Adım~0 trimsiz taban; her adımda trim genliği
+denklem~(\ref{eq:trim-dongu}) ile yalnızca bir önceki ölçümden hesaplanır.}
+\label{tab:iteratif}
+\begin{tabular}{ccccc}
+\toprule
+adım & kol A ($k{=}3$) [rad/s] & bastırma & kol B ($k{=}3{+}4$) [rad/s] & bastırma \\
+\midrule
+0 & $-2{,}405\times10^{-10}$ & --- & $-2{,}405\times10^{-10}$ & --- \\
+1 & $-1{,}09\times10^{-11}$ & $22\times$ & $-7{,}87\times10^{-12}$ & $31\times$ \\
+2 & $+2{,}5\times10^{-14}$ & $9574\times$ & $+3{,}3\times10^{-13}$ & $719\times$ \\
+3 & $-2{,}8\times10^{-13}$ & $872\times$ & $-1{,}7\times10^{-13}$ & $1412\times$ \\
+\bottomrule
+\end{tabular}
+\caption*{Adım~1 bastırması ($22$--$31\times$), harita belirsizliğinden
+beklenen $10$--$30\times$ penceresiyle birebir uyumludur. Adım~2'de kalan
+sinyal $10^{-13}$--$10^{-14}$~rad/s ile bu simülasyon süresinin eğim-fit
+tabanına iner; adım~3'ün trim genlikleri $\sim\SI{0.01}{\micro\meter}$'ye
+düştüğünden artık gürültü trimlenmektedir ve değerler taban çevresinde
+salınır. Toplam trim bütçesi: kol~A \SI{5.2}{\micro\meter},
+kol~B \SI{7.7}{\micro\meter}.}
+\end{table}
+
+Üç sonuç öne çıkar. Birincisi, iki ölçüm-trim turu, $\sim10^3\times$
+bastırma için yeterlidir ve sınırı yöntem değil $dS_y/dt$ ölçüm tabanı
+koyar — deneyde daha uzun spin ölçümü doğrudan daha derin iptal demektir.
+İkincisi, gereken trim bütçesi (5--8~$\mu$m) zaten var olan
+\SI{10}{\micro\meter}'lik hizalama toleransı mertebesindedir; yöntem
+kafese kayda değer yeni bozulma eklemez. Üçüncüsü, döngü
+Bölüm~\ref{sec:tartisma}'da önerilen ``$dS_y/dt=0$ tarama stratejisi''nin
+somutlaşmış hâlidir: harmonik genlik geri çatımı, BPM kalibrasyonu ve
+yörünge rekonstrüksiyonu döngünün hiçbir adımında gerekmez; bunlar yalnızca
+$c_k$ kalibrasyonunun bağımsız doğrulamasında rol oynar.
+
+\subsection{Gerçekçi koşul: kapalı yörüngeye oturtma olmadan}
+\label{sec:trim-gercekci}
+
+Önceki alt bölümlerde parçacık, betatron kirlenmesinden arınmış seküler
+sahte EDM'yi izole etmek için kapalı yörünge üzerinde fırlatılmıştı.
+Ancak ayrı bir çalışmada gösterildiği üzere bu koşul gerçek deneyde
+uygulanabilir değildir: tek bir injection kick yalnızca demet
+ağırlık merkezini oturtabilir, sonlu emittanslı demetin her parçacığı
+kendi betatron genliğiyle salınır ve mikron-altı oturtma toleransı
+pratikte erişilemez. Bu nedenle tüm trim makinesi gerçekçi koşulda
+yeniden sınanmıştır: parçacık \emph{eksenden} fırlatılır, kapalı yörünge
+hiç aranmaz ve betatron salınımı ölçümün doğal parçasıdır.
+
+Bu koşulda gözlenebilir, kapalı-yörünge bozulmasının sürdüğü toplam
+$dS_y/dt$'dir; betatron$\times$hizalama kuplajı baskın bileşendir ve
+hizalama vektöründe \emph{tam doğrusaldır}. Sayısal sonuçlar bunu kesin
+biçimde doğrular:
+
+\begin{table}[h]
+\centering
+\caption{CO=False (eksenden fırlatma) mod katsayıları, $k=1\ldots12$.
+Aliasing özdeşliği ($c_k=c_{24-k}$, baz vektörlerinin eşitliği) nedeniyle
+$k>12$ taranmamıştır. İşaret yapısı CO=True ile aynıdır; mutlak değerler
+betatron kuplajı baskın olduğundan $\sim$6 mertebe büyüktür.}
+\label{tab:ck-cofalse}
+\begin{tabular}{cc|cc}
+\toprule
+$k$ & $c_k$ [rad/s/m] & $k$ & $c_k$ [rad/s/m] \\
+\midrule
+1 & $+23{,}46$ & 7  & $-1{,}477$ \\
+2 & $+88{,}80$ & 8  & $-0{,}983$ \\
+3 & $-22{,}54$ & 9  & $-0{,}683$ \\
+4 & $-7{,}703$ & 10 & $-0{,}502$ \\
+5 & $-3{,}937$ & 11 & $-0{,}405$ \\
+6 & $-2{,}324$ & 12 & $-0{,}374$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{Tam doğrusallık:} $k=2$ için $A=5/10/20~\mu$m
+    taramasında $f/A$ yayılımı $\%0{,}0$ ölçülmüştür; boş kafes tabanı
+    tam sıfırdır (eksen, ideal kafesin kapalı yörüngesidir).
+  \item \textbf{Tam evrensellik:} $c_k$ vektörü üç arka planda (boş,
+    seed-7, seed-21; RMS \SI{10}{\micro\meter}) ölçülmüş; tüm modlarda
+    oran $1{,}000$, korelasyonlar $1{,}0000$, bağıl RMS sapma
+    $\%0{,}00$ bulunmuştur. Geriye dönük bakıldığında, CO=True
+    koşulundaki $\%3$--$10$ sapmanın kaynağı fizik değil, kapalı-yörünge
+    Newton bulucusunun sayısal gürültüsüdür.
+  \item \textbf{Tek atışta iptal:} kalibrasyonun hiç görmediği taze
+    rastgele desende ($f_0=-1{,}508\times10^{-4}$~rad/s) tek ölçüm-trim
+    turu artığı $-7{,}7\times10^{-12}$~rad/s'ye indirir —
+    $\mathbf{2{\times}10^7}$ \textbf{kat bastırma} (CO=True'da aynı adım
+    $22$--$31\times$ vermekteydi). İkinci tur eğim-fit tabanına
+    ($\sim10^{-12}$~rad/s) iner. Trim bütçesi $6{,}7$--$10~\mu$m'dir.
+\end{itemize}
+
+Sonuç pratik açıdan güçlüdür: oturtma varsayımının kaldırılması yöntemi
+zayıflatmak şöyle dursun, gözlenebiliri tam doğrusal hale getirerek
+\emph{tek turda} derin iptale olanak tanır. Geriye kalan soru,
+trimin eksen fırlatmasıyla kalibre edilmesinin gerçek demet ortalamasını
+ne ölçüde temsil ettiğidir; bu Bölüm~\ref{sec:trim-launch}'de incelenmektedir.
+
+\subsection{BPM ofseti ve gürültüsünün etkisi}
+\label{sec:trim-bpm}
+
+Bu makalenin yörünge-rekonstrüksiyon yönteminde BPM ofseti merkezi hata
+kaynağıdır (Bölüm~\ref{sec:tartisma} öncesi analizler). Trim döngüsü için
+durum yapısal olarak farklıdır: döngünün tek girdisi spin tabanlı
+$dS_y/dt$ ölçümü olduğundan \emph{BPM verisi döngüde doğrudan hiç
+kullanılmaz}. Gerçekçi koşulda (Bölüm~\ref{sec:trim-gercekci}) yörünge
+düzeltme adımı da bulunmadığından, BPM hatalarının ``demeti yanlış
+yörüngeye oturtma'' kanalı tanım gereği ortadan kalkar. Geriye iki dolaylı
+kanal kalır; ikisi de sayısal olarak sınanmıştır (taze desen,
+$f_0=-1{,}508\times10^{-4}$~rad/s, trim modu $k=3$).
+
+\textbf{Kanal A — $dS_y/dt$ ölçüm gürültüsü (polarimetre istatistiği).}
+Her ölçüme $f_\mathrm{ölçülen}=f_\mathrm{gerçek}+\varepsilon$ biçiminde
+gürültü eklendi ($\sigma_\varepsilon = 0{,}1|f_0| = 1{,}5\times10^{-5}$).
+Sistem tam doğrusal olduğundan kuramsal beklenti kesindir: $n$'inci adım
+sonrası artık $= -\varepsilon_{n-1}$, yani döngü tabanı
+$=\sigma_\varepsilon$. Simülasyon bunu makine hassasiyetinde doğrular:
+adım~1 ve adım~2 artıklarının $\sigma_\varepsilon$'a oranı tam
+$1{,}000$'dir. Gürültü \emph{birikmez} — her adım yalnızca son gürültü
+gerçekleşmesini trimler. Pratik sonuç: nihai iptal derinliği doğrudan
+polarimetre istatistiğiyle ölçeklenir; daha uzun spin ölçümü tabanı
+orantılı düşürür.
+
+\textbf{Kanal B — trim aktüasyon hatası (BPM-referanslı tümsek senaryosu).}
+Trimler mekanik kuadrupol kaydırıcılarla uygulanırsa BPM'ler hiç devreye
+girmez. Alternatif olarak trim, BPM okumalarına referanslı bir kapalı
+yörünge tümseğiyle gerçekleştirilirse, statik BPM ofseti $\sigma_b$
+tümseğin $k$'inci harmonik genliğine $b_k\approx\sigma_b/\sqrt{24}$
+büyüklüğünde hata bindirir; $\sigma_b=\SI{100}{\micro\meter}$ için
+$b_3\approx\SI{20}{\micro\meter}$ — bu, hesaplanan trim genliğinin
+($6{,}7~\mu$m) üç katıdır. Simülasyonda ilk trime bu hata kasıtlı olarak
+eklendi:
+
+\begin{table}[h]
+\centering
+\caption{Kanal B: ilk trime $b_3=\SI{20}{\micro\meter}$ statik aktüasyon
+hatası eklenmiş döngü. Sonraki adımlar artımsal (diferansiyel)
+aktüasyonla uygulanır; statik ofset artımda iptal olur.}
+\label{tab:trim-bpm}
+\begin{tabular}{ccc}
+\toprule
+adım & $dS_y/dt$ [rad/s] & $f_0$'a göre \\
+\midrule
+0 & $-1{,}508\times10^{-4}$ & --- \\
+1 & $-4{,}507\times10^{-4}$ & $3{,}0\times$ \emph{kötüleşme} \\
+2 & $+2{,}55\times10^{-11}$ & $5{,}9\times10^{6}\times$ bastırma \\
+3 & $+2{,}85\times10^{-12}$ & $5{,}3\times10^{7}\times$ bastırma \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Adım~1'deki ölçülen kötüleşme ($-4{,}507\times10^{-4}$) kuramsal değeri
+($c_3 b_3 = -4{,}5\times10^{-4}$) birebir doğrular. Kritik nokta statik
+hatanın \emph{kendini ele vermesidir}: döngü adım~1'de büyüyen sinyali
+ölçer ve adım~2'de artımsal trimle temizler — artımsal aktüasyonda statik
+ofset farkta iptal olur. Kalıcı hasar yoktur; maliyet bir ek ölçüm-trim
+turudur.
+
+\textbf{Özet.} BPM ofseti ve gürültüsü trim yönteminin etkinliğini
+\emph{sınırlamaz}: ölçüm gürültüsü kanalında taban polarimetre
+istatistiğidir ve uzun ölçümle düşer; aktüasyon kanalında statik hatalar
+döngünün kendini onarma özelliğiyle temizlenir. Bu, BPM ofsetinin baskın
+sistematik olduğu yörünge-rekonstrüksiyon yaklaşımıyla keskin bir
+karşıtlık oluşturur ve iki yöntemin tamamlayıcılığını güçlendirir:
+rekonstrüksiyon hizalama hatasının \emph{tanısını}, trim döngüsü ise
+BPM'lerden bağımsız \emph{tedavisini} sağlar.
+
+\subsection{Fırlatma koşuluna bağımlılık ve demet ortalaması geçerliliği}
+\label{sec:trim-launch}
+
+Trim kalibrasyonu eksen fırlatmasıyla ($y_0=p_y=0$) yapılan tek bir
+parçacık üzerinde gerçekleştirilir; gerçek demet ise dağılmış başlangıç
+koşullarına ($y_0,p_y$) sahip binlerce parçacıktan oluşur. Eksen
+kalibrasyonunun demet ortalamasını ne ölçüde temsil ettiğini saptamak
+amacıyla üç-bölümlü bir sayısal test yürütülmüştür ($k=2$, $A=10~\mu$m,
+$t_2=1$~ms, CO=False).
+
+\textbf{Konum taraması.}
+Eksen fırlatmasından $y_0=0$'dan $2$~mm'ye kadar kaydırılarak $c_k$'nin
+değişimi ölçüldü.  Tüm aralıkta etki doğrusaldır: $\Delta c_k/c_k \approx
+6{,}5\times10^{-4}\ \mu\text{m}^{-1}\cdot y_0$. $y_0=2$~mm'de maksimum
+sapma \%1.3 iken tipik $\sigma_y\approx0{,}5$~mm'de etki \%0.3'tür —
+pratik açıdan önemsiz.
+
+\textbf{Açı taraması.}
+Başlangıç açısı $\alpha=p_y/p_z$, 0'dan 1~mrad'a tarandı; görünen $c_k$
+değerleri Tablo~\ref{tab:ck-launch}'de verilmiştir.
+
+\begin{table}[h]
+\centering
+\caption{Görünen $c_k$'nin başlangıç açısına bağımlılığı ($k=2$,
+$A=10~\mu$m, CO=False). Sapma fiziksel değil, sonlu-$t_2$ betatron
+kontaminasyonu kaynaklı ölçüm yapaylığıdır.}
+\label{tab:ck-launch}
+\begin{tabular}{ccc}
+\toprule
+$\alpha$ [mrad] & $c_k$ [rad/s/m] & $c_k/c_k(0)$ \\
+\midrule
+0.0 & 88.80 & 1.000 \\
+0.1 & 91.47 & 1.030 \\
+0.2 & 93.93 & 1.058 \\
+0.5 & 100.08 & 1.127 \\
+1.0 & 105.87 & 1.192 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Gözlenen artış fiziksel bir $c_k$ değişimi \emph{değildir}: lineer kafeste
+betatron hareketi kapalı yörünge etrafında periyodik salınımdır ve
+Poincaré-ortalaması $\langle\Delta y\rangle_\mathrm{tur}$ betatron
+genliğinden bağımsız olarak kapalı yörünge değerini verir. Görünen sapmanın
+kaynağı, büyük başlangıç açısının büyük betatron genliği ($A_\beta\sim
+\alpha\sqrt{\beta_y}$) yaratması ve $S_y(t)$ izine bindirilen bu
+salınımın sonlu $t_2$'de doğrusal fit eğimini biyase etmesidir: fit
+artığı $\sim A_\beta\cdot\kappa/(\omega_\beta t_2)$ olup $t_2$'ye ters
+orantılıdır. Uzun ölçüm süresi veya demet ortalaması bu yapaylığı
+azaltır.
+
+\textbf{Demet ortalaması.}
+$N=30$ parçacık $\mathcal{N}(0,\sigma_y{=}0{,}5~\text{mm})$ ve
+$\mathcal{N}(0,\sigma_\alpha{=}0{,}2~\text{mrad})$ dağılımlarından
+çekildi; her birinin $k=2$ misalignment deseniyle $dS_y/dt$'si ölçüldü.
+
+\begin{table}[h]
+\centering
+\caption{Demet ortalaması testi: $N=30$ parçacık,
+$\sigma_y=0{,}5$~mm, $\sigma_\alpha=0{,}2$~mrad.
+Trim eksen kalibrasyonuyla uygulanmıştır.}
+\label{tab:demet-launch}
+\begin{tabular}{ll}
+\toprule
+Büyüklük & Değer \\
+\midrule
+Eksen $dS_y/dt$ (kalibrasyon) & $+8{,}880\times10^{-4}$~rad/s \\
+Demet ort. $dS_y/dt$ (trim öncesi) & $+8{,}839\times10^{-4}$~rad/s \\
+Parçacık başı std ($dS_y/dt$) & $4{,}81\times10^{-5}$~rad/s (\%5.4) \\
+Eksen--demet-ort. farkı & $-\%0{,}47$ \\
+Trim sonrası demet-ort. artığı & $4{,}14\times10^{-6}$~rad/s \\
+Bastırma (eksen kalibre) & $213\times$ (alt sınır) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Demet ortalaması eksen ölçümünden \%0.47 düşük çıkmaktadır; bu fark
+ağırlıklı olarak $\alpha<0$ parçacıklarının negatif betatron katkısından
+kaynaklanmaktadır (kontaminasyon işarete duyarlıdır). Eksen kalibrasyonu
+demet ortalamasını \%0.47 sapmayla temsil eder.
+
+Tablo~\ref{tab:demet-launch}'daki 213× sayısı ``eksen sinyalini her
+parçacıktan doğrusal çıkar'' modelinin verdiği alt sınırdır.
+\emph{Gerçek} trim bir kafes modifikasyonudur ($a_k\to0$):
+seküler $dS_y/dt$ tüm parçacıklarda tam olarak sıfırlanır; artık yalnızca
+($\ll10^{-6}$~rad/s) betatron kontaminasyonu bırakır. Dolayısıyla gerçek
+bastırma oranı 213×'i aşar; eksen kalibrasyonu lineer kafeste kesin
+olarak geçerlidir.
+
+Demet ortalaması kullanılarak $c_k$ kalibre edilirse
+(yani $\langle f\rangle_\mathrm{demet}$ ile trim miktarı belirlenir)
+\%0.47 sapması da ortadan kalkar ve artık tanım gereği sıfır olur.
+Demet büyüklüğü küçüldükçe ($\sigma_y<0{,}5$~mm, $\sigma_\alpha<0{,}2$~mrad)
+eksen--demet-ort. farkı doğrusal olarak azalır.
+
+\subsection{Rastgele hizalama hatası ve faz problemi: çift kuadratür trim}
+\label{sec:trim-faz}
+
+Önceki bölümlerdeki testler tek-modlu, cos-fazlı yapay desenler
+kullanmıştır. Gerçek deneydeki hizalama hatası ise tüm modlara yayılı ve
+\emph{rastgele fazlıdır}:
+\begin{equation}
+\Delta y_j = s_j \sum_k A_k \cos\!\big(2\pi k n_j/N - \phi_k\big),
+\end{equation}
+burada $\phi_k$ fazları öngörülemez. Trim modu da keyfi $\phi$ fazında
+uygulanabilir ve doğrusallık gereği etkinliği
+\begin{equation}
+c_k(\phi) = c_k^{\cos}\cos\phi + c_k^{\sin}\sin\phi
+          = |c_k|\cos(\phi - \psi_k)
+\label{eq:ck-faz}
+\end{equation}
+biçiminde olmalıdır. $\psi_k=\arctan(c_k^{\sin}/c_k^{\cos})$ modun
+\emph{etkin fazıdır}: birim trim genliği başına en güçlü etki bu fazda
+elde edilir; $\phi=\psi_k\pm90^\circ$ ``ölü fazında'' ise trim hiç etki
+etmez. Dolayısıyla pratik kalibrasyon mod başına \emph{iki} ölçüm
+gerektirir ($\phi=0$ ve $\phi=90^\circ$).
+
+\textbf{Çift kuadratür kalibrasyon.}
+$k=1..6$ modları iki kuadratürde kalibre edildi
+(Tablo~\ref{tab:ck-quad}; $A=10~\mu$m, CO=False).
+
+\begin{table}[h]
+\centering
+\caption{Çift kuadratür kalibrasyon: $c_k^{\cos}$, $c_k^{\sin}$, etkin
+büyüklük $|c_k|$ ve etkin faz $\psi_k$. Faz rampası
+$\psi_k\approx-5{,}85^\circ\!\cdot\!k$ (mod $180^\circ$) düzenli yapıyı
+gösterir.}
+\label{tab:ck-quad}
+\begin{tabular}{ccccc}
+\toprule
+$k$ & $c_k^{\cos}$ & $c_k^{\sin}$ & $|c_k|$ & $\psi_k$ [$^\circ$] \\
+\midrule
+1 & $+23{,}46$ & $-2{,}41$  & $23{,}58$ & $-5{,}87$  \\
+2 & $+88{,}80$ & $-18{,}38$ & $90{,}69$ & $-11{,}70$ \\
+3 & $-22{,}54$ & $+7{,}06$  & $23{,}62$ & $162{,}60$ \\
+4 & $-7{,}70$  & $+3{,}26$  & $8{,}36$  & $157{,}09$ \\
+5 & $-3{,}94$  & $+2{,}10$  & $4{,}46$  & $151{,}89$ \\
+6 & $-2{,}32$  & $+1{,}50$  & $2{,}77$  & $147{,}16$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+İki dikkat çekici yapı ortaya çıkmaktadır. Birincisi, etkin fazlar
+$\psi_k \approx -5{,}85^\circ\cdot k$ (mod $180^\circ$) doğrusal
+rampasını izler; bu, gözlenebilirin halka üzerinde sabit bir azimut
+referansına (fırlatma/gözlem noktası civarı) ağırlıklandığının
+işaretidir ($180^\circ$ sıçraması $k>Q_y$ işaret değişiminin faz
+gösterimidir). İkincisi, faz modeli Denk.~(\ref{eq:ck-faz}) ara
+fazlardaki bağımsız ölçümlerle ($\phi=45^\circ,135^\circ$, $k=2$)
+\%0{,}000 sapmayla doğrulanmıştır — sistem faz uzayında da tam
+doğrusaldır.
+
+\textbf{Rastgele desen testi.}
+48 kuadrupole tam rastgele hizalama hatası verildi (RMS $=10~\mu$m;
+spektrum $A_k\approx1$--$4~\mu$m, fazlar rastgele). Ölçülen sahte-EDM
+sinyali $f_0=-2{,}503\times10^{-4}$~rad/s'dir; kalibre $k=1..6$
+katsayılarıyla desen spektrumundan yapılan tahmin
+($-2{,}694\times10^{-4}$) bunu \%7{,}6 doğrulukla öngörür (fark kalibre
+edilmeyen $k\ge7$ modlarından). Baskın katkı, beklendiği gibi $k=2$
+içeriğinden gelir ($A_2=2{,}82~\mu$m, $\phi_2=170{,}5^\circ$
+$\to$ $-2{,}56\times10^{-4}$~rad/s).
+
+\textbf{Üç trim stratejisi.}
+Aynı rastgele desen üzerinde üç ölç--trimle stratejisi yarıştırıldı
+(Tablo~\ref{tab:trim-faz}): (A)~tek mod $k=2$, optimal $\psi_2$ fazında;
+(B)~$k=2$ ve $k=3$ kendi optimal fazlarında, genlik eşit bölüşmüş;
+(C)~$k=2$ yalnız cos fazında — etkin fazı \emph{bilmeyen} kontrol.
+
+\begin{table}[h]
+\centering
+\caption{Rastgele desen üzerinde üç trim stratejisi
+($f_0=-2{,}503\times10^{-4}$~rad/s).}
+\label{tab:trim-faz}
+\begin{tabular}{lcccc}
+\toprule
+Strateji & Adım 1 & Adım 2--3 tabanı & Toplam & Bütçe \\
+\midrule
+A: $k{=}2\,@\,\psi_2$       & $3{,}2\times10^{7}\times$ & $\sim\!10^{-12}$~rad/s & $2{,}1\times10^{8}\times$ & $2{,}76~\mu$m \\
+B: $k{=}2{+}3\,@\,\psi$     & $7{,}8\times10^{7}\times$ & $\sim\!10^{-15}$~rad/s & $1{,}0\times10^{11}\times$ & $4{,}38~\mu$m \\
+C: $k{=}2\,@\,\phi{=}0$     & $1{,}6\times10^{7}\times$ & $\sim\!4\times10^{-15}$~rad/s & $6{,}5\times10^{10}\times$ & $2{,}82~\mu$m \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Üç sonuç öne çıkmaktadır:
+\begin{itemize}
+\item \textbf{Tek atış yeterlidir.} Üç strateji de ilk adımda
+    $\ge10^{7}\times$ bastırır; sistem tam doğrusal olduğundan ölçülen
+    skalerin iptali kesindir. İkinci adım sayısal tabana
+    ($10^{-12}$--$10^{-15}$~rad/s) iner.
+\item \textbf{Faz, skaler iptal için kritik değildir.} Faz-cahil
+    strateji~C de tam başarılıdır; tek bedeli trim bütçesinin
+    $1/\cos(\phi-\psi_2)=1{,}02$ katına çıkmasıdır ($\psi_2$ küçük
+    olduğundan önemsiz). Faz yalnızca ölü faza ($\psi_k\pm90^\circ$)
+    yaklaşıldığında tehlikelidir: trim etkisizleşir ve bütçe ıraksar.
+    Çift kuadratür kalibrasyon bu durumdan kaçınmayı garantiler.
+\item \textbf{Optimal fazlı trim, fiziksel kirliliği söker.}
+    Strateji~A'nın trimi ($2{,}76~\mu$m @ $-11{,}7^\circ$), desenin
+    gerçek $k=2$ içeriğinin ($2{,}82~\mu$m @ $170{,}5^\circ$) neredeyse
+    tam anti-paralelidir: skaleri iptal eden trim, aynı zamanda baskın
+    $k=2$ hizalama kirliliğini de fiziksel olarak temizlemektedir.
+\end{itemize}
+
+\subsection{Yörünge-sürülü trim: EDM'ye kör kaba kademe}
+\label{sec:trim-orbit}
+
+Spin-sürülü trim döngüsünün yapısal bir riski vardır: gözlenebilir olan
+toplam $dS_y/dt$, gerçek EDM sinyalini de içerir; toplamı sıfıra
+trimlemek sinyali de yok eder. Bu nedenle spin-sürülü döngü ancak
+yalnız-sistematik bir gözlenebilirle (örn.\ CW/CCW kombinasyonu)
+sürülebilir. Buna karşılık \emph{kapalı yörünge} EDM'ye kördür — gerçek
+EDM yörüngeyi etkilemez — dolayısıyla yörünge-sürülü bir trim kademesi
+EDM sinyaline ilkesel olarak dokunamaz. Ek olarak yörünge ölçümü
+hızlıdır (polarimetre istatistiği gerektirmez) ve vektöreldir: 48 BPM
+okuması, tüm mod kuadratürlerini tek ölçümde verir; faz problemi
+(Bölüm~\ref{sec:trim-faz}) kendiliğinden ortadan kalkar.
+
+Bu kademe, $K$-modülasyonu kullanmadan, tek optik konfigürasyonda,
+zorlu bir senaryoda sınandı: 48 kuadrupolde rastgele dikey kaçıklık
+(RMS $=\SI{100}{\micro\meter}$) ve 48 BPM'de rastgele statik ofset
+(RMS $=\SI{100}{\micro\meter}$). Başlangıç sahte-EDM sinyali
+$f_0=-1{,}62\times10^{-3}$~rad/s'dir. Zincir üç adımdan oluşur:
+(i)~mod-yörünge kalibrasyonu — her $k=1..6$ cos/sin düğmesi için
+bilinen genlikte desen uygulanıp tur-ortalamalı yörünge okunur ve
+$48{\times}12$'lik tepki bazı $O$ kurulur (kalibrasyon diferansiyel
+olduğundan statik ofsetlerden etkilenmez); (ii)~desenin ofsetli
+yörüngesi $y_\mathrm{ölç}=y_\mathrm{gerçek}+b$ en küçük karelerle $O$
+bazına oturtulur; (iii)~kestirilen modlar fiziksel trimle geri alınır.
+Ölçülen yörünge kazançları rezonans hiyerarşisini izler: $k=2$ için
+$24{,}1$, $k=1,3$ için $\sim6{,}2$, $k=4$ için $2{,}3$, $k=5$ için
+$1{,}2$, $k=6$ için $0{,}8$. Statik ofsetin kestirim yanlılığı
+$\varepsilon=O^{+}b\sim\sigma_b\sqrt{2/N}/\mathrm{kazanç}$ ölçeğinde
+büyür: $k=2$'de $\sim0{,}5~\mu$m iken $k=6$'da $\sim28~\mu$m'ye patlar.
+
+\begin{table}[h]
+\centering
+\caption{Kestirim genişliği taraması: $k\le k_\mathrm{fit}$ modları
+yörüngeden kestirilip trimlenir; artık sahte-EDM spin takibiyle
+doğrulanır. Desen RMS $=\SI{100}{\micro\meter}$, BPM ofseti
+$\sigma_b=\SI{100}{\micro\meter}$, $f_0=-1{,}62\times10^{-3}$~rad/s.}
+\label{tab:orbit-trim}
+\begin{tabular}{lccc}
+\toprule
+Varyant & Fit aralığı & Artık $dS_y/dt$ [rad/s] & Bastırma \\
+\midrule
+A & $k=1..3$ & $-6{,}72\times10^{-5}$ & $24{,}2\times$ \\
+\textbf{C} & $\mathbf{k=1..4}$ & $\mathbf{+1{,}61\times10^{-5}}$ & $\mathbf{100{,}8\times}$ \\
+D & $k=1..5$ & $+1{,}37\times10^{-4}$ & $11{,}9\times$ \\
+B & $k=1..6$ & $+1{,}07\times10^{-4}$ & $15{,}2\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tablo~\ref{tab:orbit-trim}'deki genişlik taraması yöntemin ana dersini
+verir: bastırma, fit genişliğinde monoton \emph{değildir}. $k=4$'ü
+eklemek kazandırır ($24\times\to101\times$), çünkü A varyantının artığı
+neredeyse tamamen trimlenmeyen $k=4$ içeriğinden gelmektedir (ölçülen
+artık, $c_4^{\cos}a_4^{\cos}+c_4^{\sin}a_4^{\sin}=-6{,}7\times10^{-5}$
+öngörüsüyle birebir örtüşür). $k=5,6$'yı eklemek ise kaybettirir:
+kazancı $\lesssim1$ olan modların ofset-kirli kestirimi gerçek içerikten
+büyük trim hatası enjekte eder — B varyantında $k=6$ içeriği
+$6~\mu$m'den $37~\mu$m'ye \emph{çıkar}. Yörünge kazancı hiyerarşisi
+doğal bir düzenleyici (regularizer) gibi davranır: \emph{yörüngenin net
+gördüğü modlar fit edilmeli, gerisine dokunulmamalıdır.}
+
+Optimal C varyantı, fit kapsamındaki mod içeriklerini
+$37{,}6/16{,}2/40{,}9/45{,}0~\mu$m'den
+$3{,}8/6{,}9/9{,}2/6{,}1~\mu$m'ye indirir — birkaç-mikron hedefi
+$\SI{100}{\micro\meter}$ BPM ofseti altında, $K$-modülasyonsuz
+karşılanır. Kalan kestirim hatasının baskın bileşeni BPM ofseti değil,
+fit dışı $k\ge7$ modlarının yörünge sızıntısıdır. İkinci bir
+ölçüm--trim turu kestirim güncellemesi olarak tam sıfır döndürür
+(aynı statik ofsetler aynı yanlış hedefi gösterir): yörünge kademesi
+tek adımda kendi tabanına oturur.
+
+Bu taban, kademeli mimariyi nicel olarak gerekçelendirir. Yörüngenin
+göremediği ($\mathrm{kazanç}<1$) fakat spinin gördüğü ($c_k\neq0$)
+$k\ge7$ içeriği, C-artığının ana kaynağıdır ve ancak spin-tabanlı bir
+gözlenebilirle temizlenebilir. Önerilen işletme sırası: (1)~yörünge
+kademesi — hızlı, EDM'ye kör, $\sim100\times$; (2)~CW/CCW simetrik
+iptal — kalan üzerinde çalışır, gerçek EDM'yi korur;
+(3)~gerekirse yalnız-sistematik gözlenebilirle sürülen spin kademesi —
+artığı polarimetre istatistiği tabanına indirir.
+
+%==============================================================
 \section{Tartışma ve sonraki çalışmalar}
 \label{sec:tartisma}
 
