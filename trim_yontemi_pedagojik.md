@@ -390,16 +390,21 @@ kazanç düşer:
 |---|---|---|---|---|---|---|
 | Yörünge kazancı | 6.2 | **24.1** | 6.3 | 2.26 | 1.24 | 0.79 |
 
-100 μm BPM gürültüsüyle kestirim yanlılığı ≈ σ_b / kazanç:
+100 μm BPM ofsetiyle kestirim yanlılığı ≈ σ_b·√(2/N)/kazanç ≈ 20.4μm/kazanç
+(N=48 BPM; √(2/N) çarpanı, 48 rastgele ofsetin tek bir mod şekline
+ortalama izdüşümünden gelir):
 
-| k | Yanlılık (yaklaşık) | Yorumu |
-|---|---|---|
-| k=2 | ~4 μm | Güvenli; gerçek genlik > yanlılık |
-| k=4 | ~44 μm | Kullanılabilir; gerçek A₄=45 μm ile aynı mertebeде |
-| k=5 | ~81 μm | Tehlikeli; gerçek A₅=17 μm'den 5× büyük |
-| k=6 | ~126 μm | Felaket; kazanç < 1, gürültü büyütülüyor |
+| k | Yanlılık (formül) | Ölçülen (O⁺b) | Yorumu |
+|---|---|---|---|
+| k=2 | ~0.9 μm | 0.1–0.5 μm | Güvenli; gerçek genlik ≫ yanlılık |
+| k=4 | ~9 μm | 0.2–1.0 μm | Kullanılabilir; gerçek A₄=45 μm ≫ yanlılık |
+| k=5 | ~16 μm | 6.7–7.6 μm | Sınırda; gerçek A₅=17 μm ile aynı mertebede |
+| k=6 | ~26 μm | ~28 μm | Zararlı; gerçek A₆=6 μm'nin 4–6 katı |
 
-Kazanç hiyerarşisi, hangi modları trimleyebileceğimizi doğrudan söyler.
+Kıyas ölçütü desenin kendi mod içeriğidir: 100 μm RMS rastgele desende
+kuadratür başına beklenen genlik ~σ_q·√(2/48) ≈ 20 μm. Yanlılık bu
+değere yaklaştığında fit etmek zarar vermeye başlar. Kazanç hiyerarşisi,
+hangi modları trimleyebileceğimizi doğrudan söyler.
 
 ### 7.5 Dört deneme: adım adım spin değerleri
 
@@ -429,8 +434,8 @@ k=4 = 45 μm olarak kalır, c₄ × A₄ ~ birkaç×10⁻⁵ katkı yapar.
 
 **Varyant C (k=1..4 fit edildi) — en iyi:**
 
-A'ya ek olarak k=4 de hedeflenir. k=4 yanlılığı ~44 μm, gerçek A₄ = 45 μm
-— tam ayrıştırılamaz ama kısmen düzelir.
+A'ya ek olarak k=4 de hedeflenir. k=4 ofset yanlılığı ~1 μm (kazanç 2.26
+hâlâ ofseti bastırmaya yetiyor), gerçek A₄ = 45 μm — temiz kestirim.
 
 | k | Önce | Sonra |
 |---|---|---|
@@ -452,9 +457,9 @@ bastırıldı, kalan artık k=5 ve üzerinden geliyor.
 
 **Varyant D (k=1..5 fit edildi):**
 
-k=5 yanlılığı = 81 μm, gerçek A₅ = 17 μm. Kestirim k=5'i **81 μm
-büyüklüğünde yanlış yönde** trimler — gerçek hatanın 4-5 katı gürültü
-sisteme geri ekleniyor.
+k=5 ofset yanlılığı ~7–12 μm (ölçülen), gerçek A₅ = 17 μm — kestirimin
+yarısı ofset hayaleti. Trim k=5'i kısmen **yanlış yönde** oynatır ve
+c₅ = 4.5 rad/s/m bu hatayı doğrudan spin sinyaline taşır.
 
 **f sonrası = +1.37×10⁻⁴ rad/s.  Bastırma: 11.9× — C'den 8.5× KÖTÜ.**
 
@@ -462,7 +467,8 @@ sisteme geri ekleniyor.
 
 **Varyant B (k=1..6 fit edildi):**
 
-k=6 kazancı = 0.79 < 1. Yanlılık = 126 μm. Trim k=6 içeriğini
+k=6 kazancı = 0.79 < 1. Ölçülen yanlılık: cos −24.7 μm, sin −26.9 μm
+(bileşke 36.5 μm) — gerçek A₆ = 6.1 μm'nin 6 katı. Trim k=6 içeriğini
 **6.1 μm'den 36.5 μm'e ÇIKARIR** (BPM ofseti yanlışlıkla hata gibi
 görülüp sisteme enjekte edilir).
 

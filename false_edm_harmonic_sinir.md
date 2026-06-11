@@ -897,10 +897,13 @@ Q_y'den uzaklaştıkça kazanç düşer:
 |---|---|---|---|---|---|---|
 | Yörünge kazancı | 6.2 | **24.1** | 6.3 | 2.26 | 1.24 | 0.79 |
 
-100 μm BPM gürültüsü altında yanlılık ε ≈ σ_b / kazanç:
-k=2'de **~4 μm**, k=4'te **~44 μm**, k=5'te **~81 μm**, k=6'da
-**~126 μm** (kazanç < 1 → gürültü büyütülür). Bu yanlılıklar,
-hangi modların güvenle kesitilebileceğini doğrudan belirler.
+100 μm BPM ofseti altında kestirim yanlılığı ε ≈ σ_b·√(2/N)/kazanç
+(N=48 BPM): k=2'de **~0.9 μm**, k=4'te **~9 μm**, k=5'te **~16 μm**,
+k=6'da **~26 μm**. Ölçülen değerler (O⁺b, JSON): k=2: 0.1–0.5 μm,
+k=4: 0.2–1.0 μm, k=5: 6.7–7.6 μm, k=6: **~28 μm** — formülle uyumlu.
+Bu yanlılıklar, hangi modların güvenle kestirilebileceğini doğrudan
+belirler: yanlılık, desenin gerçek mod içeriğine (per kuadratür
+~σ_q·√(2/N) ≈ 20 μm) yaklaştığında fit zarar vermeye başlar.
 
 #### Dört varyant: adım adım spin değerleri
 
@@ -940,14 +943,16 @@ k=2'nin diğerlerinden daha az düzeltilmesinin nedeni: kazancı çok yüksek
 olduğundan BPM ofseti kestirime neredeyse hiç sızmaz — ancak BPM ofseti
 mesafeyi değil yönü bozar, dolayısıyla kısmi silinme kaçınılmaz.
 
-**D trimi (k=1..5):** k=5 kazancı = 1.24. Yanlılık ≈ 100μm / 1.24 = 81μm.
-Gerçek A₅ = 17 μm iken orbital kestirim, BPM ofseti tarafından domine
-edilir ve mod k=5'i ~81 μm büyüklüğünde **yanlış yönde** trimler. Sonuç:
+**D trimi (k=1..5):** k=5 kazancı = 1.24 → yanlılık ≈ 20.4/1.24 ≈ 16 μm
+(ölçülen: kuadratür başına 7–12 μm hata). Gerçek A₅ = 17 μm ile aynı
+mertebede: kestirim yarı yarıya ofset ürünü, trim k=5'i kısmen yanlış
+yönde oynatır ve c₅=4.5 rad/s/m bu hatayı spine taşır. Sonuç:
 f = +1.37×10⁻⁴ rad/s — C'den 8.5× DAHA KÖTÜ.
 
-**B trimi (k=1..6):** k=6 kazancı = 0.79 < 1. Yanlılık = 100μm / 0.79 =
-126 μm. k=6 içeriği **6.1 μm'den 36.5 μm'e ÇIKAR** (trim, ofseti
-yanlışlıkla hizalama hatası sanıp sisteme geri enjekte eder).
+**B trimi (k=1..6):** k=6 kazancı = 0.79 < 1 → yanlılık ≈ 20.4/0.79 ≈
+26 μm (ölçülen: cos −24.7, sin −26.9 μm; bileşke 36.5 μm). Gerçek A₆ =
+6.1 μm'nin 4–6 katı: trim, ofset hayaletini hizalama hatası sanıp
+sisteme enjekte eder; k=6 içeriği **6.1 μm'den 36.5 μm'e ÇIKAR**.
 f = +1.07×10⁻⁴ rad/s.
 
 **Sonuç:** C'nin sihiri, k=4'ün kazancının (2.26×) hâlâ yararlı eşiğin
