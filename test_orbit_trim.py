@@ -18,11 +18,18 @@ Yöntemin üç adımı:
      Statik ofsetin kaçınılmaz yanlılığı: ε = O⁺·b (mod başına ~σ_b/kazanç).
   3. TRİM+DOĞRULAMA: P_trim = P − Σ â·mod. Spin takibiyle sahte EDM
      öncesi/sonrası ölçülür. İkinci iterasyonla statik-ofset TABANI
-     görünür kılınır (aynı ofset → aynı yanlış hedef → iyileşme durur).
+     görünür kılınır (aynı ofset → aynı yanlış hedef → güncelleme = 0).
 
-İki kestirim genişliği yarıştırılır:
-  Fit-A: k=1..3 (makaledeki güvenli bölge)
-  Fit-B: k=1..6 (kazanç düştükçe ofset yanlılığı büyür — sınır testi)
+Kestirim genişliği taraması (optimum arama):
+  A: k=1..3   (makaledeki güvenli bölge)
+  C: k=1..4   (k4 kazancı 2.3, ofset yanlılığı ~1μm — aday tatlı nokta)
+  D: k=1..5
+  B: k=1..6   (k5,k6 kazancı <1.3 — ofset yanlılığı enjeksiyonu beklenir)
+
+İlk koşumun bulgusu: B (k=1..6) A'dan KÖTÜ (15× vs 24×) — düşük kazançlı
+modların kestirimi ofsetle kirlenip hata enjekte ediyor; kazanç
+hiyerarşisi doğal düzenleyicidir (regularizer). A'nın tabanı ise
+neredeyse tamamen trimlenmeyen k=4 içeriğinden geliyordu → C varyantı.
 
 Tüm koşullar CO=False (eksen fırlatma, kapalı yörünge aranmaz);
 yörünge = tur-ortalaması (C++ cod_data.txt), spin = Poincaré Sy eğimi.
@@ -53,8 +60,11 @@ PATTERN_SEED = 321
 OFFSET_RMS   = 1e-4      # statik BPM ofseti RMS [m] = 100 μm
 OFFSET_SEED  = 777
 A_CAL        = 5e-5      # kalibrasyon mod genliği [m] = 50 μm
-K_FIT_A      = [1, 2, 3]             # dar kestirim (makale bölgesi)
-K_FIT_B      = [1, 2, 3, 4, 5, 6]    # geniş kestirim
+K_CAL        = [1, 2, 3, 4, 5, 6]    # kalibre edilen düğmeler
+FITS         = {"A": [1, 2, 3],
+                "C": [1, 2, 3, 4],
+                "D": [1, 2, 3, 4, 5],
+                "B": [1, 2, 3, 4, 5, 6]}
 T2           = 1e-3
 RETURN_STEPS = 6000      # spin koşumları için
 
@@ -179,15 +189,16 @@ def main():
     rng_b = np.random.default_rng(OFFSET_SEED)
     b = rng_b.standard_normal(n_q) * OFFSET_RMS
 
-    spec_P, _ = spektrum(P, n_q, antisym)
+    spec_P, by_k_P = spektrum(P, n_q, antisym)
 
     print(f"Desen: seed={PATTERN_SEED}, RMS={np.std(P)*1e6:.1f}μm | "
           f"BPM ofseti: seed={OFFSET_SEED}, RMS={np.std(b)*1e6:.1f}μm")
-    print(f"Kestirimler: A=k{K_FIT_A}, B=k{K_FIT_B} | kalibrasyon {A_CAL*1e6:.0f}μm")
+    print("Kestirim genişlikleri: " +
+          ", ".join(f"{nm}=k1..{max(ks)}" for nm, ks in FITS.items()))
 
     # ══ BÖLÜM 1+2: kalibrasyon + desen yörüngesi + f0 (tek havuz) ═══════════
     tasks = [("ref", np.zeros(n_q).tolist(), "orbit", T2, 10)]
-    for k in K_FIT_B:
+    for k in K_CAL:
         c, s = mode_vec_pair(n_q, k, antisym)
         tasks.append((f"o{k}c", (A_CAL*c).tolist(), "orbit", T2, 10))
         tasks.append((f"o{k}s", (A_CAL*s).tolist(), "orbit", T2, 10))
@@ -199,17 +210,15 @@ def main():
 
     y_ref = np.asarray(res["ref"])
     O_cols, knob_names = [], []
-    for k in K_FIT_B:
+    for k in K_CAL:
         for ph, tag in (("cos", "c"), ("sin", "s")):
             col = (np.asarray(res[f"o{k}{tag}"]) - y_ref) / A_CAL
             O_cols.append(col)
             knob_names.append(f"k{k} {ph}")
-    O_B = np.column_stack(O_cols)            # [48 × 12]
-    nA  = 2 * len(K_FIT_A)
-    O_A = O_B[:, :nA]                        # k=1..3 alt bloğu
+    O_full = np.column_stack(O_cols)            # [48 × 12]
 
     # Yörünge kazançları
-    gains = np.sqrt(np.mean(O_B**2, axis=0))   # RMS kazanç [m yörünge / m kaçıklık]
+    gains = np.sqrt(np.mean(O_full**2, axis=0))
     print(f"\n{'─'*60}")
     print("Bölüm 1: Yörünge kazançları (RMS, boyutsuz)")
     print(f"{'─'*60}")
@@ -224,130 +233,135 @@ def main():
           f"ölçülen (ofsetli) {np.std(y_meas)*1e3:.3f}mm")
     print(f"Sahte EDM (trim öncesi): f0 = {f0:+.4e} rad/s")
 
-    # ══ BÖLÜM 3: kestirim ═══════════════════════════════════════════════════
-    a_hat_A, *_ = np.linalg.lstsq(O_A, y_meas, rcond=None)
-    a_hat_B, *_ = np.linalg.lstsq(O_B, y_meas, rcond=None)
+    # Gerçek düğme içerikleri
+    a_true = []
+    for k in K_CAL:
+        a_true.append(by_k_P[k].get('cos', 0.0))
+        a_true.append(by_k_P[k].get('sin', 0.0))
+    a_true = np.array(a_true)
 
-    # Gerçek mod içerikleri (kıyas için)
-    _, by_k = spektrum(P, n_q, antisym)
-    a_true_B = []
-    for k in K_FIT_B:
-        a_true_B.append(by_k[k].get('cos', 0.0))
-        a_true_B.append(by_k[k].get('sin', 0.0))
-    a_true_B = np.array(a_true_B)
+    # ══ BÖLÜM 3: kestirimler (genişlik taraması) ════════════════════════════
+    a_hats, eps_preds, P_trims = {}, {}, {}
+    for nm, ks in FITS.items():
+        ncol = 2 * len(ks)
+        O_fit = O_full[:, :ncol]
+        a_hat, *_ = np.linalg.lstsq(O_fit, y_meas, rcond=None)
+        a_hats[nm] = a_hat
+        eps_preds[nm] = np.linalg.pinv(O_fit) @ b
+        P_trims[nm] = P - knob_matrix(n_q, ks, antisym) @ a_hat
 
-    # Ofset yanlılığı öngörüsü: ε = O⁺ b
-    eps_pred_A = np.linalg.pinv(O_A) @ b
-    eps_pred_B = np.linalg.pinv(O_B) @ b
-
-    print(f"\n{'─'*78}")
-    print("Bölüm 3: Kestirim — gerçek içerik vs LSQ kestirimi [μm]")
-    print(f"{'─'*78}")
-    print(f"{'düğme':>9}  {'gerçek':>9}  {'kest-A':>9}  {'kest-B':>9}  "
-          f"{'hata-B':>9}  {'O⁺b öngörü':>11}")
-    print('─'*78)
+    print(f"\n{'─'*94}")
+    print("Bölüm 3: Kestirim [μm] — gerçek vs varyantlar (parantez: hata)")
+    print(f"{'─'*94}")
+    hdr = f"{'düğme':>9}  {'gerçek':>8}"
+    for nm in FITS:
+        hdr += f"  {('kest-'+nm):>16}"
+    print(hdr)
+    print('─'*94)
     for i, name in enumerate(knob_names):
-        kA = f"{a_hat_A[i]*1e6:>9.2f}" if i < nA else f"{'—':>9}"
-        print(f"{name:>9}  {a_true_B[i]*1e6:>9.2f}  {kA}  "
-              f"{a_hat_B[i]*1e6:>9.2f}  "
-              f"{(a_hat_B[i]-a_true_B[i])*1e6:>9.2f}  "
-              f"{eps_pred_B[i]*1e6:>11.2f}")
-    err_A = a_hat_A - a_true_B[:nA]
-    err_B = a_hat_B - a_true_B
-    print(f"\n  Kestirim hatası RMS: A {np.std(err_A)*1e6:.2f}μm, "
-          f"B {np.std(err_B)*1e6:.2f}μm")
-    print(f"  O⁺b öngörü RMS    : A {np.std(eps_pred_A)*1e6:.2f}μm, "
-          f"B {np.std(eps_pred_B)*1e6:.2f}μm")
+        row = f"{name:>9}  {a_true[i]*1e6:>8.2f}"
+        for nm, ks in FITS.items():
+            if i < 2*len(ks):
+                err = (a_hats[nm][i] - a_true[i])*1e6
+                row += f"  {a_hats[nm][i]*1e6:>8.2f} ({err:>+6.2f})"
+            else:
+                row += f"  {'—':>16}"
+        print(row)
+    print()
+    for nm, ks in FITS.items():
+        err = a_hats[nm] - a_true[:2*len(ks)]
+        print(f"  {nm} (k=1..{max(ks)}): kestirim hatası RMS "
+              f"{np.std(err)*1e6:>6.2f}μm | O⁺b öngörü RMS "
+              f"{np.std(eps_preds[nm])*1e6:>6.2f}μm")
 
-    # ══ BÖLÜM 4: trim + spin doğrulama ══════════════════════════════════════
-    F_A = knob_matrix(n_q, K_FIT_A, antisym)
-    F_B = knob_matrix(n_q, K_FIT_B, antisym)
-    P_A = P - F_A @ a_hat_A
-    P_B = P - F_B @ a_hat_B
+    # ══ BÖLÜM 4: trim + spin doğrulama (tüm varyantlar) ═════════════════════
+    print(f"\nBölüm 4: 4 trim varyantı spin doğrulaması + en iyinin "
+          f"2. iterasyon yörüngesi...")
+    spin_tasks = [(nm, P_trims[nm].tolist(), "spin", T2, RETURN_STEPS)
+                  for nm in FITS]
+    res2 = run(spin_tasks)
+    f_res = {nm: res2[nm] for nm in FITS}
 
-    print(f"\nBölüm 4: trim uygulandı; spin doğrulaması + B'nin 2. iterasyon "
-          f"yörüngesi (3 simülasyon)...")
-    res2 = run([("fA", P_A.tolist(), "spin", T2, RETURN_STEPS),
-                ("fB", P_B.tolist(), "spin", T2, RETURN_STEPS),
-                ("oB", P_B.tolist(), "orbit", T2, 10)])
-    fA, fB = res2["fA"], res2["fB"]
+    best = min(FITS, key=lambda nm: abs(f_res[nm]))
+    print(f"  En iyi varyant: {best} (k=1..{max(FITS[best])})")
 
-    # ── 2. iterasyon (statik taban göstergesi) ────────────────────────────
-    y_meas2 = np.asarray(res2["oB"]) + b      # AYNI statik ofsetler
-    a_hat_2, *_ = np.linalg.lstsq(O_B, y_meas2, rcond=None)
-    P_B2 = P_B - F_B @ a_hat_2
-    print(f"  2. iterasyon kestirimi RMS: {np.std(a_hat_2)*1e6:.2f}μm "
-          f"(beklenti ~0: aynı ofset aynı yanlış hedef)")
+    # 2. iterasyon (statik taban göstergesi) — en iyi varyantta
+    res3 = run([("oBest", P_trims[best].tolist(), "orbit", T2, 10)])
+    y_meas2 = np.asarray(res3["oBest"]) + b      # AYNI statik ofsetler
+    ncol_b = 2 * len(FITS[best])
+    a_hat_2, *_ = np.linalg.lstsq(O_full[:, :ncol_b], y_meas2, rcond=None)
+    print(f"  2. iterasyon güncellemesi RMS: {np.std(a_hat_2)*1e6:.4f}μm "
+          f"(beklenti 0: aynı ofset → aynı yanlış hedef → taban)")
 
-    res3 = run([("fB2", P_B2.tolist(), "spin", T2, RETURN_STEPS)])
-    fB2 = res3["fB2"]
+    # Artık spektrumlar
+    specs = {nm: spektrum(P_trims[nm], n_q, antisym)[0] for nm in FITS}
 
-    # ── Artık spektrum ve sahte EDM öngörüsü ──────────────────────────────
-    spec_A, _ = spektrum(P_A, n_q, antisym)
-    spec_B, _ = spektrum(P_B, n_q, antisym)
-    spec_B2, _ = spektrum(P_B2, n_q, antisym)
-
-    # Spin katsayılarıyla artık öngörüsü (k=1..6, çift kuadratür)
-    f_pred_B = None
+    # Spin katsayılarıyla artık öngörüsü (kalibre k=1..6 kısmı)
+    f_preds = {}
     ck_path = os.path.join(BASE, "test_b_random_trim.json")
     if os.path.exists(ck_path):
         with open(ck_path) as fh:
             ckd = json.load(fh)
-        _, by_k_B = spektrum(P_B, n_q, antisym)
-        f_pred_B = sum(ckd["c_cos"][str(k)] * by_k_B[k].get('cos', 0.0)
-                       + ckd["c_sin"][str(k)] * by_k_B[k].get('sin', 0.0)
-                       for k in K_FIT_B)
+        for nm in FITS:
+            _, by_k_t = spektrum(P_trims[nm], n_q, antisym)
+            f_preds[nm] = sum(
+                ckd["c_cos"][str(k)] * by_k_t[k].get('cos', 0.0)
+                + ckd["c_sin"][str(k)] * by_k_t[k].get('sin', 0.0)
+                for k in K_CAL)
 
-    print(f"\n{'─'*70}")
-    print("Sonuçlar")
-    print(f"{'─'*70}")
-    print(f"{'durum':>22}  {'dSy/dt [rad/s]':>15}  {'bastırma':>9}")
-    print('─'*70)
-    print(f"{'trim öncesi':>22}  {f0:>15.4e}  {'—':>9}")
-    print(f"{'A: k=1..3 trim':>22}  {fA:>15.4e}  {abs(f0/fA):>8.1f}×")
-    print(f"{'B: k=1..6 trim':>22}  {fB:>15.4e}  {abs(f0/fB):>8.1f}×")
-    print(f"{'B + 2. iterasyon':>22}  {fB2:>15.4e}  {abs(f0/fB2):>8.1f}×")
-    if f_pred_B is not None:
-        print(f"\n  B artık öngörüsü (artık spektrum × c_k, k=1..6): "
-              f"{f_pred_B:+.4e} rad/s")
+    print(f"\n{'─'*74}")
+    print("Sonuçlar — kestirim genişliği taraması")
+    print(f"{'─'*74}")
+    print(f"{'varyant':>14}  {'dSy/dt [rad/s]':>15}  {'bastırma':>9}  "
+          f"{'k1..6 artık öngörüsü':>21}")
+    print('─'*74)
+    print(f"{'trim öncesi':>14}  {f0:>15.4e}  {'—':>9}  {'—':>21}")
+    for nm, ks in FITS.items():
+        pred = f"{f_preds[nm]:+.3e}" if nm in f_preds else "—"
+        star = " ★" if nm == best else ""
+        print(f"{nm+': k=1..'+str(max(ks)):>14}  {f_res[nm]:>15.4e}  "
+              f"{abs(f0/f_res[nm]):>8.1f}×  {pred:>21}{star}")
 
-    print(f"\n{'─'*70}")
-    print("Mod içeriği [μm]: önce → A-trim → B-trim → B-iter2")
-    print(f"{'─'*70}")
+    print(f"\n{'─'*86}")
+    print("Mod içeriği [μm]: önce → A → C → D → B   (←f: fit kapsamında)")
+    print(f"{'─'*86}")
     for k in range(1, 13):
-        a0 = spec_P[k][0]*1e6
-        aA = spec_A[k][0]*1e6
-        aB = spec_B[k][0]*1e6
-        a2 = spec_B2[k][0]*1e6
-        tag = " ←fit-B" if k in K_FIT_B else ""
-        tagA = "/A" if k in K_FIT_A else ""
-        print(f"  k={k:>2}: {a0:>7.2f} → {aA:>7.2f} → {aB:>7.2f} → "
-              f"{a2:>7.2f}{tag}{tagA}")
-    rms_fit_B  = np.sqrt(np.mean([spec_B[k][0]**2 for k in K_FIT_B]))
-    rms_fit_B0 = np.sqrt(np.mean([spec_P[k][0]**2 for k in K_FIT_B]))
-    print(f"\n  Fit-B modlarının RMS içeriği: {rms_fit_B0*1e6:.1f}μm → "
-          f"{rms_fit_B*1e6:.2f}μm")
+        row = f"  k={k:>2}: {spec_P[k][0]*1e6:>7.2f}"
+        for nm in FITS:
+            row += f" → {specs[nm][k][0]*1e6:>7.2f}"
+        tags = "".join(nm for nm, ks in FITS.items() if k in ks)
+        print(row + (f"   ←{tags}" if tags else ""))
 
     # ── JSON ───────────────────────────────────────────────────────────────
     out = {
-        "_aciklama": "Yörünge-sürülü trim zinciri (k-mod yok, CO=False)",
+        "_aciklama": "Yörünge-sürülü trim zinciri, genişlik taraması "
+                     "(k-mod yok, CO=False)",
         "pattern_rms_um": PATTERN_RMS*1e6, "offset_rms_um": OFFSET_RMS*1e6,
         "pattern_seed": PATTERN_SEED, "offset_seed": OFFSET_SEED,
         "kazanclar": {knob_names[i]: float(gains[i])
                       for i in range(len(knob_names))},
-        "kestirim_hata_um_B": {knob_names[i]: float(err_B[i]*1e6)
-                               for i in range(len(knob_names))},
-        "ofset_onggoru_um_B": {knob_names[i]: float(eps_pred_B[i]*1e6)
-                               for i in range(len(knob_names))},
-        "f0": f0, "fA": fA, "fB": fB, "fB_iter2": fB2,
-        "f_pred_B": f_pred_B,
-        "bastirma_A": abs(f0/fA), "bastirma_B": abs(f0/fB),
-        "bastirma_B2": abs(f0/fB2),
-        "mod_icerik_um": {str(k): {"once": spec_P[k][0]*1e6,
-                                   "A": spec_A[k][0]*1e6,
-                                   "B": spec_B[k][0]*1e6,
-                                   "B2": spec_B2[k][0]*1e6}
-                          for k in range(1, 13)},
+        "f0": f0,
+        "varyantlar": {nm: {
+            "k_list": FITS[nm],
+            "f": f_res[nm],
+            "bastirma": abs(f0/f_res[nm]),
+            "f_pred_k16": f_preds.get(nm),
+            "kestirim_hata_um": {
+                knob_names[i]: float((a_hats[nm][i]-a_true[i])*1e6)
+                for i in range(2*len(FITS[nm]))},
+            "ofset_onggoru_um": {
+                knob_names[i]: float(eps_preds[nm][i]*1e6)
+                for i in range(2*len(FITS[nm]))},
+        } for nm in FITS},
+        "en_iyi": best,
+        "iter2_guncelleme_rms_um": float(np.std(a_hat_2)*1e6),
+        "mod_icerik_um": {str(k): dict(
+            {"once": spec_P[k][0]*1e6},
+            **{nm: specs[nm][k][0]*1e6 for nm in FITS})
+            for k in range(1, 13)},
+        "y_true_bpm": y_true.tolist(),
+        "bpm_ofsetleri": b.tolist(),
+        "O_matrisi": O_full.tolist(),
     }
     with open("test_orbit_trim.json", "w") as fh:
         json.dump(out, fh, indent=2)
@@ -361,57 +375,56 @@ def main():
 
     # Panel 1: yörünge kazançları
     ax = axes[0, 0]
-    idx = np.arange(len(K_FIT_B))
+    idx = np.arange(len(K_CAL))
     ax.bar(idx - 0.2, gains[0::2], 0.4, label='cos', color='tab:red', alpha=0.85)
     ax.bar(idx + 0.2, gains[1::2], 0.4, label='sin', color='tab:blue', alpha=0.85)
-    ax.set_xticks(idx); ax.set_xticklabels([f"k={k}" for k in K_FIT_B])
+    ax.set_xticks(idx); ax.set_xticklabels([f"k={k}" for k in K_CAL])
     ax.set_ylabel("yörünge kazancı (RMS) [m/m]")
-    ax.set_title("Mod-yörünge kazançları")
-    ax.legend(); ax.grid(True, axis='y', alpha=0.3)
+    ax.set_title("Mod-yörünge kazançları (rezonans hiyerarşisi)")
+    ax.set_yscale('log')
+    ax.legend(); ax.grid(True, which='both', axis='y', alpha=0.3)
 
-    # Panel 2: kestirim hatası vs ofset öngörüsü
+    # Panel 2: kestirim hatası (B varyantı) vs ofset öngörüsü
     ax = axes[0, 1]
+    err_B = a_hats["B"] - a_true
     xi = np.arange(len(knob_names))
-    ax.bar(xi - 0.2, err_B*1e6, 0.4, label='gerçek hata', color='tab:purple',
-           alpha=0.85)
-    ax.bar(xi + 0.2, eps_pred_B*1e6, 0.4, label='O⁺b öngörüsü',
+    ax.bar(xi - 0.2, err_B*1e6, 0.4, label='gerçek hata (B)',
+           color='tab:purple', alpha=0.85)
+    ax.bar(xi + 0.2, eps_preds["B"]*1e6, 0.4, label='O⁺b öngörüsü',
            color='tab:gray', alpha=0.85)
     ax.set_xticks(xi); ax.set_xticklabels(knob_names, rotation=45, fontsize=8)
     ax.set_ylabel("kestirim hatası [μm]")
-    ax.set_title("Kestirim hatası kaynağı: statik BPM ofseti")
+    ax.set_title("Geniş fit (k=1..6): düşük kazançta ofset patlaması")
     ax.legend(); ax.grid(True, axis='y', alpha=0.3)
 
-    # Panel 3: mod içerik öncesi/sonrası
+    # Panel 3: mod içerik öncesi/sonrası (önce, A, C, B)
     ax = axes[1, 0]
     kk = np.arange(1, 13)
-    ax.bar(kk - 0.3, [spec_P[k][0]*1e6 for k in kk], 0.3, label='önce',
+    ax.bar(kk - 0.3, [spec_P[k][0]*1e6 for k in kk], 0.2, label='önce',
            color='tab:gray', alpha=0.85)
-    ax.bar(kk,       [spec_A[k][0]*1e6 for k in kk], 0.3, label='A: k=1..3',
+    ax.bar(kk - 0.1, [specs["A"][k][0]*1e6 for k in kk], 0.2, label='A: k=1..3',
            color='tab:orange', alpha=0.85)
-    ax.bar(kk + 0.3, [spec_B[k][0]*1e6 for k in kk], 0.3, label='B: k=1..6',
+    ax.bar(kk + 0.1, [specs["C"][k][0]*1e6 for k in kk], 0.2, label='C: k=1..4',
            color='tab:green', alpha=0.85)
+    ax.bar(kk + 0.3, [specs["B"][k][0]*1e6 for k in kk], 0.2, label='B: k=1..6',
+           color='tab:red', alpha=0.85)
     ax.set_xticks(kk)
     ax.set_xlabel("Fourier modu k"); ax.set_ylabel("A_k [μm]")
     ax.set_title("Mod içeriği: trim öncesi/sonrası")
-    ax.legend(); ax.grid(True, axis='y', alpha=0.3)
+    ax.legend(fontsize=9); ax.grid(True, axis='y', alpha=0.3)
 
-    # Panel 4: sahte EDM
+    # Panel 4: sahte EDM genişlik taraması
     ax = axes[1, 1]
-    labels = ["önce", "A: k=1..3", "B: k=1..6", "B iter-2"]
-    vals = [abs(f0), abs(fA), abs(fB), abs(fB2)]
-    cols = ['tab:gray', 'tab:orange', 'tab:green', 'tab:olive']
-    ax.bar(labels, vals, color=cols, alpha=0.85)
+    labels = ["önce"] + [f"{nm}: k≤{max(ks)}" for nm, ks in FITS.items()]
+    vals = [abs(f0)] + [abs(f_res[nm]) for nm in FITS]
+    cols = ['tab:gray', 'tab:orange', 'tab:green', 'tab:cyan', 'tab:red']
+    bars = ax.bar(labels, vals, color=cols, alpha=0.85)
     ax.set_yscale('log')
-    if f_pred_B is not None:
-        ax.axhline(abs(f_pred_B), color='k', ls='--', lw=1.2,
-                   label=f'B öngörüsü (artık spektrum × c_k)')
-        ax.legend(fontsize=9)
     for i, v in enumerate(vals):
-        sup = abs(f0)/v if v > 0 else float('inf')
-        txt = "—" if i == 0 else f"{sup:.0f}×"
+        txt = "—" if i == 0 else f"{abs(f0)/v:.0f}×"
         ax.annotate(txt, (i, v), ha='center', va='bottom', fontsize=10)
     ax.set_ylabel("|dSy/dt| [rad/s]")
-    ax.set_title("Sahte EDM: spin doğrulaması")
+    ax.set_title("Sahte EDM vs kestirim genişliği (spin doğrulaması)")
     ax.grid(True, which='both', axis='y', alpha=0.3)
 
     plt.tight_layout()
