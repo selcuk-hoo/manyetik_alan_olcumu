@@ -1,8 +1,8 @@
 # YAPILACAKLAR — pEDM Quad Hizalama İzleme Projesi
 
-> Son güncelleme: 2026-06-11. Trim analiz serisi (yörünge + spin + taban
-> analizi) tamamlandı; sıradaki ağırlık makale yazımı ve spin kademesinin
-> uçtan uca gösterimi.
+> Son güncelleme: 2026-06-11. `makale_trim_tr.tex` taslağı konsolide edildi
+> (polarimetre bütçesi dahil). g₀ tarama testi çalışıyor; makale için
+> hakem yorum yanıtlarına odaklanılıyor.
 
 ---
 
@@ -46,21 +46,35 @@
   çiftinin dışına alan hücre mevcut gradyanla kararsız; aynı ton g≈0.5 T/m ister
 - [x] Belgeler: `false_edm_harmonic_sinir.md` §1–12.16,
   `trim_yontemi_pedagojik.md` §1–9, `makale_tr.tex` trim bölümü
+- [x] `makale_trim_tr.tex` — bağımsız trim makalesi taslağı: tüm semboller
+  tanımlı, 9 şekil çağrıldığı yerde, polarimetre istatistik modeli ve
+  süre bütçesi (Müller 2020 referansla), CW−CCW EDM güvenlik kanıtı
 
 ---
 
 ## 🔲 Aktif: Sıradaki İşler
 
-### 1. Spin kademesinin uçtan uca gösterimi (öncelik: yüksek)
+### 1. g₀ tarama testi (öncelik: yüksek — çalışıyor)
+`test_g0_scan.py` — eşik teorisinin g₀=0.15/0.20/0.25 T/m üç kafes
+noktasında genelliğini test eder. Şu an g₀=0.15 tohum bataryası aşamasında.
+Çıktı: `test_g0_scan.json`, `test_g0_scan.png`.
+Sonuç gelince §8 "Tartışma" içine ve CLAUDE.md'ye eklenecek.
+
+### 2. Makale kalan \todo maddeleri (öncelik: yüksek)
+`makale_trim_tr.tex` içinde kalan eksikler:
+- `\todo{kurum bilgisi}` — yazara özgü
+- `\bibitem{todo-pedm}` — pEDM tasarım raporu
+- `\bibitem{todo-omarov}` — Omarov ve ark. PRD
+- `\bibitem{todo-bba}` — BBA/k-modülasyon referansları
+- `\bibitem{todo-loco}` — LOCO tepki matrisi referansı
+- `\todo{teşekkür ve fon bilgisi}` — yazara özgü
+
+### 3. Spin kademesinin uçtan uca gösterimi (öncelik: orta)
 Yörünge trimi sonrası kalan ~10⁻⁴ artığı boylamsal spin geri-beslemesiyle
 10⁻⁵ altına indiren tam zincir simülasyonu:
 `yörünge trimi → spin ölç → c_k tabanında trim → tekrar` döngüsünün
 simetrik içerik dahil çalıştığının gösterilmesi. Mevcut altyapı yeterli
 (`test_b_iterative_trim.py` + `test_orbit_trim.py` birleşimi).
-
-### 2. Makale konsolidasyonu (öncelik: yüksek)
-`makale_tr.tex` trim bölümü büyüdü; ayrı bir trim makalesi olarak bölme
-kararı (bkz. `MAKALE_POTANSIYELI.md`).
 
 ---
 
