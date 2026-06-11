@@ -361,7 +361,32 @@ yürüyen ölç--trimle döngüsü birkaç turda $\sim10^{3}$ kat bastırmaya
 ulaşır (Şekil~\ref{fig:iteratif}); pratik sınırı kalibrasyon
 artıkları ve polarimetre istatistiği belirler. BPM gürültüsü ve
 ofseti bu kademeyi hiç etkilemez, çünkü BPM kullanılmaz.
-\todo{polarimetre istatistik modeli ve süre bütçesi}
+
+Spin hızı çözünürlüğü doğrudan polarimetre istatistiğinden türetilir.
+Toplam saptanan olay sayısı $N$ ve veri toplama süresi $T_\mathrm{fill}$
+için doğrusal presesyon modeline maksimum olabilirlik uydurmasının
+istatistik belirsizliği
+\begin{equation}
+  \sigma(\dot{S}_y)
+  = \frac{\sqrt{12}}{A_y\,\sqrt{N}\,T_\mathrm{fill}}
+\label{eq:pol-sigma}
+\end{equation}
+şeklindedir~\cite{mueller2020}.
+COSY polarimetresinde $A_y = 0.61\pm0.04$ (d-C elastik, $T_d=238$~MeV,
+$\theta_\mathrm{lab}=40^\circ$) ölçülmüştür~\cite{mueller2020};
+proton polarimetresi için benzer geometride
+$A_y \approx 0.5$ konservatif bir başlangıç değeridir.
+pEDM tasarımında dolum başına $N_\mathrm{dep}=10^{10}$ depolanmış
+parçacık ve ${\sim}1\%$ saptama verimi ile $N\approx10^{8}$ iyi olay
+elde edilir~\cite{mueller2020}; $T_\mathrm{fill}=120$~s alındığında
+\begin{equation*}
+  \sigma(\dot{S}_y)_\mathrm{dolum}
+  \approx \frac{3.46}{0.5\times10^{4}\times120}
+  \approx 5.8\times10^{-6}~\mathrm{rad/s},
+\end{equation*}
+$10^{-5}$~rad/s hedefinin yaklaşık 2 katı güvenli tarafta.
+CW$-$CCW fark kanalında iki bağımsız ölçümün ortalaması bu değeri
+ek $1/\sqrt{2}$ ile $\approx 4\times10^{-6}$~rad/s'ye çeker.
 
 \begin{figure}[htb]
 \centering
@@ -772,8 +797,33 @@ ve quad-flip tekniğiyle $10^{-9}$~rad/s altına
 taşınır~\cite{todo-omarov}.
 \end{enumerate}
 
-\todo{dolum sayısı / süre bütçesi tablosu; polarimetre istatistiği
-ile spin kademesi çözünürlüğünün bağlanması}
+Tablo~\ref{tab:sure-butcesi} spin kademesi için dolum sayısını ve süre
+bütçesini özetler; Denklem~\ref{eq:pol-sigma} ile hesaplanan çözünürlük
+değerleri pEDM tasarım koşullarını ($A_y=0.5$, $N=10^8$,
+$T_\mathrm{fill}=120$~s~\cite{mueller2020}) yansıtır.
+
+\begin{table}[htb]
+\centering
+\caption{Spin kademesi dolum sayısı ve süre bütçesi.
+  Her dolum $T_\mathrm{fill}=120$~s veri toplama ve 75~s
+  elektron soğutması içerir~\cite{mueller2020}.
+  Çözünürlük sütunu o aşamanın kümülatif ortalamasına karşılık gelir.}
+\label{tab:sure-butcesi}
+\begin{tabular}{lccc}
+\toprule
+Aşama & Dolum sayısı & Süre & $\sigma(\dot{S}_y)$ \\
+\midrule
+Çift-kuadratür kalibrasyonu ($2N_k+1$, $N_k=6$) & 13 & $\approx43$~dk
+  & $1.6\times10^{-6}$~rad/s \\
+Trim iterasyonu ($\times3$) & 3 & $\approx10$~dk
+  & $5.8\times10^{-6}$~rad/s (tek dolum) \\
+Doğrulama / yeniden kalibrasyon & 2 & $\approx7$~dk
+  & $4.1\times10^{-6}$~rad/s \\
+\midrule
+\textbf{Toplam} & \textbf{18} & $\approx60$~dk & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 %==============================================================
 \section{Tartışma ve sonraki çalışmalar}
@@ -793,8 +843,11 @@ açıkken teyidi mevcut altyapıyla yapılabilir durumdadır.
 
 (iii)~Spin izleme süresi $t_2=\SI{1}{ms}$'dir; gerçek deneyde
 $f$ çözünürlüğü polarimetre istatistiği ve spin koherans süresiyle
-belirlenir. $10^{-5}$~rad/s hedefinin gerektirdiği dolum süresi
-bütçesi ayrıca çıkarılacaktır.
+belirlenir. $10^{-5}$~rad/s hedefinin gerektirdiği dolum süresi bütçesi
+Denklem~\ref{eq:pol-sigma} ve Tablo~\ref{tab:sure-butcesi}'de
+çıkarılmıştır: pEDM tasarım koşullarında tek dolum hedefin iki katı
+güvenli tarafta çözünürlük sağlar, spin kademesinin tamamı
+$\approx60$~dk içinde tamamlanır.
 
 (iv)~Yalnız düşey kaçıklıklar ele alınmıştır; yatay kaçıklıklar ve
 kuadrupol tilt (dönme) çapraz terimleri aynı çerçeveye
@@ -834,6 +887,10 @@ giden, deneysel olarak uygulanabilir bir yol sunmaktadır.
 CW/CCW + quad-flip iptal zinciri}
 \bibitem{todo-bba} \todo{BBA / k-modülasyon referansları}
 \bibitem{todo-loco} \todo{LOCO / tepki matrisi referansı}
+\bibitem{mueller2020} T.~Müller ve ark., ``A new beam polarimeter at
+COSY to search for the electric dipole moment of charged particles,''
+\textit{JINST} \textbf{15}, P12005 (2020)
+[arXiv:2010.13536].
 \end{thebibliography}
 
 \end{document}
