@@ -1311,6 +1311,57 @@ iptal — kalan üzerinde çalışır, gerçek EDM'yi korur;
 (3)~gerekirse yalnız-sistematik gözlenebilirle sürülen spin kademesi —
 artığı polarimetre istatistiği tabanına indirir.
 
+\textbf{Evrensellik ve analitik eşik.}
+Dört ek (desen, ofset) seed çiftiyle yapılan tarama,
+Tablo~\ref{tab:orbit-trim}'deki bastırma oranlarının seed'e özgü
+olduğunu göstermiştir: beş seed üzerinde A/C/D/B mutlak artıkları
+istatistiksel olarak ayırt edilemez ($\sim2{,}5\times10^{-4}$~rad/s
+RMS) ve $100\times$ değeri elverişli faz iptalinin ürünüdür (tipik
+medyan bastırma $\sim5\times$). Artığı fit edilen modlar değil, fit
+bazının \emph{dışındaki} içerik belirler: 48 serbestlik derecesinin
+yalnızca 25'i antisimetrik $k=0..12$ bazında yaşar; kalan 23 boyut
+(simetrik QF/QD kombinasyonları, $\sim60..90~\mu$m RMS) yörünge
+fit'ine görünmez fakat spine bağlanır. Buna karşılık iki sonuç
+evrenseldir. Birincisi, ölçülen yörünge kazançları klasik
+düz-yaklaşım kapalı-yörünge harmonik yanıtına \%0{,}6 RMS sapmayla
+oturur:
+\begin{equation}
+G_k=\frac{C}{|Q_\mathrm{eff}^2-k^2|},\qquad C=24{,}8,\;
+Q_\mathrm{eff}^2=5{,}03.
+\label{eq:kazanc-yasasi}
+\end{equation}
+İkincisi, mod $k$'yı fit etmenin kazandırma koşulu kapalı biçimde
+yazılabilir: ofset yanlılığı
+$\varepsilon_k=\sigma_b\sqrt{2/N}/G_k$, beklenen gerçek içerik
+$A_k\approx\sigma_q\sqrt{2/N}$ olduğundan koşul
+$G_k>\sigma_b/\sigma_q$'ya, Denk.~(\ref{eq:kazanc-yasasi}) ile
+birleşince $k_\mathrm{max}^2<Q_\mathrm{eff}^2+C\,\sigma_q/\sigma_b$'ye
+indirgenir. $\sigma_b=\sigma_q$ için $k_\mathrm{max}=5{,}5$: $k=4$
+güvenli, $k=5$ tam eşikte (seed'e göre kararsız davranışının nedeni),
+$k=6$ zararlı — simülasyon bulgularıyla birebir. Gerçek hızlandırıcıda
+bağlayıcı olan simülasyon değerleri değil bu prosedürdür: $G_k$
+devreye almada ayni diferansiyel kalibrasyonla yerinde ölçülür ve eşik
+o makinenin $G_k$, $\sigma_b$ değerleriyle yeniden hesaplanır.
+Beam-based alignment ile $\sigma_b\to10~\mu$m indirilirse
+$k_\mathrm{max}\approx16$ olur ve tüm antisimetrik baz güvenle fit
+edilebilir.
+
+\textbf{Radyal başlangıç polarizasyonu.}
+Başlangıç polarizasyonunun boylamsal yerine radyal seçilmesi
+duyarlılığı artırmaz: hem ger\c{c}ek EDM dönüşü (radyal $E$) hem sahte
+EDM dönüşü (dikey yörünge $\times$ kuadrupol gradyanı $\to$ radyal
+$B_x$) radyal eksen etrafında olduğundan, radyal spin
+($S_x=1$, $S_z=0$) her ikisine de birinci mertebede kördür. Ölçüm:
+saf EDM sinyali boylamsal demette $-9{,}7\times10^{-10}$~rad/s iken
+radyal demette $-2{,}8\times10^{-16}$~rad/s ($3{,}5\times10^{6}$ kat
+bastırma). Buna karşın $100~\mu$m'lik kaçıklık deseni radyal demette
+$+8{,}2\times10^{-5}$~rad/s (boylamsalın \%5'i) sinyal bırakır —
+mekanizma dikey betatron hızı $\times$ radyal $E$ alanından gelen
+boylamsal $\Omega_z$ bileşenidir ($dS_y/dt=\Omega_z S_x$). Radyal
+demet böylece \emph{EDM'den arındırılmış bir hizalama-sistematiği
+kanalı} sunar: kademeli mimarinin son basamağındaki
+yalnız-sistematik gözlenebilir için somut bir adaydır.
+
 %==============================================================
 \section{Tartışma ve sonraki çalışmalar}
 \label{sec:tartisma}

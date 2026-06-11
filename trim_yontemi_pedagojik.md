@@ -486,6 +486,20 @@ görülüp sisteme enjekte edilir).
 | D | k=1..5 | +1.37×10⁻⁴ | 11.9× |
 | B | k=1..6 | +1.07×10⁻⁴ | 15.2× |
 
+> **⚠ Evrensellik uyarısı:** Bu tablo TEK seed çiftine (321/777) aittir.
+> 4 yeni seed ile yapılan tarama (`test_orbit_trim_seeds.py`) şunu
+> gösterdi: 100.8× faz şansıydı; tipik bastırma ~5×, ve A/C/D/B
+> artıkları istatistiksel olarak ayırt edilemez (hepsi ~2.5×10⁻⁴ rad/s
+> RMS). Spin artığını fit edilen modlar değil, fit bazının **dışında**
+> kalan içerik belirler: 48 serbestlik derecesinin yalnızca 25'i
+> antisym k=0..12 bazındadır; kalan 23 boyut (simetrik QF/QD
+> kombinasyonları, ~60–90 μm) yörüngeye zayıf, spine ise belirgin
+> bağlanır. Evrensel olan sonuçlar: (1) k=1..4 yörünge içeriği her
+> seed'de birkaç μm'e iner, (2) kazançlar analitik yasaya uyar
+> (G_k = 24.8/|5.03−k²|, sapma %0.6), (3) fit eşiği G_k > σ_b/σ_q
+> formülüyle önceden hesaplanabilir (σ_b=σ_q'da k_max=5.5 → k=5'in
+> seed'e göre kararsızlığı eşikte olmasındandır).
+
 ### 7.6 Neden yörünge k≥7'yi göremez ama spin görür?
 
 Kısa cevap: iki farklı fiziksel mekanizma — çelişki değil, beklenen sonuç.
@@ -512,12 +526,17 @@ Bunların spin katkısı (üst sınır, faz bağımlı):
     k=7:  1.96 × 2.68×10⁻⁵ ≤ 5.3×10⁻⁵ rad/s
     k=8:  1.52 × 3.19×10⁻⁵ ≤ 4.8×10⁻⁵ rad/s
 
-C-trim artığı = +1.61×10⁻⁵ rad/s. Rastgele fazların kısmi iptali sonucu
-net katkı bu mertebeye düşer. **Yörünge triminin 100× tavanı, onun
-göremediği k≥7 içeriğinden kaynaklanır — ne daha fazlası ne daha azı.**
+C-trim artığı = +1.61×10⁻⁵ rad/s (bu seed'de). Çok-seed taraması artığın
+genel kaynağını daha da netleştirdi: k≥7 antisym içeriğin yanında,
+antisym bazın hiç KAPSAMADIĞI 23 boyutluk simetrik içerik de (~60–90 μm)
+spine bağlanır; 5-seed artık tabanı ~2.5×10⁻⁴ rad/s'tir. **Yörünge
+triminin tavanı, onun göremediği VE bazın temsil edemediği içerikten
+kaynaklanır.**
 
 Bu bir kısıtlama değil, **tanımlanmış bir sınır**: nerede durulacağını
-biliyoruz ve neden biliyoruz.
+biliyoruz ve neden biliyoruz. Sınırı itmenin iki yolu da bellidir:
+σ_b'yi düşürmek (k_max² = Q² + 24.8·σ_q/σ_b büyür) ve baza simetrik
+düğmeler eklemek.
 
 ### 7.7 İkinci iterasyon neden kazandırmaz?
 

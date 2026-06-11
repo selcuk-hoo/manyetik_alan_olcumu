@@ -1,0 +1,19 @@
+{
+  "_aciklama": "Radyal vs boylamsal başlangıç polarizasyonu (CO=False, t2=1ms, desen seed=321 100μm RMS)",
+  "sonuclar": {
+    "long_pat": {
+      "dSy_dt": -0.0016231070693120686
+    },
+    "rad_pat": {
+      "dSy_dt": 8.189403646399179e-05
+    },
+    "long_edm": {
+      "dSy_dt": -9.65950340014098e-10
+    },
+    "rad_edm": {
+      "dSy_dt": -2.77554480713787e-16
+    }
+  },
+  "oran_kaciklik": 0.05045510429493813,
+  "oran_edm": 2.8733825044229094e-07
+}

@@ -1009,6 +1009,136 @@ Kalan ~10⁻⁵ rad/s, k≥7 içeriğinden kaynaklandığı için CW/CCW yöntem
 tarafından doğal olarak iptal edilir (her iki ışın da aynı hizalama
 hatasını görür).
 
+> **⚠ Evrensellik uyarısı (bkz. §12.12):** Bu bölümdeki bastırma
+> oranları (A=24×, C=100.8×) seed=321/777 çiftine aittir. 4 yeni seed
+> çiftiyle yapılan tarama, 100× değerinin **faz şansı** olduğunu ve
+> A/C/D/B sıralamasının seed'den seed'e değiştiğini gösterdi. Evrensel
+> olan: k=1..4 yörünge içeriğinin birkaç μm'e temizlenmesi ve analitik
+> kazanç yasası. Spin artığı ise fit bazının DIŞINDA kalan içerikle
+> belirlenir (~2.5×10⁻⁴ rad/s taban, 5-seed RMS).
+
+### 12.12 Evrensellik testi: genişlik haritası seed'e bağlı mı?
+
+**Dosyalar:** `test_orbit_trim_seeds.py`, `test_orbit_trim_seeds.json`,
+`test_orbit_trim_seeds.png` (4 yeni seed çifti, kalibrasyon O matrisi
+§12.11'den yeniden kullanıldı — kafese aittir, desene değil)
+
+**Soru:** "C (k=1..4) optimal, k≥5 fit zararlı" bulgusu evrensel mi?
+
+**Sonuç tablosu (mutlak artıklar, rad/s):**
+
+| seed | f₀ | A (k≤3) | C (k≤4) | D (k≤5) | B (k≤6) |
+|---|---|---|---|---|---|
+| 101/201 | +1.28×10⁻³ | −4.3×10⁻⁴ | −4.4×10⁻⁴ | −3.8×10⁻⁴ | −3.8×10⁻⁴ |
+| 102/202 | −2.0×10⁻⁴ | −1.6×10⁻⁶ | +1.4×10⁻⁴ | +2.8×10⁻⁴ | +1.9×10⁻⁴ |
+| 103/203 | +1.44×10⁻³ | +6.5×10⁻⁵ | −2.0×10⁻⁴ | −1.5×10⁻⁴ | −2.4×10⁻⁴ |
+| 104/204 | −9.1×10⁻⁴ | +4.0×10⁻⁴ | +3.7×10⁻⁴ | +2.1×10⁻⁴ | +3.1×10⁻⁴ |
+| 321/777 (orij.) | −1.62×10⁻³ | −6.7×10⁻⁵ | +1.6×10⁻⁵ | +1.4×10⁻⁴ | +1.1×10⁻⁴ |
+| **RMS (5 seed)** | | **2.6×10⁻⁴** | **2.8×10⁻⁴** | **2.5×10⁻⁴** | **2.6×10⁻⁴** |
+
+**Bulgu 1 — Sıralama evrensel DEĞİL:** A/C/D/B artıkları istatistiksel
+olarak ayırt edilemez (hepsi ~2.5×10⁻⁴ RMS). Seed 321'deki "C=100.8×"
+sonucu faz şansıydı. Tipik (medyan) bastırma ~5×; oran 1.4×–123×
+arasında savruluyor çünkü payda (f₀) seed'e göre 8× değişiyor.
+
+**Bulgu 2 — Artığın gerçek kaynağı fit bazının DIŞI:** Her seed için
+artık ≈ (f₀ − antisym k≤6 tahmini) eşitliği sağlanıyor (örn. seed 101:
+artık −4.4×10⁻⁴, baz-dışı katkı −5.1×10⁻⁴). 48 quad'lık desenin yalnızca
+25 serbestlik derecesi antisym k=0..12 bazında; geri kalan 23 boyut
+(simetrik QF/QD kombinasyonları, 57–90 μm RMS taşıyor) hem yörünge
+fit'ine hem spektrum analizine görünmezdir ama spine bağlanır. Seed
+321'de bu baz-dışı katkı tesadüfen küçüktü.
+
+**Bulgu 3 — k=5 fit'inin kararsızlığı analitik eşiğin kendisidir:**
+k=5 kazancı (1.24), eşik değeri σ_b/σ_q = 1.0'ın hemen üstünde —
+sınırda olan mod, seed'e göre bazen kazandırır bazen kaybettirir
+(D, 4 seed'in 2'sinde C'den iyi, 2'sinde kötü). k≤4 (G≥2.26) her
+seed'de güvenli, k=6 (G=0.79) hiçbir seed'de belirgin kazandırmıyor.
+
+#### Analitik kazanç yasası ve eşik formülü
+
+Ölçülen 6 kazanç, klasik düz-yaklaşım kapalı yörünge harmonik yanıtına
+%0.6 RMS sapmayla oturur:
+
+$$G_k = \frac{C}{|Q_\mathrm{eff}^2 - k^2|}, \qquad C = 24.8,\;
+Q_\mathrm{eff}^2 = 5.03\;(Q_\mathrm{eff}=2.243)$$
+
+| k | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| Ölçülen | 6.20 | 24.08 | 6.29 | 2.26 | 1.24 | 0.794 |
+| Model | 6.16 | 24.09 | 6.25 | 2.26 | 1.24 | 0.801 |
+
+(Not: Q_eff = 2.24, FFT ile ölçülen betatron tunu Q_y = 2.68'den
+farklıdır — formülün biçimi düz-yaklaşım COD yanıtıdır; etkin Q, gerçek
+kafesin β-modülasyonunu soğurur.)
+
+Mod k'yı fit etmenin kazandırma koşulu: ofset yanlılığı < gerçek içerik:
+
+$$\varepsilon_k = \frac{\sigma_b\sqrt{2/N}}{G_k} < A_k \approx
+\sigma_q\sqrt{2/N} \;\Longrightarrow\; \boxed{G_k > \sigma_b/\sigma_q}$$
+
+√(2/N) çarpanları sadeleşir — **eşik yalnız σ_b/σ_q oranına bağlıdır.**
+Kazanç yasasıyla birleşince: k_max² < Q_eff² + C·(σ_q/σ_b).
+
+| σ_b/σ_q | 2.0 | 1.0 | 0.5 | 0.1 |
+|---|---|---|---|---|
+| k_max | 4.2 | 5.5 | 7.4 | 15.9 |
+
+σ_b = σ_q = 100 μm'de k_max = 5.5: k=4 güvenli, k=5 sınırda, k=6 zararlı
+— simülasyonun bulduğuyla birebir.
+
+**Gerçek hızlandırıcıda bağlayıcılık:** Simülasyondaki sayılar değil,
+prosedür bağlayıcıdır. G_k devreye almada aynı diferansiyel kalibrasyonla
+yerinde ölçülür; eşik o makinenin ölçülen G_k ve σ_b değerleriyle
+yeniden hesaplanır. Beam-based alignment ile σ_b 10 μm'e inerse
+k_max ≈ 16 olur — tüm antisym bazı güvenle fit edilebilir.
+
+#### 10⁻⁵ hedefi için sonuç
+
+Deney gereksinimi (CW/CCW + quad-flip ~10⁴× ek bastırma ile toplam
+<10⁻⁹): yörünge kademesinin ~10⁻⁵ rad/s'ye inmesi yeterli. Bu testin
+gösterdiği: σ_b = 100 μm ile 12-düğmeli antisym baz bunu **garanti
+edemez** (taban 2.5×10⁻⁴). Kapanması gereken açık iki yönlüdür:
+1. **σ_b'yi düşür** (beam-based alignment) → k_max büyür,
+2. **Bazı genişlet** — antisym k≤12'nin ötesinde, baz-dışı 23 boyutu
+   (simetrik kombinasyonlar) gören düğmeler eklenmelidir; aksi hâlde
+   57–90 μm'lik görünmez içerik spin artığını domine etmeye devam eder.
+
+### 12.13 Radyal başlangıç polarizasyonu: hassasiyet artar mı?
+
+**Dosyalar:** `test_radial_spin.py`, `test_radial_spin.json`,
+`test_radial_spin.png` (CO=False, t2=1ms)
+
+**Soru:** Spin-sürülü trimde başlangıç polarizasyonu boylamsal yerine
+radyal olsa sistem daha hassas olur mu?
+
+**Teorik beklenti:** Hem gerçek EDM dönüşü (radyal E) hem sahte EDM
+dönüşü (dikey COD × quad gradyanı → radyal B_x) radyal eksen
+etrafındadır. Thomas-BMT'de dS_y/dt = Ω_z·S_x − Ω_x·S_z: boylamsal spin
+(S_z=1) Ω_x'i tam görür; radyal spin (S_x=1, S_z=0) Ω_x'e birinci
+mertebede kördür, ama Ω_z'yi (boylamsal presesyon ekseni) görür.
+
+**Ölçüm (4 koşum):**
+
+| Koşum | Spin | Kaynak | dS_y/dt [rad/s] |
+|---|---|---|---|
+| 1 | boylamsal | kaçıklık (100μm) | −1.62×10⁻³ |
+| 2 | radyal | kaçıklık (100μm) | **+8.2×10⁻⁵** |
+| 3 | boylamsal | saf EDM (η=1.88×10⁻¹⁵) | −9.66×10⁻¹⁰ |
+| 4 | radyal | saf EDM | **−2.8×10⁻¹⁶** |
+
+**Yanıt: hassasiyet ARTMAZ — EDM sinyali 3.5 milyon kat bastırılır**
+(oran 2.9×10⁻⁷). Radyal demet EDM'ye fiilen kördür.
+
+**Ama beklenmedik bir armağan var:** Kaçıklık sinyali sıfır ÇIKMADI —
+boylamsalın %5'i (+8.2×10⁻⁵) kaldı. Mekanizma: dikey betatron/yörünge
+hızı (β_y) × radyal E alanı → boylamsal Ω_z bileşeni → dS_y/dt = Ω_z·S_x.
+Yani radyal demet, **EDM'den arındırılmış bir hizalama-sistematiği
+kanalıdır**: kademeli mimarinin 3. basamağında aranan "yalnız-sistematik
+gözlenebilir"in somut bir adayı. Spin-sürülü trim radyal demetle
+yapılırsa EDM sinyalini silme riski olmaz (duyarlılık haritası farklı
+olduğundan kalibrasyonu ayrıca yapılmalıdır).
+
 ---
 
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-11*
