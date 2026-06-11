@@ -1,0 +1,35 @@
+{
+  "_aciklama": "Antisimetrik vs simetrik hizalama hata bileşenlerinin COD ve sahte EDM sinyaline etkisi (CO=False, t2=1ms, seed=321, RMS=100μm)",
+  "parametreler": {
+    "PATTERN_RMS_um": 100.0,
+    "PATTERN_SEED": 321,
+    "T2_s": 0.001,
+    "n_q": 48,
+    "antisym_basis_cols": 25
+  },
+  "desen_rms_um": {
+    "full": 89.50392597264813,
+    "antisym": 69.80117354614983,
+    "symm": 54.92505037576035,
+    "zero": 0.0
+  },
+  "ic_carpim_antisym_symm": -6.617444900424222e-24,
+  "sonuclar": {
+    "full": {
+      "COD_rms_um": 627.8796864422953,
+      "dSy_dt": -0.0016231070693120686
+    },
+    "antisym": {
+      "COD_rms_um": 549.9965638620882,
+      "dSy_dt": -0.0015208343729361093
+    },
+    "symm": {
+      "COD_rms_um": 164.5303645938823,
+      "dSy_dt": -0.00010227265700986543
+    },
+    "zero": {
+      "COD_rms_um": 0.0,
+      "dSy_dt": 0.0
+    }
+  }
+}
