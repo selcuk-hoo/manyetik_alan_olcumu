@@ -592,3 +592,57 @@ polarimetre istatistiğiyle sınırlı spin ölçümü ile temizlenir.
 Açık başlıklar: RF ve sekstüpol açık kafeste doğrusallık; x-yönü
 kaçıklıkları ve quad tilt çapraz terimleri; zamanla sürüklenen hizalamada
 izleme (tracking) kipi.
+
+---
+
+## 9. Tabanın anatomisi: yörünge triminin göremediği yarı
+
+Test III'ün artığı (~2.5×10⁻⁴ rad/s) nereden geliyor? Yanıt, 48
+serbestlik derecesinin ikiye bölünmesinde.
+
+**İki tür kaçıklık kombinasyonu.** QF'in gradyanı pozitif, QD'ninki
+negatif. Dikey kaçıklık dy radyal alan B_x = g·dy üretir; işareti g'ye
+bağlıdır:
+
+- **Antisimetrik** kombinasyon (QF ve QD zıt yönlere kayar): tekmeler
+  üst üste biner → büyük COD, büyük spin sinyali. 25 boyut. Yörünge
+  fit'inin yaşadığı dünya budur.
+- **Simetrik** kombinasyon (QF ve QD beraber kayar): tekmeler
+  birbirini söndürmeye çalışır. 23 boyut. Yörünge fit bazının
+  *dışında* kalır.
+
+**Söndürme iki kanalda da kısmidir — ölçüldü** (`test_symm_vs_antisym.py`,
+seed=321, iki parça birbirine dik):
+
+| parça | desen RMS | COD RMS | dSy/dt [rad/s] |
+|---|---|---|---|
+| antisim | 70 μm | 550 μm | −1.5×10⁻³ |
+| simetrik | 55 μm | 165 μm | −1.0×10⁻⁴ |
+
+Yörüngede iptal ~2.6× (kazanç 7.9'a karşı 3.0); spinde ~12×
+(deflektör arclarındaki geometrik spin fazı tam iptali bozar). İşte
+2.5×10⁻⁴'lük taban bu satırdan gelir: simetrik içerik trim sonrası
+aynen yerinde durur ve spini sürmeye devam eder.
+
+**"O zaman simetrik modları da fit edelim" — denendi, başarısız**
+(`test_symm_basis_fit.py`). Simetrik mod kazançları 0.7–4.7 aralığında;
+k=1 ve k=4 eşik altında. Eşik altı düğme eklemek fit'e BPM ofsetini
+enjekte eder: kestirilen simetrik genlikler 136 μm RMS (gerçek 55 μm).
+Sonuç 9× kötüleşme. §7.4'teki kural acımasızdır: **fit edilebilirliği
+kazanç belirler, istek değil.**
+
+**Kafes cerrahisi denemeleri** (`integrator2.cpp`, ayrı motor):
+deflektörü QF-QD çiftinin dışına alan topoloji (QF-d-QD-d-ARC-d) spin
+iptalini onarabilirdi; ancak mevcut gradyanla kararsız çıktı ve aynı
+ton ~2× quad gücü ister — tam kafes yeniden tasarımı, rafa kaldırıldı.
+Tek-tip-quad fikri ise quad-flip simetrisini (10⁻⁵→10⁻⁹ kademesinin
+temeli) yok ettiğinden reddedildi.
+
+**Üç-kademe mimari için anlamı:** Yörünge kademesinin teslim edebileceği
+en iyi değer, BPM ofseti σ_b=100 μm'de ~10⁻⁴ mertebesidir; CW/CCW +
+quad-flip zincirinin giriş hedefi 10⁻⁵ olduğundan aradaki boşluğu
+boylamsal **spin kademesi** kapatmak zorundadır — spin tüm 48 boyutu
+görür (c_k hiçbir modda sıfır değil), simetrik içerik dahil. Radyal
+polarizasyon bu iş için yedek değildir: Ω_z kanalı dikey yörünge
+eğimiyle sürüldüğünden, yörünge üretmeyen simetrik içeriğe o da
+büyük ölçüde kördür.

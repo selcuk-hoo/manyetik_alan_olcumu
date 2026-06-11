@@ -14,11 +14,14 @@ Bir proton depolama halkasındaki 48 kuadrupol mıknatısının hizalama hatalar
 
 ```
 .
-├── integrator.cpp              # C++ GL4 semplektik parçacık + spin izleyici
+├── integrator.cpp              # C++ GL4 semplektik parçacık + spin izleyici (ana motor)
 ├── integrator.py               # ctypes köprüsü + FieldParams sınıfı
 ├── lib_integrator.so           # Derlenmiş: Linux (git-tracked)
 ├── integrator.dylib            # Derlenmiş: macOS (git-tracked)
 ├── build_integrator.sh         # Build betiği (Linux: g++, macOS: clang++)
+├── integrator2.cpp             # İKİNCİ motor: alternatif topoloji QF-d-QD-d-ARC-d
+├── integrator2.py              # integrator2 köprüsü (lib_integrator2.so yükler)
+├── lib_integrator2.so          # Derlenmiş ikinci motor (git-tracked, yalnız Linux)
 │
 ├── params.json                 # Tüm simülasyon parametreleri (tek kaynak)
 │
@@ -38,9 +41,21 @@ Bir proton depolama halkasındaki 48 kuadrupol mıknatısının hizalama hatalar
 │
 ├── false_edm_mode_scan.py      # Yanlış-EDM hızı vs Fourier modu k taraması
 ├── false_edm_correction_test.py# Yanlış-EDM düzeltme stratejisi doğrulaması
+├── test_b_*.py                 # Spin-sürülü trim serisi: mod haritası, iteratif
+│                               #   döngü, BPM etkisi, fırlatma bağımlılığı,
+│                               #   rastgele desen + çift kuadratür trim
+│
+├── test_orbit_trim.py          # Yörünge-sürülü (BPM) trim: A/C/D/B varyantları
+├── test_orbit_trim_seeds.py    # Seed evrenselliği (5 seed karşılaştırması)
+├── test_orbit_mode_correlation.py # Gram matrisi, sızıntı, kazanç yasası k=7..12
+├── test_radial_spin.py         # Radyal vs boylamsal başlangıç polarizasyonu
+├── test_symm_vs_antisym.py     # Simetrik/antisim ayrıştırma — spin tabanı kanıtı
+├── test_symm_basis_fit.py      # Genişletilmiş baz fit (başarısız ama öğretici)
+├── test_new_topology.py        # integrator2 topoloji testi (kararsız çıktı)
+├── find_stable_gradient.py     # İnce mercek tek-hücre kararlılık analizi
 │
 ├── make_paper_figures.py       # Yayın kalitesi figürler + tablolar (6 fig, 3 tablo)
-├── fig_1_falseedm_scan.py      # Bağımsız figür jeneratörler
+├── fig_1_falseedm_scan.py      # Bağımsız figür jeneratörler (1..7)
 ├── fig_2_svd.py
 ├── fig_3_amplitude_scales.py
 ├── fig_4_reconstruction_quality.py
@@ -51,6 +66,9 @@ Bir proton depolama halkasındaki 48 kuadrupol mıknatısının hizalama hatalar
 ├── YAPILACAKLAR.md             # Aktif yapılacaklar listesi
 ├── YÖNTEM.md                   # Detaylı yöntem açıklaması
 ├── FOURIER_REKONSTRUKSIYON.md  # Fourier yöntemi teorisi
+├── false_edm_harmonic_sinir.md # Sahte EDM analiz günlüğü (§1–12.16, ana bulgular)
+├── trim_yontemi_pedagojik.md   # Trim yöntemi sıfırdan anlatım (3 test + taban analizi)
+├── makale_tr.tex               # Türkçe makale taslağı (k-mod + trim bölümleri)
 └── PROJE_ANALIZI_VE_ONERILER.md
 ```
 
@@ -69,6 +87,13 @@ python3 -c "import integrator; print('yüklendi')"
 Derleme bayrakları: `-O3 -shared -fPIC -std=c++17`
 - Linux: `g++` → `lib_integrator.so`
 - macOS: `clang++` → `integrator.dylib`
+
+**İkinci motor (`integrator2.cpp`):** Alternatif kafes topolojisi
+(QF–drift–QD–drift–DEFLEKTÖR(2Φ)–drift(2d), 6 elemanlı hücre) için bağımsız
+kopya. Eski kodu etkilemez; `integrator2.py` yalnız `lib_integrator2.so`
+yükler. Derleme: `g++ -O3 -shared -fPIC -std=c++17 integrator2.cpp -o
+lib_integrator2.so`. Dikkat: bu topoloji mevcut g₀=0.2 T/m ile kararsızdır;
+aynı ton için g≈0.5 T/m gerekir (`find_stable_gradient.py`).
 
 ---
 
@@ -172,8 +197,13 @@ Resmi test çerçevesi (pytest vb.) yoktur. Her `test_*.py` bağımsız çalış
 | `test_combined_systematics.py` | Tüm sistematikler aynı anda |
 | `test_kmod_reconstruction.py` | Bilinen Δq deseni → TSVD/Fourier/LS kıyaslaması |
 | `test_reconstruction_quality.py` | SVD gözlenebilirlik + rank limitleri |
+| `test_orbit_trim.py` | BPM-sürülü trim, fit genişliği A/C/D/B varyantları |
+| `test_orbit_trim_seeds.py` | Trim sonucunun seed evrenselliği (5 seed) |
+| `test_symm_vs_antisym.py` | Spin tabanının kaynağı: simetrik QF/QD içeriği |
+| `test_symm_basis_fit.py` | Kazanç eşiği: eşik altı mod fit'e eklenemez |
+| `test_new_topology.py` | integrator2 ile alternatif hücre dizilimi |
 
-**Yaygın metrikler:** RMS hata [μm], korelasyon katsayısı, koşul sayısı (κ), re-konstruksiyon genliği hatası.
+**Yaygın metrikler:** RMS hata [μm], korelasyon katsayısı, koşul sayısı (κ), re-konstruksiyon genliği hatası, sahte EDM hızı dSy/dt [rad/s], yörünge kazancı G_k.
 
 ---
 
@@ -221,3 +251,7 @@ Commit mesajları Türkçe ön-ek kullanır: `feat:`, `fix:`, `docs:`, `test:`, 
 | Fourier harmonik tabanı | `fodo_fourier_basis()` / `fodo_basis()` |
 | CLEAN algoritması | `bozoki_ls.py` içinde iteratif çıkarma döngüsü |
 | LASSO (ADMM) | `reconstruction.py` içinde `lasso_admm()` |
+| Yörünge kazanç yasası | G_k = 24.8/\|5.03−k²\| (`test_orbit_mode_correlation.py`) |
+| Fit eşiği | G_k > σ_b/σ_q → k_max² < Q_eff² + C·σ_q/σ_b |
+| Antisim/simetrik ayrışım | QF/QD zıt-işaret vs aynı-işaret kombinasyonlar; 25+23 boyut (`test_symm_vs_antisym.py`) |
+| Spin kuplaj katsayıları | c_k: rezonant değil, tüm k için ≠0 (`test_b_mode_map_cofalse.py`) |

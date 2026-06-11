@@ -1199,4 +1199,98 @@ kalan toplamı büyütebilir. Yörünge fit'i ise 48 bileşenli vektörde
 
 ---
 
+### 12.15 Spin tabanının kaynağı kanıtlandı: simetrik QF/QD içeriği
+
+**Dosyalar:** `test_symm_vs_antisym.py` (ayrıştırma),
+`test_symm_basis_fit.py` (genişletilmiş baz denemesi)
+
+**Ayrıştırma testi:** Seed=321 deseninin 48 bileşeni, antisimetrik baz
+(k=0..12, 25 boyut) üzerine dik izdüşümle iki parçaya ayrıldı
+(iç çarpım ~10⁻²⁴, ayrıştırma temiz):
+
+| desen | desen RMS [μm] | COD RMS [μm] | dSy/dt [rad/s] |
+|---|---|---|---|
+| tam | 89.5 | 628 | −1.62×10⁻³ |
+| antisim (25 boy.) | 69.8 | 550 | −1.52×10⁻³ |
+| **simetrik (23 boy.)** | 54.9 | **165** | **−1.02×10⁻⁴** |
+
+İki düzeltme ve bir kanıt:
+
+1. **Simetrik içerik yörüngeye kör DEĞİL:** COD kazancı ~3.0
+   (antisimin ~1/2.6'sı ama sıfır değil). QF/QD tekme iptali kısmidir
+   çünkü iki quad arasındaki betatron faz ilerlemesi tam iptale izin
+   vermez.
+2. **Spin, simetrik içeriği ~12× bastırılmış görür:** birim kaçıklık
+   başına kuplaj antisimde 2.2×10⁻⁵, simetrikte 1.9×10⁻⁶ rad/s/μm.
+   Kalıntıyı deflektör arclarındaki geometrik spin fazı
+   (aγ·Φ_def ≈ 0.23 rad/yarı-hücre) bırakır.
+3. **Floor kanıtı:** simetrik parçanın tek başına ürettiği
+   1.0×10⁻⁴ rad/s, §12.12'deki 5-seed artığının (~2.5×10⁻⁴ RMS) ana
+   bileşenidir.
+
+**Genişletilmiş baz denemesi — başarısız ve öğretici:** Madem simetrik
+içerik yörüngede görünüyor (kazanç ~3), simetrik k=1..4 modları
+kalibrasyona eklenip 16-sütunlu fit denendi. Sonuç (seed=321):
+
+| koşul | \|dSy/dt\| [rad/s] | bastırma |
+|---|---|---|
+| trim öncesi | 1.62×10⁻³ | — |
+| yalnız antisim C (k=1..4) | 1.61×10⁻⁵ | 101× |
+| **antisim + simetrik (k=1..4)** | **1.42×10⁻⁴** | **11× (9× KÖTÜ)** |
+
+Neden: simetrik mod kazançları (k=1: 0.98, k=2: 4.73, k=3: 1.58,
+k=4: 0.72) eşik G_k > σ_b/σ_q = 1.0'ın altında veya hemen üstünde.
+Eşik altı sütun eklemek fit'e BPM ofsetini enjekte eder: kestirilen
+simetrik genliklerin RMS'i 136 μm — gerçek içerik 55 μm. Fit gürültüyü
+"düzeltir", spin artığı büyür. §12.12'deki eşik yasası burada da
+bağlayıcıdır: **hangi modu fit edebileceğini korelasyon değil, kazanç
+belirler.**
+
+**Pratik sonuç:** σ_b = 100 μm BPM ofsetiyle BPM-tabanlı trim
+2.5×10⁻⁴ rad/s tabanına demirler. Omarov zinciri (CW+CCW+quad-flip)
+10⁻⁵ → 10⁻⁹ götürdüğünden zincire teslim hedefi 10⁻⁵'tir — aradaki
+~25× boşluk yalnız yörüngeyle kapanmaz. Kapatma adayları:
+(a) boylamsal spin-trim son kademesi (tüm 48 DOF'u görür, c_k hiçbir
+modda sıfır değil), (b) BBA ile σ_b'yi düşürmek, (c) kafes tasarımını
+değiştirmek (§12.16).
+
+---
+
+### 12.16 Kafes topolojisi denemeleri: iptal mekanizmasını kaynağında kırmak
+
+**Dosyalar:** `integrator2.cpp`, `integrator2.py`, `lib_integrator2.so`
+(bağımsız ikinci motor — eski kod dokunulmadı), `test_new_topology.py`,
+`find_stable_gradient.py`
+
+**Fikir 1 — deflektörü quad çiftinin dışına almak:** Mevcut hücrede
+(ARC–d–QF–d–ARC–d–QD–d) QF ile QD arasında deflektör vardır; spin QF
+tekmesinden sonra aγ·Φ_def kadar döner, QD tekmesi döndürülmüş çerçevede
+gelir → simetrik iptal bozulur. Yeni hücre QF–d–QD–d–ARC(2Φ_def)–d(2d)
+spin iptalini QF-QD arasında saf drift ile korur. 6-elemanlı hücre
+`integrator2.cpp`'ye kodlandı (hücre uzunluğu ve çevre aynı).
+
+**Sonuç — mevcut gradyanla kararsız:** g₀=0.2 T/m ile yörünge patlar
+(kazançlar ~10⁷, f₀ ≈ −441 rad/s). İnce mercek tek-hücre transfer
+matrisi analizi (`find_stable_gradient.py`) nedeni netleştirdi:
+
+| topoloji | kararlı g aralığı | Q_y≈2.68 için g |
+|---|---|---|
+| orijinal FODO | 0.01–0.70 T/m | 0.241 T/m |
+| yeni (QF-d-QD-d-ARC-d) | 0.01–**1.45** T/m | **0.498 T/m** |
+
+Yeni topolojinin kararlılık bölgesi aslında daha geniş; ancak aynı tonu
+vermek ~2× güçlü quad ister ve fırlatma/kapalı-yörünge koşulları yeni
+kafese göre yeniden türetilmelidir. Bu tam bir kafes yeniden tasarımı
+problemi — şimdilik rafa kaldırıldı.
+
+**Fikir 2 — tek tip quad (yalnız QD): reddedildi.** Gradyan işareti
+alternasyonu kaldırılırsa simetrik/antisim iptal ayrımı kökten yok olur
+ve 48 DOF'un tamamı yörüngede görünür hale gelirdi. Ancak quad-flip
+tekniği tam da bu alternasyona dayanır (flip'te sahte EDM işaret
+değiştirir, gerçek EDM değişmez); tek tip quad ile flip simetrisi
+ortadan kalkar ve 10⁻⁵→10⁻⁹ kademesinin en güçlü aracı kaybedilir.
+Kazanılandan fazlası kaybedilir — bu yol kapalı.
+
+---
+
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-11*
