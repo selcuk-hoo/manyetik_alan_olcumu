@@ -1139,6 +1139,64 @@ gözlenebilir"in somut bir adayı. Spin-sürülü trim radyal demetle
 yapılırsa EDM sinyalini silme riski olmaz (duyarlılık haritası farklı
 olduğundan kalibrasyonu ayrıca yapılmalıdır).
 
+### 12.14 Mod korelasyonu: fit neden 4'te kesiliyor — korelasyon mu, eşik mi?
+
+**Dosyalar:** `test_orbit_mode_correlation.py`,
+`test_orbit_mode_correlation.json`, `test_orbit_mode_correlation.png`
+(kalibrasyon k=7..12'ye genişletildi: 13 ek yörünge koşumu)
+
+**Soru:** Modların yörünge uzayındaki korelasyonu ölçülebilir mi? Fit'in
+k=4'te kesilmesinin nedeni korelasyon mu?
+
+**1. Gram matrisi — modlar yörüngede neredeyse diktir:** 24 düğmenin
+(k=1..12 × cos/sin) normalize yörünge parmak izleri arasında
+korelasyon C_ij = ô_i·ô_j ölçüldü. k≤6 bloğunda max |köşegen-dışı| =
+**0.011** — yani %1. LSQ bu yüzden modları tek atışta temiz ayırır;
+**fit kesiminin nedeni modlar arası korelasyon DEĞİLDİR.** (Not: k=12
+sin düğmesi Nyquist'te özdeş sıfırdır — 24 hücreli kafeste
+sin(πn) = 0.)
+
+**2. Sızıntı — fit dışı antisym modların etkisi ihmal edilebilir:**
+L = O_C⁺·O_dışı (fit dışı k=5..12 modlarının C-fit kestirimlerine
+izdüşümü): max |L| = **0.002**. Fit dışı 30μm'lik bir mod, kestirime
+en fazla 0.06μm sızar — ölçülen kestirim hatalarını (0.4–8μm)
+açıklayamaz.
+
+**3. Hata muhasebesi — kapanmıyor, ve bu bilgilendirici:**
+
+| düğme | ölçülen hata | ofset O⁺b | sızıntı L·a |
+|---|---|---|---|
+| k2 sin | 6.86 μm | −0.51 | +0.01 |
+| k3 sin | 7.93 μm | −1.41 | +0.02 |
+| k4 sin | 4.58 μm | −0.96 | +0.03 |
+
+Ofset + sızıntı, ölçülen hatanın küçük bir kısmı. Kalan baskın bileşen:
+desenin **antisym baz DIŞINDAKİ** (simetrik QF/QD) içeriğinin yörünge
+izdüşümü — §12.12'deki baz-dışı bulgusunun kestirim-uzayındaki
+görüntüsü. Yani kestirim hatası bir korelasyon problemi değil, bir
+**baz eksikliği** problemi.
+
+**4. Kazanç yasası k=7..12'de ÖNGÖRÜ olarak doğrulandı:** Yasa
+(G_k = 24.8/|5.03−k²|) k≤6'ya oturtulmuştu; k=7..12 ölçümleri saf
+öngörü testidir:
+
+| k | 7 | 8 | 9 | 10 | 11 | 12 |
+|---|---|---|---|---|---|---|
+| Ölçülen | 0.558 | 0.417 | 0.328 | 0.273 | 0.242 | 0.164 |
+| Yasa (öngörü) | 0.564 | 0.421 | 0.326 | 0.261 | 0.214 | 0.178 |
+
+k≤9'da sapma ≤%1; k=10..12'de %4–12 (kazançlar sayısal tabana yakın).
+
+**Sonuç:** Fit'in 4'te kesilmesi tamamen **eşik** meselesidir
+(G_k > σ_b/σ_q, §12.12), korelasyon meselesi değildir. Spin
+gözlenebiliriyle kontrast: spin tek skalerdir — orada "Gram matrisi"
+rank-1'dir, bütün modlar tek sayıya çöker ve korelasyon tamdır. Tek
+başına k=2'yi spin geri-beslemesiyle bastırmanın işe yaramamasının
+(hatta |f|'yi artırabilmesinin) nedeni budur: f₀ = Σc_k·a_k toplamında
+k=2 terimi diğerleriyle kısmen iptal hâlindeyse, yalnız k=2'yi çıkarmak
+kalan toplamı büyütebilir. Yörünge fit'i ise 48 bileşenli vektörde
+çalıştığından modları aynı anda ve neredeyse dik biçimde ayırır.
+
 ---
 
 *Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-11*
