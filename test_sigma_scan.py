@@ -138,22 +138,29 @@ def main():
     print(f"  {N_SEEDS} tohum × {len(SIGMA_LIST)} σ değeri = {len(tasks)} koşum")
     print(f"  σ ∈ {[s*1e6 for s in SIGMA_LIST]} μm rms")
     print("=" * 72)
-
-    nw = min(mp.cpu_count(), len(tasks))
-    with ctx.Pool(processes=nw) as pool:
-        results = pool.map(_run_one_sigma, tasks)
-
-    # ── Konsol tablosu ──────────────────────────────────────────────────────
-    print(f"\n{'tohum':>6} {'σ[μm]':>8} {'tur':>6} "
+    print(f"{'tohum':>6} {'σ[μm]':>8} {'tur':>6} "
           f"{'dSy/dt[rad/s]':>15} {'hata':>12} {'süre[s]':>8}")
     print("-" * 64)
-    results_sorted = sorted(results, key=lambda r: (r["sigma_um"], r["seed"]))
-    for r in results_sorted:
-        print(f"{r['seed']:>6} {r['sigma_um']:>8.1f} {r['n_turns']:>6.0f} "
-              f"{r['dSy_dt']:>15.3e} {r['dSy_dt_err']:>12.2e} "
-              f"{r['runtime_s']:>8.1f}")
+    sys.stdout.flush()
+
+    # imap_unordered: her iş biter bitmez yaz + kaydet
+    results = []
+    json_path = "test_sigma_scan.json"
+    nw = min(mp.cpu_count(), len(tasks))
+    with ctx.Pool(processes=nw) as pool:
+        for r in pool.imap_unordered(_run_one_sigma, tasks):
+            results.append(r)
+            print(f"{r['seed']:>6} {r['sigma_um']:>8.1f} {r['n_turns']:>6.0f} "
+                  f"{r['dSy_dt']:>15.3e} {r['dSy_dt_err']:>12.2e} "
+                  f"{r['runtime_s']:>8.1f}")
+            sys.stdout.flush()
+            # her adımda JSON'a yaz — kill'e karşı güvenli
+            with open(json_path, "w") as fh:
+                json.dump({"_partial": True, "satirlar": results}, fh,
+                          indent=2, ensure_ascii=False)
 
     # ── İstatistik özeti (her σ için) ────────────────────────────────────────
+    results_sorted = sorted(results, key=lambda r: (r["sigma_um"], r["seed"]))
     print(f"\n{'─'*72}")
     print(f"{'σ[μm]':>8} {'medyan|f|':>12} {'std':>12} {'min':>12} {'maks':>12}")
     print("-" * 60)
