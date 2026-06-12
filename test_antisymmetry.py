@@ -32,12 +32,12 @@ from false_edm_mode_scan import setup_fields, find_closed_orbit, _make_state
 
 C_LIGHT = 299792458.0
 
-N_SEEDS    = 3
-SIGMA_LIST = [2e-6, 5e-6, 10e-6, 20e-6, 40e-6, 80e-6]  # [m]
-T2         = 2e-3    # [s]
+N_SEEDS    = 2
+SIGMA_LIST = [2e-6, 5e-6, 10e-6, 20e-6, 80e-6]  # [m]
+T2         = 1e-3    # [s]
 DT         = 1e-11
-CO_TURNS   = 60
-CO_ITER    = 3
+CO_TURNS   = 40
+CO_ITER    = 2
 RET_STEP   = 10000  # sadece Poincaré istiyoruz, sürekli iz gerekmez
 
 
