@@ -35,10 +35,13 @@ C_LIGHT = 299792458.0
 
 N_SEEDS   = 5
 SIGMA_LIST = [2e-6, 5e-6, 10e-6, 20e-6, 40e-6]   # [m]
-T2        = 20e-3    # 20 ms — t2 yakınsama testinden seçildi
+T2        = 1e-3     # 1 ms — CO=True modunda t2=0.5ms'de bile kararlı
 RET_STEP  = 5000
 DT        = 1e-11
-DO_CO     = False
+DO_CO     = True     # kapalı yörünge üzerinde fırlat → betatron yok → temiz σ eğimi
+
+
+CO_TURNS = 60   # kapalı yörünge arama probu için tur sayısı
 
 
 def _run_one_sigma(task):
@@ -50,6 +53,8 @@ def _run_one_sigma(task):
     import os, json, time
     import numpy as np
     from integrator import integrate_particle
+    from false_edm_mode_scan import (setup_fields, find_closed_orbit,
+                                      _make_state)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     with open("params.json") as fh:
@@ -66,7 +71,18 @@ def _run_one_sigma(task):
     T_rev = circ / (beta0 * C_LIGHT)
 
     t_start = time.time()
-    y_launch = y0   # CO=False: eksenden fırlat
+
+    if do_co:
+        v_co, resid_rms = find_closed_orbit(
+            fields, p_mag, direction, quad_dy, dt, T_rev,
+            n_turns=CO_TURNS, n_iter=2)
+        y_launch = _make_state(v_co, p_mag, direction, [0.0, 0.0, direction])
+        co_off_mm = float(np.hypot(v_co[0], v_co[1]) * 1e3)
+        resid_beta_mm = float(resid_rms * 1e3)
+    else:
+        y_launch = y0
+        co_off_mm = 0.0
+        resid_beta_mm = float("nan")
 
     fields.poincare_quad_index = 0.0
     hist, poin, poin_t = integrate_particle(
@@ -99,6 +115,8 @@ def _run_one_sigma(task):
         "t2": t2,
         "n_turns": n_turns,
         "n_poin": n_poin,
+        "co_off_mm": co_off_mm,
+        "resid_beta_mm": resid_beta_mm,
         "dSy_dt": slope,
         "dSy_dt_err": slope_err,
         "runtime_s": elapsed,
@@ -114,8 +132,9 @@ def main():
         for sigma in SIGMA_LIST:
             tasks.append((seed, sigma, T2, RET_STEP, DT, DO_CO))
 
+    co_str = "True (kapalı yörünge)" if DO_CO else "False (eksenden)"
     print("=" * 72)
-    print(f"  σ TARAMA TESTİ — CO=False, t2={T2*1e3:.0f} ms")
+    print(f"  σ TARAMA TESTİ — CO={co_str}, t2={T2*1e3:.0f} ms")
     print(f"  {N_SEEDS} tohum × {len(SIGMA_LIST)} σ değeri = {len(tasks)} koşum")
     print(f"  σ ∈ {[s*1e6 for s in SIGMA_LIST]} μm rms")
     print("=" * 72)
