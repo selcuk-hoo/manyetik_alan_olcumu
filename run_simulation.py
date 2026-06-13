@@ -1,3 +1,4 @@
+import argparse
 import json
 import time
 import numpy as np
@@ -25,7 +26,14 @@ def main():
     5. Spin Trendi analizi ve txt dosyalarına yazım.
     """
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--t2", type=float, default=None, help="override t2 simulation duration (s)")
+    args = parser.parse_args()
+
     config = load_parameters("params.json")
+    if args.t2 is not None:
+        config["t2"] = args.t2
+
     if os.path.isfile("rf.txt"):
         os.remove("rf.txt")
     if os.path.isfile("cod_data.txt"):
@@ -135,14 +143,30 @@ def main():
         quad_dx_arr[eq_idx] += config.get("error_quad_dx", 0.0)
 
     # Rastgele quad hataları
-    dy_max = config.get("quad_random_dy_max", 0.0)
-    dx_max = config.get("quad_random_dx_max", 0.0)
-    if dy_max > 0 or dx_max > 0:
-        rng_q = np.random.default_rng(config.get("quad_random_seed", 42))
-        if dy_max > 0:
-            quad_dy_arr += rng_q.uniform(-dy_max, dy_max, n_q)
-        if dx_max > 0:
-            quad_dx_arr += rng_q.uniform(-dx_max, dx_max, n_q)
+    dy_rms = config.get("dy_random_RMS", 0.0)
+    dx_rms = config.get("dx_random_RMS", 0.0)
+    if dy_rms > 0 or dx_rms > 0:
+        rng_q_y = np.random.default_rng(config.get("dy_random_seed", 42))
+        rng_q_x = np.random.default_rng(config.get("dx_random_seed", 43))
+        if dy_rms > 0:
+            quad_dy_arr += rng_q_y.normal(0.0, dy_rms, n_q)
+        if dx_rms > 0:
+            quad_dx_arr += rng_q_x.normal(0.0, dx_rms, n_q)
+            
+    # Kapalı yörünge fırlatması
+    if config.get("use_closed_orbit", False):
+        from false_edm_mode_scan import find_closed_orbit
+        circ = 2.0*np.pi*R0 + 4.0*alanlar.nFODO*alanlar.driftLen + 2.0*alanlar.nFODO*alanlar.quadLen
+        T_rev = circ / (beta0 * 299792458.0)
+        print("\nDikey kapalı yörünge (CO) bulunuyor...")
+        # find_closed_orbit calculates CO given quad_dy.
+        # we pass h for dt.
+        v_co, resid_rms = find_closed_orbit(alanlar, p_mag, direction, quad_dy_arr, h, T_rev, n_turns=60, n_iter=2, verbose=True)
+        # Update y0 with the CO values
+        y0[1] = v_co[1]
+        y0[4] = p_mag * direction * v_co[3]
+        print(f"-> Bulunan CO fırlatma noktası: y={y0[1]*1e6:.2f} um, y'={v_co[3]*1e6:.2f} urad")
+
 
     # Tek deflektör hatası
     ed_idx = config.get("error_dipole_index", -1)
@@ -294,7 +318,14 @@ def main():
         slope_sy, _ = np.polyfit(t_array, sy_filtered, 1)
     
     print(f"-> Radyal Trend Eğimi (S_x-t): {slope_sx:.4e} rad/s")
-    print(f"-> Dikey  Trend Eğimi (S_y-t): {slope_sy:.4e} rad/s")
+    print(f"-> Dikey  Trend Eğimi (S_y-t) (SG/Sürekli): {slope_sy:.4e} rad/s")
+    
+    if poin_local is not None and len(poin_local) > 5:
+        ts_pc = np.asarray(poincare_t_arr, float)
+        sy_pc = np.asarray(poin_local[:, 7], float)
+        slope_sy_pc, _ = np.polyfit(ts_pc, sy_pc, 1)
+        print(f"-> Dikey Trend Eğimi (S_y-t) (Stroboskopik): {slope_sy_pc:.4e} rad/s")
+        
     print("--------------------------------------------------")
     
     # ---------------------------------------------------------

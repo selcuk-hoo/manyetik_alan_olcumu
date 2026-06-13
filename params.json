@@ -3,25 +3,25 @@
     "direction": -1,
     "spinHorRotation": 0.0,
     "momError": 0.0,
-    "dev0": 1e-05,
-    "y0": 1e-05,
+    "dev0": 0.0,
+    "y0": 0.0,
     "theta0_hor": 0.0,
     "theta0_ver": 0.0,
     "nFODO": 24,
-    "t2": 0.001,
+    "t2": 0.0001,
     "dt": 1e-11,
     "t_pr": 1000,
     "return_steps": 10000,
-    "poincare_quad_index": -1,
+    "poincare_quad_index": 0,
     "quadLen": 0.4,
-    "driftLen": 2.0833,
-    "g1": 0.2,
-    "g0": 0.2,
+    "driftLen": 1.88,
+    "g1": 0.21,
+    "g0": 0.21,
     "sextK1": -0.015,
     "quadSwitch": 1,
     "sextSwitch": 0,
     "EDMSwitch": 0,
-    "rfSwitch": 0,
+    "rfSwitch": 0.0,
     "rfVoltage": 1000000,
     "h": 100,
     "E0_power": 1.0,
@@ -61,43 +61,43 @@
     "dy_harmonics": [
         {
             "k": 2,
-            "amp_cos": 1e-05,
+            "amp_cos": 0.0,
             "amp_sin": 0.0
         },
         {
             "k": 4,
-            "amp_cos": 0.0003,
+            "amp_cos": 0.0,
             "amp_sin": 0.0
         },
         {
             "k": 6,
-            "amp_cos": 0.0003,
+            "amp_cos": 0.0,
             "amp_sin": 0.0
         },
         {
             "k": 8,
-            "amp_cos": 0.0002,
+            "amp_cos": 0.0,
             "amp_sin": 0.0
         }
     ],
     "dx_harmonics": [
         {
             "k": 1,
-            "amp_cos": 1e-05,
+            "amp_cos": 0.0,
             "amp_sin": 0.0
         },
         {
             "k": 3,
             "amp_cos": 0.0,
-            "amp_sin": 1e-05
+            "amp_sin": 0.0
         }
     ],
-    "dy_random_RMS": 0.0,
+    "dy_random_RMS": 1e-05,
     "dx_random_RMS": 0.0,
-    "dy_random_seed": 42,
-    "dx_random_seed": 43,
+    "dy_random_seed": 421,
+    "dx_random_seed": 431,
     "smooth_antisym_fodo": true,
-    "use_closed_orbit": false,
+    "use_closed_orbit": true,
     "k_search_max": 12,
     "greedy_residual_threshold": 0.15,
     "max_harmonics": 3,
