@@ -1546,7 +1546,64 @@ kontrastı, CO=True α taraması ve çok-seed RMS'i tek koşuda üretir.
 
 ---
 
+## 14. Yörünge-trim'in §13 estimator'ıyla yeniden değerlendirmesi (makale_trim_tr.tex) <a name="14"></a>
+
+> §13 estimator düzeltmesinden sonra, `makale_trim_tr.tex`'in yörünge-trim
+> kademesinin gerçek tabanı ve "yörünge-trim tek başına yeter mi" sorusu
+> 200 μm mekanik hizalama senaryosunda yeniden ölçüldü.
+
+### 14.1 200 μm baseline: "1e-3 CW" uzlaşması
+
+200 μm RMS dx+dy rastgele desende sahte EDM (simetrik-4-parçacık + model fit,
+3 seed): seed 0/1/2 = +9.89×10⁻⁴ / −4.27×10⁻⁴ / −1.05×10⁻³, **RMS ~8.7×10⁻⁴**.
+Bu, §13.7'deki 10 μm RMS değerinin (2.67×10⁻⁶) σ² ölçeğiyle tam tutarlı:
+2.67×10⁻⁶ × (200/10)² = 1.07×10⁻³. **Sonuç:** baştan beri "CW için ~1e-3"
+denen değer betatron artefaktı DEĞİL — **200 μm'deki gerçek dx·dy geometrik-faz
+sahte EDM'idir.** Hizalama 10 μm'ye inerse sinyal ~3×10⁻⁶'ya (σ² ile 400×) düşer.
+
+### 14.2 Basit ölçüm reçetesi: CO=True gereksiz
+
+Sahte EDM'i ölçmek için kapalı-yörünge bulmaya (CO=True) gerek yok. Yeterli:
+dx,dy ver, **4-katlı simetrik 4 parçacık** (eksen etrafında ±Δx, ±Δy bağımsız,
+spin hepsinde boylamsal) gönder, $\langle S_y\rangle$'i **model fit** et.
+§13.6'da kanıtlandığı gibi 4-katlı simetri betatron + ⟨ΔxΔy⟩ artığını temizler;
+sonuç CO=True ile aynı (4-katlı ortalama tek-parçacık ham değerinden hem tutarlı
+hem temiz: 200 μm'de RMS 8.7×10⁻⁴ vs tek-parçacık dağınık 0.6–3×10⁻³).
+
+### 14.3 Yörünge-trim (k≤4) tek başına YETMİYOR
+
+Yörünge-trim: kafese özgü O_x,O_y mod parmak izleri (antisim k=1..4 cos/sin) bir
+kez kalibre; pattern orbiti BPM ofseti (100 μm) ile ölçülür; düz LSQ fit → trim
+(k-mod/LASSO YOK). Kalan misalignment §14.2 reçetesiyle ölçüldü:
+
+| seed | f (200μm) | f (trim sonrası) | bastırma |
+|---|---|---|---|
+| 0 | +9.89×10⁻⁴ | +2.34×10⁻⁴ | 4.2× |
+| 1 | −4.27×10⁻⁴ | +2.40×10⁻⁴ | 1.8× |
+| 2 | −1.05×10⁻³ | +4.42×10⁻⁴ | 2.4× |
+
+**f_sonra RMS = 3.2×10⁻⁴** (~120 μm eşdeğer). Yörünge-trim dx·dy kanalını yalnız
+~2.7× düşürüyor — CW/CCW girişi hedefinin (~10⁻⁵) **~30× üstünde**.
+
+### 14.4 Simetrik-alt-uzay tabanı §13 estimator'ıyla da GERÇEK
+
+Kalan 3.2×10⁻⁴, trim makalesinin simetrik-alt-uzay tabanıyla (~2.5×10⁻⁴) uyumlu.
+**Kritik:** bu taban §13'ün doğru estimator'ıyla (model fit, CO yok, dx·dy) ÖLÇÜLDÜ
+ve hâlâ gerçek — yani trim makalesinin "yörünge tek başına yetmez, simetrik
+alt-uzay orbit'e kapalı" sonucu betatron artefaktına dayanmıyor, **sağlam**.
+dy-only'de trim 101× alabiliyordu; dx·dy çok daha zayıf çünkü çapraz kanal büyük
+ölçüde simetrik/orbit-görünmez alt-uzayda. **İki kademeli mimari (yörünge +
+spin) ayakta; spin kademesi hâlâ gerekli.**
+
+*(Reprodüksiyon: `/tmp/orbit_trim_dxdy.py` mantığı — kafes O kalibrasyonu +
+k≤4 LSQ trim + simetrik-4-parçacık model-fit doğrulaması; bu oturumda koşuldu.)*
+
+---
+
 *Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-16.
 §13 tam: dy-only doğrusallığı (§13.1-2), iki ikinci-derece kanal (§13.3),
 Omarov'un yeri (§13.4), demet=ideal + 4-katlı simetri (§13.6), çok-seed RMS +
-Omarov 3× uyum (§13.7), yöntem kaydı (§13.8). §10.2 thick-lens argümanı düzeltildi.*
+Omarov 3× uyum (§13.7), yöntem kaydı (§13.8). §10.2 thick-lens argümanı düzeltildi.
+§14: yörünge-trim §13 estimator'ıyla yeniden değerlendirildi — 200μm baseline
+~1e-3 (dx·dy gerçek), orbit-trim k≤4 tek başına ~2.7× (yetmez), simetrik taban
+~3×10⁻⁴ gerçek → iki kademeli mimari sağlam.*
