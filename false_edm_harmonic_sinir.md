@@ -1598,6 +1598,40 @@ spin) ayakta; spin kademesi hâlâ gerekli.**
 *(Reprodüksiyon: `/tmp/orbit_trim_dxdy.py` mantığı — kafes O kalibrasyonu +
 k≤4 LSQ trim + simetrik-4-parçacık model-fit doğrulaması; bu oturumda koşuldu.)*
 
+### 14.5 Rekonstrüksiyon metotları karşılaştırması — taban metot-bağımsız
+
+`makale_trim_tr.tex`'in orbit-trim tabanının (§taban/§erisim/§genis-baz) bir
+rekonstrüksiyon metodu kusuru DEĞİL, gözlenebilirlik sınırı olduğunu doğrulamak
+için altı metot aynı 200μm dx+dy verisinde (tek yörünge, ofset 100μm, gürültü
+1μm, 3 seed) denendi; her birinin trim sonrası kalan sahte EDM'i simetrik-4-
+parçacık + model fit ile ölçüldü:
+
+| metot | RMS [rad/s] | bastırma |
+|---|---|---|
+| baseline 200μm | 8.67×10⁻⁴ | 1× |
+| **R-LS k≤4 (FODO-antisim)** | **1.84×10⁻⁴** | **4.7× (en iyi)** |
+| TSVD r=8 | 4.53×10⁻⁴ | 1.9× |
+| CLEAN (k=0..8) | 7.81×10⁻⁴ | 1.1× |
+| Bozoki (azimut k≤4) | 9.79×10⁻⁴ | 0.9× |
+| R-LS k≤7 | 1.06×10⁻³ | 0.8× |
+| R⁻¹ direct (48-dim) | 2.68×10⁻³ | 0.3× |
+
+**Bulgular — makalenin taban tezinin metot-bağımsız teyidi:**
+1. **En iyi R-LS k≤4** (dar, FODO-antisim). Bu, §kazanç/§esik'teki "kazanç
+   hiyerarşisi doğal düzenleyicidir" ilkesidir: yüksek-kazançlı k≤4 modları
+   ofsete dayanıklı.
+2. **Agresif metotlar (R-LS k≤7, CLEAN, TSVD, R⁻¹) k≤4'ten KÖTÜ.** Düşük-kazançlı/
+   yüksek modları fit etmek BPM ofsetini o modlara enjekte eder — tam olarak
+   **§genis-baz mekanizması** (eşik-altı sütunlara ofset enjeksiyonu, orada 9×
+   kötüleşme). R⁻¹ direct en kötü: ofset R⁻¹b olarak tam sızar (κ(R)≈249×100μm).
+3. **Bozoki (azimut baz) zayıf** — yanlış baz (clean_rls_yontemleri.md §4 ile uyumlu).
+4. **Hiçbir orbit metodu ~1.8×10⁻⁴ altına inmiyor** — bu plato §erisim'in simetrik
+   alt-uzay SNR≈0.3<1 gözlenebilirlik sınırıdır. Rekonstrüksiyon metodu seçimi
+   tabanı değiştirmez → **spin kademesi metot-bağımsız olarak gereklidir.**
+
+*(Reprodüksiyon: `/tmp/recon_compare.py`; R_dy_1.npy/R_dx_1.npy
+`build_response_matrix.py` ile üretilir.)*
+
 ---
 
 *Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-16.
