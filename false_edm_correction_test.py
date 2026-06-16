@@ -19,14 +19,19 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from false_edm_mode_scan import (setup_fields, find_closed_orbit, _make_state, C)
+from false_edm_mode_scan import (setup_fields, find_closed_orbit, _make_state,
+                                  measure_dSy_dt_model, C)
 from fourier_reconstruct import fodo_basis
 
 R1 = np.load("R_dy_1.npy")
 
 
 def measure_false_edm(quad_dy, t2=5e-4, return_steps=5000, dt=None, co_turns=60):
-    """Verilen kaçıklık vektörü için stroboskopik dS_y/dt [rad/s]."""
+    """Verilen kaçıklık vektörü için seküler dS_y/dt [rad/s].
+
+    Birincil ölçüm madde 2 model fitidir (salınım sızıntısı çıkarılmış seküler
+    eğim). Düz polyfit eğimi yapay olarak ∝A doğrusal şişer; model fit gerçek
+    ∝A² seküler terimi açığa çıkarır."""
     from integrator import integrate_particle
     with open("params.json") as f:
         config = json.load(f)
@@ -51,7 +56,7 @@ def measure_false_edm(quad_dy, t2=5e-4, return_steps=5000, dt=None, co_turns=60)
         quad_dy=quad_dy)
     sy_strobe = np.asarray(poin[:, 7], float)
     ts = np.asarray(poin_t, float)
-    slope = float(np.polyfit(ts, sy_strobe, 1)[0])
+    slope = float(measure_dSy_dt_model(sy_strobe, ts))   # madde 2: seküler eğim
     return slope, co_off_mm
 
 

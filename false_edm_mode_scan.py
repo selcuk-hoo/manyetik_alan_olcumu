@@ -194,6 +194,80 @@ def measure_dSy_dt(hist, t_array):
     return slope
 
 
+def measure_dSy_dt_model(sy, t, n_osc=6, return_fit=False):
+    """Seküler (gerçek sahte-EDM) eğimi, salınımları model fitiyle ÇIKARARAK ölç.
+
+    SORUN (bkz. false_edm_harmonic_sinir.md tanısı): stroboskopik S_y(n) saf
+    seküler bir doğru değildir; genliği misalignment ile DOĞRUSAL büyüyen
+    sınırlı salınımlar (betatron kirlenmesi + yavaş spin-tune dalgası) taşır.
+    Düz `polyfit(...,1)` bu salınımların yerel eğimini seküler sürüklenme
+    sanır → ölçülen sinyal yapay olarak ∝A (doğrusal) çıkar; gerçek ∝A²
+    (kuadratik) seküler terim altta gizlenir.
+
+    ÇÖZÜM (madde 2): S_y'yi seküler doğru + salınım modeliyle birlikte fit et,
+    yalnız seküler eğimi raporla:
+        S_y(t) = a + b·t + Σ_k [c_k cos(2π f_k t) + d_k sin(2π f_k t)]
+    Salınım frekansları f_k, detrend edilmiş sinyalin FFT'sindeki en güçlü
+    n_osc tepeden otomatik bulunur. Yalnız `b` (seküler eğim) döndürülür.
+
+    SINIR (kavramsal, kaçınılmaz): pencere içinde EN AZ bir tam periyodu olan
+    salınımlar çıkarılabilir (f ≥ 1/span). Periyodu t2'den uzun "çok yavaş"
+    dalga, doğru ile dejenere olduğundan ayrıştırılamaz; o rejim yalnız daha
+    uzun t2 ile çözülür (madde 1). Bu fonksiyon ÇÖZÜLEBİLİR salınım sızıntısını
+    (özellikle betatron beat'ini) temizler.
+
+    Dönüş: seküler eğim b [rad/s].  return_fit=True ise (b, freqs, model_pred)
+    de döner (görselleştirme/tanı için).
+    """
+    sy = np.asarray(sy, float)
+    t  = np.asarray(t, float)
+    n  = len(sy)
+    if n < 8:                                   # model fit için çok az nokta
+        b = float(np.polyfit(t, sy, 1)[0]) if n >= 2 else float("nan")
+        return (b, [], None) if return_fit else b
+
+    span = float(t[-1] - t[0])
+    if span <= 0:
+        return (float("nan"), [], None) if return_fit else float("nan")
+
+    # 1) Kaba doğrusal trendi çıkar → FFT tepe bulmak için artık sinyal
+    p1    = np.polyfit(t, sy, 1)
+    resid = sy - np.polyval(p1, t)
+
+    # 2) Baskın salınım frekanslarını bul (pencereli FFT). DC binini at;
+    #    f < 1/span olan binleri DIŞLA (bir tam periyodu sığmayan salınım
+    #    doğru terimle dejenere → lstsq'yi kötü koşullandırır).
+    win   = np.hanning(n)
+    fftm  = np.abs(np.fft.rfft(resid * win))
+    ffreq = np.fft.rfftfreq(n, d=span / (n - 1))
+    f_min = 1.0 / span
+    df    = ffreq[1] - ffreq[0] if len(ffreq) > 1 else f_min
+    order = np.argsort(fftm)[::-1]
+    freqs = []
+    for idx in order:
+        f = ffreq[idx]
+        if f < f_min:                           # çözülemeyen yavaş dalga → doğruya bırak
+            continue
+        if any(abs(f - g) < 1.5 * df for g in freqs):   # yakın tepeleri tekrar ekleme
+            continue
+        freqs.append(float(f))
+        if len(freqs) >= n_osc:
+            break
+
+    # 3) Tasarım matrisi [1, t, cos(2πf t), sin(2πf t), ...] → lineer en küçük kareler
+    cols = [np.ones(n), t]
+    for f in freqs:
+        w = 2.0 * np.pi * f
+        cols.append(np.cos(w * t))
+        cols.append(np.sin(w * t))
+    A = np.column_stack(cols)
+    coef, *_ = np.linalg.lstsq(A, sy, rcond=None)
+    b = float(coef[1])                          # seküler eğim
+    if return_fit:
+        return b, freqs, A @ coef
+    return b
+
+
 def _run_one_k(task):
     """Tek bir k modu için simülasyon + eğim ölçümü (paralel worker).
 
@@ -250,6 +324,10 @@ def _run_one_k(task):
     if sy_strobe is not None:
         ts = np.asarray(poin_t, float)
         slope = float(np.polyfit(ts, sy_strobe, 1)[0])
+        # Madde 2: salınım-çıkaran model fit ile seküler eğim (betatron/spin-tune
+        # sızıntısı temizlenmiş). Düz `slope` ile karşılaştırma için saklanır.
+        slope_model, fit_freqs, _ = measure_dSy_dt_model(sy_strobe, ts,
+                                                         return_fit=True)
         # Richardson integration-error estimate: re-run at 2·dt (same y_launch,
         # no CO redo — half the steps, ~50% extra wall time per k).
         # |slope(dt) - slope(2dt)| ≈ leading-order truncation error of slope(dt).
@@ -267,6 +345,8 @@ def _run_one_k(task):
         ts = None
         slope = float("nan")
         slope_err = float("nan")
+        slope_model = float("nan")
+        fit_freqs = []
     # Karşılaştırma: eski sürekli-SG yöntemi (örnekleme-bağımlı, güvenilmez)
     slope_sg = float(measure_dSy_dt(hist, t_array))
     sy = hist[:, 7].copy()   # sürekli S_y (hızlı salınım bağlamı için)
@@ -275,6 +355,7 @@ def _run_one_k(task):
     # Kapalı yörünge üzerinde fırlatıldıysa ~0 (≪ CO ofseti) → temiz fırlatma.
     return {"k": k, "co_off_mm": co_off_mm, "resid_beta_mm": resid_beta_mm,
             "dSy_dt": slope, "dSy_dt_err": slope_err,
+            "dSy_dt_model": slope_model, "fit_freqs": fit_freqs,
             "dSy_dt_sg": slope_sg, "runtime": dt_run,
             "sy": sy, "t_array": t_array,
             "sy_strobe": (sy_strobe.copy() if sy_strobe is not None else None),
@@ -324,15 +405,20 @@ def run_scan(k_list, amp_coef=1e-5, t2=5e-4, return_steps=5000, nproc=None,
 
     results.sort(key=lambda r: r["k"])
     print(f"  {'k':>3}  {'CO ofset':>10}  {'kalan betatron':>16}  "
-          f"{'dS_y/dt strobe':>16}  {'(SG, güvenilmez)':>16}")
+          f"{'dS_y/dt strobe':>16}  {'dS_y/dt model':>16}  {'düz/model':>10}")
     for r in results:
+        sd = r["dSy_dt"]; sm = r.get("dSy_dt_model", float("nan"))
+        ratio = abs(sd / sm) if sm not in (0.0, float("nan")) and abs(sm) > 0 else float("nan")
         print(f"  {r['k']:>3}  {r['co_off_mm']:>8.3f}mm  "
               f"{r['resid_beta_mm']:>14.2e}mm  "
-              f"{r['dSy_dt']:>16.3e}  {r.get('dSy_dt_sg', float('nan')):>16.2e}"
+              f"{sd:>16.3e}  {sm:>16.3e}  {ratio:>9.1f}×"
               f"   ({r['runtime']:.0f}s)")
+    print("  (dS_y/dt strobe = düz polyfit; dS_y/dt model = salınım-çıkaran model "
+          "fit [madde 2] → temiz seküler eğim. 'düz/model' oranı, salınım "
+          "sızıntısının düz fiti ne kadar şişirdiğini gösterir.)")
     if do_co:
-        print("  (dS_y/dt strobe = sabit-azimut tur-başına örneklemeden seküler "
-              "eğim [rad/s]; SG sütunu eski sürekli yöntem, örnekleme-bağımlı)")
+        print("  (örnekleme: sabit-azimut tur-başına, EDMSwitch=0; SG kolonu kaldırıldı, "
+              "model fit onu geçersiz kılar)")
     print(f"  toplam duvar-saati: {wall:.0f}s  "
           f"(seri tahmini ~{sum(r['runtime'] for r in results):.0f}s)")
 
@@ -346,6 +432,7 @@ def plot_results(results, amp_coef):
 
     ks      = np.array([r["k"] for r in results])
     dsy     = np.array([abs(r["dSy_dt"]) for r in results])
+    dsy_mdl = np.array([abs(r.get("dSy_dt_model", np.nan)) for r in results])
     dsy_err = np.array([r.get("dSy_dt_err", 0.0) for r in results])
     # Orbit rezonans göstergesi: bulunan kapalı-yörünge fırlatma ofseti
     # (parçacık bunun üzerine oturtulduğu için kalan betatron ~0'dır).
@@ -356,7 +443,9 @@ def plot_results(results, amp_coef):
     ax1.errorbar(ks, dsy, yerr=dsy_err, fmt="o-", color=color1, lw=1.8,
                  ms=8, mfc="white", mew=2, capsize=4, capthick=1.5,
                  elinewidth=1.3,
-                 label=r"$|dS_y/dt|$  [err: Richardson $\Delta t$ convergence]")
+                 label=r"$|dS_y/dt|$ düz polyfit  [err: Richardson $\Delta t$]")
+    ax1.plot(ks, dsy_mdl, "s--", color="tab:green", lw=1.8, ms=7, mfc="white",
+             mew=2, label=r"$|dS_y/dt|$ model fit (salınım çıkarıldı) [madde 2]")
     ax1.set_yscale("log")
     ax1.set_xlabel("Fourier mode $k$ of quad misalignment", fontsize=12)
     ax1.set_ylabel(r"$|dS_y/dt|$  [rad/s]  (false EDM signal)", color=color1,
@@ -471,10 +560,19 @@ if __name__ == "__main__":
 
     # özet
     dsy = {r["k"]: abs(r["dSy_dt"]) for r in results}
+    dsy_m = {r["k"]: abs(r.get("dSy_dt_model", float("nan"))) for r in results}
     kmax_signal = max(dsy, key=dsy.get)
-    print(f"\n  ÖZET: en büyük false EDM sinyali  k={kmax_signal}")
+    print(f"\n  ÖZET (düz polyfit): en büyük false EDM sinyali  k={kmax_signal}")
     if 2 in dsy and dsy[2] > 0:
         for k in sorted(dsy):
             if k != 2:
                 print(f"    k=2 / k={k}:  {dsy[2]/dsy[k]:6.1f}×" if dsy[k] > 0
                       else f"    k=2 / k={k}:  inf")
+    # Madde 2: model fit sonrası seküler eğim — salınım sızıntısı ne kadar
+    # büyüktü? Düz/model oranı yüksekse düz polyfit yapaylığı baskındı.
+    print(f"\n  MODEL FİT (salınım çıkarıldı) — seküler eğim [rad/s]:")
+    for k in sorted(dsy_m):
+        sd, sm = dsy[k], dsy_m[k]
+        sup = (sd / sm) if sm > 0 else float("nan")
+        print(f"    k={k}:  düz={sd:.3e}  model={sm:.3e}  "
+              f"(düz, salınım sızıntısı ile {sup:.0f}× şişmiş)")
