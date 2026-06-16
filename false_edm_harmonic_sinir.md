@@ -1632,6 +1632,37 @@ parçacık + model fit ile ölçüldü:
 *(Reprodüksiyon: `/tmp/recon_compare.py`; R_dy_1.npy/R_dx_1.npy
 `build_response_matrix.py` ile üretilir.)*
 
+### 14.6 Stage 2 — spin ölç-trim zinciri tamamlıyor (COD + spin uçtan uca)
+
+Orbit-trim'in çarptığı simetrik-alt-uzay tabanı (orbit-görünmez) spin kademesiyle
+temizlendi. Senaryo: 200μm dx+dy (seed 0), orbit-trim sonrası artık ≈ simetrik kısım
+(QF/QD hücre-içi ortalaması, RMS ~141μm), f₀ ölçüldü; simetrik mod S₂'nin spin
+kuplajı çift-kuadratürle kalibre edildi; §12.6 ölç-trim döngüsü (`A_trim=−f/|c|`,
+faz ψ yönünde) uygulandı. f, simetrik-4-parçacık + model fit (§13, CO yok) ile ölçüldü.
+
+| adım | f [rad/s] | bastırma |
+|---|---|---|
+| orbit-trim sonrası (simetrik artık) | +9.44×10⁻⁴ | 1× |
+| spin iter 1 | −2.19×10⁻⁶ | 431× |
+| spin iter 2 | −9.12×10⁻⁷ | 1035× |
+| spin iter 3 | −3.80×10⁻⁷ | 2485× |
+| spin iter 4 | −1.58×10⁻⁷ | **5964×** |
+
+**Bulgular:**
+- Simetrik S₂ spin kuplajı **|c|=12.6 rad/s/m** — orbit göremez (kazanç G~3,
+  eşik altı) ama spin görür; §taban/§erisim'in (SNR_spin~17) somut teyidi.
+- Spin ölç-trim simetrik artığı **~6000× düşürüp 1.6×10⁻⁷'ye** indiriyor —
+  **CW/CCW girişi hedefinin (~10⁻⁵) ~60× altında.** Trim bütçesi 75μm (çoğu ilk adım).
+- Tek simetrik mod (S₂) skaler f'i nullamaya yeterli; iterasyonlar ölçüm tabanına yakınsar.
+
+**Büyük resim:** dx·dy kanalında sahte EDM **simetrik alt-uzay tarafından domine
+edilir** (orbit-görünmez); orbit-trim tek başına ~2-4× (§14.3-14.5), ama **spin
+kademesi baskın simetrik kısmı 6000× temizler** → hedef altı. İki-kademeli mimari
+(COD + spin), §13 doğru estimator'ı ve dx·dy kanalıyla **uçtan uca doğrulandı**.
+
+*(Reprodüksiyon: `/tmp/spin_trim_chain.py`; estimator git geçmişinden
+4cb9cc6:false_edm_mode_scan.py.)*
+
 ---
 
 *Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-16.
