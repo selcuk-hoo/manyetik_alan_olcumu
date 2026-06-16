@@ -352,12 +352,19 @@ iptali ile açıklanır; bu da k=2 tek başına baskın (koheren) durumun
 
 Lineer ölçek = 2.0, kuadratik = 4.0; ölçülen ≈ 2.1 → **lineer baskın.**
 
-**Fiziksel kaynak:** İnce-lens (thin-lens) teorisinde birinci-dereceden
-sıfırlama tam geçerlidir. Simülasyonda kullanılan kalın-lens (thick-lens,
-$L_{\text{quad}} = 0.4$ m) quaderinde partikülün konumu quad içinde değişir;
-bu değişim sıfır-iptal koşulunu hafifçe bozar → küçük ama ölçülebilir
-birinci-derece katkı:
-$$\frac{dS_y}{dt} \approx c_k^{(1)} \cdot A_k + c_k^{(2)} \cdot A_k^2, \quad c^{(1)} \gg c^{(2)}\cdot A$$
+> **DÜZELTME (bkz. §13):** Bu doğrusal baskınlık önceden *kalın-lens
+> (thick-lens) birinci-derece iptali hafifçe bozuyor* diye açıklanmıştı.
+> **Bu açıklama §13.2'de ÇÜRÜTÜLDÜ:** quad uzunluğu 8× inceltilip integral
+> güç $K=G\cdot L$ sabit tutulduğunda α **değişmedi** (1.24→1.19). Yani
+> doğrusal terimin kaynağı kalın-lens DEĞİLDİR. Gerçek kaynak: §2'deki
+> ideal birinci-derece iptal, gerçek kapalı yörüngenin betatron-faz
+> transferiyle *yayılmış* olmasından ötürü tam kapanmaz; dy-only için
+> bu doğrusal terim gerçek ve indirgenemezdir. Ayrıca asıl Omarov
+> kuadratiği bu (dy-only) kanalda değil, **dx·dy geometrik-faz çapraz
+> kanalındadır** (§13.3b, α=2.00). Aşağıdaki $c^{(1)}\gg c^{(2)}A$ ifadesi
+> yalnızca dy-only kanalın küçük-genlik davranışını betimler:
+$$\frac{dS_y}{dt}\bigg|_{dy\text{-only}} \approx c_k^{(1)} A_k + c_k^{(2)} A_k^2,
+\quad c^{(1)} \gg c^{(2)} A \;\; (A \lesssim 20\,\mu\text{m})$$
 
 ### 10.3 Optimizasyon: Minimum False EDM Konfigürasyonu
 
@@ -1293,4 +1300,144 @@ Kazanılandan fazlası kaybedilir — bu yol kapalı.
 
 ---
 
-*Son güncelleme: oturum `claude/claude-md-docs-spai7t`, tarih 2026-06-11*
+## 13. dy-only Doğrusallığının Kaynağı ve Omarov Kuadratiğinin Yeri (nihai tanı) <a name="13-nihai-tani"></a>
+
+> **Bağlam:** "Omarov makalesinde sahte EDM quad misalignment'ın *karesiyle*
+> değişir; bizde ise doğrusal terim baskın — kuadratik nerede gizli?" sorusu
+> sistematik olarak araştırıldı. Sonuç: kuadratik *gizlenmemiş*; yanlış kanal
+> uyarılıyordu. Aşağıda dört yanlış hipotezin elenmesi ve doğru cevap.
+> Ölçümler `claude/awesome-babbage-nmi6w9` oturumunda, **CO=True + madde 2
+> model fit** (`measure_dSy_dt_model`, `false_edm_mode_scan.py`) ve **antitetik
+> demet-ortalaması** ile yapıldı; t2=0.5 ms, k=2 FODO-antisim mod ya da rastgele
+> desen.
+
+### 13.1 Ölçüm artefaktı: betatron sızıntısı (gerçek ama AYRI sorun)
+
+CO=False tek parçacıkta stroboskopik $S_y(n)$'in düz `polyfit(...,1)` eğimi
+seküler değildir; içine **betatron salınımı** sızar. Ölçülen yapı (k=2, 10μm):
+
+- Baskın frekans **0.30/tur** (periyot 3.3 tur) = dikey betatron tune
+  $Q_y=2.68$'in stroboskopik alias'ı; genlik $\mathrm{std}(S_y)\approx1.6\times10^{-5}$
+  rad, betatron genliğiyle (∝$A_\beta$) orantılı.
+- Düz fit bu salınımın kapanmamış kuyruğunu seküler eğim sanır → yapay
+  ∝misalignment terim. t2 ile küçülür: 1ms→1.9×10⁻⁴, 3ms→3.8×10⁻⁵,
+  10ms→1.0×10⁻⁷ (640×, 370× düşüş — gerçek seküler t2-bağımsız olurdu).
+
+**Spin tune DEĞİL:** ölçüldü — $S_x$ 1 ms'de yalnız ~0.7 µrad hareket eder,
+$S_z=-1.0\ldots-0.9999999991$ (donuk, $1-|S_z|\sim10^{-9}$). Spin-tune faz
+ilerlemesi mrad-altı → seküler eğime katkısı ihmal edilebilir. *(Bu belgenin
+erken taslaklarındaki "yavaş spin-tune dalgası" yorumu yanlıştı; kontaminasyon
+hızlı betatrondur — §3'teki betatron kirlenmesinin ta kendisi.)*
+
+**Çözüm:** madde 2 model fit salınımı açıkça çıkarır (CO=False'ta t2 ile
+iyileşir: 0.5ms'de 5.5×, 3ms'de 84×); CO=True salınımı kaynağında öldürür;
+demet-ortalaması faz iptaliyle yok eder.
+
+### 13.2 İdeal parçacık (CO=True) GERÇEKTEN doğrusal — thick-lens DEĞİL
+
+Betatron yokken (CO=True, salınım yok, model=düz fit aynı) ölçülen seküler
+eğim temizdir ve doğrusaldır:
+
+| A [μm] (k=2) | dSy/dt [rad/s] | yerel α |
+|---|---|---|
+| 1→2 | 1.58→3.12 ×10⁻¹⁰ | 0.98 |
+| 5→10 | 0.76→1.71 ×10⁻⁹ | 1.16 |
+| 10→20 | →4.28×10⁻⁹ | 1.32 |
+| 20→50 | →2.64×10⁻⁸ | 1.98 |
+| 50→100 | →1.65×10⁻⁷ | 2.64 |
+
+Küçük/gerçekçi genlikte (≲20μm) **α≈1 (doğrusal)**; kuadratik ancak büyük
+misalignment'ta (kesişim $A^*\approx20\mu$m) devreye girer. Küçük-A doğrusal
+katsayısı $c_1\approx+1.6\times10^{-4}$ rad/s/m.
+
+**Elenen hipotezler:**
+
+- **Thick-lens (kalın mercek): ÇÜRÜTÜLDÜ.** $K=G\cdot L$ ve cell uzunluğu sabit
+  tutulup $L$ 0.40→0.05 m (8×) inceltildiğinde α **sabit** (1.24,1.18,1.19,1.19),
+  genlik neredeyse değişmedi. Doğrusal terim sonlu quad uzunluğundan gelmiyor.
+- **Coherent-vs-rastgele: ÇÜRÜTÜLDÜ.** Rastgele desen (CO=True, σ=2..40μm,
+  5 tohum) da **α≈1.03** (medyan). İşaret-iptali kuadratiği baskın kılmıyor.
+
+**Gerçek kaynak:** §2'deki $\sum_j G_j y_{\mathrm{CO},j}=0$ iptali, $y_{\mathrm{CO}}$'nun
+misalignment ile *aynı* $(-1)^j\cos$ desenine sahip olduğunu varsayar; oysa
+gerçek kapalı yörünge kick'lerin $(I-M)^{-1}$ ile **betatron-fazı boyunca
+yayılmış** hâlidir → desen bozulur, iptal birinci derecede kapanmaz →
+indirgenemez $c_1 A$ terimi (rastgele desende: net radyal alan
+$\sum_j(-1)^j dy_j\neq0$).
+
+### 13.3 İki BÜYÜK ikinci-derece kanal — dy-only'nin 100–2300×'i
+
+dy-only ideal seküler (~10⁻⁹) baskın değildir. Asıl fizik iki kanalda:
+
+**(a) Emittans kanalı (demet-bağımlı).** Antitetik-fazlı demet
+(σ_y=0.5mm, σ_y'=0.2mrad) ile $\langle S_y\rangle$'den ölçülen seküler:
+
+| | dSy/dt [rad/s] |
+|---|---|
+| CO=True ideal $s_0$ | 1.71×10⁻⁹ |
+| Demet ort. $s_{\rm beam}$ | **3.77×10⁻⁷** (≈**220×**) |
+
+Betatron genliğiyle ∝$A_\beta^2$ (ölçülen üs 2.19); misalignment'ta ∝$A^{1.0}$.
+CO=True bu kanalı tamamen kaçırır — bkz. §13.5/açık sorun.
+
+**(b) dx·dy geometrik-faz çapraz kanalı (Omarov σ²).** İki düzlem birlikte
+kaçıkken (rastgele dx ve dy, rms σ; CO=True, model fit):
+
+| tohum | 2μm | 10μm | 20μm | α |
+|---|---|---|---|---|
+| 0 | 1.17e-8 | 2.92e-7 | 1.17e-6 | **2.00** |
+| 1 | 2.28e-9 | 5.56e-8 | 2.16e-7 | 1.98 |
+| 2 | 1.85e-8 | 4.61e-7 | 1.85e-6 | 2.00 |
+
+**Medyan α = 2.00 — tam kuadratik.** Kontrast (σ=10μm): dy-only −1.3×10⁻¹⁰,
+**dx-only = +0.000 (tam sıfır)**, dx+dy = +2.9×10⁻⁷ (dy-only'nin ~2300×'i),
+çapraz = both−dy−dx = +2.9×10⁻⁷ (sinyalin tamamı).
+
+Mekanizma: $dy\to B_x$ (spin x-ekseni etrafında döner), $dx\to B_y$
+(spin y-ekseni etrafında döner). Tek başına $dx$ dikey spini etkilemez
+(düzlemler ayrık). İki farklı eksen etrafındaki **komütatif olmayan** dönmeler
+→ geometrik (Berry) faz → net $S_y\propto dx\cdot dy$; $dx\sim dy\sim\sigma$
+ise **∝σ²**. Bu, §8'deki bilinear $x\cdot y$ çapraz teriminin σ-ölçeklenmiş
+hâlidir (§8 sabit-dy/değişken-x_0 ile doğrusal görmüştü; iki düzlem birlikte
+ölçeklenince kuadratik).
+
+### 13.4 Omarov kuadratiğinin yeri — nihai cevap
+
+Omarov'un misalignment-kuadratik sahte EDM'i **dx·dy geometrik-faz
+kanalıdır** ve onu görmek için **her iki düzlemin aynı anda kaçık** olması
+gerekir. Proje şimdiye dek **yalnız dy** test ettiği için bu kanalı hiç
+uyarmadı; ölçtüğü dy-only sinyali baskın olmayan, birinci-derece radyal-alan
+kanalıdır (doğrusal, ~10⁻⁹). **Kuadratik gizlenmemişti; dikey-tek testlerin
+hiç dokunmadığı dx·dy kanalında duruyordu.** dy-only doğrusallığı Omarov ile
+çelişmez.
+
+**Dört hipotezin özeti:**
+
+| Hipotez | Sonuç |
+|---|---|
+| Fit artefaktı (betatron) tek başına açıklar | Kısmen — gerçek ama ayrı; CO=True'da yok, yine doğrusal |
+| Thick-lens | Çürütüldü (8× inceltmede α sabit) |
+| Coherent vs rastgele | Çürütüldü (rastgele de α≈1) |
+| Emittans kanalı misalignment-kuadratik | Çürütüldü (∝A¹) |
+| **dx·dy geometrik-faz** | **Doğrulandı (α=2.00)** |
+
+### 13.5 Çıkarımlar ve açık sorunlar
+
+1. **dy-only çatı dominant fiziği kaçırıyor.** `false_edm_mode_scan.py`,
+   `c_k` tabloları (§12), trim döngüsü — hepsi dy-only. Gerçek sahte EDM
+   iki büyük kanalca (dx·dy ∝σ², emittans ∝$A_\beta^2$) yönetiliyor, her ikisi
+   de ~10⁻⁷. Analiz **dx+dy birlikte** ve **demet-ortalamalı** olacak şekilde
+   genişletilmelidir.
+2. **CO=True yetersiz:** yalnız ideal parçacığın $s_0$'ını verir; ideal olmayan
+   (sonlu betatron) parçacıkların emittans kanalını (220×) kaçırır. Fiziksel
+   gözlenebilir $d\langle S_y\rangle/dt$ = demet ortalamasıdır.
+3. **Omarov mutlak değer teyidi açık:** buradaki α üsleri ve oranlar Omarov'un
+   *mertebeleriyle* (~10⁻⁵/10⁻⁹) ölçek uyumunu doğrulamak için makale
+   parametreleriyle (kafes, σ, emittans, t2) birebir eşleme gerekir
+   (YAPILACAKLAR; kütüphane erişimine bağlı).
+
+---
+
+*Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-16
+(§13 eklendi: dy-only doğrusallığı + dx·dy geometrik-faz kuadratiği;
+§10.2 thick-lens argümanı düzeltildi).*
