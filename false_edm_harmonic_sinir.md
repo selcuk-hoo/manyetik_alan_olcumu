@@ -1438,6 +1438,115 @@ hiç dokunmadığı dx·dy kanalında duruyordu.** dy-only doğrusallığı Omar
 
 ---
 
-*Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-16
-(§13 eklendi: dy-only doğrusallığı + dx·dy geometrik-faz kuadratiği;
-§10.2 thick-lens argümanı düzeltildi).*
+### 13.6 dx·dy kanalında demet: ideal'e eşit + örnekleme artığı dersi <a name="13-6"></a>
+
+**Soru:** dx·dy α=2.00 (§13.3b) **CO=True** ile ölçüldü — yani tek ideal parçacık.
+Gerçek demette (sonlu betatron genlikli ideal-olmayan parçacıklar) bu kanal
+büyür mü? (dy-only'de emittans kanalı CO=True'yu 220× büyütüyordu, §13.3a.)
+
+**Yöntem — 4D kapalı yörünge + antitetik demet:** dx hem yatay hem (skew yokken)
+yalnız yatay kapalı yörünge üretir, dy yalnız dikey. Düzlemler orbit düzeyinde
+ayrık olduğundan yatay CO (dx'ten) ve dikey CO (dy'den) bağımsız bulunur; parçacık
+4D kapalı yörüngede $(x_{\rm CO},x'_{\rm CO},y_{\rm CO},y'_{\rm CO})$ fırlatılır.
+Demet, bu merkez etrafında rastgele $(\Delta x,\Delta x',\Delta y,\Delta y')$
+örnekleriyle temsil edilir; $\langle S_y\rangle$ alınıp madde 2 ile seküler eğim
+çıkarılır.
+
+**İLK SONUÇ YANILTICIYDI — kritik tuzak:** 2-katlı antitetik demet (her çekiliş
+için $+v$ ve $-v$) **σ^0.17 düz, ~1.5×10⁻⁵** verdi. Büyüklük Omarov'la örtüşüyordu
+ama **misalignment'tan bağımsız** olması Omarov'un kuadratiğiyle çelişir → şüpheli.
+
+**TANI:** Düz sinyal, sonlu-N **$\langle\Delta x\cdot\Delta y\rangle$ örnekleme
+artığıdır.** Gerçek korelasyonsuz demette $\langle\Delta x\Delta y\rangle=0$, ama
+N örnekte örnek ortalaması $\sim\sigma_x\sigma_y/\sqrt N\neq0$. Bu kalıntı,
+betatron'un kendi geometrik fazını ($\propto\Delta x\Delta y$, misalignment'tan
+bağımsız) besler. **2-katlı antitetik bunu iptal etmez**: $\Delta x\Delta y$
+çifttir, $(-\Delta x)(-\Delta y)=\Delta x\Delta y$.
+
+**ÇÖZÜM — 4-katlı çift-düzlem simetri:** x-düzlemi ve y-düzlemi işaretleri
+**bağımsız** çevrilir. Her çekiliş için 4 parçacık (spin hepsinde AYNI,
+boylamsal $(0,0,-1)$ — spin simetriye sokulMAZ):
+
+| # | x | x' | y | y' |
+|---|---|---|---|---|
+| 1 | $x_{\rm CO}{+}\Delta x$ | $x'_{\rm CO}{+}\Delta x'$ | $y_{\rm CO}{+}\Delta y$ | $y'_{\rm CO}{+}\Delta y'$ |
+| 2 | $x_{\rm CO}{+}\Delta x$ | $x'_{\rm CO}{+}\Delta x'$ | $y_{\rm CO}{-}\Delta y$ | $y'_{\rm CO}{-}\Delta y'$ |
+| 3 | $x_{\rm CO}{-}\Delta x$ | $x'_{\rm CO}{-}\Delta x'$ | $y_{\rm CO}{+}\Delta y$ | $y'_{\rm CO}{+}\Delta y'$ |
+| 4 | $x_{\rm CO}{-}\Delta x$ | $x'_{\rm CO}{-}\Delta x'$ | $y_{\rm CO}{-}\Delta y$ | $y'_{\rm CO}{-}\Delta y'$ |
+
+Yatay sapma (Δx, Δx' birlikte) bir bütün olarak ±; dikey (Δy, Δy' birlikte) bağımsız
+±. Δx·Δy işaretleri (+,−,−,+) → ortalamada **tam 0**. İptal olan: bir düzlemde tek
+her terim ($\langle\Delta x\Delta y\rangle$, $x_{\rm CO}\Delta y$, $y_{\rm CO}\Delta x$).
+Hayatta kalan: $x_{\rm CO} y_{\rm CO}$ (ideal/kapalı-yörünge) ve her iki düzlemde çift
+emittans terimleri ($\langle\Delta x^2\rangle,\langle\Delta y^2\rangle$). Özünde
+kafesin $x\to-x,\,y\to-y$ yansıma simetrisi örneğe zorla dayatılır.
+
+**4-KATLI SONUÇ:** $s_{\rm beam}=s_{\rm ideal}$ (**1.0×** tüm σ'da), σ^1.97.
+**Yani dx·dy kanalında demet ideal'e EŞİTtir — büyütmez.**
+
+**Açı vs ofset:** "ideal-olmayan parçacıkları ofset yerine giriş açısıyla göndersek?"
+sorusu test edildi (saf açı, $\Delta x'=\Delta y'\neq0$, pozisyon ofseti 0, yine
+4-katlı): yine **1.0×**. Betatron'u nasıl uyarırsan (ofset ya da açı) demet=ideal.
+
+**Asimetrinin sebebi (dy-only 220× ama dx·dy 1.0×):**
+- dy-only emittans terimi $\propto\langle\Delta y^2\rangle$ — Δy'de **çift**, faz
+  ortalamasında hayatta kalır → gerçek büyütme.
+- dx·dy baskın geometrik fazı $x_{\rm CO}\cdot y_{\rm CO}$ kapalı-yörünge çarpımıdır;
+  betatron katkısı $\langle\Delta x\Delta y\rangle$ üzerinden gelir, korelasyonsuz
+  demette 0 → büyütme yok. **dx·dy için CO=True temsilcidir** (dy-only'nin aksine).
+
+### 13.7 Çok-seed RMS ve Omarov nicel karşılaştırması <a name="13-7"></a>
+
+dx·dy çok desen-bağımlı (rastgele desende $\sum$ işaret iptalleri); doğru istatistik
+**desen ensemble'ı üzerinden RMS**. 10 rastgele desen (dx ve dy bağımsız $N(0,\sigma)$),
+CO=True 4D, tam dt=1e-11 (beam=ideal olduğundan tek ideal parçacık yeterli):
+
+| σ (dx+dy rms) | RMS | medyan | min | maks |
+|---|---|---|---|---|
+| 5 μm | 8.25×10⁻⁷ | 3.7×10⁻⁷ | 6.1×10⁻⁸ | 2.2×10⁻⁶ |
+| **10 μm** | **3.32×10⁻⁶** | 1.5×10⁻⁶ | 2.4×10⁻⁷ | 8.7×10⁻⁶ |
+| 20 μm | 1.34×10⁻⁵ | 6.0×10⁻⁶ | 9.0×10⁻⁷ | 3.5×10⁻⁵ |
+
+- **RMS ~ σ^2.01 — kusursuz kuadratik** (Omarov σ²).
+- **10μm RMS = 3.3×10⁻⁶ vs Omarov ~10⁻⁵ → oran 3.0×.** Bazı desenler (en kötü:
+  8.7×10⁻⁶) neredeyse tam Omarov'da.
+- Seed saçılması min→maks ~36× → sahte EDM güçlü desen-bağımlı; tek seed (seed-0:
+  1.1×10⁻⁶) yanıltıcı düşüktü, RMS doğru karşılaştırma.
+- Kalan **3× faktör** Omarov'un tam parametreleriyle (σ tanımı per-plane/toplam,
+  tune/β fonksiyonları, t2, halka detayları) eşlemediğimiz için beklenen belirsizlik
+  içinde. **Mekanizma + kuadratik ölçek + mertebe oturuyor.**
+
+**Omarov bağlamı:** İlgili makale Omarov vd. PRD 105, 032001 (2022) "symmetric-**hybrid**
+ring" — elektrik saptırıcı + manyetik quad, bu projenin kafesiyle aynı tip (kullanıcı
+teyit etti: Omarov bu testte elektrik quad değil, tam bizim örgüyü kullanıyor, dx-dy
+10μm rms → ~10⁻⁵, misalignment'ta kuadratik). Eski tamamen-elektrik makale
+(Hacıömeroğlu & Semertzidis arXiv:1709.01208) farklı kafestir.
+
+### 13.8 Yöntem kaydı: ne, nasıl, NEDEN (tekrar bu yollardan geçmemek için) <a name="13-8"></a>
+
+| Teknik | Ne yapar | Neden gerekli |
+|---|---|---|
+| **Model fit** (madde 2, `measure_dSy_dt_model`) | $S_y(n)=a+bn+\sum_k[c_k\cos+d_k\sin]$ fit eder, yalnız seküler $b$ döner | Düz `polyfit(...,1)` betatron salınımını (0.30/tur, ∝$A_\beta$) seküler sanar; model fit onu açıkça çıkarır. **Sınır:** periyodu pencereden uzun salınım çözülemez (yavaş dalga değil, çözünürlük) |
+| **CO=True (kapalı yörüngede fırlatma)** | Betatronu kaynağında öldürür → temiz seküler | Tek parçacık betatron sızıntısı t2 ile küçülür ama ∝misalignment kalır, fitle inmez. **Uyarı:** dy-only'de emittans kanalını kaçırır (220×); dx·dy'de temsilci |
+| **4D CO (yatay+dikey)** | dx+dy için tam kapalı yörünge | dx yatay orbit üretir; yalnız dikey CO bulup x=0 fırlatmak yatay betatron sokar, değeri değiştirir |
+| **Antitetik (2-katlı, $\pm v$)** | $v$'de tek terimleri (doğrusal betatron) iptal | dy-only emittans ölçümü için yeterli (Δy² çift, korunur) |
+| **4-katlı çift-düzlem** | x,y işaretleri bağımsız → $\langle\Delta x\Delta y\rangle=0$ tam | dx·dy demetinde 2-katlı yetmez; sonlu-N $\langle\Delta x\Delta y\rangle$ artığı sahte düz ~1.5e-5 üretir |
+| **CO doğrusal ölçekleme** | CO'yu bir σ'da bul, $CO(\sigma)=\frac{\sigma}{\sigma_0}CO(\sigma_0)$ | Sextupol yok → kapalı yörünge misalignment'ta tam doğrusal; σ-taramasında CO aramasını 3× azaltır, **yaklaşıklık değil** |
+| **Tam dt=1e-11 her yerde** | CO arama + spin izi aynı adım | Adım büyütmek (GL4 4. derece) yörünge/spin truncation hatasını bozar; hız için CO ölçekleme kullanılır, adım değil |
+
+**Çürütülen hipotezler (bir daha denenmesin):** (1) doğrusallık sadece fit artefaktı
+— hayır, CO=True temiz de doğrusal; (2) thick-lens — hayır, 8× inceltmede α sabit;
+(3) coherent-vs-rastgele — hayır, rastgele de α≈1; (4) emittans kanalı
+misalignment-kuadratik — hayır ∝A¹; (5) demet dx·dy'yi büyütür — hayır, =ideal;
+(6) açı enjeksiyonu dx·dy'yi büyütür — hayır, ofsetle aynı; (7) yavaş spin-tune
+dalgası — hayır, spin donuk, kontaminasyon hızlı betatron.
+
+**Reprodüksiyon:** `test_dxdy_geometric_phase.py` (bu oturumda eklendi) — dy/dx/dx+dy
+kontrastı, CO=True α taraması ve çok-seed RMS'i tek koşuda üretir.
+
+---
+
+*Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-16.
+§13 tam: dy-only doğrusallığı (§13.1-2), iki ikinci-derece kanal (§13.3),
+Omarov'un yeri (§13.4), demet=ideal + 4-katlı simetri (§13.6), çok-seed RMS +
+Omarov 3× uyum (§13.7), yöntem kaydı (§13.8). §10.2 thick-lens argümanı düzeltildi.*

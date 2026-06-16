@@ -46,6 +46,14 @@
   çiftinin dışına alan hücre mevcut gradyanla kararsız; aynı ton g≈0.5 T/m ister
 - [x] Belgeler: `false_edm_harmonic_sinir.md` §1–12.16,
   `trim_yontemi_pedagojik.md` §1–9, `makale_tr.tex` trim bölümü
+- [x] **§13 — "kuadratik nerede" araştırması** (`false_edm_harmonic_sinir.md`
+  §13.1–13.8, `test_dxdy_geometric_phase.py`): Omarov'un kuadratik sahte-EDM'i
+  **dx·dy geometrik-faz çapraz kanalıdır** (iki düzlem birlikte, σ²); proje
+  yalnız dy-only (doğrusal birinci-derece) ölçüyordu. Çok-seed RMS σ^2.01,
+  10μm'de 3.3×10⁻⁶ → Omarov ~10⁻⁵ ile **3× içinde**. dx·dy için demet=ideal
+  (CO=True temsilci); dy-only'de emittans kanalı 220×. Madde 2 model-fit
+  estimator'ı (`measure_dSy_dt_model`) betatron sızıntısını temizler. Çürütülen
+  hipotezler ve yöntem kaydı §13.8'de — **bu yollardan tekrar geçmeyin.**
 - [x] `makale_trim_tr.tex` — bağımsız trim makalesi taslağı: tüm semboller
   tanımlı, 9 şekil çağrıldığı yerde, polarimetre istatistik modeli ve
   süre bütçesi (Müller 2020 referansla), CW−CCW EDM güvenlik kanıtı
