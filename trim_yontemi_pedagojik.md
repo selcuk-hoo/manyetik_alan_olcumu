@@ -646,3 +646,112 @@ görür (c_k hiçbir modda sıfır değil), simetrik içerik dahil. Radyal
 polarizasyon bu iş için yedek değildir: Ω_z kanalı dikey yörünge
 eğimiyle sürüldüğünden, yörünge üretmeyen simetrik içeriğe o da
 büyük ölçüde kördür.
+
+---
+
+## 10. İki kademeyi birleştirmek: COD ölçümünü spin ile tamamlamak
+
+Buraya kadar yörünge kademesi (§7) ve spin kademesi (§3, §6) ayrı ayrı
+anlatıldı. Bu bölüm ikisini **uçtan uca tek bir zincirde** birleştirir ve
+yol boyunca sahte EDM'in *gerçekte hangi kanaldan* geldiğine dair önemli bir
+düzeltme yapar. Anlatım yine sıfırdan: önce mekanizma, sonra ölçüm hilesi,
+sonra zincirin tamamı sayılarla.
+
+### 10.1 Sürpriz: sahte EDM aslında bir **dx·dy** çapraz kanalıdır
+
+Şimdiye kadar hep dikey kaçıklık $dy$'yi konuştuk. Ama dikkatli bir spin
+takibi şunu gösteriyor: tek başına $dy$ küçük (ve çoğu rejimde doğrusal) bir
+etki verir; asıl büyük sahte EDM **yatay ve dikey kaçıklığın çarpımından**
+doğar. Sezgi şöyle:
+
+- $dy$ (dikey kaçıklık) → radyal alan $B_x$ → spini **x-ekseni** etrafında döndürür.
+- $dx$ (yatay kaçıklık) → dikey alan $B_y$ → spini **y-ekseni** etrafında döndürür.
+- **Tek başına $dx$ dikey spini ($S_y$) hiç değiştirmez** (y-ekseni etrafında dönme $S_y$'yi yerinde bırakır — sayısal teyit: dx-only $\Rightarrow$ $S_y$ tam sıfır).
+- Ama iki dönme **aynı anda** varsa: x ve y eksenleri etrafındaki dönmeler
+  **sıra değiştirilemez** (komütatif değil). Ardışık iki farklı-eksen dönmesi
+  net bir üçüncü-eksen dönmesi bırakır — bu bir **geometrik (Berry) fazıdır**.
+  Sonuç: net $S_y \propto dx\cdot dy$.
+
+$dx$ ve $dy$ ikisi de $\sim\sigma$ mertebesindeyse, çarpım $\propto\sigma^2$ —
+yani sahte EDM hizalama hatasının **karesiyle** ölçeklenir (Omarov'un gördüğü
+kuadratik davranış; çok-seed RMS ölçümünde üs $\approx 2.0$). Pratik sonuç:
+kontrol etmemiz gereken sistematik, dikey kaçıklığın tek başına değil,
+**yatay×dikey çarpımının** içeriğidir. Bu, simetrik alt-uzayın (§9) neden bu
+kadar önemli olduğunu da açıklar: çapraz terim büyük ölçüde her iki düzlemin
+**simetrik** (QF/QD aynı-yönlü) parçalarının çarpımında yaşar ve §9'da
+gördüğümüz gibi yörünge bu parçaya kördür.
+
+### 10.2 $f$'i temiz ölçmenin hilesi: dört simetrik parçacık
+
+Sahte EDM hızı $f=dS_y/dt$ ölçülürken bir tuzak var: tek bir parçacığı
+eksenden fırlatırsak, kaymış kapalı yörünge etrafında **devasa bir betatron
+salınımı** yapar ($\sim$mm) ve bu salınımın $S_y$'ye bulaşması aradığımız
+minik seküler sürüklenmeyi boğar. Eski çözüm parçacığı kapalı yörüngeye
+"oturtmaktı" (CO arama); ama buna **gerek yok**.
+
+Bunun yerine **dört parçacık** gönderiyoruz; transvers ofsetleri eksenin
+etrafında dört işaret kombinasyonu:
+$(+\Delta x,+\Delta y),\ (+\Delta x,-\Delta y),\ (-\Delta x,+\Delta y),\ (-\Delta x,-\Delta y)$
+(spin hepsinde aynı, boylamsal). Dördünün $S_y$'sini **ortalıyoruz**. Neden işe yarar?
+
+- Betatron salınımı ve istenmeyen $\langle\Delta x\,\Delta y\rangle$ örnekleme
+  çapraz-terimi, işaret çevirmeleri altında **tek** (odd) — dört kombinasyonda
+  $(+,-,-,+)$ toplanır, **tam sıfırlanır**.
+- Gerçek sahte-EDM sürüklenmesi (kapalı yörünge çarpımı $x_{\rm CO}\,y_{\rm CO}$)
+  işaret çevirmeleri altında **çift** (even) — dördünde de aynı, ortalamada
+  **dokunulmadan kalır**.
+
+Yani kafesin sol-sağ/yukarı-aşağı yansıma simetrisini örneğe zorlayarak,
+kapalı yörüngeyi hiç aramadan temiz bir $f$ elde ederiz. Kalan yavaş salınım
+da model fitiyle (seküler doğru + sinüzoit) çıkarılır.
+
+### 10.3 Zincirin tamamı, sayılarla (200 μm → hedef altı)
+
+Tipik bir makinede mekanik hizalama $\sim$200 μm RMS'tir. Tek bir tohum için
+($dx,dy=$ 200 μm) adım adım:
+
+| Aşama | Ne yapılır | $f$ [rad/s] |
+|---|---|---|
+| Başlangıç | 200 μm dx+dy | $\sim 9\times10^{-4}$ |
+| **Stage 1 — yörünge** | BPM yörüngesinden antisim k≤4'ü kestir, kaydırıcıyla trimle (§7) | $\sim 9\times10^{-4}$ (çok az düşer!) |
+| **Stage 2 — spin** | simetrik modun spin kuplajını kalibre et, ölç-trimle döngüsü | $1.6\times10^{-7}$ |
+
+**Stage 1 neden neredeyse hiç düşürmüyor?** Çünkü dx·dy kanalında sahte EDM
+büyük ölçüde **simetrik alt-uzaydadır** ve §9'da kanıtlandığı gibi yörünge bu
+alt-uzayı BPM ofseti gürültüsünün altında göremez (SNR$\approx$0.3). Yörünge
+yalnız antisim parçayı temizler — o da bu kanalda küçük bir paydır. (Altı
+farklı rekonstrüksiyon metodu — Bozoki, CLEAN, R-LS, R⁻¹, TSVD — denendi;
+hepsi aynı $\sim$10⁻⁴ tabanına çarptı: bu bir gözlenebilirlik sınırıdır,
+metot kusuru değil. En iyisi dar R-LS k≤4, yalnız $\sim$4×.)
+
+**Stage 2 nasıl bitiriyor?** Spin, simetrik içeriği **görür** (kuplaj
+$\sim$12 kat zayıf ama sıfır değil). Simetrik mod $S_2$'nin spin kuplajı
+çift-kuadratürle kalibre edilir ($|c|\approx 12.6$ rad/s/m), sonra §3'teki
+ölç-trimle döngüsü işletilir. Dört adımda $f$:
+$9.4\times10^{-4}\to 2.2\times10^{-6}\to\dots\to 1.6\times10^{-7}$
+(**$\sim$6000× bastırma**, 75 μm trim bütçesiyle). Bu, CW/CCW + quad-flip
+iptal zincirinin giriş hedefi $10^{-5}$'in $\sim$60 kat altındadır.
+
+### 10.4 Neden tek bir simetrik mod $f$'i nullamaya yetiyor?
+
+Sezgi: $f$ tek bir **sayıdır** (skaler). Trim modu, kuplajı $c$ [rad/s/m]
+bilinen tek bir düğmedir. $A_{\rm trim}=-f/c$ seçersek, trim'in $f$'ye
+katkısı mevcut $f$'i (doğrusal mertebede) **tam götürür** — tıpkı kalibre bir
+kadranı çevirip bir göstergeyi sıfırlamak gibi. Geriye kalan (doğrusal-ötesi
+artık + öbür modlar + ölçüm gürültüsü) her iterasyonda küçülür; ikinci-üçüncü
+adımlar onu ölçüm tabanına indirir. Birden çok modu *ayrı ayrı* bilmek
+gerekmez; tek bir iyi-kuplajlı düğme skaler hedefi nullar.
+
+### 10.5 Özet: rollerin net dağılımı
+
+- **Yörünge kademesi (hızlı, EDM-kör):** antisim, yüksek-kazançlı içeriği
+  saniyeler-dakikalar içinde temizler; simetrik alt-uzaya yapısal olarak kördür.
+- **Spin kademesi (yavaş, eksiksiz):** simetrik dahil tüm içeriği görür;
+  dört-simetrik-parçacık ölçümü + ölç-trimle döngüsüyle kalanı CW/CCW giriş
+  seviyesinin altına indirir; CW$-$CCW fark kanalı sayesinde gerçek EDM'ye kör.
+
+İki kademe **tamamlayıcıdır**: biri olmadan diğeri hedefe ulaşmaz. Bu bölümün
+sayıları, doğru spin-eğim estimator'ı (salınım-çıkaran model fit) ile dx·dy
+kanalında uçtan uca alınmış olup `makale_trim_tr.tex`'in iki-kademeli
+mimarisini doğrular. (Ayrıntılı analiz günlüğü: `false_edm_harmonic_sinir.md`
+§13–14.)
