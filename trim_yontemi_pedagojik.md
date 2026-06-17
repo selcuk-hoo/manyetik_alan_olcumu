@@ -1,757 +1,364 @@
-# Harmonik Trim Yöntemi — Pedagojik Anlatım
+# Sahte EDM'i Kaynağında Bastırmak — Ders Kitabı Tarzı Anlatım
 
-Bu belge, sahte EDM sinyalini "ölç–trimle" döngüsüyle bastırma
-yöntemini ve bu oturumda yapılan iki kritik testi — **fırlatma koşulu
-bağımlılığı** ile **rastgele desen + fazlı trim** — hiçbir ön bilgi
-varsaymadan, adım adım anlatır. Teknik rapor için
-`false_edm_harmonic_sinir.md` §12'ye, makale diline dökülmüş haline
-`makale_tr.tex`'e bakınız.
+Bu belge, proton EDM (pEDM) deneyinde kuadrupol hizalama hatalarının yarattığı
+**sahte EDM** sinyalini nasıl ölçüp bastırdığımızı sıfırdan anlatır. Hiçbir ön
+bilgi varsaymaz; her kavram ilk kullanıldığında tanımlanır. Teknik analiz günlüğü
+`false_edm_harmonic_sinir.md`'de (§1–14), makale dili `makale_trim_tr.tex`'tedir.
 
----
-
-## 1. Problem: Sahte EDM nedir, neden çıkar?
-
-Proton EDM deneyi, protonun spininin düşey yönde çok yavaş dönmesini
-($dS_y/dt$) arar. Gerçek bir EDM bu dönmeyi yaratır — ama ne yazık ki
-**mıknatıs hizalama hataları da aynı şeyi yapar**.
-
-Zincir şöyle işler:
-
-1. Halkadaki 48 kuadrupol mıknatıstan bazıları ideal konumundan
-   birkaç mikron **düşey kaymış** olsun (Δy).
-2. Kaymış kuadrupol, içinden geçen demete küçük bir düşey itme verir
-   → demetin kapalı yörüngesi düşeyde **bozulur** (artık tam düzlemde
-   değildir).
-3. Bozulmuş yörünge üzerinde proton, kuadrupollerin **radyal manyetik
-   alanını** görür (ideal yörüngede görmezdi).
-4. Radyal manyetik alan, Thomas-BMT denklemi gereği spini düşey
-   eksende döndürür → $dS_y/dt \neq 0$.
-
-Sonuç: hiç EDM olmasa bile spin düşeyde döner. Buna **sahte EDM**
-(false EDM) diyoruz. Deneyin en sinsi sistematiği budur, çünkü gerçek
-sinyalle **aynı imzayı** taşır.
-
-Sayısal ölçek: 10 μm'lik tipik hizalama hatası ~10⁻⁴ rad/s sahte
-sinyal üretir; hedeflenen EDM duyarlılığı bunun milyonlarca kat
-altındadır. Yani sahte sinyali en az ~10⁶–10⁷ kat bastırmak gerekir.
+İçindekiler:
+1. Sahte EDM nedir ve asıl kaynağı neden **dx·dy**'dir?
+2. Hata desenini iki şekilde ayırmak: Fourier modları + simetrik/antisimetrik
+3. İki gözlenebilir: yörünge (BPM) ve spin — hangisi neyi görür?
+4. Sahte EDM'i temiz ölçmek: dört simetrik parçacık
+5. Ölç–trimle döngüsü: tek bir sayıyı sıfırlamak
+6. Birinci kademe — yörünge (COD) trimi: ne kadar gider, neden durur?
+7. İkinci kademe — spin trimi: yörüngenin göremediğini temizler
+8. Büyük resim: iki kademe + CW/CCW iptal zinciri
+9. Sık sorulan sorular
 
 ---
 
-## 2. Anahtar fikir: Hata desenini Fourier modlarına ayır
+## 1. Sahte EDM nedir ve asıl kaynağı neden dx·dy'dir?
 
-48 kuadrupolun her birinin kayması ayrı bir sayı: 48 bilinmeyen.
-Bunların hepsiyle tek tek uğraşmak yerine, kayma *desenini* halka
-çevresince **Fourier modlarına** ayırırız:
+Proton EDM deneyi, protonun spininin yatay düzlemden düşeye doğru **çok yavaş
+dönmesini** arar. Gerçek bir elektrik dipol momenti bu dönmeyi yaratır; ölçtüğümüz
+büyüklük dikey spin bileşeninin birikme hızıdır:
+$$f \equiv \frac{dS_y}{dt}.$$
+Sorun şu: **mıknatıs hizalama hataları da $f\neq0$ üretir** ve bunu gerçek
+EDM'den ayırt etmek imkânsızdır. Buna **sahte EDM** denir; deneyin en tehlikeli
+sistematiğidir.
 
-```
-Δy_j = Σ_k A_k · cos(2πk·n_j/N − φ_k)        (N = 24 FODO hücresi)
-```
+### Mekanizma: iki düzlem bir arada
 
-Her mod k, halka çevresinde k kez dalgalanan bir kayma desenidir:
-- k=1: halkanın bir yanı yukarı, öbür yanı aşağı (tek dalga)
-- k=2: iki tepe, iki çukur
-- k=3: üç tepe, üç çukur... vb.
+Bir kuadrupol ideal konumundan kayarsa, içinden geçen demete sapmış bir alan
+gösterir. Hangi yönde kaydığı kritik:
 
-**Neden bu ayrıştırma işe yarar?** Çünkü sahte EDM her moda eşit tepki
-vermez. Demetin düşey betatron ayar frekansı Q_y ≈ 2.68'dir; **k=2
-modu bu rezonansa en yakın olduğundan yörüngeyi en çok bozar** ve sahte
-EDM'nin aslan payını üretir. Yüksek modlar (k≥5) neredeyse zararsızdır.
+- **Düşey kaçıklık $dy$** → demet kuadrupolün **radyal** manyetik alanını ($B_x$)
+  görür → Thomas–BMT denklemi gereği spin **x-ekseni** etrafında döner. Bu, $S_y$
+  ile $S_z$'yi karıştırır.
+- **Yatay kaçıklık $dx$** → demet **dikey** alanı ($B_y$) görür → spin **y-ekseni**
+  etrafında döner. Bu, $S_x$ ile $S_z$'yi karıştırır ama **$S_y$'ye dokunmaz**.
 
-Doğrusal bir kafeste her modun katkısı toplanır:
+Buradan ilk sürpriz çıkar: **tek başına yatay kaçıklık dikey spini hiç
+değiştirmez** (simülasyonda dx-only $\Rightarrow$ $S_y$ tam sıfır). Tek başına
+düşey kaçıklık ise küçük bir etki verir — üstelik halka çevresinde büyük ölçüde
+birbirini götürür (birinci derecede iptal).
 
-```
-dS_y/dt = Σ_k  c_k · A_k        (faz şimdilik göz ardı — §6'da gelecek)
-```
+Asıl büyük sahte EDM, **iki kaçıklık birlikte varken** doğar. Sebebi geometriktir:
+x-ekseni etrafında bir dönme ile y-ekseni etrafında bir dönme **sıra
+değiştirilemez** (komütatif değildir). Ardışık iki farklı-eksen dönmesi, net bir
+üçüncü-eksen dönmesi bırakır — bu, kuantum/klasik mekanikteki **geometrik (Berry)
+fazıdır**. Sonuç:
+$$f \;\propto\; dx \cdot dy.$$
 
-Buradaki **c_k katsayısı, k modunun "kaldıraç kolu"dur**: 1 metre mod
-genliği başına kaç rad/s sahte sinyal ürettiğini söyler. Ölçtüğümüz
-değerler (cos fazı, CO=False):
+Pratik anlamı büyüktür. $dx$ ve $dy$ ikisi de tipik RMS $\sigma$ mertebesindeyse,
+çarpım $\propto\sigma^2$ — yani sahte EDM hizalama hatasının **karesiyle**
+ölçeklenir. (Çok-tohumlu RMS ölçümünde üs $\approx 2.0$ çıkar; Omarov vd.'nin
+bildirdiği kuadratik davranışla uyumlu.) Demek ki kontrol etmemiz gereken
+sistematik, dikey kaçıklığın tek başına değil, **yatay × dikey** içeriğinin
+çarpımıdır.
 
-| k | c_k [rad/s/m] | yorum |
-|---|---|---|
-| 1 | +23.5 | pozitif (k < Q_y) |
-| **2** | **+88.8** | **baskın — rezonansa en yakın** |
-| 3 | −22.5 | negatif (k > Q_y; rezonansın öbür yakası) |
-| 4 | −7.7 | hızla küçülür (~1/k²) |
-| 5 | −3.9 | |
-| 6 | −2.3 | |
+### Sayısal ölçek
 
-İşaret kuralına dikkat: k=2 ile k=3 **zıt işaretli**. Bu, birinin
-ürettiği sahte sinyali diğeriyle **iptal edebileceğimiz** anlamına
-gelir — trim yönteminin temeli budur.
-
----
-
-## 3. Ölç–trimle döngüsü: yöntem üç cümlede
-
-1. **Ölç:** Spin polarimetresiyle $f = dS_y/dt$'yi ölç (BPM'e gerek yok!).
-2. **Trimle:** Kuadrupolleri bilinçli olarak küçük bir Fourier modu
-   deseninde kaydır: genlik $a = -f / c_\mathrm{trim}$. Bu, ölçülen
-   sinyali tam iptal edecek "karşı-kirlilik"tir.
-3. **Tekrarla:** Kalan sinyali ölç, gerekirse küçük bir düzeltme daha uygula.
-
-Önemli incelik: hangi kuadrupolun ne kadar kaydığını **bilmemize gerek
-yok**. Tek bilmemiz gereken kalibre edilmiş c_k katsayısı ve ölçülen
-tek bir sayı (f). Desen ne olursa olsun, f skalerini sıfırlamak sahte
-EDM'yi sıfırlamaktır.
-
-Bir benzetme: terazinin bir kefesinde bilinmeyen ağırlıklar var
-(hizalama hataları). Hangi ağırlıkların orada olduğunu bilmiyoruz ama
-ibrenin ne kadar saptığını görüyoruz. Öbür kefeye ibreyi sıfırlayacak
-kadar bilinen ağırlık (trim) koyarız. İçerik bilgisi gerekmez; sadece
-ibre okuması yeter.
-
-Tüm bu testlerde **CO=False** koşulu kullanılır: parçacık ideal
-eksenden fırlatılır, kapalı yörünge hiç aranmaz (kick ile yörüngeye
-oturtmanın pratik olmadığına daha önce karar verilmişti —
-`injection_kick_raporu.md`). Betatron salınımı ölçümün doğal
-parçasıdır ve — kritik bulgu — bu koşulda sistem **tam doğrusaldır**:
-f/A oranı genlikten bağımsız, sapma %0.0.
+200 μm RMS mekanik hizalamada (her iki düzlem) sahte EDM $\sim 9\times10^{-4}$
+rad/s'dir. Hizalama 10 μm'ye indirilirse — kuadratik ölçek gereği — $\sim10^{-4}$
+kat düşer. Nihai hedef, CW/CCW + quad-flip iptal zincirinin (§8) giriş gereksinimi
+olan $\sim10^{-5}$ rad/s'nin altına inmektir; oradan zincir $10^{-9}$'un altını
+halleder.
 
 ---
 
-## 4. Test I: Trim eksende kalibre ediliyor — ya demetin geri kalanı?
+## 2. Hata desenini ayırmanın iki yolu
 
-**Dosya:** `test_b_trim_launch_dep.py`
+48 kuadrupolün her birinin yatay ve dikey kayması ayrı birer sayıdır: düzlem
+başına 48 bilinmeyen. Bunlarla tek tek uğraşmak yerine deseni **iki tamamlayıcı
+biçimde** ayrıştırırız.
 
-### 4.1 Soru neden önemli?
+### 2a. Fourier modları (halka çevresinde dalga sayısı)
 
-c_k katsayılarını tek bir parçacıkla, onu tam eksenden (y=0, açı=0)
-fırlatarak kalibre ediyoruz. Ama gerçek demet binlerce parçacıktan
-oluşur ve her biri **farklı noktadan, farklı açıyla** yola çıkar.
-Akla şu kuşku gelir:
+Kayma desenini halka çevresince $k$ kez dalgalanan modlara açarız:
+$$\Delta_j \;=\; \sum_k A_k\,\cos\!\Big(\tfrac{2\pi k\,n_j}{N} - \varphi_k\Big),
+\qquad N=24\ \text{FODO hücresi}.$$
+$k=1$ tek dalga, $k=2$ iki tepe-iki çukur, vb. Bu yararlıdır çünkü halka her moda
+eşit tepki vermez (§6'da göreceğiz: dikey betatron tonu $Q_y\approx2.68$'e yakın
+modlar yörüngeyi en çok bozar).
 
-> "Eksendeki parçacık için sinyali sıfırlayan trim, kenardaki
-> parçacıklar için sıfırlamıyorsa, demet *ortalamasında* artık
-> sinyal kalır ve deney bunu gerçek EDM sanır."
+### 2b. Simetrik / antisimetrik ayrışım (QF ve QD'nin işareti)
 
-Bu kuşkuyu sayısal olarak sınamak gerekir.
+Her FODO hücresinde bir odaklayıcı (QF, gradyanı +) ve bir dağıtıcı (QD,
+gradyanı −) kuadrupol vardır. Bir kaçıklık deseni, hücre içindeki QF ve QD'nin
+**aynı mı zıt mı** yönde kaydığına göre ikiye ayrılır:
 
-### 4.2 Nasıl test ettik?
+- **Antisimetrik** (QF ve QD zıt yönde): gradyan işaretleri de zıt olduğundan
+  iki tekme **üst üste biner** → büyük yörünge bozulması. 25 boyutlu alt-uzay.
+- **Simetrik** (QF ve QD aynı yönde): tekmeler **birbirini söndürmeye** çalışır
+  → küçük yörünge. 23 boyutlu alt-uzay.
 
-Üç bölümlü tarama (hepsi k=2 modu, A=10μm, t₂=1ms):
-
-- **Konum taraması:** Parçacığı eksenden 0, 0.1, 0.2, 0.5, 1, 2 mm
-  kaydırıp fırlat; her seferinde c_k'yi yeniden ölç.
-- **Açı taraması:** Konum sıfır, ama fırlatma açısı α = 0 … 1 mrad.
-- **Demet benzetimi:** 30 parçacığı gerçekçi bir demet dağılımından
-  çek (σ_y=0.5mm, σ_α=0.2mrad), her birinin gördüğü sinyali ölç,
-  eksen kalibrasyonuyla karşılaştır.
-
-### 4.3 Ne bulduk?
-
-**Konum etkisi minicik.** 2 mm kaymada bile c_k yalnız %1.3 değişiyor;
-gerçekçi 0.5 mm'de etki %0.3. Önemsiz.
-
-**Açı etkisi görünürde büyük: %3 / 0.1 mrad.** 1 mrad'da %19'a çıkıyor.
-İlk bakışta korkutucu — ama bu **fiziksel bir c_k değişimi değil,
-ölçüm yapaylığı**. Nedeni şu: büyük açıyla fırlatılan parçacık büyük
-betatron salınımı yapar; bu salınım spin izine de süzülür ve sonlu
-ölçüm penceresinde (1 ms) doğrusal eğim fitini hafifçe biyaslar.
-Salınımın *gerçek* ortalaması sıfırdır; sadece fit penceresinin
-kenar etkisi görünür. Ölçüm süresi uzadıkça bu yapaylık 1/t₂ ile erir.
-
-**Demet ortalaması eksene çok yakın: fark yalnız %0.47.** 30 parçacığın
-ortalama sinyali, eksen parçacığının sinyalinden binde beş kadar düşük.
-Yani eksen kalibrasyonu demeti %0.5 doğrulukla temsil ediyor.
-
-### 4.4 Asıl güvence: trim bir *kafes* işlemidir
-
-En önemli kavramsal nokta şu: trim, parçacığa değil **kafese**
-uygulanır. Trim kuadrupolleri fiziksel olarak kaydırıp k=2 kirliliğini
-söker (a_k → 0). Kirlilik bir kez söküldü mü, **hangi koşulla
-fırlatılırsa fırlatılsın hiçbir parçacık** seküler spin sürüklenmesi
-yaşamaz — çünkü sürüklenmeyi yaratan şey ortadan kalkmıştır.
-
-Demetteki parçacıkların "farklı c_k görmesi" sadece ölçüm
-yapaylığıdır; trimin etkisi ise fizikseldir ve evrenseldir. Testteki
-muhafazakâr alt sınır bile (eksen sinyalini doğrusal çıkarma modeli)
-213× bastırma verir; gerçek bastırma çok daha derindir.
-
-**Test I'in dersi:** Eksen kalibrasyonu güvenlidir. Demet sıcaklığı
-trimi bozmaz.
+Bu ayrım, belgenin kalbidir: birazdan göreceğimiz gibi **yörünge yalnız
+antisimetrik yarıyı görür; simetrik yarıya kördür** — ve dx·dy sahte EDM'i büyük
+ölçüde bu görünmez simetrik yarıda yaşar.
 
 ---
 
-## 5. Faz problemi: rastgele desende yeni bir boyut
+## 3. İki gözlenebilir: yörünge ve spin
 
-Şimdiye dek testler hep "cos fazlı" yapay desenler kullandı:
-mod tam `cos(2πkn/N)` şeklindeydi. Ama gerçek hizalama hatası
-rastgeledir ve her modun bir de **fazı** vardır:
+Hizalamayı düzeltmek için iki farklı ölçüm aracımız var; her biri farklı şey görür.
 
-```
-A_k · cos(2πk·n/N − φ_k)
-```
+**Yörünge (BPM okuması).** Kaçık kuadrupoller kapalı yörüngeyi bozar; bunu ışın
+konum monitörleri (BPM) ölçer. Avantajı: gerçek EDM kapalı yörüngeyi **hiç
+bozmaz**, dolayısıyla BPM ölçümü gerçek sinyale yapısal olarak kördür —
+yanlışlıkla EDM'i "düzeltip" yok etme riski yoktur. Dezavantajı: BPM'lerin
+$\sim100$ μm'lik **statik elektronik ofseti** vardır ve yörünge yalnız
+antisimetrik, yüksek-kazançlı modları ofset gürültüsünün üstünde görebilir.
 
-φ_k, dalganın halka çevresindeki "kayma açısıdır": aynı genlikteki k=2
-modu, tepeleri başka kuadrupollere denk gelecek şekilde döndürülmüş
-olabilir. Trigonometri bunu iki bileşene ayırır:
+**Spin ($f=dS_y/dt$).** Sahte EDM'in kendisini doğrudan ölçer. Avantajı: **tüm 48
+boyutu görür** — simetrik içerik dahil (kuplaj zayıf ama sıfır değil). Dezavantajı:
+hem sahte hem gerçek EDM'e duyarlıdır; gerçek sinyali yutmamak için CW/CCW fark
+kanalı gerekir (§8), ve ölçüm polarimetre istatistiğiyle sınırlıdır (yavaş).
 
-```
-A·cos(θ − φ) = (A·cosφ)·cos θ + (A·sinφ)·sin θ
-                └── cos kuadratürü ──┘ └── sin kuadratürü ──┘
-```
-
-Yani her modun aslında **iki bağımsız düğmesi** var: cos bileşeni ve
-sin bileşeni. Şimdiye dek yalnız cos düğmesini kalibre etmiştik
-(c_k^cos). Sin düğmesinin kaldıraç kolu (c_k^sin) farklı olabilir!
-
-### 5.1 Etkin faz ve ölü faz
-
-Doğrusallık gereği, φ fazında uygulanan trimin etkinliği:
-
-```
-c_k(φ) = c_k^cos·cosφ + c_k^sin·sinφ = |c_k| · cos(φ − ψ_k)
-```
-
-Bu bir sinüzoittir. İki özel açı vardır:
-
-- **ψ_k (etkin faz):** trimin birim genlik başına EN GÜÇLÜ olduğu faz.
-  `ψ_k = atan2(c_k^sin, c_k^cos)`.
-- **ψ_k ± 90° (ölü faz):** trimin HİÇ etki etmediği faz. Bu fazda ne
-  kadar kaydırırsanız kaydırın sinyal kıpırdamaz!
-
-Benzetme: sıkışmış bir kapıyı itiyorsunuz. Menteşe ekseni ψ_k+90°
-yönü gibidir — o yönde ittirmek kapıyı hiç döndürmez. Kapı yüzeyine
-dik itmek (ψ_k yönü) en az kuvvetle en çok döndürür. Ara açılarda
-da kapı döner ama daha çok kuvvet gerekir: kuvvet ihtiyacı
-1/cos(φ−ψ_k) ile büyür.
-
-Pratik sonuç: **mod başına iki kalibrasyon ölçümü** (φ=0 ve φ=90°)
-yapılırsa hem |c_k| hem ψ_k bilinir ve ölü faza düşme riski kalmaz.
+İki aracın **birbirini tamamlaması** bu belgenin ana mesajıdır: yörünge hızlı ve
+EDM-kör ama yarım-kör; spin yavaş ama eksiksiz.
 
 ---
 
-## 6. Test II: Rastgele desen + fazlı çok-modlu trim
-
-**Dosya:** `test_b_random_trim.py`
-
-### 6.1 Kurulum
-
-Gerçek deneye en yakın senaryo: 48 kuadrupolun HER BİRİNE bağımsız
-rastgele kayma verildi (Gauss, RMS=10μm, seed=123). Bu desen Fourier'e
-ayrıştırılınca tüm modlar dolu çıkar (A_k ≈ 1–4 μm) ve fazlar
-rastgeledir — örneğin baskın k=2 içeriği A₂=2.82μm, φ₂=170.5°.
-
-Test dört bölümden oluşur.
-
-### 6.2 Bölüm 1 — Çift kuadratür kalibrasyon
-
-k=1..6 için hem cos hem sin fazında ölçüm (12 simülasyon):
-
-| k | c_k^cos | c_k^sin | \|c_k\| | ψ_k |
-|---|---|---|---|---|
-| 1 | +23.5 | −2.4 | 23.6 | −5.9° |
-| 2 | +88.8 | −18.4 | **90.7** | **−11.7°** |
-| 3 | −22.5 | +7.1 | 23.6 | 162.6° |
-| 4 | −7.7 | +3.3 | 8.4 | 157.1° |
-| 5 | −3.9 | +2.1 | 4.5 | 151.9° |
-| 6 | −2.3 | +1.5 | 2.8 | 147.2° |
-
-**Sürpriz keşif — faz rampası:** Etkin fazlar rastgele değil; düzenli
-bir merdiven izliyor: ψ_k ≈ −5.85° × k (180° sıçramaları, k>Q_y işaret
-değişiminin faz dilindeki ifadesidir: −22.5 = +22.5 @ 180°). Mod
-başına sabit faz eğimi, klasik sinyal işlemedeki "zaman gecikmesi =
-frekansla doğrusal faz" kuralının halka karşılığıdır: gözlenebilir,
-halka üzerinde belli bir azimut noktasına (fırlatma/gözlem civarı)
-referanslıdır. Bu güzel bir iç tutarlılık kontrolüdür — altı bağımsız
-ölçüm tek bir geometrik parametreyle açıklanıyor.
-
-### 6.3 Bölüm 2 — Faz modeli gerçekten sinüzoit mi?
-
-Model φ=0 ve 90'daki ölçümlerle kuruldu; sonra **bağımsız** iki ara
-fazda (45° ve 135°) test edildi:
-
-| φ | ölçülen | model | sapma |
-|---|---|---|---|
-| 45° | 49.795 | 49.795 | %0.000 |
-| 135° | −75.793 | −75.793 | %0.000 |
-
-Sapma sıfır — sistem faz uzayında da kusursuz doğrusal. İki ölçüm,
-modun tüm faz davranışını eksiksiz belirliyor.
-
-### 6.4 Bölüm 3 — Desenin sinyalini önceden tahmin edebiliyor muyuz?
-
-Rastgele desenin ölçülen sinyali: **f₀ = −2.503×10⁻⁴ rad/s**.
-
-Desenin spektrumunu (A_k, φ_k) kalibre katsayılarla çarpıp toplayınca
-(yalnız k=1..6): tahmin −2.694×10⁻⁴ → **%7.6 doğru**. Kalan fark
-kalibre edilmeyen k≥7 modlarından. Katkıların dökümü öğreticidir:
-
-- k=2: −2.56×10⁻⁴ → **tek başına f₀'ın ~%102'si!**
-- diğer beş mod toplamı: küçük ve kısmen birbirini iptal ediyor
-
-Yani rastgele bir desende bile hikâye k=2'nin hikâyesidir — kuram
-bölümündeki rezonans argümanının doğrudan sayısal teyidi.
-
-### 6.5 Bölüm 4 — Üç trim stratejisi yarışıyor
-
-Aynı desen üzerinde üç farklı reçeteyle ölç–trimle döngüsü (3'er adım):
-
-**Strateji A — "tek mod, doğru faz":** k=2 trimi, etkin fazı ψ₂=−11.7°'de.
-**Strateji B — "iki mod, doğru fazlar":** k=2 ve k=3, her biri kendi
-ψ'sinde, genlik eşit bölüşmüş (toplam kaldıraç |c₂|+|c₃| olduğundan
-mod başına daha az kayma gerekir).
-**Strateji C — "faz cahili":** k=2 trimi ama yalnız cos fazında —
-sanki çift kuadratür kalibrasyonu hiç yapılmamış gibi.
-
-Sonuçlar:
-
-| | Adım 1 bastırma | Nihai taban | Toplam | Trim bütçesi |
-|---|---|---|---|---|
-| A | 3.2×10⁷× | ~10⁻¹² rad/s | 2.1×10⁸× | 2.76 μm |
-| **B** | **7.8×10⁷×** | **~10⁻¹⁵ rad/s** | **1.0×10¹¹×** | 4.38 μm |
-| C | 1.6×10⁷× | ~4×10⁻¹⁵ rad/s | 6.5×10¹⁰× | 2.82 μm |
-
-Okunması gereken üç mesaj:
-
-1. **Tek adım yetiyor.** Üç strateji de ilk trimde sinyali on milyon
-   kat bastırdı. Doğrusal sistemde ölçülen skalerin iptali kesindir;
-   ikinci adım sadece sayısal kırıntıları süpürür.
-
-2. **Faz cahili olmak ölümcül değil.** Strateji C de mükemmel çalıştı.
-   Bedeli ne? Bütçesi A'dan %2 fazla (2.82 vs 2.76 μm) — çünkü
-   cos fazı, etkin faza yalnız 11.7° uzak: cos(11.7°)=0.979. Faz
-   ancak ölü faza (ψ₂±90°) yaklaşırsa felaket olur; o zaman trim
-   etkisiz kalır ve bütçe ıraksar. Çift kuadratür kalibrasyon bu
-   riski tamamen ortadan kaldırır.
-
-3. **Doğru fazlı trim, kirliliğin kendisini söküyor.** Strateji A'nın
-   uyguladığı trim: 2.76μm @ −11.7°. Desenin gerçek k=2 içeriği:
-   2.82μm @ 170.5°. Bu ikisi neredeyse tam **anti-paralel**
-   (170.5° ≈ −11.7° + 182°). Yani skaleri sıfırlamak için hesaplanan
-   trim, farkında olmadan desendeki fiziksel k=2 kirliliğinin hemen
-   hemen tam negatifini üretmiş — sinyali maskelememiş, kaynağı
-   temizlemiş.
-
----
-
-## 7. Test III: Yörünge-sürülü trim — spin ölçümü olmadan, BPM'den
-
-*Dosya: `test_orbit_trim.py`, sonuçlar: `test_orbit_trim.json`*
-
-### 7.1 Yeni problem: spin kullanmak neden riskli?
-
-Şimdiye kadar trim için spini rehber olarak kullandık: f₀ ölç, hedef modu
-trimle, f sonrasını ölç. Bu işe yarar — ama bir güvenlik açığı taşır.
-
-Spin, hem hizalama kirliliğinden hem de gerçek EDM'den etkilenir:
-
-    dS_y/dt = (sahte EDM'den gelen katkı) + (gerçek EDM'den gelen katkı)
-
-Trim f₀'ı sıfırlamayı hedeflediğinde, **gerçek EDM sinyalini de yutabilir**.
-Bunu önlemek için CW/CCW ayrıştırması gerekir — ama bu, deneyin en hassas
-adımıdır.
-
-Alternatif: kapalı yörüngeyi rehber al. Gerçek bir EDM,
-kapalı yörüngeyi hiç bozmuyor. Dolayısıyla BPM okumaları **tamamen
-EDM'den bağımsız**; yanlışlıkla sinyali yutmak mümkün değil.
-
-### 7.2 Senaryo: gerçekçi ve zor
-
-- 48 quad rastgele dikey kaçıklık, RMS = **100 μm** (seed=321)
-- 48 BPM statik ofset, RMS = **100 μm** (seed=777) — sinyal ve gürültü
-  eşit büyüklükte
-- k-modülasyon yok; tek optik konfigürasyon
-- Başlangıç spin hızı: **f₀ = −1.623×10⁻³ rad/s**
-
-Desenin Fourier spektrumu (her mod genliği, μm):
-
-    k=1: 37.6μm  k=2: 16.2μm  k=3: 40.9μm  k=4: 45.0μm
-    k=5: 17.0μm  k=6:  6.1μm  k=7: 26.8μm  k=8: 31.9μm
-
-### 7.3 Yöntem: kalibrasyon → kestirim → trim
-
-**Adım 1 — Kalibrasyon:** Her k=1..6 modu için cos ve sin desen
-(12 düğme toplamda), 50 μm genliğinde uygulanır. Her seferinde 48
-BPM'den tur-ortalamalı kapalı yörünge okunur. Bu 12 ölçüm, tepki matrisi
-O [48×12]'yi oluşturur. Kalibrasyon **diferansiyel** olduğundan statik
-BPM ofseti sıfırlanır — sadece uygulanan modun yarattığı fark görülür.
-
-**Adım 2 — Kestirim:** Gerçek desenin BPM okuması:
-
-    y_ölç = y_gerçek + b   (b: statik ofset, bilinmiyor)
-
-Least-squares çözümü O·â ≈ y_ölç verir → mod kestirimleri â. Ama
-b bilinmediği için â içinde bir sistematik yanlılık bulunur. Bu yanlılık,
-orbitsal kazancı küçük olan modlarda büyür (aşağıya bakınız).
-
-**Adım 3 — Trim:** Quad kaçıklık dizisine Δp = −Σₖ âₖ·mod_k eklenir.
-Doğrulama: spin takibi ile f ölçülür.
-
-### 7.4 Kazanç hiyerarşisi: yörünge hangi modları görür?
-
-Mod-k kaçıklığı, halka boyunca transfer matrisinin rezonans faktörüyle
-büyütülür. Bu faktör, betatron tununa (Q_y ≈ 2.68) yakınlıkla belirlenir.
-k=2, Q_y'ye en yakın mode → 24.1× büyütme. k değeri Q_y'den uzaklaştıkça
-kazanç düşer:
-
-| k | 1 | 2 | 3 | 4 | 5 | 6 |
-|---|---|---|---|---|---|---|
-| Yörünge kazancı | 6.2 | **24.1** | 6.3 | 2.26 | 1.24 | 0.79 |
-
-100 μm BPM ofsetiyle kestirim yanlılığı ≈ σ_b·√(2/N)/kazanç ≈ 20.4μm/kazanç
-(N=48 BPM; √(2/N) çarpanı, 48 rastgele ofsetin tek bir mod şekline
-ortalama izdüşümünden gelir):
-
-| k | Yanlılık (formül) | Ölçülen (O⁺b) | Yorumu |
-|---|---|---|---|
-| k=2 | ~0.9 μm | 0.1–0.5 μm | Güvenli; gerçek genlik ≫ yanlılık |
-| k=4 | ~9 μm | 0.2–1.0 μm | Kullanılabilir; gerçek A₄=45 μm ≫ yanlılık |
-| k=5 | ~16 μm | 6.7–7.6 μm | Sınırda; gerçek A₅=17 μm ile aynı mertebede |
-| k=6 | ~26 μm | ~28 μm | Zararlı; gerçek A₆=6 μm'nin 4–6 katı |
-
-Kıyas ölçütü desenin kendi mod içeriğidir: 100 μm RMS rastgele desende
-kuadratür başına beklenen genlik ~σ_q·√(2/48) ≈ 20 μm. Yanlılık bu
-değere yaklaştığında fit etmek zarar vermeye başlar. Kazanç hiyerarşisi,
-hangi modları trimleyebileceğimizi doğrudan söyler.
-
-### 7.5 Dört deneme: adım adım spin değerleri
-
-Kaç modu fit edeceğimizi değiştirip f sonrasını ölçüyoruz:
-
-**Başlangıç:** f₀ = −1.623×10⁻³ rad/s.
-
----
-
-**Varyant A (k=1..3 fit edildi):**
-
-Trim k=1, 2, 3 içeriklerini azaltır:
-
-| k | Önce | Sonra |
-|---|---|---|
-| 1 | 37.6 μm | 3.8 μm |
-| 2 | 16.2 μm | 7.0 μm |
-| 3 | 40.9 μm | 9.2 μm |
-| 4 | 45.0 μm | **45.0 μm (dokunulmadı!)** |
-
-k=4, fit kapsamına girmediği için trim onu tamamen pas geçer.
-k=4 = 45 μm olarak kalır, c₄ × A₄ ~ birkaç×10⁻⁵ katkı yapar.
-
-**f sonrası = −6.72×10⁻⁵ rad/s.  Bastırma: 24.2×.**
-
----
-
-**Varyant C (k=1..4 fit edildi) — en iyi:**
-
-A'ya ek olarak k=4 de hedeflenir. k=4 ofset yanlılığı ~1 μm (kazanç 2.26
-hâlâ ofseti bastırmaya yetiyor), gerçek A₄ = 45 μm — temiz kestirim.
-
-| k | Önce | Sonra |
-|---|---|---|
-| 1 | 37.6 μm | 3.8 μm |
-| 2 | 16.2 μm | 6.9 μm |
-| 3 | 40.9 μm | 9.2 μm |
-| 4 | 45.0 μm | **6.0 μm** ← k=4 nihayet azaldı |
-| 5 | 17.0 μm | 17.0 μm (dokunulmadı) |
-| 6 | 6.1 μm | 6.1 μm (dokunulmadı) |
-| 7 | 26.8 μm | 26.8 μm (dokunulmadı) |
-| 8 | 31.9 μm | 31.9 μm (dokunulmadı) |
-
-**f sonrası = +1.61×10⁻⁵ rad/s.  Bastırma: 100.8×.**
-
-İşaret bile tersine döndü (−1.623×10⁻³ → +1.61×10⁻⁵): k=4 katkısı
-bastırıldı, kalan artık k=5 ve üzerinden geliyor.
-
----
-
-**Varyant D (k=1..5 fit edildi):**
-
-k=5 ofset yanlılığı ~7–12 μm (ölçülen), gerçek A₅ = 17 μm — kestirimin
-yarısı ofset hayaleti. Trim k=5'i kısmen **yanlış yönde** oynatır ve
-c₅ = 4.5 rad/s/m bu hatayı doğrudan spin sinyaline taşır.
-
-**f sonrası = +1.37×10⁻⁴ rad/s.  Bastırma: 11.9× — C'den 8.5× KÖTÜ.**
-
----
-
-**Varyant B (k=1..6 fit edildi):**
-
-k=6 kazancı = 0.79 < 1. Ölçülen yanlılık: cos −24.7 μm, sin −26.9 μm
-(bileşke 36.5 μm) — gerçek A₆ = 6.1 μm'nin 6 katı. Trim k=6 içeriğini
-**6.1 μm'den 36.5 μm'e ÇIKARIR** (BPM ofseti yanlışlıkla hata gibi
-görülüp sisteme enjekte edilir).
-
-**f sonrası = +1.07×10⁻⁴ rad/s.  Bastırma: 15.2×.**
-
----
-
-**Özet tablosu:**
-
-| Varyant | Fit | dS_y/dt | Bastırma |
-|---|---|---|---|
-| — | Trim yok | −1.623×10⁻³ | — |
-| A | k=1..3 | −6.72×10⁻⁵ | 24.2× |
-| **C** | **k=1..4** | **+1.61×10⁻⁵** | **100.8× ★** |
-| D | k=1..5 | +1.37×10⁻⁴ | 11.9× |
-| B | k=1..6 | +1.07×10⁻⁴ | 15.2× |
-
-> **⚠ Evrensellik uyarısı:** Bu tablo TEK seed çiftine (321/777) aittir.
-> 4 yeni seed ile yapılan tarama (`test_orbit_trim_seeds.py`) şunu
-> gösterdi: 100.8× faz şansıydı; tipik bastırma ~5×, ve A/C/D/B
-> artıkları istatistiksel olarak ayırt edilemez (hepsi ~2.5×10⁻⁴ rad/s
-> RMS). Spin artığını fit edilen modlar değil, fit bazının **dışında**
-> kalan içerik belirler: 48 serbestlik derecesinin yalnızca 25'i
-> antisym k=0..12 bazındadır; kalan 23 boyut (simetrik QF/QD
-> kombinasyonları, ~60–90 μm) yörüngeye zayıf, spine ise belirgin
-> bağlanır. Evrensel olan sonuçlar: (1) k=1..4 yörünge içeriği her
-> seed'de birkaç μm'e iner, (2) kazançlar analitik yasaya uyar
-> (G_k = 24.8/|5.03−k²|, sapma %0.6), (3) fit eşiği G_k > σ_b/σ_q
-> formülüyle önceden hesaplanabilir (σ_b=σ_q'da k_max=5.5 → k=5'in
-> seed'e göre kararsızlığı eşikte olmasındandır).
-
-### 7.6 Neden yörünge k≥7'yi göremez ama spin görür?
-
-Kısa cevap: iki farklı fiziksel mekanizma — çelişki değil, beklenen sonuç.
-
-**Yörünge kazancı rezonans kökenlidir.** Transfer matrisi, betatron tununa
-(Q_y ≈ 2.68) yakın modları büyütür. k=7 için tahmin: ~0.45×. 100 μm
-BPM gürültüsüyle, kazancı < 1 olan bir modun sinyali tamamen gürültü içinde
-boğulur. BPM verisinden bu modu çıkarmak mümkün değildir.
-
-**cₖ geometrik bir integraldır, rezonans gerektirmez.** dS_y/dt = Σ cₖ·Aₖ
-formülündeki cₖ, halka boyunca radyal B alanının geometrik yol
-integralidir. Bu integralin içinde Q_y yoktur. cₖ değerleri yavaş düşer:
-
-| k | 1 | 2 | 3 | 4 | 5 | 6 | 7* | 8* |
-|---|---|---|---|---|---|---|---|---|
-| |cₖ| (rad/s/m) | 23.6 | **90.7** | 23.6 | 8.4 | 4.5 | 2.8 | ~1.96 | ~1.52 |
-| Yörünge kazancı | 6.2 | 24.1 | 6.3 | 2.26 | 1.24 | 0.79 | ~0.45 | ~0.35 |
-
-*Ekstrapolasyon*
-
-**Sayısal kanıt:** C trimi sonrası k=7 = 26.8 μm, k=8 = 31.9 μm değişmedi.
-Bunların spin katkısı (üst sınır, faz bağımlı):
-
-    k=7:  1.96 × 2.68×10⁻⁵ ≤ 5.3×10⁻⁵ rad/s
-    k=8:  1.52 × 3.19×10⁻⁵ ≤ 4.8×10⁻⁵ rad/s
-
-C-trim artığı = +1.61×10⁻⁵ rad/s (bu seed'de). Çok-seed taraması artığın
-genel kaynağını daha da netleştirdi: k≥7 antisym içeriğin yanında,
-antisym bazın hiç KAPSAMADIĞI 23 boyutluk simetrik içerik de (~60–90 μm)
-spine bağlanır; 5-seed artık tabanı ~2.5×10⁻⁴ rad/s'tir. **Yörünge
-triminin tavanı, onun göremediği VE bazın temsil edemediği içerikten
-kaynaklanır.**
-
-Bu bir kısıtlama değil, **tanımlanmış bir sınır**: nerede durulacağını
-biliyoruz ve neden biliyoruz. Sınırı itmenin iki yolu da bellidir:
-σ_b'yi düşürmek (k_max² = Q² + 24.8·σ_q/σ_b büyür) ve baza simetrik
-düğmeler eklemek.
-
-### 7.7 İkinci iterasyon neden kazandırmaz?
-
-Aynı BPM ölçümü → aynı yanlı kestirim → aynı (yanlı) trim → 2. iterasyon
-güncellemesi: **tam 0.0000 μm**. Statik BPM ofseti aynı sistematik yanlılığı
-yaratır; bu yanlılık, orbit döngüsünün birinci adımda oturduğu tabandır.
-Tekrar etmek hiçbir şeyi değiştirmez.
-
----
-
-## 8. Büyük resim: üç-kademe mimari
-
-Tüm testleri bir araya getirince, sahte EDM bastırımının doğal üç kademesi
-ortaya çıkıyor:
-
-| Kademe | Araç | Referans | Bastırma | f sonrası |
-|---|---|---|---|---|
-| 0 | Ham | — | — | −1.623×10⁻³ rad/s |
-| **1** | **Yörünge trimi** | BPM, EDM-kör | **~100×** | **+1.61×10⁻⁵ rad/s** |
-| 2 | CW/CCW iptali | Yön simetrisi | ~10³–10⁸× | ~10⁻⁸–10⁻¹³ rad/s |
-| 3 | Spin trimi (son) | Yalnız-sistematik | polarimetre sınırı | EDM tabanı |
-
-**Yörünge kademesi** (Test III): k=1..4 içeriği birkaç μm'e indirilir.
-EDM sinyaline hiç dokunmaz. Saniyeler içinde tamamlanır.
-
-**CW/CCW iptali**: CW ve CCW ışınlarda Δy = +a ve −a; sahte EDM işaret
-değiştirir, gerçek EDM değiştirmez → basit çıkarma ile 10³–10⁸× ek bastırım.
-
-**Spin kademesi**: Kalan küçük artık (k≥5 ve trim hatalarından), yalnızca
-polarimetre istatistiğiyle sınırlı spin ölçümü ile temizlenir.
-
-### 8.1 Beş soruya beş yanıt
-
-| Soru | Test | Yanıt |
-|---|---|---|
-| c_k doğrusal mı? | trim_realistic | Evet, %0.0 sapma |
-| c_k desene bağlı mı? | mode_map_cofalse | Hayır, korelasyon 1.0000 |
-| c_k fırlatma koşuluna bağlı mı? | launch_dep | Fiziksel olarak hayır; %0.5 doğruluk |
-| BPM gürültüsü/ofseti döngüyü bozar mı? | trim_bpm | Tabana oturur, polarimetre sınırı |
-| Rastgele fazlı gerçek desende çalışır mı? | random_trim | Evet, ≥10⁷×; faz 2 ölçümde çözülür |
-| EDM sinyaline dokunmadan trim mümkün mü? | **orbit_trim** | **Evet; BPM rehberliğiyle 100×, EDM-kör** |
-
-### 8.2 Deneysel reçete
-
-1. **Başlangıç kalibrasyonu:** k=1..4 için cos+sin (8 ölçüm) →
-   yörünge tepki matrisi O. Spin kalibrasyonu gerekmez bu adımda.
-2. **BPM okuması:** Tur-ortalamalı y_BPM → k=1..4 mod kestirimleri â.
-3. **Yörünge trimi:** Δp = −Σ âₖ·mod_k. Bütçe: birkaç ×10 μm — mekanik
-   kaydırıcıların rahat aralığı.
-4. **Spin doğrulama:** f ölçülür; beklenen değer ~10⁻⁵ rad/s mertebeсinde.
-5. **Gerekirse CW/CCW:** Kalan ~10⁻⁵ rad/s'yi yön iptaliyle temizle.
-
-Açık başlıklar: RF ve sekstüpol açık kafeste doğrusallık; x-yönü
-kaçıklıkları ve quad tilt çapraz terimleri; zamanla sürüklenen hizalamada
-izleme (tracking) kipi.
-
----
-
-## 9. Tabanın anatomisi: yörünge triminin göremediği yarı
-
-Test III'ün artığı (~2.5×10⁻⁴ rad/s) nereden geliyor? Yanıt, 48
-serbestlik derecesinin ikiye bölünmesinde.
-
-**İki tür kaçıklık kombinasyonu.** QF'in gradyanı pozitif, QD'ninki
-negatif. Dikey kaçıklık dy radyal alan B_x = g·dy üretir; işareti g'ye
-bağlıdır:
-
-- **Antisimetrik** kombinasyon (QF ve QD zıt yönlere kayar): tekmeler
-  üst üste biner → büyük COD, büyük spin sinyali. 25 boyut. Yörünge
-  fit'inin yaşadığı dünya budur.
-- **Simetrik** kombinasyon (QF ve QD beraber kayar): tekmeler
-  birbirini söndürmeye çalışır. 23 boyut. Yörünge fit bazının
-  *dışında* kalır.
-
-**Söndürme iki kanalda da kısmidir — ölçüldü** (`test_symm_vs_antisym.py`,
-seed=321, iki parça birbirine dik):
-
-| parça | desen RMS | COD RMS | dSy/dt [rad/s] |
-|---|---|---|---|
-| antisim | 70 μm | 550 μm | −1.5×10⁻³ |
-| simetrik | 55 μm | 165 μm | −1.0×10⁻⁴ |
-
-Yörüngede iptal ~2.6× (kazanç 7.9'a karşı 3.0); spinde ~12×
-(deflektör arclarındaki geometrik spin fazı tam iptali bozar). İşte
-2.5×10⁻⁴'lük taban bu satırdan gelir: simetrik içerik trim sonrası
-aynen yerinde durur ve spini sürmeye devam eder.
-
-**"O zaman simetrik modları da fit edelim" — denendi, başarısız**
-(`test_symm_basis_fit.py`). Simetrik mod kazançları 0.7–4.7 aralığında;
-k=1 ve k=4 eşik altında. Eşik altı düğme eklemek fit'e BPM ofsetini
-enjekte eder: kestirilen simetrik genlikler 136 μm RMS (gerçek 55 μm).
-Sonuç 9× kötüleşme. §7.4'teki kural acımasızdır: **fit edilebilirliği
-kazanç belirler, istek değil.**
-
-**Kafes cerrahisi denemeleri** (`integrator2.cpp`, ayrı motor):
-deflektörü QF-QD çiftinin dışına alan topoloji (QF-d-QD-d-ARC-d) spin
-iptalini onarabilirdi; ancak mevcut gradyanla kararsız çıktı ve aynı
-ton ~2× quad gücü ister — tam kafes yeniden tasarımı, rafa kaldırıldı.
-Tek-tip-quad fikri ise quad-flip simetrisini (10⁻⁵→10⁻⁹ kademesinin
-temeli) yok ettiğinden reddedildi.
-
-**Üç-kademe mimari için anlamı:** Yörünge kademesinin teslim edebileceği
-en iyi değer, BPM ofseti σ_b=100 μm'de ~10⁻⁴ mertebesidir; CW/CCW +
-quad-flip zincirinin giriş hedefi 10⁻⁵ olduğundan aradaki boşluğu
-boylamsal **spin kademesi** kapatmak zorundadır — spin tüm 48 boyutu
-görür (c_k hiçbir modda sıfır değil), simetrik içerik dahil. Radyal
-polarizasyon bu iş için yedek değildir: Ω_z kanalı dikey yörünge
-eğimiyle sürüldüğünden, yörünge üretmeyen simetrik içeriğe o da
-büyük ölçüde kördür.
-
----
-
-## 10. İki kademeyi birleştirmek: COD ölçümünü spin ile tamamlamak
-
-Buraya kadar yörünge kademesi (§7) ve spin kademesi (§3, §6) ayrı ayrı
-anlatıldı. Bu bölüm ikisini **uçtan uca tek bir zincirde** birleştirir ve
-yol boyunca sahte EDM'in *gerçekte hangi kanaldan* geldiğine dair önemli bir
-düzeltme yapar. Anlatım yine sıfırdan: önce mekanizma, sonra ölçüm hilesi,
-sonra zincirin tamamı sayılarla.
-
-### 10.1 Sürpriz: sahte EDM aslında bir **dx·dy** çapraz kanalıdır
-
-Şimdiye kadar hep dikey kaçıklık $dy$'yi konuştuk. Ama dikkatli bir spin
-takibi şunu gösteriyor: tek başına $dy$ küçük (ve çoğu rejimde doğrusal) bir
-etki verir; asıl büyük sahte EDM **yatay ve dikey kaçıklığın çarpımından**
-doğar. Sezgi şöyle:
-
-- $dy$ (dikey kaçıklık) → radyal alan $B_x$ → spini **x-ekseni** etrafında döndürür.
-- $dx$ (yatay kaçıklık) → dikey alan $B_y$ → spini **y-ekseni** etrafında döndürür.
-- **Tek başına $dx$ dikey spini ($S_y$) hiç değiştirmez** (y-ekseni etrafında dönme $S_y$'yi yerinde bırakır — sayısal teyit: dx-only $\Rightarrow$ $S_y$ tam sıfır).
-- Ama iki dönme **aynı anda** varsa: x ve y eksenleri etrafındaki dönmeler
-  **sıra değiştirilemez** (komütatif değil). Ardışık iki farklı-eksen dönmesi
-  net bir üçüncü-eksen dönmesi bırakır — bu bir **geometrik (Berry) fazıdır**.
-  Sonuç: net $S_y \propto dx\cdot dy$.
-
-$dx$ ve $dy$ ikisi de $\sim\sigma$ mertebesindeyse, çarpım $\propto\sigma^2$ —
-yani sahte EDM hizalama hatasının **karesiyle** ölçeklenir (Omarov'un gördüğü
-kuadratik davranış; çok-seed RMS ölçümünde üs $\approx 2.0$). Pratik sonuç:
-kontrol etmemiz gereken sistematik, dikey kaçıklığın tek başına değil,
-**yatay×dikey çarpımının** içeriğidir. Bu, simetrik alt-uzayın (§9) neden bu
-kadar önemli olduğunu da açıklar: çapraz terim büyük ölçüde her iki düzlemin
-**simetrik** (QF/QD aynı-yönlü) parçalarının çarpımında yaşar ve §9'da
-gördüğümüz gibi yörünge bu parçaya kördür.
-
-### 10.2 $f$'i temiz ölçmenin hilesi: dört simetrik parçacık
-
-Sahte EDM hızı $f=dS_y/dt$ ölçülürken bir tuzak var: tek bir parçacığı
-eksenden fırlatırsak, kaymış kapalı yörünge etrafında **devasa bir betatron
-salınımı** yapar ($\sim$mm) ve bu salınımın $S_y$'ye bulaşması aradığımız
-minik seküler sürüklenmeyi boğar. Eski çözüm parçacığı kapalı yörüngeye
-"oturtmaktı" (CO arama); ama buna **gerek yok**.
-
-Bunun yerine **dört parçacık** gönderiyoruz; transvers ofsetleri eksenin
-etrafında dört işaret kombinasyonu:
-$(+\Delta x,+\Delta y),\ (+\Delta x,-\Delta y),\ (-\Delta x,+\Delta y),\ (-\Delta x,-\Delta y)$
-(spin hepsinde aynı, boylamsal). Dördünün $S_y$'sini **ortalıyoruz**. Neden işe yarar?
+## 4. Sahte EDM'i temiz ölçmek: dört simetrik parçacık
+
+$f$'i ölçmenin bir tuzağı var. Tek bir parçacığı halkanın eksenine fırlatırsak,
+kaçıklıkların kaydırdığı kapalı yörünge etrafında büyük (mm mertebesinde)
+**betatron salınımı** yapar. Bu salınımın $S_y$'ye karışması, aradığımız minik
+seküler sürüklenmeyi boğar. Eskiden çözüm parçacığı kapalı yörüngeye "oturtmaktı";
+ama buna gerek yok.
+
+Bunun yerine **dört parçacık** göndeririz; eksen etrafındaki transvers ofsetleri
+işaretlerin dört kombinasyonudur:
+$$(\pm\Delta x,\ \pm\Delta y)\quad\text{(dört bağımsız işaret)},$$
+spin hepsinde boylamsal. Dördünün $S_y(t)$'sini ortalarız. Neden işe yarar?
+Kafesin yansıma simetrisini örneğe **zorlarız**:
 
 - Betatron salınımı ve istenmeyen $\langle\Delta x\,\Delta y\rangle$ örnekleme
-  çapraz-terimi, işaret çevirmeleri altında **tek** (odd) — dört kombinasyonda
-  $(+,-,-,+)$ toplanır, **tam sıfırlanır**.
-- Gerçek sahte-EDM sürüklenmesi (kapalı yörünge çarpımı $x_{\rm CO}\,y_{\rm CO}$)
-  işaret çevirmeleri altında **çift** (even) — dördünde de aynı, ortalamada
-  **dokunulmadan kalır**.
+  karışması işaret çevirmeleri altında **tektir** (odd); dört terimde
+  $(+,-,-,+)$ toplanıp **tam sıfırlanır**.
+- Gerçek sahte-EDM sürüklenmesi (kapalı yörünge çarpımı $x_{\rm CO}y_{\rm CO}$'dan
+  gelir) işaret çevirmeleri altında **çifttir** (even); dördünde aynıdır,
+  ortalamada **korunur**.
 
-Yani kafesin sol-sağ/yukarı-aşağı yansıma simetrisini örneğe zorlayarak,
-kapalı yörüngeyi hiç aramadan temiz bir $f$ elde ederiz. Kalan yavaş salınım
-da model fitiyle (seküler doğru + sinüzoit) çıkarılır.
+Böylece kapalı yörüngeyi hiç aramadan temiz bir $f$ elde ederiz. Kalan yavaş
+salınım, model fitiyle (seküler doğru + sinüzoit bileşenleri) çıkarılır. *(Eski
+analizlerde kullanılan "tek parçacık + düz doğrusal fit" yöntemi bu salınımı
+seküler sanıp $f$'i mertebelerce şişiriyordu; bu belgedeki tüm güncel sayılar
+dört-parçacık + model fit ile alınmıştır — bkz. `false_edm_harmonic_sinir.md`
+§13.)*
 
-### 10.3 Zincirin tamamı, sayılarla (200 μm → hedef altı)
+---
 
-Tipik bir makinede mekanik hizalama $\sim$200 μm RMS'tir. Tek bir tohum için
-($dx,dy=$ 200 μm) adım adım:
+## 5. Ölç–trimle döngüsü
+
+Sahte EDM'i bastırma fikri üç cümlede özetlenir:
+
+1. **Ölç:** $f$'i ölç (yukarıdaki dört-parçacık yöntemiyle).
+2. **Trimle:** Kuadrupolleri kaydırıcılarla bilinçli, küçük bir desende oynat;
+   genliği $A_{\rm trim} = -f/c$. Burada $c$, o trim modunun **kaldıraç koludur**
+   (birim trim başına kaç rad/s ürettiği). Bu, ölçülen sinyali tam götürecek
+   "karşı-kirliliktir".
+3. **Tekrarla:** Kalanı ölç, gerekirse küçük bir düzeltme daha.
+
+**Neden tek bir mod yeter?** $f$ tek bir **sayıdır** (skaler). Kaldıraç kolu $c$
+bilinen tek bir düğmeyi $A_{\rm trim}=-f/c$ kadar çevirmek, $f$'i doğrusal
+mertebede **tam sıfırlar** — kalibre bir kadranla bir göstergeyi sıfırlamak gibi.
+Hangi kuadrupolün ne kadar kaydığını bilmemize gerek yoktur; sadece ibre
+okuması ($f$) ve bir düğmenin kalibrasyonu yeter. Geriye kalan (doğrusal-ötesi
+artık + öteki modlar + ölçüm gürültüsü) bir-iki iterasyonda ölçüm tabanına iner.
+
+> **Kalibrasyon hakkında bir not.** $c$ kaldıraç kolu, modu küçük bir bilinen
+> genlikle uygulayıp $f$ değişimini ölçerek bulunur; iki kuadratür (cos ve sin)
+> ölçülürse modun hem gücü $|c|$ hem etkin fazı $\psi=\mathrm{atan2}(c^{\sin},
+> c^{\cos})$ belirlenir ve "ölü faza" (etkisiz yön) düşme riski kalmaz. Bu
+> simülasyonda $c$'ler analitik olarak da hesaplanabilir ve küçük kaçıklıklarda
+> desenden bağımsızdır; gerçek deneyde de kalibrasyon rutin bir adımdır. Bu
+> yüzden burada kalibrasyonu bir **ön hazırlık** olarak anıyoruz, yöntemin özü
+> olarak değil — özü, skaler $f$'i $-f/c$ ile nullamaktır.
+
+---
+
+## 6. Birinci kademe: yörünge (COD) trimi
+
+İlk kademe hızlı ve EDM-kördür: BPM yörüngesinden hizalama modlarını kestirip
+kaydırıcılarla geri besler, spini hiç okumaz. **Her iki düzlemde** çalışır —
+dikey yörüngeden $dy$ modları, yatay yörüngeden $dx$ modları kestirilir (iki
+bağımsız 48-boyutlu problem, skew kuplaj ihmal edilir).
+
+### 6a. Hangi modları görebiliriz? Kazanç hiyerarşisi
+
+Bir kuadrupol modunun yörüngeyi ne kadar bozduğu, halka boyunca **betatron
+rezonansıyla** belirlenir. Sezgi: her kaçık kuadrupol demete küçük bir tekme
+verir; bu tekmeler halka çevresinde dolaşırken üst üste biner. Eğer modun uzaysal
+frekansı betatron tonuna ($Q_y\approx2.68$) yakınsa, tekmeler **rezonansla**
+büyür — tıpkı bir salıncağı doğru ritimde itmek gibi. Uzaksa, tekmeler birbirini
+söndürür.
+
+Sonuç bir **kazanç hiyerarşisidir** $G_k$ (birim mod genliği başına RMS yörünge):
+
+| $k$ | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| $G_k$ | 6.2 | **24.1** | 6.3 | 2.3 | 1.2 | 0.8 |
+
+$k=2$, $Q_y$'ye en yakın olduğundan zirvedir. Bu kazançlar analitik bir yasaya
+oturur: $G_k = C/|Q_{\rm eff}^2-k^2|$ (nominal kafeste $C=24.8$,
+$Q_{\rm eff}^2=5.03$, fit artığı %0.6) — yani bir uydurma değil, kapalı-yörünge
+dinamiğinin parametrizasyonudur.
+
+**Kazanç neden fit edilebilirliği belirler?** BPM'lerin $\sigma_b\approx100$ μm
+statik ofseti vardır. Bir modu yörüngeden kestirirken bu ofset, mod kestirimine
+bir **yanlılık** olarak sızar; büyüklüğü kabaca $\sigma_b/G_k$'dır (kazanç böler).
+Yüksek-kazançlı $k=2$ için yanlılık $\sim$μm-altı — zararsız. Düşük-kazançlı
+$k\geq6$ için yanlılık, modun gerçek içeriğinden büyük olur; o modu fit etmek
+düzeltmek yerine **ofset hayaletini sisteme enjekte eder**. Kapalı-form eşik:
+$$G_k > \frac{\sigma_b}{\sigma_q}\quad\Longleftrightarrow\quad
+k_{\max}^2 < Q_{\rm eff}^2 + C\,\frac{\sigma_q}{\sigma_b}.$$
+$\sigma_b=\sigma_q$ için $k_{\max}\approx5.5$: $k\leq4$ güvenle fit edilir, $k=5$
+sınırda, $k\geq6$ zararlı. Yani **kazanç hiyerarşisi doğal bir düzenleyicidir**:
+fazla mod fit etmeye çalışmak sonucu kötüleştirir. (Sayısal teyit: $k\leq4$ fit
+eden varyant en iyi; $k\leq6$ fit eden, düşük-kazançlı modlara ofset enjekte
+ederek daha kötü sonuç verir.)
+
+### 6b. Yörünge tek başına çözer mi? Hayır — simetrik taban
+
+Burada belgenin ana fizik sonucu gelir. dx·dy sahte EDM'i büyük ölçüde **her iki
+düzlemin simetrik (QF/QD aynı-yönlü) parçalarının çarpımındadır** (§2b). Ve
+simetrik alt-uzay, tanımı gereği **düşük kazançlıdır** (tekmeler söndüğü için): bu
+modlar yörüngeyi $\sim$3 kat zayıf sürer ($G\sim3$), ofset gürültüsünün eşiğine
+yakın ya da altında kalır.
+
+Sayısal olarak (ortogonal ayrıştırma, `test_symm_vs_antisym` mantığı):
+
+| parça | desen RMS | COD RMS | $f$ [rad/s] |
+|---|---|---|---|
+| antisimetrik (25 boyut) | 70 μm | 550 μm | büyük |
+| **simetrik** (23 boyut) | 55 μm | 165 μm | **kalanın çoğu** |
+
+Yörünge trimi antisimetrik parçayı temizler — ama dx·dy kanalında bu küçük bir
+paydır. Simetrik parça **yerinde durur**, çünkü yörünge onu gürültü tabanının
+altında göremez (sinyal/gürültü $\approx0.3<1$).
+
+**Sonuç (her iki düzlemde COD trimi, doğru estimator, 200 μm):** kademe sahte
+EDM'i yalnız $\sim$2–5× düşürür ve $\sim3\times10^{-4}$ rad/s tabanına çarpar.
+Bu, $10^{-5}$ hedefinin çok üstündedir.
+
+### 6c. Rekonstrüksiyon metodu tabanı değiştirmez
+
+"Belki daha iyi bir geri-çatım metodu simetrik tabanı aşar" diye altı metot aynı
+veride denendi (her iki düzlem, 200 μm dx+dy):
+
+| metot | bastırma |
+|---|---|
+| R-LS (FODO-antisim, $k\leq4$) | **4.7× (en iyi)** |
+| TSVD | 1.9× |
+| CLEAN | 1.1× |
+| Bozoki (azimut baz) | 0.9× |
+| R-LS ($k\leq7$) | 0.8× |
+| tam $R^{-1}$ | 0.3× |
+
+İki ders: (1) en iyi metot **dar, düşük-modlu** R-LS'tir (kazanç hiyerarşisi
+düzenleyici); agresif metotlar (CLEAN, tam $R^{-1}$, geniş R-LS) düşük-kazançlı
+modlara ofset enjekte edip kötüleşir. (2) **Hiçbir metot $\sim10^{-4}$ tabanının
+altına inmez** — bu bir **gözlenebilirlik sınırıdır**, metot kusuru değil.
+Simetrik alt-uzay yörüngeye yapısal olarak kapalıdır; onu yalnız spin görür.
+
+---
+
+## 7. İkinci kademe: spin trimi
+
+Yörüngenin bıraktığı simetrik tabanı **spin** temizler — çünkü spin tüm modlara
+bağlanır (kuplaj $c_k$ hiçbir modda sıfır değildir; simetrik içerikte
+$\sim$12 kat zayıf ama sonlu). Burada §3'teki avantaj devreye girer: spin simetrik
+alt-uzayda iyi bir sinyal/gürültüye sahiptir (polarimetre tabanına karşı
+SNR$\sim$17), oysa yörünge için SNR$\sim$0.3 idi.
+
+### Uçtan uca zincir, sayılarla (200 μm → hedef altı)
 
 | Aşama | Ne yapılır | $f$ [rad/s] |
 |---|---|---|
 | Başlangıç | 200 μm dx+dy | $\sim 9\times10^{-4}$ |
-| **Stage 1 — yörünge** | BPM yörüngesinden antisim k≤4'ü kestir, kaydırıcıyla trimle (§7) | $\sim 9\times10^{-4}$ (çok az düşer!) |
-| **Stage 2 — spin** | simetrik modun spin kuplajını kalibre et, ölç-trimle döngüsü | $1.6\times10^{-7}$ |
+| **Stage 1 — yörünge** | her iki düzlemde antisim $k\leq4$ trimi | $\sim 9\times10^{-4}$ (çok az düşer) |
+| **Stage 2 — spin** | simetrik modun $c$'sini kalibre et, ölç–trimle | $1.6\times10^{-7}$ |
 
-**Stage 1 neden neredeyse hiç düşürmüyor?** Çünkü dx·dy kanalında sahte EDM
-büyük ölçüde **simetrik alt-uzaydadır** ve §9'da kanıtlandığı gibi yörünge bu
-alt-uzayı BPM ofseti gürültüsünün altında göremez (SNR$\approx$0.3). Yörünge
-yalnız antisim parçayı temizler — o da bu kanalda küçük bir paydır. (Altı
-farklı rekonstrüksiyon metodu — Bozoki, CLEAN, R-LS, R⁻¹, TSVD — denendi;
-hepsi aynı $\sim$10⁻⁴ tabanına çarptı: bu bir gözlenebilirlik sınırıdır,
-metot kusuru değil. En iyisi dar R-LS k≤4, yalnız $\sim$4×.)
+Stage 1'in neredeyse hiç düşürmemesi (§6b) beklenendir: kanal simetrik-domine.
+Stage 2'de simetrik mod $S_2$'nin spin kuplajı ölçülür ($|c|\approx12.6$ rad/s/m —
+zayıf ama sonlu), §5'teki ölç–trimle döngüsü işletilir. Dört adımda
+$$9.4\times10^{-4}\to2.2\times10^{-6}\to\dots\to1.6\times10^{-7}\quad(\sim6000\times),$$
+75 μm trim bütçesiyle. Bu, CW/CCW iptal zincirinin giriş hedefi $10^{-5}$'in
+$\sim$60 kat altındadır. Tek bir simetrik mod skaler $f$'i nullamaya yeter (§5);
+iterasyonlar ölçüm tabanına yakınsar.
 
-**Stage 2 nasıl bitiriyor?** Spin, simetrik içeriği **görür** (kuplaj
-$\sim$12 kat zayıf ama sıfır değil). Simetrik mod $S_2$'nin spin kuplajı
-çift-kuadratürle kalibre edilir ($|c|\approx 12.6$ rad/s/m), sonra §3'teki
-ölç-trimle döngüsü işletilir. Dört adımda $f$:
-$9.4\times10^{-4}\to 2.2\times10^{-6}\to\dots\to 1.6\times10^{-7}$
-(**$\sim$6000× bastırma**, 75 μm trim bütçesiyle). Bu, CW/CCW + quad-flip
-iptal zincirinin giriş hedefi $10^{-5}$'in $\sim$60 kat altındadır.
+**EDM güvenliği.** Spin hem sahte hem gerçek EDM'i görür; körlemesine $f\to0$
+yapmak gerçek sinyali de yutabilir. Çözüm: hata sinyalini CW (saat yönü) ve CCW
+(ters yön) saklamaların **farkı** üzerinden kurmak. Gerçek EDM yön değişiminde
+işaret değiştirmez (toplamda korunur), sahte EDM değiştirir (farkta kalır). Böylece
+spin kademesi de yapısal olarak EDM-kör hale gelir.
 
-### 10.4 Neden tek bir simetrik mod $f$'i nullamaya yetiyor?
+---
 
-Sezgi: $f$ tek bir **sayıdır** (skaler). Trim modu, kuplajı $c$ [rad/s/m]
-bilinen tek bir düğmedir. $A_{\rm trim}=-f/c$ seçersek, trim'in $f$'ye
-katkısı mevcut $f$'i (doğrusal mertebede) **tam götürür** — tıpkı kalibre bir
-kadranı çevirip bir göstergeyi sıfırlamak gibi. Geriye kalan (doğrusal-ötesi
-artık + öbür modlar + ölçüm gürültüsü) her iterasyonda küçülür; ikinci-üçüncü
-adımlar onu ölçüm tabanına indirir. Birden çok modu *ayrı ayrı* bilmek
-gerekmez; tek bir iyi-kuplajlı düğme skaler hedefi nullar.
+## 8. Büyük resim: iki kademe + CW/CCW zinciri
 
-### 10.5 Özet: rollerin net dağılımı
+Güncel verilerle tutarlı tam tablo:
 
-- **Yörünge kademesi (hızlı, EDM-kör):** antisim, yüksek-kazançlı içeriği
-  saniyeler-dakikalar içinde temizler; simetrik alt-uzaya yapısal olarak kördür.
-- **Spin kademesi (yavaş, eksiksiz):** simetrik dahil tüm içeriği görür;
-  dört-simetrik-parçacık ölçümü + ölç-trimle döngüsüyle kalanı CW/CCW giriş
-  seviyesinin altına indirir; CW$-$CCW fark kanalı sayesinde gerçek EDM'ye kör.
+| Kademe | Araç | Gördüğü | 200 μm'den $f$ |
+|---|---|---|---|
+| 0 | Ham | — | $\sim9\times10^{-4}$ |
+| **1** | Yörünge (COD) trimi, EDM-kör | antisim, yüksek-kazanç | $\sim9\times10^{-4}$ (zayıf düşüş; dx·dy simetrik-domine) |
+| **2** | Spin ölç–trimle | tüm modlar, simetrik dahil | $\sim1.6\times10^{-7}$ |
+| 3 | CW/CCW + quad-flip | yön/gradyan simetrisi | $<10^{-9}$ |
 
-İki kademe **tamamlayıcıdır**: biri olmadan diğeri hedefe ulaşmaz. Bu bölümün
-sayıları, doğru spin-eğim estimator'ı (salınım-çıkaran model fit) ile dx·dy
-kanalında uçtan uca alınmış olup `makale_trim_tr.tex`'in iki-kademeli
-mimarisini doğrular. (Ayrıntılı analiz günlüğü: `false_edm_harmonic_sinir.md`
-§13–14.)
+Roller net: **yörünge kademesi** hızlıdır, EDM'e dokunmaz, ama yapısal olarak
+simetrik alt-uzaya kördür — antisimetrik, yüksek-kazançlı içeriği saniyeler
+içinde temizler. **Spin kademesi** yavaştır (polarimetre istatistiği) ama
+eksiksizdir; yörüngenin göremediği simetrik tabanı temizleyip sinyali CW/CCW
+zincirinin giriş seviyesinin altına indirir. **CW/CCW + quad-flip** kalanı yön ve
+gradyan simetrileriyle $10^{-9}$'un altına taşır. Üç kademe **tamamlayıcıdır**;
+hiçbiri tek başına hedefe ulaşmaz.
+
+*(Önemli düzeltme: bu belgenin eski sürümünde dx·dy yerine yalnız dikey kaçıklık
+vurgulanıyor ve eski "tek parçacık + düz fit" estimator'ından gelen abartılı
+bastırma rakamları kullanılıyordu. Yukarıdaki tüm sayılar dört-parçacık + model
+fit ile, dx·dy kanalında alınmıştır; ayrıntı `false_edm_harmonic_sinir.md` §13–14.)*
+
+---
+
+## 9. Sık sorulan sorular
+
+**S1 — Sahte EDM'in asıl kaynağı tek başına dikey kaçıklık değil mi?**
+Hayır. Tek başına $dy$ küçük ve büyük ölçüde iptal olan bir etki verir; tek başına
+$dx$ dikey spini hiç etkilemez. Asıl büyük sinyal **dx·dy geometrik-faz
+çarpımından** gelir ve $\sigma^2$ ile ölçeklenir (§1).
+
+**S2 — Yörünge düzeltmesini hem x hem y'de yaparsak yeter mi?**
+Hayır. Her iki düzlemde COD trimi yapılır (zaten öyle yapıyoruz), ama dx·dy
+kanalı **simetrik alt-uzayda** domine ve yörünge bu alt-uzaya kördür; sonuç
+$\sim$2–5×'te durur. Denenen altı rekonstrüksiyon metodu da aynı tabana çarpar
+(§6c). COD tek başına çözmez.
+
+**S3 — O zaman spin neden görüyor da yörünge görmüyor?**
+İki farklı fizik. Yörünge kazancı **rezonans** kökenlidir ($G_k\propto
+1/|Q_{\rm eff}^2-k^2|$); simetrik/yüksek modlar düşük kazançlı olup BPM ofseti
+gürültüsünün altında kalır (SNR$<$1). Spin kuplajı $c_k$ ise **geometrik bir yol
+integralidir**, rezonans gerektirmez; tüm modlara bağlanır (simetrik içerikte
+zayıf ama sıfır değil) ve polarimetre tabanına karşı SNR$\sim$17 verir.
+
+**S4 — Tek bir trim modu nasıl tüm sinyali sıfırlıyor?**
+Çünkü $f$ tek bir skalerdir; kalibre bir düğmeyi $-f/c$ kadar çevirmek onu
+doğrusal mertebede tam götürür (§5). Deseni çözmek gerekmez; ibreyi sıfırlamak
+yeter.
+
+**S5 — Spin trimi gerçek EDM'i yutmaz mı?**
+Yutabilirdi; bu yüzden hata sinyali CW$-$CCW farkı üzerinden kurulur. Gerçek EDM
+yön değişiminde işaret değiştirmez, sahte EDM değiştirir → fark yalnız
+sistematiği görür (§7).
+
+**Açık başlıklar:** RF ve sekstüpoller açıkken doğrusallığın teyidi; quad tilt
+(skew) çapraz terimleri; çok-tohumlu RMS ile zincirin istatistiksel sağlamlığı;
+zamanla sürüklenen hizalamada sürekli izleme kipi.
+
+---
+
+*Sayısal kanıtlar ve reprodüksiyon: `false_edm_harmonic_sinir.md` §13–14
+(dx·dy kuadratiği, demet=ideal, rekonstrüksiyon karşılaştırması, COD+spin zinciri).*
