@@ -1031,20 +1031,28 @@ bir gereksinim.
 
 ### Falso EDM sinyali ve beta fonksiyonu
 
-Bu çalışmada ölçülen büyüklük quad kayma profili $\Delta y_j$. Ama
-pEDM için asıl önemli büyüklük falso EDM sinyali:
+Bu çalışmada ölçülen büyüklük quad kayma profili $\Delta y_j$. **Erken bir
+modelde** falso EDM sinyalinin buna **doğrusal** bir fonksiyonel olduğu
+varsayılmıştı:
 
-$$\Phi_\text{spin} \propto \sum_j K_j L_j \bigl(y_\text{CO}(s_j) - \Delta y_j\bigr)$$
+$$\Phi_\text{spin} \overset{?}{\propto} \sum_j K_j L_j \bigl(y_\text{CO}(s_j) - \Delta y_j\bigr) \qquad \text{(tek-düzlem, dy-doğrusal)}$$
 
 Kapalı yörünge $y_\text{CO}(s_j) = \sum_k R_{jk}\,\Delta y_k$ ve
 $R_{jk} \propto \sqrt{\beta_j \beta_k}$ olduğundan bu toplam
-**beta fonksiyonuyla ağırlıklandırılmış** bir büyüklük. Büyük
-$\beta$'lı quad'ların katkısı orantısız büyük; basit ortalama
-$\langle \Delta y \rangle$ ile falso EDM sinyali arasındaki
-korelasyon zayıf.
+**beta fonksiyonuyla ağırlıklandırılmış** bir büyüklüktür.
 
-Bu çalışma $\Delta y_j$'yi ölçüyor; falso EDM sinyalinin kendisini
-doğrudan hedeflemek farklı bir ölçüm tasarımı gerektirir (bkz. §14).
+> **⚠️ Düzeltme (bkz. §19.1, `false_edm_harmonic_sinir.md §13`).** Sonraki çalışma
+> yukarıdaki **doğrusal (dy-only)** terimin küçük ve büyük ölçüde **sönen** bir
+> katkı olduğunu gösterdi. Baskın falso EDM **kuadratiktir (σ²)** ve **dx·dy
+> geometrik (Berry) faz** kanalından gelir (yatay × dikey kaçıklık çarpımı). Yani
+> bu tek-düzlem doğrusal ifade falso EDM'in *tamamını temsil etmez*; sahte sinyali
+> üreten asıl büyüklük **bilineerdir**. Bu, aşağıdaki (§14) "tek-quad doğrusal
+> hedefleme" fikrini de geçersiz kılar: bilineer bir büyüklük tek bir $w$ vektörüyle
+> hedeflenemez.
+
+Bu çalışma $\Delta y_j$'yi (kaçıklık profilini) ölçüyor; baskın (dx·dy) falso EDM
+kanalının kendisi kapalı yörüngeye neredeyse görünmezdir (§19.2 gözlenebilirlik
+no-go'su) ve doğrudan ölçümü spin tarafını gerektirir.
 
 ### K-modülasyonun kör olduğu şeyler
 
@@ -1070,14 +1078,18 @@ Bu denklemden quad $j$'nin bulunduğu noktadaki $\beta_j$ doğrudan
 ölçülür. BPM bilgisi gerekmez, kondisyon sayısı sorunu yok. Bu
 çalışmada kullanılan donanımın en doğal ve temiz uygulaması.
 
-### Falso EDM katkısının doğrudan hedeflenmesi
+### Falso EDM katkısının doğrudan hedeflenmesi (⚠️ aşılan fikir)
 
-§13'te görüldüğü gibi falso EDM sinyali $w^T \Delta q$ formunda
-bir doğrusal fonksiyonel. $w$ vektörü $K_j$, $\beta_j$, $R$'den
-önceden hesaplanabilir. Hangi quad'ın kmod sondaj yönü $v_j$ bu
-$w$'ya en iyi hizalanırsa, **o tek quad** modüle edilerek falso EDM
-katkısı doğrudan ölçülebilir. 48 komponentin hepsini ölçmek yerine
-tek sayı hedefleniyor — rank sorunu bu özel problem için uygun.
+Erken bir öneride falso EDM sinyali $w^T \Delta q$ formunda **doğrusal** bir
+fonksiyonel kabul edilmiş, $w$ vektörü $K_j$, $\beta_j$, $R$'den önceden
+hesaplanıp tek bir quad'ı modüle ederek hedeflenmesi düşünülmüştü.
+
+> **⚠️ Bu fikir geçerli değil (bkz. §13 düzeltmesi, §19.1).** Baskın falso EDM
+> doğrusal değil **kuadratik (dx·dy bilineer)** olduğundan tek bir $w$ vektörüyle
+> doğrusal hedefleme baskın kanalı yakalamaz. Doğrusal terim gerçek ama küçük ve
+> sönen bir katkıdır. Falso EDM'in baskın kısmı kapalı yörüngeye görünmez (§19.2)
+> ve ölçümü/iptali spin + CW/CCW + quad-flip gerektirir (Omarov SBA;
+> `omarov_symmetric_hybrid.md`).
 
 ### Quad tilt (skew kuplaj)
 
@@ -1309,9 +1321,9 @@ Bu bir yazılım hatası değil, yöntemin fiziksel sınırı.
 - **Beta-beat etkisi:** Gerçek halkada $R$ model $R$'den sapınca
   ne oluyor? %1 beta-beat → kaç μm ek hata? (Test 8, sürmekte.)
 
-- **Falso EDM hedef vektörü:** $w = (w_1, \ldots, w_{48})$ vektörünü
-  hesapla ($K_j$, $\beta_j$, $R$ kullanarak), hangi quad en iyi hizalanıyor?
-  Tek ölçümle falso EDM katkısını doğrudan hedefleme denenebilir.
+- ~~**Falso EDM hedef vektörü:** $w$ vektörüyle tek-quad doğrusal hedefleme.~~
+  **(Kapandı — geçersiz.)** Baskın falso EDM kuadratiktir (dx·dy bilineer,
+  §19.1), doğrusal bir $w$ vektörüyle hedeflenemez. Bkz. §13/§14 düzeltmeleri.
 
 - **Greedy + çok-konfig:** Rank ≥ 3 ile greedy harmonikleri doğru
   seçiyor mu? Sistematik test yapılmadı.
