@@ -37,15 +37,14 @@
 ## 3. Simülasyon adımları (hepsi §13 doğru estimator'ı = model fit ile)
 
 1. **Truth:** rastgele dx,dy σ∈{200,300} μm, N=20–30 seed.
-2. **Yörünge-trim uygula** (mevcut `test_orbit_trim.py` mantığı, k≤k_max LSQ).
+2. **Yörünge-trim uygula** (EDM-kör yörünge-trim mantığı, k≤k_max LSQ).
 3. **Kalan misalignment** → sahte EDM'i **model-fit + CO=True** ile ölç
-   (`test_dxdy_geometric_phase.py` / §13 estimator), dx·dy kanalı dahil.
-   ESKİ test_orbit_trim'in spin doğrulaması kontamine estimator'la idi — **bu
-   adım yeniden, doğru estimator'la.**
+   (§13 model-fit estimator'ı), dx·dy kanalı dahil. ESKİ yörünge-trim spin
+   doğrulaması kontamine estimator'la idi — **bu adım yeniden, doğru estimator'la.**
 4. **Simetrik alt-uzay tabanı:** dik ayrıştırma (antisim/simetrik) ile simetrik
    parçanın sahte EDM'ini **model-fit + CO=True** ile yeniden ölç. Eski ~1.0×10⁻⁴
-   gerçek mi, yoksa artefakt mı? (test_symm_vs_antisym.py'yi doğru estimator'la
-   yeniden koş.)
+   gerçek mi, yoksa artefakt mı? (simetrik/antisim ayrıştırmayı doğru
+   estimator'la yeniden koş.)
 5. **Karar:** yörünge-trim sonrası kalan (simetrik dahil) sahte EDM ≤10⁻⁵ mü?
    - Evet → spin kademesi GEREKSİZ; makale "yörünge-trim + CW/CCW" olarak sadeleşir.
    - Hayır → simetrik taban gerçek; spin kademesi korunur.
@@ -61,11 +60,13 @@
 
 ## 5. Mevcut kod kaldıraçları
 
-`test_orbit_trim.py`, `test_orbit_trim_seeds.py`, `test_symm_vs_antisym.py`
-(yörünge-trim + simetrik ayrıştırma — ama spin doğrulamaları **kontamine
-estimator'la**; doğru estimator'la yeniden koşulacak), `build_response_matrix.py`,
-`fourier_reconstruct.py`, `test_dxdy_geometric_phase.py` (§13 doğru estimator +
-dx·dy), CW/CCW için bu oturumdaki `cwccw_dxdy` mantığı.
+Kalıcı: `build_response_matrix.py`, `fourier_reconstruct.py`, `reconstruction.py`.
+Yörünge-trim + simetrik ayrıştırma + dx·dy/§13 estimator ve CW/CCW mantığının
+keşif scriptleri 2026-06 temizliğinde kaldırıldı (git geçmişinde; oturum içinde
+`/tmp` altında `orbit_trim_dxdy.py`, `spin_trim_chain.py`, `recon_compare.py`
+olarak yeniden üretildi). **Bu plan uygulandı; sonuçlar
+`false_edm_harmonic_sinir.md §14`'te** (yörünge-trim ~2.7×, simetrik taban gerçek
+→ spin kademesi korunur; 6 metot aynı tabana çarpar).
 
 ---
 

@@ -480,7 +480,6 @@ yığılmış sistem kurulur:
 
 ```bash
 for n in 0 1 2; do python3 build_response_matrix.py --config $n; done
-for n in 0 1 2; do python3 test_kmod_reconstruction.py --config $n; done
 python3 reconstruction.py   # R_dy_1_c0.npy varlığı çok-konfig modunu tetikler
 ```
 
@@ -576,7 +575,7 @@ Bu ilişki tersten kullanılırsa: tune kayması ölçülürse $\beta_{y,j}$
 (o quad'taki dikey beta fonksiyonu) belirlenir. Tüm quad'lar sırayla
 kmod edilirse halka boyunca $\beta(s)$ profili çıkarılır.
 
-**Nasıl ölçülür:** `run_simulation.py` Poincaré kesiti hesaplıyor,
+**Nasıl ölçülür:** `integrator.py` üzerinden Poincaré kesiti hesaplanır,
 buradan tune doğrudan okunabilir. Her kmod ölçümü bir $\beta$ ölçümü
 anlamına gelir.
 
