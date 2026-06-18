@@ -31,8 +31,20 @@
 16. [params.json — parametre referansı](#16-paramsjson--parametre-referansı)
 17. [Bilinen tuzaklar](#17-bilinen-tuzaklar)
 18. [Açık konular](#18-açık-konular)
+19. [Güncel durum ve ana bulgular (2026-06)](#19-güncel-durum-ve-ana-bulgular-2026-06)
 
 ---
+
+> **⚠️ Güncel durum notu (2026-06).** Bu README, projenin **kapalı-yörünge ile
+> hizalama ölçümü** dönemini (k-mod + Fourier rekonstrüksiyon) pedagojik bir
+> yolculuk olarak anlatır ve o haliyle geçerlidir. O dönemden bu yana asıl
+> sonuç **sahte EDM** tarafında ortaya çıktı; özet ve sonraki adımlar **§19**'da.
+> Ayrıca repo 2026-06'da temizlendi: aşağıda adı geçen bazı keşif scriptleri
+> (`test_kmod_reconstruction.py`, `scan_j2.py`, `show_response.py`,
+> `bpm_offset_test.py`, `test_*.py`, `fig_*.py`) **kaldırıldı**; mantıkları git
+> geçmişinde ve `.md` günlüklerinde. Güncel çalıştırılabilir giriş noktaları:
+> `build_response_matrix.py`, `reconstruction.py`, `fourier_reconstruct.py`,
+> `bozoki_ls.py`. §15'teki reçeteler tarihsel referanstır.
 
 ## 1. Sahne ve Bağlam
 
@@ -1087,18 +1099,21 @@ her BPM'in kazanç hatası tahmin edilebilir. Gradyan modülasyonu
 
 | Dosya | Rolü |
 |-------|------|
-| `integrator.cpp` | GL4 simplektik entegratör (C++) |
-| `integrator.py` | Python/ctypes sarmalayıcı |
+| `integrator.cpp` / `integrator.py` | GL4 simplektik entegratör (C++) + Python/ctypes sarmalayıcı |
+| `integrator2.cpp` / `integrator2.py` | İkinci motor (alternatif topoloji) |
 | `build_response_matrix.py` | R₁, R₂ ve ΔR matrislerini hesaplar |
-| `test_kmod_reconstruction.py` | Simülasyon + rekonstrüksiyon karşılaştırması |
 | `reconstruction.py` | Hedefli, Greedy, LASSO, çok-konfig rekonstrüksiyon (tam çıktı) |
 | `fourier_reconstruct.py` | Temiz Fourier kalite raporu: hedefli fit + CLEAN (LASSO/greedy yok) |
-| `scan_j2.py` | En iyi j₂ quad çiftini tara |
-| `show_response.py` | Tepki matrisi görselleştirme |
-| `bpm_offset_test.py` | R-tabanlı CLEAN testi: BPM ofseti altında tek orbit ölçümü (§12c) |
+| `bozoki_ls.py` | Bozoki 1989 vs R-matris vs CLEAN karşılaştırması |
 | `FOURIER_REKONSTRUKSIYON.md` | Fourier yönteminin pedagojik derinlemesine anlatımı |
-| `PROJE_ANALIZI_VE_ONERILER.md` | Analiz ve beyin fırtınası |
-| `YÖNTEM.md` | Detaylı matematiksel türetimler |
+| `false_edm_harmonic_sinir.md` | **Sahte EDM ana günlüğü** (§1–15) |
+| `trim_yontemi_pedagojik.md` | İki-kademe trim (orbit + spin) sıfırdan anlatım |
+| `cosy_polarimeter.md` / `omarov_symmetric_hybrid.md` | Literatür özetleri (polarimetre / SBA) |
+| `PROJE_ANALIZI_VE_ONERILER.md` / `YÖNTEM.md` | Analiz/beyin fırtınası ve matematiksel türetimler |
+
+> Not: aşağıdaki "Hızlı Başlangıç" reçetelerinde geçen `test_kmod_reconstruction.py`
+> kaldırıldı (mantığı git geçmişinde). Eşdeğer akış: `build_response_matrix.py`
+> → `reconstruction.py` / `fourier_reconstruct.py`. Reçeteler tarihsel referanstır.
 
 ### Kütüphaneyi derle
 
@@ -1318,3 +1333,82 @@ Bu bir yazılım hatası değil, yöntemin fiziksel sınırı.
 - **R model doğruluğu alt sınırı:** §12c'de δK/K ≲ 3–4% eşiği saptandı.
   Gerçek halkada β-beat ölçümünden R'yi ne kadar iyi kalibrasyon yapılabilir?
   LOCO benzeri yöntemlerle R kalibrasyonu henüz uygulanmadı.
+
+---
+
+## 19. Güncel Durum ve Ana Bulgular (2026-06)
+
+Yukarıdaki §1–18 projenin **"kapalı yörüngeden hizalama ölç"** dönemini anlatır.
+O dönemden sonra odak **sahte EDM**'e kaydı ve asıl fiziksel sonuçlar orada çıktı.
+Bu bölüm, ayrıntılı günlükler (`false_edm_harmonic_sinir.md`,
+`trim_yontemi_pedagojik.md`, `omarov_symmetric_hybrid.md`, `cosy_polarimeter.md`)
+için bir harita ve özettir.
+
+### 19.1 Sahte EDM nereden geliyor? — dx·dy geometrik faz, σ² ölçekleme
+
+Kuadrupol kaçıklığının ürettiği sahte EDM sinyali (dikey spin presesyon hızı
+dS_y/dt), kaçıklıkla **kuadratik** ölçeklenir ve asıl kanal **dx·dy geometrik
+(Berry) faz**tır:
+
+- **dy-only** katkı doğrusaldır ve büyük ölçüde söner (küçük).
+- **dx-only** S_y için tam olarak sıfırdır.
+- Asıl, kuadratik (σ²) sinyal **yatay × dikey** kaçıklık çarpımından (dx·dy)
+  doğar. Omarov (PRD 105, 032001) da bunu σ taramasıyla doğrular (y = k·σ²).
+
+> **Kritik ölçüm reçetesi:** sahte EDM'i ölçerken **4-katlı simetrik parçacık
+> örneklemesi** (sx,sy=±1 dört kombinasyon ortalaması) + **model-fit estimator**
+> [S_y(t)=a+bt+Σ_k(c_k cos+d_k sin), yalnız sekuler b çekilir] kullanılır. Düz
+> polyfit veya tek-parçacık CO=True YANLIŞ sonuç verir — bu hata defalarca yapıldı.
+> Ayrıntı: `false_edm_harmonic_sinir.md §13`.
+
+### 19.2 Kapalı yörünge neden yetmiyor? — gözlenebilirlik no-go'su
+
+Sahte EDM'i süren misalignment deseni **simetrik alt-uzaydadır** (hücre içi
+QF/QD aynı yönlü). Kuadrupol gradyan işareti QF/QD'de zıt olduğundan, simetrik
+bir **ofset** → **alternatif (yüksek-k, k≈24) kick** üretir. Kapalı yörünge ise
+tünde tepe yapan rezonant bir alçak-geçiren filtredir:
+
+$$G_k = \frac{C}{|Q_{\text{eff}}^2 - k^2|}, \qquad C\approx 24.8,\ Q_{\text{eff}}^2\approx 5.03.$$
+
+k≈24 ≫ Q≈2.7 olduğundan bu kanal ~1/k² bastırılır → **kapalı yörüngeye neredeyse
+görünmez**. Sonuç: yörünge-tabanlı yeniden çatım bir **gözlenebilirlik tabanına
+(~1.8×10⁻⁴)** çarpar ve **6 farklı metot** (R-LS, CLEAN, Bozoki, R⁻¹, TSVD) aynı
+tabana takılır — bu, metodun değil fiziğin sınırıdır (`false_edm_harmonic_sinir.md
+§14`).
+
+**No-go (operasyonel hilelere karşı):** quad-flip, tün taraması, aile k-mod, ORM
+— hiçbiri bu yüksek-k kanalı açmaz, çünkü tünü k≈24'e yaklaştırmak (24-hücreli
+halkada yapısal rezonans) mümkün değil. Görünür kılmanın yolları yalnız *yerel*
+(per-quad k-mod), *bilineer* (ikinci-derece yörünge imzası) ya da *spin*'dir;
+ilk ikisi operasyonel/efor açısından ağır bulundu (`omarov_symmetric_hybrid.md §9`).
+
+### 19.3 İki-kademe mimari ve spin yolunun durumu
+
+- **Kademe 1 — Yörünge-trim:** antisimetrik (k≤4) yığını bedava (BPM, her tur)
+  kaldırır; tek başına ~2.7× — simetrik tabana çarpar (yetmez).
+- **Kademe 2 — Spin ölç-trim:** simetrik artığı ~6000× temizler (→1.6×10⁻⁷),
+  CW/CCW + quad-flip ile <1 nrad/s hedefine taşınır (`trim_yontemi_pedagojik.md`).
+
+**Literatür kıyası (stratejik karar).** Saf spin yolunda özgün katkı dardır:
+Omarov spin-tabanlı hizalamayı (SBA) + *yükselt-sonra-söndür* (bilinen B_x/B_y
+düğmesiyle bilinmeyen alanı amplifiye edip hızlı ölç → istatistik duvarını aş) +
+CR/quad-flip iptalini yayınlamış. Polarimetre istatistiği (COSY: A_y≈0.6, verim
+%1.1, >10¹² olay/yıl) sahte-EDM'i 10⁻⁹ rad/s seviyesinde *doğrulamanın* bir
+EDM-ölçümü kadar süreceğini gösteriyor; ama Omarov artığı bu seviyede ölçmüyor,
+yükseltip ölçüyor. Ayrıntı: `cosy_polarimeter.md`, `omarov_symmetric_hybrid.md §8`,
+`false_edm_harmonic_sinir.md §15`.
+
+**Açık stratejik soru:** Katkı, yörünge tarafındaki **kesin gözlenebilirlik
+(no-go) teoreminde** mi, yoksa henüz denenmemiş basit bir gözlemlenebilirde mi?
+(Güncel `YAPILACAKLAR.md` ve yukarıdaki günlükler.)
+
+### 19.4 Belge haritası
+
+| Konu | Belge |
+|------|-------|
+| Sahte EDM ∝ dx·dy, σ²; doğru estimator | `false_edm_harmonic_sinir.md §13` |
+| Yörünge gözlenebilirlik tabanı; 6 metot aynı tabana | `false_edm_harmonic_sinir.md §14` |
+| İki-kademe (orbit + spin) trim pedagojik | `trim_yontemi_pedagojik.md` |
+| COSY polarimetre + EDM zaman bütçesi | `cosy_polarimeter.md` |
+| Omarov SBA + no-go kanal araştırması | `omarov_symmetric_hybrid.md §8–9` |
+| Stratejik karar (spin yolunda katkı sınırı) | `false_edm_harmonic_sinir.md §15` |
