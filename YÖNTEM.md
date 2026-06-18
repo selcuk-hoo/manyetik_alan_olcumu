@@ -6,6 +6,14 @@
 > Amaç hem "ne yapıyoruz, nasıl yapıyoruz" sorularına, hem de
 > "neden işe yarıyor, neden gerekli" sorularına net cevap vermektir.
 
+> **⚠️ Güncel not (2026-06).** Bu belge **kapalı-yörünge ile hizalama ölçümü**
+> yöntemini (k-mod + Fourier) anlatır ve geçerlidir. Sonradan iki ekleme/düzeltme
+> yapıldı: (1) yöntemin temel sınırı artık **kazanç yasası** ile niceldir
+> (bkz. **§9.1**); (2) bu sınır, sahte-EDM'i süren **simetrik alt-uzaya körlük**
+> demektir (`false_edm_harmonic_sinir.md`, `README §19`). Ayrıca §Ek'teki kod
+> akışındaki `test_kmod_reconstruction.py` 2026-06 temizliğinde kaldırıldı;
+> güncel akış aşağıda düzeltildi.
+
 ---
 
 ## İçindekiler
@@ -438,6 +446,35 @@ baza eklenmelidir.
 3. **Koşul sayısının etkisi:** Baz doğru seçilirse $\kappa$ küçük kalır
    ve gürültü büyütülmez.
 
+### 9.1 Yöntemin temel sınırı: kazanç yasası ve gözlenebilirlik tabanı
+
+§9'un başında "yüksek harmonikler zaten ölçülemez" dedik; bunun **nicel** hali
+yörünge kazanç yasasıdır. Bir $k$ harmonikli misalignment desenine kapalı
+yörüngenin tepkisi:
+
+$$G_k = \frac{C}{\,|Q_{\text{eff}}^2 - k^2|\,}, \qquad C \approx 24.8,\quad Q_{\text{eff}}^2 \approx 5.03.$$
+
+Kapalı yörünge, uzaysal harmonikte **tünde ($Q\approx 2.7$) tepe yapan rezonant
+bir alçak-geçiren filtredir**. $k \gg Q$ için kazanç $\sim 1/k^2$ söner. Bir
+harmoniğin fit'e güvenle eklenebilmesi için kazancının gürültü/sinyal oranını
+aşması gerekir:
+
+$$G_k > \frac{\sigma_b}{\sigma_q} \;\;\Longrightarrow\;\; k_{\max}^2 < Q_{\text{eff}}^2 + C\,\frac{\sigma_q}{\sigma_b}.$$
+
+Burada $\sigma_q$ aranan misalignment genliği, $\sigma_b$ BPM ofset/gürültü
+tabanıdır. Bu, **kaç harmonik kurtarılabilir**'in kesin üst sınırıdır.
+
+**Kritik sonuç (sahte-EDM bağlantısı).** Kuadrupol gradyan işareti QF/QD'de zıt
+olduğundan, **simetrik ofset** (hücre içi QF/QD aynı yönlü) → **alternatif
+(yüksek-$k$, $k\approx 24$) kick** üretir → kazanç yasasıyla bastırılır →
+**kapalı yörüngeye neredeyse görünmez**. Tam da bu simetrik alt-uzay sahte EDM'i
+(dx·dy geometrik faz) sürdüğünden, yörünge-tabanlı yeniden çatım sahte-EDM
+amacıyla bir **gözlenebilirlik tabanına (~1.8×10⁻⁴)** çarpar; 6 farklı metot
+(R-LS, CLEAN, Bozoki, R⁻¹, TSVD) aynı tabana takılır. Bu, metodun değil fiziğin
+sınırıdır ve quad-flip/tün taraması gibi operasyonel hilelerle aşılamaz
+(ayrıntı: `false_edm_harmonic_sinir.md §14`, `omarov_symmetric_hybrid.md §9`,
+`README §19`).
+
 ### Sınırlar: gerçek senaryoya transfer
 
 Yukarıdaki 0.02 μm sonucu **sinüzoidal test verisi** ile elde edilmiştir:
@@ -806,7 +843,7 @@ yeterli rank elde edilir.
      R₁, R₂  ←  iki konfigürasyonda her quad'ı sırayla kaydır + simüle et
      ΔR = R₂ − R₁
 
-2. test_kmod_reconstruction.py
+2. reconstruction.py / fourier_reconstruct.py
      (a) Gerçek dy/dx üret (rastgele veya sinüzoidal --smooth)
      (b) İki konfigürasyonda parçacık takibi; y₁ ve y₂'yi al
      (c) Δy = y₂ − y₁
@@ -816,10 +853,15 @@ yeterli rank elde edilir.
          Fourier:  dy = F · (ΔR·F)⁺ · Δy
 ```
 
-Fourier seçimi kod içinde üç satırdır:
+> Not: eski sürücü `test_kmod_reconstruction.py` 2026-06 temizliğinde kaldırıldı
+> (mantığı git geçmişinde). Bugün rekonstrüksiyon `reconstruction.py` (hedefli +
+> greedy + LASSO) ve `fourier_reconstruct.py` (hedefli fit + CLEAN) ile yapılır.
+
+Fourier seçimi kod içinde üç satırdır (baz fonksiyonu: `fodo_basis` —
+`fourier_reconstruct.py`; ya da `fodo_fourier_basis` — `reconstruction.py`):
 
 ```python
-F = fourier_basis(n_q=48, k_list=[2, 4])   # sıkı baz
+F, _ = fodo_basis(n_q=48, k_list=[2, 4], antisym=True)   # FODO-antisimetrik sıkı baz
 M = dR @ F
 a, *_ = np.linalg.lstsq(M, delta_y, rcond=None)
 dy_geri = F @ a
