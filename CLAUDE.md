@@ -225,11 +225,12 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 - `main` — kararlı dal. **Kullanıcı talimatı: tüm çalışmalar her zaman main'e
   push edilir** ("bütün yaptıklarını her zaman main'e push et").
 - Aktif oturum dalı: `claude/awesome-babbage-nmi6w9`.
-- Sürüm etiketleri: `v1.1 … v4.3` (en güncel: **v4.3** — doküman tutarlılık
-  geçişi: lineer-model düzeltmesi, COSY/Omarov referans özetleri, no-go/§19,
-  ölü-betik temizliği. v4.2: literatür kıyası + stratejik karar). **Bu ortamda
-  tag push'u 403 ile engellenir**; tag'ler yerel makineden oluşturulup itilir.
-  Branch (main) push'u sorunsuz çalışır.
+- Sürüm etiketleri: en güncel **v4.3** (doküman tutarlılık geçişi: stratejik
+  karar + lineer-model düzeltmesi + COSY/Omarov referans özetleri + no-go/§19 +
+  ölü-betik temizliği). Kod v4.x boyunca değişmedi; v4.2 v4.3 ile aynı kodu ama
+  eski/hatalı dokümanı işaret ettiğinden kaldırıldı. **Bu ortamda tag push'u 403
+  ile engellenir**; tag'ler yerel makineden oluşturulup itilir. Branch (main)
+  push'u sorunsuz çalışır.
 - Commit ön-ekleri: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`.
 
 ---
