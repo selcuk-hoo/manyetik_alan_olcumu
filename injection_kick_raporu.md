@@ -7,6 +7,17 @@
 `test_realistic_amplitude.py` (Test 7), `test_realistic_beam.py` (Test 8),
 `test_quad_dx_effect.py` (Test 9)
 
+> **⚠️ Kapsam ve güncel not (2026-06).** Bu rapor **injection (fırlatma)
+> toleransı** konusudur: parçacığı kapalı yörüngeye oturtmak. Buradaki "sahte EDM
+> **lineer** büyür" ifadeleri **tek-parçacık betatron** kontaminasyonuna aittir
+> (fırlatma ofseti δy ile lineer) — bu, kuadrupol kaçıklığının ürettiği **baskın**
+> sahte EDM kanalıyla **karıştırılmamalıdır**: o kanal **kuadratiktir (σ²)** ve
+> **dx·dy** geometrik fazdan gelir (`false_edm_harmonic_sinir.md §13`, `README §19.1`).
+> Ayrıca buradaki tek-parçacık "ideal kick / CO=True" çerçevesi, ideal-olmayan
+> parçacıkların sahte-EDM üretimini temsil etmediği için sonradan **4-katlı
+> simetrik örnekleme + model-fit** reçetesiyle aşıldı. Adı geçen `test_*.py`
+> betikleri 2026-06 temizliğinde kaldırıldı (mantık git geçmişinde).
+
 ---
 
 ## 1. Problem: Betatron kirlenmesi ve sahte EDM

@@ -1,5 +1,18 @@
 # False EDM'in Fourier-Mod Spektrumu: Spin Takibiyle Doğrudan Ölçüm
 
+> **⚠️ Erken/aşılmış belge (2026-06).** Bu doküman yöntemin ilk halini anlatır ve
+> iki noktada **güncel sonuçlarla uyuşmaz** (doğrusu `false_edm_harmonic_sinir.md
+> §13`'tedir):
+> 1. **"Yavaş spin-tune dalgası" yorumu yanlıştı** (aşağıda §5–6'da geçer):
+>    ölçüldü, $S_x$ 1 ms'de yalnız ~0.7 µrad hareket eder; kontaminasyon aslında
+>    hızlı betatron aliasıdır. **ÇÜRÜTÜLDÜ.**
+> 2. Buradaki **"~lineer" genlik sonucu** 2-katlı/eski estimator'a dayanır.
+>    Baskın sahte EDM **kuadratiktir (σ²)** ve **dx·dy** geometrik faz kanalından
+>    gelir; doğru ölçüm **4-katlı simetrik örnekleme + model-fit** ister.
+>
+> Atıfta bulunulan `false_edm_mode_scan.py` 2026-06 temizliğinde kaldırıldı
+> (mantığı git geçmişinde). Belge tarihsel/pedagojik referans olarak korunuyor.
+
 > Bu doküman `false_edm_mode_scan.py` betiğinin yöntemini anlatır.
 > Soru basit: quad hizalama hatalarının hangi Fourier modu yanlış-EDM
 > (false EDM) sinyalini en çok besler? Cevabı **el sallamadan**, doğrudan
