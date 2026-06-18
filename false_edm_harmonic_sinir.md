@@ -1665,10 +1665,34 @@ kademesi baskın simetrik kısmı 6000× temizler** → hedef altı. İki-kademe
 
 ---
 
-*Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-16.
+---
+
+## §15 — Stratejik değerlendirme: spin yolunda katkı sınırı (literatür kıyası)
+
+İki referans makale (`cosy_polarimeter.md`, `omarov_symmetric_hybrid.md`)
+incelendikten sonra varılan dürüst sonuç:
+
+- **Spin ile ölç-düzelt çerçevesinde özgün katkı dardır.** Omarov (Phys. Rev. D
+  105, 032001) SBA + yükselt-sonra-söndür + CR/quad-flip iptalini yayınlamış;
+  bizim spin-trim'imiz çoğunu yeniden türetir.
+- **Önemli içgörü:** Omarov artığı 10⁻⁹'da *ölçmüyor* — bilinen B_x/B_y düğmesiyle
+  *yükseltip* hızlı ölçüyor (t ∝ 1/f² duvarını aşar). Bizim iki tur önceki
+  "ölçmek ~1 yıl alır → yöntem kullanılamaz" endişemizin çözümü bu.
+- **Açık olabilecek yer spin değil, yörünge tarafı:** Omarov per-quad harita
+  çıkarmıyor ve SBA zaman bütçesi vermiyor. Kapalı-yörünge kanalı araştırması
+  (quad-flip neden simetrik alt-uzayı açmaz; per-quad k-mod × flip BBA tabanı;
+  bilineer ∝dx·dy yörünge imzası) `omarov_symmetric_hybrid.md §8–9`'a taşındı.
+
+*(Karar: katkıyı yörünge/ölçüm sınırının kesin teoreminde ya da Omarov'un
+dokunmadığı bir gözlemlenebilir kanalda aramak; saf spin-trim yöntemi değil.)*
+
+---
+
+*Son güncelleme: oturum `claude/awesome-babbage-nmi6w9`, tarih 2026-06-18.
 §13 tam: dy-only doğrusallığı (§13.1-2), iki ikinci-derece kanal (§13.3),
 Omarov'un yeri (§13.4), demet=ideal + 4-katlı simetri (§13.6), çok-seed RMS +
 Omarov 3× uyum (§13.7), yöntem kaydı (§13.8). §10.2 thick-lens argümanı düzeltildi.
 §14: yörünge-trim §13 estimator'ıyla yeniden değerlendirildi — 200μm baseline
 ~1e-3 (dx·dy gerçek), orbit-trim k≤4 tek başına ~2.7× (yetmez), simetrik taban
-~3×10⁻⁴ gerçek → iki kademeli mimari sağlam.*
+~3×10⁻⁴ gerçek → iki kademeli mimari sağlam. §15: literatür kıyası + stratejik
+karar (spin yolunda katkı sınırı; yörünge kanalı araştırması açıldı).*

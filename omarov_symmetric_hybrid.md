@@ -169,6 +169,80 @@ karşılanır. "Hizalama gereksinimleri mevcut teknolojiyle erişilebilir."
 
 ---
 
+## 8. Stratejik Sonuç: Spin Yolunda Katkı Sınırı
+
+Bu üç makaleyi (Omarov + COSY polarimetre + kendi simülasyonumuz) yan yana
+koyunca varılan dürüst değerlendirme:
+
+**Saf "spin ile ölç-düzelt" çerçevesinde özgün katkı payı dardır.** Omarov işin
+çekirdeğini yayınlamış durumda:
+- Spin-tabanlı hizalama (SBA),
+- yükselt-sonra-söndür numarası (bilinen B_x/B_y düğmesiyle bilinmeyen E_quad'ı
+  amplifiye edip hızlı ölç → istatistik duvarını aş),
+- CR demet ayrımı = bol-istatistikli proxy,
+- CW/CCW + quad-flip iptali,
+- gerçekçi misalignment'la dS_y/dt < 1 nrad/s gösterimi.
+
+Bizim bir spin-trim yöntemimiz bunların çoğunu yeniden türetir → manşetlik
+yenilik değil.
+
+**Omarov'un YAPMADIĞı (olası boşluklar):**
+1. **Per-quad misalignment haritası çıkarmıyor.** SBA, alan harmoniklerini
+   (her N için net E_quad) söndürür; "şu quad şu kadar kaçık" demez. Ama biz de
+   gösterdik ki bu harita fizik olarak belirlenemez (kapalı yörünge simetrik
+   alt-uzayı göremez; spin yalnız net harmonik etkiyi verir) → **negatif sonuç.**
+2. **SBA'nın zaman/istatistik bütçesini vermiyor.** Mümkün olduğunu gösterir,
+   "kaç depolama / kaç gün / hangi tolerans seviyesinde istatistik duvarı"
+   sorusunu yanıtlamaz. Bizim t ∝ 1/f² ölçeklemesi + COSY FoM + yükselt-söndür
+   kazancı bunu sayısal bütçeye çevirebilir — pratik ama ikincil seviye katkı.
+3. **Farklı kafes** (elektrik-büküm hibrit vs bizim manyetik odaklamalı) →
+   bağımsız doğrulama değeri sınırlı.
+
+**Karar:** Katkıyı spin tarafında aramak yerine **yörünge/ölçüm tarafının gerçek
+sınırını** (ne kurtarılabilir, ne kurtarılamaz — kesin gözlenebilirlik teoremi)
+ya da Omarov'un dokunmadığı bir gözlemlenebilir kanalı araştırmak daha verimli.
+Açık aday kanallar §9'da tartışılıyor.
+
+---
+
+## 9. Açık Kapalı-Yörünge Kanalı Araştırması (devam eden)
+
+**Soru:** Spini bir kenara bırakıp kapalı yörüngeyi zorlarsak, simetrik
+alt-uzayı (sahte EDM'i süren, orbit-görünmez kısım) kurtaracak gözden kaçmış bir
+kanal var mı?
+
+**Görünmezliğin kökü (polariteden bağımsız).** Simetrik OFSET (hücre içi
+QF=QD=a_c) → kuadrupol gradyan işareti QF/QD'de değiştiği için **alternatif
+(yüksek-k, k≈24) KICK** deseni üretir. Kapalı yörünge rezonant bir alçak-geçiren
+filtredir (kazanç tünde, Q≈2.7, tepe yapar; G_k ∝ 1/|Q²−k²|). k≈24 ≫ Q olduğundan
+bastırılır. Antisimetrik ofset ise düzgün (düşük-k) kick → görünür.
+
+**Quad-flip bu kanalı AÇMAZ.** Gradyanları g→−g çevirmek tüm kick'lerin işaretini
+toptan çevirir; alternatif desen alternatif kalır, k≈24 yine tünden uzak. Flip
+ikinci ve optik-olarak-farklı bir tepki matrisi R′ verir (Q_x↔Q_y kayar) →
+**marjinal (tüne yakın) modların** koşullanmasını iyileştirir, ama derin-bastırılmış
+yüksek-k simetrik kanalı kurtarmaz. "Flip-öncesi QF / flip-sonrası QD" ayrıştırması
+yalnız zaten görünür modlarda işe yarar.
+
+**İntuisyona göre gerçekten açık olabilecek adaylar (test edilmeli):**
+1. **Per-quad k-modülasyonu (demet-tabanlı quad-merkez bulma).** Her quad'ın
+   gradyanını modüle edip yörünge tepkisini izlemek, o quad'daki demet-göreli
+   ofseti **yerel** ölçer — rezonant alçak-geçirenden geçmez, bireysel ofsetleri
+   (simetrik dahil) görebilir. Sınır: BPM ofseti (~100 μm) — projenin başlangıç
+   problemi. **k-mod × quad-flip** kombinasyonu BPM-ofsetini quad-merkezinden
+   ayırabilir (iki polarite, aynı geometriye iki bağımsız kısıt) → BBA tabanını
+   düşürebilir. Omarov'da yok.
+2. **İkinci-derece / bilineer yörünge gözlemlenebilirı (∝ dx·dy).** Kapalı yörünge
+   ofsette doğrusaldır ama sahte EDM bilineerdir. Belirlenemez ofset haritasını
+   kurmak yerine, sahte-EDM'i asıl süren ⟨dx·dy⟩ harmoniklerini bir ikinci-derece
+   yörünge imzasından doğrudan ölçmek mümkün olabilir. Spekülatif — genliğin
+   gürültü üstünde olup olmadığı simülasyonla sınanmalı.
+
+Öncelik: (1) en somut ve en az spekülatif → önce `k-mod × flip` BBA tabanı
+sayısal çıkarılmalı.
+
+---
+
 *Bu özet kuadrupol hizalamaya odaklanır. Tam tasarım (elektrot geometrisi, SCT,
 sekstupol optimizasyonu, GR düzeltmeleri, polarimetre detayı) için orijinal
 makaleye — Phys. Rev. D 105, 032001 (2022) — bakınız.*
