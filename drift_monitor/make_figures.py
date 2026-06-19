@@ -272,8 +272,59 @@ def fig4_permode():
 
 
 # --------------------------------------------------------------------------
+# Şekil 6 — ε-taraması: gürültü büyütmesi vs kondisyon sayısı
+# --------------------------------------------------------------------------
+def fig6_epsilon_sweep():
+    """ε taraması: ‖ΔR⁻¹‖ = 1/σ_min(ΔR) 1/ε ile ölçeklenir (asıl sonuç);
+    κ(ΔR) ise ε'den kabaca bağımsızdır (κ(ΔR) ≈ κ(R'), R' = g·∂R/∂g)."""
+    print("Şekil 6: ε-taraması (gürültü büyütmesi ∝ 1/ε; κ(ΔR) ~ sabit)")
+    eps_grid = np.array([0.005, 0.0075, 0.01, 0.015, 0.02, 0.03, 0.05, 0.075, 0.10])
+
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.4))
+
+    for plane, c in (("y", "C0"), ("x", "C1")):
+        Kxarc = fl.calibrate_K_x_arc(CFG) if plane == "x" else None
+        R = build_R(CFG, CFG["g1"], plane, Kxarc)
+        inv_smin = []   # ‖ΔR⁻¹‖ = 1/σ_min(ΔR)
+        kappa_dR = []   # κ(ΔR)
+        for eps in eps_grid:
+            dR = R - build_R(CFG, CFG["g1"] * (1.0 + eps), plane, Kxarc)
+            s = np.linalg.svd(dR, compute_uv=False)
+            inv_smin.append(1.0 / s[-1])
+            kappa_dR.append(s[0] / s[-1])
+        inv_smin = np.array(inv_smin)
+
+        # Sol panel: gürültü büyütmesi (log-log) + 1/ε referansı
+        axL.loglog(eps_grid, inv_smin, "o-", color=c, label=f"Düzlem {plane}")
+        # 1/ε referansı (ε=0.02 noktasından normalize)
+        ref = inv_smin[eps_grid == 0.02][0] * (0.02 / eps_grid)
+        axL.loglog(eps_grid, ref, ":", color=c, lw=1, alpha=0.7)
+
+        # Sağ panel: κ(ΔR) (semilogx)
+        axR.semilogx(eps_grid, kappa_dR, "s-", color=c, label=f"Düzlem {plane}")
+
+    axL.set_xlabel(r"İki-gradient ayrımı $\varepsilon$")
+    axL.set_ylabel(r"$\|\Delta R^{-1}\| = 1/\sigma_{\min}(\Delta R)$")
+    axL.set_title(r"Gürültü büyütmesi $\propto 1/\varepsilon$ (nokta çizgi: $1/\varepsilon$ ref.)")
+    axL.grid(True, which="both", alpha=0.3)
+    axL.legend(fontsize=9)
+
+    axR.set_xlabel(r"İki-gradient ayrımı $\varepsilon$")
+    axR.set_ylabel(r"$\kappa(\Delta R)$")
+    axR.set_title(r"$\kappa(\Delta R)$ $\varepsilon$'dan kabaca bağımsız "
+                  r"($\approx\kappa(R')$)")
+    axR.grid(True, which="both", alpha=0.3)
+    axR.legend(fontsize=9)
+
+    fig.suptitle(r"Şekil 6 — $\varepsilon$ taraması: ofset-iptal eden "
+                 r"estimatörün gürültü büyütmesi $\propto 1/\varepsilon$ patlar; "
+                 r"$\kappa(\Delta R)$ ise sabit", fontsize=10.5)
+    _save(fig, "fig6_epsilon_sweep.png")
+
+
+# --------------------------------------------------------------------------
 FIGS = {1: fig1_svd_spectra, 2: fig2_drift_tracking,
-        3: fig3_betabeat, 4: fig4_permode}
+        3: fig3_betabeat, 4: fig4_permode, 6: fig6_epsilon_sweep}
 
 
 def main():

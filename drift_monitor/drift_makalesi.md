@@ -156,12 +156,14 @@ ofsete kurban eder.
 ile iki ayrı gradient ayarında ölçüm alıp
 $\widehat{\Delta q}=\Delta R^{-1}(\mathbf{y}_1-\mathbf{y}_2)$,
 $\Delta R=R_1-R_2$. Ofset iptal olur, fakat $R\propto(KL)\propto g$ olduğundan
-$\Delta R\approx\varepsilon R$ ölçeklemesi (bulk singüler değerlerde) geçerlidir
-ve kondisyon sayısı en az $\sim 1/\varepsilon$ kat kötüleşir. Sayısal olarak
-$\kappa(R)\approx 193$ iken $\kappa(\Delta R)$ düzleme bağlı olarak
-$\sim 7\times10^3$ (yatay) – $\sim 4\times10^4$ (dikey) mertebesindedir, yani
-$R$'den 1–2 mertebe kötüdür (en küçük modlar bulk ölçeklemesinin de altına
-çöker; bkz. Şekil 1).
+küçük $\varepsilon$ için $\Delta R\approx\varepsilon\,(g\,\partial R/\partial g)$
+olur; bu, ofset-iptal eden estimatörün **gürültü büyütmesini**
+$\|\Delta R^{-1}\| = 1/\sigma_{\min}(\Delta R)\propto 1/\varepsilon$ olarak
+patlatır (asıl sorun budur). Dikkat: $1/\varepsilon$ ile ölçeklenen kondisyon
+sayısı $\kappa(\Delta R)$ **değil** — o, türev matrisi $g\,\partial R/\partial g$'nin
+koşulluluğu olup $\varepsilon$'dan kabaca bağımsızdır ($\sim 10^4$, $\kappa(R)\approx 193$'ün
+~2 mertebe üstünde). Pratikte ($\varepsilon\approx 0.02$) gürültü büyütmesi
+$\|\Delta R^{-1}\|\sim 10^4$ mertebesine çıkar (Şekil 1, Şekil 6).
 
 **(iii) $\Delta R^{-1}$ + düzenlileştirme.** Tikhonov / TSVD. Gürültü-bias
 dengesi; en iyi durumda dahi $\sim 50\,\mu$m (§3.1).
@@ -244,9 +246,16 @@ transferi: Tikhonov/TSVD yüksek-$k$ modlarını ($k\gtrsim 18$) tamamen söndü
 48 modun yalnızca 3–5'i kurtarılır. SVD spektrumu yan yana çizildiğinde
 $\Delta R\approx\varepsilon R$ bulk ölçeklemesi doğrulanır (Şekil 1):
 $\Delta R$'nin büyük singüler değerleri $R$'ninkilerin yaklaşık $\varepsilon$
-katıdır; en küçük modlar ise bu ölçeklemenin altına çöker ve $\kappa(\Delta R)$
-$R$'den 1–2 mertebe büyür. Bulk için $\kappa$ artışı $\sim 1/\varepsilon$
-mertebesinde olup $\varepsilon\in[0.005,0.05]$ taramasında bu eğilim korunur.
+katıdır; en küçük modlar ise bu ölçeklemenin altına çöker, $\Delta R$ her
+durumda $R$'den ~2 mertebe kötü koşulludur.
+
+$\varepsilon$ taraması (Şekil 6) asıl ölçeklemeyi netleştirir: ofset-iptal
+eden estimatörün gürültü büyütmesi $\|\Delta R^{-1}\|=1/\sigma_{\min}(\Delta R)$
+tüm $\varepsilon\in[0.005,0.10]$ aralığında temiz biçimde $\propto 1/\varepsilon$
+patlarken, kondisyon sayısı $\kappa(\Delta R)$ kabaca sabit ($\sim 10^4$) kalır.
+Yani $\varepsilon\to 0$ sınırında yöntemi kullanılamaz kılan κ değil,
+$\|\Delta R^{-1}\|$'dir — bu, §2.4'teki alt-sınır önermesinin ($\|\Delta R^{-1}\|
+\sim\|R^{-1}\|/\varepsilon$) doğrudan sayısal doğrulamasıdır.
 
 ### 3.3 Test 3 — Yatay model ters-suç kontrolü
 
@@ -511,13 +520,21 @@ test parametreleri `drift_monitor/test_params.json`'dadır.
 
 ---
 
-## Şekil Listesi (planlanan)
+## Şekil Listesi
+
+Şekiller `drift_monitor/make_figures.py` (Şekil 1–4, 6) ve
+`drift_monitor/make_fig5_architecture.py` (Şekil 5) ile üretilir.
 
 1. $R$ ve $\Delta R$ singüler-değer spektrumlarının yan yana karşılaştırması
-   ($\Delta R\approx\varepsilon R$ kayması; §2.4/§3.2).
+   ($\Delta R\approx\varepsilon R$ bulk kayması, kuyrukta ek çöküş; §2.4/§3.2).
+   — `fig1_svd_spektrum.png`
 2. Drift izleme zaman serisi: gerçek vs kestirilen drift RMS, mutlak
-   rekonstrüksiyonla birlikte (§3.4).
+   rekonstrüksiyonla birlikte (§3.4). — `fig2_drift_izleme.png`
 3. β-beating tarama eğrisi: tracking hatası vs $\varepsilon_\beta$ (§3.7).
+   — `fig3_betabeat.png`
 4. Per-mod grafiği: mod indeksine karşı gürültü büyütmesi ($1/\sigma$) ve
-   simetrik güç oranı, çift eksen (§4.3).
-5. İki-katmanlı işletme mimarisi şeması (§5).
+   simetrik güç oranı, çift eksen (§4.3). — `fig4_permode_svd.png`
+5. İki-katmanlı işletme mimarisi şeması (§5). — `fig5_mimari.png`
+6. $\varepsilon$ taraması: gürültü büyütmesi $\|\Delta R^{-1}\|\propto 1/\varepsilon$
+   (sol) ve $\kappa(\Delta R)$'nin $\varepsilon$'dan bağımsızlığı (sağ); §3.2.
+   — `fig6_epsilon_sweep.png`
