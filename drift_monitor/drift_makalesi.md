@@ -80,7 +80,10 @@ Dolayısıyla bu makalenin amacı klasik kapalı-yörünge/k-modülasyon yöntem
 bu yerleşik stratejinin yerine koymak **değildir**. Aksine, mevcut BPM
 altyapısıyla sürekli, ucuz ve fizik-veri-toplamayı bozmadan çalışabilen bir
 **tamamlayıcı online drift izleyici**nin neyi başarabileceğini ve nerede
-yapısal olarak duracağını nicelemektir.
+yapısal olarak duracağını nicelemektir. Kısaca: kapalı yörüngeyi spin-tabanlı
+hizalama teşhisinin yerine koymuyoruz; onun sürekli bir hizalama-drift izleyici
+olarak hizmet edebileceği **gözlenebilir alt-uzayı** ve bu alt-uzayın sınırını
+niceliyoruz.
 
 ### 1.3 Çalışmanın katkısı
 
@@ -363,9 +366,11 @@ $$
 değil, bu konfigürasyonun mod yapısı üzerine kuruludur.)
 
 Kazanç $k\approx Q\,(\approx 2.7)$ civarında tepe yapar ve $k\gg Q$ için
-hızla bastırılır. Bu, kapalı yörüngenin esasen bir **rezonant alçak-geçiren
-filtre** gibi davrandığı anlamına gelir: düşük-$k$ (düzgün) kick desenleri
-görünür, yüksek-$k$ (alternatif) desenler bastırılır.
+hızla bastırılır. Yani kapalı yörünge bir **mod-seçici (rezonant) tepki**dir:
+tune'a yakın azimutal harmonikler kuvvetle geçer, $k\gg Q$ desenleri
+bastırılır. (Bu klasik bir uzaysal alçak-geçiren filtre değildir — tepe $k=0$'da
+değil $k\approx Q$'dadır; ilgili aralıkta düşük-$k$/antisimetrik desenler
+görünür, yüksek-$k$/simetrik desenler bastırılır.)
 
 ### 4.2 Simetrik / antisimetrik ayrışım
 
@@ -486,9 +491,13 @@ prob — demet ayrımı/spin) [Omarov 2022].
   akım dalgalanması vardır. Bunların sistematik incelenmesi gelecek çalışmadır.
 - **Tek kafes.** Tüm sonuçlar 24-hücreli FODO'da. Genellenebilirlik kazanç
   yasası $G_k$ üzerinden tahmin edilebilir ama doğrulanmamıştır.
-- **BPM ofset uzun-vadeli kararlılığı.** Drift modunun temel varsayımı
-  $\mathbf{b}(t)\approx\mathbf{b}_0$ olduğundan, donanımın saatler–günler
-  ölçeğinde ofset stabilitesi deneysel olarak karakterize edilmelidir.
+- **BPM ofset kararlılığı operasyonel bir gerekliliktir.** Yöntem BPM ofsetine
+  *duyarsız* değildir; ofsetin *hızına* duyarsızdır. Drift modu
+  $\mathbf{b}(t)\approx\mathbf{b}_0$ varsayar ve geçerliliği bir kayma-hızı
+  bütçesine bağlıdır: $\dot{\mathbf{b}} \lesssim 2\,\mu$m/epoch (§3.5). Bu eşiğin
+  pEDM BPM donanımında saatler–günler ölçeğinde sağlanıp sağlanmadığı deneysel
+  olarak karakterize edilmelidir; yöntemin pratik kullanılabilirliğinin
+  belirleyicisidir.
 
 ---
 

@@ -105,7 +105,10 @@ Dolayısıyla bu makalenin amacı klasik kapalı-yörünge/k-modülasyon yöntem
 yerleşik stratejinin yerine koymak \textbf{değildir}. Aksine, mevcut BPM
 altyapısıyla sürekli, ucuz ve fizik-veri-toplamayı bozmadan çalışabilen bir
 \textbf{tamamlayıcı online drift izleyici}nin neyi başarabileceğini ve nerede
-yapısal olarak duracağını nicelemektir.
+yapısal olarak duracağını nicelemektir. Kısaca: kapalı yörüngeyi spin-tabanlı
+hizalama teşhisinin yerine koymuyoruz; onun sürekli bir hizalama-drift izleyici
+olarak hizmet edebileceği \textbf{gözlenebilir alt-uzayı} ve bu alt-uzayın
+sınırını niceliyoruz.
 
 \subsection{Çalışmanın katkısı}
 \begin{enumerate}
@@ -463,9 +466,11 @@ Q_\text{eff}^2\approx 5.03.
 (Sabitler bu örgüye özgüdür; aşağıdaki argüman genel kapalı-yörünge yasası
 değil, bu konfigürasyonun mod yapısı üzerine kuruludur.) Kazanç
 $k\approx Q\,(\approx 2.7)$ civarında tepe yapar ve $k\gg Q$ için hızla
-bastırılır. Bu, kapalı yörüngenin esasen bir \textbf{rezonant alçak-geçiren
-filtre} gibi davrandığı anlamına gelir: düşük-$k$ (düzgün) kick desenleri
-görünür, yüksek-$k$ (alternatif) desenler bastırılır.
+bastırılır. Yani kapalı yörünge bir \textbf{mod-seçici (rezonant) tepki}dir:
+tune'a yakın azimutal harmonikler kuvvetle geçer, $k\gg Q$ desenleri
+bastırılır. (Bu klasik bir uzaysal alçak-geçiren filtre değildir --- tepe
+$k=0$'da değil $k\approx Q$'dadır; ilgili aralıkta düşük-$k$/antisimetrik
+desenler görünür, yüksek-$k$/simetrik desenler bastırılır.)
 
 \subsection{Simetrik / antisimetrik ayrışım}
 48 boyutlu misalignment uzayı, hücre içi QF/QD çiftinin göreli işaretine göre
@@ -607,10 +612,13 @@ yörünge-dışı bir prob --- demet ayrımı/spin) \cite{omarov2022}.
   incelenmesi gelecek çalışmadır.
 \item \textbf{Tek kafes.} Tüm sonuçlar 24-hücreli FODO'da. Genellenebilirlik
   kazanç yasası $G_k$ üzerinden tahmin edilebilir ama doğrulanmamıştır.
-\item \textbf{BPM ofset uzun-vadeli kararlılığı.} Drift modunun temel
-  varsayımı $\mathbf{b}(t)\approx\mathbf{b}_0$ olduğundan, donanımın
-  saatler--günler ölçeğinde ofset stabilitesi deneysel olarak karakterize
-  edilmelidir.
+\item \textbf{BPM ofset kararlılığı operasyonel bir gerekliliktir.} Yöntem BPM
+  ofsetine \emph{duyarsız} değildir; ofsetin \emph{hızına} duyarsızdır. Drift
+  modu $\mathbf{b}(t)\approx\mathbf{b}_0$ varsayar ve geçerliliği bir
+  kayma-hızı bütçesine bağlıdır: $\dot{\mathbf{b}}\lesssim 2\,\mu$m/epoch
+  (\S3.5). Bu eşiğin pEDM BPM donanımında saatler--günler ölçeğinde sağlanıp
+  sağlanmadığı deneysel olarak karakterize edilmelidir; yöntemin pratik
+  kullanılabilirliğinin belirleyicisidir.
 \end{itemize}
 
 % ============================================================
