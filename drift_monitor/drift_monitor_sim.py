@@ -40,8 +40,9 @@ with open(_os.path.join(_DIR, "test_params.json"), "r") as _f:
     _tp = json.load(_f)
 _t4 = _tp["test4"]
 
-# Başlangıç misalignment büyüklüğü — params.json'dan (y ve x ortalaması)
-DQ0_RMS    = 0.5 * (float(_cfg["quad_random_dy_max"]) + float(_cfg["quad_random_dx_max"]))
+# Başlangıç misalignment büyüklüğü (Test 4 senaryosu: 100 μm RMS).
+# test_params.json'da verilirse oradan, yoksa varsayılan 100 μm.
+DQ0_RMS    = float(_t4.get("DQ0_RMS", 100e-6))
 BPM_OFFSET = float(_t4["BPM_OFFSET"])
 BPM_NOISE  = float(_t4["BPM_NOISE"])
 DRIFT_RAMP = float(_t4["DRIFT_RAMP"])
@@ -148,7 +149,7 @@ def main():
     print("=" * 72)
     print("drift_monitor_sim.py — Test 4")
     print("=" * 72)
-    print(f"DQ0_RMS    = {DQ0_RMS*1e6:.0f} μm  (params.json quad_random_dy/dx_max ortalaması)")
+    print(f"DQ0_RMS    = {DQ0_RMS*1e6:.0f} μm  (Test 4 başlangıç misalignment, test_params.json)")
     print(f"BPM_OFFSET = {BPM_OFFSET*1e6:.0f} μm  BPM_NOISE = {BPM_NOISE*1e6:.1f} μm  "
           f"DRIFT_RAMP = {DRIFT_RAMP*1e6:.0f} μm  N_EPOCHS = {N_EPOCHS}  (test_params.json)")
 

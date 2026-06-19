@@ -156,8 +156,12 @@ ofsete kurban eder.
 ile iki ayrı gradient ayarında ölçüm alıp
 $\widehat{\Delta q}=\Delta R^{-1}(\mathbf{y}_1-\mathbf{y}_2)$,
 $\Delta R=R_1-R_2$. Ofset iptal olur, fakat $R\propto(KL)\propto g$ olduğundan
-$\Delta R\approx\varepsilon R$ ölçeklemesi geçerlidir ve kondisyon sayısı
-yaklaşık $1/\varepsilon$ kat kötüleşir ($\kappa(\Delta R)\approx 27\,000$).
+$\Delta R\approx\varepsilon R$ ölçeklemesi (bulk singüler değerlerde) geçerlidir
+ve kondisyon sayısı en az $\sim 1/\varepsilon$ kat kötüleşir. Sayısal olarak
+$\kappa(R)\approx 193$ iken $\kappa(\Delta R)$ düzleme bağlı olarak
+$\sim 7\times10^3$ (yatay) – $\sim 4\times10^4$ (dikey) mertebesindedir, yani
+$R$'den 1–2 mertebe kötüdür (en küçük modlar bulk ölçeklemesinin de altına
+çöker; bkz. Şekil 1).
 
 **(iii) $\Delta R^{-1}$ + düzenlileştirme.** Tikhonov / TSVD. Gürültü-bias
 dengesi; en iyi durumda dahi $\sim 50\,\mu$m (§3.1).
@@ -238,9 +242,11 @@ Düzenlileştirme ham (ii)'yi $\sim 35\times$ iyileştirir ama korelasyon
 Saf sinüsoidal patern girişine ($\Delta q_j=A\cos(2\pi kj/N)$) estimatör mod
 transferi: Tikhonov/TSVD yüksek-$k$ modlarını ($k\gtrsim 18$) tamamen söndürür;
 48 modun yalnızca 3–5'i kurtarılır. SVD spektrumu yan yana çizildiğinde
-$\Delta R\approx\varepsilon R$ ölçeklemesi doğrulanır:
-$\kappa(\Delta R)/\kappa(R)\approx 1/\varepsilon\approx 50$ ilişkisi
-$\varepsilon\in[0.005,0.05]$ taramasında geçerli kalır.
+$\Delta R\approx\varepsilon R$ bulk ölçeklemesi doğrulanır (Şekil 1):
+$\Delta R$'nin büyük singüler değerleri $R$'ninkilerin yaklaşık $\varepsilon$
+katıdır; en küçük modlar ise bu ölçeklemenin altına çöker ve $\kappa(\Delta R)$
+$R$'den 1–2 mertebe büyür. Bulk için $\kappa$ artışı $\sim 1/\varepsilon$
+mertebesinde olup $\varepsilon\in[0.005,0.05]$ taramasında bu eğilim korunur.
 
 ### 3.3 Test 3 — Yatay model ters-suç kontrolü
 
@@ -261,7 +267,7 @@ $t=1..10$: hizalama 10 μm RMS yavaşça kayar, ofset sabit.
 | İyileşme | 29× | 28× |
 
 50 μm RMS ofset yöntemi etkilemez; geriye yalnızca gürültü-kaynaklı taban
-kalır. (`drift_monitor/drift_monitor_sim.py`)
+kalır (Şekil 2). (`drift_monitor/drift_monitor_sim.py`)
 
 ### 3.5 Test 5 — BPM ofseti zamanla kayarsa?
 
@@ -285,7 +291,8 @@ tilt'ler):
 | **B: drift modu** | **6.25 μm** | **0.85** | **7.18 μm** | **0.85** |
 | C: sayısal $\Delta R$ | 980 μm | -0.02 | 1357 μm | -0.11 |
 
-$\kappa(\Delta R_{\text{an}})=\kappa(\Delta R_{\text{num}})\approx 27\,000$.
+Her iki $\Delta R$ inşası da $\kappa\sim 10^4$ mertebesinde kötü koşulludur
+(düzleme bağlı $\sim 7\times10^3$–$4\times10^4$; bkz. Şekil 1).
 Sayısal $R$, $\Delta R$ yaklaşımını kurtarmaz — $\kappa(\Delta R)$ matrisin
 nasıl inşa edildiğine değil $\varepsilon$ ve örgü fiziğine bağlıdır. Drift
 modu yapısal olarak farklı bir problem (mutlak değil, değişim) çözdüğü için
@@ -311,7 +318,7 @@ ile (15 tohum medyanı):
 LOCO sonrası tipik $\sim\%1$ β-beating'de taban yalnızca 0.1 μm artar
 (5.98→6.08 μm); hedefe 3.9 μm marj kalır. Yöntem, standart-kalite LOCO'su olan
 bir hızlandırıcıda operasyonel olarak kullanılabilir.
-(`drift_monitor/test8_betabeat.py`)
+(Şekil 3; `drift_monitor/test8_betabeat.py`)
 
 ### 3.8 Test özeti
 
@@ -387,7 +394,9 @@ en kötü 8 mod ortalama **%96** simetrik. En kötü modun ($\sigma_{\min}$)
 koşulluluk-kaynaklı duyarlılığı en iyiye göre $\sim 193$ kat ($=\kappa(R)$)
 daha kötüdür; bu fark tümüyle simetrik alt-uzayda yoğunlaşır. (Bu, "tüm
 simetrik modlar 193 kat kötü" demek değildir; tablodaki $1/\sigma$ sütunu
-mod-mod artışı gösterir.) (`drift_monitor/permode2.py`)
+mod-mod artışı gösterir.) Bu ilişki Şekil 4'te açıkça görülür: gürültü
+duyarlılığı $1/\sigma$ arttıkça simetrik güç oranı %100'e tırmanır.
+(`drift_monitor/permode2.py`)
 
 ### 4.4 Sahte EDM kanalıyla çakışma
 
@@ -420,7 +429,8 @@ karşı-dönen demet ayrımı veya spin presesyonudur [Omarov 2022].
 
 ## 5. Önerilen İşletme Modu
 
-Tek bir yöntem her ihtiyacı karşılamaz; iki katmanlı bir mimari öneriyoruz.
+Tek bir yöntem her ihtiyacı karşılamaz; iki katmanlı bir mimari öneriyoruz
+(Şekil 5).
 
 **Yavaş mutlak katman (saatlik–günlük).** LOCO + BBA + survey ile mutlak
 hizalama $\Delta q_0$, BPM ofseti $\mathbf{b}_0$ ve örgü modeli ($\beta,\phi,Q$,

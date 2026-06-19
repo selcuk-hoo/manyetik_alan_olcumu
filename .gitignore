@@ -93,3 +93,7 @@ extract_*.py
 get_*.py
 sy_plot.png
 2.pdf
+
+# drift_monitor üretilen figürleri (make_figures.py / make_fig5_architecture.py ile yeniden üretilir)
+drift_monitor/*.png
+test4_drift_monitor.png

@@ -27,7 +27,8 @@
     },
 
     "test4": {
-        "_comment": "drift_monitor_sim.py — calibrated-reference drift tracking. DQ0_RMS comes from params.json quad_random_dy/dx_max.",
+        "_comment": "drift_monitor_sim.py — calibrated-reference drift tracking. DQ0_RMS: Test 4 initial misalignment RMS.",
+        "DQ0_RMS": 100e-6,
         "BPM_OFFSET": 50e-6,
         "BPM_NOISE": 1e-6,
         "DRIFT_RAMP": 10e-6,
