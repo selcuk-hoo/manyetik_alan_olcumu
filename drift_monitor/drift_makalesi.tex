@@ -165,6 +165,29 @@ simülasyon izleyicisinden bağımsızdır ve \texttt{fodo\_lattice.py} içinde
 uygulanmıştır. Varsayılan örgüde $\kappa(R)\approx 193$,
 $\sigma_{\max}\approx 28.4$, $\sigma_{\min}\approx 0.147$.
 
+\paragraph{Analitik R'nin tam parçacık takibiyle doğrulanması.}
+Analitik R tüm sonuçların temeli olduğundan, onu bağımsız bir tam parçacık
+izleyicisiyle (C++ GL4 semplektik, \texttt{integrator.cpp}) karşılaştırıyoruz.
+İzleyici R'si, her kuadrupole küçük bir $\delta y$ (veya $\delta x$)
+perturbasyonu uygulayıp kapalı yörünge tepkisini 48 BPM'de ölçerek kurulur.
+Sonuç (Şekil~\ref{fig:thsim}): analitik ve izleyici R'leri eleman-eleman
+korelasyon $0.9992$ (dikey) / $0.9977$ (yatay), göreli fark
+$\|R_\text{sim}-R_\text{an}\|/\|R_\text{an}\| = 5.3\%/7.2\%$, kondisyon sayıları
+tutarlı ($\kappa$: 228 vs 193 dikey, 135 vs 140 yatay). Böylece analitik R
+üzerine kurulan tüm gözlenebilirlik analizi tam parçacık dinamiğiyle
+doğrulanmış olur.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig7_theory_sim.png}
+\caption{Analitik Courant-Snyder R (teori) ile tam parçacık izleyicisinden
+(C++ GL4, \texttt{integrator.cpp}) kurulan R'nin eleman-eleman karşılaştırması;
+(a) dikey, (b) yatay düzlem. Noktalar $y=x$ üzerinde: korelasyon
+$0.9992/0.9977$, $\kappa$ tutarlı. Drift makalesinin analitik temelini tam
+parçacık dinamiğiyle doğrular.}
+\label{fig:thsim}
+\end{figure}
+
 \subsection{Aday estimatörler}
 Aday yöntemler iki sınıfa ayrılır: ofseti tahmin etmeye/iptal etmeye çalışan
 \textbf{mutlak rekonstrüksiyon} yaklaşımları (i--iii) ve ofseti bir nuisance
@@ -397,6 +420,16 @@ Tablo~\ref{tab:t8}). LOCO sonrası tipik $\sim$\%1 $\beta$-beating'de taban
 yalnızca 0.1\,$\mu$m artar (5.98$\to$6.08\,$\mu$m); hedefe 3.9\,$\mu$m marj
 kalır. Yöntem, standart-kalite LOCO'su olan bir hızlandırıcıda operasyonel
 olarak kullanılabilir (Şekil~\ref{fig:beta}).
+
+\paragraph{İzleyici doğrulaması.} Yukarıdaki tarama $\beta$-beating'i analitik
+olarak ($\beta,\phi$ doğrudan bozularak) modelliyordu. Bunu $\beta$-beating'in
+gerçek kaynağıyla --- kuadrupol fraksiyonel gradyan hatalarıyla --- tam parçacık
+izleyicisinde tekrarladık: bozulmuş $R_\text{true}$ izleyiciden kuruldu, monitör
+nominal $R_\text{nom}^{-1}$ ile çalıştı. Gradyan hatası RMS'i $0,\,2\%,\,5\%$
+için drift takip hatası $6.17,\,6.17,\,6.25\,\mu$m ($\kappa$: $228\to239\to233$).
+Gerçek gradyan-hatası kaynaklı $\beta$-beating analitik taramadan bile daha
+sağlam çıktı; Test 8 tam parçacık dinamiğiyle doğrulandı.
+(\texttt{drift\_betabeat\_sim.py})
 
 \begin{table}[tb]
 \centering\small

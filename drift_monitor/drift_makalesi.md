@@ -143,6 +143,19 @@ Bu inşa simülasyon izleyicisinden bağımsızdır ve `drift_monitor/fodo_latti
 içinde uygulanmıştır. Varsayılan örgüde $\kappa(R)\approx 193$,
 $\sigma_{\max}\approx 28.4$, $\sigma_{\min}\approx 0.147$.
 
+**Analitik R'nin tam parçacık takibiyle doğrulanması.**
+Analitik R, tüm sonuçların temelidir; bu yüzden onu bağımsız bir tam parçacık
+izleyicisiyle (C++ GL4 semplektik, `integrator.cpp`) karşılaştırıyoruz.
+İzleyici R'si, her kuadrupole küçük bir $\delta y$ (veya $\delta x$) perturbasyonu
+uygulayıp kapalı yörünge tepkisini 48 BPM'de ölçerek kurulur
+(`build_response_matrix.py`). Sonuç (Şekil~\ref{fig:thsim}): analitik ve
+izleyici R'leri eleman-eleman korelasyon **0.9992** (dikey) / **0.9977** (yatay),
+göreli fark $\|R_\text{sim}-R_\text{an}\|/\|R_\text{an}\|=\%5.3/\%7.2$, kondisyon
+sayıları tutarlı ($\kappa$: 228 vs 193 dikey, 135 vs 140 yatay). Böylece
+analitik R üzerine kurulan tüm gözlenebilirlik analizi (SVD mod yapısı, $\kappa$,
+drift kurtarımı) tam parçacık dinamiğiyle doğrulanmış olur.
+(`drift_monitor/theory_sim_validate.py`)
+
 ### 2.3 Aday estimatörler
 
 Aday yöntemler iki sınıfa ayrılır: ofseti tahmin etmeye/iptal etmeye çalışan
@@ -331,6 +344,16 @@ LOCO sonrası tipik $\sim\%1$ β-beating'de taban yalnızca 0.1 μm artar
 (5.98→6.08 μm); hedefe 3.9 μm marj kalır. Yöntem, standart-kalite LOCO'su olan
 bir hızlandırıcıda operasyonel olarak kullanılabilir.
 (Şekil 3; `drift_monitor/test8_betabeat.py`)
+
+**İzleyici doğrulaması.** Yukarıdaki tarama, β-beating'i analitik olarak
+($\beta,\phi$ doğrudan bozularak) modelliyordu. Bunu β-beating'in gerçek
+kaynağıyla — kuadrupol fraksiyonel gradyan hatalarıyla — tam parçacık
+izleyicisinde tekrarladık: bozulmuş tepki matrisi $R_\text{true}$ izleyiciden
+kuruldu, drift monitör nominal $R_\text{nom}^{-1}$ ile çalıştı. Gradyan hatası
+RMS'i 0, %2, %5 için drift takip hatası 6.17, 6.17, 6.25 μm
+(κ: 228→239→233). Gerçek gradyan-hatası kaynaklı β-beating, analitik taramadan
+bile daha sağlam çıktı — Test 8'in sonucu tam parçacık dinamiğiyle doğrulandı.
+(`drift_monitor/drift_betabeat_sim.py`)
 
 ### 3.8 Test özeti
 
@@ -541,9 +564,10 @@ test parametreleri `drift_monitor/test_params.json`'dadır.
 
 Tüm şekiller **PRD tek-sütun** formatında (genişlik 3.375 in / 246 pt, serif +
 Computer-Modern mathtext, 600 dpi) üretilir: `drift_monitor/make_figures.py`
-(Şekil 1–4, 6) ve `drift_monitor/make_fig5_architecture.py` (Şekil 5). Çok
-panelli şekiller dikey istiflenir ve (a)/(b) ile etiketlenir; şekil-içi başlık
-yoktur, açıklama aşağıdaki caption'lardadır (PRD konvansiyonu).
+(Şekil 1–4, 6), `drift_monitor/make_fig5_architecture.py` (Şekil 5) ve
+`drift_monitor/theory_sim_validate.py` (Şekil 7). Çok panelli şekiller dikey
+istiflenir ve (a)/(b) ile etiketlenir; şekil-içi başlık yoktur, açıklama
+aşağıdaki caption'lardadır (PRD konvansiyonu).
 
 **ŞEKİL 1.** (`fig1_svd_spektrum.png`) Tepki matrisi $R$ ve iki-gradient farkı
 $\Delta R=R(g_1)-R(g_1(1+\varepsilon))$ ($\varepsilon=0.02$) için singüler-değer
@@ -578,3 +602,9 @@ noktalı $1/\varepsilon$ referansıyla — temiz $1/\varepsilon$ ölçeklemesi;
 (b) kondisyon sayısı $\kappa(\Delta R)$, $\varepsilon$'dan kabaca bağımsız
 ($\sim 10^4$). $\varepsilon\to0$'da yöntemi bozan κ değil $\|\Delta R^{-1}\|$'dir.
 (§2.4, §3.2)
+
+**ŞEKİL 7.** (`fig7_theory_sim.png`) Analitik Courant-Snyder R (teori) ile tam
+parçacık izleyicisinden (C++ GL4, `integrator.cpp`) kurulan R'nin eleman-eleman
+karşılaştırması; (a) dikey, (b) yatay düzlem. Noktalar $y=x$ üzerinde:
+korelasyon 0.9992/0.9977, $\kappa$ tutarlı. Drift makalesinin analitik temelini
+tam parçacık dinamiğiyle doğrular. (§2.2)
