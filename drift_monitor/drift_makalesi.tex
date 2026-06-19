@@ -1,0 +1,645 @@
+% drift_makalesi.tex — iki-sütunlu makale taslağı (revtex KULLANMADAN)
+% Derleme: pdflatex drift_makalesi.tex  (iki kez, referanslar için)
+% Şekiller bu dosyayla aynı dizinde (drift_monitor/) PNG olarak bulunmalı;
+% üretim: python3 make_figures.py ; python3 make_fig5_architecture.py
+\documentclass[twocolumn,a4paper,10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{textcomp}
+\usepackage[hidelinks,unicode]{hyperref}
+\usepackage{geometry}
+\geometry{margin=2cm}
+
+% Şekiller bu dizinde
+\graphicspath{{./}}
+
+\title{\bfseries Dondurulmuş-spin proton EDM halkasında kapalı-yörünge
+tabanlı hizalama drift izlemesi: performans ve gözlenebilirlik
+sınırları\thanks{Taslak v0.1 (2026-06-19). \texttt{makale-taslagi-2.md} ve
+\texttt{drift\_monitor/} test sonuçlarından konsolide edilmiştir; başlık
+geçicidir.}}
+
+\author{(yazar bilgisi)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Proton EDM (pEDM) deneyinin alternating-gradient (AG) versiyonunda, manyetik
+kuadrupol hizalama hataları baskın sistematik kaynağıdır ve spin koherans
+zaman ölçeğinde $\sim 10\,\mu$m seviyesinde kontrol altında tutulmalıdır
+\cite{omarov2022}. Bu çalışmada, kalibrasyon anına göreli bir
+\emph{kapalı-yörünge tabanlı online hizalama drift izleme yöntemi} öneriyor
+ve sistematik simülasyon testleriyle hem yeteneklerini hem de temel sınırını
+niceliyoruz. Yaklaşım, problemi bilinçli olarak yeniden tanımlar: amaç
+\emph{mutlak hizalama rekonstrüksiyonu} ($\Delta q = R^{-1}\mathbf{y}$) değil,
+\emph{göreli hizalama kararlılığı izlemesi}dir. Yöntem, kalibrasyon anındaki
+BPM okumasını referans alarak
+$\widehat{\delta q}(t) = R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ ile hizalama
+driftini kestirir; sabit BPM elektronik ofseti zaman farkında iptal olur.
+Gerçekçi hata bütçesinde (50\,$\mu$m RMS ofset, 1\,$\mu$m gürültü) yöntem
+6--7\,$\mu$m RMS hassasiyetle çalışır (mutlak rekonstrüksiyona göre
+$\sim 29\times$ iyileşme) ve LOCO kalitesinde (\%1) $\beta$-beating altında
+dahi hedefin altında kalır. Yöntemin temel sınırını singüler-değer (SVD)
+per-mod analiziyle ortaya koyuyoruz: tepki matrisinin en kötü koşullanmış
+modları (\%96 oranında \emph{simetrik} alt-uzay; hücre içi QF/QD aynı yönde)
+en büyük koşulluluk-kaynaklı duyarlılık dezavantajına (en kötü modda en iyiye
+göre $\sim 193$ kat) maruz kalır. Bu simetrik alt-uzay, sahte EDM'yi süren
+$dx\cdot dy$ geometrik-faz kanalına ($\propto\sigma^2$) en güçlü katkıyı veren
+bileşenlerle örtüşür \cite[Fig.~9a]{omarov2022}; dolayısıyla kapalı-yörünge
+izleme antisimetrik hizalama driftini hassasça takip ederken,
+sahte-EDM-kritik simetrik kanalı bu ölçüm konfigürasyonu altında gürültü
+sınırında bırakır. Bu sonuç, kapalı-yörünge tabanlı izlemenin yalnızca belirli
+hizalama modlarına duyarlı olduğunu ve gözlenebilirlik sınırının tepki
+matrisinin mod yapısından kaynaklandığını gösterir; yöntemin kesin tanımlı bir
+\emph{geçerlilik alanı} ve kesin tanımlı bir \emph{kör noktası} vardır.
+\end{abstract}
+
+% ============================================================
+\section{Giriş}
+
+\subsection{Bağlam ve sistematik önceliği}
+
+Proton EDM deneyinin ilk önerileri tamamen elektrostatik, zayıf-odaklamalı
+halka tasarımına dayanıyordu; baskın sistematik ortalama dikey manyetik
+alandı. Demet dinamiğini ve kararlılığı iyileştirmek için sonraki nesil
+simetrik-hibrit tasarım, manyetik kuadrupollerle \textbf{alternating-gradient
+(FODO)} odaklamaya geçti \cite{omarov2022}. Bu geçişle sistematik öncelikler
+de değişti: baskın sistematik artık \textbf{kuadrupol hizalama hatalarıdır}.
+
+Hizalanmamış bir kuadrupol, üzerinden geçen demete net bir kuvvet uygular; bu
+kuvvetin halka boyunca uygun bileşeni EDM sinyalini taklit eden sahte bir
+dikey spin presesyonu üretir. Omarov vd.\ \cite{omarov2022}, manyetik-quad'lı
+pEDM tasarımında bu sahte alanın sistematik bütçesini ayrıntılı türetmiş ve
+hedef hassasiyeti ($d_p < 10^{-29}\,e\cdot$cm, eşdeğer $dS_y/dt < 1$\,nrad/s)
+korumak için hizalama hatalarının spin koherans zaman ölçeğinde
+\textbf{10\,$\mu$m RMS seviyesinde bilinmesi/kontrol edilmesi} gerektiğini
+göstermiştir. Bu sayı, bu çalışmanın hedef hassasiyetini doğrudan belirler.
+
+Halkada $2\times 24 = 48$ manyetik kuadrupol vardır; her biri yatay ($dx$) ve
+dikey ($dy$) eksende bağımsız kayabilir. Ölçüm aracı 48 BPM çiftidir. Temel
+zorluk şudur: BPM elektronik ofsetleri ($\sim 100\,\mu$m) ölçülmek istenen
+hizalama sinyaliyle ($\sim 10\,\mu$m) \textbf{aynı büyüklüktedir}; mutlak bir
+kapalı-yörünge ölçümü bu ofsete boğulur.
+
+\subsection{Alanın benimsediği hizalama stratejisi}
+
+Omarov vd.'nin simetrik-hibrit tasarımı, hizalamayı mekanik olarak $\mu$m
+seviyesinde dayatmak yerine sistematiği hizalamaya \textbf{duyarsız} kılan üç
+katmanlı bir savunmaya dayanır: (i) pasif kafes simetrisi ($\sigma^2$
+bastırma), (ii) CW/CCW karşı-dönen demetler + kuadrupol polarite çevirmeyle
+aktif iptal, (iii) spin-tabanlı hizalama (SBA), ``yükselt-sonra-söndür''
+numarasıyla. Bu çerçevede asıl hassas hizalama ölçümü tek-demet kapalı
+yörüngesinden değil, karşı-dönen demet ayrımının ($\Delta y$) SQUID-tabanlı
+BPM'lerle okunmasından ve spinin kalibrasyon probu olarak kullanılmasından
+gelir; mekanik tolerans $\sim 100\,\mu$m'ye gevşetilir.
+
+Dolayısıyla bu makalenin amacı klasik kapalı-yörünge/k-modülasyon yöntemini bu
+yerleşik stratejinin yerine koymak \textbf{değildir}. Aksine, mevcut BPM
+altyapısıyla sürekli, ucuz ve fizik-veri-toplamayı bozmadan çalışabilen bir
+\textbf{tamamlayıcı online drift izleyici}nin neyi başarabileceğini ve nerede
+yapısal olarak duracağını nicelemektir.
+
+\subsection{Çalışmanın katkısı}
+\begin{enumerate}
+\item \textbf{Pozitif sonuç (yöntem).} Kalibrasyon-referanslı drift modu
+  $\widehat{\delta q}(t)=R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$, sabit BPM
+  ofsetini yapısal olarak iptal eder ve iyi-koşullu $R$ ($\kappa\approx 193$)
+  kullanır; gerçekçi hata bütçesinde 6--7\,$\mu$m RMS sağlar (\S3).
+\item \textbf{Temel sınır (özgün omurga --- makalenin merkezi tezi).} Per-mod
+  SVD analiziyle, kapalı-yörünge izlemenin kör noktasının \textbf{simetrik
+  alt-uzay} olduğu ve bunun sahte-EDM'yi süren $dx\cdot dy$ kanalıyla
+  çakıştığı gösterilir (\S4). Bu, kapalı-yörünge yöntemlerinin
+  sahte-EDM-kritik bilgiyi bu ölçüm konfigürasyonunda neden sağlayamadığının
+  nicel bir ifadesidir; makalenin asıl sonucu ölçülen RMS sayısı değil, bu
+  gözlenebilirlik ayrımıdır.
+\item \textbf{Yapısal arka plan (destekleyici).} İki-ölçümlü, tam-ofset-iptal
+  eden lineer estimatör sınıfı için bir tekillik önermesi verilir
+  ($\|\Delta R^{-1}\|\sim\|R^{-1}\|/\varepsilon$); bu, ``iki gradient farkıyla
+  ofseti iptal et'' gibi bariz alternatiflerin neden yapısal olarak
+  kötü-koşullu olduğunu, drift modunun (iki \emph{zaman}) ise neden bu sınırın
+  dışında kaldığını açıklar (\S2.4).
+\end{enumerate}
+
+% ============================================================
+\section{Model ve Yöntem}
+
+\subsection{Lineer model}
+Lineer rejimde BPM okumaları ile hizalama hataları arasındaki ilişki:
+\begin{equation}
+\mathbf{y} = R\,\Delta q + \mathbf{b} + \boldsymbol{\eta},
+\label{eq:lin}
+\end{equation}
+burada $\Delta q\in\mathbb{R}^{48}$ misalignment vektörü,
+$R\in\mathbb{R}^{48\times48}$ tepki matrisi, $\mathbf{b}$ BPM elektronik
+ofseti, $\boldsymbol{\eta}$ ölçüm gürültüsüdür. Yatay-dikey kuplaj ihmal
+edilebilir kabul edilir; problem iki bağımsız $48\times48$ sisteme ayrılır.
+
+\subsection{Tepki matrisinin analitik inşası}
+Periyodik FODO örgüsünde, Courant-Snyder formalizmiyle kapalı-yörünge tepki
+matrisi:
+\begin{equation}
+R_{ij} = \frac{\sqrt{\beta_i\beta_j}}{2\sin(\pi Q)}\,
+         \cos\!\bigl(|\phi_i-\phi_j|-\pi Q\bigr)\,(KL)_j,
+\label{eq:R}
+\end{equation}
+$\beta_i,\phi_i$ her quad girişindeki Twiss parametreleri, $Q$ tune, $(KL)_j$
+quad'ın işaretli integral gücüdür (QF/QD tip işareti ve düzlem işareti içinde
+saklanır). Gürültü için bu çalışmada $\sigma_\eta = 1\,\mu$m alınır; bu, tek
+BPM okuma gürültüsü değil, çok-tur ortalaması sonrası etkin yörünge belirleme
+belirsizliğini temsil eden bir \textbf{model parametresidir}. Yatay düzlemde
+elektrostatik ark deflektörlerinin katkısı için $K_{x,\text{arc}}$
+tune-eşlemeyle kalibre edilir (\S3.3, ters-suç kontrolü); dikey düzlemde
+Maxwell garantisiyle ($n=1\Rightarrow E_z=0$) $K_{y,\text{arc}}=0$. Bu inşa
+simülasyon izleyicisinden bağımsızdır ve \texttt{fodo\_lattice.py} içinde
+uygulanmıştır. Varsayılan örgüde $\kappa(R)\approx 193$,
+$\sigma_{\max}\approx 28.4$, $\sigma_{\min}\approx 0.147$.
+
+\subsection{Aday estimatörler}
+Aday yöntemler iki sınıfa ayrılır: ofseti tahmin etmeye/iptal etmeye çalışan
+\textbf{mutlak rekonstrüksiyon} yaklaşımları (i--iii) ve ofseti bir nuisance
+(rahatsızlık) parametresi gibi eleyip yalnız değişimi kestiren \textbf{göreli
+kararlılık izlemesi} (iv).
+
+\paragraph{(i) Mutlak tek-gradient.} $\widehat{\Delta q}=R^{-1}\mathbf{y}$.
+$\kappa(R)$ küçük olduğundan gürültü iyi kontrol altındadır, ancak BPM ofseti
+$R^{-1}\mathbf{b}$ olarak tahmine doğrudan sızar. Mutlak hizalama bilgisini
+ofsete kurban eder.
+
+\paragraph{(ii) İki-gradient $\Delta R^{-1}$ (ofset-iptal).}
+$g_2=g_1(1+\varepsilon)$ ile iki ayrı gradient ayarında ölçüm alıp
+$\widehat{\Delta q}=\Delta R^{-1}(\mathbf{y}_1-\mathbf{y}_2)$,
+$\Delta R=R_1-R_2$. Ofset iptal olur, fakat $R\propto(KL)\propto g$ olduğundan
+küçük $\varepsilon$ için $\Delta R\approx\varepsilon\,(g\,\partial R/\partial
+g)$ olur; bu, ofset-iptal eden estimatörün \textbf{gürültü büyütmesini}
+$\|\Delta R^{-1}\| = 1/\sigma_{\min}(\Delta R)\propto 1/\varepsilon$ olarak
+patlatır (asıl sorun budur). Dikkat: $1/\varepsilon$ ile ölçeklenen kondisyon
+sayısı $\kappa(\Delta R)$ \textbf{değil} --- o, türev matrisi
+$g\,\partial R/\partial g$'nin koşulluluğu olup $\varepsilon$'dan kabaca
+bağımsızdır ($\sim 10^4$, $\kappa(R)\approx 193$'ün $\sim$2 mertebe üstünde).
+Pratikte ($\varepsilon\approx 0.02$) gürültü büyütmesi
+$\|\Delta R^{-1}\|\sim 10^4$ mertebesine çıkar (Şekil~\ref{fig:svd},
+Şekil~\ref{fig:eps}).
+
+\paragraph{(iii) $\Delta R^{-1}$ + düzenlileştirme.} Tikhonov / TSVD.
+Gürültü-bias dengesi; en iyi durumda dahi $\sim 50\,\mu$m (\S3.1).
+
+\paragraph{(iv) Drift modu (kalibrasyon-referans) --- önerilen.} Tek gradient,
+iki \emph{zaman}:
+\begin{equation}
+\widehat{\delta q}(t)=R^{-1}\bigl(\mathbf{y}(t)-\mathbf{y}_0\bigr).
+\label{eq:drift}
+\end{equation}
+Sabit ofset zaman farkında iptal olur; geriye yalnızca
+$\sqrt{2}\,\sigma_\eta\|R^{-1}\|$ gürültüsü kalır. Yöntem mutlak hizalamayı
+değil, kalibrasyondan beri \textbf{değişimi} kestirir; mutlak referans dış
+kaynaktan (LOCO/BBA) gelir (\S5).
+
+\subsection{Ofset--gürültü dualitesi: bir önerme (destekleyici)}
+Bu bölüm, aday (ii)'nin gürültü büyütmesinin algoritmik değil \textbf{yapısal}
+olduğunu, dolayısıyla ``iki gradient farkıyla ofseti iptal et'' fikrinin neden
+çıkmaz olduğunu gösterir. Sonuç, aşağıda açıkça tanımlanan dar bir estimatör
+sınıfı için geçerli bir tekillik önermesidir (genel bir teorem iddiası
+değildir).
+
+\paragraph{Estimatör sınıfı $\mathcal{C}$.} Şu dört koşulu sağlayanlar:
+(1) \emph{Lineerlik:} $\widehat{\Delta q}=A_1\mathbf{y}_1+A_2\mathbf{y}_2$;
+(2) \emph{İki-ölçüm:} aynı $\Delta q$ ve aynı $\mathbf{b}$ ile
+$\mathbf{y}_a=R_a\Delta q+\mathbf{b}+\eta_a$, $a\in\{1,2\}$;
+(3) \emph{Ön-yargısızlık:} her $\Delta q$ için
+$\mathbb{E}[\widehat{\Delta q}]=\Delta q$;
+(4) \emph{Tam ofset iptali:} her sabit $\mathbf{b}$ tahmine sızmaz.
+
+\paragraph{İddia.} $\mathcal{C}$ içinde tek çözüm $A_1=\Delta R^{-1}$,
+$A_2=-\Delta R^{-1}$'dir.
+
+\paragraph{Türetiş.} Koşul (3): $A_1R_1+A_2R_2=I$. Koşul (4):
+$A_1+A_2=0\Rightarrow A_2=-A_1$. Birleştirince
+$A_1(R_1-R_2)=I\Rightarrow A_1=\Delta R^{-1}$. $\blacksquare$
+
+\paragraph{Sonuç.} $\mathcal{C}$ içindeki tek çözümün gürültü büyütmesi
+$\|\Delta R^{-1}\|$'dir; $\Delta R\approx\varepsilon R$ ile yaklaşık
+$\|R^{-1}\|/\varepsilon$. Bu, $\varepsilon\to 0$ sınırında patlar (\S3.2'de SVD
+spektrumuyla doğrulanır). Önemli nokta: \textbf{drift modu (iv) $\mathcal{C}$
+dışındadır} --- iki ölçüm aynı anda değil iki farklı \emph{zamanda} alınır ve
+estimatör $\Delta q$'yu değil $\delta q(t)=\Delta q(t)-\Delta q_0$'ı kestirir.
+Ofset zaman farkıyla iptal olur, kondisyon sayısı $\kappa(R)\approx 193$
+kalır. $\mathcal{C}$ dışındaki diğer yaklaşımlar (Tikhonov/TSVD, Bayesçi,
+Kalman, çok-epoch) bu sınıra uymak zorunda değildir.
+
+% ============================================================
+\section{Sayısal Deneyler}
+Tüm testler ortak bir altyapıda koşuldu (Ek~A): semplektik izleyici, gerçekçi
+BPM gürültü ve ofset modeli, opsiyonel quad/dipol tilt'leri. Hızlandırıcı
+parametreleri \texttt{params.json}, test parametreleri
+\texttt{test\_params.json} içindedir.
+
+\subsection{Test 1 --- Düzenlileştirme ham $\Delta R^{-1}$'i kurtarır mı?}
+BPM ofseti \textbf{yok}; bu test ideal şartta gürültü tabanını ölçer. Aynı
+veride dört estimatör (Tablo~\ref{tab:t1}). \textbf{Uyarı:} Direct $R^{-1}$
+operasyonel bir rakip değildir; ofset sıfır varsayımına dayanır ve gerçek
+halkada ($\mathbf{b}\neq 0$) 200+\,$\mu$m'e tırmanır (Test~4). Tabloda yalnızca
+gürültü tabanı referansı olarak yer alır. Düzenlileştirme ham (ii)'yi
+$\sim 35\times$ iyileştirir ama korelasyon 0.998'den 0.35'e düşer (RMS azalır,
+biçim bozulur) ve hâlâ 10\,$\mu$m hedefinin çok üstündedir.
+
+\begin{table}[tb]
+\centering\small
+\caption{Test 1: ofsetsiz ideal şartta dört estimatör.}
+\label{tab:t1}
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+Estimatör & $y$-RMS & $y$-kor & Yorum \\
+          & [$\mu$m] &        &       \\
+\midrule
+Direct $R^{-1}$        & 3.5  & 0.998 & gürültü tabanı \\
+Ham $\Delta R^{-1}$    & 1865 & 0.085 & \S2.4 sınırı \\
+Tikhonov (L-curve)     & 53   & 0.348 & bias--varyans \\
+TSVD ($k{=}3$, oracle) & 52   & 0.383 & oracle üst-sınır \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Test 2 --- Uzaysal transfer fonksiyonu ve SVD spektrumu}
+Saf sinüsoidal patern girişine ($\Delta q_j=A\cos(2\pi kj/N)$) estimatör mod
+transferi: Tikhonov/TSVD yüksek-$k$ modlarını ($k\gtrsim 18$) tamamen söndürür;
+48 modun yalnızca 3--5'i kurtarılır. SVD spektrumu yan yana çizildiğinde
+$\Delta R\approx\varepsilon R$ bulk ölçeklemesi doğrulanır
+(Şekil~\ref{fig:svd}): $\Delta R$'nin büyük singüler değerleri $R$'ninkilerin
+yaklaşık $\varepsilon$ katıdır; en küçük modlar ise bu ölçeklemenin altına
+çöker, $\Delta R$ her durumda $R$'den $\sim$2 mertebe kötü koşulludur.
+
+$\varepsilon$ taraması (Şekil~\ref{fig:eps}) asıl ölçeklemeyi netleştirir:
+ofset-iptal eden estimatörün gürültü büyütmesi
+$\|\Delta R^{-1}\|=1/\sigma_{\min}(\Delta R)$ tüm
+$\varepsilon\in[0.005,0.10]$ aralığında temiz biçimde $\propto 1/\varepsilon$
+patlarken, kondisyon sayısı $\kappa(\Delta R)$ kabaca sabit ($\sim 10^4$)
+kalır. Yani $\varepsilon\to 0$ sınırında yöntemi kullanılamaz kılan $\kappa$
+değil, $\|\Delta R^{-1}\|$'dir --- bu, \S2.4'teki alt-sınır önermesinin
+($\|\Delta R^{-1}\|\sim\|R^{-1}\|/\varepsilon$) doğrudan sayısal
+doğrulamasıdır.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig1_svd_spektrum.png}
+\caption{Tepki matrisi $R$ ve iki-gradient farkı
+$\Delta R=R(g_1)-R(g_1(1+\varepsilon))$ ($\varepsilon=0.02$) için
+singüler-değer spektrumları; (a) dikey, (b) yatay düzlem. Kesikli gri çizgi
+$\varepsilon\,\sigma(R)$ beklenen bulk ölçeklemesidir. $\Delta R$'nin büyük
+singüler değerleri bu çizgiyi izler; en küçük modlar daha da çöker. $R$ iyi
+koşulludur ($\kappa\approx 193/140$), $\Delta R$ ise $\sim$2 mertebe kötüdür.}
+\label{fig:svd}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig6_epsilon_sweep.png}
+\caption{$\varepsilon$ taraması: (a) ofset-iptal eden estimatörün gürültü
+büyütmesi $\|\Delta R^{-1}\|=1/\sigma_{\min}(\Delta R)$, noktalı
+$1/\varepsilon$ referansıyla --- temiz $1/\varepsilon$ ölçeklemesi;
+(b) kondisyon sayısı $\kappa(\Delta R)$, $\varepsilon$'dan kabaca bağımsız
+($\sim 10^4$). $\varepsilon\to0$'da yöntemi bozan $\kappa$ değil
+$\|\Delta R^{-1}\|$'dir.}
+\label{fig:eps}
+\end{figure}
+
+\subsection{Test 3 --- Yatay model ters-suç kontrolü}
+$K_{x,\text{arc}}$ kalibrasyonu simülasyondan alınır (klasik ters-suç).
+$K_{x,\text{arc}}(1+\delta)$, $\delta\in[-10\%,+10\%]$ taramasında yatay RMS
+3.48--4.01\,$\mu$m (0.5\,$\mu$m değişim); dikey sabit (Maxwell). Gerçek halkada
+LOCO'nun sağladığı $<1\%$ doğrulukta yöntem \textbf{operasyonel olarak
+ters-suçtan bağımsız}.
+
+\subsection{Test 4 --- Drift modunun kalibrasyon-referansla gösterimi}
+\textbf{Senaryo.} $t=0$: 100\,$\mu$m RMS hizalama + 50\,$\mu$m RMS BPM ofseti
+kaydedilir. $t=1..10$: hizalama 10\,$\mu$m RMS yavaşça kayar, ofset sabit.
+50\,$\mu$m RMS ofset yöntemi etkilemez; geriye yalnızca gürültü-kaynaklı taban
+kalır (Şekil~\ref{fig:drift}, Tablo~\ref{tab:t4}).
+
+\begin{table}[tb]
+\centering\small
+\caption{Test 4: mutlak vs drift modu (RMS hata).}
+\label{tab:t4}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Yöntem & Düzlem $y$ & Düzlem $x$ \\
+\midrule
+Mutlak $R^{-1}\mathbf{y}(t)$ & $\sim$197\,$\mu$m & $\sim$185\,$\mu$m \\
+\textbf{Drift $R^{-1}(\mathbf{y}-\mathbf{y}_0)$}
+                             & \textbf{6.6\,$\mu$m} & \textbf{6.5\,$\mu$m} \\
+İyileşme                     & $29\times$ & $28\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig2_drift_izleme.png}
+\caption{Test 4 kalibrasyon-referans drift izleme, (a) dikey, (b) yatay
+düzlem. Gerçek drift, kestirilen drift ve naif mutlak rekonstrüksiyon hatası
+epoch'a karşı (log ölçek). 50\,$\mu$m BPM ofseti mutlak rekonstrüksiyonu
+$\sim$200\,$\mu$m'de boğarken drift modu 6--7\,$\mu$m RMS'te izler.}
+\label{fig:drift}
+\end{figure}
+
+\subsection{Test 5 --- BPM ofseti zamanla kayarsa?}
+Drift modu $\mathbf{b}(t)\approx\mathbf{b}_0$ varsayar; ofset kayma hızı
+$\dot{\mathbf{b}}$ arttıkça kestirime $R^{-1}\dot{\mathbf{b}}\,\Delta t$ olarak
+sızar. Simülasyonda drift modu ile per-epoch iki-gradient + 30-epoch ortalama
+karşılaştırıldığında, drift modunun üstünlüğünü kaybettiği geçiş
+$\sim 2\,\mu$m/epoch ofset kayma hızındadır. Bu eşiğin gerçek bir pEDM BPM
+sisteminde sağlanıp sağlanmadığı \textbf{deneysel olarak doğrulanması gereken
+bir gerekliliktir} (\S6); burada bir donanım iddiası yapılmamakta, yalnızca
+yöntemin geçerli kaldığı kayma-hızı bütçesi nicelenmektedir.
+
+\subsection{Test 6 --- Üç yöntemin adil karşılaştırması}
+Aynı veri, aynı bütçe (50\,$\mu$m ofset, 1\,$\mu$m gürültü, 10\,$\mu$m drift,
+0.2\,mrad tilt'ler); Tablo~\ref{tab:t6}. Her iki $\Delta R$ inşası da
+$\kappa\sim 10^4$ mertebesinde kötü koşulludur (düzleme bağlı
+$\sim 7\times10^3$--$4\times10^4$; bkz.\ Şekil~\ref{fig:svd}). Sayısal $R$,
+$\Delta R$ yaklaşımını kurtarmaz --- $\kappa(\Delta R)$ matrisin nasıl inşa
+edildiğine değil $\varepsilon$ ve örgü fiziğine bağlıdır. Drift modu yapısal
+olarak farklı bir problem (mutlak değil, değişim) çözdüğü için bu sınırın
+dışındadır.
+
+\begin{table*}[tb]
+\centering
+\caption{Test 6: aynı senaryoda üç estimatörün yan yana karşılaştırması.}
+\label{tab:t6}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Estimatör & $y$-RMS [$\mu$m] & $y$-kor & $x$-RMS [$\mu$m] & $x$-kor \\
+\midrule
+A: analitik $\Delta R$        & 3282 & $-0.02$ & 3756 & $0.09$ \\
+\textbf{B: drift modu}        & \textbf{6.25} & \textbf{0.85} & \textbf{7.18} & \textbf{0.85} \\
+C: sayısal $\Delta R$         & 980  & $-0.02$ & 1357 & $-0.11$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Test 8 --- Örgü modeli hatası altında $\beta$-beating sağlamlığı}
+Drift modu $R^{-1}$'in doğruluğuna bağlıdır. Gerçek halkada LOCO + BBA sonrası
+$\sim$\%1--5 $\beta$-beating ve faz hatası kalır. Nominal model
+$R_\text{nom}$ ile gerçek makine $R_\text{true}$ ($\beta,\phi$'de
+$\varepsilon_\beta$ bozunumu) arasında kasıtlı uyumsuzluk; veri
+$R_\text{true}$, kestirim $R_\text{nom}^{-1}$ ile (15 tohum medyanı,
+Tablo~\ref{tab:t8}). LOCO sonrası tipik $\sim$\%1 $\beta$-beating'de taban
+yalnızca 0.1\,$\mu$m artar (5.98$\to$6.08\,$\mu$m); hedefe 3.9\,$\mu$m marj
+kalır. Yöntem, standart-kalite LOCO'su olan bir hızlandırıcıda operasyonel
+olarak kullanılabilir (Şekil~\ref{fig:beta}).
+
+\begin{table}[tb]
+\centering\small
+\caption{Test 8: $\beta$-beating altında drift takip hatası.}
+\label{tab:t8}
+\begin{tabular}{@{}rrrl@{}}
+\toprule
+$\varepsilon_\beta$ & $y$ [$\mu$m] & $x$ [$\mu$m] & Yorum \\
+\midrule
+0\%            & 5.98  & 5.88  & gürültü tabanı \\
+0.5\%          & 5.94  & 5.91  & önemsiz \\
+\textbf{1\%}   & \textbf{6.08} & \textbf{6.09} & \textbf{hedef altında} \\
+2\%            & 6.48  & 6.58  & $<7\,\mu$m \\
+5\%            & 8.57  & 9.13  & $<10\,\mu$m \\
+10\%           & 13.00 & 14.51 & sınır aşılır \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig3_betabeat.png}
+\caption{Test 8: örgü-modeli hatası ($\beta$-beating) altında drift takip
+hatası, $\varepsilon_\beta$'ya karşı (15-tohum medyanı). Kesik kırmızı çizgi
+10\,$\mu$m hedef, noktalı gri çizgi LOCO-gerçekçi \%1 seviyesi. \%1'de hata
+6.1\,$\mu$m; \%5'e kadar hedef altında.}
+\label{fig:beta}
+\end{figure}
+
+\subsection{Test özeti}
+Tablo~\ref{tab:summary} altı testin ana sayısını derler.
+
+\begin{table*}[tb]
+\centering
+\caption{Sayısal deneylerin özeti.}
+\label{tab:summary}
+\begin{tabular}{@{}cll@{}}
+\toprule
+Test & Soru & Ana sayı \\
+\midrule
+1 & Düzenlileştirme $\Delta R$'yi kurtarır mı? & $1865\to52\,\mu$m, ama direct $3.5\,\mu$m \\
+2 & Düzenlileştirme nasıl çuvallıyor? & 48 modun 43--45'i siliniyor \\
+3 & Yatay modelde ters-suç? & $\pm10\%\to{<}0.5\,\mu$m \\
+4 & Drift modu ofseti tolere eder mi? & $197\,\mu$m $\to$ $6.6\,\mu$m ($29\times$) \\
+5 & Ofset kayarsa? & $<2\,\mu$m/epoch'a kadar üstün \\
+6 & Aday yöntemler yan yana? & $\Delta R$: 1000--3700\,$\mu$m, drift: 6--7\,$\mu$m \\
+8 & $\beta$-beating? & \%1$\to$6.1\,$\mu$m; \%5$\to$8.6\,$\mu$m; hedef altında \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% ============================================================
+\section{Gözlenebilirlik Sınırı}
+Bu bölüm makalenin özgün omurgasıdır: drift modunun gürültü tabanının (\S3)
+rastgele bir sayı olmadığını, \textbf{hangi hizalama desenlerinin} iyi/kötü
+izlendiğini belirleyen yapısal bir bölünmeden kaynaklandığını gösterir.
+
+\subsection{Yörünge kazanç yasası}
+Bu kafes (24-hücreli FODO) için yapılan mod analizinde, azimutal harmonik
+$k$'lı bir kick desenine kapalı-yörünge tepkisi tune'da rezonant bir kazançla
+ölçeklenir:
+\begin{equation}
+G_k = \frac{C}{\,|Q_\text{eff}^2-k^2|\,},\quad C\approx 24.8,\;
+Q_\text{eff}^2\approx 5.03.
+\label{eq:gain}
+\end{equation}
+(Sabitler bu örgüye özgüdür; aşağıdaki argüman genel kapalı-yörünge yasası
+değil, bu konfigürasyonun mod yapısı üzerine kuruludur.) Kazanç
+$k\approx Q\,(\approx 2.7)$ civarında tepe yapar ve $k\gg Q$ için hızla
+bastırılır. Bu, kapalı yörüngenin esasen bir \textbf{rezonant alçak-geçiren
+filtre} gibi davrandığı anlamına gelir: düşük-$k$ (düzgün) kick desenleri
+görünür, yüksek-$k$ (alternatif) desenler bastırılır.
+
+\subsection{Simetrik / antisimetrik ayrışım}
+48 boyutlu misalignment uzayı, hücre içi QF/QD çiftinin göreli işaretine göre
+iki dik alt-uzaya ayrılır:
+\begin{itemize}
+\item \textbf{Antisimetrik} (QF ve QD zıt yönde): düzgün, \textbf{düşük-$k$}
+  kick deseni üretir $\rightarrow$ $G_k$ büyük $\rightarrow$ kapalı yörüngede
+  \textbf{görünür}.
+\item \textbf{Simetrik} (QF ve QD aynı yönde, $\text{QF}=\text{QD}=a_c$):
+  kuadrupol gradyan işareti QF/QD'de değiştiği için \textbf{alternatif,
+  yüksek-$k$ ($k\approx 24$)} kick deseni üretir $\rightarrow$ $G_k$ küçük
+  $\rightarrow$ kapalı yörüngede \textbf{neredeyse görünmez}.
+\end{itemize}
+
+\subsection{Per-mod SVD analizi (anahtar sonuç)}
+$R=U\Sigma V^\top$ ayrışımında her sağ-tekil vektör $V_i$ bir misalignment
+deseni, $1/\sigma_i$ ise o deseni kestirirken yaşanan gürültü büyütmesidir
+($\sigma_{\max}=28.4$, $\sigma_{\min}=0.147$, $\kappa(R)=193$;
+Tablo~\ref{tab:svd}). En iyi 8 mod ortalama \textbf{\%4} simetrik (antisimetrik
+baskın, iyi koşullu); en kötü 8 mod ortalama \textbf{\%96} simetrik. En kötü
+modun ($\sigma_{\min}$) koşulluluk-kaynaklı duyarlılığı en iyiye göre
+$\sim 193$ kat ($=\kappa(R)$) daha kötüdür; bu fark tümüyle simetrik
+alt-uzayda yoğunlaşır. (Bu, ``tüm simetrik modlar 193 kat kötü'' demek
+değildir; tablodaki $1/\sigma$ sütunu mod-mod artışı gösterir.) Bu ilişki
+Şekil~\ref{fig:permode}'te açıkça görülür: gürültü duyarlılığı $1/\sigma$
+arttıkça simetrik güç oranı \%100'e tırmanır.
+
+\begin{table}[tb]
+\centering\small
+\caption{Seçili singüler modlar: gürültü duyarlılığı ve simetrik içerik.}
+\label{tab:svd}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+Mod & $\sigma$ & $1/\sigma$ & Sim. güç \\
+\midrule
+0 (en iyi)  & 28.4  & 0.04 & \%4 \\
+2           & 10.1  & 0.10 & \%6 \\
+10          & 2.0   & 0.51 & \%13 \\
+20          & 0.49  & 2.03 & \%42 \\
+40          & 0.16  & 6.39 & \%91 \\
+47 (en kötü)& 0.147 & 6.82 & \textbf{\%98} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig4_permode_svd.png}
+\caption{$R$'nin (dikey düzlem) singüler modları: sol eksen (mavi) gürültü
+duyarlılığı $1/\sigma_i$, sağ eksen (kırmızı) modun simetrik alt-uzaydaki güç
+oranı. En kötü koşullanmış modlar (sağ) \%96--98 simetriktir; gürültü
+duyarlılığı arttıkça simetrik içerik \%100'e tırmanır.}
+\label{fig:permode}
+\end{figure}
+
+\subsection{Sahte EDM kanalıyla çakışma}
+Bu yapısal kör noktanın önemi, simetrik alt-uzayın fiziksel anlamından gelir.
+Sahte EDM'yi süren baskın mekanizma, ardışık dönüşlerin geometrik (Berry)
+fazından doğan ve $dx\cdot dy$'ye orantılı, dolayısıyla misalignment ile
+\textbf{kuadratik ($\propto\sigma^2$)} ölçeklenen bir terimdir
+\cite[Fig.~9a]{omarov2022}. Simülasyonlarımızda bu kuadratik sistematik kanala
+en güçlü katkıyı veren hizalama bileşenlerinin \textbf{simetrik alt-uzayda
+yoğunlaştığı} görülmüştür (çok-tohum RMS taramasında $\sigma$-üssü
+$\approx 2.0$ ile mekanizma bağımsız olarak doğrulanır).
+
+Sonuç birleştiğinde: kapalı-yörünge izleme, sahte-EDM-kritik simetrik deseni
+en kötü koşullanmış modlarda en iyiye göre $\sim 193$ kata varan duyarlılık
+dezavantajıyla ``görür''. Mevcut 1\,$\mu$m BPM gürültüsünde bu modlarda etkin
+hassasiyet $\sim 193\,\mu$m mertebesine düşer --- drift modunun
+$\sim 6\,\mu$m'lik RMS tabanına bu simetrik bileşen karışır, ama
+\textbf{sahte-EDM açısından kritik kısım iki mertebe daha az hassasiyetle}
+kestirilebilir. Bu sınır, simetrik alt-uzayın yüksek-$k$ doğasının
+($G_k\propto 1/|Q^2-k^2|$, $k\approx 24$) doğrudan bir sonucudur: \emph{bu
+ölçüm konfigürasyonunda} --- tek kapalı yörünge, tek tepki matrisi --- daha
+iyi BPM donanımı veya daha fazla veri yığılması yalnız gürültü tabanını
+düşürür, simetrik modların $\sim 193\times$'lik göreli dezavantajını gidermez.
+Sınırın ilkesel olmadığını, yalnız bu konfigürasyona özgü olduğunu vurgulamak
+gerekir: ek gözlemlenebilirler (farklı tune/optik kombinasyonları,
+faz-ilerleme modülasyonu, ya da yörünge+spin birleşik ölçümü) prensipte bu
+alt-uzaya erişebilir. Pratikte simetrik kanala doğrudan duyarlı gözlemlenebilir
+karşı-dönen demet ayrımı veya spin presesyonudur \cite{omarov2022}.
+
+% ============================================================
+\section{Önerilen İşletme Modu}
+Tek bir yöntem her ihtiyacı karşılamaz; iki katmanlı bir mimari öneriyoruz
+(Şekil~\ref{fig:mimari}).
+
+\paragraph{Yavaş mutlak katman (saatlik--günlük).} LOCO + BBA + survey ile
+mutlak hizalama $\Delta q_0$, BPM ofseti $\mathbf{b}_0$ ve örgü modeli
+($\beta,\phi,Q$, dolayısıyla $R$). Bu, hızlandırıcı operasyonunda zaten var
+olan standart prosedürdür.
+
+\paragraph{Hızlı drift katmanı (sürekli, saniye--dakika).} Bu çalışmanın
+katkısı: $\widehat{\delta q}(t)=R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$. Fizik
+run'ı boyunca sürekli çalışır, veri toplamayı bozmaz, kalibrasyondan beri
+(antisimetrik) hizalama değişimini izler.
+
+İki katman tamamlayıcıdır: yavaş katman mutlak referansı ve $R$'yi sağlar,
+hızlı katman o referansa göre değişimi takip eder. \S4'ün sınırı gereği, her
+iki katman da simetrik alt-uzayı kapalı yörüngeden kurtaramaz; bu bilgi dış
+bir gözlemlenebilirden (demet ayrımı / spin) gelmelidir.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig5_mimari.png}
+\caption{İki-katmanlı hizalama izleme mimarisi: yavaş mutlak katman
+(LOCO/BBA $\rightarrow \Delta q_0,\mathbf{b}_0,R$) ve hızlı drift katmanı
+($R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$). Simetrik (sahte-EDM-kritik) alt-uzay
+her iki katmanda da gürültü sınırındadır.}
+\label{fig:mimari}
+\end{figure}
+
+% ============================================================
+\section{Tartışma ve Sonuç}
+Bu çalışmada pEDM AG halkasında kuadrupol hizalama driftini sürekli izlemek
+için kalibrasyon-referans yöntemi önerildi ve gerçekçi BPM hata bütçesi
+altında (50\,$\mu$m ofset, 1\,$\mu$m gürültü, 0.2\,mrad tilt) 6--7\,$\mu$m RMS
+hassasiyetle, $\sim$\%1 $\beta$-beating'e dayanıklı şekilde çalıştığı
+sistematik testlerle gösterildi. Yöntem iki katmanlı bir mimaride (yavaş
+LOCO/BBA + hızlı drift) operasyonel olarak konumlandırıldı.
+
+Daha önemlisi, yöntemin \textbf{temel sınırı} nicelendi: per-mod SVD analizi,
+kapalı-yörünge izlemenin kör noktasının \%96 simetrik içerikli en kötü
+koşullanmış modlar olduğunu (en kötü modda en iyiye göre $\sim 193$ kat
+koşulluluk-kaynaklı duyarlılık dezavantajı) ve bu modlara en güçlü katkı veren
+hizalama bileşenlerinin sahte EDM'yi süren $dx\cdot dy$ geometrik-faz kanalıyla
+örtüştüğünü gösterdi. Bu, kapalı-yörünge yöntemlerinin sahte-EDM-kritik bilgiyi
+bu ölçüm konfigürasyonunda neden sağlayamadığının nicel bir ifadesidir:
+antisimetrik drift hassasça izlenir, simetrik (kritik) kanal ise gürültü
+sınırında kalır ve donanım iyileştirmesiyle kolayca giderilemez. Bu kanala
+erişim ek bir gözlemlenebilir gerektirir (farklı optik kombinasyonları ya da
+yörünge-dışı bir prob --- demet ayrımı/spin) \cite{omarov2022}.
+
+Çalışmanın kısıtları:
+\begin{itemize}
+\item \textbf{Lineer model ötesi.} Sonuçlar Eş.~\eqref{eq:lin}'e dayanır;
+  gerçek halkada BPM gain hataları, roll/kuplaj, sekstupol feed-down, fringe
+  alanlar, histerezis ve akım dalgalanması vardır. Bunların sistematik
+  incelenmesi gelecek çalışmadır.
+\item \textbf{Tek kafes.} Tüm sonuçlar 24-hücreli FODO'da. Genellenebilirlik
+  kazanç yasası $G_k$ üzerinden tahmin edilebilir ama doğrulanmamıştır.
+\item \textbf{BPM ofset uzun-vadeli kararlılığı.} Drift modunun temel
+  varsayımı $\mathbf{b}(t)\approx\mathbf{b}_0$ olduğundan, donanımın
+  saatler--günler ölçeğinde ofset stabilitesi deneysel olarak karakterize
+  edilmelidir.
+\end{itemize}
+
+% ============================================================
+\appendix
+\section{Sayısal simülasyon altyapısı}
+Tüm sonuçlar Python tabanlı bir altyapıda üretildi. Parçacık takibi
+dördüncü-mertebe Gauss-Legendre (GL4) semplektik integratörüyle; analitik tepki
+matrisi Courant-Snyder formalizmiyle (\texttt{fodo\_lattice.py}) inşa edildi.
+Ana gösterim \texttt{drift\_monitor\_sim.py} (Test~4), $\beta$-beating
+sağlamlığı \texttt{test8\_betabeat.py} (Test~8), per-mod SVD analizi
+\texttt{permode2.py} içindedir. Şekiller \texttt{make\_figures.py} (Şekil 1--4,
+6) ve \texttt{make\_fig5\_architecture.py} (Şekil 5) ile üretilir.
+
+% ============================================================
+\begin{thebibliography}{9}
+\bibitem{omarov2022}
+Z.~Omarov, H.~Davoudiasl, \emph{et al.} (Y.~K.~Semertzidis dahil),
+``Comprehensive symmetric-hybrid ring design for a proton EDM experiment at
+below $10^{-29}\,e\cdot$cm,'' \emph{Phys.\ Rev.\ D} \textbf{105}, 032001
+(2022).
+\bibitem{pedm2011}
+pEDM Collaboration, ``Storage Ring Proton Electric Dipole Moment Experiment
+Proposal,'' BNL (2011).
+\bibitem{lee}
+S.~Y.~Lee, \emph{Accelerator Physics}, 3rd ed., World Scientific (2011).
+\bibitem{safranek}
+J.~Safranek, ``Experimental determination of storage ring optics using orbit
+response measurements,'' \emph{Nucl.\ Instrum.\ Meth.\ A} \textbf{388}, 27
+(1997).
+\end{thebibliography}
+
+\end{document}
