@@ -54,6 +54,15 @@ tarafındaki kesin sınır teoreminde aranıyor.
 ├── fourier_reconstruct.py      # FODO bazı + R-LS + CLEAN; harmonik kalite
 ├── bozoki_ls.py                # Bozoki 1989 vs R-matris vs CLEAN karşılaştırması
 │
+│   # ── Drift İzleme (ikinci makale adayı) ──
+├── drift_monitor/
+│   ├── fodo_lattice.py         # Analitik Twiss + R matrisi (C++ bağımlılığı yok)
+│   ├── drift_monitor_sim.py    # Test 4: kalibrasyon-referans drift gösterimi
+│   ├── test8_betabeat.py       # Test 8: β-beating sağlamlık taraması
+│   ├── permode2.py             # SVD per-mod analizi (no-go bağlantısı)
+│   └── test_params.json        # Test parametreleri (BPM ofset/gürültü/drift)
+├── makale-taslagi-2.md         # İkinci makale taslağı: drift izleme + dualite teoremi
+│
 │   # ── Belgeler (.md bağımsız okunabilir; pedagojik) ──
 ├── README.md                   # Ana proje belgesi (Türkçe, pedagojik, ~1300 satır)
 ├── YÖNTEM.md                   # Detaylı yöntem açıklaması
@@ -191,6 +200,11 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | COSY polarimetre performansı + EDM zaman bütçesi (dS_y/dt~1nrad/s tabanı) | `cosy_polarimeter.md` |
 | Omarov SBA + yükselt-söndür; quad-flip neden simetrik alt-uzayı açmaz | `omarov_symmetric_hybrid.md §5,§9` |
 | Stratejik karar: saf spin-trim'de özgün katkı dar | `omarov_symmetric_hybrid.md §8`, `false_edm_harmonic_sinir.md §15` |
+| **Drift izleme (ikinci makale)** | |
+| Kalibrasyon-ref drift: 50 μm BPM ofsetine rağmen 6.6 μm RMS; mutlak 197 μm → 29× | `makale-taslagi-2.md §3.4`, `drift_monitor/drift_monitor_sim.py` |
+| Dualite teoremi: iki-ölçüm tam-ofset-iptal sınıfı C'de ΔR⁻¹ tek çözüm; ‖ΔR⁻¹‖~‖R⁻¹‖/ε | `makale-taslagi-2.md §2.4` |
+| Test 8 (β-beating): %1→6.1 μm, %5→8.6 μm; LOCO kalitesiyle operasyonel | `makale-taslagi-2.md §3.7`, `drift_monitor/test8_betabeat.py` |
+| SVD per-mod: en kötü 8 mod %96 simetrik, 193× gürültü; no-go ile doğrudan bağlantı | `makale-taslagi-2.md §3.8`, `drift_monitor/permode2.py` |
 
 ---
 

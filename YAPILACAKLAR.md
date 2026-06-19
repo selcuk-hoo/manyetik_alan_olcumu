@@ -1,8 +1,8 @@
 # YAPILACAKLAR — pEDM Quad Hizalama İzleme Projesi
 
-> Son güncelleme: 2026-06-11. `makale_trim_tr.tex` taslağı konsolide edildi
-> (polarimetre bütçesi dahil). g₀ tarama testi çalışıyor; makale için
-> hakem yorum yanıtlarına odaklanılıyor.
+> Son güncelleme: 2026-06-19. İkinci makale adayı (drift izleme) canlandırıldı:
+> `drift_monitor/` klasörü eklendi, Test 8 (β-beating) ve per-mod SVD analizi
+> tamamlandı, `makale-taslagi-2.md` güncellendi.
 
 ---
 
@@ -60,6 +60,22 @@
 - [x] `makale_trim_tr.tex` — bağımsız trim makalesi taslağı: tüm semboller
   tanımlı, 9 şekil çağrıldığı yerde, polarimetre istatistik modeli ve
   süre bütçesi (Müller 2020 referansla), CW−CCW EDM güvenlik kanıtı
+
+---
+
+## ✅ Tamamlanan (2026-06-19 eklemeleri)
+
+### Drift izleme — ikinci makale adayı
+- [x] **`drift_monitor/` klasörü** — `fodo_lattice.py`, `drift_monitor_sim.py`,
+  `test8_betabeat.py`, `permode2.py`, `test_params.json` repoya alındı
+- [x] **Test 4 (kalibrasyon-ref demo)** — 50 μm ofset altında 6.6 μm drift hassasiyeti;
+  mutlak 197 μm → 29× iyileşme (`drift_monitor_sim.py`)
+- [x] **Test 8 (β-beating sağlamlığı)** — %1 β-beating: 5.98→6.08 μm; %5→8.6 μm;
+  hedef 10 μm altında güvenli (`test8_betabeat.py`)
+- [x] **SVD per-mod analizi** — κ(R)=193; en kötü 8 mod %96 simetrik, 193× gürültü
+  büyütmesi; no-go bağlantısı kuruldu (`permode2.py`)
+- [x] **`makale-taslagi-2.md`** — Test 8 ve per-mod sonuçları ile güncellendi;
+  dualite teoremi §2.4; 8 test özeti §3.9; simetrik sınır §5'te
 
 ---
 
