@@ -97,3 +97,8 @@ sy_plot.png
 # drift_monitor üretilen figürleri (make_figures.py / make_fig5_architecture.py ile yeniden üretilir)
 drift_monitor/*.png
 test4_drift_monitor.png
+
+# Git geçmişinden kurtarılan doğrulanmış keşif scriptleri (konvansiyon: kalıcı repoda tutulmaz;
+# mantık drift_monitor/ vendored lib + .md referanslarına taşınacak)
+false_edm_mode_scan.py
+false_edm_correction_test.py
