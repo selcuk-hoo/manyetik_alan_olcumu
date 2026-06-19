@@ -520,21 +520,44 @@ test parametreleri `drift_monitor/test_params.json`'dadır.
 
 ---
 
-## Şekil Listesi
+## Şekiller ve Caption'lar
 
-Şekiller `drift_monitor/make_figures.py` (Şekil 1–4, 6) ve
-`drift_monitor/make_fig5_architecture.py` (Şekil 5) ile üretilir.
+Tüm şekiller **PRD tek-sütun** formatında (genişlik 3.375 in / 246 pt, serif +
+Computer-Modern mathtext, 600 dpi) üretilir: `drift_monitor/make_figures.py`
+(Şekil 1–4, 6) ve `drift_monitor/make_fig5_architecture.py` (Şekil 5). Çok
+panelli şekiller dikey istiflenir ve (a)/(b) ile etiketlenir; şekil-içi başlık
+yoktur, açıklama aşağıdaki caption'lardadır (PRD konvansiyonu).
 
-1. $R$ ve $\Delta R$ singüler-değer spektrumlarının yan yana karşılaştırması
-   ($\Delta R\approx\varepsilon R$ bulk kayması, kuyrukta ek çöküş; §2.4/§3.2).
-   — `fig1_svd_spektrum.png`
-2. Drift izleme zaman serisi: gerçek vs kestirilen drift RMS, mutlak
-   rekonstrüksiyonla birlikte (§3.4). — `fig2_drift_izleme.png`
-3. β-beating tarama eğrisi: tracking hatası vs $\varepsilon_\beta$ (§3.7).
-   — `fig3_betabeat.png`
-4. Per-mod grafiği: mod indeksine karşı gürültü büyütmesi ($1/\sigma$) ve
-   simetrik güç oranı, çift eksen (§4.3). — `fig4_permode_svd.png`
-5. İki-katmanlı işletme mimarisi şeması (§5). — `fig5_mimari.png`
-6. $\varepsilon$ taraması: gürültü büyütmesi $\|\Delta R^{-1}\|\propto 1/\varepsilon$
-   (sol) ve $\kappa(\Delta R)$'nin $\varepsilon$'dan bağımsızlığı (sağ); §3.2.
-   — `fig6_epsilon_sweep.png`
+**ŞEKİL 1.** (`fig1_svd_spektrum.png`) Tepki matrisi $R$ ve iki-gradient farkı
+$\Delta R=R(g_1)-R(g_1(1+\varepsilon))$ ($\varepsilon=0.02$) için singüler-değer
+spektrumları; (a) dikey, (b) yatay düzlem. Kesikli gri çizgi $\varepsilon\,\sigma(R)$
+beklenen bulk ölçeklemesidir. $\Delta R$'nin büyük singüler değerleri bu çizgiyi
+izler; en küçük modlar daha da çöker. $R$ iyi koşulludur ($\kappa\approx 193/140$),
+$\Delta R$ ise ~2 mertebe kötüdür. (§2.4, §3.2)
+
+**ŞEKİL 2.** (`fig2_drift_izleme.png`) Test 4 kalibrasyon-referans drift izleme,
+(a) dikey, (b) yatay düzlem. Gerçek drift, kestirilen drift ve naif mutlak
+rekonstrüksiyon hatası epoch'a karşı (log ölçek). 50 μm BPM ofseti mutlak
+rekonstrüksiyonu ~200 μm'de boğarken drift modu 6–7 μm RMS'te izler. (§3.4)
+
+**ŞEKİL 3.** (`fig3_betabeat.png`) Test 8: örgü-modeli hatası (β-beating)
+altında drift takip hatası, $\varepsilon_\beta$'ya karşı (15-tohum medyanı).
+Kesik kırmızı çizgi 10 μm hedef, noktalı gri çizgi LOCO-gerçekçi %1 seviyesi.
+%1'de hata 6.1 μm; %5'e kadar hedef altında. (§3.7)
+
+**ŞEKİL 4.** (`fig4_permode_svd.png`) $R$'nin (dikey düzlem) singüler modları:
+sol eksen (mavi) gürültü duyarlılığı $1/\sigma_i$, sağ eksen (kırmızı) modun
+simetrik alt-uzaydaki güç oranı. En kötü koşullanmış modlar (sağ) %96–98
+simetriktir; gürültü duyarlılığı arttıkça simetrik içerik %100'e tırmanır. (§4.3)
+
+**ŞEKİL 5.** (`fig5_mimari.png`) İki-katmanlı hizalama izleme mimarisi: yavaş
+mutlak katman (LOCO/BBA → $\Delta q_0,\mathbf{b}_0,R$) ve hızlı drift katmanı
+($R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$). Simetrik (sahte-EDM-kritik) alt-uzay her
+iki katmanda da gürültü sınırındadır. (§5)
+
+**ŞEKİL 6.** (`fig6_epsilon_sweep.png`) $\varepsilon$ taraması: (a) ofset-iptal
+eden estimatörün gürültü büyütmesi $\|\Delta R^{-1}\|=1/\sigma_{\min}(\Delta R)$,
+noktalı $1/\varepsilon$ referansıyla — temiz $1/\varepsilon$ ölçeklemesi;
+(b) kondisyon sayısı $\kappa(\Delta R)$, $\varepsilon$'dan kabaca bağımsız
+($\sim 10^4$). $\varepsilon\to0$'da yöntemi bozan κ değil $\|\Delta R^{-1}\|$'dir.
+(§2.4, §3.2)
