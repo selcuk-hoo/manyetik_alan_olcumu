@@ -68,8 +68,8 @@ matrisinin mod yapısından kaynaklandığını gösterir; yöntemin kesin tanı
 \subsection{Bağlam ve sistematik önceliği}
 
 Proton EDM deneyinin ilk önerileri tamamen elektrostatik, zayıf-odaklamalı
-halka tasarımına dayanıyordu; baskın sistematik ortalama dikey manyetik
-alandı. Demet dinamiğini ve kararlılığı iyileştirmek için sonraki nesil
+halka tasarımına dayanıyordu \cite{anastassopoulos2016}; baskın sistematik
+ortalama dikey manyetik alandı. Demet dinamiğini ve kararlılığı iyileştirmek için sonraki nesil
 simetrik-hibrit tasarım, manyetik kuadrupollerle \textbf{alternating-gradient
 (FODO)} odaklamaya geçti \cite{omarov2022}. Bu geçişle sistematik öncelikler
 de değişti: baskın sistematik artık \textbf{kuadrupol hizalama hatalarıdır}.
@@ -143,8 +143,8 @@ ofseti, $\boldsymbol{\eta}$ ölçüm gürültüsüdür. Yatay-dikey kuplaj ihmal
 edilebilir kabul edilir; problem iki bağımsız $48\times48$ sisteme ayrılır.
 
 \subsection{Tepki matrisinin analitik inşası}
-Periyodik FODO örgüsünde, Courant-Snyder formalizmiyle kapalı-yörünge tepki
-matrisi:
+Periyodik FODO örgüsünde, Courant-Snyder formalizmiyle \cite{lee2011}
+kapalı-yörünge tepki matrisi:
 \begin{equation}
 R_{ij} = \frac{\sqrt{\beta_i\beta_j}}{2\sin(\pi Q)}\,
          \cos\!\bigl(|\phi_i-\phi_j|-\pi Q\bigr)\,(KL)_j,
@@ -553,8 +553,8 @@ karşı-dönen demet ayrımı veya spin presesyonudur \cite{omarov2022}.
 Tek bir yöntem her ihtiyacı karşılamaz; iki katmanlı bir mimari öneriyoruz
 (Şekil~\ref{fig:mimari}).
 
-\paragraph{Yavaş mutlak katman (saatlik--günlük).} LOCO + BBA + survey ile
-mutlak hizalama $\Delta q_0$, BPM ofseti $\mathbf{b}_0$ ve örgü modeli
+\paragraph{Yavaş mutlak katman (saatlik--günlük).} LOCO \cite{safranek1997} +
+BBA + survey ile mutlak hizalama $\Delta q_0$, BPM ofseti $\mathbf{b}_0$ ve örgü modeli
 ($\beta,\phi,Q$, dolayısıyla $R$). Bu, hızlandırıcı operasyonunda zaten var
 olan standart prosedürdür.
 
@@ -627,19 +627,27 @@ sağlamlığı \texttt{test8\_betabeat.py} (Test~8), per-mod SVD analizi
 % ============================================================
 \begin{thebibliography}{9}
 \bibitem{omarov2022}
-Z.~Omarov, H.~Davoudiasl, \emph{et al.} (Y.~K.~Semertzidis dahil),
+Z.~Omarov, H.~Davoudiasl, S.~Hac\i{}\"omero\u{g}lu, V.~Lebedev, W.~M.~Morse,
+Y.~K.~Semertzidis, A.~J.~Silenko, E.~J.~Stephenson, and R.~Suleiman,
 ``Comprehensive symmetric-hybrid ring design for a proton EDM experiment at
 below $10^{-29}\,e\cdot$cm,'' \emph{Phys.\ Rev.\ D} \textbf{105}, 032001
-(2022).
-\bibitem{pedm2011}
-pEDM Collaboration, ``Storage Ring Proton Electric Dipole Moment Experiment
-Proposal,'' BNL (2011).
-\bibitem{lee}
-S.~Y.~Lee, \emph{Accelerator Physics}, 3rd ed., World Scientific (2011).
-\bibitem{safranek}
+(2022),
+\href{https://doi.org/10.1103/PhysRevD.105.032001}{doi:10.1103/PhysRevD.105.032001};
+arXiv:2007.10332.
+\bibitem{anastassopoulos2016}
+V.~Anastassopoulos \emph{et al.}, ``A storage ring experiment to detect a
+proton electric dipole moment,'' \emph{Rev.\ Sci.\ Instrum.} \textbf{87},
+115116 (2016),
+\href{https://doi.org/10.1063/1.4967465}{doi:10.1063/1.4967465};
+arXiv:1502.04317.
+\bibitem{lee2011}
+S.~Y.~Lee, \emph{Accelerator Physics}, 3rd ed.\ (World Scientific, 2011),
+\href{https://doi.org/10.1142/8335}{doi:10.1142/8335}.
+\bibitem{safranek1997}
 J.~Safranek, ``Experimental determination of storage ring optics using orbit
 response measurements,'' \emph{Nucl.\ Instrum.\ Meth.\ A} \textbf{388}, 27
-(1997).
+(1997),
+\href{https://doi.org/10.1016/S0168-9002(97)00309-4}{doi:10.1016/S0168-9002(97)00309-4}.
 \end{thebibliography}
 
 \end{document}

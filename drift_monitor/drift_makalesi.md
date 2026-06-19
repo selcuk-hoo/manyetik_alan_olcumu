@@ -494,17 +494,25 @@ prob — demet ayrımı/spin) [Omarov 2022].
 
 ## Kaynaklar
 
-*(Taslak — tamamlanacak.)*
-
-1. Z. Omarov, H. Davoudiasl, … Y. K. Semertzidis vd., "Comprehensive
-   symmetric-hybrid ring design for a proton EDM experiment at below
-   $10^{-29}\,e\cdot\text{cm}$," *Phys. Rev. D* **105**, 032001 (2022).
-2. pEDM Collaboration, "Storage Ring Proton Electric Dipole Moment Experiment
-   Proposal," BNL (2011).
-3. S. Y. Lee, *Accelerator Physics*, 3rd ed., World Scientific (2011).
+1. **[omarov2022]** Z. Omarov, H. Davoudiasl, S. Hacıömeroğlu, V. Lebedev,
+   W. M. Morse, Y. K. Semertzidis, A. J. Silenko, E. J. Stephenson, R. Suleiman,
+   "Comprehensive symmetric-hybrid ring design for a proton EDM experiment at
+   below $10^{-29}\,e\cdot\text{cm}$," *Phys. Rev. D* **105**, 032001 (2022).
+   doi:[10.1103/PhysRevD.105.032001](https://doi.org/10.1103/PhysRevD.105.032001);
+   arXiv:2007.10332.
+2. **[anastassopoulos2016]** V. Anastassopoulos vd., "A storage ring experiment
+   to detect a proton electric dipole moment," *Rev. Sci. Instrum.* **87**,
+   115116 (2016).
+   doi:[10.1063/1.4967465](https://doi.org/10.1063/1.4967465);
+   arXiv:1502.04317. [pEDM deney önerisinin hakemli versiyonu]
+3. **[lee2011]** S. Y. Lee, *Accelerator Physics*, 3rd ed., World Scientific
+   (2011). doi:[10.1142/8335](https://doi.org/10.1142/8335).
    [tepki matrisi formalizmi]
-4. J. Safranek, "Experimental determination of storage ring optics using orbit
-   response measurements," *NIM A* **388**, 27 (1997). [LOCO]
+4. **[safranek1997]** J. Safranek, "Experimental determination of storage ring
+   optics using orbit response measurements," *Nucl. Instrum. Meth. A* **388**,
+   27 (1997).
+   doi:[10.1016/S0168-9002(97)00309-4](https://doi.org/10.1016/S0168-9002(97)00309-4).
+   [LOCO]
 
 ---
 
