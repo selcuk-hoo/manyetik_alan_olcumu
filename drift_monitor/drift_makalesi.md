@@ -333,6 +333,26 @@ sıfır), dolayısıyla bir $x\!-\!y$ çapraz (kuplaj) terimi yoktur. Her düzle
 kendi $48\times48$ sistemidir. (Sahte EDM'i süren $dx\cdot dy$ kuplajı bu lineer
 yörünge modelinde değil, ikinci-derece bir spin etkisidir — bkz. §4.4.)
 
+**Peki gerçek quad tilt bu varsayımı kırar mı?** Kuadrupol dönmesi (tilt) gerçek
+bir skew bileşeni yaratır ve $dx\to$ dikey, $dy\to$ yatay yörünge çapraz
+terimlerini açar. Bunu doğrudan test ettik: rastgele quad tilt'lerle **kuplajlı**
+tam tepki matrisini (dört blok $R_{yy},R_{yx},R_{xy},R_{xx}$) izleyiciden kurup,
+düzlem-ayrık monitörle ($R_{yy}^{-1},R_{xx}^{-1}$) drift kurtarımı yaptık
+(Tablo~7). Sonuç: gerçekçi 0.2 mrad tilt'te çapraz kuplaj diyagonal tepkinin
+yalnız **%0.33'ü**; drift takip hatası **değişmez** (6.27 μm). 1 mrad'a kadar
+(kuplaj %1.1) hata yine sabit. Yani çapraz kuplaj, drift modunun ölçtüğü *değişime*
+$\sim$(kuplaj)$\times$(drift) $\approx 0.1\,\mu$m katkı verir — 6 μm tabanının
+çok altında. **Düzlem-ayrık model gerçekçi quad tilt altında geçerlidir.**
+
+| Quad tilt | $x\!-\!y$ kuplajı $\|R_{yx}\|/\|R_{xx}\|$ | $y$-takip | $x$-takip |
+|---|---|---|---|
+| 0 | %0.00 | 6.27 μm | 5.95 μm |
+| **0.2 mrad** | **%0.33** | **6.27 μm** | **5.95 μm** |
+| 1 mrad | %1.08 | 6.26 μm | 5.95 μm |
+
+*(Tablo 7. İzleyiciden kurulan kuplajlı R; düzlem-ayrık drift kurtarımı,
+15-tohum medyanı. `drift_monitor/drift_quadtilt_sim.py`)*
+
 ### 3.7 Test 8 — Örgü modeli hatası altında β-beating sağlamlığı
 
 Drift modu $R^{-1}$'in doğruluğuna bağlıdır. Gerçek halkada LOCO + BBA sonrası
@@ -493,16 +513,19 @@ katkısı doğrusal ve küçüktür; yalnız-$dx$ ise $S_y$ için sıfırdır. A
 sözcük **çarpım** $dx\cdot dy$'dir: etki iki düzlemin *birlikte* kaçık olmasını
 gerektirir (komütatif olmayan iki eksenli spin dönmesi → net Berry fazı).
 
-**Yapısal sınır (kesin).** Drift monitörün lineer modeli (Eş. 1, §2.1)
-yatay ve dikey düzlemleri **ayrık** ele alır: $dy$ yalnız dikey yörüngeyi, $dx$
-yalnız yatay yörüngeyi üretir; birinci derecede çapraz terim yoktur (çapraz terim
-ancak skew kuplajı = kuadrupol dönmesiyle doğar, bu modelde sıfır). Tablo 6'nın
-$x$ ve $y$ sütunlarını birbirinden bağımsız vermesinin sebebi tam da budur:
-problem iki ayrık $48\times48$ sistemdir, ortak $x\!-\!y$ terimi yoktur.
-Dolayısıyla monitör, sahte EDM'i süren **bilineer $dx\cdot dy$ büyüklüğünü
-yapısal olarak temsil edemez ve kısıtlayamaz** — bu, mod/gözlenebilirlik
-ayrıntısından bağımsız, kesin bir ifadedir. Kapalı yörünge tek düzlemin
-*ortalama* yer değiştirmesini taşır; iki düzlemin *çarpımını* taşımaz.
+**Yapısal sınır (kesin) — asıl mesele lineerlik.** Sahte EDM'i süren büyüklük
+iki düzlemin **çarpımıdır** ($dx\cdot dy$); yani misalignment'ta ikinci
+dereceden (bilineer). Oysa **kapalı-yörünge tepkisi misalignment'ta lineerdir**
+(Eş. 1). Burada kritik nokta düzlem-ayrıklık *değil*, lineerliktir: quad tilt bir
+skew kuplajı (yatay↔dikey çapraz bloklar) eklese bile tepki *hâlâ lineer bir
+haritadır* ve hiçbir $dx\cdot dy$ çarpım terimi üretmez. Nitekim çapraz kuplajı
+açıkça ölçtük (Tablo 7): 0.2 mrad tilt'te kuplaj diyagonalin %0.33'ü ve drift
+kurtarımını hiç değiştirmez — çünkü mesele kuplajın büyüklüğü değil, gözlenenin
+*derecesidir*. **Lineer bir gözlemlenebilir, bilineer bir büyüklüğü ilkesel
+olarak kısıtlayamaz**; dolayısıyla monitör — kuplajlı ya da değil — sahte EDM'i
+süren $dx\cdot dy$'yi yapısal olarak göremez. (Tablo 6'nın $x/y$ sütunlarının
+ayrık olması bu lineerliğin bir görünümüdür: kapalı yörünge tek düzlemin
+*ortalama* yer değiştirmesini taşır, iki düzlemin *çarpımını* değil.)
 
 **Düzlem-içi sınır.** Buna ek olarak, *her bir düzlemin kendi içinde* monitör
 simetrik (yüksek-$k$) alt-uzaya §4.2–4.3 gereği neredeyse kördür (en kötü modda
