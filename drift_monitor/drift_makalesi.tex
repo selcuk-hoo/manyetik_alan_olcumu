@@ -51,14 +51,14 @@ dahi hedefin altında kalır. Yöntemin temel sınırını singüler-değer (SVD
 per-mod analiziyle ortaya koyuyoruz: tepki matrisinin en kötü koşullanmış
 modları (\%96 oranında \emph{simetrik} alt-uzay; hücre içi QF/QD aynı yönde)
 en büyük koşulluluk-kaynaklı duyarlılık dezavantajına (en kötü modda en iyiye
-göre $\sim 193$ kat) maruz kalır. Bu simetrik alt-uzay, sahte EDM'yi süren
-$dx\cdot dy$ geometrik-faz kanalına ($\propto\sigma^2$) en güçlü katkıyı veren
-bileşenlerle örtüşür \cite[Fig.~9a]{omarov2022}; dolayısıyla kapalı-yörünge
-izleme antisimetrik hizalama driftini hassasça takip ederken,
-sahte-EDM-kritik simetrik kanalı bu ölçüm konfigürasyonu altında gürültü
-sınırında bırakır. Bu sonuç, kapalı-yörünge tabanlı izlemenin yalnızca belirli
-hizalama modlarına duyarlı olduğunu ve gözlenebilirlik sınırının tepki
-matrisinin mod yapısından kaynaklandığını gösterir; yöntemin kesin tanımlı bir
+göre $\sim 193$ kat) maruz kalır. Ayrıca sahte EDM'i süren baskın kanal, yatay
+ve dikey kaçıklığın \textbf{çarpımına} ($dx\cdot dy$, $\propto\sigma^2$) bağlı
+bilineer bir geometrik-faz etkisidir \cite[Fig.~9a]{omarov2022}; lineer ve
+düzlem-ayrık olan drift monitör bu çarpımı \textbf{yapısal olarak temsil edemez}.
+Bu iki yapısal neden --- düzlem-ayrıklık ve simetrik alt-uzay körlüğü ---
+kapalı-yörünge izlemenin antisimetrik hizalama driftini hassasça takip ederken,
+sahte-EDM-kritik bilgiyi tanımlı biçimde dış bir gözlemlenebilire (karşı-dönen
+demet ayrımı / spin) bıraktığını gösterir. Yöntemin kesin tanımlı bir
 \emph{geçerlilik alanı} ve kesin tanımlı bir \emph{kör noktası} vardır.
 \end{abstract}
 
@@ -142,8 +142,13 @@ Lineer rejimde BPM okumaları ile hizalama hataları arasındaki ilişki:
 \end{equation}
 burada $\Delta q\in\mathbb{R}^{48}$ misalignment vektörü,
 $R\in\mathbb{R}^{48\times48}$ tepki matrisi, $\mathbf{b}$ BPM elektronik
-ofseti, $\boldsymbol{\eta}$ ölçüm gürültüsüdür. Yatay-dikey kuplaj ihmal
-edilebilir kabul edilir; problem iki bağımsız $48\times48$ sisteme ayrılır.
+ofseti, $\boldsymbol{\eta}$ ölçüm gürültüsüdür. \textbf{Modelleme varsayımı:}
+yatay--dikey kuplaj yoktur (skew bileşeni = kuadrupol dönmesi sıfır kabul edilir),
+dolayısıyla problem birbirinden bağımsız iki $48\times48$ sisteme ($dy\to$ dikey
+yörünge, $dx\to$ yatay yörünge) ayrılır. Bu düzlem-ayrıklığın, drift izlemenin
+sahte-EDM ile ilişkisi açısından önemli bir sonucu vardır (\S4.4): lineer yörünge
+tepkisi tek bir düzlemin yer değiştirmesini taşır, iki düzlemin \emph{çarpımını}
+değil.
 
 \subsection{Tepki matrisinin analitik inşası}
 Periyodik FODO örgüsünde, Courant-Snyder formalizmiyle \cite{lee2011}
@@ -395,6 +400,12 @@ edildiğine değil $\varepsilon$ ve örgü fiziğine bağlıdır. Drift modu yap
 olarak farklı bir problem (mutlak değil, değişim) çözdüğü için bu sınırın
 dışındadır.
 
+Tablodaki $x$ ve $y$ sütunları \textbf{bağımsızdır}: bu çalışmadaki lineer model
+yatay ve dikey düzlemleri ayrık ele alır (skew kuplajı = kuadrupol dönmesi
+sıfır), dolayısıyla bir $x\!-\!y$ çapraz (kuplaj) terimi yoktur; her düzlem kendi
+$48\times48$ sistemidir. (Sahte EDM'i süren $dx\cdot dy$ kuplajı bu lineer
+yörünge modelinde değil, ikinci-derece bir spin etkisidir --- bkz.\ \S4.4.)
+
 \begin{table*}[tb]
 \centering
 \caption{Test 6: aynı senaryoda üç estimatörün yan yana karşılaştırması.}
@@ -421,15 +432,22 @@ yalnızca 0.1\,$\mu$m artar (5.98$\to$6.08\,$\mu$m); hedefe 3.9\,$\mu$m marj
 kalır. Yöntem, standart-kalite LOCO'su olan bir hızlandırıcıda operasyonel
 olarak kullanılabilir (Şekil~\ref{fig:beta}).
 
-\paragraph{İzleyici doğrulaması.} Yukarıdaki tarama $\beta$-beating'i analitik
-olarak ($\beta,\phi$ doğrudan bozularak) modelliyordu. Bunu $\beta$-beating'in
-gerçek kaynağıyla --- kuadrupol fraksiyonel gradyan hatalarıyla --- tam parçacık
-izleyicisinde tekrarladık: bozulmuş $R_\text{true}$ izleyiciden kuruldu, monitör
-nominal $R_\text{nom}^{-1}$ ile çalıştı. Gradyan hatası RMS'i $0,\,2\%,\,5\%$
-için drift takip hatası $6.17,\,6.17,\,6.25\,\mu$m ($\kappa$: $228\to239\to233$).
-Gerçek gradyan-hatası kaynaklı $\beta$-beating analitik taramadan bile daha
-sağlam çıktı; Test 8 tam parçacık dinamiğiyle doğrulandı.
-(\texttt{drift\_betabeat\_sim.py})
+\paragraph{İzleyici doğrulaması --- ve focal length hatası nereye düşüyor.}
+Yukarıdaki tarama $\beta$-beating'i analitik olarak ($\beta,\phi$ doğrudan
+bozularak), yani \emph{belirtiyi} modelliyordu. Bunu $\beta$-beating'in fiziksel
+\emph{kaynağıyla} tekrarladık: \textbf{kuadrupol odak-uzaklığı (focal length)
+hataları.} Bir kuadrupolün odak uzaklığı $1/f=(G/B\rho)\,L$ gradyanla belirlenir;
+fraksiyonel bir gradyan hatası $\delta G/G$ doğrudan bir focal-length hatasıdır.
+Yani focal-length hatasını $\beta$-beating'in \emph{içine gömmedik} --- tersine,
+onu \textbf{kaynak} olarak verip sonucunu izleyiciye ürettirdik. Bu yaklaşım
+focal hatanın \emph{tam} etkisini yakalar (yalnız $\beta$ şekil bozulması değil,
+tune kayması da dahil), çünkü hepsi $R_\text{nom}$ ile $R_\text{true}$
+uyumsuzluğuna yansır. Her kuadrupole bağımsız rastgele $\delta G/G$ verilip
+$R_\text{true}$ izleyiciden kuruldu; monitör nominal $R_\text{nom}^{-1}$ ile
+çalıştı. Gradyan (focal) hata RMS'i $0,\,2\%,\,5\%$ için drift takip hatası
+$6.17,\,6.17,\,6.25\,\mu$m ($\kappa$: $228\to239\to233$). Gerçek focal-hata
+kaynaklı $\beta$-beating analitik taramadan bile daha sağlam çıktı; Test 8 tam
+parçacık dinamiğiyle doğrulandı. (\texttt{drift\_betabeat\_sim.py})
 
 \begin{table}[tb]
 \centering\small
@@ -487,42 +505,66 @@ Bu bölüm makalenin özgün omurgasıdır: drift modunun gürültü tabanının
 rastgele bir sayı olmadığını, \textbf{hangi hizalama desenlerinin} iyi/kötü
 izlendiğini belirleyen yapısal bir bölünmeden kaynaklandığını gösterir.
 
-\subsection{Yörünge kazanç yasası}
-Bu kafes (24-hücreli FODO) için yapılan mod analizinde, azimutal harmonik
-$k$'lı bir kick desenine kapalı-yörünge tepkisi tune'da rezonant bir kazançla
-ölçeklenir:
+\subsection{Hangi kaçıklık desenleri kapalı yörüngede görünür?}
+Önce kurulumu somutlaştıralım. Halka 24 FODO hücresinden oluşur; her hücrede bir
+\textbf{odaklayıcı} kuadrupol (QF) ve bir \textbf{dağıtıcı} kuadrupol (QD)
+vardır --- toplam 48 kuadrupol. Bir ``hizalama hatası deseni'', 48 kuadrupolün
+dikey kaymalarını veren 48 sayılık bir vektördür ($\Delta q\in\mathbb{R}^{48}$).
+Bir kaymış kuadrupolün kapalı yörüngeye etkisi bir \textbf{kick}tir (küçük açısal
+sapma) ve büyüklüğü (gradyan $\times$ kayma) ile orantılıdır.
+
+Bir kick dizisinin kapalı yörüngeye toplam etkisi, kick deseninin \textbf{azimutal
+harmoniğine} --- halka çevresi boyunca kaç kez tekrarladığına, $k$ --- bağlıdır.
+Kapalı yörünge harmonik $k$'ya bir kazançla yanıt verir:
 \begin{equation}
 G_k = \frac{C}{\,|Q_\text{eff}^2-k^2|\,},\quad C\approx 24.8,\;
-Q_\text{eff}^2\approx 5.03.
+Q_\text{eff}^2\approx 5.03,
 \label{eq:gain}
 \end{equation}
-(Sabitler bu örgüye özgüdür; aşağıdaki argüman genel kapalı-yörünge yasası
-değil, bu konfigürasyonun mod yapısı üzerine kuruludur.) Kazanç
-$k\approx Q\,(\approx 2.7)$ civarında tepe yapar ve $k\gg Q$ için hızla
-bastırılır. Yani kapalı yörünge bir \textbf{mod-seçici (rezonant) tepki}dir:
-tune'a yakın azimutal harmonikler kuvvetle geçer, $k\gg Q$ desenleri
-bastırılır. (Bu klasik bir uzaysal alçak-geçiren filtre değildir --- tepe
-$k=0$'da değil $k\approx Q$'dadır; ilgili aralıkta düşük-$k$/antisimetrik
-desenler görünür, yüksek-$k$/simetrik desenler bastırılır.)
+burada $Q$ betatron tune'udur ($\approx 2.7$); sabitler bu örgüye özgüdür.
+Kazanç tune'a yakın ($k\approx Q$) harmoniklerde en büyük, $k\gg Q$
+harmoniklerde küçüktür. Yani \textbf{kapalı yörünge bir mod-seçici (rezonant)
+filtredir}: yalnız belirli uzaysal harmonikleri güçlü gösterir. (Bu klasik bir
+alçak-geçiren filtre değildir --- tepe $k=0$'da değil $k\approx Q$'dadır.)
 
-\subsection{Simetrik / antisimetrik ayrışım}
-48 boyutlu misalignment uzayı, hücre içi QF/QD çiftinin göreli işaretine göre
-iki dik alt-uzaya ayrılır:
+\subsection{İki tür hizalama deseni: simetrik ve antisimetrik}
+Hangi desenin hangi harmoniğe düştüğünü görmek için hizalama hatalarını
+hücre-hücre iki gruba ayırıyoruz. Her hücredeki (QF, QD) çifti için iki uç durum:
 \begin{itemize}
-\item \textbf{Antisimetrik} (QF ve QD zıt yönde): düzgün, \textbf{düşük-$k$}
-  kick deseni üretir $\rightarrow$ $G_k$ büyük $\rightarrow$ kapalı yörüngede
-  \textbf{görünür}.
-\item \textbf{Simetrik} (QF ve QD aynı yönde, $\text{QF}=\text{QD}=a_c$):
-  kuadrupol gradyan işareti QF/QD'de değiştiği için \textbf{alternatif,
-  yüksek-$k$ ($k\approx 24$)} kick deseni üretir $\rightarrow$ $G_k$ küçük
-  $\rightarrow$ kapalı yörüngede \textbf{neredeyse görünmez}.
+\item \textbf{Antisimetrik desen:} QF ve QD \textbf{zıt yönde} kayar
+  (ör.\ QF $+a$, QD $-a$).
+\item \textbf{Simetrik desen:} QF ve QD \textbf{aynı yönde} kayar
+  (QF $+a$, QD $+a$).
 \end{itemize}
+Her hizalama hatası bu ikisinin toplamı olarak yazılabilir; böylece 48-boyutlu
+desen uzayı iki dik \textbf{alt-uzaya} ayrılır (her biri 24-boyutlu). Buradaki
+``alt-uzay'' basitçe \emph{belli bir simetri kuralına uyan tüm desenlerin
+ailesi} demektir.
 
-\subsection{Per-mod SVD analizi (anahtar sonuç)}
-$R=U\Sigma V^\top$ ayrışımında her sağ-tekil vektör $V_i$ bir misalignment
-deseni, $1/\sigma_i$ ise o deseni kestirirken yaşanan gürültü büyütmesidir
-($\sigma_{\max}=28.4$, $\sigma_{\min}=0.147$, $\kappa(R)=193$;
-Tablo~\ref{tab:svd}). En iyi 8 mod ortalama \textbf{\%4} simetrik (antisimetrik
+Belirleyici ayrıntı \textbf{gradyan işaretidir}: QF odaklar (gradyan $+$), QD
+dağıtır (gradyan $-$). Kick $=$ gradyan $\times$ kayma olduğundan:
+\begin{itemize}
+\item \textbf{Antisimetrik} (kaymalar $+a/-a$, gradyanlar $+/-$): iki kick
+  \textbf{aynı işarette} toplanır $\rightarrow$ düzgün, \textbf{düşük-$k$} desen
+  $\rightarrow$ $G_k$ büyük $\rightarrow$ \textbf{yörüngede görünür}.
+\item \textbf{Simetrik} (kaymalar $+a/+a$, gradyanlar $+/-$): iki kick
+  \textbf{zıt işarette} $\rightarrow$ hücre içinde işaret değiştiren, hızlı
+  alternatif \textbf{yüksek-$k$ ($k\approx 24$)} desen $\rightarrow$ $k\gg Q$
+  $\rightarrow$ $G_k$ küçük $\rightarrow$ \textbf{yörüngede neredeyse görünmez}.
+\end{itemize}
+Sezgi: simetrik kayma, gradyan alternasyonu yüzünden kendi kendini söndüren bir
+kick örüntüsü üretir; kapalı yörünge bunu ``görmez'', antisimetrik kaymayı ise
+güçlü görür.
+
+\subsection{Hangi desenler ne kadar gürültüyle kestirilir? (per-mod SVD)}
+\S4.2'deki simetrik/antisimetrik ayrım kategorikti (iki uç durum). Tepki
+matrisinin \textbf{tekil değer ayrışımı (SVD)} bunu nicel ve sürekli hale
+getirir. $R=U\Sigma V^\top$ yazıldığında her sağ-tekil vektör $V_i$ bir hizalama
+deseni (``mod''), karşılık gelen tekil değer $\sigma_i$ ise o desenin yörüngede
+ne kadar güçlü göründüğüdür; monitör o modu kestirirken gürültüyü $1/\sigma_i$
+ile büyütür. Her mod için gürültü büyütmesi $1/\sigma_i$ ve modun \S4.2 anlamında
+simetrik içeriği hesaplanır ($\sigma_{\max}=28.4$, $\sigma_{\min}=0.147$,
+$\kappa(R)=193$; Tablo~\ref{tab:svd}). En iyi 8 mod ortalama \textbf{\%4} simetrik (antisimetrik
 baskın, iyi koşullu); en kötü 8 mod ortalama \textbf{\%96} simetrik. En kötü
 modun ($\sigma_{\min}$) koşulluluk-kaynaklı duyarlılığı en iyiye göre
 $\sim 193$ kat ($=\kappa(R)$) daha kötüdür; bu fark tümüyle simetrik
@@ -559,32 +601,53 @@ duyarlılığı arttıkça simetrik içerik \%100'e tırmanır.}
 \label{fig:permode}
 \end{figure}
 
-\subsection{Sahte EDM kanalıyla çakışma}
-Bu yapısal kör noktanın önemi, simetrik alt-uzayın fiziksel anlamından gelir.
-Sahte EDM'yi süren baskın mekanizma, ardışık dönüşlerin geometrik (Berry)
-fazından doğan ve $dx\cdot dy$'ye orantılı, dolayısıyla misalignment ile
-\textbf{kuadratik ($\propto\sigma^2$)} ölçeklenen bir terimdir
-\cite[Fig.~9a]{omarov2022}. Simülasyonlarımızda bu kuadratik sistematik kanala
-en güçlü katkıyı veren hizalama bileşenlerinin \textbf{simetrik alt-uzayda
-yoğunlaştığı} görülmüştür (çok-tohum RMS taramasında $\sigma$-üssü
-$\approx 2.0$ ile mekanizma bağımsız olarak doğrulanır).
+\subsection{Bunun sahte EDM ile ilişkisi --- ve kesin sınır}
+Drift monitörün amacı hizalama driftini izlemekti; ama asıl önemsediğimiz sahte
+EDM'dir. İki arasındaki bağı dürüstçe, sınırlarıyla kuruyoruz.
 
-Sonuç birleştiğinde: kapalı-yörünge izleme, sahte-EDM-kritik simetrik deseni
-en kötü koşullanmış modlarda en iyiye göre $\sim 193$ kata varan duyarlılık
-dezavantajıyla ``görür''. Mevcut 1\,$\mu$m BPM gürültüsünde bu modlarda etkin
-hassasiyet $\sim 193\,\mu$m mertebesine düşer --- drift modunun
-$\sim 6\,\mu$m'lik RMS tabanına bu simetrik bileşen karışır, ama
-\textbf{sahte-EDM açısından kritik kısım iki mertebe daha az hassasiyetle}
-kestirilebilir. Bu sınır, simetrik alt-uzayın yüksek-$k$ doğasının
-($G_k\propto 1/|Q^2-k^2|$, $k\approx 24$) doğrudan bir sonucudur: \emph{bu
-ölçüm konfigürasyonunda} --- tek kapalı yörünge, tek tepki matrisi --- daha
-iyi BPM donanımı veya daha fazla veri yığılması yalnız gürültü tabanını
-düşürür, simetrik modların $\sim 193\times$'lik göreli dezavantajını gidermez.
-Sınırın ilkesel olmadığını, yalnız bu konfigürasyona özgü olduğunu vurgulamak
-gerekir: ek gözlemlenebilirler (farklı tune/optik kombinasyonları,
-faz-ilerleme modülasyonu, ya da yörünge+spin birleşik ölçümü) prensipte bu
-alt-uzaya erişebilir. Pratikte simetrik kanala doğrudan duyarlı gözlemlenebilir
-karşı-dönen demet ayrımı veya spin presesyonudur \cite{omarov2022}.
+\paragraph{Sahte EDM'in baskın kanalı bir yatay--dikey kuplajıdır.} Sahte
+vertikal spin presesyonunu ($dS_y/dt$) süren baskın terim, yatay ($dx$) ve dikey
+($dy$) kaçıklığın \textbf{çarpımına} orantılı bir geometrik (Berry) faz
+katkısıdır; kaçıklıkla \textbf{kuadratik} ($\propto\sigma^2$) ölçeklenir
+\cite[Fig.~9a]{omarov2022}; bizim \S13.7 spin-takip taramamız $\sigma$-üssünü
+$2.0$ ölçer. Yalnız-$dy$ katkısı doğrusal ve küçüktür; yalnız-$dx$ ise $S_y$
+için sıfırdır. Anahtar sözcük \textbf{çarpım} $dx\cdot dy$'dir: etki iki düzlemin
+\emph{birlikte} kaçık olmasını gerektirir.
+
+\paragraph{Yapısal sınır (kesin).} Drift monitörün lineer modeli
+(Eş.~\eqref{eq:lin}) yatay ve dikey düzlemleri \textbf{ayrık} ele alır: $dy$
+yalnız dikey, $dx$ yalnız yatay yörüngeyi üretir; birinci derecede çapraz terim
+yoktur (skew kuplajı = kuadrupol dönmesi sıfır). Tablo~\ref{tab:t6}'nın $x$ ve
+$y$ sütunlarını bağımsız vermesinin sebebi budur: problem iki ayrık
+$48\times48$ sistemdir. Dolayısıyla monitör, sahte EDM'i süren \textbf{bilineer
+$dx\cdot dy$ büyüklüğünü yapısal olarak temsil edemez, kısıtlayamaz} --- bu,
+mod/gözlenebilirlik ayrıntısından bağımsız, kesin bir ifadedir. Kapalı yörünge
+tek düzlemin \emph{ortalama} yer değiştirmesini taşır, iki düzlemin
+\emph{çarpımını} değil.
+
+\paragraph{Düzlem-içi sınır.} Buna ek olarak, her düzlemin kendi içinde monitör
+simetrik (yüksek-$k$) alt-uzaya \S4.2--4.3 gereği neredeyse kördür (en kötü modda
+$\sim 193$ kat gürültü dezavantajı). Yani simetrik bir dikey drift, sahte-EDM'e
+katkı verse bile monitörün en zayıf gördüğü yöndedir.
+
+\paragraph{Açıkça belirtilen sınır (dürüstlük).} Baskın $dx\cdot dy$ kanalının
+ağırlığının özellikle \emph{simetrik} alt-uzayda mı yoğunlaştığı ayrı,
+desen-bağımlı bir sorudur; spin taramamız bu kanalın seed'e göre $\sim 36\times$
+saçıldığını gösterir (\S13.7) ve bu ayrışım tek bir kapalı-yörünge ölçümüyle
+çözülemez --- bu da rapor ettiğimiz sınırın bir parçasıdır. Yalnız-$dy$ (baskın
+olmayan) kanalda spin simülasyonu, gözlenebilir harmonikler çıkarıldıktan sonra
+artık sahte-EDM'in küçük kaldığını gösterir; baskın kanal için kesin nicel
+alt-uzay ayrışımı gelecek iştir.
+
+\paragraph{Sonuç.} Kapalı-yörünge drift monitörü sahte-EDM-kritik bilgiyi
+\textbf{iki bağımsız yapısal nedenle} kısıtlayamaz: (1) lineer ve düzlem-ayrık
+olduğundan baskın kanalı süren bilineer $dx\cdot dy$'yi ilkesel olarak göremez;
+(2) gördüğü her düzlem içinde simetrik (yüksek-$k$) alt-uzayı zayıf gözler. Her
+iki sınır da daha iyi BPM donanımı ya da daha fazla veriyle kapanmaz; bu kanala
+erişim \textbf{farklı bir gözlemlenebilir} gerektirir --- karşı-dönen (CW/CCW)
+demet ayrımı veya doğrudan spin presesyonu \cite{omarov2022}. Drift monitörün
+net rolü budur: antisimetrik hizalama driftini ucuza ve sürekli izler,
+sahte-EDM-kritik kanalı tanımlı biçimde dış bir gözlemlenebilire bırakır.
 
 % ============================================================
 \section{Önerilen İşletme Modu}
@@ -625,17 +688,19 @@ hassasiyetle, $\sim$\%1 $\beta$-beating'e dayanıklı şekilde çalıştığı
 sistematik testlerle gösterildi. Yöntem iki katmanlı bir mimaride (yavaş
 LOCO/BBA + hızlı drift) operasyonel olarak konumlandırıldı.
 
-Daha önemlisi, yöntemin \textbf{temel sınırı} nicelendi: per-mod SVD analizi,
-kapalı-yörünge izlemenin kör noktasının \%96 simetrik içerikli en kötü
-koşullanmış modlar olduğunu (en kötü modda en iyiye göre $\sim 193$ kat
-koşulluluk-kaynaklı duyarlılık dezavantajı) ve bu modlara en güçlü katkı veren
-hizalama bileşenlerinin sahte EDM'yi süren $dx\cdot dy$ geometrik-faz kanalıyla
-örtüştüğünü gösterdi. Bu, kapalı-yörünge yöntemlerinin sahte-EDM-kritik bilgiyi
-bu ölçüm konfigürasyonunda neden sağlayamadığının nicel bir ifadesidir:
-antisimetrik drift hassasça izlenir, simetrik (kritik) kanal ise gürültü
-sınırında kalır ve donanım iyileştirmesiyle kolayca giderilemez. Bu kanala
-erişim ek bir gözlemlenebilir gerektirir (farklı optik kombinasyonları ya da
-yörünge-dışı bir prob --- demet ayrımı/spin) \cite{omarov2022}.
+Daha önemlisi, yöntemin \textbf{temel sınırı} iki bağımsız yapısal nedenle
+nicelendi (\S4.4). \emph{Birincisi (kesin):} sahte EDM'i süren baskın kanal,
+yatay ve dikey kaçıklığın çarpımına ($dx\cdot dy$) bağlı bilineer bir etkidir
+\cite{omarov2022}; lineer ve düzlem-ayrık olan monitör bu çarpımı yapısal olarak
+temsil edemez (Tablo~\ref{tab:t6}'da $x$/$y$ sütunlarının bağımsızlığı bunun
+göstergesi). \emph{İkincisi:} her düzlem içinde, per-mod SVD analizi monitörün
+kör noktasının \%96 simetrik içerikli en kötü koşullanmış modlar olduğunu
+gösterir (en kötü modda en iyiye göre $\sim 193$ kat duyarlılık dezavantajı).
+Baskın kanalın ağırlığının özellikle simetrik alt-uzayda mı yoğunlaştığı ise
+desen-bağımlı, açık bir sorudur (\S4.4). Net sonuç: antisimetrik drift hassasça
+izlenir; sahte-EDM-kritik bilgi ise donanım/veriyle kapanmayan yapısal nedenlerle
+erişilemez ve farklı bir gözlemlenebilir (karşı-dönen demet ayrımı / spin)
+gerektirir \cite{omarov2022}.
 
 Çalışmanın kısıtları:
 \begin{itemize}
