@@ -35,10 +35,11 @@ geçicidir.}}
 Proton EDM (pEDM) deneyinin alternating-gradient (AG) versiyonunda, manyetik
 kuadrupol hizalama hataları baskın sistematik kaynağıdır ve spin koherans
 zaman ölçeğinde $\sim 10\,\mu$m seviyesinde kontrol altında tutulmalıdır
-\cite{omarov2022}. Bu çalışmada, kalibrasyon anına göreli bir
-\emph{kapalı-yörünge tabanlı online hizalama drift izleme yöntemi} öneriyor
-ve sistematik simülasyon testleriyle hem yeteneklerini hem de temel sınırını
-niceliyoruz. Yaklaşım, problemi bilinçli olarak yeniden tanımlar: amaç
+\cite{omarov2022}. Bu çalışmada, bu hizalamayı sürekli izlemek için kalibrasyon
+anına göreli bir \emph{kapalı-yörünge tabanlı online hizalama drift izleme
+yöntemi} öneriyor ve sistematik simülasyon testleriyle hem yeteneklerini hem de
+gözlenebilirlik sınırını niceliyoruz. Yaklaşım, problemi bilinçli olarak yeniden
+tanımlar: amaç
 \emph{mutlak hizalama rekonstrüksiyonu} ($\Delta q = R^{-1}\mathbf{y}$) değil,
 \emph{göreli hizalama kararlılığı izlemesi}dir. Yöntem, kalibrasyon anındaki
 BPM okumasını referans alarak
@@ -46,20 +47,17 @@ $\widehat{\delta q}(t) = R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ ile hizalama
 driftini kestirir; sabit BPM elektronik ofseti zaman farkında iptal olur.
 Gerçekçi hata bütçesinde (50\,$\mu$m RMS ofset, 1\,$\mu$m gürültü) yöntem
 6--7\,$\mu$m RMS hassasiyetle çalışır (mutlak rekonstrüksiyona göre
-$\sim 29\times$ iyileşme) ve LOCO kalitesinde (\%1) $\beta$-beating altında
-dahi hedefin altında kalır. Yöntemin temel sınırını singüler-değer (SVD)
-per-mod analiziyle ortaya koyuyoruz: tepki matrisinin en kötü koşullanmış
-modları (\%96 oranında \emph{simetrik} alt-uzay; hücre içi QF/QD aynı yönde)
-en büyük koşulluluk-kaynaklı duyarlılık dezavantajına (en kötü modda en iyiye
-göre $\sim 193$ kat) maruz kalır. Ayrıca sahte EDM'i süren baskın kanal, yatay
-ve dikey kaçıklığın \textbf{çarpımına} ($dx\cdot dy$, $\propto\sigma^2$) bağlı
-bilineer bir geometrik-faz etkisidir \cite[Fig.~9a]{omarov2022}; lineer ve
-düzlem-ayrık olan drift monitör bu çarpımı \textbf{yapısal olarak temsil edemez}.
-Bu iki yapısal neden --- düzlem-ayrıklık ve simetrik alt-uzay körlüğü ---
-kapalı-yörünge izlemenin antisimetrik hizalama driftini hassasça takip ederken,
-sahte-EDM-kritik bilgiyi tanımlı biçimde dış bir gözlemlenebilire (karşı-dönen
-demet ayrımı / spin) bıraktığını gösterir. Yöntemin kesin tanımlı bir
-\emph{geçerlilik alanı} ve kesin tanımlı bir \emph{kör noktası} vardır.
+$\sim 29\times$ iyileşme) ve LOCO kalitesinde (\%1) $\beta$-beating ile gerçekçi
+quad tilt altında dahi hedefin altında kalır. Analitik tepki matrisini tam
+parçacık (semplektik + spin) izleyicisiyle doğruluyoruz. Yöntemin
+\textbf{gözlenebilirlik sınırını} singüler-değer (SVD) per-mod analiziyle ortaya
+koyuyoruz: monitör, antisimetrik (hücre içi QF/QD zıt yönde) hizalama driftini
+güçlü, simetrik (QF/QD aynı yönde) driftini ise zayıf çözer --- en kötü
+koşullanmış modlar \%96 simetriktir ve en kötü modda en iyiye göre $\sim 193$
+kat gürültü dezavantajına uğrar. Böylece yöntemin kesin tanımlı bir
+\emph{geçerlilik alanı} (antisimetrik drift) ve kesin tanımlı bir \emph{kör
+noktası} (simetrik drift) vardır; ikincisinin belirli bir sistematik bütçe
+(ör.\ sahte EDM) için önemi makineye bağlıdır ve ayrı bir çalışmaya bırakılır.
 \end{abstract}
 
 % ============================================================
@@ -112,23 +110,25 @@ sınırını niceliyoruz.
 
 \subsection{Çalışmanın katkısı}
 \begin{enumerate}
-\item \textbf{Pozitif sonuç (yöntem).} Kalibrasyon-referanslı drift modu
+\item \textbf{Yöntem ve doğrulama.} Kalibrasyon-referanslı drift modu
   $\widehat{\delta q}(t)=R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$, sabit BPM
   ofsetini yapısal olarak iptal eder ve iyi-koşullu $R$ ($\kappa\approx 193$)
-  kullanır; gerçekçi hata bütçesinde 6--7\,$\mu$m RMS sağlar (\S3).
-\item \textbf{Temel sınır (özgün omurga --- makalenin merkezi tezi).} Per-mod
-  SVD analiziyle, kapalı-yörünge izlemenin kör noktasının \textbf{simetrik
-  alt-uzay} olduğu ve bunun sahte-EDM'yi süren $dx\cdot dy$ kanalıyla
-  çakıştığı gösterilir (\S4). Bu, kapalı-yörünge yöntemlerinin
-  sahte-EDM-kritik bilgiyi bu ölçüm konfigürasyonunda neden sağlayamadığının
-  nicel bir ifadesidir; makalenin asıl sonucu ölçülen RMS sayısı değil, bu
-  gözlenebilirlik ayrımıdır.
+  kullanır; gerçekçi hata bütçesinde 6--7\,$\mu$m RMS sağlar (\S3). Kullanılan
+  analitik $R$, tam parçacık izleyicisiyle doğrulanır (\S2.2).
+\item \textbf{Sağlamlık.} Yöntem; BPM ofsetine, $\beta$-beating'e (gerçek
+  gradyan hatasıyla) ve gerçekçi quad tilt'in yarattığı $x$--$y$ kuplajına
+  karşı sağlamdır (\S3).
 \item \textbf{Yapısal arka plan (destekleyici).} İki-ölçümlü, tam-ofset-iptal
   eden lineer estimatör sınıfı için bir tekillik önermesi verilir
   ($\|\Delta R^{-1}\|\sim\|R^{-1}\|/\varepsilon$); bu, ``iki gradient farkıyla
   ofseti iptal et'' gibi bariz alternatiflerin neden yapısal olarak
   kötü-koşullu olduğunu, drift modunun (iki \emph{zaman}) ise neden bu sınırın
   dışında kaldığını açıklar (\S2.4).
+\item \textbf{Gözlenebilirlik karakterizasyonu.} Per-mod SVD analiziyle,
+  monitörün \emph{hangi} hizalama desenlerini iyi/kötü çözdüğü nicelenir:
+  antisimetrik drift güçlü, simetrik drift zayıf gözlenir (\S4). Bu, yöntemin
+  geçerlilik alanını ve kör noktasını tanımlar; kör noktanın belirli bir
+  sistematik bütçe için önemi (ör.\ sahte EDM) makineye bağlı ayrı bir sorudur.
 \end{enumerate}
 
 % ============================================================
@@ -530,9 +530,12 @@ Test & Soru & Ana sayı \\
 
 % ============================================================
 \section{Gözlenebilirlik Sınırı}
-Bu bölüm makalenin özgün omurgasıdır: drift modunun gürültü tabanının (\S3)
-rastgele bir sayı olmadığını, \textbf{hangi hizalama desenlerinin} iyi/kötü
-izlendiğini belirleyen yapısal bir bölünmeden kaynaklandığını gösterir.
+Bu bölüm yöntemin \textbf{hangi hizalama desenlerini} iyi, hangilerini kötü
+çözdüğünü karakterize eder. Bu, drift modunun gürültü tabanının (\S3) rastgele
+bir sayı olmadığını; tepki matrisinin mod yapısından kaynaklanan, yöntemin
+geçerlilik alanını ve kör noktasını tanımlayan yapısal bir özellik olduğunu
+gösterir. (Bu karakterizasyon tümüyle monitörün kendi özelliğidir; herhangi bir
+fiziksel sistematik bütçesinden bağımsız geçerlidir.)
 
 \subsection{Hangi kaçıklık desenleri kapalı yörüngede görünür?}
 Önce kurulumu somutlaştıralım. Halka 24 FODO hücresinden oluşur; her hücrede bir
@@ -630,58 +633,27 @@ duyarlılığı arttıkça simetrik içerik \%100'e tırmanır.}
 \label{fig:permode}
 \end{figure}
 
-\subsection{Bunun sahte EDM ile ilişkisi --- ve kesin sınır}
-Drift monitörün amacı hizalama driftini izlemekti; ama asıl önemsediğimiz sahte
-EDM'dir. İki arasındaki bağı dürüstçe, sınırlarıyla kuruyoruz.
+\subsection{Kör noktanın anlamı ve sistematik bütçeyle ilişkisi (ileri bakış)}
+\S4.1--4.3'ün sonucu \textbf{yöntem düzeyinde} kesin bir ifadedir: kapalı-yörünge
+drift monitörü antisimetrik hizalama driftini güçlü, simetrik driftini ise
+$\sim 193$ kat daha gürültülü çözer. Bu, monitörün geçerlilik alanını
+(antisimetrik) ve kör noktasını (simetrik) tanımlar ve daha iyi BPM donanımı ya
+da daha fazla veriyle kapanmaz; bu alt-uzaya erişim ilkesel olarak
+\textbf{farklı bir gözlemlenebilir} (ör.\ karşı-dönen CW/CCW demet ayrımı veya
+doğrudan spin presesyonu \cite{omarov2022}) gerektirir.
 
-\paragraph{Sahte EDM'in baskın kanalı bir yatay--dikey kuplajıdır.} Sahte
-vertikal spin presesyonunu ($dS_y/dt$) süren baskın terim, yatay ($dx$) ve dikey
-($dy$) kaçıklığın \textbf{çarpımına} orantılı bir geometrik (Berry) faz
-katkısıdır; kaçıklıkla \textbf{kuadratik} ($\propto\sigma^2$) ölçeklenir
-\cite[Fig.~9a]{omarov2022}; bizim \S13.7 spin-takip taramamız $\sigma$-üssünü
-$2.0$ ölçer. Yalnız-$dy$ katkısı doğrusal ve küçüktür; yalnız-$dx$ ise $S_y$
-için sıfırdır. Anahtar sözcük \textbf{çarpım} $dx\cdot dy$'dir: etki iki düzlemin
-\emph{birlikte} kaçık olmasını gerektirir.
-
-\paragraph{Yapısal sınır (kesin) --- asıl mesele lineerlik.} Sahte EDM'i süren
-büyüklük iki düzlemin \textbf{çarpımıdır} ($dx\cdot dy$); yani misalignment'ta
-ikinci dereceden (bilineer). Oysa \textbf{kapalı-yörünge tepkisi misalignment'ta
-lineerdir} (Eş.~\eqref{eq:lin}). Kritik nokta düzlem-ayrıklık \emph{değil},
-lineerliktir: quad tilt bir skew kuplajı (yatay$\leftrightarrow$dikey çapraz
-bloklar) eklese bile tepki \emph{hâlâ lineer bir haritadır} ve hiçbir
-$dx\cdot dy$ çarpım terimi üretmez. Çapraz kuplajı açıkça ölçtük
-(Tablo~\ref{tab:tilt}): 0.2\,mrad tilt'te kuplaj diyagonalin \%0.33'ü ve drift
-kurtarımını hiç değiştirmez --- çünkü mesele kuplajın büyüklüğü değil, gözlenenin
-\emph{derecesidir}. \textbf{Lineer bir gözlemlenebilir, bilineer bir büyüklüğü
-ilkesel olarak kısıtlayamaz}; dolayısıyla monitör --- kuplajlı ya da değil ---
-sahte EDM'i süren $dx\cdot dy$'yi yapısal olarak göremez.
-(Tablo~\ref{tab:t6}'nın $x/y$ sütunlarının ayrık olması bu lineerliğin bir
-görünümüdür: kapalı yörünge tek düzlemin \emph{ortalama} yer değiştirmesini
-taşır, iki düzlemin \emph{çarpımını} değil.)
-
-\paragraph{Düzlem-içi sınır.} Buna ek olarak, her düzlemin kendi içinde monitör
-simetrik (yüksek-$k$) alt-uzaya \S4.2--4.3 gereği neredeyse kördür (en kötü modda
-$\sim 193$ kat gürültü dezavantajı). Yani simetrik bir dikey drift, sahte-EDM'e
-katkı verse bile monitörün en zayıf gördüğü yöndedir.
-
-\paragraph{Açıkça belirtilen sınır (dürüstlük).} Baskın $dx\cdot dy$ kanalının
-ağırlığının özellikle \emph{simetrik} alt-uzayda mı yoğunlaştığı ayrı,
-desen-bağımlı bir sorudur; spin taramamız bu kanalın seed'e göre $\sim 36\times$
-saçıldığını gösterir (\S13.7) ve bu ayrışım tek bir kapalı-yörünge ölçümüyle
-çözülemez --- bu da rapor ettiğimiz sınırın bir parçasıdır. Yalnız-$dy$ (baskın
-olmayan) kanalda spin simülasyonu, gözlenebilir harmonikler çıkarıldıktan sonra
-artık sahte-EDM'in küçük kaldığını gösterir; baskın kanal için kesin nicel
-alt-uzay ayrışımı gelecek iştir.
-
-\paragraph{Sonuç.} Kapalı-yörünge drift monitörü sahte-EDM-kritik bilgiyi
-\textbf{iki bağımsız yapısal nedenle} kısıtlayamaz: (1) lineer ve düzlem-ayrık
-olduğundan baskın kanalı süren bilineer $dx\cdot dy$'yi ilkesel olarak göremez;
-(2) gördüğü her düzlem içinde simetrik (yüksek-$k$) alt-uzayı zayıf gözler. Her
-iki sınır da daha iyi BPM donanımı ya da daha fazla veriyle kapanmaz; bu kanala
-erişim \textbf{farklı bir gözlemlenebilir} gerektirir --- karşı-dönen (CW/CCW)
-demet ayrımı veya doğrudan spin presesyonu \cite{omarov2022}. Drift monitörün
-net rolü budur: antisimetrik hizalama driftini ucuza ve sürekli izler,
-sahte-EDM-kritik kanalı tanımlı biçimde dış bir gözlemlenebilire bırakır.
+Bu kör noktanın belirli bir \textbf{sistematik bütçe} için ne kadar önemli
+olduğu ayrı bir sorudur. pEDM bağlamında ilgili sistematik, kaçıklığın ürettiği
+sahte EDM'dir; baskın kanalı yatay$\times$dikey kaçıklığın çarpımına
+($dx\cdot dy$) bağlı, misalignment'ta ikinci-dereceden bir geometrik-faz
+etkisidir \cite{omarov2022}. Bu kanalın ağırlığının monitörün zayıf-gözlediği
+simetrik alt-uzaya ne kadar düştüğü desen-bağımlı, inceliklidir ve tek bir
+kapalı-yörünge ölçümüyle çözülemez. Bu nedenle sahte-EDM $\leftrightarrow$
+gözlenebilirlik bağını niceleme işini --- tam parçacık + spin izleyicisiyle,
+orbit-düzeltme öncesi/sonrası ayrımıyla --- \textbf{bu çalışmanın kapsamı
+dışında, ayrı bir incelemeye} bırakıyoruz. Bu makalenin iddiası yöntem düzeyinde
+kalır: monitör, antisimetrik hizalama driftini ucuza ve sürekli izleyen,
+geçerlilik alanı ve kör noktası net tanımlı bir araçtır.
 
 % ============================================================
 \section{Önerilen İşletme Modu}
@@ -722,19 +694,14 @@ hassasiyetle, $\sim$\%1 $\beta$-beating'e dayanıklı şekilde çalıştığı
 sistematik testlerle gösterildi. Yöntem iki katmanlı bir mimaride (yavaş
 LOCO/BBA + hızlı drift) operasyonel olarak konumlandırıldı.
 
-Daha önemlisi, yöntemin \textbf{temel sınırı} iki bağımsız yapısal nedenle
-nicelendi (\S4.4). \emph{Birincisi (kesin):} sahte EDM'i süren baskın kanal,
-yatay ve dikey kaçıklığın çarpımına ($dx\cdot dy$) bağlı bilineer bir etkidir
-\cite{omarov2022}; lineer ve düzlem-ayrık olan monitör bu çarpımı yapısal olarak
-temsil edemez (Tablo~\ref{tab:t6}'da $x$/$y$ sütunlarının bağımsızlığı bunun
-göstergesi). \emph{İkincisi:} her düzlem içinde, per-mod SVD analizi monitörün
-kör noktasının \%96 simetrik içerikli en kötü koşullanmış modlar olduğunu
-gösterir (en kötü modda en iyiye göre $\sim 193$ kat duyarlılık dezavantajı).
-Baskın kanalın ağırlığının özellikle simetrik alt-uzayda mı yoğunlaştığı ise
-desen-bağımlı, açık bir sorudur (\S4.4). Net sonuç: antisimetrik drift hassasça
-izlenir; sahte-EDM-kritik bilgi ise donanım/veriyle kapanmayan yapısal nedenlerle
-erişilemez ve farklı bir gözlemlenebilir (karşı-dönen demet ayrımı / spin)
-gerektirir \cite{omarov2022}.
+Yöntemin \textbf{gözlenebilirlik sınırı} da nicelendi (\S4): per-mod SVD
+analizi, monitörün kör noktasının \%96 simetrik içerikli en kötü koşullanmış
+modlar olduğunu gösterir (en kötü modda en iyiye göre $\sim 193$ kat duyarlılık
+dezavantajı). Yani monitör antisimetrik hizalama driftini hassasça izler;
+simetrik drift yöntemin geçerlilik alanı dışındadır ve donanım/veriyle kapanmayan
+yapısal nedenlerle erişimi farklı bir gözlemlenebilir gerektirir. Bu kör noktanın
+belirli bir sistematik bütçe (ör.\ kaçıklığın ürettiği sahte EDM) için önemi
+makineye bağlı, ayrı bir sorudur ve bu çalışmanın kapsamı dışındadır (\S4.4).
 
 Çalışmanın kısıtları:
 \begin{itemize}

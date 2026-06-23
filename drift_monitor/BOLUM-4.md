@@ -160,20 +160,43 @@ $$
 \text{QF kicki} \propto (+)\cdot(+a) = +,\qquad
 \text{QD kicki} \propto (-)\cdot(+a) = - .
 $$
-İki kick **zıt işarette**! Hücre içinde sürekli işaret değiştiren, hızlı
-alternatif bir desen — yani **yüksek-$k$** ($k\approx 24$, hücre sayısı
-mertebesinde). Yüksek-$k$ → $k \gg Q$ → $G_k$ küçük → **kapalı yörüngede
+İki kick **zıt işarette**! Hücre içinde işaret değiştiren, **yüksek-$k$** bir
+desen doğar. Yüksek-$k$ → $k \gg Q$ → $G_k$ küçük → **kapalı yörüngede
 neredeyse hiç görünmez.**
 
-> **Özetle sezgi:** Simetrik kayma, gradyan işaretlerinin alternasyonu yüzünden
-> kendi kendini söndüren bir kick örüntüsü yaratır. Kapalı yörünge bu hızlı
-> titreşen örüntüye (salıncak analojisi: çok yüksek frekanslı itmeye) tepki
-> vermez. Antisimetrik kayma ise düzgün, "ritimde" bir örüntü yaratır ve
-> yörüngeyi belirgin biçimde büker.
+> **Hangi $k$ tam olarak? (incelik)** Kick = gradyan × kayma ve gradyan QF/QD'de
+> işaret değiştirdiğinden, kick dizisi $k_j = g\,(-1)^j\,dq_j$ biçimindedir.
+> Buradaki $(-1)^j$ çarpanı halkanın en hızlı titreşimidir (Nyquist, $k=24$) ve
+> bir diziyi onunla çarpmak spektrumu **24 kadar kaydırır**. Bu yüzden:
+> antisimetrik kaçıklık → kick düşük banda ($k\in[0,12]$) düşer (görünür);
+> simetrik kaçıklık → yüksek banda ($k\in[12,24]$) kayar (bastırılır). Yani
+> "simetrik = tek bir $k=24$ modu" **değildir**; $k=24$ yalnız hücreden hücreye
+> *üniform* simetrik desenin özel durumudur. Simetrik genlik hücreyle değişirse
+> kick $k=24-k'$ ($k'=0\dots12$) bandına yayılır — hepsi $k\gg Q$ olduğundan
+> hepsi bastırılır.
+
+> **Özetle sezgi:** Simetrik kayma, gradyan alternasyonu yüzünden kendi kendini
+> söndüren hızlı titreşen bir kick örüntüsü yaratır; kapalı yörünge buna
+> (salıncak analojisi: çok yüksek frekanslı itme) tepki vermez. Antisimetrik
+> kayma düzgün, "ritimde" bir örüntü yaratır ve yörüngeyi belirgin biçimde büker.
+
+**Tek bir sayıyla: simetri parametresi $\hat S$.** İki kutuya ayırmak yerine,
+bir desenin ne kadar simetrik olduğunu tek bir sayıyla ölçebiliriz. Hücre $c$
+için ortalama $s_c=\tfrac12(q_{QF,c}+q_{QD,c})$ ve fark
+$d_c=\tfrac12(q_{QF,c}-q_{QD,c})$ tanımlayıp, hücre-içi çarpımları toplarsak
+şu hoş özdeşlik çıkar:
+$$
+\sum_c q_{QF,c}\,q_{QD,c} = \sum_c (s_c^2 - d_c^2) = \|s\|^2 - \|d\|^2,
+\qquad
+\hat S \equiv \frac{\|s\|^2-\|d\|^2}{\|s\|^2+\|d\|^2}\in[-1,+1].
+$$
+$\hat S=+1$ tümüyle simetrik, $\hat S=-1$ tümüyle antisimetrik desendir. ($\hat S$
+kaba bir özettir; tam gözlenebilirlik resmi §4.4'teki SVD'dir, çünkü simetrik
+alt-uzayın kendi içinde de $k'$ değişir.)
 
 **Sonuç:** Antisimetrik kaçıklık → görünür; simetrik kaçıklık → görünmez. Bu,
-bölümün omurgası. Ama "görünür/görünmez" kategorik (ya/ya da) bir ifade; bir
-sonraki adımda bunu **sürekli ve nicel** hale getireceğiz.
+bölümün omurgası. Ama "görünür/görünmez" kategorik bir ifade; bir sonraki adımda
+bunu **sürekli ve nicel** hale getireceğiz.
 
 ---
 
@@ -189,8 +212,10 @@ R = U\,\Sigma\,V^{\top}.
 $$
 Bunun bizim için anlamı şu: $R$ matrisinin "doğal modları" vardır. Her **mod**
 bir kaçıklık desenidir ($V$'nin bir sütunu, $V_i$) ve her moda bir **tekil
-değer** $\sigma_i$ eşlik eder. $\sigma_i$, o desenin kapalı yörüngede **ne kadar
-güçlü göründüğünün** ölçüsüdür:
+değer** ($\sigma_i$; İng. *singular value*) eşlik eder. Matematiksel tanım:
+$\sigma_i=\sqrt{\lambda_i(R^\top R)}$, yani $\sigma_i^2$, $R^\top R$ matrisinin
+özdeğeridir; $R V_i=\sigma_i U_i$. $\sigma_i$, o desenin kapalı yörüngede
+**ne kadar güçlü göründüğünün** ölçüsüdür:
 - Büyük $\sigma_i$ → desen yörüngede güçlü iz bırakır (kolay görülür).
 - Küçük $\sigma_i$ → desen yörüngede zayıf iz bırakır (zor görülür).
 
@@ -306,15 +331,32 @@ desene $\sim 36$ kat saçıldığını gösteriyor. Bu ayrışımı tek bir kapa
 ölçümünden kesin çıkarmak mümkün değil — ve bu belirsizliğin kendisi,
 rapor ettiğimiz sınırın bir parçasıdır.
 
-### Net, savunulabilir ifade
+### Önizleme: spin simülasyonu ne diyor? (ve neden ayrı bir çalışma)
+
+Bu bağı kapalı bir biçimde keşfetmeye başladık (spin izleyicisiyle, 4D kapalı
+yörüngede sahte EDM ölçümü). İlk bulgu **öğretici ve ilk sezgiyi tersine
+çeviriyor:** σ=10μm kaçıklıkta, sahte EDM **antisimetrik** ($\hat S=-1$)
+desenlerde *yüksek* (~3600 nrad/s medyan), **simetrik** ($\hat S=+1$) desenlerde
+*düşük* (~66 nrad/s) çıkıyor — yani görünür desen daha çok sahte EDM üretiyor!
+Sebebi temiz: antisimetrik kaçıklık büyük kapalı yörünge yapar → demet hem $x$
+hem $y$'de büyük salınır → büyük $x_{\rm co}\!\cdot\!y_{\rm co}$ geometrik fazı.
+
+**Ama kritik uyarı:** bu ölçüm **orbit-düzeltmesizdir.** Antisimetriğin ürettiği
+büyük sahte EDM, görünür (düzeltilebilir) yörünge salınımından gelir;
+korrektörlerle (ki monitör tam bunu görür) söndürülebilir. **Düzeltme-sonrası
+indirgenemez taban** ise simetrik kısımdır (görünmez). Yani ham vs
+düzeltme-sonrası ayrımı kritiktir ve doğru köprü ancak bu ayrımla kurulur.
+
+Bu, kendi başına bir araştırma (orbit-düzeltme öncesi/sonrası, desen-bağımlılık,
+σ² ölçekleme, tilt kanalı) — **bu metodoloji makalesinin kapsamı dışında.** Bu
+yüzden burada yalnız *yöntem düzeyindeki* kesin ifadeyle yetiniyoruz:
 
 > Kapalı-yörünge drift monitörü **antisimetrik** hizalama driftini güvenle ve
-> ucuza izler. Sahte EDM'i ek olarak kısıtlamak, kaçıklığın **simetrik**
-> kısmını da doğru bilmeyi gerektirir; ama kapalı yörünge tam bu kısmı kötü
-> belirler (yüksek-$k$, $\sim 193$ kat gürültü). Baskın dx·dy kanalının bu
-> kötü-belirlenen alt-uzaya bağımlılığını nicelemek ileride yapılacak iştir ve
-> doğal olarak **farklı bir gözlemlenebilir** (karşı-dönen CW/CCW demet ayrımı
-> ya da doğrudan spin presesyonu) gerektirir.
+> ucuza izler; **simetrik** kısmı kötü belirler ($\sim 193$ kat gürültü). Bu
+> kör noktanın sahte-EDM bütçesi için önemi makineye bağlı ve ayrı bir
+> çalışmanın konusudur; o alt-uzaya doğrudan erişim **farklı bir
+> gözlemlenebilir** (karşı-dönen CW/CCW demet ayrımı ya da spin presesyonu)
+> gerektirir.
 
 ---
 
@@ -329,17 +371,23 @@ Burada iki kavramı **kesinlikle** karıştırmamak gerekiyor:
 
 | | Ne demek | Hangi mertebe |
 |---|---|---|
-| **Skew kuplajı** (quad tilt) | $dx \to$ dikey yörünge (ya da $dy\to$ yatay) | **Lineer** — yörünge tek bir kaçıklığa ($dx$ *veya* $dy$) birinci derecede bağlı |
+| **Skew kuplajı** (quad tilt) | $dx \to$ dikey yörünge (ya da $dy\to$ yatay) | **Lineer** — yörünge tek bir kaçıklığa ($dx$ *veya* $dy$) birinci derecede bağlı; ama katsayı tilt $\theta$ ile orantılı ($R_{yx}\propto\theta$, tilt yoksa sıfır) |
 | **Sahte EDM $dx\cdot dy$** | iki kaçıklığın **çarpımı** | **Bilineer** — ikinci derece, ikisi *birlikte* |
 
+> **Kuplajın kaynağı tilt'tir, kaçıklık değil.** Sıradan (dönmemiş) bir
+> kuadrupolün $dx$ kayması yalnız *yatay* yörünge üretir; çapraz (dikeye) bir
+> etki için kuadrupolün **dönmüş** olması gerekir. Tilt'li quad'ın skew bileşeni,
+> yatay kaçıklık $dx$'i gördüğünde dikey bir kick verir: $R_{yx}\propto\theta\,dx$
+> — yani $dx$'te lineer, ama katsayısı $\theta$'ya orantılı; $\theta=0$ iken tam
+> sıfır (nitekim ölçtük). 
+>
 > **Sık yapılan hata:** "Skew kuplajı x ile y'yi karıştırıyor, demek ki bu
-> dx·dy etkisidir." **Hayır.** Skew kuplajı, dikey yörüngeyi $dx$'e **lineer**
-> bağlar ($y \propto dx$, tek başına $dx$). Sahte EDM ise $dx$ *çarpı* $dy$ —
-> tamamen farklı, ikinci-derece bir nicelik. Biri "çapraz ama birinci derece",
-> öteki "çarpım, ikinci derece". (Ayrıca: x-y kuplajı nonlineerlik
-> **gerektirmez**; skew kuadrupol standart bir *lineer* kuplaj elemanıdır —
-> hareket denklemleri lineer kalır, sadece transfer matrisinin köşegen-dışı
-> blokları dolu olur.)
+> dx·dy etkisidir." **Hayır.** Skew kuplajı dikey yörüngeyi $dx$'e **lineer**
+> bağlar (tek başına $dx$, $\propto\theta$). Sahte EDM ise $dx$ *çarpı* $dy$ —
+> ikinci-derece, ikisi birlikte. Biri "çapraz ama birinci derece", öteki
+> "çarpım, ikinci derece". (x-y kuplajı nonlineerlik **gerektirmez**; skew
+> kuadrupol standart bir *lineer* kuplaj elemanıdır — hareket denklemleri lineer
+> kalır, yalnız transfer matrisinin köşegen-dışı blokları dolar.)
 
 **Peki bu skew kuplajı düzlem-ayrık varsayımımızı bozar mı?** Doğrudan test
 ettik. "Düzlem-ayrık monitör" derken şunu kastediyoruz: monitör $R_{yy}$
@@ -375,13 +423,17 @@ tabanının çok altında.)
    ve $\kappa\approx 193$ kat gürültü büyütmesine uğrar; yani monitör kaçıklığın
    simetrik kısmını güvenilmez kestirir (§4.4).
 
-3. **Sahte EDM ile bağ inceliklidir:** engel "lineerlik" değildir (monitör
-   ilkesel olarak $\Delta q$'yu çatıp dx·dy'yi hesaplayabilir); engel,
-   kaçıklığın simetrik kısmının kötü bilinmesidir. Baskın dx·dy kanalının bu
-   kötü-bilinen kısma ne kadar bağlı olduğu açık bir sorudur; bu yüzden
-   sahte-EDM-kritik bilgi doğal olarak **farklı bir gözlemlenebilire** (demet
-   ayrımı / spin) bırakılır. Quad tilt'in yarattığı (lineer, küçük) skew
-   kuplajı bunu değiştirmez (§4.5–4.6).
+3. **Sahte EDM ile bağ ayrı bir çalışmanın konusudur.** Engel "lineerlik"
+   değildir (monitör ilkesel olarak $\Delta q$'yu çatıp dx·dy'yi hesaplayabilir);
+   engel, kaçıklığın simetrik kısmının kötü bilinmesidir. Spin simülasyonu
+   önizlemesi inceliği gösteriyor: ham (orbit-düzeltmesiz) sahte EDM aslında
+   *antisimetrik* desende yüksek (büyük yörünge salınımı), simetrikte düşük;
+   indirgenemez taban ise düzeltme-sonrası simetrik kısımdır. Bu ham-vs-düzeltme
+   ayrımı, desen-bağımlılık ve tilt kanalı kendi başına bir araştırma →
+   **bu metodoloji makalesinin dışında.** Bu makale yöntem düzeyinde durur:
+   monitör antisimetrik drifti güvenle izler, simetrik kör noktayı tanımlı
+   biçimde dış bir gözlemlenebilire bırakır. (Quad tilt'in yarattığı lineer,
+   küçük skew kuplajı bunu değiştirmez; §4.6.)
 
 ---
 
