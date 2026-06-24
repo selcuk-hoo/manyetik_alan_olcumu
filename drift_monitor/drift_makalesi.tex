@@ -560,33 +560,44 @@ filtredir}: yalnız belirli uzaysal harmonikleri güçlü gösterir. (Bu klasik 
 alçak-geçiren filtre değildir --- tepe $k=0$'da değil $k\approx Q$'dadır.)
 
 \subsection{İki tür hizalama deseni: simetrik ve antisimetrik}
-Hangi desenin hangi harmoniğe düştüğünü görmek için hizalama hatalarını
-hücre-hücre iki gruba ayırıyoruz. Her hücredeki (QF, QD) çifti için iki uç durum:
-\begin{itemize}
-\item \textbf{Antisimetrik desen:} QF ve QD \textbf{zıt yönde} kayar
-  (ör.\ QF $+a$, QD $-a$).
-\item \textbf{Simetrik desen:} QF ve QD \textbf{aynı yönde} kayar
-  (QF $+a$, QD $+a$).
-\end{itemize}
-Her hizalama hatası bu ikisinin toplamı olarak yazılabilir; böylece 48-boyutlu
-desen uzayı iki dik \textbf{alt-uzaya} ayrılır (her biri 24-boyutlu). Buradaki
-``alt-uzay'' basitçe \emph{belli bir simetri kuralına uyan tüm desenlerin
-ailesi} demektir.
+Hangi desenin hangi harmoniğe düştüğünü görmek için her hücredeki (QF, QD)
+çiftini iki bileşene ayırırız:
+$$
+s_c = \tfrac12(q_{QF,c}+q_{QD,c})\ \text{(simetrik)},\qquad
+d_c = \tfrac12(q_{QF,c}-q_{QD,c})\ \text{(antisimetrik)},
+$$
+öyle ki $q_{QF,c}=s_c+d_c$ ve $q_{QD,c}=s_c-d_c$. Her gerçek kaçıklık --- genelde
+ne saf simetrik ne saf antisimetrik --- bu iki bileşene \textbf{tek türlü}
+ayrılır. \emph{Örnek:} bir hücrede QF $=3$, QD $=1$ ise $s=2,\ d=1$; yani kayma
+$(2,2)_{\text{sim}}+(1,-1)_{\text{antisim}}$ olarak yazılır. (48-boyutlu desen
+uzayı böylece 24 simetrik + 24 antisimetrik genlikten oluşan iki dik
+\textbf{aileye} ayrılır; ``her hata = iki \emph{aileden} birer bileşen'' ---
+iki sabit desenin toplamı değil.)
 
-Belirleyici ayrıntı \textbf{gradyan işaretidir}: QF odaklar (gradyan $+$), QD
-dağıtır (gradyan $-$). Kick $=$ gradyan $\times$ kayma olduğundan:
+Bir desenin ne kadar simetrik olduğunu \textbf{tek bir sayıyla} ölçeriz:
+$$
+\chi \equiv \frac{\|s\|^2-\|d\|^2}{\|s\|^2+\|d\|^2}\in[-1,+1],
+$$
+$\chi=+1$ tümüyle simetrik, $\chi=-1$ tümüyle antisimetrik, $\chi\approx0$
+karışık. (Spin $S$, singüler değer $\sigma$ veya tepki $R$ ile karışmasın diye
+$\chi$ harfi.)
+
+\textbf{Belirleyici ayrıntı gradyan işaretidir:} QF odaklar (gradyan $+$), QD
+dağıtır ($-$); kick $=$ gradyan $\times$ kayma olduğundan kick dizisi
+$k_j=g(-1)^j q_j$. Buradan:
 \begin{itemize}
-\item \textbf{Antisimetrik} (kaymalar $+a/-a$, gradyanlar $+/-$): iki kick
-  \textbf{aynı işarette} toplanır $\rightarrow$ düzgün, \textbf{düşük-$k$} desen
-  $\rightarrow$ $G_k$ büyük $\rightarrow$ \textbf{yörüngede görünür}.
-\item \textbf{Simetrik} (kaymalar $+a/+a$, gradyanlar $+/-$): iki kick
-  \textbf{zıt işarette} $\rightarrow$ hücre içinde işaret değiştiren, hızlı
-  alternatif \textbf{yüksek-$k$ ($k\approx 24$)} desen $\rightarrow$ $k\gg Q$
-  $\rightarrow$ $G_k$ küçük $\rightarrow$ \textbf{yörüngede neredeyse görünmez}.
+\item \textbf{Antisimetrik bileşen} ($+a/-a$): kickler \textbf{aynı işarette}
+  $\rightarrow$ düzgün, \textbf{düşük-$k$} $\rightarrow$ $G_k$ büyük $\rightarrow$
+  \textbf{görünür}.
+\item \textbf{Simetrik bileşen} ($+a/+a$): kickler \textbf{zıt işarette}
+  $\rightarrow$ hücre-içi alternatif, \textbf{yüksek-$k$} $\rightarrow$ $G_k$
+  küçük $\rightarrow$ \textbf{neredeyse görünmez}.
 \end{itemize}
-Sezgi: simetrik kayma, gradyan alternasyonu yüzünden kendi kendini söndüren bir
-kick örüntüsü üretir; kapalı yörünge bunu ``görmez'', antisimetrik kaymayı ise
-güçlü görür.
+$(-1)^j$ çarpanı (Nyquist harmoniği, $k=24$) spektrumu 24 kaydırır: antisimetrik
+bileşen $k\in[0,12]$, simetrik bileşen $k\in[12,24]$ bandına düşer (üniform
+simetrik desen $k=24$ özel durumu). Tümü $k\gg Q$ olduğundan simetrik içerik
+bastırılır. Sezgi: simetrik kayma kendi kendini söndüren bir kick örüntüsü
+üretir; kapalı yörünge bunu görmez, antisimetriği güçlü görür.
 
 \subsection{Hangi desenler ne kadar gürültüyle kestirilir? (per-mod SVD)}
 \S4.2'deki simetrik/antisimetrik ayrım kategorikti (iki uç durum). Tepki
@@ -595,7 +606,7 @@ getirir. $R=U\Sigma V^\top$ yazıldığında her sağ-tekil vektör $V_i$ bir hi
 deseni (``mod''), karşılık gelen tekil değer $\sigma_i$ ise o desenin yörüngede
 ne kadar güçlü göründüğüdür; monitör o modu kestirirken gürültüyü $1/\sigma_i$
 ile büyütür. Her mod için gürültü büyütmesi $1/\sigma_i$ ve modun \S4.2 anlamında
-simetrik içeriği hesaplanır ($\sigma_{\max}=28.4$, $\sigma_{\min}=0.147$,
+simetrik içeriği $\chi_i$ hesaplanır ($\sigma_{\max}=28.4$, $\sigma_{\min}=0.147$,
 $\kappa(R)=193$; Tablo~\ref{tab:svd}). En iyi 8 mod ortalama \textbf{\%4} simetrik (antisimetrik
 baskın, iyi koşullu); en kötü 8 mod ortalama \textbf{\%96} simetrik. En kötü
 modun ($\sigma_{\min}$) koşulluluk-kaynaklı duyarlılığı en iyiye göre
@@ -611,7 +622,7 @@ arttıkça simetrik güç oranı \%100'e tırmanır.
 \label{tab:svd}
 \begin{tabular}{@{}rrrr@{}}
 \toprule
-Mod & $\sigma$ & $1/\sigma$ & Sim. güç \\
+Mod & $\sigma$ & $1/\sigma$ & Sim. içerik $\chi_i$ \\
 \midrule
 0 (en iyi)  & 28.4  & 0.04 & \%4 \\
 2           & 10.1  & 0.10 & \%6 \\

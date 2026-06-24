@@ -86,117 +86,94 @@ yörünge ne kadar değişir?*"
 
 ---
 
-## 4.2 Kapalı yörünge bir "mod-seçici filtre" gibi davranır
+## 4.2 Bir desen ne kadar simetrik? — $\chi$ parametresi
 
-Şimdi kilit fiziksel olguyu görelim. Kapalı yörünge, kendisine uygulanan kick
-desenine **her harmonikte aynı şiddette tepki vermez**.
+İleride göreceğiz ki kapalı yörünge bazı hizalama driftlerini iyi, bazılarını
+neredeyse hiç göremez; belirleyici özellik driftin **ne kadar simetrik**
+olduğudur. O hâlde önce bunu ölçen tek bir sayı tanımlayalım.
 
-**Azimutal harmonik $k$ nedir?** Bir kick desenini halka çevresi boyunca
-çizdiğinizi düşünün. Desen çevre boyunca **kaç kez** tekrarlıyorsa, o sayı
-harmonik $k$'dır. $k=1$ → çevrede bir tam dalga; $k=24$ → çevrede 24 hızlı
-salınım (komşu hücreler arasında işaret değiştiren bir desen).
-
-Bir kuadrupol halkasının kapalı yörüngesi, $k$ harmonikli bir kicke şu
-**kazançla** yanıt verir:
+Her FODO hücresinde iki quad var: QF ve QD. Bir hücredeki dikey kaymaları
+$(q_{QF}, q_{QD})$ ikilisi olarak alalım. Gerçek bir kaçıklık genelde ne "saf
+simetrik" ne de "saf antisimetrik"tir — ama **her zaman** bir simetrik bileşen
+artı bir antisimetrik bileşene ayrılır:
 $$
-G_k = \frac{C}{\,\lvert Q_{\text{eff}}^2 - k^2\rvert\,},
-\qquad C\approx 24.8,\quad Q_{\text{eff}}^2\approx 5.03 .
+s = \tfrac12(q_{QF}+q_{QD})\ (\text{ortalama; simetrik bileşen}),\qquad
+d = \tfrac12(q_{QF}-q_{QD})\ (\text{yarı-fark; antisimetrik bileşen}),
 $$
-Burada $Q$ halkanın **betatron tune**'udur — demetin bir turda kaç betatron
-salınımı yaptığı ($Q\approx 2.7$).
+çünkü $q_{QF}=s+d$, $q_{QD}=s-d$ (iki denklem, iki bilinmeyen → her ikili için
+tek çözüm). Örnek: QF=3, QD=1 → $s=2,\ d=1$; yani ne simetrik ne antisimetrik
+olan bu kayma, $(2,2)_{\text{sim}}+(1,-1)_{\text{antisim}}$ olarak yazılır.
 
-**Bu formül ne diyor?** Payda $\lvert Q^2 - k^2\rvert$, $k$ tune'a yaklaştıkça
-küçülür → kazanç **büyür** (rezonans!). $k$ tune'dan uzaklaştıkça payda büyür →
-kazanç **küçülür**.
+> **Sık karışan nokta:** "Her hizalama hatası simetrik + antisimetrik *desenlerin*
+> toplamıdır" demek, iki *sabit deseni* toplamak değildir. Her hücrenin kendi
+> $s_c$ ve $d_c$'si vardır; yani 24 simetrik + 24 antisimetrik genlik (toplam
+> 48 = serbestlik sayısı). Kastedilen, bu iki *aileden* birer bileşendir.
 
-> **Sezgi (salıncak analojisi):** Bir salıncağı doğru ritimde (rezonans
-> frekansında) iterseniz büyük genlikle sallanır; yanlış ritimde iterseniz
-> neredeyse hiç tepki alamazsınız. Kapalı yörünge de böyle: tune'a yakın ($k
-> \approx Q$) "ritimdeki" kick desenlerini güçlü gösterir, tune'dan çok uzak
-> ($k \gg Q$) desenleri yutar.
+Şimdi bütün halka için (24 hücre) "ne kadar simetrik?" sorusunu **tek bir
+sayıyla** yanıtlayalım. Hücre-içi çarpımları toplarsak hoş bir özdeşlik çıkar:
+$$
+\sum_c q_{QF,c}\,q_{QD,c} = \sum_c (s_c^2-d_c^2) = \|s\|^2-\|d\|^2,
+$$
+ve bunu normalize edersek **simetri parametresi**:
+$$
+\boxed{\ \chi \;\equiv\; \frac{\|s\|^2-\|d\|^2}{\|s\|^2+\|d\|^2}\;\in[-1,+1].\ }
+$$
+$\chi=+1$ tümüyle simetrik, $\chi=-1$ tümüyle antisimetrik, $\chi\approx0$ karışık
+desendir. (Simetri "karakteri" için $\chi$ harfini seçtik; spin $S$, singüler
+değer $\sigma$ ya da tepki matrisi $R$ ile karışmasın diye.)
 
-Yani **kapalı yörünge bir mod-seçici (rezonant) filtredir.** (Dikkat: bu klasik
-bir "alçak-geçiren" filtre değildir — en güçlü tepki $k=0$'da değil, $k\approx
-Q$'dadır. Ama bizim ilgilendiğimiz aralıkta — $k$'nın 2 mi yoksa 24 mü olduğu —
-düşük-$k$ güçlü, yüksek-$k$ zayıf gösterilir.)
+$\chi$ bu bölümün **sezgisel tutamağıdır**: drift ne kadar simetrikse ($\chi$ ne
+kadar $+1$'e yakınsa), monitör onu o kadar zayıf görür. Peki neden? Cevap
+sıradaki bölümde.
 
 ---
 
-## 4.3 İki tür kaçıklık deseni: simetrik ve antisimetrik
+## 4.3 $\chi$ neden önemli? — mod-seçici filtre ve gradyan alternasyonu
 
-Şimdi en önemli kavramsal adıma geldik: **hangi kaçıklık deseni hangi
-harmoniğe düşer?** Bunu görmek için kaçıklıkları hücre-hücre **iki gruba**
-ayırıyoruz. Her hücredeki (QF, QD) çiftine bakın:
+Cevap iki parçadan oluşur: (a) kapalı yörünge desenlere nasıl tepki verir,
+(b) simetri bunu nasıl belirler.
 
-| Desen türü | QF kayması | QD kayması | Sözle |
-|---|---|---|---|
-| **Antisimetrik** | $+a$ | $-a$ | çift, **zıt yönde** kayar |
-| **Simetrik**     | $+a$ | $+a$ | çift, **aynı yönde** kayar |
-
-Herhangi bir kaçıklık deseni bu iki "saf" türün toplamı olarak yazılabilir.
-Böylece 48-boyutlu kaçıklık uzayı, birbirine **dik** iki **alt-uzaya** ayrılır
-(her biri 24-boyutlu).
-
-> **"Alt-uzay" korkutmasın.** Burada alt-uzay sadece *belli bir kurala uyan tüm
-> desenlerin ailesi* demek. "Simetrik alt-uzay" = hücre içinde QF ve QD'nin hep
-> aynı yönde kaydığı bütün desenler. "Antisimetrik alt-uzay" = hep zıt yönde
-> kaydığı bütün desenler. Tıpkı bir vektörü "yatay bileşen + dikey bileşen"
-> diye ayırmak gibi; burada bileşenler "simetrik kısım + antisimetrik kısım".
-
-**Şimdi kilit nokta — gradyan işareti.** §4.1'de QF (`+`) ve QD (`−`)
-gradyanlarının zıt olduğunu söylemiştik. Kick = gradyan × kayma olduğuna göre,
-iki desenin ürettiği kickleri yazalım:
-
-**Antisimetrik desen** (kaymalar $+a/-a$, gradyanlar $+/-$):
+**(a) Kapalı yörünge bir mod-seçici filtredir.** Yörünge, kendisine uygulanan
+kick desenine her harmonikte aynı şiddette tepki vermez. Bir kick deseninin
+halka çevresi boyunca **kaç kez tekrarladığı** azimutal harmonik $k$'dır ($k=1$:
+çevrede bir dalga; $k=24$: komşu quad'lar arasında işaret değiştiren en hızlı
+titreşim). Tepki kazancı:
 $$
-\text{QF kicki} \propto (+)\cdot(+a) = +,\qquad
-\text{QD kicki} \propto (-)\cdot(-a) = + .
+G_k = \frac{C}{\,\lvert Q_{\text{eff}}^2 - k^2\rvert\,},
+\qquad C\approx 24.8,\quad Q_{\text{eff}}^2\approx 5.03 ,
 $$
-İki kick **aynı işarette**! Hücreden hücreye düzgün ilerleyen, **düşük-$k$** bir
-kick deseni doğar. Düşük-$k$ → $G_k$ büyük → **kapalı yörüngede güçlü görünür.**
+$Q\approx 2.7$ betatron tune'u. Kazanç tune'a yakın ($k\approx Q$) harmoniklerde
+büyür (rezonans), $k\gg Q$'da küçülür.
 
-**Simetrik desen** (kaymalar $+a/+a$, gradyanlar $+/-$):
-$$
-\text{QF kicki} \propto (+)\cdot(+a) = +,\qquad
-\text{QD kicki} \propto (-)\cdot(+a) = - .
-$$
-İki kick **zıt işarette**! Hücre içinde işaret değiştiren, **yüksek-$k$** bir
-desen doğar. Yüksek-$k$ → $k \gg Q$ → $G_k$ küçük → **kapalı yörüngede
-neredeyse hiç görünmez.**
+> **Salıncak analojisi:** Salıncağı doğru ritimde itersen büyük sallanır; çok
+> hızlı/yanlış ritimde neredeyse tepki alamazsın. Orbit de tune'a yakın
+> harmonikleri güçlü gösterir, çok yüksek harmonikleri yutar. (Bu klasik bir
+> alçak-geçiren filtre *değil* — tepe $k=0$'da değil $k\approx Q$'dadır; ama
+> bizim aralığımızda "düşük-$k$ güçlü, yüksek-$k$ zayıf" doğru.)
 
-> **Hangi $k$ tam olarak? (incelik)** Kick = gradyan × kayma ve gradyan QF/QD'de
-> işaret değiştirdiğinden, kick dizisi $k_j = g\,(-1)^j\,dq_j$ biçimindedir.
-> Buradaki $(-1)^j$ çarpanı halkanın en hızlı titreşimidir (Nyquist, $k=24$) ve
-> bir diziyi onunla çarpmak spektrumu **24 kadar kaydırır**. Bu yüzden:
-> antisimetrik kaçıklık → kick düşük banda ($k\in[0,12]$) düşer (görünür);
-> simetrik kaçıklık → yüksek banda ($k\in[12,24]$) kayar (bastırılır). Yani
-> "simetrik = tek bir $k=24$ modu" **değildir**; $k=24$ yalnız hücreden hücreye
-> *üniform* simetrik desenin özel durumudur. Simetrik genlik hücreyle değişirse
-> kick $k=24-k'$ ($k'=0\dots12$) bandına yayılır — hepsi $k\gg Q$ olduğundan
-> hepsi bastırılır.
+**(b) Simetri, kick'i hangi harmoniğe taşır.** Bir quad'ın kicki = gradyan ×
+kayma; ve gradyan QF/QD'de işaret değiştirir ($+/-$). Demek ki kick dizisi
+$k_j = g\,(-1)^j\,q_j$ biçimindedir. §4.2'nin iki bileşeni için:
 
-> **Özetle sezgi:** Simetrik kayma, gradyan alternasyonu yüzünden kendi kendini
-> söndüren hızlı titreşen bir kick örüntüsü yaratır; kapalı yörünge buna
-> (salıncak analojisi: çok yüksek frekanslı itme) tepki vermez. Antisimetrik
-> kayma düzgün, "ritimde" bir örüntü yaratır ve yörüngeyi belirgin biçimde büker.
+- **Antisimetrik bileşen** ($q_{QF}=+a,\ q_{QD}=-a$): kickler
+  $g(+)(+a)=+$ ve $g(-)(-a)=+$ → **aynı işarette**, hücreden hücreye düzgün →
+  **düşük-$k$** → $G_k$ büyük → **görünür**.
+- **Simetrik bileşen** ($q_{QF}=q_{QD}=+a$): kickler $g(+)(+a)=+$ ve
+  $g(-)(+a)=-$ → **zıt işarette**, hücre içinde alternatif → **yüksek-$k$** →
+  $G_k$ küçük → **neredeyse görünmez**.
 
-**Tek bir sayıyla: simetri parametresi $\hat S$.** İki kutuya ayırmak yerine,
-bir desenin ne kadar simetrik olduğunu tek bir sayıyla ölçebiliriz. Hücre $c$
-için ortalama $s_c=\tfrac12(q_{QF,c}+q_{QD,c})$ ve fark
-$d_c=\tfrac12(q_{QF,c}-q_{QD,c})$ tanımlayıp, hücre-içi çarpımları toplarsak
-şu hoş özdeşlik çıkar:
-$$
-\sum_c q_{QF,c}\,q_{QD,c} = \sum_c (s_c^2 - d_c^2) = \|s\|^2 - \|d\|^2,
-\qquad
-\hat S \equiv \frac{\|s\|^2-\|d\|^2}{\|s\|^2+\|d\|^2}\in[-1,+1].
-$$
-$\hat S=+1$ tümüyle simetrik, $\hat S=-1$ tümüyle antisimetrik desendir. ($\hat S$
-kaba bir özettir; tam gözlenebilirlik resmi §4.4'teki SVD'dir, çünkü simetrik
-alt-uzayın kendi içinde de $k'$ değişir.)
+> **Hangi $k$ tam olarak?** $(-1)^j$ çarpanı halkanın Nyquist harmoniğidir
+> ($k=24$); bir diziyi onunla çarpmak spektrumu **24 kadar kaydırır.** Yani
+> antisimetrik bileşen düşük banda ($k\in[0,12]$), simetrik bileşen yüksek banda
+> ($k\in[12,24]$) düşer. "Simetrik = tek bir $k=24$" **değildir**: $k=24$ yalnız
+> hücreden hücreye *üniform* simetrik desenin özel durumudur; simetrik genlik
+> hücreyle değişirse kick $k=24-k'$ ($k'=0\dots12$) bandına yayılır — hepsi
+> $k\gg Q$ olduğundan hepsi bastırılır.
 
-**Sonuç:** Antisimetrik kaçıklık → görünür; simetrik kaçıklık → görünmez. Bu,
-bölümün omurgası. Ama "görünür/görünmez" kategorik bir ifade; bir sonraki adımda
-bunu **sürekli ve nicel** hale getireceğiz.
+İşte $\chi$'nin önemi buradan gelir: yüksek $\chi$ (simetrik) → yüksek-$k$ kick →
+filtre yutar → monitör göremez; düşük $\chi$ (antisimetrik) → düşük-$k$ →
+görünür. Ama bu hâlâ "görünür/görünmez" ikili sezgisi; bir sonraki adımda
+**ne kadar** sorusunu SVD ile sürekli ve kesin yanıtlayacağız.
 
 ---
 
@@ -238,8 +215,8 @@ $$
 \kappa(R)\approx 193 .
 $$
 
-Şimdi her modu inceleyelim: (i) gürültü büyütmesi $1/\sigma_i$ ve (ii) modun ne
-kadarının **simetrik** alt-uzayda olduğu (§4.3 anlamında):
+Şimdi her modu inceleyelim: (i) gürültü büyütmesi $1/\sigma_i$ ve (ii) modun
+**simetrik içeriği** — yani o modun §4.2'deki anlamda $\chi$ değeri:
 
 | Mod | $\sigma_i$ | gürültü büyütme $1/\sigma_i$ | modun simetrik içeriği |
 |---|---|---|---|
@@ -251,11 +228,17 @@ kadarının **simetrik** alt-uzayda olduğu (§4.3 anlamında):
 | 47 (en kötü) | 0.147 | 6.82 | **%98** |
 
 **Tablonun okunuşu:** En iyi görülen modlar neredeyse tümüyle **antisimetrik**
-(ortalama %4 simetrik). En kötü görülen modlar neredeyse tümüyle **simetrik**
-(ortalama %96). Yani §4.3'ün kategorik ifadesi ("simetrik görünmez") SVD'de
-**sürekli bir eğim** olarak doğrulanır: *bir mod ne kadar simetrikse, o kadar
-gürültülü kestirilir.* En kötü mod, en iyiye göre $\kappa\approx 193$ kat daha
-fazla gürültü büyütmesine maruz kalır.
+($\chi\approx-1$); en kötü görülenler neredeyse tümüyle **simetrik**
+($\chi\approx+1$). Yani §4.3'ün kategorik ifadesi ("simetrik görünmez") SVD'de
+**sürekli bir eğim** olarak doğrulanır: *bir mod ne kadar simetrikse ($\chi$ ne
+kadar büyükse), o kadar gürültülü kestirilir.* En kötü mod, en iyiye göre
+$\kappa\approx 193$ kat daha fazla gürültü büyütmesine maruz kalır.
+
+> **$\chi$ özettir, $\sigma$ kesindir.** $\chi$ tek başına gözlenebilirliği
+> *tam* belirlemez: §4.3'teki gibi, aynı $\chi$'ye sahip iki mod bant-içi $k'$
+> farkı yüzünden farklı $\sigma$'ya (farklı gürültü büyütmesine) sahip olabilir.
+> $\chi$ eğilimi verir (simetrik → kötü gözlenir); kesin, mod-başına nicelik
+> $\sigma_i$'dir. Bu yüzden hem $\chi$ (sezgi) hem SVD (kesinlik) gerekir.
 
 > **Çok önemli incelik (yanlış anlamayı önlemek için):** "$193$ kat" demek
 > *bütün* simetrik modlar 193 kat kötü demek **değildir**. Bu, en kötü tek mod
@@ -335,8 +318,8 @@ rapor ettiğimiz sınırın bir parçasıdır.
 
 Bu bağı kapalı bir biçimde keşfetmeye başladık (spin izleyicisiyle, 4D kapalı
 yörüngede sahte EDM ölçümü). İlk bulgu **öğretici ve ilk sezgiyi tersine
-çeviriyor:** σ=10μm kaçıklıkta, sahte EDM **antisimetrik** ($\hat S=-1$)
-desenlerde *yüksek* (~3600 nrad/s medyan), **simetrik** ($\hat S=+1$) desenlerde
+çeviriyor:** σ=10μm kaçıklıkta, sahte EDM **antisimetrik** ($\chi=-1$)
+desenlerde *yüksek* (~3600 nrad/s medyan), **simetrik** ($\chi=+1$) desenlerde
 *düşük* (~66 nrad/s) çıkıyor — yani görünür desen daha çok sahte EDM üretiyor!
 Sebebi temiz: antisimetrik kaçıklık büyük kapalı yörünge yapar → demet hem $x$
 hem $y$'de büyük salınır → büyük $x_{\rm co}\!\cdot\!y_{\rm co}$ geometrik fazı.
