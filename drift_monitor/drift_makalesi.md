@@ -393,7 +393,28 @@ izleyiciden kuruldu; monitör nominal $R_\text{nom}^{-1}$ ile çalıştı. Grady
 $\beta,\phi$ taramasından bile daha sağlam çıktı — Test 8 tam parçacık
 dinamiğiyle doğrulandı. (`drift_monitor/drift_betabeat_sim.py`)
 
-### 3.8 Test özeti
+### 3.8 Test 9 — BPM kazanç hataları
+
+Gerçek BPM'ler bir kazanç hatasıyla okur: $y_{\text{ölç},i}=(1+g_i)\,y_{\text{gerçek},i}
++ b_i + \text{gürültü}$, $g_i$ per-BPM kalibrasyon hatası (tipik %1–2). Drift modu
+zaman farkı aldığından sabit ofset $g$'den bağımsız yine iptal olur; geriye
+çarpımsal bir model uyumsuzluğu kalır: $\widehat{\delta q}=R^{-1}\,\text{diag}(1{+}g)\,
+R\,\delta q = \delta q + R^{-1}\text{diag}(g)R\,\delta q$. Per-BPM $g\sim N(0,\sigma_g)$
+ile tarama (Şekil 9):
+
+| $\sigma_g$ | y-takip |
+|---|---|
+| 0 | 5.7 μm |
+| %1 | 6.0 μm |
+| **%2 (tipik)** | **6.4 μm** |
+| %5 | 8.6 μm |
+| %10 | 13.4 μm |
+
+Tipik %2 kazanç hatasında taban yalnız 0.6 μm artar (5.7→6.4 μm); %5'e kadar
+hedefin altında. Yöntem gerçekçi BPM kazanç hatalarına dayanıklıdır.
+(`drift_monitor/drift_gain_sim.py`)
+
+### 3.9 Test özeti
 
 | Test | Soru | Ana sayı |
 |---|---|---|
@@ -403,7 +424,9 @@ dinamiğiyle doğrulandı. (`drift_monitor/drift_betabeat_sim.py`)
 | 4 | Drift modu ofseti tolere eder mi? | 197 μm → 6.6 μm (29×) |
 | 5 | Ofset kayarsa? | $<2\,\mu$m/epoch'a kadar üstün |
 | 6 | Aday yöntemler yan yana? | $\Delta R$: 1000–3700 μm, drift: 6–7 μm |
-| 8 | β-beating? | %1→6.1 μm; %5→8.6 μm; hedef altında |
+| 8 | β-beating? (gerçek gradyan/focal hatası) | %1→6.1 μm; %5→8.6 μm |
+| (tilt) | quad tilt / x–y kuplajı? | 0.2 mrad: kuplaj %0.33, takip değişmez |
+| 9 | BPM kazanç hatası? | %2→6.4 μm; %5→8.6 μm; hedef altında |
 
 ---
 
@@ -590,11 +613,17 @@ Bu kör noktanın belirli bir sistematik bütçe (ör. kaçıklığın ürettiğ
 EDM) için önemi makineye bağlı, ayrı bir sorudur ve bu çalışmanın kapsamı
 dışındadır (§4.4).
 
-Çalışmanın kısıtları:
+Sağlamlık, başlıca lineer-olmayan/model hata kanalları için açıkça test edildi:
+BPM kazanç hataları (Test 9, %2→6.4 μm), kuadrupol tilt'inin yarattığı x–y skew
+kuplajı (Tablo 7, 0.2 mrad'da etkisiz) ve β-beating/focal-uzunluk hataları
+(Test 8). Üçünde de yöntem hedefin altında kalır.
 
-- **Lineer model ötesi.** Sonuçlar Eş. (1)'e dayanır; gerçek halkada BPM gain
-  hataları, roll/kuplaj, sekstupol feed-down, fringe alanlar, histerezis ve
-  akım dalgalanması vardır. Bunların sistematik incelenmesi gelecek çalışmadır.
+Çalışmanın kalan kısıtları:
+
+- **Model ötesi diğer etkiler.** Sonuçlar Eş. (1) lineer modeline dayanır;
+  test edilmeyen ikincil kanallar arasında sekstupol feed-down, fringe alanlar,
+  manyetik histerezis ve akım dalgalanması var. Bunlar gelecek çalışmadır, ama
+  test edilenler (gain, skew-kuplaj, β-beating) bu sınıfın baskın üyeleridir.
 - **Tek kafes.** Tüm sonuçlar 24-hücreli FODO'da. Genellenebilirlik kazanç
   yasası $G_k$ üzerinden tahmin edilebilir ama doğrulanmamıştır.
 - **BPM ofset kararlılığı operasyonel bir gerekliliktir.** Yöntem BPM ofsetine
@@ -647,8 +676,9 @@ test parametreleri `drift_monitor/test_params.json`'dadır.
 
 Tüm şekiller **PRD tek-sütun** formatında (genişlik 3.375 in / 246 pt, serif +
 Computer-Modern mathtext, 600 dpi) üretilir: `drift_monitor/make_figures.py`
-(Şekil 1–4, 6, 8), `drift_monitor/make_fig5_architecture.py` (Şekil 5) ve
-`drift_monitor/theory_sim_validate.py` (Şekil 7). Çok panelli şekiller dikey
+(Şekil 1–4, 6, 8), `drift_monitor/make_fig5_architecture.py` (Şekil 5),
+`drift_monitor/theory_sim_validate.py` (Şekil 7) ve
+`drift_monitor/drift_gain_sim.py` (Şekil 9). Çok panelli şekiller dikey
 istiflenir ve (a)/(b) ile etiketlenir; şekil-içi başlık yoktur, açıklama
 aşağıdaki caption'lardadır (PRD konvansiyonu).
 
@@ -691,6 +721,12 @@ parçacık izleyicisinden (C++ GL4, `integrator.cpp`) kurulan R'nin eleman-elema
 karşılaştırması; (a) dikey, (b) yatay düzlem. Noktalar $y=x$ üzerinde:
 korelasyon 0.9992/0.9977, $\kappa$ tutarlı. Drift makalesinin analitik temelini
 tam parçacık dinamiğiyle doğrular. (§2.2)
+
+**ŞEKİL 9.** (`fig9_bpm_gain.png`) Test 9: BPM kazanç hatası RMS $\sigma_g$
+altında drift takip hatası (30-tohum medyanı, analitik $R$). Kesik kırmızı
+10 μm hedef, noktalı gri tipik %2 seviyesi. Sabit ofset gain'den bağımsız iptal
+olduğundan etki yalnız çarpımsal model uyumsuzluğudur; %5'e kadar hedef altında.
+(§3.8)
 
 **ŞEKİL 8.** (`fig8_svd_gain.png`) SVD spektrumunun kazanç yasasıyla birleşmesi:
 her SVD modunun tekil değeri $\sigma_i$, o modun kick-harmoniğindeki kazanç

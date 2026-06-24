@@ -506,8 +506,29 @@ hatası, $\varepsilon_\beta$'ya karşı (15-tohum medyanı). Kesik kırmızı ç
 \label{fig:beta}
 \end{figure}
 
+\subsection{Test 9 --- BPM kazanç hataları}
+Gerçek BPM'ler bir kazanç hatasıyla okur:
+$y_{\text{ölç},i}=(1+g_i)\,y_{\text{gerçek},i}+b_i+\text{gürültü}$, $g_i$ per-BPM
+kalibrasyon hatası (tipik \%1--2). Drift modu zaman farkı aldığından sabit ofset
+$g$'den bağımsız yine iptal olur; geriye çarpımsal bir model uyumsuzluğu kalır:
+$\widehat{\delta q}=R^{-1}\text{diag}(1{+}g)R\,\delta q=\delta q+
+R^{-1}\text{diag}(g)R\,\delta q$. Per-BPM $g\sim N(0,\sigma_g)$ taraması
+(Şekil~\ref{fig:gain}): $\sigma_g=0,\,\%1,\,\%2,\,\%5,\,\%10$ için takip hatası
+$5.7,\,6.0,\,6.4,\,8.6,\,13.4\,\mu$m. Tipik \%2'de taban yalnız $0.6\,\mu$m artar;
+\%5'e kadar hedef altında. (\texttt{drift\_gain\_sim.py})
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\columnwidth]{fig9_bpm_gain.png}
+\caption{Test 9: BPM kazanç hatası RMS $\sigma_g$ altında drift takip hatası
+(30-tohum medyanı, analitik $R$). Kesik kırmızı 10\,$\mu$m hedef, noktalı gri
+tipik \%2 seviyesi. Sabit ofset gain'den bağımsız iptal olduğundan etki yalnız
+çarpımsal model uyumsuzluğudur; \%5'e kadar hedef altında.}
+\label{fig:gain}
+\end{figure}
+
 \subsection{Test özeti}
-Tablo~\ref{tab:summary} altı testin ana sayısını derler.
+Tablo~\ref{tab:summary} sistematik testlerin ana sayısını derler.
 
 \begin{table*}[tb]
 \centering
@@ -523,7 +544,9 @@ Test & Soru & Ana sayı \\
 4 & Drift modu ofseti tolere eder mi? & $197\,\mu$m $\to$ $6.6\,\mu$m ($29\times$) \\
 5 & Ofset kayarsa? & $<2\,\mu$m/epoch'a kadar üstün \\
 6 & Aday yöntemler yan yana? & $\Delta R$: 1000--3700\,$\mu$m, drift: 6--7\,$\mu$m \\
-8 & $\beta$-beating? & \%1$\to$6.1\,$\mu$m; \%5$\to$8.6\,$\mu$m; hedef altında \\
+8 & $\beta$-beating (gerçek focal hatası)? & \%1$\to$6.1\,$\mu$m; \%5$\to$8.6\,$\mu$m \\
+--- & quad tilt / $x$--$y$ kuplajı? & 0.2\,mrad: kuplaj \%0.33, takip değişmez \\
+9 & BPM kazanç hatası? & \%2$\to$6.4\,$\mu$m; \%5$\to$8.6\,$\mu$m \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -740,12 +763,18 @@ yapısal nedenlerle erişimi farklı bir gözlemlenebilir gerektirir. Bu kör no
 belirli bir sistematik bütçe (ör.\ kaçıklığın ürettiği sahte EDM) için önemi
 makineye bağlı, ayrı bir sorudur ve bu çalışmanın kapsamı dışındadır (\S4.4).
 
-Çalışmanın kısıtları:
+Sağlamlık, başlıca model-hata kanalları için açıkça test edildi: BPM kazanç
+hataları (Test 9, \%2$\to$6.4\,$\mu$m), kuadrupol tilt'inin yarattığı $x$--$y$
+skew kuplajı (Tablo~\ref{tab:tilt}, 0.2\,mrad'da etkisiz) ve $\beta$-beating /
+focal-uzunluk hataları (Test 8). Üçünde de yöntem hedefin altında kalır.
+
+Çalışmanın kalan kısıtları:
 \begin{itemize}
-\item \textbf{Lineer model ötesi.} Sonuçlar Eş.~\eqref{eq:lin}'e dayanır;
-  gerçek halkada BPM gain hataları, roll/kuplaj, sekstupol feed-down, fringe
-  alanlar, histerezis ve akım dalgalanması vardır. Bunların sistematik
-  incelenmesi gelecek çalışmadır.
+\item \textbf{Model ötesi diğer etkiler.} Sonuçlar Eş.~\eqref{eq:lin} lineer
+  modeline dayanır; test edilmeyen ikincil kanallar arasında sekstupol
+  feed-down, fringe alanlar, manyetik histerezis ve akım dalgalanması var.
+  Bunlar gelecek çalışmadır; ama test edilenler (gain, skew-kuplaj,
+  $\beta$-beating) bu sınıfın baskın üyeleridir.
 \item \textbf{Tek kafes.} Tüm sonuçlar 24-hücreli FODO'da. Genellenebilirlik
   kazanç yasası $G_k$ üzerinden tahmin edilebilir ama doğrulanmamıştır.
 \item \textbf{BPM ofset kararlılığı operasyonel bir gerekliliktir.} Yöntem BPM
