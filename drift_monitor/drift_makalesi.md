@@ -140,9 +140,24 @@ $\beta_i,\phi_i$ her quad girişindeki Twiss parametreleri, $Q$ tune, $(KL)_j$
 quad'ın işaretli integral gücüdür (QF/QD tip işareti ve düzlem işareti içinde
 saklanır). Gürültü için bu çalışmada $\sigma_\eta = 1\,\mu$m alınır; bu, tek
 BPM okuma gürültüsü değil, çok-tur ortalaması sonrası etkin yörünge belirleme
-belirsizliğini temsil eden bir **model parametresidir**. Yatay düzlemde elektrostatik ark deflektörlerinin katkısı için
-$K_{x,\text{arc}}$ tune-eşlemeyle kalibre edilir (§3.3, ters-suç kontrolü);
-dikey düzlemde Maxwell garantisiyle ($n=1\Rightarrow E_z=0$) $K_{y,\text{arc}}=0$.
+belirsizliğini temsil eden bir **model parametresidir**.
+
+Tek bir incelik yatay düzlemdedir. Halkadaki elektrostatik ark deflektörleri
+yatay düzlemde demeti hafifçe **odaklar**; bu odaklamanın gücü $K_{x,\text{arc}}$,
+$R$'yi doğru kurmak için gerekir ama temiz bir analitik kapalı formu yoktur.
+Onu **tune-eşleme** ile belirleriz: analitik modelin ürettiği yatay tune $Q_x$,
+tam izleyicinin verdiği $Q_x$ değerine eşitlenene kadar tek serbest parametre
+$K_{x,\text{arc}}$ ayarlanır (bir kök-bulma). Dikey düzlemde bu serbestlik yoktur:
+Maxwell gereği elektrostatik deflektörün orta düzlemde dikey alanı sıfırdır
+($E_z=0$), yani arklar dikeyde odaklamaz ve $K_{y,\text{arc}}=0$ — kesin,
+kalibrasyonsuz.
+
+Bir model parametresini, sonra karşı sınayacağımız simülasyona uydurmak bir
+**ters-suç (inverse crime)** riski taşır: uyumu yapay olarak şişirebilir. Bunu
+§3.3'te açıkça denetliyoruz — $K_{x,\text{arc}}$'ı $\pm\%10$ bozup drift
+kurtarımının neredeyse hiç değişmediğini ($<0.5\,\mu$m) gösteriyoruz; yani sonuç
+bu kalibrasyonun tam değerine bağlı değildir.
+
 Bu inşa simülasyon izleyicisinden bağımsızdır ve `drift_monitor/fodo_lattice.py`
 içinde uygulanmıştır. Varsayılan örgüde $\kappa(R)\approx 193$,
 $\sigma_{\max}\approx 28.4$, $\sigma_{\min}\approx 0.147$.
@@ -172,64 +187,86 @@ küçük olduğundan gürültü iyi kontrol altındadır, ancak BPM ofseti
 $R^{-1}\mathbf{b}$ olarak tahmine doğrudan sızar. Mutlak hizalama bilgisini
 ofsete kurban eder.
 
-**(ii) İki-gradient $\Delta R^{-1}$ (ofset-iptal).** $g_2=g_1(1+\varepsilon)$
-ile iki ayrı gradient ayarında ölçüm alıp
-$\widehat{\Delta q}=\Delta R^{-1}(\mathbf{y}_1-\mathbf{y}_2)$,
-$\Delta R=R_1-R_2$. Ofset iptal olur, fakat $R\propto(KL)\propto g$ olduğundan
-küçük $\varepsilon$ için $\Delta R\approx\varepsilon\,(g\,\partial R/\partial g)$
-olur; bu, ofset-iptal eden estimatörün **gürültü büyütmesini**
-$\|\Delta R^{-1}\| = 1/\sigma_{\min}(\Delta R)\propto 1/\varepsilon$ olarak
-patlatır (asıl sorun budur). Dikkat: $1/\varepsilon$ ile ölçeklenen kondisyon
-sayısı $\kappa(\Delta R)$ **değil** — o, türev matrisi $g\,\partial R/\partial g$'nin
-koşulluluğu olup $\varepsilon$'dan kabaca bağımsızdır ($\sim 10^4$, $\kappa(R)\approx 193$'ün
-~2 mertebe üstünde). Pratikte ($\varepsilon\approx 0.02$) gürültü büyütmesi
-$\|\Delta R^{-1}\|\sim 10^4$ mertebesine çıkar (Şekil 1, Şekil 6).
+**(ii) İki-gradient $\Delta R^{-1}$ (ofset-iptal).** İki farklı gradient
+ayarında ölçüm alalım: $g_1$ ve $g_2=g_1(1+\varepsilon)$, tepki matrisleri
+$R_1,R_2$. Aynı kaçıklık $\Delta q$ ve aynı ofset $\mathbf b$ için
+$$
+\mathbf y_1=R_1\Delta q+\mathbf b+\eta_1,\qquad
+\mathbf y_2=R_2\Delta q+\mathbf b+\eta_2.
+$$
+Fark alınca ofset düşer ve
+$\mathbf y_1-\mathbf y_2=\Delta R\,\Delta q+(\eta_1-\eta_2)$, $\Delta R\equiv R_1-R_2$;
+böylece $\widehat{\Delta q}=\Delta R^{-1}(\mathbf y_1-\mathbf y_2)=
+\Delta q+\Delta R^{-1}(\eta_1-\eta_2)$. Sorun, $\Delta R$'nin **küçük** olmasıdır:
+$R\propto(KL)\propto g$ olduğundan
+$$
+\Delta R = R_1-R_2 \approx -\varepsilon\,g\,\frac{\partial R}{\partial g}
+\equiv -\varepsilon R',
+$$
+yani $\Delta R$, $R$ ölçeğinin yalnız $\varepsilon\,(\approx0.02)$ katıdır.
+Tersini almak gürültüyü
+$$
+\bigl\|\widehat{\Delta q}-\Delta q\bigr\|\approx
+\sqrt2\,\sigma_\eta\,\|\Delta R^{-1}\| = \frac{\sqrt2\,\sigma_\eta}{\varepsilon}\,
+\|R'^{-1}\|
+$$
+gibi $1/\varepsilon$ ile patlatır. (Dikkat: $1/\varepsilon$ ile büyüyen şey
+kondisyon sayısı $\kappa(\Delta R)$ **değil** — o $\approx\kappa(R')$,
+$\varepsilon$'dan bağımsız; bizzat gürültü büyütmesi $\|\Delta R^{-1}\|$'dir.)
+Pratikte $\|\Delta R^{-1}\|\sim 10^4\times$ (Şekil 1, Şekil 6).
 
-**(iii) $\Delta R^{-1}$ + düzenlileştirme.** Tikhonov / TSVD. Gürültü-bias
-dengesi; en iyi durumda dahi $\sim 50\,\mu$m (§3.1).
+**(iii) $\Delta R^{-1}$ + düzenlileştirme.** (ii)'nin gürültü patlamasını
+dizginlemek için düzenlileştirme denenir. **Tikhonov**, ham ters yerine
+$(\Delta R^\top\Delta R+\lambda I)^{-1}\Delta R^\top$ kullanır: $\lambda$ terimi
+küçük tekil değerlerin patlamasını keser. **TSVD** ise yalnız en büyük $k$ tekil
+değeri tutup gerisini sıfırlar. İkisi de gürültüyü azaltır, ama bunu kestirimi
+**bozarak** (bias) yapar: zayıf-gözlenen modlar kısmen/tamamen atıldığından
+geri çatılan desen gerçeğinden sapar. En iyi ayarda bile $\sim50\,\mu$m'de kalır
+(§3.1) — 10 μm hedefin çok üstünde.
 
 **(iv) Drift modu (kalibrasyon-referans) — önerilen.** Tek gradient, iki
-*zaman*:
-
+*zaman*. $t_0$'da referans $\mathbf y_0=R\Delta q_0+\mathbf b+\eta_0$ kaydedilir;
+sonra
 $$
-\widehat{\delta q}(t)=R^{-1}\bigl(\mathbf{y}(t)-\mathbf{y}_0\bigr).
+\widehat{\delta q}(t)=R^{-1}\bigl(\mathbf y(t)-\mathbf y_0\bigr).
 $$
+Burada $\mathbf y(t)-\mathbf y_0=R(\Delta q(t)-\Delta q_0)+(\eta(t)-\eta_0)$
+(sabit $\mathbf b$ düşer), dolayısıyla
+$$
+\widehat{\delta q}(t)=\underbrace{\Delta q(t)-\Delta q_0}_{\text{aranan drift}}
++\,R^{-1}\bigl(\eta(t)-\eta_0\bigr).
+$$
+İki bağımsız gürültü örneği ($\eta(t),\eta_0$; her biri $\sigma_\eta$) toplamda
+$2\sigma_\eta^2$ varyans verir; kestirim hatası kovaryansı
+$R^{-1}(2\sigma_\eta^2 I)R^{-\top}$, RMS mertebesi $\sqrt2\,\sigma_\eta\|R^{-1}\|$.
+Kritik fark (ii) ile: burada terslenen matris **iyi-koşullu $R$** ($\kappa\approx193$),
+kötü-koşullu $\Delta R$ değil — o yüzden gürültü $\sim1/\varepsilon$ değil
+$\mathcal O(1)$'dir. Yöntem mutlak hizalamayı değil kalibrasyondan beri
+**değişimi** verir; mutlak referans dış kaynaktan (LOCO/BBA) gelir (§5).
 
-Sabit ofset zaman farkında iptal olur; geriye yalnızca
-$\sqrt{2}\,\sigma_\eta\|R^{-1}\|$ gürültüsü kalır. Yöntem mutlak hizalamayı
-değil, kalibrasyondan beri **değişimi** kestirir; mutlak referans dış
-kaynaktan (LOCO/BBA) gelir (§5).
+### 2.4 Neden (ii) çıkmaz ama (iv) çalışır?
 
-### 2.4 Ofset–gürültü dualitesi: bir önerme (destekleyici)
+(ii) ile (iv) **farklı sorular** çözer; aradaki fark yöntemin tüm hikâyesidir.
 
-Bu bölüm, aday (ii)'nin gürültü büyütmesinin algoritmik değil **yapısal**
-olduğunu, dolayısıyla "iki gradient farkıyla ofseti iptal et" fikrinin neden
-çıkmaz olduğunu gösterir. Sonuç, aşağıda açıkça tanımlanan dar bir estimatör
-sınıfı için geçerli bir tekillik önermesidir (genel bir teorem iddiası
-değildir).
+**Sorun.** Ofseti yok etmenin "doğal" yolu, eşzamanlı iki ölçümün farkını
+almaktır (ii). Ama eşzamanlı iki ölçümde ofseti tam iptal eden *her* lineer,
+ön-yargısız estimatör, kaçıklığı sonuçta $\Delta R$ üzerinden geri çatmak
+zorundadır — ve $\Delta R$ yapısal olarak $\varepsilon$-küçüktür (§2.3-ii), yani
+gürültü $1/\varepsilon$ patlar. Bu, algoritma seçimiyle aşılamaz: ön-yargısızlık
+$A_1R_1+A_2R_2=I$ ve tam ofset iptali $A_1+A_2=0$ koşulları birlikte tek bir
+çözüme zorlar, $A_1=\Delta R^{-1}$. Düzenlileştirme (iii) bu sınıfın *dışına*
+bias ekleyerek çıkar, ama bedeli $\sim50\,\mu$m'dir.
 
-**Estimatör sınıfı $\mathcal{C}$.** Şu dört koşulu sağlayanlar:
-(1) *Lineerlik:* $\widehat{\Delta q}=A_1\mathbf{y}_1+A_2\mathbf{y}_2$;
-(2) *İki-ölçüm:* aynı $\Delta q$ ve aynı $\mathbf{b}$ ile
-$\mathbf{y}_a=R_a\Delta q+\mathbf{b}+\eta_a$, $a\in\{1,2\}$;
-(3) *Ön-yargısızlık:* her $\Delta q$ için $\mathbb{E}[\widehat{\Delta q}]=\Delta q$;
-(4) *Tam ofset iptali:* her sabit $\mathbf{b}$ tahmine sızmaz.
+**Simülasyon bunu doğruluyor:** ham $\Delta R^{-1}$ Test 1'de 1865 μm, Test 6'da
+$\sim$3000 μm verir; Şekil 6 gürültünün $\propto1/\varepsilon$ patladığını
+gösterir. Sınır gerçek ve yapısaldır, sayısal bir aksaklık değil.
 
-**İddia.** $\mathcal{C}$ içinde tek çözüm $A_1=\Delta R^{-1}$, $A_2=-\Delta R^{-1}$'dir.
-
-**Türetiş.** Koşul (3): $A_1R_1+A_2R_2=I$. Koşul (4): $A_1+A_2=0\Rightarrow A_2=-A_1$.
-Birleştirince $A_1(R_1-R_2)=I\Rightarrow A_1=\Delta R^{-1}$. $\blacksquare$
-
-**Sonuç.** $\mathcal{C}$ içindeki tek çözümün gürültü büyütmesi
-$\|\Delta R^{-1}\|$'dir; $\Delta R\approx\varepsilon R$ ile yaklaşık
-$\|R^{-1}\|/\varepsilon$. Bu, $\varepsilon\to 0$ sınırında patlar (§3.2'de SVD
-spektrumuyla doğrulanır). Önemli nokta: **drift modu (iv) $\mathcal{C}$
-dışındadır** — iki ölçüm aynı anda değil iki farklı *zamanda* alınır ve
-estimatör $\Delta q$'yu değil $\delta q(t)=\Delta q(t)-\Delta q_0$'ı kestirir.
-Ofset zaman farkıyla iptal olur, kondisyon sayısı $\kappa(R)\approx 193$
-kalır. $\mathcal{C}$ dışındaki diğer yaklaşımlar (Tikhonov/TSVD, Bayesçi,
-Kalman, çok-epoch) bu sınıra uymak zorunda değildir; farklı trade-off'larla
-çalışırlar.
+**(iv) neden kaçar?** Drift modu ofseti *eşzamanlı* iptal etmeye çalışmaz; iki
+farklı **zamanda** ölçer. Sabit ofset zaman farkında kendiliğinden düşer
+(algoritmik hüner değil, fiziksel). Geriye terslenen matris **iyi-koşullu $R$**
+($\kappa\approx193$), kötü-koşullu $\Delta R$ değildir — bu yüzden gürültü
+$1/\varepsilon$ değil $\mathcal O(1)$'dir. Bedeli: yalnız *değişimi* verir,
+mutlak hizalamayı değil; ama bizim aradığımız da zaten değişimdir.
 
 ---
 
@@ -240,42 +277,54 @@ BPM gürültü ve ofset modeli, opsiyonel quad/dipol tilt'leri. Hızlandırıcı
 parametreleri `params.json`, test parametreleri `drift_monitor/test_params.json`
 içindedir.
 
-### 3.1 Test 1 — Düzenlileştirme ham $\Delta R^{-1}$'i kurtarır mı?
+### 3.1 Test 1 — Düzenlileştirme iki-gradient yöntemini kurtarır mı?
 
-BPM ofseti **yok**; bu test ideal şartta gürültü tabanını ölçer. Aynı veride
-dört estimatör:
+Soru: §2.3-(iii)'teki düzenlileştirme, (ii)'nin gürültü patlamasını 10 μm
+hedefine indirebilir mi? Bunu sınamak için ofseti **sıfır** alıyoruz (en lehte
+durum: (ii)'nin tek derdi gürültü, ofset değil) ve aynı veride dört estimatörü
+karşılaştırıyoruz (Tablo~1). "$y$-korr", geri çatılan desenin gerçek desenle
+korelasyonudur (1 = biçim korunmuş, 0 = biçim bozulmuş).
 
-| Estimatör | y-RMS | y-korr | Yorum |
+| Estimatör | y-RMS | y-korr | Açıklama |
 |---|---|---|---|
-| Direct $R^{-1}$ (ofsetsiz) | 3.5 μm | 0.998 | Gürültü tabanı referansı |
-| Ham $\Delta R^{-1}$ | 1865 μm | 0.085 | §2.4 sınırının nümerik gerçekleşmesi |
-| Tikhonov (L-curve) | 53 μm | 0.348 | bias-varyans dengesi |
-| TSVD ($k=3$, oracle) | 52 μm | 0.383 | oracle üst-sınır |
+| Direct $R^{-1}$ (ofsetsiz) | 3.5 μm | 0.998 | yalnız *referans*: ofset=0 alındığında gürültü tabanı |
+| Ham $\Delta R^{-1}$ (ii) | 1865 μm | 0.085 | düzenlileştirmesiz iki-gradient: gürültü patlar |
+| Tikhonov (iii) | 53 μm | 0.348 | $\lambda$ ile dengelenmiş; biçim büyük ölçüde kayıp |
+| TSVD ($k=3$, iii) | 52 μm | 0.383 | en iyi 3 mod tutulmuş ($k$ ideal seçilmiş üst-sınır) |
 
-**Uyarı:** Direct $R^{-1}$ operasyonel bir rakip değildir; ofset sıfır
-varsayımına dayanır ve gerçek halkada ($\mathbf{b}\neq 0$) 200+ μm'e tırmanır
-(Test 4). Tabloda yalnızca gürültü tabanı referansı olarak yer alır.
-Düzenlileştirme ham (ii)'yi $\sim 35\times$ iyileştirir ama korelasyon
-0.998'den 0.35'e düşer (RMS azalır, biçim bozulur) ve hâlâ 10 μm hedefinin
-çok üstündedir.
+İki ders: (a) **düzenlileştirme gürültüyü ~35× bastırır (1865→~52 μm) ama
+hedefin hâlâ 5× üstündedir** ve bunu biçimi bozarak yapar (korelasyon 0.998→0.35:
+RMS düşer çünkü estimatör zayıf modları "0 tahmin et"meye kayar). (b) Direct
+$R^{-1}$ (3.5 μm) burada en iyi görünür ama **operasyonel rakip değildir** —
+ofset=0 varsaydığı için gerçek halkada ($\mathbf b\neq0$) 200+ μm'e fırlar
+(Test 4); tabloda sadece gürültü tabanı referansı olarak var. Yani hiçbir
+iki-gradient varyantı işe yaramıyor; çözüm farklı bir problem kurmaktan (drift
+modu) geçiyor.
 
 ### 3.2 Test 2 — Uzaysal transfer fonksiyonu ve SVD spektrumu
 
-Saf sinüsoidal patern girişine ($\Delta q_j=A\cos(2\pi kj/N)$) estimatör mod
-transferi: Tikhonov/TSVD yüksek-$k$ modlarını ($k\gtrsim 18$) tamamen söndürür;
-48 modun yalnızca 3–5'i kurtarılır. SVD spektrumu yan yana çizildiğinde
-$\Delta R\approx\varepsilon R$ bulk ölçeklemesi doğrulanır (Şekil 1):
-$\Delta R$'nin büyük singüler değerleri $R$'ninkilerin yaklaşık $\varepsilon$
-katıdır; en küçük modlar ise bu ölçeklemenin altına çöker, $\Delta R$ her
-durumda $R$'den ~2 mertebe kötü koşulludur.
+Bu test, (ii)'nin neden çuvalladığını $R$ ile $\Delta R$'nin singüler-değer
+spektrumlarını yan yana koyarak gösterir (Şekil 1). $\Delta R$'nin tekil
+değerleri, $R$'ninkilerin kabaca **$\varepsilon$ katı** çıkar (empirik:
+$\varepsilon=0.02$'de büyük modlarda oran $\sim0.02$) — §2.3-(ii)'deki
+$\Delta R\approx\varepsilon R'$ beklentisiyle uyumlu.
 
-$\varepsilon$ taraması (Şekil 6) asıl ölçeklemeyi netleştirir: ofset-iptal
-eden estimatörün gürültü büyütmesi $\|\Delta R^{-1}\|=1/\sigma_{\min}(\Delta R)$
-tüm $\varepsilon\in[0.005,0.10]$ aralığında temiz biçimde $\propto 1/\varepsilon$
-patlarken, kondisyon sayısı $\kappa(\Delta R)$ kabaca sabit ($\sim 10^4$) kalır.
-Yani $\varepsilon\to 0$ sınırında yöntemi kullanılamaz kılan κ değil,
-$\|\Delta R^{-1}\|$'dir — bu, §2.4'teki alt-sınır önermesinin ($\|\Delta R^{-1}\|
-\sim\|R^{-1}\|/\varepsilon$) doğrudan sayısal doğrulamasıdır.
+Ama bir incelik var: **en küçük birkaç mod bu $\varepsilon$ çizgisinin de altına
+"çöker".** Bunun anlamı: $\Delta R=R(g_1)-R(g_2)$ farkında, bazı modlar için
+$R(g_1)$ ile $R(g_2)$ neredeyse birbirini götürür; o modların $\Delta R$ tekil
+değeri $\varepsilon\,\sigma(R)$'nin bile altına iner (uniform $\varepsilon$
+ölçeklemesinden daha hızlı küçülür). Sonuç: $\sigma_{\min}(\Delta R)$ ekstra
+küçük → $\kappa(\Delta R)$ daha da büyür ($\sim10^4$, $R$'den $\sim$2 mertebe
+kötü).
+
+$\varepsilon$ taraması (Şekil 6) asıl ölçeklemeyi netleştirir: ofset-iptal eden
+estimatörün gürültü büyütmesi $\|\Delta R^{-1}\|=1/\sigma_{\min}(\Delta R)$ tüm
+$\varepsilon\in[0.005,0.10]$ aralığında temiz biçimde $\propto1/\varepsilon$
+patlarken, kondisyon sayısı $\kappa(\Delta R)$ kabaca **sabit** ($\sim10^4$)
+kalır. Yani $\varepsilon\to0$'da yöntemi kullanılamaz kılan $\kappa$ değil,
+gürültü büyütmesi $\|\Delta R^{-1}\|$'dir — §2.4'teki argümanın sayısal
+doğrulaması. (Ayrıca düzenlileştirilmiş estimatörler yüksek-$k$ modları söndürür:
+48 modun yalnız 3–5'i geri çatılabilir; biçim bozulmasının kaynağı budur.)
 
 ### 3.3 Test 3 — Yatay model ters-suç kontrolü
 
@@ -432,12 +481,18 @@ hedefin altında. Yöntem gerçekçi BPM kazanç hatalarına dayanıklıdır.
 
 ## 4. Gözlenebilirlik Sınırı
 
-Bu bölüm yöntemin **hangi hizalama desenlerini** iyi, hangilerini kötü
-çözdüğünü karakterize eder. Bu, drift modunun gürültü tabanının (§3) rastgele
-bir sayı olmadığını; tepki matrisinin mod yapısından kaynaklanan, yöntemin
-geçerlilik alanını ve kör noktasını tanımlayan yapısal bir özellik olduğunu
-gösterir. (Bu karakterizasyon tümüyle monitörün kendi özelliğidir; herhangi bir
-fiziksel sistematik bütçesinden bağımsız geçerlidir.)
+§3'te drift modunun bir **gürültü tabanına** ($\sim6$–7 μm, Test 4) oturduğunu
+gördük: 1 μm BPM gürültüsü $R^{-1}$'den geçerken $\sqrt2\,\sigma_\eta\|R^{-1}\|$
+mertebesinde bir hataya büyür (§2.3-iv). Bu bölüm o tabanın **rastgele bir sayı
+olmadığını**, doğrudan $R$'nin mod yapısından geldiğini gösterir: $R^{-1}$'in
+gürültüyü hangi yönde ne kadar büyüttüğü, hangi hizalama desenlerinin iyi/kötü
+çözüldüğünü belirler. Somut olarak, 6–7 μm'lik tabana en büyük katkı, $R$'nin en
+küçük tekil değerli (en kötü koşullu) modlarından gelir — ve aşağıda bu modların
+**simetrik** desenler olduğunu göreceğiz. Yani §3'teki taban ile §4'teki kör
+nokta aynı olgunun iki yüzüdür: monitör simetrik driftleri zayıf çözer, bu da
+hem gürültü tabanını yükseltir hem de geçerlilik alanını antisimetrik driftle
+sınırlar. (Bu karakterizasyon tümüyle monitörün kendi özelliğidir; herhangi bir
+fiziksel sistematik bütçesinden bağımsızdır.)
 
 ### 4.1 Hangi kaçıklık desenleri kapalı yörüngede görünür?
 
