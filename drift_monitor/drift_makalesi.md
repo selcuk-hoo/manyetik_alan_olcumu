@@ -522,7 +522,7 @@ $\sim$1.2–3.4 arası — bu, $\sqrt\beta$ ve $KL$ ağırlığından.) Yani $G_
 $\beta/KL$-ağırlıklı **kesin** spektrumudur; geri-çatım gürültüsü doğrudan
 rezonans paydasıdır: $1/\sigma_k\propto|Q_{\rm eff}^2-k^2|$. Kısaca $\chi$ (hangi
 banda), $G_k$ (rezonans) ve $\sigma_i$ (kesin spektrum) tek hikâyenin
-parçalarıdır.
+parçalarıdır (Şekil 8).
 
 ### 4.4 Kör noktanın anlamı ve sistematik bütçeyle ilişkisi (ileri bakış)
 
@@ -647,7 +647,7 @@ test parametreleri `drift_monitor/test_params.json`'dadır.
 
 Tüm şekiller **PRD tek-sütun** formatında (genişlik 3.375 in / 246 pt, serif +
 Computer-Modern mathtext, 600 dpi) üretilir: `drift_monitor/make_figures.py`
-(Şekil 1–4, 6), `drift_monitor/make_fig5_architecture.py` (Şekil 5) ve
+(Şekil 1–4, 6, 8), `drift_monitor/make_fig5_architecture.py` (Şekil 5) ve
 `drift_monitor/theory_sim_validate.py` (Şekil 7). Çok panelli şekiller dikey
 istiflenir ve (a)/(b) ile etiketlenir; şekil-içi başlık yoktur, açıklama
 aşağıdaki caption'lardadır (PRD konvansiyonu).
@@ -691,3 +691,11 @@ parçacık izleyicisinden (C++ GL4, `integrator.cpp`) kurulan R'nin eleman-elema
 karşılaştırması; (a) dikey, (b) yatay düzlem. Noktalar $y=x$ üzerinde:
 korelasyon 0.9992/0.9977, $\kappa$ tutarlı. Drift makalesinin analitik temelini
 tam parçacık dinamiğiyle doğrular. (§2.2)
+
+**ŞEKİL 8.** (`fig8_svd_gain.png`) SVD spektrumunun kazanç yasasıyla birleşmesi:
+her SVD modunun tekil değeri $\sigma_i$, o modun kick-harmoniğindeki kazanç
+$G_k=C/|Q_{\rm eff}^2-k^2|$'ya karşı (log-log). Noktalar $\sigma\propto G_k$
+doğrusunu izler (korelasyon 0.92); renk modun simetrisi $\chi_i$. Yüksek-$\sigma$
+(iyi gözlenen) modlar antisimetrik ($\chi\!\to\!-1$, kick tune'a yakın), düşük-$\sigma$
+modlar simetrik ($\chi\!\to\!+1$, kick $k\!\approx\!24$). Yani $\chi$, $G_k$ ve
+$\sigma$ tek olgudur. (§4.3)

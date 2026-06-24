@@ -296,7 +296,7 @@ def fig6_epsilon_sweep():
         axT.loglog(eps_grid, inv_smin, m + "-", color=c, label=f"düzlem {plane}")
         ref = inv_smin[eps_grid == 0.02][0] * (0.02 / eps_grid)
         axT.loglog(eps_grid, ref, ":", color=c, lw=0.8)
-        axB.semilogx(eps_grid, kappa_dR, m + "-", color=c, label=f"düzlem {plane}")
+        axB.loglog(eps_grid, kappa_dR, m + "-", color=c, label=f"düzlem {plane}")
 
     axT.set_ylabel(r"$\|\Delta R^{-1}\|=1/\sigma_{\min}$")
     axT.grid(True, which="both", alpha=0.3)
@@ -316,8 +316,53 @@ def fig6_epsilon_sweep():
 
 
 # --------------------------------------------------------------------------
+# Şekil 8 — SVD spektrumu = G_k'nın kesin gerçekleşmesi (σ_k ∝ G_k)
+# --------------------------------------------------------------------------
+def fig8_svd_gain():
+    """Her SVD modunun tekil değeri σ_i ile o modun kick-harmoniğindeki
+    kazanç G_k arasındaki örtüşme (σ_k ∝ G_k). Kick harmoniği (-1)^j çarpanıyla
+    (Nyquist kayması) bulunur — orbit gain kaçıklık desenine değil KICK'e uygulanır."""
+    print("Şekil 8: SVD ↔ G_k birleşmesi (σ_k ∝ G_k)")
+    C_GAIN, QEFF2 = 24.8, 5.03
+    R = build_R(CFG, CFG["g1"], "y")
+    U, S, Vt = np.linalg.svd(R)
+    N = len(S)
+    sign = (-1.0) ** np.arange(N)
+
+    def kick_k(v):
+        F = np.abs(np.fft.rfft(sign * v)); F[0] = 0.0
+        return int(np.argmax(F))
+
+    ks = np.array([kick_k(Vt[i]) for i in range(N)])
+    Gk = C_GAIN / np.abs(QEFF2 - ks ** 2.0)
+    chi = np.array([2.0 * sym_frac(Vt[i]) - 1.0 for i in range(N)])  # χ∈[-1,1]
+    corr = np.corrcoef(np.log(S), np.log(Gk))[0, 1]
+
+    fig, ax = plt.subplots(figsize=(COL, 2.8))
+    sc = ax.scatter(Gk, S, c=chi, cmap="coolwarm", s=14, vmin=-1, vmax=1,
+                    edgecolors="k", linewidths=0.3, zorder=3)
+    # σ = a·G_k referans (medyan oran)
+    a = np.median(S / Gk)
+    gg = np.array([Gk.min(), Gk.max()])
+    ax.plot(gg, a * gg, "--", color="0.4", lw=0.9, zorder=2,
+            label=rf"$\sigma\!\propto\!G_k$ (eğim $\approx${a:.1f})")
+    ax.set_xscale("log"); ax.set_yscale("log")
+    ax.set_xlabel(r"kick-harmoniği kazancı $G_k=C/|Q_{\rm eff}^2-k^2|$")
+    ax.set_ylabel(r"tekil değer $\sigma_i$")
+    ax.text(0.04, 0.92, rf"log-log korelasyon $={corr:.2f}$",
+            transform=ax.transAxes, fontsize=7, va="top")
+    ax.legend(loc="lower right", fontsize=6.5)
+    ax.grid(True, which="both", alpha=0.3)
+    cb = fig.colorbar(sc, ax=ax, pad=0.02)
+    cb.set_label(r"simetri $\chi_i$", fontsize=7); cb.ax.tick_params(labelsize=6)
+    fig.tight_layout()
+    _save(fig, "fig8_svd_gain.png")
+
+
+# --------------------------------------------------------------------------
 FIGS = {1: fig1_svd_spectra, 2: fig2_drift_tracking,
-        3: fig3_betabeat, 4: fig4_permode, 6: fig6_epsilon_sweep}
+        3: fig3_betabeat, 4: fig4_permode, 6: fig6_epsilon_sweep,
+        8: fig8_svd_gain}
 
 
 def main():

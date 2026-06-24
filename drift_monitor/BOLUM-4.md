@@ -229,6 +229,8 @@ $$
 > gürültüsü de doğrudan rezonans paydasıdır: $1/\sigma_k \propto 1/G_k =
 > |Q_{\rm eff}^2-k^2|/C$. $\chi$ ise bir kaçıklığın hangi banda (hangi $k$'ya)
 > düştüğünü söyler — yani üçü ($\chi$, $G_k$, $\sigma$) tek hikâyenin parçaları.
+> (Makaledeki Şekil 8 bunu görselleştirir: $\sigma_i$ vs $G_k$, korelasyon 0.92,
+> renk $\chi_i$.)
 
 Şimdi her modu inceleyelim: (i) gürültü büyütmesi $1/\sigma_i$ ve (ii) modun
 **simetrik içeriği** — yani o modun §4.2'deki anlamda $\chi$ değeri:
