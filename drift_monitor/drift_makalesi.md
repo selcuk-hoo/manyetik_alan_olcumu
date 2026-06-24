@@ -594,7 +594,7 @@ duyarlılığı $1/\sigma$ arttıkça simetrik güç oranı %100'e tırmanır.
 kazanç yasasından bağımsız değildir; her SVD modu (yaklaşık) bir kick-harmoniğine
 karşılık gelir ve tekil değeri o harmonikteki kazançla orantılıdır,
 $\sigma_k\propto G_k$. (Sayısal teyit: mod kick-harmoniği ile $G_k$ arasında
-log-log korelasyon $0.92$; $\sigma_k/G_k$ oranı tüm spektrumda yalnız
+lineer (Pearson) korelasyon $0.98$; $\sigma_k/G_k$ oranı tüm spektrumda yalnız
 $\sim$1.2–3.4 arası — bu, $\sqrt\beta$ ve $KL$ ağırlığından.) Yani $G_k$ rezonans
 **iskeletini** ($k\approx Q$'da güçlü, $k\gg Q$'da zayıf) verir, SVD ise onun
 $\beta/KL$-ağırlıklı **kesin** spektrumudur; geri-çatım gürültüsü doğrudan
@@ -786,7 +786,7 @@ olduğundan etki yalnız çarpımsal model uyumsuzluğudur; %5'e kadar hedef alt
 **ŞEKİL 8.** (`fig8_svd_gain.png`) SVD spektrumunun kazanç yasasıyla birleşmesi:
 her SVD modunun tekil değeri $\sigma_i$, o modun kick-harmoniğindeki kazanç
 $G_k=C/|Q_{\rm eff}^2-k^2|$'ya karşı (log-log). Noktalar $\sigma\propto G_k$
-doğrusunu izler (korelasyon 0.92); renk modun simetrisi $\chi_i$. Yüksek-$\sigma$
+doğrusunu izler (Pearson korelasyon 0.98, $\sigma\approx1.22\,G_k$); renk modun simetrisi $\chi_i$. Yüksek-$\sigma$
 (iyi gözlenen) modlar antisimetrik ($\chi\!\to\!-1$, kick tune'a yakın), düşük-$\sigma$
 modlar simetrik ($\chi\!\to\!+1$, kick $k\!\approx\!24$). Yani $\chi$, $G_k$ ve
 $\sigma$ tek olgudur. (§4.3)

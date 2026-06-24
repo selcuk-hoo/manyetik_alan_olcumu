@@ -336,23 +336,23 @@ def fig8_svd_gain():
     ks = np.array([kick_k(Vt[i]) for i in range(N)])
     Gk = C_GAIN / np.abs(QEFF2 - ks ** 2.0)
     chi = np.array([2.0 * sym_frac(Vt[i]) - 1.0 for i in range(N)])  # χ∈[-1,1]
-    corr = np.corrcoef(np.log(S), np.log(Gk))[0, 1]
+    corr = np.corrcoef(Gk, S)[0, 1]                                  # lineer Pearson
 
     fig, ax = plt.subplots(figsize=(COL, 2.8))
     sc = ax.scatter(Gk, S, c=chi, cmap="coolwarm", s=14, vmin=-1, vmax=1,
                     edgecolors="k", linewidths=0.3, zorder=3)
-    # σ = a·G_k referans (medyan oran)
-    a = np.median(S / Gk)
-    gg = np.array([Gk.min(), Gk.max()])
+    # σ = a·G_k referansı (orijinden geçen en küçük kareler)
+    a = float(np.sum(S * Gk) / np.sum(Gk * Gk))
+    gg = np.array([0.0, Gk.max() * 1.03])
     ax.plot(gg, a * gg, "--", color="0.4", lw=0.9, zorder=2,
-            label=rf"$\sigma\!\propto\!G_k$ (eğim $\approx${a:.1f})")
-    ax.set_xscale("log"); ax.set_yscale("log")
+            label=rf"$\sigma\!=\!{a:.2f}\,G_k$")
+    ax.set_xlim(0, Gk.max() * 1.05); ax.set_ylim(0, S.max() * 1.05)
     ax.set_xlabel(r"kick-harmoniği kazancı $G_k=C/|Q_{\rm eff}^2-k^2|$")
     ax.set_ylabel(r"tekil değer $\sigma_i$")
-    ax.text(0.04, 0.92, rf"log-log korelasyon $={corr:.2f}$",
+    ax.text(0.04, 0.92, rf"Pearson korelasyon $={corr:.2f}$",
             transform=ax.transAxes, fontsize=7, va="top")
     ax.legend(loc="lower right", fontsize=6.5)
-    ax.grid(True, which="both", alpha=0.3)
+    ax.grid(True, alpha=0.3)
     cb = fig.colorbar(sc, ax=ax, pad=0.02)
     cb.set_label(r"simetri $\chi_i$", fontsize=7); cb.ax.tick_params(labelsize=6)
     fig.tight_layout()

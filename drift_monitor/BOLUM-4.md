@@ -220,7 +220,7 @@ $$
 > her SVD modu (yaklaşık) bir kick-harmoniğine karşılık gelir ve tekil değeri o
 > harmonikteki kazançla orantılıdır, $\sigma_k \propto G_k$. Sayısal olarak
 > doğruladık: her modun kick-harmoniğini bulup $G_k$ ile karşılaştırınca log-log
-> korelasyon **0.92**, oran $\sigma_k/G_k$ tüm spektrumda yalnız $\sim$1.2–3.4
+> lineer (Pearson) korelasyon **0.98** ($\sigma\approx1.22\,G_k$), oran $\sigma_k/G_k$ tüm spektrumda yalnız $\sim$1.2–3.4
 > arası değişir (bu yavaş değişim, $\sqrt{\beta}$ ve $KL$ ağırlıklarından gelir).
 > Örnek: en iyi mod (σ=28.4) kick-harmoniği $k\!=\!2$ (tune'a yakın, rezonans,
 > $G\!=\!24$); en kötü mod (σ=0.147) kick-harmoniği $k\!=\!24$ (uzak, $G\!=\!0.043$).
@@ -229,7 +229,7 @@ $$
 > gürültüsü de doğrudan rezonans paydasıdır: $1/\sigma_k \propto 1/G_k =
 > |Q_{\rm eff}^2-k^2|/C$. $\chi$ ise bir kaçıklığın hangi banda (hangi $k$'ya)
 > düştüğünü söyler — yani üçü ($\chi$, $G_k$, $\sigma$) tek hikâyenin parçaları.
-> (Makaledeki Şekil 8 bunu görselleştirir: $\sigma_i$ vs $G_k$, korelasyon 0.92,
+> (Makaledeki Şekil 8 bunu görselleştirir: $\sigma_i$ vs $G_k$ lineer, korelasyon 0.98,
 > renk $\chi_i$.)
 
 Şimdi her modu inceleyelim: (i) gürültü büyütmesi $1/\sigma_i$ ve (ii) modun
