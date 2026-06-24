@@ -215,24 +215,38 @@ $$
 \kappa(R)\approx 193 .
 $$
 
-> **SVD ile $G_k$ aynı şeydir — biri kesin, biri analitik.** §4.3'teki kazanç
-> yasası $G_k=C/|Q_{\rm eff}^2-k^2|$ ile buradaki $\sigma_i$ ayrı iki olgu değil:
-> her SVD modu (yaklaşık) bir kick-harmoniğine karşılık gelir ve tekil değeri o
-> harmonikteki kazançla orantılıdır, $\sigma_k \propto G_k$. Sayısal olarak
-> doğruladık: her modun kick-harmoniğini bulup $G_k$ ile karşılaştırınca lineer
-> (Pearson) korelasyon **0.995** ($\sigma\approx1.22\,G_k$), oran $\sigma_k/G_k$ tüm spektrumda yalnız $\sim$1.2–3.4
-> arası değişir (bu yavaş değişim, $\sqrt{\beta}$ ve $KL$ ağırlıklarından gelir).
-> Örnek: en iyi mod (σ=28.4) kick-harmoniği $k\!=\!2$ (tune'a yakın, rezonans,
-> $G\!=\!24$); en kötü mod (σ=0.147) kick-harmoniği $k\!=\!24$ (uzak, $G\!=\!0.043$).
-> Yani: **$G_k$ rezonans iskeletini (neden $k\approx Q$'da güçlü, $k\gg Q$'da
-> zayıf) verir; SVD bunun $\beta/KL$ ağırlıklı kesin spektrumudur.** Geri-çatım
-> gürültüsü de doğrudan rezonans paydasıdır: $1/\sigma_k \propto 1/G_k =
-> |Q_{\rm eff}^2-k^2|/C$. $\chi$ ise bir kaçıklığın hangi banda (hangi $k$'ya)
-> düştüğünü söyler — yani üçü ($\chi$, $G_k$, $\sigma$) tek hikâyenin parçaları.
-> (Makaledeki Şekil 8 bunu iki panelde görselleştirir, yatay eksen kick harmoniği
-> $k$: (a) $\sigma_i$ noktaları teorik $G_k$ eğrisine oturur, korelasyon 1.00;
-> (b) modun simetrisi $\chi_i$ düşük-$k$'de $-1$ (antisimetrik) → yüksek-$k$'de
-> $+1$ (simetrik) geçer.)
+> **SVD spektrumu ile $G_k$ neden benzeşir — ve neden bunu fazla büyütmemek
+> gerekir.** §4.3'teki kazanç yasası $G_k=C/|Q_{\rm eff}^2-k^2|$ ile buradaki
+> $\sigma_i$ arasında çok yakın bir ilişki var; ama bu ilişkinin **kaynağını**
+> doğru anlamak önemli. Halkamız 24 **özdeş** FODO hücresinden oluşuyor, yani $R$
+> matrisi (yaklaşık) **periyodik**. Periyodik bir sistemin doğal modları (singüler
+> vektörleri) her zaman **uzaysal harmoniklerdir** — nitekim sayısal olarak
+> modlarımızın $\gtrsim$%96'sı tek bir harmonikten ibaret. Böylece her modu bir
+> kick-harmoniği $k$ ile etiketleyebiliriz ve kapalı yörüngenin harmonik-$k$ bir
+> kick'e tepkisi Hill denkleminin rezonans paydasıyla ölçeklenir,
+> $\sigma\sim 1/|Q_{\rm eff}^2-k^2|$.
+>
+> **Buradaki tuzak.** Bu yüzden "$\sigma_i$ ile $G_k$ neredeyse kusursuz korele
+> (Pearson $\approx$1)" demek kulağa çarpıcı gelir, ama aslında büyük ölçüde
+> **tautolojiktir:** periyodiklik zaten $\sigma$'yı $k$'nin düzgün bir fonksiyonu
+> yapar, $k$ ile azalan hemen her makul eğri böyle yüksek korelasyon verir.
+> Üstelik bu korelasyonun ayırt edici gücü neredeyse tamamen **tek bir noktada**
+> (yumuşak $k\!\approx\!2$ rezonans tepesinde) toplanır; mod-mod düzeyinde
+> $\sigma/G_k$ oranı $\sqrt{\beta}$ ve $KL$ ağırlıkları yüzünden $\sim$1.2–3.4
+> arası (3 kata kadar) gezer. Tam da bu nedenle bu korelasyonu makalede **ayrı
+> bir figür olarak sunmuyoruz** — gerçek bir keşiften çok, periyodik bir latisin
+> beklenen cebirsel özelliği; üstelik aynı bilgiyi Şekil 4 daha doğrudan veriyor.
+>
+> **Asıl işe yarayan içerik** korelasyon sayısı değil, **mekanizmadır:** simetri
+> neden $\sigma$'yı belirliyor? Hücre içinde aynı yönlü (simetrik) bir kaçıklık,
+> odaklayıcı/odaksızlaştırıcı kuadrupol diziliminin $(-1)^j$ işaret değişimi
+> yüzünden **alternatif** (yüksek-$k$, $k\!\to\!24$) bir kick üretir — betatron
+> tune'undan ($Q\approx2.3$) uzak, dolayısıyla küçük $\sigma$ ve yüksek gürültü.
+> Antisimetrik kaçıklık ise düşük-$k$ (tune'a yakın) bir kick verdiğinden büyük
+> $\sigma$ ile iyi ölçülür. İşte aşağıdaki tablodaki (ve Şekil 4'teki) "simetri
+> arttıkça gürültü artar" eğiminin **nedeni** budur. Kısaca: $G_k$ rezonans
+> iskeletini verir, SVD onun $\beta/KL$-ağırlıklı kesin halini; ama anlatının
+> taşıyıcı kısmı bu mekanizmadır, sayısal korelasyon değil.
 
 Şimdi her modu inceleyelim: (i) gürültü büyütmesi $1/\sigma_i$ ve (ii) modun
 **simetrik içeriği** — yani o modun §4.2'deki anlamda $\chi$ değeri:

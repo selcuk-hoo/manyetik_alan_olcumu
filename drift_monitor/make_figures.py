@@ -316,83 +316,8 @@ def fig6_epsilon_sweep():
 
 
 # --------------------------------------------------------------------------
-# Şekil 8 — SVD spektrumu = G_k'nın kesin gerçekleşmesi (σ_k ∝ G_k)
-# --------------------------------------------------------------------------
-def fig8_svd_gain():
-    """SVD spektrumu = yörünge gain yasasının kendisi (iki panel, ortak x=k).
-
-    Her SVD modunun iki sayısı var: tekil değeri σ_i ve kick-harmoniği k(i).
-    Kick harmoniği (-1)^j çarpanıyla (Nyquist kayması) bulunur — orbit gain
-    kaçıklık desenine değil KICK'e uygulanır. Yatay eksen fiziksel harmonik k:
-
-      (a) σ_i ↔ G_k: tekil değerler, modun k'sindeki rezonans kazancı
-          G_k=C/|Q_eff²−k²|'ya oturur (k≈Q_eff'te tepe, yüksek-k'de bastırma).
-      (b) χ_i ↔ k:   bastırılan yüksek-k uç simetrik (χ>0), iyi ölçülen
-          düşük-k uç antisimetrik (χ<0). Gürültü tabanı / no-go bağlantısı.
-    """
-    print("Şekil 8: SVD spektrumu = gain yasası (σ_i↔G_k, χ_i↔k)")
-    C_GAIN, QEFF2 = 24.8, 5.03
-    R = build_R(CFG, CFG["g1"], "y")
-    U, S, Vt = np.linalg.svd(R)
-    N = len(S)
-    sign = (-1.0) ** np.arange(N)
-
-    def kick_k(v):
-        # DC bin'i (k=0) silmeyin: üniform-antisimetrik mod (v≈(-1)^j·sabit) için
-        # sign*v üniformdur, gerçek kick harmoniği k=0'dır. F[0]'ı sıfırlamak bu modu
-        # yanlışlıkla k=24'e etiketler (sahte aykırı nokta) — bkz. fig8 doğrulaması.
-        F = np.abs(np.fft.rfft(sign * v))
-        return int(np.argmax(F))
-
-    ks = np.array([kick_k(Vt[i]) for i in range(N)])                 # her modun k'si
-    Gk = C_GAIN / np.abs(QEFF2 - ks ** 2.0)                          # modun kazancı
-    chi = np.array([2.0 * sym_frac(Vt[i]) - 1.0 for i in range(N)])  # χ∈[-1,1]
-    corr = np.corrcoef(Gk, S)[0, 1]                                  # lineer Pearson
-    a = float(np.sum(S * Gk) / np.sum(Gk * Gk))                      # σ≈a·G_k ölçeği
-
-    # Teorik eğri yalnız tamsayı k'de tanımlı (fiziksel harmonikler); pol yok
-    # çünkü Q_eff=√5.03≈2.24 hiçbir tamsayıya düşmez.
-    kk = np.arange(0, N // 2 + 1)
-    Gk_line = C_GAIN / np.abs(QEFF2 - kk ** 2.0)
-
-    fig, (axa, axb) = plt.subplots(2, 1, figsize=(COL, 4.2), sharex=True)
-
-    # ---- Panel (a): σ_i ve teorik a·G_k, ortak yatay eksen k --------------
-    axa.plot(kk, a * Gk_line, "--", color="0.4", lw=0.9, zorder=2,
-             label=rf"$a\,G_k,\ a={a:.2f}$")
-    axa.scatter(ks, S, s=16, color="C0", edgecolors="k", linewidths=0.3,
-                zorder=3, label=r"$\sigma_i$ (mod)")
-    axa.set_ylabel(r"tekil değer $\sigma_i$")
-    axa.set_ylim(0, max(S.max(), (a * Gk_line).max()) * 1.05)
-    # LOG ALTERNATİFİ: spektrum ~193× yayılır; bastırılmış kuyruğu görmek için
-    # aşağıdaki iki satırı açın (lineer set_ylim'i kapatın):
-    # axa.set_yscale("log")
-    # axa.set_ylim(S.min() * 0.6, max(S.max(), (a * Gk_line).max()) * 1.6)
-    axa.text(0.97, 0.60, rf"Pearson $={corr:.2f}$", transform=axa.transAxes,
-             fontsize=7, va="top", ha="right")
-    axa.legend(loc="upper right", fontsize=6.5)
-    axa.grid(True, alpha=0.3)
-    _panel_label(axa, "(a)")
-
-    # ---- Panel (b): χ_i, ortak yatay eksen k ------------------------------
-    axb.axhline(0.0, color="gray", lw=0.7, ls=":")
-    axb.scatter(ks, chi, c=chi, cmap="coolwarm", s=16, vmin=-1, vmax=1,
-                edgecolors="k", linewidths=0.3, zorder=3)
-    axb.set_ylim(-1.08, 1.08)
-    axb.set_ylabel(r"simetri $\chi_i$")
-    axb.set_xlabel(r"kick harmoniği $k$")
-    axb.set_xlim(-0.6, N // 2 + 0.6)
-    axb.grid(True, alpha=0.3)
-    _panel_label(axb, "(b)")
-
-    fig.tight_layout()
-    _save(fig, "fig8_svd_gain.png")
-
-
-# --------------------------------------------------------------------------
 FIGS = {1: fig1_svd_spectra, 2: fig2_drift_tracking,
-        3: fig3_betabeat, 4: fig4_permode, 6: fig6_epsilon_sweep,
-        8: fig8_svd_gain}
+        3: fig3_betabeat, 4: fig4_permode, 6: fig6_epsilon_sweep}
 
 
 def main():

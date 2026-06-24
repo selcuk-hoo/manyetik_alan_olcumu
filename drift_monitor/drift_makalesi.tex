@@ -671,34 +671,25 @@ değildir; tablodaki $1/\sigma$ sütunu mod-mod artışı gösterir.) Bu ilişki
 Şekil~\ref{fig:permode}'te açıkça görülür: gürültü duyarlılığı $1/\sigma$
 arttıkça simetrik içerik $\chi_i$ $+1$'e tırmanır.
 
-\paragraph{SVD spektrumu $G_k$'nın kesin gerçekleşmesidir.} Bu $\sigma_i$'ler
-\S4.2'deki kazanç yasasından bağımsız değildir: her SVD modu (yaklaşık) bir
-kick-harmoniğine karşılık gelir ve tekil değeri o harmonikteki kazançla
-orantılıdır, $\sigma_k\propto G_k$. (Sayısal teyit: mod kick-harmoniği ile $G_k$
-arasında lineer (Pearson) korelasyon $0.995$; $\sigma_k/G_k$ oranı tüm spektrumda yalnız
-$\sim$1.2--3.4 --- bu, $\sqrt\beta$ ve $KL$ ağırlığından.) Yani $G_k$ rezonans
-\textbf{iskeletini} ($k\approx Q$'da güçlü, $k\gg Q$'da zayıf), SVD ise onun
-$\beta/KL$-ağırlıklı \textbf{kesin} spektrumunu verir; geri-çatım gürültüsü
-doğrudan rezonans paydasıdır, $1/\sigma_k\propto|Q_{\rm eff}^2-k^2|$. Kısaca
-$\chi$ (hangi bant), $G_k$ (rezonans) ve $\sigma_i$ (kesin spektrum) tek
-hikâyenin parçalarıdır (Şekil~\ref{fig:svdgain}).
-
-\begin{figure}[tb]
-\centering
-\includegraphics[width=\columnwidth]{fig8_svd_gain.png}
-\caption{SVD spektrumunun kazanç yasasıyla birleşmesi; yatay eksen her iki
-panelde de modun fiziksel kick harmoniği $k$. \textbf{(a)} Her SVD modunun tekil
-değeri $\sigma_i$ (noktalar), kendi $k$'sindeki rezonans kazancı
-$G_k=C/|Q_{\rm eff}^2-k^2|$ teorik eğrisine (kesik çizgi, $a=1.22$ ölçeği)
-oturur: $\sigma_i\approx a\,G_k$ (Pearson korelasyon $1.00$). Kazanç $k\approx
-Q_{\rm eff}\approx2.24$'te tepe yapar, yüksek-$k$'de bastırılır. \textbf{(b)}
-Aynı modların simetrisi $\chi_i\in[-1,+1]$: iyi gözlenen düşük-$k$ uç
-antisimetrik ($\chi\!\to\!-1$), bastırılan (gürültü yükselten) yüksek-$k$ uç
-simetrik ($\chi\!\to\!+1$). $G_k$ analitik rezonans iskeleti, $\sigma_i$ ise
-onun $\beta/KL$-ağırlıklı kesin spektrumudur; gürültü tabanı bu bastırılmış
-simetrik uçtan gelir.}
-\label{fig:svdgain}
-\end{figure}
+\paragraph{Bu sıralamanın fiziksel kökeni.} Modların simetrik içeriğinin
+$\sigma$ küçüldükçe artması bir tesadüf değil, latisin periyodikliğinin doğrudan
+sonucudur. Halka 24 özdeş FODO hücresinden oluştuğundan $R$ (yaklaşık)
+periyodiktir; bunun cebirsel sonucu, singüler modlarının uzaysal harmonikler
+olmasıdır (sayısal olarak modların $\gtrsim\!\%96$'sı tek bir harmonikten ibaret).
+Böylece her modu bir kick-harmoniği $k$ ile etiketleyebiliriz. Kapalı yörüngenin
+harmonik-$k$ bir kick'e tepkisi Hill denkleminin rezonans paydasıyla ölçeklenir,
+$\sigma \sim 1/|Q_{\rm eff}^2-k^2|$ (\S4.2'deki kazanç yasası $G_k$ ile aynı
+iskelet): betatron tune'una yakın ($k\approx Q\approx2.3$) kick'ler yükseltilir
+(büyük $\sigma$), uzak ($k\gg Q$) olanlar bastırılır (küçük $\sigma$). Simetri
+buraya şöyle bağlanır: hücre içinde aynı yönlü (simetrik) bir kaçıklık,
+odaklayıcı/odaksızlaştırıcı kuadrupol diziliminin $(-1)^j$ işaret değişimi
+nedeniyle \textbf{alternatif} bir kick (yüksek-$k$, $k\!\to\!24$) üretir ---
+tune'dan uzak, dolayısıyla küçük $\sigma$ ve yüksek gürültü. Antisimetrik
+kaçıklık ise düşük-$k$ (tune'a yakın) bir kick verdiğinden büyük $\sigma$ ile iyi
+ölçülür. Şekil~\ref{fig:permode}'teki monoton tırmanışın mekanizması budur. (Bu
+ölçekleme periyodiklikten gelen yapısal bir özelliktir; mod-mod düzeyinde
+$\sigma/G_k$ oranı, $\sqrt\beta$ ve $KL$ ağırlıkları yüzünden $\sim$1.2--3.4
+arasında değişir, yani kesin bir eşitlik değil, doğru bir iskelettir.)
 
 \begin{table}[tb]
 \centering\small
