@@ -8,8 +8,10 @@ make_figures.py — drift_makalesi.md için tüm şekilleri PRD tek-sütun forma
   Şekil 3: β-beating tarama eğrisi (tracking hatası vs ε_β)              — §3.7
   Şekil 4: Per-mod SVD (mod indeksi → 1/σ ve simetrik güç, çift eksen)   — §4.3
   Şekil 6: ε taraması (‖ΔR⁻¹‖ ∝ 1/ε; κ(ΔR) sabit)                       — §3.2
+  Şekil 9: BPM kazanç hataları (drift_gain_sim.py sarmalanır)            — §3.8
 
 Şekil 5 (iki-katmanlı mimari şeması) ayrı: make_fig5_architecture.py.
+Şekil 7 (teori-izleyici doğrulaması) C++ izleyici gerektirir (uzun sürer).
 
 PRD biçim kuralları (bu betikte uygulanır):
   * Tek-sütun genişlik: 3.375 in (246 pt). Çok-panelli şekiller dikey istiflenir.
@@ -316,8 +318,27 @@ def fig6_epsilon_sweep():
 
 
 # --------------------------------------------------------------------------
+# Şekil 9 — BPM kazanç hataları
+# --------------------------------------------------------------------------
+def fig9_bpm_gain():
+    """BPM kazanç (gain) hatası taraması → fig9_bpm_gain.png.
+
+    Asıl mantık ayrı modülde (drift_gain_sim.py): kazanç hatası analitik $R$ ile
+    çarpımsal model uyumsuzluğu yaratır, sabit ofset iptal olur. Buraya yalnız
+    birleşik üreticiden de çağrılabilsin diye sarmalanmıştır."""
+    print("Şekil 9: BPM kazanç hataları (drift_gain_sim)")
+    import drift_gain_sim
+    cwd = os.getcwd()
+    try:
+        drift_gain_sim.main()        # fig9_bpm_gain.png'i _DIR altına kaydeder
+    finally:
+        os.chdir(cwd)                # drift_gain_sim cwd'yi değiştirir; geri al
+
+
+# --------------------------------------------------------------------------
 FIGS = {1: fig1_svd_spectra, 2: fig2_drift_tracking,
-        3: fig3_betabeat, 4: fig4_permode, 6: fig6_epsilon_sweep}
+        3: fig3_betabeat, 4: fig4_permode, 6: fig6_epsilon_sweep,
+        9: fig9_bpm_gain}
 
 
 def main():
