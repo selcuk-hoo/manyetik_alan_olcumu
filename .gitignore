@@ -94,8 +94,10 @@ get_*.py
 sy_plot.png
 2.pdf
 
-# drift_monitor üretilen figürleri (make_figures.py / make_fig5_architecture.py ile yeniden üretilir)
-drift_monitor/*.png
+# drift_monitor: makale figürleri (fig1–fig9) repoda tutulur; yalnız ikinci-makale
+# (sahte-EDM) figürleri ve geçici çıktılar dışlanır.
+drift_monitor/fig8_fedm_vs_shat.png
+drift_monitor/fig9_fedm_vs_tilt.png
 test4_drift_monitor.png
 
 # Git geçmişinden kurtarılan doğrulanmış keşif scriptleri (konvansiyon: kalıcı repoda tutulmaz;
