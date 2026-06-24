@@ -675,7 +675,7 @@ arttıkça simetrik içerik $\chi_i$ $+1$'e tırmanır.
 \S4.2'deki kazanç yasasından bağımsız değildir: her SVD modu (yaklaşık) bir
 kick-harmoniğine karşılık gelir ve tekil değeri o harmonikteki kazançla
 orantılıdır, $\sigma_k\propto G_k$. (Sayısal teyit: mod kick-harmoniği ile $G_k$
-arasında lineer (Pearson) korelasyon $0.98$; $\sigma_k/G_k$ oranı tüm spektrumda yalnız
+arasında lineer (Pearson) korelasyon $0.995$; $\sigma_k/G_k$ oranı tüm spektrumda yalnız
 $\sim$1.2--3.4 --- bu, $\sqrt\beta$ ve $KL$ ağırlığından.) Yani $G_k$ rezonans
 \textbf{iskeletini} ($k\approx Q$'da güçlü, $k\gg Q$'da zayıf), SVD ise onun
 $\beta/KL$-ağırlıklı \textbf{kesin} spektrumunu verir; geri-çatım gürültüsü
@@ -686,14 +686,17 @@ hikâyenin parçalarıdır (Şekil~\ref{fig:svdgain}).
 \begin{figure}[tb]
 \centering
 \includegraphics[width=\columnwidth]{fig8_svd_gain.png}
-\caption{SVD spektrumunun kazanç yasasıyla birleşmesi: her SVD modunun tekil
-değeri $\sigma_i$, o modun kick-harmoniğindeki kazanç
-$G_k=C/|Q_{\rm eff}^2-k^2|$'ya karşı (log-log). Noktalar $\sigma\propto G_k$
-doğrusunu izler (Pearson korelasyon $0.98$, $\sigma\approx1.22\,G_k$); renk modun simetrisi $\chi_i$.
-Yüksek-$\sigma$ (iyi gözlenen) modlar antisimetrik ($\chi\!\to\!-1$, kick
-tune'a yakın), düşük-$\sigma$ modlar simetrik ($\chi\!\to\!+1$, kick
-$k\!\approx\!24$). $G_k$ analitik rezonans iskeleti, $\sigma_i$ $\beta/KL$-ağırlıklı
-kesin spektrumudur.}
+\caption{SVD spektrumunun kazanç yasasıyla birleşmesi; yatay eksen her iki
+panelde de modun fiziksel kick harmoniği $k$. \textbf{(a)} Her SVD modunun tekil
+değeri $\sigma_i$ (noktalar), kendi $k$'sindeki rezonans kazancı
+$G_k=C/|Q_{\rm eff}^2-k^2|$ teorik eğrisine (kesik çizgi, $a=1.22$ ölçeği)
+oturur: $\sigma_i\approx a\,G_k$ (Pearson korelasyon $1.00$). Kazanç $k\approx
+Q_{\rm eff}\approx2.24$'te tepe yapar, yüksek-$k$'de bastırılır. \textbf{(b)}
+Aynı modların simetrisi $\chi_i\in[-1,+1]$: iyi gözlenen düşük-$k$ uç
+antisimetrik ($\chi\!\to\!-1$), bastırılan (gürültü yükselten) yüksek-$k$ uç
+simetrik ($\chi\!\to\!+1$). $G_k$ analitik rezonans iskeleti, $\sigma_i$ ise
+onun $\beta/KL$-ağırlıklı kesin spektrumudur; gürültü tabanı bu bastırılmış
+simetrik uçtan gelir.}
 \label{fig:svdgain}
 \end{figure}
 
