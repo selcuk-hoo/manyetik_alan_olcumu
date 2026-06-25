@@ -730,10 +730,12 @@ hizalama $\Delta q_0$, BPM ofseti $\mathbf{b}_0$ ve örgü modeli ($\beta,\phi,Q
 dolayısıyla $R$). Bu, hızlandırıcı operasyonunda zaten var olan standart
 prosedürdür.
 
-**Hızlı drift katmanı (sürekli, saniye–dakika).** Bu çalışmanın katkısı:
-$\widehat{\delta q}(t)=R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$. Fizik run'ı boyunca
-sürekli çalışır, veri toplamayı bozmaz, kalibrasyondan beri (antisimetrik)
-hizalama değişimini izler.
+**Hızlı drift katmanı (sürekli, saniye–dakika).**
+$\widehat{\delta q}(t)=R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ — matematiği standart
+SOFB/LOCO ile ortaktır (özgünlük burada değil; §1.4). Fizik run'ı boyunca sürekli
+çalışır, veri toplamayı bozmaz, kalibrasyondan beri **antisimetrik** hizalama
+değişimini izler; ama §4'ün gözlenebilirlik sınırı gereği koherent/simetrik drifti
+göremez.
 
 İki katman tamamlayıcıdır: yavaş katman mutlak referansı ve $R$'yi sağlar,
 hızlı katman o referansa göre değişimi takip eder. §4'ün sınırı gereği, her
@@ -744,27 +746,47 @@ bir gözlemlenebilirden (demet ayrımı / spin) gelmelidir.
 
 ## 6. Tartışma ve Sonuç
 
-Bu çalışmada pEDM AG halkasında kuadrupol hizalama driftini sürekli izlemek
-için kalibrasyon-referans yöntemi önerildi ve gerçekçi BPM hata bütçesi
-altında (50 μm ofset, 1 μm gürültü, 0.2 mrad tilt) 6–7 μm RMS hassasiyetle,
-$\sim\%1$ β-beating'e dayanıklı şekilde çalıştığı sistematik testlerle
-gösterildi. Yöntem iki katmanlı bir mimaride (yavaş LOCO/BBA + hızlı drift)
-operasyonel olarak konumlandırıldı.
+**Asıl sonuç bir gözlenebilirlik sınırıdır, yeni bir yöntem değil.** Kapalı-yörünge
+tabanlı hizalama-drift tanısının — mevcut BPM'lerle, girişimsiz, pasif — yapısal
+bir kör noktası olduğunu gösterdik ve niceledik: tanı response-matrisinin SVD
+alt-uzayları, hangi drift desenlerinin görünür hangilerinin kör olduğunu belirler;
+ve **gerçekçi drift kaynaklarının mekânsal-korelasyon spektrumu bu alt-uzaylara
+projekte edildiğinde, koherent (uzun-korelasyonlu) yer-hareketi tam da kör simetrik
+alt-uzaya düşer** (§4.4). Yani tanı, korelasyonsuz magnet-özel drifti hassasça
+izler (geçerlilik alanı; §3'te 50 μm ofset + %1 β-beating altında 6–7 μm RMS,
+tam parçacık izleyicisiyle doğrulanmış $R$ ile), ama koherent yer-hareketine
+**yapısal olarak kördür** — bu körlük donanım çözünürlüğüyle (daha iyi BPM) değil,
+ancak farklı bir gözlemlenebilirle aşılır.
 
-Yöntemin **gözlenebilirlik sınırı** da nicelendi (§4): per-mod SVD analizi,
-monitörün kör noktasının %96 simetrik içerikli en kötü koşullanmış modlar
-olduğunu gösterir (en kötü modda en iyiye göre $\sim 193$ kat duyarlılık
-dezavantajı). Yani monitör antisimetrik hizalama driftini hassasça izler;
-simetrik drift yöntemin geçerlilik alanı dışındadır ve donanım/veriyle
-kapanmayan yapısal nedenlerle erişimi farklı bir gözlemlenebilir gerektirir.
-Bu kör noktanın belirli bir sistematik bütçe (ör. kaçıklığın ürettiği sahte
-EDM) için önemi makineye bağlı, ayrı bir sorudur ve bu çalışmanın kapsamı
-dışındadır (§4.4).
+**Önceki çalışmalarla dürüst ilişki (bkz. §1.4).** Bu sentezin yapı taşları
+yerleşiktir ve özgün değildir: ofset-iptalli diferansiyel orbit + $R^{-1}$
+rekonstrüksiyon SOFB/LOCO matematiğidir [Safranek 1997; Huang 2022]; response
+matrisinin SVD'si, koşulluluğu ve null-space'i 1990'lardan beri kanoniktir
+[Chung 1993; Mirza 2019; Wegscheider 2023]; mekânsal-frekansın tune ile rezonansı
+ve uzun-dalga (koherent) bastırması analitik olarak Rossbach 1989'da, kazanç yasası
+$G_k\propto 1/|Q^2-k^2|$ ders kitabında [Khan 2017] vardır; ATL yer-hareketi modeli
+[Shiltsev 1995] ve simetrik/antisimetrik FODO mod ayrımı [Tiefenback 1985] de
+bilinmektedir. **Özgün kalıntı:** Rossbach'ın *bozulma-büyüklüğü* sonucunu, drift-
+kaynağı korelasyon spektrumunun tanı matrisinin null-space'ine açık projeksiyonuyla
+bir *tanı-gözlenebilirlik körlüğü* teoremine çevirmek ve bu kör alt-uzayın hassas
+(EDM) halkalardaki sistematik kör noktayla çakıştığını göstermek.
+
+**EDM bağlamı.** Depolama-halkası EDM aramalarında sahte EDM, kaçıklığın
+$dx\cdot dy$ geometrik-faz kanalından gelir [Hacıömeroğlu & Semertzidis 2017;
+Omarov 2022] ve düzeltme-sonrası simetrik artıkla ilişkilidir. Tanının kör alt-uzayı
+tam da bu artıkla çakıştığından, orbit-tabanlı izleme onu bastıramaz; bu, srEDM
+kolaborasyonunun CR demet ayrımı, spin-tabanlı hizalama ve SQUID-BPM'e yönelmesinin
+zaten bilinen gerekçesidir [Omarov 2022; Anastassopoulos 2016]. Çalışmamız bu kör
+noktaya *yörünge tarafından* kesin bir gözlenebilirlik sınırı koyar.
+(İleri yönde açık bir kanal: ayrı bir incelemede [`berry.md`], sahte EDM'nin
+*ölçülen yörüngenin* alan-ağırlıklı bilineer bir fonksiyoneli olarak — inversiyon
+gerektirmeden — öngörülebildiğine dair ön kanıt bulduk; bu, kör alt-uzayı *ileri-
+ölçümle* kısmen geri kazanma ihtimalini açar ama analitik türetme gerektirir.)
 
 Sağlamlık, başlıca lineer-olmayan/model hata kanalları için açıkça test edildi:
 BPM kazanç hataları (Test 9, %2→6.4 μm), kuadrupol tilt'inin yarattığı x–y skew
 kuplajı (Tablo 7, 0.2 mrad'da etkisiz) ve β-beating/focal-uzunluk hataları
-(Test 8). Üçünde de yöntem hedefin altında kalır.
+(Test 8). Üçünde de tanı geçerlilik alanı içinde hedefin altında kalır.
 
 Çalışmanın kalan kısıtları:
 
