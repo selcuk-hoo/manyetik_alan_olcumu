@@ -40,8 +40,8 @@ Bu ikisi bizim bulamadığımız ve residue'müzü en çok tehdit eden makaleler
 
 | Makale | Neyi tehdit ediyor | Link |
 |--------|---------------------|------|
-| **Rossbach 1989**, "Closed-orbit distortions of periodic FODO lattices due to plane ground waves", Particle Accelerators 23, 121 | **C+D**: FODO'da yer-dalgalarının COD'u; uzun dalga (koherent) → küçük orbit, rezonans nN±Q'da. Bizim "koherent→simetrik→kör" sonucumuzun fizik çekirdeği. | CERN inspire |
-| **Wegscheider et al. 2023**, PRAB 26, 032803 | **B**: ORM'den kuadrupol hatası geri-çatımında quasidegeneracy / null-space (düzeltme değil, REKONSTRÜKSİYON gözlenebilirliği) — bizim B iddiamızın doğrudan eşi. | GSI repo |
+| **Rossbach 1989** (OKUNDU), Particle Accel. 23, 121 | **C+D FİZİĞİ onda**: uzun-dalga (koherent) yer-hareketi → küçük COD, rezonans mN±Q. AMA "antisimetrik/null/observability/diagnostic"=0 → *bozulma büyüklüğü*, bizim *tanı-gözlenebilirlik* çerçevesi değil. Verdikt: fizik FULL, çerçeve ince. | `ref_rossbach_groundwaves.md` |
+| **Wegscheider/Vilsmeier 2023** (OKUNDU), PRAB 26, 032803 | **B'ye ADJACENT, tam eş DEĞİL**: Jacobian'ı kuadrupol **gücüne** göre (LOCO optik-fit degeneracy); "misalign"=0 → transvers KAÇIKLIK değil GRADYAN hatası. Bizim B (kaçıklık gözlenebilirlik) zaten PAC1993'le (aynı matris) preempted; Wegscheider felsefeyi pekiştirir ama parametre farklı. | `ref_wegscheider_degeneracy.md` |
 
 Diğer surfacelenen: Tiefenback 1985 (FODO sim/antisim mod), Shiltsev 1995 (ATL),
 Parkhomchuk-Shiltsev-Stupakov 1994 (korelasyon→COD), Khan 2017 (σ_k=Q/π\|Q²−k²\|),
