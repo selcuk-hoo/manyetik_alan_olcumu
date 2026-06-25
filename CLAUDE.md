@@ -21,12 +21,25 @@ yeniden çatımı ile maske kaldırılır.
 
 **Ulaşılan ana sonuç (bkz. `false_edm_harmonic_sinir.md`, `omarov_symmetric_hybrid.md`):**
 Sahte EDM, kuadrupol kaçıklığının **dx·dy geometrik (Berry) faz** kanalından gelir
-ve misalignment ile **kuadratik (σ²)** ölçeklenir. Bu kanalı süren misalignment
-deseni **simetrik alt-uzaydadır** (hücre içi QF/QD aynı yönlü) ve **kapalı yörüngeye
-neredeyse görünmezdir**: simetrik ofset → alternatif (yüksek-k, k≈24) kick →
-rezonant yörünge tepkisi G_k ∝ 1/|Q²−k²| ile bastırılır (Q≈2.7 ≪ 24). Sonuç:
-yörünge-tabanlı yeniden çatım bir gözlenebilirlik tabanına (~1.8×10⁻⁴) çarpar; 6
-farklı metot (R-LS, CLEAN, Bozoki, R⁻¹, TSVD) aynı tabana takılır.
+ve misalignment ile **kuadratik (σ²)** ölçeklenir; mekanizma kapalı yörüngenin
+çarpımıdır, **f ∝ x_CO·y_CO**.
+
+> **Önemli düzeltme (2026-06, `orbit_ileri_olcum.md`):** "Sahte EDM'yi simetrik
+> alt-uzay domine eder" ifadesi **yanıltıcıdır**. Doğru tablo: **ham (düzeltme
+> öncesi) sahte EDM'yi ANTİSİMETRİK (orbit-GÖRÜNÜR) alt-uzay domine eder** (~37×;
+> antisimetrik kaçıklık büyük kapalı yörünge → büyük x_CO·y_CO). Simetrik kısım
+> **düzeltme-SONRASI artık**tır: deneyde kapalı yörünge sıfıra çekilince
+> orbit-görünür (antisimetrik) kısım silinir, geriye orbit-kör simetrik artık kalır.
+
+Bu simetrik artık kapalı yörüngeye neredeyse görünmezdir: simetrik ofset →
+alternatif (yüksek-k, k≈24) kick → rezonant yörünge tepkisi G_k ∝ 1/|Q²−k²| ile
+bastırılır (Q≈2.7 ≪ 24). Sonuç: yörünge-tabanlı **inversiyon** (R⁻¹ ile kaçıklık
+geri-çatımı) bir gözlenebilirlik tabanına (~1.8×10⁻⁴) çarpar; 6 farklı metot
+(R-LS, CLEAN, Bozoki, R⁻¹, TSVD) aynı tabana takılır. **Ama no-go bir *inversiyon*
+sınırıdır**: sahte EDM kapalı yörüngenin fonksiyoneli olduğundan, ölçülen
+yörüngeden **ileri yönde** öngörmek inversiyona girmez ve standart BPM'lerle
+(48 adet, 1 μm gürültü) dominant kısmı güçlü, simetrik artığı kısmen öngörür
+(`orbit_ileri_olcum.md`).
 
 **Açık stratejik soru:** Bu simetrik alt-uzayı **operasyonel olarak basit** bir
 kapalı-yörünge gözlemiyle kurtarmak mümkün mü? (per-quad k-mod ve bilineer yörünge
@@ -73,6 +86,8 @@ tarafındaki kesin sınır teoreminde aranıyor.
 ├── trim_yontemi_pedagojik.md   # Trim yöntemi sıfırdan anlatım (iki kademe)
 ├── cosy_polarimeter.md         # COSY LYSO polarimetre özeti + zaman bütçesi
 ├── omarov_symmetric_hybrid.md  # Omarov PRD 105,032001 özeti + kanal araştırması
+├── orbit_ileri_olcum.md        # İLERİ-ÖLÇÜM: f∝x_CO·y_CO; no-go=inversiyon;
+│                               #   standart BPM SQUID yerine; ham=antisim/artık=sim
 ├── MAKALE_POTANSIYELI.md / PROJE_ANALIZI_VE_ONERILER.md / SIMULASYON_PLANI_HIZALAMA.md
 ├── YAPILACAKLAR.md             # Aktif yapılacaklar
 ├── injection_kick_raporu.md    # Enjeksiyon kick raporu
@@ -200,6 +215,9 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | COSY polarimetre performansı + EDM zaman bütçesi (dS_y/dt~1nrad/s tabanı) | `cosy_polarimeter.md` |
 | Omarov SBA + yükselt-söndür; quad-flip neden simetrik alt-uzayı açmaz | `omarov_symmetric_hybrid.md §5,§9` |
 | Stratejik karar: saf spin-trim'de özgün katkı dar | `omarov_symmetric_hybrid.md §8`, `false_edm_harmonic_sinir.md §15` |
+| **Ham sahte EDM'yi ANTİSİMETRİK (orbit-görünür) domine eder (~37×); sim=düzeltme-sonrası artık** | `orbit_ileri_olcum.md §3-4` |
+| f∝x_CO·y_CO sayısal teyit; ⟨x·y⟩ korele, ∮xdy~0; 48-BPM+1μm dayanıklı | `orbit_ileri_olcum.md §4` |
+| No-go = inversiyon sınırı; ileri-ölçüm onu atlar (sim R²≈0.32, antisim 0.65) | `orbit_ileri_olcum.md §5` |
 | **Drift izleme (ikinci makale)** | |
 | Kalibrasyon-ref drift: 50 μm BPM ofsetine rağmen 6.6 μm RMS; mutlak 197 μm → 29× | `makale-taslagi-2.md §3.4`, `drift_monitor/drift_monitor_sim.py` |
 | Dualite teoremi: iki-ölçüm tam-ofset-iptal sınıfı C'de ΔR⁻¹ tek çözüm; ‖ΔR⁻¹‖~‖R⁻¹‖/ε | `makale-taslagi-2.md §2.4` |
