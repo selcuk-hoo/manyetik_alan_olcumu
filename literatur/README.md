@@ -10,6 +10,7 @@ karşılaştırma için (snippet'ten DEĞİL).
 | `ref_pac1993_2263.md` | Chung, Decker, Evans — Closed Orbit Correction Using SVD of the Response Matrix (temel SVD orbit-düzeltme) | PAC 1993, p.2263 (APS/Argonne) |
 | `ref_fast_bba_ac.md` | Fast beam-based alignment using ac excitations | PRAB 23, 012802 / arXiv:2001.xxxxx |
 | `ref_simultaneous_bba.md` | Simultaneous beam-based alignment measurement for multiple magnets | arXiv:2203.14869 |
+| `ref_allelectric_quad_misplacement.md` | **Hacıömeroğlu & Semertzidis** (yazarın KENDİ 2017 makalesi) — all-electric halkada misplacement→sahte-EDM (ileri hesap, FARKLI makine; izleme/gözlenebilirlik DEĞİL) | arXiv:1709.01208 |
 | `_BIZIM_drift_makalesi_eski_derleme.md` | **BİZİM kendi taslağımız** (reframe öncesi derleme) — rakip DEĞİL | — |
 
 **Eksik (yüklenmedi):** arXiv:2104.05300 "Noninvasively improving the ORM while
