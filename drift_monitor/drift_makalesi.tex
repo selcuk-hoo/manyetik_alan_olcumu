@@ -18,11 +18,10 @@
 % Şekiller bu dizinde
 \graphicspath{{./}}
 
-\title{\bfseries Dondurulmuş-spin proton EDM halkasında kapalı-yörünge
-tabanlı hizalama drift izlemesi: performans ve gözlenebilirlik
-sınırları\thanks{Taslak v0.1 (2026-06-19). \texttt{makale-taslagi-2.md} ve
-\texttt{drift\_monitor/} test sonuçlarından konsolide edilmiştir; başlık
-geçicidir.}}
+\title{\bfseries Mıknatıs hizalama driftinin kapalı yörüngeden online
+izlenmesi: BPM-ofsetine bağışık bir yöntem ve sürücü-deseni gözlenebilirlik
+sınırları\thanks{Taslak v0.2 (2026-06). NIM-A tipi genel demet-tabanlı yöntem
+makalesi; pEDM yalnız motivasyon örneğidir, EDM-çözümü iddiası yoktur.}}
 
 \author{(yazar bilgisi)}
 \date{\today}
@@ -32,32 +31,32 @@ geçicidir.}}
 
 \begin{abstract}
 \noindent
-Proton EDM (pEDM) deneyinin alternating-gradient (AG) versiyonunda, manyetik
-kuadrupol hizalama hataları baskın sistematik kaynağıdır ve spin koherans
-zaman ölçeğinde $\sim 10\,\mu$m seviyesinde kontrol altında tutulmalıdır
-\cite{omarov2022}. Bu çalışmada, bu hizalamayı sürekli izlemek için kalibrasyon
-anına göreli bir \emph{kapalı-yörünge tabanlı online hizalama drift izleme
-yöntemi} öneriyor ve sistematik simülasyon testleriyle hem yeteneklerini hem de
-gözlenebilirlik sınırını niceliyoruz. Yaklaşım, problemi bilinçli olarak yeniden
-tanımlar: amaç
-\emph{mutlak hizalama rekonstrüksiyonu} ($\Delta q = R^{-1}\mathbf{y}$) değil,
-\emph{göreli hizalama kararlılığı izlemesi}dir. Yöntem, kalibrasyon anındaki
-BPM okumasını referans alarak
-$\widehat{\delta q}(t) = R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ ile hizalama
-driftini kestirir; sabit BPM elektronik ofseti zaman farkında iptal olur.
-Gerçekçi hata bütçesinde (50\,$\mu$m RMS ofset, 1\,$\mu$m gürültü) yöntem
-6--7\,$\mu$m RMS hassasiyetle çalışır (mutlak rekonstrüksiyona göre
-$\sim 29\times$ iyileşme) ve LOCO kalitesinde (\%1) $\beta$-beating ile gerçekçi
-quad tilt altında dahi hedefin altında kalır. Analitik tepki matrisini tam
-parçacık (semplektik + spin) izleyicisiyle doğruluyoruz. Yöntemin
-\textbf{gözlenebilirlik sınırını} singüler-değer (SVD) per-mod analiziyle ortaya
-koyuyoruz: monitör, antisimetrik (hücre içi QF/QD zıt yönde) hizalama driftini
-güçlü, simetrik (QF/QD aynı yönde) driftini ise zayıf çözer --- en kötü
-koşullanmış modlar \%96 simetriktir ve en kötü modda en iyiye göre $\sim 193$
-kat gürültü dezavantajına uğrar. Böylece yöntemin kesin tanımlı bir
-\emph{geçerlilik alanı} (antisimetrik drift) ve kesin tanımlı bir \emph{kör
-noktası} (simetrik drift) vardır; ikincisinin belirli bir sistematik bütçe
-(ör.\ sahte EDM) için önemi makineye bağlıdır ve ayrı bir çalışmaya bırakılır.
+Depolama halkalarında mıknatıs hizalaması yer hareketi ve termal etkilerle
+zamanla \emph{kayar}; bu drift demet kararlılığını ve hizalamaya aşırı duyarlı
+uygulamaların (ör.\ depolama-halkası EDM aramaları) sistematik bütçesini bozar.
+Hizalama driftini \emph{çalışma sırasında, girişimsiz, standart BPM'lerle} izleyen
+bir \emph{kapalı-yörünge tabanlı online drift-izleme yöntemi} sunuyor ve
+sistematik simülasyonla hem performansını hem de gözlenebilirlik sınırını
+niceliyoruz. Yöntem problemi bilinçle yeniden tanımlar: amaç \emph{mutlak hizalama
+rekonstrüksiyonu} ($\Delta q = R^{-1}\mathbf{y}$) değil, \emph{göreli hizalama
+kararlılığı izlemesi}dir. Kalibrasyon anındaki BPM okumasını referans alarak
+$\widehat{\delta q}(t) = R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ ile drifti kestirir;
+\textbf{sabit BPM elektronik ofseti zaman farkında iptal olur}. Gerçekçi hata
+bütçesinde (50\,$\mu$m RMS ofset, 1\,$\mu$m gürültü) 6--7\,$\mu$m RMS hassasiyetle
+çalışır (mutlak rekonstrüksiyona göre $\sim 29\times$ iyileşme), LOCO kalitesinde
+(\%1) $\beta$-beating ve gerçekçi quad tilt altında dayanıklıdır; analitik tepki
+matrisi tam parçacık (semplektik + spin) izleyicisiyle doğrulanır. \textbf{Asıl
+katkı gözlenebilirlik sınırıdır:} singüler-değer analizi yöntemin \emph{hangi
+drift desenlerini} çözebildiğini gösterir --- antisimetrik (yüksek mekânsal-frekans,
+korelasyonsuz magnet-özel drifte karşılık gelen) deseni güçlü, simetrik
+(uzun-korelasyonlu, \textbf{koherent yer-hareketine} karşılık gelen) deseni zayıf
+çözer (en kötü 8 mod \%96 simetrik, $\sim 193\times$ gürültü dezavantajı). Gerçekçi
+drift kaynaklarını bu alt-uzaylara projekte ederek yöntemin \emph{geçerlilik
+alanını} (korelasyonsuz/magnet-özel drift) ve \emph{kör noktasını}
+(koherent/yer-hareketi driftı) nicel olarak sınırlandırırız. Böylece yöntem, kesin
+tanımlı kapsamıyla hizalama-drift izleme için ucuz ve girişimsiz bir araçtır;
+aşırı-duyarlı uygulamalarda (pEDM) spin-tabanlı yöntemleri \emph{tamamlar, yerini
+tutmaz}.
 \end{abstract}
 
 % ============================================================

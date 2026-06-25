@@ -1,66 +1,77 @@
-# Dondurulmuş-spin proton EDM halkasında kapalı-yörünge tabanlı hizalama drift izlemesi: performans ve gözlenebilirlik sınırları
+# Mıknatıs hizalama driftinin kapalı yörüngeden online izlenmesi: BPM-ofsetine bağışık bir yöntem ve sürücü-deseni gözlenebilirlik sınırları
 
-> **Durum:** Taslak (v0.1, 2026-06-19). Dil: Türkçe. Bu belge `makale-taslagi-2.md`
-> ve `drift_monitor/` altındaki test sonuçlarından konsolide edilmiştir.
-> Başlık geçicidir.
+> **Durum:** Taslak (v0.2, 2026-06). Dil: Türkçe. NIM-A tipi **genel demet-tabanlı
+> yöntem** makalesi olarak konumlandırıldı: merkezî katkı, online hizalama-drift
+> izleme yöntemi ve onun gözlenebilirlik sınırıdır; pEDM yalnız **motivasyon
+> örneği** (aşırı hizalama-duyarlı uygulama) olarak anılır, makalenin EDM-çözümü
+> iddiası yoktur.
 
 ---
 
 ## Özet
 
-Proton EDM (pEDM) deneyinin alternating-gradient (AG) versiyonunda, manyetik
-kuadrupol hizalama hataları baskın sistematik kaynağıdır ve spin koherans
-zaman ölçeğinde $\sim 10\,\mu\text{m}$ seviyesinde kontrol altında tutulmalıdır
-[Omarov 2022]. Bu çalışmada, bu hizalamayı sürekli izlemek için kalibrasyon
-anına göreli bir **kapalı-yörünge tabanlı online hizalama drift izleme yöntemi**
-öneriyor ve sistematik simülasyon testleriyle hem yeteneklerini hem de
-gözlenebilirlik sınırını niceliyoruz. Yaklaşım, problemi bilinçli olarak yeniden
-tanımlar: amaç **mutlak hizalama rekonstrüksiyonu** ($\Delta q = R^{-1}\mathbf{y}$)
-değil, **göreli hizalama kararlılığı izlemesi**dir. Yöntem, kalibrasyon anındaki
-BPM okumasını referans alarak
-$\widehat{\delta q}(t) = R^{-1}\bigl(\mathbf{y}(t)-\mathbf{y}_0\bigr)$ ile
-hizalama driftini kestirir; sabit BPM elektronik ofseti zaman farkında iptal
-olur. Gerçekçi hata bütçesinde (50 μm RMS ofset, 1 μm gürültü) yöntem 6–7 μm
-RMS hassasiyetle çalışır (mutlak rekonstrüksiyona göre $\sim 29\times$ iyileşme)
-ve LOCO kalitesinde (%1) β-beating ile gerçekçi quad tilt altında dahi hedefin
-altında kalır. Analitik tepki matrisini tam parçacık (semplektik + spin)
-izleyicisiyle doğruluyoruz. Yöntemin **gözlenebilirlik sınırını** singüler-değer
-(SVD) per-mod analiziyle ortaya koyuyoruz: monitör, antisimetrik (hücre içi
-QF/QD zıt yönde) hizalama driftini güçlü, simetrik (QF/QD aynı yönde) driftini
-ise zayıf çözer — en kötü koşullanmış modlar %96 simetriktir ve en kötü modda
-en iyiye göre $\sim 193$ kat gürültü dezavantajına uğrar. Böylece yöntemin kesin
-tanımlı bir **geçerlilik alanı** (antisimetrik drift) ve kesin tanımlı bir
-**kör noktası** (simetrik drift) vardır; ikincisinin belirli bir sistematik
-bütçe (ör. sahte EDM) için önemi makineye bağlıdır ve ayrı bir çalışmaya
-bırakılır.
+Depolama halkalarında mıknatıs hizalaması, yer hareketi ve termal etkilerle zamanla
+**kayar**; bu drift, demet kararlılığını ve özellikle hizalamaya aşırı duyarlı
+uygulamaların (ör. depolama-halkası EDM aramaları) sistematik bütçesini bozar.
+Bu çalışmada hizalama driftini **çalışma sırasında, girişimsiz, standart BPM'lerle**
+izleyen bir **kapalı-yörünge tabanlı online drift-izleme yöntemi** sunuyor ve
+sistematik simülasyonla hem performansını hem de **gözlenebilirlik sınırını**
+niceliyoruz. Yöntem problemi bilinçle yeniden tanımlar: amaç **mutlak hizalama
+rekonstrüksiyonu** ($\Delta q = R^{-1}\mathbf{y}$) değil, **göreli hizalama
+kararlılığı izlemesi**dir. Kalibrasyon anındaki BPM okumasını referans alarak
+$\widehat{\delta q}(t) = R^{-1}\bigl(\mathbf{y}(t)-\mathbf{y}_0\bigr)$ ile drifti
+kestirir; **sabit BPM elektronik ofseti zaman farkında iptal olur** (yöntemin
+ofset-bağışıklığı buradan gelir). Gerçekçi hata bütçesinde (50 μm RMS ofset,
+1 μm gürültü) 6–7 μm RMS hassasiyetle çalışır (mutlak rekonstrüksiyona göre
+$\sim 29\times$ iyileşme), LOCO kalitesinde (%1) β-beating ve gerçekçi quad tilt
+altında dahi dayanıklıdır; analitik tepki matrisi tam parçacık (semplektik + spin)
+izleyicisiyle doğrulanır. **Asıl katkı gözlenebilirlik sınırıdır:** singüler-değer
+analizi, yöntemin **hangi drift desenlerini** çözebildiğini gösterir — antisimetrik
+(hücre içi QF/QD zıt yönde; yüksek mekânsal-frekans, korelasyonsuz magnet-özel
+drifte karşılık gelen) deseni güçlü, simetrik (QF/QD aynı yönde; uzun-korelasyonlu,
+**koherent yer-hareketine** karşılık gelen) deseni ise zayıf çözer (en kötü 8 mod
+%96 simetrik, $\sim 193\times$ gürültü dezavantajı). Gerçekçi drift kaynaklarını bu
+alt-uzaylara projekte ederek yöntemin **geçerlilik alanını** (korelasyonsuz/
+magnet-özel drift) ve **kör noktasını** (koherent/yer-hareketi driftı) nicel olarak
+sınırlandırırız. Böylece yöntem, kesin tanımlı kapsamıyla, hizalama-drift izleme
+için ucuz ve girişimsiz bir araçtır; aşırı-duyarlı uygulamalarda (pEDM) spin-tabanlı
+yöntemleri **tamamlar, onların yerini tutmaz**.
 
 ---
 
 ## 1. Giriş
 
-### 1.1 Bağlam ve sistematik önceliği
+### 1.1 Bağlam: hizalama drifti ve mevcut araçlar
 
-Proton EDM deneyinin ilk önerileri tamamen elektrostatik, zayıf-odaklamalı
-halka tasarımına dayanıyordu; baskın sistematik ortalama dikey manyetik
-alandı. Demet dinamiğini ve kararlılığı iyileştirmek için sonraki nesil
-simetrik-hibrit tasarım, manyetik kuadrupollerle **alternating-gradient
-(FODO)** odaklamaya geçti [Omarov 2022]. Bu geçişle sistematik öncelikler de
-değişti: baskın sistematik artık **kuadrupol hizalama hatalarıdır**.
+Depolama halkalarında mıknatıs konumları sabit değildir: yer hareketi (ATL
+yasası), termal döngüler ve mekanik oturma, hizalamayı saatler–günler ölçeğinde
+**kaydırır**. Bu drift demet kararlılığını bozar ve hizalamaya duyarlı her
+uygulamada sistematik bütçeye girer. Hizalama/optik hatalarını kapalı yörüngeden
+çıkarmak olgun bir alandır (LOCO, orbit-response-matrix analizi, beam-based
+alignment, yavaş orbit geri-beslemesi). Bu çalışmanın hedeflediği boşluk dar ama
+pratik: **çalışma sırasında, girişimsiz, BPM ofsetlerine bağışık biçimde hizalama
+*driftini* izlemek** — mutlak hatayı çözmek değil, kalibrasyon-anına göre
+değişimi takip etmek. Mutlak rekonstrüksiyonun temel engeli, BPM elektronik
+ofsetlerinin ($\sim 100\,\mu$m) ölçülmek istenen hizalama sinyaliyle aynı
+büyüklükte olmasıdır; zaman-farkı alan bir drift ölçümü bu ofseti yapısal olarak
+iptal eder.
 
-Hizalanmamış bir kuadrupol, üzerinden geçen demete net bir kuvvet uygular;
-bu kuvvetin halka boyunca uygun bileşeni EDM sinyalini taklit eden sahte bir
-dikey spin presesyonu üretir. Omarov vd. [Omarov 2022], manyetik-quad'lı pEDM
-tasarımında bu sahte alanın sistematik bütçesini ayrıntılı türetmiş ve hedef
-hassasiyeti ($d_p < 10^{-29}\,e\cdot\text{cm}$, eşdeğer $dS_y/dt < 1$ nrad/s)
-korumak için hizalama hatalarının spin koherans zaman ölçeğinde **10 μm RMS
-seviyesinde bilinmesi/kontrol edilmesi** gerektiğini göstermiştir. Bu sayı,
-bu çalışmanın hedef hassasiyetini doğrudan belirler.
+**Motivasyon örneği — pEDM.** Yöntemi, hizalama gereksinimi alışılmadık ölçüde
+sıkı olan bir uygulamayla somutlaştırıyoruz. Proton EDM deneyinin simetrik-hibrit
+tasarımı, demet dinamiğini iyileştirmek için manyetik kuadrupollerle
+**alternating-gradient (FODO)** odaklamaya geçmiştir [Omarov 2022]; bu geçişle
+baskın sistematik **kuadrupol hizalama hatalarıdır**. Hizalanmamış bir kuadrupol
+demete net kuvvet uygular ve halka boyunca uygun bileşeni EDM sinyalini taklit
+eden sahte dikey spin presesyonu üretir. Omarov vd. [Omarov 2022] bu sahte alanın
+bütçesini türetmiş ve hedef hassasiyeti ($d_p < 10^{-29}\,e\cdot\text{cm}$,
+eşdeğer $dS_y/dt < 1$ nrad/s) korumak için hizalamanın spin-koherans ölçeğinde
+**$\sim$10 μm seviyesinde bilinmesi/kontrol edilmesi** gerektiğini göstermiştir —
+bu, yöntemimiz için zorlu bir hedef hassasiyet sağlar. (Yöntemin pEDM
+sistematiğini *çözdüğünü* iddia etmiyoruz; §4'te göstereceğimiz gibi geçerlilik
+alanı sınırlıdır ve spin-tabanlı yöntemleri tamamlar — bkz. §4.4.)
 
 Halkada $2\times 24 = 48$ manyetik kuadrupol vardır; her biri yatay ($dx$) ve
-dikey ($dy$) eksende bağımsız kayabilir. Ölçüm aracı 48 BPM çiftidir. Temel
-zorluk şudur: BPM elektronik ofsetleri ($\sim 100\,\mu$m) ölçülmek istenen
-hizalama sinyaliyle ($\sim 10\,\mu$m) **aynı büyüklüktedir**; mutlak bir
-kapalı-yörünge ölçümü bu ofsete boğulur.
+dikey ($dy$) eksende bağımsız kayabilir. Ölçüm aracı 48 BPM çiftidir.
 
 ### 1.2 Alanın benimsediği hizalama stratejisi
 
@@ -609,7 +620,43 @@ büyük $\sigma$ ile iyi ölçülür. Şekil 4'teki monoton tırmanışın mekan
 $\sigma/G_k$ oranı $\sqrt\beta$ ve $KL$ ağırlıkları yüzünden $\sim$1.2–3.4
 arasında değişir — kesin bir eşitlik değil, doğru bir iskelettir.)
 
-### 4.4 Kör noktanın anlamı ve sistematik bütçeyle ilişkisi (ileri bakış)
+### 4.4 Gerçek drift kaynakları hangi alt-uzaya düşer?
+
+§4.1–4.3 gözlenebilirliği soyut kaçıklık desenleri (simetrik/antisimetrik)
+cinsinden verir. Operasyonel soru şudur: **gerçek drift kaynakları bu
+alt-uzaylara nasıl projekte olur?** Bir FODO hücresindeki QF ve QD fiziksel
+komşudur; bir drift kaynağı bu ikisini **aynı yönde** kaydırırsa simetrik
+(kör), **zıt yönde** kaydırırsa antisimetrik (görünür) içerik üretir. Mekânsal
+korelasyon uzunluğunu ($L$, quad-aralığı biriminde) tarayarak rastgele drift
+alanlarının simetrik güç payını ölçtük:
+
+| Korelasyon uzunluğu $L$ | Simetrik (kör) güç |
+|------|------|
+| 0 (korelasyonsuz) | %51 (50/50) |
+| 1 quad | %89 |
+| 2 quad | %97 |
+| ≥4 quad | ~%100 |
+
+Sonuç keskin: **bir quad-aralığından uzun her mekânsal korelasyon, drifti ezici
+biçimde simetrik (kör) yapar.** Bunun fiziksel okuması:
+
+- **Koherent yer-hareketi / global termal** (korelasyon uzunluğu $\gg$ hücre):
+  komşu mıknatısları birlikte kaydırır → **simetrik → monitöre büyük ölçüde
+  görünmez.**
+- **Magnet-özel korelasyonsuz drift** (güç kaynağı, mesnet, soğutma; ayrıca QF
+  ve QD'nin farklı mıknatıs tipleri olması): quad-quad bağımsız → **antisimetrik
+  içerik → görünür.**
+
+Dolayısıyla yöntemin etkin kapsamı **drift kaynağı karışımına** bağlıdır:
+korelasyonsuz/magnet-özel drifti izler, koherent yer-hareketine kördür. (Not:
+sahte-EDM açısından görünür antisimetrik kısım birim başına daha çok katkı
+verir; ancak rutin orbit düzeltmesi açıkken antisimetrik drift zaten düzelticiler
+tarafından telafi edilir ve kalan sahte-EDM driftini kör simetrik kısım sürer —
+bu ayrım §4.5 ve ayrı çalışmaya bırakılır.) Bu, yöntemin **geçerlilik alanını**
+dürüstçe sınırlar: bir tesis, drift kaynağı spektrumunu bilerek yöntemin o
+ortamda ne kadar işe yarayacağını öngörebilir.
+
+### 4.5 Kör noktanın anlamı ve sistematik bütçeyle ilişkisi (ileri bakış)
 
 §4.1–4.3'ün sonucu **yöntem düzeyinde** kesin bir ifadedir: kapalı-yörünge
 drift monitörü antisimetrik hizalama driftini güçlü, simetrik driftini ise
