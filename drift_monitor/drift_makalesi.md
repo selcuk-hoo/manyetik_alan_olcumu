@@ -1,41 +1,46 @@
-# Mıknatıs hizalama driftinin kapalı yörüngeden online izlenmesi: BPM-ofsetine bağışık bir yöntem ve sürücü-deseni gözlenebilirlik sınırları
+# Kapalı-yörünge tabanlı hizalama-drift tanısının gözlenebilirlik sınırı: koherent yer-hareketine yapısal körlük ve hassas (EDM) halkalardaki kör noktayla bağı
 
-> **Durum:** Taslak (v0.2, 2026-06). Dil: Türkçe. NIM-A tipi **genel demet-tabanlı
-> yöntem** makalesi olarak konumlandırıldı: merkezî katkı, online hizalama-drift
-> izleme yöntemi ve onun gözlenebilirlik sınırıdır; pEDM yalnız **motivasyon
-> örneği** (aşırı hizalama-duyarlı uygulama) olarak anılır, makalenin EDM-çözümü
-> iddiası yoktur.
+> **Durum:** Taslak (v0.3, 2026-06). Dil: Türkçe. **Literatür-bilgili dürüst
+> konumlandırma:** Bu bir "yeni yöntem/algoritma" makalesi DEĞİLDİR — kullanılan
+> matematik (ofset-iptalli diferansiyel orbit = SOFB; R⁻¹ ile rekonstrüksiyon =
+> LOCO; SVD null-space = Chung 1993; koherent yer-hareketi → küçük COD = Rossbach
+> 1989; ATL = Shiltsev; EDM sistematiği = Omarov, Hacıömeroğlu & Semertzidis)
+> yerleşik prior-art'tır. **Özgün katkı bir *sentez/negatif-sonuç*tur:** bilinen
+> yer-dalgası bastırma fiziğini, tanı *response*-matrisinin SVD null-space'ine
+> açık projeksiyonla bir **yapısal gözlenebilirlik körlüğü** ifadesine çevirmek
+> ve bu kör alt-uzayın **EDM-ilgili simetrik artıkla çakıştığını** göstermek.
+> NIM-A tipi odaklı gözlenebilirlik-sınırı/negatif-sonuç makalesi hedeflenir.
 
 ---
 
 ## Özet
 
-Depolama halkalarında mıknatıs hizalaması, yer hareketi ve termal etkilerle zamanla
-**kayar**; bu drift, demet kararlılığını ve özellikle hizalamaya aşırı duyarlı
-uygulamaların (ör. depolama-halkası EDM aramaları) sistematik bütçesini bozar.
-Bu çalışmada hizalama driftini **çalışma sırasında, girişimsiz, standart BPM'lerle**
-izleyen bir **kapalı-yörünge tabanlı online drift-izleme yöntemi** sunuyor ve
-sistematik simülasyonla hem performansını hem de **gözlenebilirlik sınırını**
-niceliyoruz. Yöntem problemi bilinçle yeniden tanımlar: amaç **mutlak hizalama
-rekonstrüksiyonu** ($\Delta q = R^{-1}\mathbf{y}$) değil, **göreli hizalama
-kararlılığı izlemesi**dir. Kalibrasyon anındaki BPM okumasını referans alarak
-$\widehat{\delta q}(t) = R^{-1}\bigl(\mathbf{y}(t)-\mathbf{y}_0\bigr)$ ile drifti
-kestirir; **sabit BPM elektronik ofseti zaman farkında iptal olur** (yöntemin
-ofset-bağışıklığı buradan gelir). Gerçekçi hata bütçesinde (50 μm RMS ofset,
-1 μm gürültü) 6–7 μm RMS hassasiyetle çalışır (mutlak rekonstrüksiyona göre
-$\sim 29\times$ iyileşme), LOCO kalitesinde (%1) β-beating ve gerçekçi quad tilt
-altında dahi dayanıklıdır; analitik tepki matrisi tam parçacık (semplektik + spin)
-izleyicisiyle doğrulanır. **Asıl katkı gözlenebilirlik sınırıdır:** singüler-değer
-analizi, yöntemin **hangi drift desenlerini** çözebildiğini gösterir — antisimetrik
-(hücre içi QF/QD zıt yönde; yüksek mekânsal-frekans, korelasyonsuz magnet-özel
-drifte karşılık gelen) deseni güçlü, simetrik (QF/QD aynı yönde; uzun-korelasyonlu,
-**koherent yer-hareketine** karşılık gelen) deseni ise zayıf çözer (en kötü 8 mod
-%96 simetrik, $\sim 193\times$ gürültü dezavantajı). Gerçekçi drift kaynaklarını bu
-alt-uzaylara projekte ederek yöntemin **geçerlilik alanını** (korelasyonsuz/
-magnet-özel drift) ve **kör noktasını** (koherent/yer-hareketi driftı) nicel olarak
-sınırlandırırız. Böylece yöntem, kesin tanımlı kapsamıyla, hizalama-drift izleme
-için ucuz ve girişimsiz bir araçtır; aşırı-duyarlı uygulamalarda (pEDM) spin-tabanlı
-yöntemleri **tamamlar, onların yerini tutmaz**.
+Depolama halkalarında mıknatıs hizalaması yer hareketi ve termal etkilerle zamanla
+**kayar**; bu drifti mevcut BPM'lerle, girişimsiz, pasif izlemek doğal ve ucuz bir
+fikirdir. Bu çalışmada böyle bir kapalı-yörünge tabanlı drift tanısının **temel bir
+yapısal gözlenebilirlik sınırı** taşıdığını gösterir ve niceliyoruz. Tanı aracı,
+kalibrasyon-anı yörüngesine göre fark alıp $\widehat{\delta q}(t) =
+R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$ ile drifti kestirir; sabit BPM ofseti zaman
+farkında iptal olur (bu matematik standart yavaş-orbit-geribeslemesi/LOCO ile
+ortaktır — özgünlük burada değil). **Asıl sonuç gözlenebilirlik sınırıdır:**
+response matrisinin singüler-değer ayrışımı, hangi *drift desenlerinin* görünür
+hangilerinin **kör** olduğunu belirler. Bir FODO hücresindeki zıt-gradyanlı quad
+çiftinin **simetrik** (aynı yön) yer değişimi alternatif (yüksek mekânsal-frekans)
+kick üretir; bu da rezonant kazanç yasası $G_k\propto 1/|Q^2-k^2|$ ile bastırılarak
+neredeyse sıfır kapalı-yörünge verir (en kötü modda $\sim 193\times$ gürültü
+dezavantajı). **Özgün adım:** gerçekçi drift kaynaklarının mekânsal-korelasyon
+spektrumunu (ATL yer-hareketi) bu SVD alt-uzaylarına projekte ederiz ve gösteririz
+ki **koherent (uzun-korelasyonlu) yer-hareketi tam da kör simetrik alt-uzaya düşer**
+— komşu mıknatısları birlikte kaydırdığından. Böylece kapalı-yörünge tanısı, bedava
+ve girişimsiz olmasına karşın, **koherent drifte yapısal olarak kördür** (yalnız
+korelasyonsuz, magnet-özel drifti görür). Bu kör nokta, hassas halkalarda — özellikle
+depolama-halkası EDM aramalarında, sahte EDM'yi süren $dx\cdot dy$ geometrik-faz
+sistematiğiyle ilişkili simetrik artıkla — çakışır; dolayısıyla orbit-tabanlı tanı
+o artığı bastıramaz ve spin-tabanlı yöntemleri (CR demet ayrımı, SBA) gerektirir.
+Sonuç, yer-dalgası bastırma fiziğinin (Rossbach 1989) ve SVD null-space'in
+(Chung 1993) bilinen sonuçlarını, **bir tanı-gözlenebilirlik teoremine** ve onun
+EDM kör-noktası sonucuna sentezler — yeni bir matematik aracı değil, yaygın bir
+yöntem-sınıfının fiziksel limitinin açık ifadesidir.
 
 ---
 
@@ -94,27 +99,61 @@ hizalama teşhisinin yerine koymuyoruz; onun sürekli bir hizalama-drift izleyic
 olarak hizmet edebileceği **gözlenebilir alt-uzayı** ve bu alt-uzayın sınırını
 niceliyoruz.
 
-### 1.3 Çalışmanın katkısı
+### 1.3 Çalışmanın katkısı (ve ne olmadığı)
 
-1. **Yöntem ve doğrulama.** Kalibrasyon-referanslı drift modu
-   $\widehat{\delta q}(t)=R^{-1}(\mathbf{y}(t)-\mathbf{y}_0)$, sabit BPM
-   ofsetini yapısal olarak iptal eder ve iyi-koşullu $R$ ($\kappa\approx 193$)
-   kullanır; gerçekçi hata bütçesinde 6–7 μm RMS sağlar (§3). Kullanılan
-   analitik $R$, tam parçacık izleyicisiyle doğrulanır (§2.2).
-2. **Sağlamlık.** Yöntem; BPM ofsetine, β-beating'e (gerçek gradyan
-   hatasıyla) ve gerçekçi quad tilt'in yarattığı x–y kuplajına karşı sağlamdır
-   (§3).
-3. **Yapısal arka plan (destekleyici).** İki-ölçümlü, tam-ofset-iptal eden
-   lineer estimatör sınıfı için bir tekillik önermesi verilir
-   ($\|\Delta R^{-1}\|\sim\|R^{-1}\|/\varepsilon$); bu, "iki gradient farkıyla
-   ofseti iptal et" gibi bariz alternatiflerin neden yapısal olarak
-   kötü-koşullu olduğunu, drift modunun (iki *zaman*) ise neden bu sınırın
-   dışında kaldığını açıklar (§2.4).
-4. **Gözlenebilirlik karakterizasyonu.** Per-mod SVD analiziyle, monitörün
-   *hangi* hizalama desenlerini iyi/kötü çözdüğü nicelenir: antisimetrik drift
-   güçlü, simetrik drift zayıf gözlenir (§4). Bu, yöntemin geçerlilik alanını
-   ve kör noktasını tanımlar; kör noktanın belirli bir sistematik bütçe için
-   önemi (ör. sahte EDM) makineye bağlı ayrı bir sorudur.
+Açıkça belirtelim: bu çalışma **yeni bir ölçüm yöntemi, yeni bir orbit-düzeltme
+algoritması ya da yeni bir BPM önermiyor.** Kullandığı araçlar yerleşiktir (§1.4).
+Katkı bir **gözlenebilirlik-sınırı sentezi**dir:
+
+1. **Asıl sonuç — yapısal körlük teoremi.** Gerçekçi drift kaynaklarının
+   mekânsal-korelasyon spektrumunu, kapalı-yörünge tanı response-matrisinin SVD
+   alt-uzaylarına projekte ederiz (§4.4). Sonuç: **koherent (uzun-korelasyonlu)
+   yer-hareketi, tam da orbit-kör simetrik alt-uzaya düşer** — komşu mıknatısları
+   birlikte kaydırdığı için. Yani kapalı-yörünge tanısı, bedava/girişimsiz
+   olmasına karşın koherent drifte **yapısal olarak kördür**; yalnız korelasyonsuz
+   magnet-özel drifti görür.
+2. **EDM kör-noktası bağı.** Bu kör alt-uzay, depolama-halkası EDM aramalarında
+   sahte EDM'yi süren simetrik artıkla çakışır; dolayısıyla orbit-tanı o artığı
+   bastıramaz, spin-tabanlı yöntemleri (CR ayrımı, SBA) **tamamlar, yerini tutmaz**.
+3. **Nicel karakterizasyon (destekleyici).** Yöntemin geçerlilik alanı
+   (antisimetrik/korelasyonsuz drift, 6–7 μm RMS) ve kör noktası (simetrik/koherent,
+   $\sim 193\times$ gürültü) sistematik simülasyonla ve tam parçacık+spin
+   izleyicisiyle doğrulanmış analitik $R$ ile nicelenir (§2–§3).
+
+Yani özgünlük yeni *matematikte* değil; **bilinen yer-dalgası bastırma fiziğini
+(Rossbach 1989) ve SVD null-space'i (Chung 1993) bir *tanı-gözlenebilirlik körlüğü*
+ifadesine sentezleyip EDM kör-noktasına bağlamakta**dır.
+
+### 1.4 Önceki çalışmalarla ilişki (dürüst konumlandırma)
+
+Bu çalışmanın yapı taşları yerleşik literatürdür; katkı onların **sentezi ve
+yeni bir gözlenebilirlik-diline aktarımı**dır. Açıkça:
+
+- **Ofset-iptalli diferansiyel orbit + R⁻¹ rekonstrüksiyon:** yavaş-orbit
+  geribeslemesi (SOFB) ve LOCO'nun [Safranek 1997] standart matematiği; mıknatıs
+  hatasını kapalı yörüngeden pasif/ML ile çıkarma da güncel [Huang 2022; Xu 2025].
+  Bizim yeniden-tanımımız (mutlak değil *drift*) bir çerçeveleme farkıdır.
+- **Response-matrisinin SVD'si, koşulluluk ve null-space:** Chung, Decker & Evans
+  1993 (orbit düzeltme bağlamında); Mirza vd. 2019 (simetrik/circulant ORM);
+  Wegscheider/Vilsmeier vd. 2023 (ORM ters-modellemede degeneracy — quadrupol
+  *gücü* için). Kaçıklık→orbit matrisi, corrector→orbit matrisiyle yapısal olarak
+  aynıdır; dolayısıyla SVD koşulluluk/null-space **analizi özgün değildir.**
+- **Mekânsal-frekans ↔ tune rezonansı ve uzun-dalga bastırması:** Rossbach 1989,
+  FODO'da yer-dalgalarının COD'unu analitik hesaplar; uzun dalga (koherent) →
+  küçük COD, rezonans mN±Q. Kazanç yasası $G_k\propto 1/|Q^2-k^2|$ ders kitabı /
+  [Khan 2017]. Simetrik/antisimetrik mod ayrımı FODO'da daha önce (demet zarfı
+  için) [Tiefenback 1985]. Yani **bu fizik bilinmektedir.**
+- **Yer-hareketi modeli (ATL):** Shiltsev 1995; Parkhomchuk vd. 1994.
+- **EDM sistematiği:** sahte EDM ∝ $dx\cdot dy$ geometrik faz ve simetrik kaçıklığın
+  rolü [Hacıömeroğlu & Semertzidis 2017]; simetrik-hibrit tasarım, CR ayrımı,
+  SBA, SQUID-BPM [Omarov vd. 2022]. **EDM bağlantısı da kolaborasyonun mevcut
+  işidir.**
+
+**Özgün kalıntı (residue):** Rossbach'ın *bozulma-büyüklüğü* sonucu, açıkça bir
+*tanı gözlenebilirliği* ifadesine çevrilmemiştir; kimse drift-kaynağı korelasyon
+spektrumunu tanı matrisinin **null-space'ine projekte edip** "koherent drift
+yapısal olarak ölçülemez" teoremini kurmamış, ne de bunu EDM kör-noktasıyla
+açıkça eşlememiştir. Katkımız bu sentez ve negatif-sonuç ifadesidir.
 
 ---
 
@@ -765,7 +804,39 @@ kuplajı (Tablo 7, 0.2 mrad'da etkisiz) ve β-beating/focal-uzunluk hataları
    optics using orbit response measurements," *Nucl. Instrum. Meth. A* **388**,
    27 (1997).
    doi:[10.1016/S0168-9002(97)00309-4](https://doi.org/10.1016/S0168-9002(97)00309-4).
-   [LOCO]
+   [LOCO; parametre null-space]
+5. **[chung1993]** Y. Chung, G. Decker, K. Evans Jr., "Closed orbit correction
+   using singular value decomposition of the response matrix," *Proc. PAC 1993*,
+   p. 2263. [SVD orbit-düzeltme; mode-space, decoupled/gözlenemez modlar]
+6. **[mirza2019]** S. H. Mirza, R. Singh, H. Klingbeil, P. Forck, "Closed orbit
+   correction at synchrotrons for symmetric and near-symmetric lattices,"
+   *Phys. Rev. Accel. Beams* **22**, 072804 (2019). arXiv:1902.08683.
+   [circulant ORM, DFT/Fourier mode-space]
+7. **[wegscheider2023]** D. Vilsmeier, R. Singh, M. Bai, "Inverse modeling of
+   circular lattices via orbit response measurements in the presence of
+   degeneracy," *Phys. Rev. Accel. Beams* **26**, 032803 (2023).
+   [ORM ters-modelleme degeneracy/null-space — quadrupol gücü]
+8. **[rossbach1989]** J. Rossbach, "Closed-orbit distortions of periodic FODO
+   lattices due to plane ground waves," *Particle Accelerators* **23**, 121
+   (1989). [yer-dalgası → COD; uzun dalga bastırma, rezonans mN±Q]
+9. **[shiltsev1995]** V. Shiltsev, "Space-time ground diffusion: the ATL law for
+   accelerators," *Proc. IWAA 1995* / SSCL-Preprint-470. [ATL yasası]
+10. **[parkhomchuk1994]** V. Parkhomchuk, V. Shiltsev, G. Stupakov, "Slow ground
+    motion and operation of large colliders," *Phys. Rev. E* **49**, 3980 (1994).
+    [korelasyon → COD; tam-korele hareket sıfır bozulma]
+11. **[khan2017]** S. A. Khan vd., harmonik/DFT kapalı-yörünge analizi (SIS18),
+    $\sigma_k = Q/(\pi|Q^2-k^2|)$ kazanç yasası. [gain yasası]
+12. **[tiefenback1985]** M. G. Tiefenback, FODO örgüsünde simetrik/antisimetrik
+    mod ayrışımı (demet zarfı), LBL preprint (1985).
+13. **[huang2022]** X. Huang vd., "Simultaneous beam-based alignment measurement
+    for multiple magnets," arXiv:2203.14869 (2022). [modülasyonsuz çoklu-quad BBA]
+14. **[haciomeroglu2017]** S. Hacıömeroğlu, Y. K. Semertzidis, "Systematic errors
+    related to quadrupole misplacement in an all-electric storage ring for proton
+    EDM experiment," arXiv:1709.01208 (2017). [sahte EDM ∝ dx·dy; simetrik kaçıklık]
+
+> **Kaynak notu:** Tam künyeler/sayfa numaraları yayın öncesi doğrulanacak;
+> [khan2017], [tiefenback1985] deep-research ile bulundu, birincil kaynaktan
+> teyit edilmeli. İlgili PDF tam metinleri `literatur/` altında.
 
 ---
 
