@@ -21,6 +21,13 @@ karşılaştırma için (snippet'ten DEĞİL).
 | Mirza (circulant) | **HAYIR** | Orbit *düzeltme* (BPM↔corrector); misalignment gözlenebilirliği/drift/kör nokta yok (terim sayıları 0). Tek örtüşme: response-matrix circulant gözlemi (= eski fig8, zaten kaldırıldı). |
 | 2104.05300 (sürekli ORM) | **HAYIR** | Dither ile *corrector↔orbit* ORM'sini online günceller (düzeltme modeli); misalignment/alignment/drift/BPM-ofset/EDM = 0. "Sürekli" = matris-tahmini, drift izleme değil. |
 | 1709.01208 | rakip değil | Yazarın KENDİ all-electric ileri-sistematik makalesi. |
-| PAC1993, BBA'lar | (okunacak) | SVD-düzeltme temeli / aktif per-quad BBA. |
+| PAC1993 (SVD orbit corr.) | **KISMEN** | SVD-gözlenebilirlik TEMELİNİ kurar (mode-space, κ, decoupled/gözlenemez modlar, harmonik modlar ≈ G_k, periyodiklik). Bizim analitik çekirdeğimiz 1993'te var → özgün değil. AMA drift-kaynağı/EDM/ofset-iptali yok. |
+| BBA'lar (fast-ac, simultaneous) | (okunacak) | aktif per-quad BBA. |
+
+**Özgünlük residue'sü (Mirza+PAC1993+2104.05300 sonrası):** SVD-gözlenebilirlik
+*makinesi* özgün değil (PAC1993). Kalan tek savunulabilir çekirdek: o makinenin
+**fiziksel drift kaynağına + sahte-EDM alt-uzayına** uygulanması — koherent
+yer-hareketinin yapısal körlüğü + ofset-iptalli drift izleme. BBA + EDM
+literatürüne karşı hâlâ sınanmalı.
 
 **Not:** Telif metinler; yalnız özel araştırma deposunda referans amaçlı.
