@@ -31,3 +31,21 @@ yer-hareketinin yapısal körlüğü + ofset-iptalli drift izleme. BBA + EDM
 literatürüne karşı hâlâ sınanmalı.
 
 **Not:** Telif metinler; yalnız özel araştırma deposunda referans amaçlı.
+
+---
+
+## Deep-research (ChatGPT + Gemini) ile çıkan KRİTİK yeni prior-art (henüz okunmadı)
+
+Bu ikisi bizim bulamadığımız ve residue'müzü en çok tehdit eden makaleler — **mutlaka okunmalı:**
+
+| Makale | Neyi tehdit ediyor | Link |
+|--------|---------------------|------|
+| **Rossbach 1989**, "Closed-orbit distortions of periodic FODO lattices due to plane ground waves", Particle Accelerators 23, 121 | **C+D**: FODO'da yer-dalgalarının COD'u; uzun dalga (koherent) → küçük orbit, rezonans nN±Q'da. Bizim "koherent→simetrik→kör" sonucumuzun fizik çekirdeği. | CERN inspire |
+| **Wegscheider et al. 2023**, PRAB 26, 032803 | **B**: ORM'den kuadrupol hatası geri-çatımında quasidegeneracy / null-space (düzeltme değil, REKONSTRÜKSİYON gözlenebilirliği) — bizim B iddiamızın doğrudan eşi. | GSI repo |
+
+Diğer surfacelenen: Tiefenback 1985 (FODO sim/antisim mod), Shiltsev 1995 (ATL),
+Parkhomchuk-Shiltsev-Stupakov 1994 (korelasyon→COD), Khan 2017 (σ_k=Q/π\|Q²−k²\|),
+Safranek 1997 (LOCO null-space), Huang 2022 / Xu 2025 (pasif/ML misalignment).
+
+**İki AI'ın harf-notları (ÇELİŞİYOR → notlar yumuşak, asıl olan substance):**
+A: NONE/PARTIAL · B: PARTIAL/FULL · C: NONE/PARTIAL · D: FULL/(PARTIAL-NONE) · E: PARTIAL/FULL
