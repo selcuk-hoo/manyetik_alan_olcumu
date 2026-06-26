@@ -1,103 +1,128 @@
-# Berry Fonksiyoneli: Sahte EDM'yi Kapalı Yörüngeden İleri-Öngörmek
+# Berry Fonksiyoneli: Sahte EDM'yi Kapalı Yörüngeden Öngörmek (lisans-seviyesi anlatım)
 
-> **Amaç (tek cümle):** Sahte EDM (false EDM, dS_y/dt) ölçülen kapalı yörüngenin
-> bir fonksiyoneli mi, ve bu fonksiyonel empirik/ML ile bulunabilir mi?
-> **Durum (2026-06): UMUT VERİCİ.** ML ile fonksiyonelin formu bulundu
-> (alan-ağırlıklı bilineer çarpım, LOO-R²≈0.88, permütasyon-doğrulamalı); analitik
-> türetme ve daha çok config ile pekiştirme açık.
->
-> Bu dosya kendi-içinde okunur; başka bir sohbet doğrudan buradan başlayabilir.
-> Veri ve scriptler: `berry_data/`.
+> **Tek cümlelik soru:** Parçacığın halka içinde çizdiği **yörüngeyi** (BPM'lerle
+> ölçülen) bilirsek, o yörüngenin ürettiği **sahte EDM sinyalini** (spinin yanlış
+> dönmesini) hesaplayabilir miyiz?
+> **Cevap (2026-06): EVET, yaklaşık olarak.** Basit makine-öğrenmesiyle, sahte
+> EDM'yi yörüngeden **%88 doğrulukla** öngören bir formül bulduk. Aşağıda *nasıl*
+> yaptığımız adım adım, hiç bilmeyen birine anlatılıyor.
 
 ---
 
-## 1. Bağlam ve neden önemli
+## 1. Problem nedir? (sezgi)
 
-Drift-monitör çalışması (`drift_monitor/`) kapalı-yörüngeden hizalama izler ama
-**no-go**'ya çarpar: sahte EDM'yi süren simetrik artık orbit-INVERSİYONUNA kördür
-(κ≈193). KRİTİK AYRIM (bu oturumda kuruldu): **no-go bir *inversiyon* sınırıdır**
-(R⁻¹ ile kaçıklık geri-çatımı). Sahte EDM ise kaçıklığın değil **kapalı yörüngenin**
-fonksiyonelidir, ve BPM yörüngeyi doğrudan ölçer. Dolayısıyla f'i ölçülen yörüngeden
-**ileri yönde** öngörmek inversiyona girmez → no-go onu yasaklamayabilir — **eğer
-doğru fonksiyonel bilinirse.** Bu dosya o fonksiyoneli arar.
+Bir EDM deneyinde proton spininin **çok yavaş** dikey dönmesini ararız — gerçek
+sinyal bu. Ama mıknatıslar mükemmel hizalı değilse, spin **sahte** bir dikey dönme
+de yapar; buna "sahte EDM" (false EDM) deriz. Bu sahte dönme, parçacığın halka
+içindeki **kapalı yörüngesine** bağlıdır: yörünge yatay (x) ve dikey (y) yönde
+kıvrıldıkça, spin her turda biraz dikeye kayar (bir tür "geometrik faz" / Berry
+fazı — bir döngüde geriye kalan artık).
 
-(Tam bağlam: `orbit_ileri_olcum.md`. Drift-monitör + literatür: `drift_monitor/`,
-`literatur/`.)
+**Anahtar fikir:** Sahte EDM, kaçıklığın değil, **yörüngenin** bir fonksiyonudur.
+BPM'ler yörüngeyi zaten ölçer. O hâlde yörüngeden sahte EDM'yi *ileri yönde*
+hesaplayabilmeliyiz — **eğer doğru formülü bilirsek.** Bu dosya o formülü arar.
 
-## 2. Kurulu fizik
+(Niye önemli: kaçıklığı yörüngeden geri-çözmek "kötü-koşullu" bir ters problemdir
+[no-go]. Ama sahte EDM'yi *doğrudan* yörüngeden hesaplamak ters problem değil; bu
+yüzden no-go'ya takılmayabilir.)
 
-- Sahte EDM ∝ **dx·dy geometrik (Berry) faz**, σ² ölçekleme
-  (`false_edm_harmonic_sinir.md §13`; Hacıömeroğlu & Semertzidis 2017,
-  arXiv:1709.01208).
-- Mekanizma kapalı yörüngenin çarpımıdır ama **basit ⟨x_CO·y_CO⟩ ortalaması YANLIŞ
-  proxy'dir** (antisim configlerde orbit büyük, ⟨xy⟩≈0, f büyük). f, global ortalama
-  değil **alan-ağırlıklı/yapısal** bir integraldir.
-- Ölçüm reçetesi (doğrulanmış): 4D kapalı yörüngede tek ideal parçacık + model-fit
-  seküler eğim (`berry_data/false_edm_4d.py`, `false_edm_mode_scan.py`).
+## 2. "Fonksiyonel" ve "çekirdek" ne demek? (basitçe)
 
-## 3. Bu oturumdaki bulgular (özet)
+Yörüngeyi halka boyunca N noktada örnekleyelim: her noktada bir yatay konum xᵢ ve
+bir dikey konum yᵢ. Sahte EDM tek bir sayı (f). Soru: f, xᵢ ve yᵢ'lerden nasıl
+çıkar?
 
-1. **Ham sahte EDM'yi ANTİSİMETRİK (orbit-görünür) domine eder** (~37×). Simetrik
-   kısım düzeltme-sonrası artıktır.
-2. **No-go = inversiyon sınırı.** Per-quad modülasyon onu atlar (üniform koşulluluk,
-   spread 1.3×) ama Omarov/BBA bölgesidir.
-3. **⟨xy⟩ proxy sağlam değil** (antisim'de çöker). Berry yönlü-alan Σ(x1y2−x2y1)
-   en tutarlı *basit* lead (~−0.5, her iki grupta).
-4. **ML kernel-fit fonksiyoneli buldu** (§4) — asıl ilerleme.
+- **En basit tahmin:** f, x ve y'nin çarpımının ortalaması, f ≈ ⟨xᵢyᵢ⟩.
+  (Fizik "f ∝ x·y geometrik faz" dediği için doğal başlangıç.) **Ama bu YANLIŞ
+  çıktı** (§4): bazı yörüngelerde ⟨xy⟩≈0 iken f büyük.
+- **Daha esnek tahmin:** her nokta **farklı ağırlıkta** olsun:
+  $$f \approx \sum_{i} w_i\, x_i\, y_i$$
+  Burada wᵢ, "halkanın i. noktasındaki x·y çarpımı sahte EDM'ye ne kadar katkı
+  veriyor" demek. wᵢ'ler bilinmiyor; onları **veriden öğreneceğiz.** İşte
+  "fonksiyonel" bu (yörüngeyi sayıya çeviren kural); wᵢ dizisine "çekirdek" denir.
 
-## 4. ML ile fonksiyonel keşfi (ASIL SONUÇ)
+## 3. Algoritma adım adım (gerçekte ne yaptık)
 
-**Model:** f bilineer kabul edilir, f ≈ Σ_{i,j} W_ij x_i y_j (x_i,y_j = yörüngenin
-i. noktadaki değeri). Lokallik kısıtıyla:
-- **(1) uniform:** f = Σ x_i y_i  (= ⟨xy⟩, 1 parametre)
-- **(2) ağırlıklı diagonal:** f = Σ w_i x_i y_i  (alan-ağırlıklı yerel çarpım)
-- **(3) + Berry komşu:** + Σ a_i (x_i y_{i+1} − x_{i+1} y_i)  (yönlü-alan)
+**Adım 1 — Veri üret.** Simülatörle (C++ parçacık+spin izleyici) 64 farklı
+kaçıklık senaryosu koşturduk. Her senaryo için kaydettik:
+- f = sahte EDM (tam izleyiciden, "gerçek cevap")
+- yörünge: halka boyunca 480 noktada x(s) ve y(s).
+(`berry_data/run1_data.npz`, `run2_data.npz`.)
 
-**Yöntem:** ridge + LOO-CV + **permütasyon testi** (f karıştırılıp aynı fit → null
-dağılımı; gerçek R² null'un çok üstündeyse sahte-uyum değil). 64 config (run1+run2).
+**Adım 2 — Özellikleri kur.** Yörüngeyi N noktaya indir (ör. N=24). Her senaryo
+için N tane "özellik" hesapla: pᵢ = xᵢ·yᵢ. Yani her senaryo bir özellik-vektörü,
+ona karşılık bir f sayısı.
 
-**Sonuç (N=12/16/24 noktada tutarlı):**
+**Adım 3 — Ağırlıkları öğren (regresyon).** wᵢ'leri öyle seç ki Σ wᵢ pᵢ tüm
+senaryolarda gerçek f'e en yakın olsun. Bu **en küçük kareler** problemi. Ama N
+ağırlık, 64 veriye yakın → ezberleme (overfit) riski. Bunu önlemek için
+**ridge** (Tikhonov) cezası ekledik: ağırlıkların gereksiz büyümesini bastıran
+küçük bir terim. (Tek "ayar düğmesi" λ; birkaç değer denedik.)
 
-| Model | LOO-R² | permütasyon null (maks) | Verdikt |
+**Adım 4 — Dürüstçe doğrula (KRİTİK).** "Ezbere mi öğrendi, gerçekten mi buldu?"
+iki testle:
+- **LOO çapraz-doğrulama:** Her senaryoyu sırayla dışarıda bırak, kalan 63'ten
+  ağırlıkları öğren, dışarıdakini **tahmin et**. Tahminler ne kadar iyi? (R²:
+  1.0 mükemmel, 0 işe yaramaz.) Bu, *görmediği* veride performansı ölçer.
+- **Permütasyon testi (sahteyi yakalar):** f etiketlerini **rastgele karıştır**
+  (yörünge–f eşleşmesini boz), aynı fiti yap. Eğer yöntem sağlamsa, karışık veride
+  R² ≈ 0 çıkmalı. Eğer karışıkta da yüksek R² çıkıyorsa → yöntem gürültüye uyuyor,
+  sonuç sahte. (Bu oturumda daha önce bu tuzağa düşmüştük; o yüzden bu test şart.)
+
+## 4. Sonuç
+
+| Model | LOO-R² (görmediği veride) | Permütasyon (karışık) | Verdikt |
 |------|------|------|------|
 | (1) uniform ⟨xy⟩ | 0.26–0.36 | — | zayıf |
-| **(2) ağırlıklı diagonal** | **0.88–0.89** | ~0.16–0.21 | **GERÇEK** |
-| (3) + Berry komşu | 0.91–0.94 | ~0.12–0.16 | GERÇEK (marjinal +) |
+| **(2) ağırlıklı Σ wᵢxᵢyᵢ** | **0.88** | maks ~0.2 | **GERÇEK** |
+| (3) + komşu "Berry-alan" terim | 0.91–0.94 | maks ~0.15 | gerçek (az ek) |
 
-**Yorum:** Sahte EDM, yörüngenin **alan-ağırlıklı yerel çarpımı** Σ w_i x_i y_i ile
-LOO-R²≈0.88 öngörülüyor — uniform ⟨xy⟩'den (0.3) büyük sıçrama, ve **permütasyon-
-temiz** (bu oturumda daha önce düştüğümüz sahte-R² tuzağı DEĞİL). Berry off-diagonal
-marjinal katkı verir; baskın yapı ağırlıklı diagonaldır. Öğrenilen w_i ağırlıkları
-belirli bir azimutta yoğunlaşıyor (kuplajın yerel kaynağı — deflektör/quad?
-fiziksel yorum açık).
+Okuması: **uniform ortalama** sahte EDM'nin yalnız ~%30'unu açıklar; ama **noktalara
+göre ağırlıklı** çarpım **%88'ini** açıklar — ve permütasyon temiz olduğundan bu
+ezber değil, **gerçek bir formül.** Yani sahte EDM, yörüngenin *ağırlıklı bilineer*
+bir fonksiyonelidir, ve makine bunu buldu. (3 farklı N'de tutarlı; `kernel_fit.py`.)
 
-→ **Cevap: EVET, orbit→sahte-EDM bilineer, öğrenilebilir bir fonksiyoneldir; ML
-(yapı-dayatan, permütasyon-testli) onu buluyor.**
+## 5. wᵢ'nin fiziksel yorumu (öğrenilen ağırlık nerede yoğun?)
 
-## 5. Açık problemler / sonraki adımlar
+Öğrenilen wᵢ'yi halka konumuna karşı çizdik (`berry_data/berry_weights.png`):
 
-1. **Daha çok config** (~birkaç yüz) ile R²'yi ve w_i'yi pekiştir (64 az; tracker
-   pahalı, paralel üret). Şu an 64 config / 16 ağırlık — permütasyon geçti ama
-   istatistik dar.
-2. **w_i'nin fiziksel yorumu:** ağırlık nerede yoğun? Lattice alan profiliyle
-   (deflektör/quad konumları) eşleştir → fonksiyonelin fiziksel anlamı.
-3. **Analitik türetme:** Berry fazını Thomas-BMT spin denkleminden türetip
-   Σ w_i x_i y_i formunu (ve w_i'yi) *kanıtla*. ML keşif aracı; son söz analitik.
-4. **48-BPM + gürültü dayanıklılığı:** öğrenilen fonksiyonel gerçekçi BPM
-   örneklemesiyle (48 nokta, 1μm gürültü) ne kadar korunur?
-5. **Post-düzeltme rejimi:** rutin orbit-düzeltmesi açıkken (antisim telafi edilir)
-   simetrik artığın bu fonksiyonelle öngörülebilirliği — asıl deney rejimi.
+- **Kararlı:** farklı N ve λ'da aynı profil → fit hilesi değil, **gerçek** bir yapı.
+- **Uniform DEĞİL:** ağırlık halka boyunca değişiyor (bu yüzden basit ⟨xy⟩ yetersiz).
+- **Salınımlı + en güçlü s/C≈0'da:** kuplaj halkanın başlangıç bölgesinde (turun
+  ilk ~%2'si) en büyük (negatif); ayrıca s/C≈0.17, 0.6, 0.8 civarında ikincil yapı.
+- **Orbit genliğini basitçe izlemiyor:** yani ağırlık "yörünge nerede büyükse orası"
+  değil; kendine ait, alan-yapılı bir profil.
 
-## 6. Reprodüksiyon (`berry_data/`)
+**Fiziksel okuma (kısmi, dürüst):** Salınımlı profil, kuplajın belirli halka
+bölgelerinde (muhtemelen radyal-alanın etki ettiği yerler — deflektör/quad
+bölgeleri ya da betatron-faz yapısı) yoğunlaştığını gösterir; uniform değil. **Ama
+tam element-eşlemesi (hangi ağırlık tepesi hangi fiziksel elemana karşılık?) henüz
+yapılmadı** — bunun için lattice'in alan-haritasını (deflektörlerin s-konumları,
+betatron fazı) profile bindirmek gerekir. Sıradaki en bilgilendirici adım budur.
 
-- `run1_data.npz` (24 config), `run2_data.npz` (40: 28 sim + 12 antisim) — her
-  config: `f`, tam kapalı yörünge `xo`,`yo` (480 nokta), kaçıklıklar `dx`,`dy`.
-- `kernel_fit.py` — bu §4 analizi (tracker gerekmez, npz'den çalışır):
-  `python3 berry_data/kernel_fit.py` (yolları /tmp yerine berry_data'ya çevir).
-- `false_edm_4d.py` + `false_edm_mode_scan.py` — doğrulanmış sahte-EDM estimator
-  (git'ten restore: commit `5cba757`, `41b1c6a~1`; `_BASE` repo köküne yamalı).
-- `run1_gen.py` / `run2_gen.py` — yeni config üretimi (tracker; `bash
-  build_integrator.sh` sonrası; ~birkaç dk/config, 4 worker paralel).
+## 6. Açık problemler (öncelik sırası)
 
-**Çalıştırma notu:** scriptlerde `sys.path` ve `_BASE` repo köküne işaret etmeli;
-tracker için `build_integrator.sh` ile `lib_integrator.so` derlenmeli.
+1. **wᵢ'nin element-eşlemesi:** ağırlık profilini deflektör/quad konumları ve
+   betatron faziyle bindir → "kuplaj nerede" sorusunu fiziksel cevapla. (Ucuz,
+   en bilgilendirici; analitik türetmeye köprü.)
+2. **Daha çok config:** 64 az; ~birkaç yüz ile R² ve wᵢ pekişir (tracker pahalı,
+   paralel üret).
+3. **48-BPM + gürültü:** öğrenilen fonksiyonel gerçekçi BPM örneklemesiyle korunur mu?
+4. **Analitik türetme (uzak hedef):** Berry fazını Thomas-BMT spin denkleminden
+   türetip Σwᵢxᵢyᵢ formunu ve wᵢ'yi *kanıtla*. Şimdilik ML keşif aracı; bu son adım.
+5. **Makaleye entegrasyon:** "hangi yörünge modları sahte EDM'yi sürüyor" (wᵢ'den)
+   ile "hangi modlar gözlenebilir" (drift makalesi) birleştirilip **izlenmesi
+   öncelikli modlar haritası** çıkarılabilir → makaleyi özgün/faydalı yapar (bkz.
+   sohbet tartışması).
+
+## 7. Reprodüksiyon (`berry_data/`)
+
+- `run1_data.npz` (24 config) + `run2_data.npz` (40 config): her config `f`, tam
+  yörünge `xo`,`yo` (480 nokta), kaçıklıklar `dx`,`dy`.
+- `kernel_fit.py` — §3–4 analizi (tracker GEREKMEZ, npz'den çalışır):
+  `python3 berry_data/kernel_fit.py`.
+- `berry_weights.png` — §5 ağırlık profili figürü.
+- `false_edm_4d.py`, `false_edm_mode_scan.py` — doğrulanmış sahte-EDM estimator
+  (git'ten restore: `5cba757`, `41b1c6a~1`).
+- `run1_gen.py`, `run2_gen.py` — yeni config üretimi (tracker; `bash
+  build_integrator.sh` sonrası).
