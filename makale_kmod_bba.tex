@@ -1,0 +1,285 @@
+% makale_kmod_bba.tex — Yeni makale taslağı (v0.1, 2026-06)
+% all-quad K-modülasyon BBA ile geometrik-faz sahte-EDM ölçümü
+% Derleme: pdflatex makale_kmod_bba.tex (iki kez, referanslar için)
+% Plan ve detaylar: kmod_bba_plani.md ; Omarov okuması: omarov.md
+% NOT: Bu bir TASLAKTIR. "TODO" işaretli yerler henüz hesaplanmadı/yazılmadı.
+\documentclass[twocolumn,a4paper,10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{textcomp}
+\usepackage[hidelinks,unicode]{hyperref}
+\usepackage{geometry}
+\usepackage{xcolor}
+\geometry{margin=2cm}
+\graphicspath{{./}}
+
+% TODO makrosu — derlemede kırmızı görünür, son sürümde kaldırılır
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+\title{\bfseries Depolama-halkası proton EDM deneyinde geometrik-faz sahte
+sinyalini ölçmek: tüm-kuadrupol K-modülasyonu ile demet-tabanlı hizalama ve
+standart BPM geri-çatımının fizibilitesi%
+\thanks{Taslak v0.1 (2026-06). Genel demet-tabanlı yöntem makalesi; pEDM
+motivasyon örneğidir. Hesap detayları \texttt{kmod\_bba\_plani.md},
+\texttt{omarov.md}; üretken scriptler proje deposunda.}}
+
+\author{(yazar bilgisi)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Depolama-halkası proton elektrik dipol momenti (pEDM) deneylerinde, kuadrupol
+hizalama hatalarının yol açtığı \emph{geometrik (Berry) faz} sahte bir
+EDM-benzeri dikey spin presesyonu üretir ve hizalama RMS'i ile \emph{kuadratik}
+ölçeklenir. Simetrik-hibrit tasarım \cite{omarov2022} bu sistematiği
+karşı-dönen (CR) demetler, kuadrupol polarite değişimi ve CR demet-ayrımının
+küçültülmesiyle hedefin altına indirir; ancak ayrımı/hizalamayı ölçecek
+enstrümanın (SQUID-tabanlı BPM ve K-modülasyon) gerçek-zamanlı geri-çatım
+yeteneği ve özellikle \emph{orbit-kör simetrik kiplere} duyarlılığı nicel olarak
+test edilmemiştir. Bu çalışmada (i) sahte-EDM'in geometrik-faz kökenini
+doğrulanmış bir tahmin ediciyle ($\sigma^2$ testinde üs $p=2.00$) ve bir Berry
+fonksiyoneli fitiyle gösteriyor; (ii) hizalama hatalarını antisimetrik
+(orbit-görünür) ve simetrik (orbit-kör) kiplere ayırıyor; (iii) bir/birkaç
+kuadrupol modülasyonu ile yörünge-farkı tabanlı geri-çatımın simetrik kiplerde
+çöktüğünü; (iv) tüm kuadrupolleri K-modüle edip \emph{tek demetin salınım
+genliğini} standart (kapasitif) BPM'lerle ölçen demet-tabanlı hizalamanın (BBA)
+bu körlüğü atlatma potansiyelini inceliyoruz. Tek-demet modülasyon genliği
+kuadrupol-merkez ofsetiyle orantılı olduğundan, manyetik SQUID-BPM yerine
+kapasitif BPM yeterlidir. \TODO{nicel ana sonuç: geri-çatım hassasiyeti +
+gerçek-zaman + kalan sahte-EDM $<1$ nrad/s mı?}
+\end{abstract}
+
+\section{Giriş}
+\label{sec:intro}
+Depolama-halkası pEDM yönteminde dikey spin presesyon hızı
+$\mathrm{d}S_y/\mathrm{d}t \propto E\,\eta$ protonun EDM'ini ölçer; manyetik
+moment (MDM) kuplajı EDM kuplajından mertebelerce büyük olduğundan, alanların ve
+hizalamanın katı kontrolü zorunludur \cite{omarov2022,anastassopoulos2016}.
+Sahte (EDM-benzeri) sistematiklerin başında, kuadrupol hizalama hatalarının
+ürettiği \emph{geometrik faz} gelir: ardışık dönüşlerin non-komütatifliğinden
+doğan ve genliklerin \emph{çarpımıyla} ölçeklenen spin presesyonu.
+
+Omarov \emph{ve ark.} \cite{omarov2022} simetrik-hibrit halka tasarımında bu
+sistematiği üç koldan bastırır: eşzamanlı CR demet depolama, kuadrupol polarite
+değişimi ve CR demet-ayrımının dipole-korektörlerle $\lesssim 100\,\mu$m'ye
+küçültülmesi (Denklem (C1)--(C2), Şekil 9, 16; bkz.\ \texttt{omarov.md}). Ayrım,
+manyetik pikaplar veya SQUID-tabanlı BPM ile K-modülasyon altında ölçülür ve
+$\sim$10$\,\mu$m planarite gereği mekanik (su terazisi) veya SQUID-BPM ile
+sağlanır.
+
+\textbf{Açık kalan nokta.} Referans \cite{omarov2022} geometrik-faz
+\emph{fiziğini} (iptalin hedefin altına indiğini) gösterir, ancak \emph{ayrımı /
+hizalamayı ölçecek enstrüman zincirini} (48 azimut konumunda BPM örneklemesi +
+K-modülasyon geri-çatımı) simüle etmez; ölçümün doğruluğu ve özellikle
+\emph{simetrik (orbit-kör) hizalama kiplerine} duyarlılığı açıktır. Bu çalışma tam
+da bu ölçüm boşluğunu hedefler.
+
+\section{Geometrik-faz sahte EDM: mekanizma ve doğrulama}
+\label{sec:mechanism}
+Tüm kuadrupolleri her iki düzlemde rastgele RMS $\sigma$ ile kaydırıp dikey
+presesyon hızının büyümesini izlediğimizde, sahte EDM kuadratik ölçeklenir. Sabit
+desende genliği $\sigma=10,5,2.5\,\mu$m olarak ölçeklediğimizde, doğrulanmış
+tahmin edici (4B kapalı yörünge + model-fit seküler eğim) altı tohumun hepsinde
+üs $p = 2.00 \pm 0.01$ verir (Tablo~\ref{tab:results}); yani saf geometrik faz,
+lineer kaçak yoktur. Bu, \cite{omarov2022} Şekil 9(a)'nın nicel karşılığıdır.
+
+Sahte-EDM'in kapalı yörüngenin bir bilineer fonksiyoneli olduğunu, makine
+öğrenmesiyle bulunan $f \approx \sum_i w_i x_i y_i$ (alan-ağırlıklı yerel çarpım;
+LOO-$R^2 \approx 0.88$, permütasyon-doğrulamalı) ile gösteriyoruz.
+\TODO{Berry fonksiyoneli figürü (w\_i profili) + fit detayını §\ref{sec:mechanism}'e
+ekle; \texttt{berry.md}'den.}
+
+Referans ölçek: gerçek EDM (benzetimde $\eta=1.88\times10^{-15}$) tek bir demet
+yönünde $\mathrm{d}S_y/\mathrm{d}t = 9.81\times10^{-10}$ rad/s üretir ve yön
+tersine çevirmede \emph{işaret değiştirir} (Denklem (C1)); sahte geometrik-faz
+sinyali ise 10$\,\mu$m'de $\sim10^{-6}$ rad/s mertebesindedir, yani gerçek
+sinyali $\sim$1000$\times$ gömer.
+
+\section{Antisimetrik / simetrik kip ayrışımı ve gözlenebilirlik}
+\label{sec:modes}
+Bir FODO hücresi içinde QF/QD kuadrupollerinin zıt-işaretli kaçıklığı
+\emph{antisimetrik} (düşük-$k$) kipi, aynı-işaretli kaçıklığı \emph{simetrik}
+(yüksek-$k$, Nyquist kaymalı) kipi oluşturur. Kapalı-yörünge tepkisi
+$G_k \propto 1/|Q^2-k^2|$ rezonant olduğundan ($Q \approx 2.7$), antisimetrik
+kipler büyük yörünge üretip BPM'lere \emph{görünür}; simetrik kipler bastırılır ve
+\emph{orbit-kör} kalır. Ham sahte-EDM'i antisimetrik kip domine eder
+($\sim$37$\times$); yörünge düzeltildiğinde geriye \emph{simetrik artık} kalır.
+
+CR (CW/CCW) iptaliyle, sahte-EDM'in EDM kanalını kirleten kısmı, demet
+yönüne göre \emph{tek} olan bileşendir. 30 tohumlu, gerçekçi rastgele 10$\,\mu$m
+hizalama topluluğunda CW/CCW telafisi sahte-EDM'i yalnızca $3.4\times$ azaltır
+(kalan $= 474\times$ gerçek EDM). Hizalamanın \emph{antisimetrik (orbit-görünür)}
+bileşenini çıkarmak (ideal yörünge düzeltmesi) kirliliği ek $7.7\times$ azaltır
+(kalan $= 62\times$ gerçek EDM); geriye kalan, \emph{orbit-kör simetrik artıktır}
+ve onu ne yörünge ölçümü, ne CW/CCW kapatır (Tablo~\ref{tab:results}). Bu, ölçüm
+yönteminin simetrik kipi görüp göremediğinin neden kritik olduğunu gösterir.
+
+\begin{table}[t]
+\centering
+\caption{Doğrulanmış nicel sonuçlar (bu çalışma). Tahmin edici: 4B-CO +
+model-fit; gerçek EDM ölçeği $9.81\times10^{-10}$ rad/s.}
+\label{tab:results}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Büyüklük & Değer & Not \\
+\midrule
+Sahte EDM $\propto \sigma^p$, üs $p$ & $2.00\pm0.01$ & geometrik faz \\
+Gerçek EDM (tek/diferansiyel) & $9.81\times10^{-10}$ & Denklem (C1) \\
+10\,$\mu$m sahte EDM (seküler) & $\sim10^{-6}$ & worst $6.5\times10^{-6}$ \\
+CW/CCW telafisi (tek başına) & $3.4\times$ & kalan $474\times$ \\
+\;+ yörünge düzeltme (antisim) & $7.7\times$ & kalan $62\times$ \\
+Kalan simetrik orbit-kör artık & $62\times$ EDM & orbit-kör \\
+Dejenerasyon CCW $\equiv$ CW+flip & özdeş & 4'lü $\to$ 2'li \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Polarite-değişimi dejenerasyonu.} İdealize periyodik FODO'da, demet yön
+tersine çevirme (CCW) ile tüm kuadrupol polaritelerinin çevrilmesi (flip)
+\emph{özdeştir} (CCW $\equiv$ CW+flip; halka ters-çevirme simetrisi). Dolayısıyla
+Denklem (C2)'nin dört-kollu kombinasyonu idealize latiste ikiye çöker; polarite
+değişimi CW/CCW ötesinde bağımsız iptal sağlamaz. \TODO{Gerçek simetrik-hibrit
+latiste bu dejenerasyonun ne ölçüde kırıldığını nicelle.}
+
+\section{Yörünge-tabanlı geri-çatımın sınırı (negatif sonuçlar)}
+\label{sec:negative}
+\textbf{(a) Bir/birkaç kuadrupol modülasyonu.} Tek-kuadrupol K-modülasyonunun
+ürettiği yörünge-farkı tepki matrisi $\Delta R$ düşük ranklıdır; simetrik kipler
+gözlenemez. Analitik FODO Twiss tepki matrisinde $\kappa(\Delta R) \approx
+2.8\times10^4$, model hatasını katastrofik biçimde büyütür.
+\TODO{v2.7/v2.8 kodunu (\texttt{analytic\_kmod.py},
+\texttt{test\_kmod\_reconstruction.py}) geri al; tek/birkaç-quad mod. için
+simetrik-kip gözlenemezliğini güncel rakamlarla göster.}
+
+\textbf{(b) Drift + baştan-LOCO.} Kapalı-yörünge-tabanlı drift izleme ve LOCO,
+BPM-ofseti ($\sim$100$\,\mu$m) altında bir gözlenebilirlik tabanına çarpar; en
+kötü kipler $\sim$\%96 simetriktir ve gürültüyü $\sim$193$\times$ büyütür. Drift
+yöntemi simetrik kiplere büyük oranda kördür.
+\TODO{Drift makalesi sonuçlarını (\texttt{drift\_monitor/}) bu bölüme bir
+\emph{negatif adım} olarak özetle; SVD per-mod gözlenebilirlik figürü.}
+
+\section{Tüm-kuadrupol K-modülasyonu ile demet-tabanlı hizalama}
+\label{sec:method}
+Önerilen yöntem yörünge-farkı yerine \emph{tek demetin K-modülasyon salınım
+genliğini} kullanır. Bir kuadrupolün gradyanı $g \to g(1+\varepsilon\sin\omega t)$
+modüle edildiğinde, demetin o kuadrupoldeki merkez-ofseti $\delta$ ile orantılı
+bir dipol kick ($\propto \varepsilon g \delta$) modüle olur; BPM'lerde ölçülen
+salınım genliği böylece \emph{kuadrupol-demet ofsetiyle orantılıdır}. Tüm
+kuadrupoller (frekans-çoğullamalı veya sıralı) modüle edilerek her kuadrupolün
+ofseti \emph{doğrudan} ölçülür --- bu, yörünge-farkı inversiyonunun simetrik-kip
+körlüğünü atlatan, kip-başına \emph{tekdüze koşullanmış} bir ölçümdür.
+
+\TODO{Yöntemin matematiği: salınım genliği $\to$ per-quad ofset eşlemesi; frekans-
+çoğullama şeması; modülasyon derinliği $\varepsilon$ ve frekans seçimi; gerçek-
+zaman veri-alımıyla girişimsizlik.}
+
+\section{Sonuçlar: geri-çatım ve kalan sahte EDM}
+\label{sec:results}
+\TODO{LINCHPIN. 48-kuadrupol K-modülasyonu $\to$ tek-demet salınım genliği $\to$
+per-quad ofset geri-çatım $\to$ kalan sahte-EDM (doğrulanmış tahmin ediciyle ileri
+hesap). Gerçekçi kapasitif-BPM ofseti ($\sim$100$\,\mu$m) + gürültü ($\sim$1$\,\mu$m)
+altında. Ana sorular: (i) simetrik kip gözlenebilir mi (uniform-frekans $\Delta R$
+mi, frekans-çoğullamalı per-quad mı)? (ii) kalan sahte-EDM $<1$ nrad/s'ye iner mi?
+(iii) gerçek-zamanlı yeterli mi? Tablo + figür.}
+
+\section{Kapasitif-BPM fizibilitesi}
+\label{sec:capacitive}
+SQUID-tabanlı BPM manyetik olduğundan CR demetlerin \emph{ayrımını} ölçebilir;
+kapasitif BPM bunu yapamaz. Ancak önerilen yöntemde gözlenen büyüklük ayrım değil,
+\emph{tek demetin} modülasyon salınım genliğidir ve bu genlik kuadrupol-merkez
+ofsetiyle (yatay düzleme mesafeyle) orantılıdır. Dolayısıyla yeterli hassasiyet
+sağlandığında \emph{kapasitif BPM yeterlidir} ve SQUID gereksinimi kalkar; bu,
+maliyet ve uygulanabilirlik açısından \cite{omarov2022}'ye göre belirgin bir
+sadeleşmedir.
+\TODO{Kapasitif-BPM gürültü/çözünürlük modeliyle gerekli modülasyon süresi ve
+ulaşılabilir ofset hassasiyetini nicelle; COSY/benzeri BPM spesifikasyonu.}
+
+\section{Önceki çalışmalarla ilişki}
+\label{sec:priorart}
+Demet-tabanlı hizalama ve K-modülasyon köklü tekniklerdir: SVD-tabanlı yörünge
+analizi \cite{chung1993}, simetrik/yarı-simetrik latislerde circulant tepki
+matrisi \cite{mirza2019}, AC-uyartımlı hızlı BBA \cite{fastbba2020} ve
+çoklu mıknatıs için eşzamanlı BBA \cite{huang2022}. Ters-modelleme
+dejenerasyonu \cite{wegscheider2023} ve koherent yer-hareketi kaynaklı COD
+\cite{rossbach1989} gözlenebilirlik bağlamını kurar. Bizim katkımız
+\emph{teknik değil}: (i) BBA gözlemini geometrik-faz/sahte-EDM sistematiğine
+bağlamak (Berry fonksiyoneli köprüsü); (ii) simetrik-kip gözlenebilirlik analizi;
+(iii) pEDM için gerçek-zamanlı, kapasitif-BPM ile fizibilite; (iv) yörünge/SQUID-
+ayrım yolunun simetrik kiplerde çökerken BBA'nın çökmediğini göstermek.
+\cite{haciomeroglu2017} aynı sistematiğin farklı (tüm-elektrik) makinede
+ileri-hesabıdır; izleme/gözlenebilirlik içermez.
+\TODO{Mirza/Huang/fast-BBA ile ayrışmayı (özgünlük) net paragraf; \texttt{literatur/}'dan.}
+
+\section{Tartışma ve sonuç}
+\label{sec:conclusion}
+\TODO{Karar kapısı. Linchpin başarılıysa: ucuz, gerçek-zamanlı, nondestructive,
+SQUID-gerektirmeyen hizalama-ölçüm yöntemi --- \cite{omarov2022}'nin açık
+bıraktığı ölçümü kapatır. Başarısızsa: simetrik-kip indirgenemezliğinin keskin
+gözlenebilirlik-sınırı teoremi. Her iki sonuç da değerli; hangisi olduğunu §6
+belirler.}
+
+\section*{Üretilebilirlik}
+Doğrulanmış sahte-EDM tahmin edici \texttt{berry\_data/false\_edm\_4d.py}
+(\texttt{measure\_false\_edm}; 4B-CO + model-fit; $\sigma^2$ testinde $p=2.00$).
+K-modülasyon geri-çatım çekirdeği \texttt{analytic\_kmod.py} (tag v2.8),
+\texttt{build\_response\_matrix.py} (uniform k-mod, tag v2.7). Plan ve tüm
+detaylar \texttt{kmod\_bba\_plani.md}; Omarov okuması \texttt{omarov.md}.
+
+\begin{thebibliography}{99}
+\bibitem{omarov2022}
+Z.~Omarov, H.~Davoudiasl, S.~Hac\i{}\"omero\u{g}lu, V.~Lebedev, W.~M.~Morse,
+Y.~K.~Semertzidis, A.~J.~Silenko, E.~J.~Stephenson, and R.~Suleiman,
+``Comprehensive symmetric-hybrid ring design for a proton EDM experiment at
+below $10^{-29}\,e\cdot$cm,'' \emph{Phys.\ Rev.\ D} \textbf{105}, 032001 (2022),
+arXiv:2007.10332.
+
+\bibitem{anastassopoulos2016}
+V.~Anastassopoulos \emph{et al.}, ``A storage ring experiment to detect a proton
+electric dipole moment,'' \emph{Rev.\ Sci.\ Instrum.} \textbf{87}, 115116 (2016),
+arXiv:1502.04317.
+
+\bibitem{chung1993}
+Y.~Chung, G.~Decker, and K.~Evans~Jr., ``Closed orbit correction using singular
+value decomposition of the response matrix,'' in \emph{Proc.\ PAC 1993}, p.~2263.
+
+\bibitem{mirza2019}
+S.~H.~Mirza, R.~Singh, H.~Klingbeil, and P.~Forck, ``Closed orbit correction at
+synchrotrons for symmetric and near-symmetric lattices,'' \emph{Phys.\ Rev.\
+Accel.\ Beams} \textbf{22}, 072804 (2019), arXiv:1902.08683.
+
+\bibitem{fastbba2020}
+``Fast beam-based alignment using ac excitations,'' \emph{Phys.\ Rev.\ Accel.\
+Beams} \textbf{23}, 012802 (2020). \TODO{tam yazar/künye \texttt{literatur/ref\_fast\_bba\_ac.md}'den}
+
+\bibitem{huang2022}
+X.~Huang \emph{et al.}, ``Simultaneous beam-based alignment measurement for
+multiple magnets,'' arXiv:2203.14869 (2022).
+
+\bibitem{wegscheider2023}
+D.~Vilsmeier, R.~Singh, and M.~Bai, ``Inverse modeling of circular lattices via
+orbit response measurements in the presence of degeneracy,'' \emph{Phys.\ Rev.\
+Accel.\ Beams} \textbf{26}, 032803 (2023).
+
+\bibitem{rossbach1989}
+J.~Rossbach, ``Closed-orbit distortions of periodic FODO lattices due to plane
+ground waves,'' \emph{Particle Accelerators} \textbf{23}, 121 (1989).
+
+\bibitem{haciomeroglu2017}
+S.~Hac\i{}\"omero\u{g}lu and Y.~K.~Semertzidis, ``Systematic errors related to
+quadrupole misplacement in an all-electric storage ring for proton EDM
+experiment,'' arXiv:1709.01208 (2017).
+
+\bibitem{ziemann2021}
+V.~Ziemann and M.~Ziemann, ``Noninvasively improving the orbit-response matrix
+while continuously correcting the orbit,'' arXiv:2104.05300 (2021).
+\end{thebibliography}
+
+\end{document}
