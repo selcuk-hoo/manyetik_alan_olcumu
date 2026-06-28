@@ -471,10 +471,15 @@ $\psi=0.1$~mrad bütçeyi değiştirmez, ama $\psi=1$~mrad hedefin $\sim$3$\time
 
 \Sezgi{Önemli \emph{dürüst sınır}: dx,dy AC-BBA tilt'i \emph{ölçmez}. Bir quad'ın
 kendi ekseni etrafında dönmesi (roll), merkez-ofsetine bakan BBA'ya neredeyse
-görünmez. O hâlde tilt ya mekanik olarak $\lesssim 0.1$~mrad'a hizalanmalı (tipik
-survey'den biraz sıkı ama olağan), ya da \emph{skew}-bileşeni modüle eden bir
-``skew-BBA'' uzantısıyla ölçülmelidir. Bu, $\beta$-beating'den ayrı, açıkça
-belirtilen bir bütçe kalemidir.}
+görünmez. O hâlde tilt ya mekanik olarak $\lesssim 0.1$--$0.3$~mrad'a hizalanmalı
+(modern lazer-tracker survey'i bu seviyeyi sağlar ve pEDM tasarımı kuplaj için
+zaten bu mertebeyi ister), ya da \emph{skew}-bileşeni modüle eden bir ``skew-BBA''
+uzantısıyla ölçülmelidir. \textbf{CW/CCW + quad-flip bunu kurtarmaz:} estimator
+testinde idealize latiste CCW ile quad-flip \emph{özdeştir} (dejenerasyon, oran
+1.00) --- flip bağımsız bir iptal knob'u vermez; ve CW/CCW ters-çevirme
+geometrik-faz sahte-EDM'i (misalignment \emph{ve} tilt kanalı) yalnız mütevazı
+($\sim$3.4$\times$, ensemble) bastırır, NULL'lamaz. Tilt $\beta$-beating'den ayrı,
+açıkça belirtilen bir bütçe kalemidir.}
 
 \begin{table}[t]
 \centering

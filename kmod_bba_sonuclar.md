@@ -222,6 +222,46 @@ kontrol gerektirir: (i) mekanik roll hizalama ≲0.1 mrad (ulaşılabilir ama ti
 survey'den sıkı), veya (ii) skew-bileşen modülasyonuyla bir **skew-BBA uzantısı**.
 Bu, yöntemin açık bir sınırıdır; β-beating bütçesinden ayrı bir kalemdir.
 
+### 7.3.1 Pratiklik (0.2 mrad makul mu?) ve CW/CCW+flip tilt'i giderir mi?
+
+**0.2 mrad roll pratik mi?** Evet, *standart-ila-sıkı* ama olağan:
+- Modern lazer-tracker survey'i roll'u ~0.1–0.2 mrad RMS hizalar; 0.2 mrad
+  ulaşılabilir sınırda.
+- Kuplaja duyarlı halkalar (ışık kaynakları) zaten ~0.1–0.5 mrad roll şart koşar.
+- pEDM tasarımı skew-kuplaj sistematiği için (omarov.md App. E) zaten sıkı roll
+  ister → bizim ~0.1–0.3 mrad toleransımız tasarımın *zaten* talep ettiğiyle
+  tutarlı, EK yük değil.
+- Mekanik karşılık: ψ=0.2 mrad, yarı-açıklık ~4 cm quad'da ~8 μm kutup kayması →
+  survey hassasiyeti seviyesinde.
+- Uyarı: 48-quad RMS'i; drift'e karşı korunmalı; tek-quad outlier önemli.
+
+**CW/CCW + quad-flip tilt etkisini giderir mi? — HAYIR (estimator testi).**
+Aynı 10 μm misalignment deseni; sahte-EDM (EDMSwitch=0); yön (CW/CCW) × polarite
+(g→−g) 4'lü (`/tmp/kmod_recover/fast_est.py cwccw`):
+
+| tilt | f(CW,g+) | f(CCW,g+) | f(CW,g−) | f(CCW,g−) |
+|------|----------|-----------|----------|-----------|
+| 0 mrad | +5.24e−7 | +1.556e−6 | +1.556e−6 | +5.24e−7 |
+| 1 mrad | +5.25e−7 | +1.571e−6 | +1.572e−6 | +5.25e−7 |
+
+İki kritik bulgu:
+1. **DEJENERASYON KESİN:** f(CCW,g+) = f(CW,g−) (oran 1.00). Yani **quad-flip,
+   CW/CCW ile ÖZDEŞ** (idealize FODO ters-çevirme simetrisi; Omarov Eq. C2 4'lü →
+   2'li). Flip **bağımsız ikinci bir iptal knob'u SAĞLAMAZ** → "CW/CCW + flip" =
+   etkin olarak tek ters-çevirme.
+2. **CW/CCW geometrik-faz sahte-EDM'i NULL'lamaz:** (CW−CCW)/2 artığı = 5.16e−7 ≈
+   ham (kazanç ~1× bu seed'de; ensemble ~3.4×, proje). Tilt EKLEMEK her kombinasyonu
+   yalnız ~%1 değiştirir (tilt'in mutlak katkısı ~birkaç×10⁻⁹, 10 μm fonu altında
+   küçük; ama 0.3 μm kalan üstünde baskın — §7.3). Tilt katkısı (CW−CCW)/2
+   kanalında **kalır** (~6.7e−9 marjinal) → ters-çevirme tilt'i ayrıca temizlemez.
+
+→ **Sonuç:** CW/CCW+flip, tilt sahte-EDM'ini *özel olarak* gidermez; tilt aynı
+bending-kuplaj/geometrik-faz mekanizmasından geçer ve ters-çevirme onu yalnız
+misalignment kanalıyla aynı mütevazı oranda (~3.4× ensemble) bastırır. Tilt yine
+**≲0.1–0.3 mrad kontrol** (veya skew-BBA) gerektirir. (Tek-seed; marjinal farklar
+CO-bulma gürültüsü mertebesinde — ensemble ile pekiştirilebilir; dejenerasyon
+bulgusu kesin.)
+
 ### 7.4 Sistematik bütçe özeti
 
 | Kalem | Eşik (hedef <1 nrad/s için) | Ulaşılabilirlik |
