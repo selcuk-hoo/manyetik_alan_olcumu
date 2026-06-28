@@ -2,7 +2,9 @@
 % all-quad K-modülasyon BBA ile geometrik-faz sahte-EDM ölçümü
 % Derleme: pdflatex makale_kmod_bba.tex (iki kez, referanslar için)
 % Plan ve detaylar: kmod_bba_plani.md ; Omarov okuması: omarov.md
-% NOT: Bu bir TASLAKTIR. "TODO" işaretli yerler henüz hesaplanmadı/yazılmadı.
+% NOT: Bu bir TASLAKTIR. LINCHPIN (gözlenebilirlik + kalan sahte-EDM) HESAPLANDI
+%   ve §3-§6'ya işlendi (bkz. kmod_bba_sonuclar.md). Kalan "TODO": Berry-figürü,
+%   drift-makalesi özeti, kapasitif-BPM gürültü modeli, Mirza ayrışma paragrafı.
 \documentclass[twocolumn,a4paper,10pt]{article}
 
 \usepackage[T1]{fontenc}
@@ -52,8 +54,16 @@ kuadrupol modülasyonu ile yörünge-farkı tabanlı geri-çatımın simetrik ki
 genliğini} standart (kapasitif) BPM'lerle ölçen demet-tabanlı hizalamanın (BBA)
 bu körlüğü atlatma potansiyelini inceliyoruz. Tek-demet modülasyon genliği
 kuadrupol-merkez ofsetiyle orantılı olduğundan, manyetik SQUID-BPM yerine
-kapasitif BPM yeterlidir. \TODO{nicel ana sonuç: geri-çatım hassasiyeti +
-gerçek-zaman + kalan sahte-EDM $<1$ nrad/s mı?}
+kapasitif BPM yeterlidir. Analitik FODO modelinde per-quad AC-BBA, simetrik ve
+antisimetrik kipleri \emph{eşit} (kip-başına tekdüze koşullanma, $1.35\times$
+yayılım) ve BPM-ofsetine bağışık geri-çatar; yörünge-farkı ($\Delta R$)
+inversiyonu ($\kappa \approx 3.7\times10^4$) simetrik kipte çökerken
+($r_\mathrm{sim}=0.13$) AC-BBA korur ($r_\mathrm{sim}=0.997$). Bir saniyelik
+modülasyonla per-quad istatistiksel ofset hassasiyeti $\sim$24~nm; bu durumda
+sınırlayıcı etken istatistik değil, optik-model ($\beta$-beating) bilgisidir.
+Doğrulanmış tahmin ediciyle ($p=2.00$) ileri-hesap, kalan geometrik-faz
+sahte-EDM'inin $\beta$-beating $\varepsilon \lesssim 0.5$--$1\%$ kontrol
+edildiğinde hedefin ($1$~nrad/s) altına indiğini gösterir.
 \end{abstract}
 
 \section{Giriş}
@@ -151,13 +161,18 @@ latiste bu dejenerasyonun ne ölçüde kırıldığını nicelle.}
 
 \section{Yörünge-tabanlı geri-çatımın sınırı (negatif sonuçlar)}
 \label{sec:negative}
-\textbf{(a) Bir/birkaç kuadrupol modülasyonu.} Tek-kuadrupol K-modülasyonunun
-ürettiği yörünge-farkı tepki matrisi $\Delta R$ düşük ranklıdır; simetrik kipler
-gözlenemez. Analitik FODO Twiss tepki matrisinde $\kappa(\Delta R) \approx
-2.8\times10^4$, model hatasını katastrofik biçimde büyütür.
-\TODO{v2.7/v2.8 kodunu (\texttt{analytic\_kmod.py},
-\texttt{test\_kmod\_reconstruction.py}) geri al; tek/birkaç-quad mod. için
-simetrik-kip gözlenemezliğini güncel rakamlarla göster.}
+\textbf{(a) Uniform-frekans $\Delta R$ inversiyonu.} İki gradyan ayarında
+kapalı-yörünge \emph{farkını} kullanan geri-çatım (eski K-mod yolu,
+\texttt{analytic\_kmod.py}), $\Delta y = \Delta R\,\mathbf{dy}$'yi tersine çözer.
+Analitik FODO Twiss'inden hesaplanan $\Delta R_{dy}$ için
+$\kappa(\Delta R) = 3.74\times10^4$; en küçük 12 tekil-değerli kip ortalama
+\%92 \emph{simetrik} içeriklidir (en büyük 12 kip ise \%8). Yani simetrik kipler
+küçük tekil değerlere düşer ve BPM gürültüsü/ofseti altında gözlenemez. Saf
+simetrik ve antisimetrik 100~$\mu$m ofset desenleri için (40 tohum, 100~$\mu$m BPM
+ofseti + 1~$\mu$m gürültü; gürültü-farkında kesik SVD), $\Delta R$ inversiyonu
+antisimetriği kısmen kurtarır ($r = 0.59$) ama simetrikte çöker ($r = 0.13$)
+(Tablo~\ref{tab:obs}). Bu, projedeki ``yörünge düzeltme antisimetriği
+$7.7\times$ temizler, simetriğe kör'' bulgusunun gözlenebilirlik karşılığıdır.
 
 \textbf{(b) Drift + baştan-LOCO.} Kapalı-yörünge-tabanlı drift izleme ve LOCO,
 BPM-ofseti ($\sim$100$\,\mu$m) altında bir gözlenebilirlik tabanına çarpar; en
@@ -177,18 +192,112 @@ kuadrupoller (frekans-çoğullamalı veya sıralı) modüle edilerek her kuadrup
 ofseti \emph{doğrudan} ölçülür --- bu, yörünge-farkı inversiyonunun simetrik-kip
 körlüğünü atlatan, kip-başına \emph{tekdüze koşullanmış} bir ölçümdür.
 
-\TODO{Yöntemin matematiği: salınım genliği $\to$ per-quad ofset eşlemesi; frekans-
-çoğullama şeması; modülasyon derinliği $\varepsilon$ ve frekans seçimi; gerçek-
-zaman veri-alımıyla girişimsizlik.}
+\textbf{Matematik.} Kuadrupol $j$, $\Delta K_j = \varepsilon K_j$ derinliğiyle
+modüle edildiğinde, demet o kuadrupolü $o_j$ ofsetiyle geçiyorsa BPM $i$'deki
+salınım genliği
+\begin{equation}
+A_{ij} = T_{ij}\,o_j, \quad
+T_{ij} = \frac{\sqrt{\beta_i \beta_j}}{2\sin\pi Q}\,
+\cos\!\big(|\phi_i-\phi_j|-\pi Q\big)\,\Delta K_j L_q\,s_j,
+\label{eq:Tmatrix}
+\end{equation}
+($s_j$: QF/QD foklama işareti). Tüm kuadrupoller \emph{ayrı} frekanslarda
+($f_j$, 1--10~kHz) eşzamanlı modüle edilir; her BPM her frekansta demodüle
+edilerek çapraz-konuşmasız $A_{ij}$ matrisi elde edilir (eşzamanlı AC-BBA,
+\cite{huang2022}). Her kuadrupolün ofseti, sütun-başına projeksiyonla
+\emph{doğrudan} çözülür:
+\begin{equation}
+\hat o_j = \frac{\sum_i T_{ij}\,A_{ij}}{\sum_i T_{ij}^2}.
+\label{eq:proj}
+\end{equation}
+Bu, kuadrupoller arası bir matris-ters-çevirme \emph{içermez}; koşullanma yalnız
+$\sum_i T_{ij}^2 \propto \beta_j$ ile belirlenir ve $\beta_j$ yayılımı
+($41.5$--$75.8$~m) per-quad ofset hatasında yalnız $1.35\times$ yayılıma yol açar
+(tekdüze). Simetrik kipte $1/|Q^2-k^2|$ bastırması \emph{yoktur}, çünkü hiçbir
+kip-ayrıştırması/inversiyonu yapılmaz (Tablo~\ref{tab:obs}).
+
+\textbf{BPM-ofset bağışıklığı.} Statik BPM ofseti DC'dir; $f_j$'de demodülasyon
+($\cos\omega_j t$ ile çarpıp ortalamak) onu \emph{otomatik} söndürür. Bu nedenle
+$100\,\mu$m BPM ofseti altında geri-çatım korelasyonu $1.000000$'dır
+(Tablo~\ref{tab:obs}); $\Delta R$ yönteminin gerektirdiği common-mode iptal
+gerekmez --- manyetik SQUID-BPM yerine standart kapasitif BPM yeterlidir
+(§\ref{sec:capacitive}).
+
+\begin{table}[t]
+\centering
+\caption{Mod-ayrımlı geri-çatım korelasyonu (analitik FODO; 40 tohum;
+$100\,\mu$m BPM ofseti + $1\,\mu$m gürültü). Per-quad AC-BBA simetrik ve
+antisimetrik kipi eşit kurtarır; $\Delta R$ inversiyonu simetrikte çöker.}
+\label{tab:obs}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Yöntem & simetrik $r$ & antisim $r$ \\
+\midrule
+\textbf{Per-quad AC-BBA} & $\mathbf{0.997\pm0.001}$ & $\mathbf{0.997\pm0.001}$ \\
+$\Delta R$ inversiyonu & $0.128\pm0.030$ & $0.588\pm0.088$ \\
+\midrule
+\multicolumn{3}{@{}l}{$\kappa(\Delta R)=3.74\times10^4$;\;
+per-quad $\sigma_o$ yayılımı $1.35\times$;} \\
+\multicolumn{3}{@{}l}{AC-BBA $100\,\mu$m ofset altında $r=1.000000$.} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Gerçek-zaman ve girişimsizlik.} Modülasyon $\sim$\%1--2 derinlikte,
+1--10~kHz'de süreklidir; tur-tur BPM örneklemesi ($f_\mathrm{rev}=224$~kHz) ile
+1~s'lik entegrasyon $N_\mathrm{tur}=2.2\times10^5$ örnek verir. Per-quad
+istatistiksel ofset hassasiyeti
+$\sigma_\mathrm{stat} = \sigma_\mathrm{BPM}\sqrt{2/N_\mathrm{tur}}/\sqrt{\textstyle\sum_i T_{ij}^2}
+\approx 24$~nm (depth \%2, $\sigma_\mathrm{BPM}=1\,\mu$m); sınır istatistik
+değil, optik-model ($\beta$-beating) bilgisidir.
 
 \section{Sonuçlar: geri-çatım ve kalan sahte EDM}
 \label{sec:results}
-\TODO{LINCHPIN. 48-kuadrupol K-modülasyonu $\to$ tek-demet salınım genliği $\to$
-per-quad ofset geri-çatım $\to$ kalan sahte-EDM (doğrulanmış tahmin ediciyle ileri
-hesap). Gerçekçi kapasitif-BPM ofseti ($\sim$100$\,\mu$m) + gürültü ($\sim$1$\,\mu$m)
-altında. Ana sorular: (i) simetrik kip gözlenebilir mi (uniform-frekans $\Delta R$
-mi, frekans-çoğullamalı per-quad mı)? (ii) kalan sahte-EDM $<1$ nrad/s'ye iner mi?
-(iii) gerçek-zamanlı yeterli mi? Tablo + figür.}
+All-quad K-modülasyonu, per-quad ofseti $\hat o_j$ ölçer (Denklem~\ref{eq:proj}).
+Düzeltme sonrası kalan demet-quad ofset $e_j = o_j - \hat o_j$, gerçek optik
+$T^\mathrm{true}$ ($\beta$-beating $\varepsilon$) ile model $T^\mathrm{model}$
+arasındaki uyuşmazlıktan doğan per-quad kazanç hatasıyla belirlenir. Bu kalan
+ofset deseni, doğrulanmış tahmin ediciye misalignment olarak verilip kalan
+geometrik-faz sahte-EDM'i hesaplanır (konservatif: ideal yörünge-yönlendirmenin
+kapalı-yörünge sönümü sayılmaz $\to$ üst sınır).
+
+Tahmin edici, azaltılmış-ayar koşumunda da $\sigma^2$ ölçeklemesini korur
+(üs $p = 2.002$, 10$\to$5$\,\mu$m); ölçek $A_\mathrm{eff} = 1.18\times10^4$
+rad/s/m². 10$\,\mu$m giriş hizalama hatası için gerçek demet-quad ofset RMS'i
+$53.8\,\mu$m'dir. Sonuçlar (Tablo~\ref{tab:linchpin}): $\beta$-beating yokken
+(yalnız istatistiksel taban, 24~nm) kalan sahte-EDM $4.2\times10^{-11}$ rad/s,
+hedefin $24\times$ altındadır. Hedef ($1$~nrad/s) $\varepsilon \approx \%1$'de
+($\sigma_\mathrm{res} \approx 0.29\,\mu$m) aşılır; $\varepsilon \lesssim \%0.5$
+için $\sim$$4\times$ marjla altında kalınır.
+
+\begin{table}[t]
+\centering
+\caption{LINCHPIN: all-quad AC-BBA sonrası kalan geometrik-faz sahte-EDM,
+optik-model $\beta$-beating $\varepsilon$'nin fonksiyonu olarak (giriş hizalama
+$\sigma=10\,\mu$m, depth \%2, $t_\mathrm{int}=1$~s, $\sigma_\mathrm{BPM}=1\,\mu$m).
+Hedef $1$~nrad/s; gerçek EDM $9.81\times10^{-10}$ rad/s.}
+\label{tab:linchpin}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+$\varepsilon$ & kalan ofset & $|$sahte-EDM$|$ (rad/s) & $<10^{-9}$? \\
+\midrule
+\%0 (stat.\ taban) & $0.024\,\mu$m & $4.2\times10^{-11}$ & evet ($24\times$) \\
+\%0.1 & $0.038\,\mu$m & $\sim1.7\times10^{-11}$ & evet \\
+\%0.5 & $0.149\,\mu$m & $\sim2.6\times10^{-10}$ & evet \\
+\%1.0 & $0.296\,\mu$m & $1.03\times10^{-9}$ & hayır ($\approx$ EDM) \\
+\%5.0 & $1.507\,\mu$m & $1.74\times10^{-8}$ & hayır \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Sonuç.} Make-or-break \emph{pozitiftir ama koşulludur}: per-quad AC-BBA,
+simetrik (orbit-kör) kipi görerek ve BPM-ofsetine bağışık kalarak no-go'yu atlar;
+kalan sahte-EDM ise yalnız \emph{optik-model bilgisiyle} ($\beta$-beating
+$\varepsilon \lesssim \%0.5$--$1$) sınırlıdır --- bu, istatistik veya
+indirgenemez no-go değil, LOCO ile ulaşılabilir bir kalibrasyon hedefidir
+(\%1 LOCO operasyonel; bkz.\ ikinci-makale drift çalışması).
 
 \section{Kapasitif-BPM fizibilitesi}
 \label{sec:capacitive}
@@ -220,11 +329,24 @@ ileri-hesabıdır; izleme/gözlenebilirlik içermez.
 
 \section{Tartışma ve sonuç}
 \label{sec:conclusion}
-\TODO{Karar kapısı. Linchpin başarılıysa: ucuz, gerçek-zamanlı, nondestructive,
-SQUID-gerektirmeyen hizalama-ölçüm yöntemi --- \cite{omarov2022}'nin açık
-bıraktığı ölçümü kapatır. Başarısızsa: simetrik-kip indirgenemezliğinin keskin
-gözlenebilirlik-sınırı teoremi. Her iki sonuç da değerli; hangisi olduğunu §6
-belirler.}
+Karar kapısı \emph{pozitif} sonuçlandı: all-quad per-quad AC-BBA, standart
+(kapasitif) BPM'lerle, geometrik-faz sahte-EDM'i süren kuadrupol hizalama
+hatalarını --- simetrik (orbit-kör) bileşeni dahil --- gerçek-zamanlı ve
+BPM-ofsetine bağışık ölçer. Bu, Referans~\cite{omarov2022}'nin açık bıraktığı
+ölçüm boşluğunu (\S\ref{sec:intro}) kapatır ve SQUID-tabanlı BPM gereksinimini
+kaldırır. Yöntem yörünge-farkı inversiyonunun no-go'sunu (\S\ref{sec:negative})
+\emph{atlar}, çünkü kip-ayrıştırması/inversiyonu değil, kuadrupol-başına doğrudan
+ölçüm yapar.
+
+Koşul nettir ve dürüstçe ifade edilir: kalan sahte-EDM hedefin altına \emph{ancak}
+optik-model ($\beta$-beating) $\varepsilon \lesssim \%0.5$--$1$ düzeyinde
+bilindiğinde iner (Tablo~\ref{tab:linchpin}). Bu sınır istatistiksel değildir
+(istatistiksel taban $\sim$24~nm $\to 4\times10^{-11}$ rad/s) ve no-go'nun
+indirgenemez simetrik tabanı da değildir; LOCO ile ulaşılabilir bir
+\emph{kalibrasyon} hedefidir. Yöntemin asıl katkısı tekniksel yenilik değil
+(eşzamanlı AC-BBA bilinir, \cite{huang2022}); (i) BBA gözlemini geometrik-faz
+sahte-EDM sistematiğine bağlamak, (ii) simetrik-kip gözlenebilirliğini nicelemek,
+(iii) pEDM için kapasitif-BPM fizibilitesini göstermektir.
 
 \section*{Üretilebilirlik}
 Doğrulanmış sahte-EDM tahmin edici \texttt{berry\_data/false\_edm\_4d.py}

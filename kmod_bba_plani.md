@@ -10,6 +10,14 @@
 > İlgili belgeler: `omarov.md` (§9 boşluk, §10 nerede duruyoruz), `orbit_ileri_olcum.md`
 > §9, `false_edm_harmonic_sinir.md` (no-go), `literatur/` (prior-art), `CLAUDE.md`
 > (proje kuralları). Bu plan onları **özetler ve birleştirir**.
+>
+> **GÜNCELLEME (2026-06): LINCHPIN ÇALIŞTIRILDI → `kmod_bba_sonuclar.md`.**
+> Sonuç **POZİTİF ama koşullu**: per-quad AC-BBA simetrik modu görür (no-go'yu
+> atlar; AC-BBA sim/antisim corr=0.997 vs ΔR sim=0.13), BPM-ofsetine bağışık,
+> istatistiksel taban ~24 nm/1s. Kalan sahte-EDM **β-beating ε ≲ %0.5–1**
+> kontrol edilirse hedefin (1 nrad/s) altına iner (ε=%1 → 1.03e-9; ε=0 → 4.2e-11;
+> p=2.002 doğrulandı). Kod: `ac_bba_observability.py`, `ac_bba_linchpin.py`,
+> `analytic_kmod.py` (v2.8). §6 testleri tamamlandı; kalan iş makale figürleri.
 
 ---
 
