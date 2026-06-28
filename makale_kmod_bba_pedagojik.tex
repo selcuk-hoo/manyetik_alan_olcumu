@@ -129,8 +129,19 @@ Tüm kuadrupolleri her iki düzlemde rastgele RMS $\sigma$ ile kaydırıp dikey
 presesyon hızının büyümesini izlediğimizde, sahte EDM kuadratik ölçeklenir. Sabit
 desende genliği $\sigma=10,5,2.5\,\mu$m olarak ölçeklediğimizde, doğrulanmış
 tahmin edici (4B kapalı yörünge + model-fit seküler eğim) altı tohumun hepsinde
-üs $p = 2.00 \pm 0.01$ verir (Tablo~\ref{tab:results}); yani saf geometrik faz,
-lineer kaçak yoktur. Bu, \cite{omarov2022} Şekil 9(a)'nın nicel karşılığıdır.
+üs $p = 2.00 \pm 0.01$ verir (Tablo~\ref{tab:results}, Şekil~\ref{fig:sigma});
+yani saf geometrik faz, lineer kaçak yoktur. Bu, \cite{omarov2022} Şekil
+9(a)'nın nicel karşılığıdır.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\columnwidth]{fig_kmod_sigma.png}
+\caption{Sahte-EDM hizalama RMS'i $\sigma$ ile \emph{kuadratik} ölçeklenir:
+log-log eğim $p=2.00$ ($\sigma=2.5,5,10\,\mu$m, 4D-CO + model-fit estimator).
+Bu üs, geometrik (Berry) fazın parmak izidir --- doğrusal bir kaçak olsaydı eğim
+1'e kayardı.}
+\label{fig:sigma}
+\end{figure}
 
 \textbf{Berry fonksiyoneli: sahte EDM yörüngenin neresinden gelir?} Sahte EDM'in
 kapalı yörüngenin bir \emph{bilineer fonksiyoneli} olduğunu doğrudan veriden
@@ -484,7 +495,21 @@ ve mekanik roll ($\lesssim$0.3~mrad) veya skew-BBA ile kontrol edilmelidir.
 Doğrudan ölçtük (6-seed $\psi$-taraması, 0.3~$\mu$m kalan misalignment üstünde):
 $\psi=0.2$~mrad'da tilt katkısı \emph{sıfırla tutarlıdır} ($-0.004\pm0.79$~nrad/s)
 ve toplam sahte-EDM baseline'da ($\sim$1.3~nrad/s, $\beta$-beating-sınırlı) kalır;
-tilt ancak $\psi\!\approx\!0.5$~mrad'da baskın olur ($+2.7$~nrad/s).}
+tilt ancak $\psi\!\approx\!0.5$~mrad'da baskın olur ($+2.7$~nrad/s)
+(Şekil~\ref{fig:syst}).}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{fig_kmod_syst.png}
+\caption{Quad-tilt sistematiği (her quad bağımsız rastgele roll). (a) 0.3~$\mu$m
+kalan misalignment üstünde tilt $\psi$-taraması (6 tohum): $\psi=0.2$~mrad'da
+kalan sahte-EDM hedefte kalır ($\sim$1.3~nrad/s; tilt katkısı $\approx0$), yeşil
+bant tolerans bölgesidir; $\psi=0.5$~mrad'da tilt baskın olur. (b) Tilt'in
+CW/CCW EDM-kanalına katkısının söndürülebilir (EVEN) ve kalan (ODD) bileşenleri
+(20 tohum, 10~$\mu$m + 1~mrad); ODD$>$EVEN olduğundan demet-yönü ters-çevirmesi
+tilt'i \emph{gidermez}. Üretim: \texttt{make\_kmod\_figures.py}.}
+\label{fig:syst}
+\end{figure*}
 
 \begin{table}[t]
 \centering
