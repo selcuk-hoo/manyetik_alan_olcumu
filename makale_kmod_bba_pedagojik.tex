@@ -439,6 +439,63 @@ $\varepsilon \lesssim \%0.5$--$1$) sınırlıdır --- bu, istatistik veya
 indirgenemez no-go değil, LOCO ile ulaşılabilir bir kalibrasyon hedefidir
 (\%1 LOCO operasyonel; bkz.\ ikinci-makale drift çalışması).
 
+\section{Sistematik bütçe: BPM ve quad tilt}
+\label{sec:systematics}
+§\ref{sec:results} kalan sahte-EDM'i \emph{optik-model} ($\beta$-beating)
+hatasıyla sınırladı. Bütçeyi tamamlamak için iki ek kaynağı --- BPM kusurları ve
+quad \emph{tilt} (roll) --- ayrı ayrı nicelliyoruz (\texttt{ac\_bba\_systematics.py}).
+
+\textbf{BPM ofseti: bağışıklık (sadece iddia değil, hesaplandı).} Statik BPM
+ofseti DC'dir; modülasyon frekansında demodülasyon onu söndürür. Bunu zaman-domeni
+demodülasyonunu açıkça hesaplayarak doğruladık: 100~$\mu$m ofset altında, keyfi
+(1--10~kHz) frekanslarla per-quad ofset yanlılığı yalnız $\sim$65~nm
+(bütçe eşiği $\sim$300~nm'nin çok altında); modülasyon frekanslarını entegrasyon
+penceresine \emph{kilitlersek} (Dirichlet çekirdeği sıfırlanır) yanlılık makine-
+epsilon, yani \emph{tam} sıfırdır. $\Delta R$ yönteminin aksine common-mode iptal
+gerekmez.
+
+\textbf{BPM kazanç hatası: asıl BPM sistematiği, ama bastırılır.} Çarpımsal kazanç
+hatası $\delta g_i$ per-quad ofseti $\hat o_j = o_j(1 + \sum_i w_{ij}\delta g_i)$
+($w_{ij}=T_{ij}^2/\sum_i T_{ij}^2$) kadar yanlıltır. 48 BPM üzerinden ortalandığı
+için \%1 kazanç hatası yalnız 0.087~$\mu$m kalan ofset ($8.8\times10^{-11}$ rad/s)
+verir --- \%1 $\beta$-beating'in (0.30~$\mu$m) altında, yani \emph{baskın değil}.
+
+\textbf{Quad tilt: iki kanal.} Eğik bir quad'ın gradyanı modüle edilince skew
+(çapraz) bir kick doğar; bu (a) BBA ölçümünü çapraz-düzlem sızıntısıyla yanlıltır
+($\hat o_y \mathrel{+}= 2\psi\, o_x$; kalan sahte-EDM $\propto (2\psi)^2 f_0$, yani
+tilt'te \emph{ikinci} derece, $\psi=1$~mrad'da $\sim$$1.4\times10^{-10}$), ve (b)
+tilt sahte-EDM'i geometrik faz üzerinden \emph{doğrudan} besler. Doğrulanmış
+estimator ile (b) kanalı (a)'dan \emph{baskındır} (Tablo~\ref{tab:syst}):
+$\psi=0.1$~mrad bütçeyi değiştirmez, ama $\psi=1$~mrad hedefin $\sim$3$\times$
+üstüne çıkar.
+
+\Sezgi{Önemli \emph{dürüst sınır}: dx,dy AC-BBA tilt'i \emph{ölçmez}. Bir quad'ın
+kendi ekseni etrafında dönmesi (roll), merkez-ofsetine bakan BBA'ya neredeyse
+görünmez. O hâlde tilt ya mekanik olarak $\lesssim 0.1$~mrad'a hizalanmalı (tipik
+survey'den biraz sıkı ama olağan), ya da \emph{skew}-bileşeni modüle eden bir
+``skew-BBA'' uzantısıyla ölçülmelidir. Bu, $\beta$-beating'den ayrı, açıkça
+belirtilen bir bütçe kalemidir.}
+
+\begin{table}[t]
+\centering
+\caption{Sistematik bütçe özeti. Bağlayıcı kalemler $\beta$-beating ve quad
+tilt'tir; ikisi de tasarım/kalibrasyonla ulaşılabilir (no-go'nun indirgenemez
+tabanından farklı).}
+\label{tab:syst}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Kalem & Eşik ($<1$~nrad/s) & Ulaşılabilirlik \\
+\midrule
+$\beta$-beating (optik) & $\varepsilon \lesssim \%0.5$--$1$ & LOCO (rutin) \\
+BPM ofset & --- (bağışık) & kilitli $f$'de tam \\
+BPM kazanç & $\sigma_g \lesssim \%1$--$2$ & kalibrasyon \\
+Quad tilt (roll) & $\psi \lesssim 0.1$--$0.3$~mrad & mekanik / skew-BBA \\
+İstatistik (BPM gürültü) & --- ($\sim$24~nm/1~s) & sorun değil \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Kapasitif-BPM fizibilitesi}
 \label{sec:capacitive}
 SQUID-tabanlı BPM manyetik olduğundan CR demetlerin \emph{ayrımını} ölçebilir;
@@ -521,12 +578,14 @@ kaldırır. Yöntem yörünge-farkı inversiyonunun no-go'sunu (\S\ref{sec:negat
 \emph{atlar}, çünkü kip-ayrıştırması/inversiyonu değil, kuadrupol-başına doğrudan
 ölçüm yapar.
 
-Koşul nettir ve dürüstçe ifade edilir: kalan sahte-EDM hedefin altına \emph{ancak}
-optik-model ($\beta$-beating) $\varepsilon \lesssim \%0.5$--$1$ düzeyinde
-bilindiğinde iner (Tablo~\ref{tab:linchpin}). Bu sınır istatistiksel değildir
-(istatistiksel taban $\sim$24~nm $\to 4\times10^{-11}$ rad/s) ve no-go'nun
-indirgenemez simetrik tabanı da değildir; LOCO ile ulaşılabilir bir
-\emph{kalibrasyon} hedefidir. Yöntemin asıl katkısı tekniksel yenilik değil
+Koşullar net ve dürüstçe ifade edilir (Tablo~\ref{tab:syst}): kalan sahte-EDM
+hedefin altına \emph{ancak} optik-model ($\beta$-beating) $\varepsilon \lesssim
+\%0.5$--$1$ \emph{ve} quad tilt $\psi \lesssim 0.1$--$0.3$~mrad düzeyinde
+kontrol edildiğinde iner. BPM ofseti AC demodülasyonla bağışıktır ve BPM kazanç
+hatası (\%1) 48 BPM üzerinden bastırılır --- ikisi de baskın değildir. Bu
+sınırlar istatistiksel değildir (istatistiksel taban $\sim$24~nm $\to
+4\times10^{-11}$ rad/s) ve no-go'nun indirgenemez simetrik tabanı da değildir;
+tasarım/kalibrasyonla (LOCO, mekanik/skew-BBA) ulaşılabilir hedeflerdir. Yöntemin asıl katkısı tekniksel yenilik değil
 (eşzamanlı AC-BBA bilinir, \cite{huang2022}); (i) BBA gözlemini geometrik-faz
 sahte-EDM sistematiğine bağlamak, (ii) simetrik-kip gözlenebilirliğini nicelemek,
 (iii) pEDM için kapasitif-BPM fizibilitesini göstermektir.

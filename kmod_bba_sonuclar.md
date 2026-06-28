@@ -164,7 +164,78 @@ python3 make_kmod_figures.py
 ayar (n_turns=14 CO, t2=3e-4) sürücüsü `/tmp/kmod_recover/fast_est.py`;
 p≈2 aynı koşumda doğrulanır.
 
-## 6. Makale
+## 6. Sistematik bütçe: BPM ofset/kazanç ve quad-tilt (`ac_bba_systematics.py`)
+
+β-beating bütçesi §4'te. Üç ek sistematik nicellendi (soru: "BPM-ofset ve quad-tilt
+analizi yapıldı mı?" — evet, aşağıda):
+
+### 7.1 BPM OFSET — bağışıklık RİGORÖZ doğrulandı (varsayım değil)
+Önceki gözlenebilirlik testinde ofset bağışıklığını *model kurarken* (genliğe
+eklemeyerek) varsaymıştık. Şimdi zaman-domeni demodülasyonunu gerçekten hesapladık:
+BPM her tur okur, modülasyon frekansında demodüle edilir; statik ofset (DC) Dirichlet
+çekirdeğiyle sızabilir.
+
+| Frekans seçimi | ô ofset-yanlılığı (100 μm ofset altında) |
+|----------------|------------------------------------------|
+| serbest (1–10 kHz keyfi) | RMS **65 nm**, maks 261 nm |
+| pencere-kilitli (f=tam·f_rev/N) | **≈ makine-epsilon (TAM sıfır)** |
+
+→ Serbest frekansta bile (~65 nm) bütçe eşiğinin (~300 nm) **ÇOK altında**;
+frekansları entegrasyon penceresine kilitlersek ofset bağışıklığı **tam**. BPM
+ofseti AC-BBA için sistematik DEĞİL (ΔR'nin aksine, common-mode iptal gerekmez).
+
+### 7.2 BPM KAZANÇ hatası — asıl BPM sistematiği, 48 BPM'de ortalanır
+Gerçek BPM sistematiği ofset değil çarpımsal kazanç hatası δg_i'dir.
+ô_j = o_j(1 + Σ_i w_ij δg_i), w_ij = T_ij²/Σ_i T_ij² (toplam 1).
+
+| σ_gain | kalan ofset RMS | kalan sahte-EDM | hedef<1e-9? |
+|--------|-----------------|------------------|-------------|
+| %1 | 0.087 μm | 8.8×10⁻¹¹ | ✓ |
+| %5 | 0.43 μm | 2.2×10⁻⁹ | ✗ |
+| %10 | 0.87 μm | 8.8×10⁻⁹ | ✗ |
+
+→ Kazanç 48 BPM üzerinden ortalandığından (per-quad değil) β-beating'den **baskın
+değil**: %1 kazanç → 0.087 μm < %1 β-beating → 0.30 μm. %1 kazanç kalibrasyonu rutin.
+
+### 7.3 QUAD TİLT — İKİ kanal, ayrı ayrı
+**(a) BBA-ölçüm yanlılığı (çapraz-düzlem sızıntısı, lineer model):** eğik quad'ın
+modülasyonu skew kick verir → ô_y += 2ψ·o_x. Düzeltme artığı ∝ 2ψ·o → kalan
+sahte-EDM ∝ (2ψ)²·f₀ (tilt'te İKİNCİ derece): ψ=1 mrad → 1.4×10⁻¹⁰ (küçük).
+
+**(b) Tilt'in DOĞRUDAN geometrik-faz kanalı (C++ estimator):** tilt, sahte-EDM'i
+BBA'dan bağımsız da besler. Sabit misalignment + tilt taraması (azaltılmış ayar,
+2 seed; `/tmp/kmod_recover/fast_est.py tilt`):
+
+| mis σ | tilt ψ | \|sahte-EDM\| | hedef<1e-9? |
+|-------|--------|---------------|-------------|
+| 0 | 1 mrad | 1.0×10⁻⁸ ± 4.5×10⁻⁹ | ✗ (büyük saçılma; kısmen CO-bulma artığı) |
+| 0.30 μm | 0 (baseline) | 7.6×10⁻¹⁰ ± 6.8×10⁻¹⁰ | ✓ |
+| 0.30 μm | **0.1 mrad** | 3.8×10⁻¹⁰ ± 3.1×10⁻¹⁰ | ✓ (baseline'ı değiştirmez) |
+| 0.30 μm | **1 mrad** | 3.0×10⁻⁹ ± 1.9×10⁻⁹ | ✗ |
+| 10 μm | 1 mrad | 8.3×10⁻⁷ | (dx·dy kanalı domine) |
+
+→ **Tilt'in doğrudan kanalı (b), BBA-yanlılığından (a) BASKINDIR.** Tilt toleransı
+**≈ 0.1–0.3 mrad**: 0.1 mrad'da bütçe değişmez, 1 mrad'da hedefi 3× aşar.
+
+**Önemli kapsam notu (dürüst sınır):** dx,dy AC-BBA tilt'i **ölçmez**. Tilt ayrı
+kontrol gerektirir: (i) mekanik roll hizalama ≲0.1 mrad (ulaşılabilir ama tipik
+survey'den sıkı), veya (ii) skew-bileşen modülasyonuyla bir **skew-BBA uzantısı**.
+Bu, yöntemin açık bir sınırıdır; β-beating bütçesinden ayrı bir kalemdir.
+
+### 7.4 Sistematik bütçe özeti
+
+| Kalem | Eşik (hedef <1 nrad/s için) | Ulaşılabilirlik |
+|-------|------------------------------|------------------|
+| β-beating (optik model) | ε ≲ %0.5–1 | LOCO (rutin) |
+| BPM ofset | — (bağışık; kilitli f'de tam) | sorun değil |
+| BPM kazanç | σ_g ≲ %1–2 | kalibrasyon (rutin) |
+| Quad tilt (roll) | ψ ≲ 0.1–0.3 mrad | mekanik veya skew-BBA |
+| İstatistik (BPM gürültü) | — (~24 nm/1s) | sorun değil |
+
+Bağlayıcı kalemler: **β-beating ve quad-tilt**. İkisi de tasarım/kalibrasyon-
+ulaşılabilir; no-go'nun indirgenemez tabanından farklı.
+
+## 7. Makale
 
 İki sürüm: `makale_kmod_bba.tex` (sıkı/teknik) ve **`makale_kmod_bba_pedagojik.tex`**
 (pedagojik — sezgi kutuları + figürler + tüm eski TODO'lar dolduruldu: Berry
