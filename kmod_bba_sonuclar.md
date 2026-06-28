@@ -155,6 +155,20 @@ python3 ac_bba_linchpin.py --calib --workers 3 --seeds 3
 python3 ac_bba_linchpin.py --sweep --workers 3 --seeds 3
 ```
 
+```bash
+# Figürler (fig_kmod_obs.png + fig_kmod_linchpin.png; matplotlib gerekir)
+python3 make_kmod_figures.py
+```
+
 **Not:** Pahalı estimator koşumları (CO-bulma + spin takibi) için azaltılmış
 ayar (n_turns=14 CO, t2=3e-4) sürücüsü `/tmp/kmod_recover/fast_est.py`;
 p≈2 aynı koşumda doğrulanır.
+
+## 6. Makale
+
+İki sürüm: `makale_kmod_bba.tex` (sıkı/teknik) ve **`makale_kmod_bba_pedagojik.tex`**
+(pedagojik — sezgi kutuları + figürler + tüm eski TODO'lar dolduruldu: Berry
+fonksiyoneli, drift/LOCO negatifi, kapasitif-BPM gürültü/süre modeli, Mirza/Huang
+ayrışması). Figürler: `fig_kmod_obs.png` (gözlenebilirlik: ΔR-SV spektrumu +
+mod-ayrımlı geri-çatım), `fig_kmod_linchpin.png` (kalan sahte-EDM vs β-beating),
+`berry_data/berry_weights.png` (Berry ağırlık profili). Üretici: `make_kmod_figures.py`.
