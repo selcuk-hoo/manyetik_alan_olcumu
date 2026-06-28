@@ -255,12 +255,36 @@ Aynı 10 μm misalignment deseni; sahte-EDM (EDMSwitch=0); yön (CW/CCW) × pola
    küçük; ama 0.3 μm kalan üstünde baskın — §7.3). Tilt katkısı (CW−CCW)/2
    kanalında **kalır** (~6.7e−9 marjinal) → ters-çevirme tilt'i ayrıca temizlemez.
 
-→ **Sonuç:** CW/CCW+flip, tilt sahte-EDM'ini *özel olarak* gidermez; tilt aynı
-bending-kuplaj/geometrik-faz mekanizmasından geçer ve ters-çevirme onu yalnız
-misalignment kanalıyla aynı mütevazı oranda (~3.4× ensemble) bastırır. Tilt yine
-**≲0.1–0.3 mrad kontrol** (veya skew-BBA) gerektirir. (Tek-seed; marjinal farklar
-CO-bulma gürültüsü mertebesinde — ensemble ile pekiştirilebilir; dejenerasyon
-bulgusu kesin.)
+→ **Sonuç:** CW/CCW+flip, tilt sahte-EDM'ini *özel olarak* gidermez (tek-seed;
+20-seed ensemble ile pekiştirildi, aşağı).
+
+**20-SEED ENSEMBLE (CO-gürültüsünü söndürmek için; `/tmp/kmod_recover/cwccw_ens.py`).**
+Her seed AYNI 10 μm per-quad misalignment + per-quad random 1 mrad tilt; 4 ölçüm
+(CW/CCW × tilt 0/1mrad). Tüm 20 seed temiz (maks CO-artık 0.018 μm, başarısızlık
+yok). Tilt marjinalini (tilt'in EDM-kanalına katkısı) **EVEN** (CW/CCW farkında
+söner) ve **ODD** (kalır) olarak ayırdık:
+
+| Büyüklük | median \|·\| | RMS |
+|----------|-------------|-----|
+| EDM-kanalı false-EDM (CW−CCW)/2, tilt'siz | 2.82×10⁻⁷ | 8.41×10⁻⁷ |
+| … tilt'li | 2.79×10⁻⁷ | 8.10×10⁻⁷ |
+| Tilt marjinali EVEN (CW/CCW **söner**) | 6.1×10⁻⁹ | 3.07×10⁻⁸ |
+| Tilt marjinali ODD (CW/CCW **kalır**) | 7.85×10⁻⁹ | 5.73×10⁻⁸ |
+| **ODD/EVEN oranı** | **1.29** | **1.87** |
+
+İki sağlam bulgu:
+1. **(CW−CCW)/2 EDM-kanalı false-EDM'i ~2.8×10⁻⁷ (median)** — projedeki "CW/CCW
+   telafi 3.4×, kalan 474× EDM ≈ 4.6×10⁻⁷" ile tutarlı (testi doğrular). CW/CCW
+   geometrik-faz sahte-EDM'ini genelde **temizlemez** (büyük ODD bileşen).
+2. **Tilt marjinali DOMİNANT ODD** (ODD/EVEN = 1.3–1.9, hem median hem RMS):
+   CW/CCW yalnız EVEN kısmı (~%40) söndürür; **ODD çoğunluk (~%60) KALIR**. Kalan
+   tilt katkısı (1 mrad'da) hedefe (10⁻⁹) göre **~8× (median) – 57× (RMS)**.
+
+→ **NİHAİ:** CW/CCW + quad-flip tilt sahte-EDM'ini gidermez — (a) flip CW/CCW ile
+özdeş (bağımsız knob değil), (b) tilt'in EDM-kanalı katkısı dominant odd → ters-
+çevirme onu söndüremez, hedefin ~8–57× üstünde kalır. **Tilt bağımsız kontrol
+gerektirir: ≲0.1–0.3 mrad mekanik roll veya skew-BBA.** (Marjinal ortalaması
+1.46σ — büyük-f seed'lerce çarpık; ama EVEN/ODD ayrımı ve dejenerasyon sağlam.)
 
 ### 7.4 Sistematik bütçe özeti
 
