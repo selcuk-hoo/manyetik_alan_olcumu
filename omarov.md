@@ -216,3 +216,75 @@ alt-uzay yapısı** açık bırakılmış. Net olmayan üç nokta:
 | Sec. IV A: 5/10/50 μm, SQUID-BPM | orbit-monitör = ucuz ikame |
 | App. E #1 vertical velocity | ana sistematik; simetrik latis bastırır |
 | App. E #3 S_s·β_y·E_s | "SBA ile kolay değil"; ∮E_s ds=0 argümanı |
+
+---
+
+## 9. KRİTİK BOŞLUK: CR-ayrım ÖLÇÜMÜ önerildi ama test EDİLMEDİ
+
+Geometrik-faz kontrolünün tüm zinciri **CR demet ayrımını ölçüp dipole-korektörlerle
+küçültmeye** dayanıyor (§4). Ama bu ölçümün kendisi makalede **gösterilmiyor**:
+
+**Makalede VAR olan (öneri düzeyinde, 032001-13):**
+- Konum, halka çevresinde **48 bin'e** bölünüp örnekleniyor (Fig. 15; 24 FODO =
+  48 quad = 48 azimut konumu → fiilen **48-BPM** örneklemesi).
+- Ayrım "magnetic pickup'larla ölçülebilir"; μm-ayrım → birkaç cm'de pT-radyal B.
+- SNR için **K-modülasyon** (quad alanları %1, 1–10 kHz) gerekiyor.
+- Enstrüman: flux-gate magnetometre (birkaç pT/√Hz) **veya** SQUID-BPM
+  (10 fT/√Hz, Ref. [64]).
+
+**Makalede TEST EDİLMEYEN (boşluk):**
+1. **48-BPM/pickup'larla CR-ayrım profilinin doğru GERİ-ÇATILABİLDİĞİ** hiç simüle
+   edilmemiş. Reconstruction prosedürü (BPM ofsetleri, gürültü, K-mod çözümü →
+   ayrım haritası) yok. Tek paragraflık bir enstrüman önerisi.
+2. **Ölçümün doğruluğu** (ayrım gerçekten hedef seviyede ölçülebilir mi) test
+   edilmemiş. Makalenin testleri **fiziği** doğruluyor (σ²; CW+CCW+polarite iptali
+   <1 nrad/s; σ=100μm/>1mm ayrım → <1nrad/s) — yani "EĞER ayrımı küçültürsen
+   geometrik faz düşer". Ama "ayrımı **ölçüp** küçültme" enstrüman zincirinin
+   kendisi nicel sınanmamış.
+3. **Simetrik (orbit-kör) bileşene körlük ihtimali açıkça ele alınmamış.** Ayrım
+   ölçümü kapalı-yörünge-farkı tabanlı; simetrik misalignment küçük ayrım üretir
+   (yüksek-k, G_k ∝ 1/|Q²−k²| ile bastırılır) → 48-BPM/SQUID-BPM bu bileşeni
+   göremeyebilir. Makale bunu test etmiyor.
+
+→ **Özetle Omarov, geometrik-faz "düzeltme knob'unun" (CR-ayrım) FİZİĞİNİ
+kanıtlıyor; ama o knob'u sürecek ÖLÇÜMÜN (48-BPM/SQUID-BPM + K-mod reconstruction)
+yapılabilirliğini ve simetrik-artığa körlüğünü açık bırakıyor.** Tam da bizim
+çalışmanın oturduğu yer burası.
+
+---
+
+## 10. NEREDE DURUYORUZ (bu oturum, make-or-break + Omarov karşılaştırması)
+
+**Doğrulanmış estimator (kritik temel):** σ=10→5→2.5 μm ölçeklemesinde sahte EDM
+**p = 2.00 ± 0.01** (her seed) → saf kuadratik geometrik faz, lineer kaçak YOK.
+CO+model-fit yöntemimiz Omarov Fig. 9a'sını birebir üretiyor. (`/tmp/sigma_olcekleme.py`)
+
+**Bu oturumun nicel zinciri (EDMSwitch ile, doğrulanmış):**
+
+| Ölçüm | Değer | Script (/tmp) |
+|-------|-------|---------------|
+| Gerçek EDM (η=1.88e-15), TEK/diferansiyel | 9.81×10⁻¹⁰ rad/s | `edm_only.py` |
+| 10 μm sahte EDM (seküler, σ²) | ~10⁻⁶ (worst ~6.5e-6) | `cwccw_ensemble.py` |
+| CW/CCW telafisi (tek başına) | **3.4×** (artık 474× EDM) | `cwccw_telafi.py` |
+| **Orbit-düzeltme kazancı** (antisim çıkar) | **7.7×** (artık 62× EDM) | `orbit_duzeltme.py` |
+| Kalan simetrik orbit-kör artık | 62× EDM (6.05e-8) | `orbit_duzeltme.py` |
+| Dejenerasyon: CCW ≡ CW+polarite-flip | özdeş (4-lü → 2-li) | `cwccw_validate` |
+
+**Bizim konumumuz:** Orbit-monitör (standart BPM) = **SQUID-BPM'in ucuz ikamesi**,
+SBA'nın tamamlayıcısı DEĞİL. Geometrik-faz sahte-EDM'in **orbit-görünür (antisim)
+kısmını 7.7× temizliyor** (doğrudan test). **Yeni katkı:** Omarov'un §9'da açık
+bıraktığı iki şeyi nicelliyoruz — (a) ayrım/orbit ölçümünün alt-uzay yapısı
+(antisim görünür / simetrik kör), (b) simetrik orbit-kör artığın **paylaşılan
+sınırı** (62×, hem bizim hem SQUID-BPM hem CW/CCW için kör).
+
+**Omarov'un bu konuda durduğu yer:** Geometrik fazı CW+CCW+polarite + CR-ayrım
+küçültmeyle hedefin altına indirdiğini **fiziksel olarak** gösteriyor (Fig. 16,
+<1 nrad/s); ama (i) polarite-switch'in idealize latiste CW/CCW'ye dejenere olması
+(§6.1), (ii) simetrik alt-uzayın ayrı izole edilmemesi (§6.2), (iii) CR-ayrım
+ÖLÇÜMÜNÜN test edilmemesi (§9) — üç noktada **prosedür nicel olarak açık**.
+
+> **Reprodüksiyon:** Bu oturumun scriptleri `/tmp` altında (proje konvansiyonu:
+> keşif kodu repoda tutulmaz). Çekirdek estimator `berry_data/false_edm_4d.py`
+> (`measure_false_edm`, 4D-CO + model-fit). Yön/polarite: `CFG["direction"]=±1`,
+> `CFG["g0"]/["g1"]=±0.21`. Gerçek EDM: `fields.EDMSwitch=1.0`. σ-testi p=2.00 ile
+> estimator doğrulanmıştır.

@@ -93,8 +93,12 @@ tarafındaki kesin sınır teoreminde aranıyor.
 ├── trim_yontemi_pedagojik.md   # Trim yöntemi sıfırdan anlatım (iki kademe)
 ├── cosy_polarimeter.md         # COSY LYSO polarimetre özeti + zaman bütçesi
 ├── omarov_symmetric_hybrid.md  # Omarov PRD 105,032001 özeti + kanal araştırması
+├── omarov.md                   # Omarov PRD 105,032001 DİKKATLİ OKUMA: geometrik-faz
+│                               #   kontrolü (CW+CCW+polarite, CR-ayrım); SBA değil;
+│                               #   §9 BPM/ayrım-ölçüm boşluğu; §10 nerede duruyoruz
 ├── orbit_ileri_olcum.md        # İLERİ-ÖLÇÜM: f∝x_CO·y_CO; no-go=inversiyon;
 │                               #   standart BPM SQUID yerine; ham=antisim/artık=sim
+│                               #   §9 make-or-break sonuçları (7.7×, 62×, p=2.00)
 ├── MAKALE_POTANSIYELI.md / PROJE_ANALIZI_VE_ONERILER.md / SIMULASYON_PLANI_HIZALAMA.md
 ├── YAPILACAKLAR.md             # Aktif yapılacaklar
 ├── injection_kick_raporu.md    # Enjeksiyon kick raporu
@@ -201,8 +205,14 @@ Yeniden çalıştırmak için o günlüklerdeki snippet/yol notlarına bakın.
 - **4-katlı simetrik parçacık örneklemesi:** (sx, sy)=±1 dört kombinasyon ortalaması
   → betatron + ⟨ΔxΔy⟩ artığını tam söndürür (CO arama gerektirmez).
 - **Model-fit estimator:** S_y(t)=a+bt+Σ_k[c_k cos+d_k sin]; yalnız sekuler eğim b
-  çekilir. Düz polyfit veya tek-parçacık CO=True KULLANMAYIN (ideal-olmayan
-  parçacıkların sahte EDM üretimini temsil etmez — bu hata tekrar tekrar yapıldı).
+  çekilir. Düz polyfit KULLANMAYIN.
+- **NOT (2026-06, doğrulandı):** 4D-CO + model-fit (tek ideal parçacık kapalı
+  yörünge üzerinde; `berry_data/false_edm_4d.py`) **σ²-testinde p=2.00 verir**
+  (σ=10/5/2.5μm; geometrik faz, lineer kaçak yok — `omarov.md §10`,
+  `orbit_ileri_olcum.md §9`). Yani CO+model-fit, geometrik-faz sahte-EDM'i DOĞRU
+  ölçer; 4-katlı simetrik örnekleme alternatif/eşdeğer yoldur, şart değil. Eski
+  "tek-parçacık CO=True kullanma" uyarısı **düz polyfit + CO** kombinasyonu içindir
+  (model-fit ile değil). Omarov da aynı yöntemi kullanır (Fig. 9a, Eq. C3–C5).
 
 ### Bağımlılıklar
 Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
@@ -223,6 +233,12 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | Omarov SBA + yükselt-söndür; quad-flip neden simetrik alt-uzayı açmaz | `omarov_symmetric_hybrid.md §5,§9` |
 | Stratejik karar: saf spin-trim'de özgün katkı dar | `omarov_symmetric_hybrid.md §8`, `false_edm_harmonic_sinir.md §15` |
 | **Ham sahte EDM'yi ANTİSİMETRİK (orbit-görünür) domine eder (~37×); sim=düzeltme-sonrası artık** | `orbit_ileri_olcum.md §6` |
+| **Estimator doğrulandı: sahte EDM σ²-ölçeklenir, p=2.00 (geometrik faz, lineer kaçak yok)** | `orbit_ileri_olcum.md §9`, `omarov.md §10` |
+| **Make-or-break: orbit-düzeltme EDM-kanalı kirliliğini 7.7× düşürür (artık 62× EDM, simetrik kör)** | `orbit_ileri_olcum.md §9`, `omarov.md §10` |
+| **Gerçek EDM=9.8e-10 (TEK, (CW−CCW)/2=Omarov Eq.C1); CW/CCW telafisi tek başına 3.4×** | `omarov.md §3,§10` |
+| **Omarov: geometrik faz=CW+CCW+polarite+CR-ayrım (SBA DEĞİL); SBA→E-alan/vert.velocity** | `omarov.md §2-5` |
+| **Omarov BOŞLUK: CR-ayrım ÖLÇÜMÜ (48-BPM/SQUID+K-mod) test edilmedi; simetrik-artığa körlük açık** | `omarov.md §9` |
+| **Dejenerasyon: idealize FODO'da CCW≡CW+polarite-flip (Eq.C2 4'lü→2'li)** | `omarov.md §6.1`, git Test 7 |
 | f kapalı-yörünge fonksiyoneli ama ⟨x·y⟩ DEĞİL; Berry yönlü-alan en tutarlı lead | `orbit_ileri_olcum.md §2-3` |
 | İleri-ölçüm no-go'yu atlar MI? — AÇIK PROBLEM; doğru fonksiyonel pinlenemedi (analitik gerek) | `orbit_ileri_olcum.md §5,§7` |
 | **Drift izleme (ikinci makale)** | |

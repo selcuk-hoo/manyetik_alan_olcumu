@@ -94,3 +94,35 @@ Keşif kodu `/tmp/spin_meas/` (kalıcı repoda değil):
 - `run1_gen.py`/`run2_gen.py` — veri üretimi (f + tam kapalı yörünge).
 - `run2_data.npz` — 40 config (28 sim + 12 antisim): f, ince yörünge, kaçıklıklar.
 - `run2_analyze.py` + permütasyon/per-hücre analizleri.
+
+---
+
+## 9. NEREDE DURUYORUZ (2026-06, make-or-break + Omarov karşılaştırması)
+
+> Tam analiz ve Omarov makalesinin (PRD 105,032001) bu konudaki konumu için
+> **`omarov.md` §9–10**'a bakın. Burası kısa durum kaydı.
+
+**Estimator doğrulandı (kritik temel):** σ=10→5→2.5 μm ölçeklemesinde sahte EDM
+**p = 2.00 ± 0.01** (her seed) → saf kuadratik geometrik faz, lineer kaçak YOK.
+CO+model-fit yöntemi Omarov Fig. 9a'sını birebir üretir. Bu, CLAUDE.md'deki
+"tek-parçacık CO=True kullanma" uyarısının aksine, **CO+model-fit'in geometrik
+fazı doğru ölçtüğünü** ampirik kanıtlar (4-katlı simetrik örnekleme şart değil).
+
+**Bu oturumun nicel zinciri (EDMSwitch ile):**
+- Gerçek EDM (η=1.88e-15) = **9.81×10⁻¹⁰ rad/s**, TEK/diferansiyel ((CW−CCW)/2;
+  Omarov Eq. C1 ile birebir).
+- 10 μm sahte EDM (seküler) ~10⁻⁶ → gerçek sinyali ~1000× gömer.
+- **CW/CCW telafisi tek başına: 3.4×** (artık = 474× EDM).
+- **Orbit-düzeltme (antisim çıkar) ek 7.7×** (artık = 62× EDM). → **doğrudan
+  make-or-break: monitör DEĞERLİ; korkulan "kazanç~1" GERÇEKLEŞMEDİ.**
+- Kalan **simetrik orbit-kör artık 62× EDM** → paylaşılan sınır (biz + SQUID-BPM
+  + SBA + CW/CCW hepsi kör).
+- **Dejenerasyon:** idealize FODO'da **CCW ≡ CW+polarite-flip** (Eq. C2 4'lü → 2'li).
+
+**Konumlandırma (düzeltildi):** Orbit-monitör = **SQUID-BPM ucuz ikamesi** (SBA
+tamamlayıcısı DEĞİL — SBA E-alan/vertical-velocity hizalar, geometrik fazı
+düzeltmez). Omarov geometrik fazı CW+CCW+polarite + CR-ayrım küçültmeyle hedefin
+altına indirdiğini **fiziksel** gösteriyor, ama (i) polarite dejenerasyonu, (ii)
+simetrik alt-uzayın izole edilmemesi, (iii) **CR-ayrım ÖLÇÜMÜNÜN (48-BPM/SQUID-BPM
++ K-mod reconstruction) test edilmemesi** — üç noktada prosedür açık (omarov.md §9).
+Özgün katkı adayı: bu üç boşluğu nicelleştirmek.
