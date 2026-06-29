@@ -1,11 +1,27 @@
 # Berry Fonksiyoneli: Sahte EDM'yi Kapalı Yörüngeden Öngörmek (lisans-seviyesi anlatım)
 
+> ## ⚠️ DÜZELTME (2026-06): "%88" SONUCU GEÇERSİZ — AŞIRI-UYUM
+> Aşağıdaki "f ≈ Σ wᵢxᵢyᵢ, LOO-R²=0.88" iddiası **latis simetri testinde çöküyor**
+> ve geri çekilmiştir. Halka **24 özdeş FODO hücresinden** oluştuğundan fiziksel
+> duyarlılık çekirdeği **24-periyodik** olmak zorundadır. Testler:
+> - 24-periyodik (tek-hücre) çekirdek dayatınca **LOO-R² = 0.10** (öngörüsüz).
+> - Serbest (periyodik-olmayan) fitin "0.88"i; ağırlıkların gücü k=1–6
+>   harmoniklerinde + uç-nokta sıçramalarında (wₛ₌₀=−1) — latis yapısı DEĞİL.
+> - w_i↔w_{i+2} (bir-hücre kaydırma) periyodiklik korelasyonu yalnız 0.28.
+>
+> Yani 0.88, **örneğe-özgü aşırı-uyumdur** (24 ağırlık, 64 config), fiziksel
+> çekirdek değil. Bu, `orbit_ileri_olcum.md`'nin "fonksiyonel pinlenemedi, AÇIK
+> PROBLEM" değerlendirmesini doğrular. **Berry-fonksiyoneli figürü/iddiası
+> K-mod BBA makalesinden ÇIKARILDI** (makale mekanizma için yalnız σ²/p=2.00'a
+> dayanır; üretici: `make_kmod_figures.py:fig_sigma`). Aşağıdaki §1–§5 tarihsel
+> kayıt olarak bırakıldı; "%88/EVET" ifadeleri bu düzeltmeyle okunmalıdır.
+> Test kodu: 24-periyodik vs serbest LOO karşılaştırması (cell-fold reshape).
+
 > **Tek cümlelik soru:** Parçacığın halka içinde çizdiği **yörüngeyi** (BPM'lerle
 > ölçülen) bilirsek, o yörüngenin ürettiği **sahte EDM sinyalini** (spinin yanlış
 > dönmesini) hesaplayabilir miyiz?
-> **Cevap (2026-06): EVET, yaklaşık olarak.** Basit makine-öğrenmesiyle, sahte
-> EDM'yi yörüngeden **%88 doğrulukla** öngören bir formül bulduk. Aşağıda *nasıl*
-> yaptığımız adım adım, hiç bilmeyen birine anlatılıyor.
+> **Cevap (DÜZELTİLDİ): HAYIR, güvenilir biçimde değil** (yukarıdaki düzeltme).
+> Erken "%88" sonucu latis 24-katlı simetrisini ihlal eden bir aşırı-uyumdu.
 
 ---
 

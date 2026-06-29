@@ -58,8 +58,9 @@ küçültülmesiyle hedefin altına indirir; ancak ayrımı/hizalamayı ölçece
 enstrümanın (SQUID-tabanlı BPM ve K-modülasyon) gerçek-zamanlı geri-çatım
 yeteneği ve özellikle \emph{orbit-kör simetrik kiplere} duyarlılığı nicel olarak
 test edilmemiştir. Bu çalışmada (i) sahte-EDM'in geometrik-faz kökenini
-doğrulanmış bir tahmin ediciyle ($\sigma^2$ testinde üs $p=2.00$) ve bir Berry
-fonksiyoneli fitiyle gösteriyor; (ii) hizalama hatalarını antisimetrik
+doğrulanmış bir tahmin ediciyle ($\sigma^2$ testinde üs $p=2.00$) gösteriyor
+(yörüngeden $f$'i öngören kapalı fonksiyonel açık problem olarak kalıyor);
+(ii) hizalama hatalarını antisimetrik
 (orbit-görünür) ve simetrik (orbit-kör) kiplere ayırıyor; (iii) bir/birkaç
 kuadrupol modülasyonu ile yörünge-farkı tabanlı geri-çatımın simetrik kiplerde
 çöktüğünü; (iv) tüm kuadrupolleri K-modüle edip \emph{tek demetin salınım
@@ -143,45 +144,26 @@ Bu üs, geometrik (Berry) fazın parmak izidir --- doğrusal bir kaçak olsaydı
 \label{fig:sigma}
 \end{figure}
 
-\textbf{Berry fonksiyoneli: sahte EDM yörüngenin neresinden gelir?} Sahte EDM'in
-kapalı yörüngenin bir \emph{bilineer fonksiyoneli} olduğunu doğrudan veriden
-gösteriyoruz. Halka boyunca yörüngeyi $N$ noktada örnekleyip ($x_i, y_i$) her nokta
-için $p_i = x_i y_i$ özelliğini kurarız ve sahte EDM'i
-\begin{equation}
-f \approx \sum_{i=1}^{N} w_i\, x_i\, y_i
-\label{eq:berry}
-\end{equation}
-formunda fitleriz; $w_i$ ``halkanın $i$. noktasındaki $x\cdot y$ çarpımı sahte
-EDM'e ne kadar katkı veriyor'' ağırlığıdır ve veriden (ridge regresyon)
-öğrenilir.
+\textbf{Sahte EDM yörüngenin neresinden gelir? (açık problem).} Sahte EDM bir
+kapalı-yörünge fonksiyonelidir, ama \emph{kapalı formunu} (örneğin basit bir
+$f \approx \sum_i w_i x_i y_i$ bilineer çekirdeğini) bu çalışmada güvenilir biçimde
+belirleyemedik; açık bırakıyoruz.
 
-\Sezgi{En naif tahmin ``$f \propto \langle x\,y\rangle$ (halka ortalaması)''
-çalışmaz: bazı yörüngelerde $\langle xy\rangle \approx 0$ iken $f$ büyüktür, çünkü
-katkı halka boyunca \emph{üniform değildir} --- bazı bölgeler (radyal alanın etkin
-olduğu yerler) ağır basar. $w_i$ tam da bu ``nerede ne kadar'' haritasıdır.
-Dürüstlük testi: $f$ etiketlerini rastgele karıştırıp (yörünge--$f$ eşleşmesini
-bozup) aynı fiti yaparsak $R^2 \approx 0$ çıkmalı --- çıkıyor (permütasyon-null
-maks $\sim$0.2). Yani bulunan formül ezber değil.}
+\Sezgi{Neden açık? Halkayı $N$ noktada örnekleyip $f \approx \sum_i w_i x_i y_i$
+fitlersek, serbest (latise bakmayan) ağırlıklarla görmediği veride
+LOO-$R^2\!\approx\!0.88$ alırız --- cazip görünür. \emph{Ama bu bir tuzak:} halka
+24 özdeş FODO hücresinden oluşur, dolayısıyla fiziksel duyarlılık çekirdeği
+\textbf{24-periyodik} olmak zorundadır. 24-periyodikliği zorladığımızda
+(tek-hücre çekirdek) LOO-$R^2$ \textbf{0.10}'a düşer (öngörüsüz); serbest fitin
+gücü ise $k\!=\!1$--$6$ harmoniklerinde ve uç-noktalarda toplanır
+($w_{s=0}\!=\!-1$). Yani $0.88$, latis simetrisini ihlal eden örneğe-özgü bir
+\emph{aşırı-uyumdur}, fiziksel çekirdek değil. Dürüst kayıt:
+\texttt{orbit\_ileri\_olcum.md}.}
 
-64 senaryoda (C++ parçacık+spin izleyici), \emph{görmediği} veride çapraz-doğrulama
-(LOO-$R^2$): üniform $\langle xy\rangle$ yalnız $\sim$\%30 açıklar; \emph{ağırlıklı}
-$\sum_i w_i x_i y_i$ ise \textbf{\%88} açıklar ($R^2 = 0.88$), permütasyon temiz.
-Öğrenilen $w_i$ profili farklı $N$ ve düzenlileştirmede aynı kalır (gerçek yapı) ve
-halka başlangıcında ($s/C \lesssim 0.02$) en güçlü, ayrıca $s/C \approx 0.17,
-0.6, 0.8$'de ikincil tepelidir (Şekil~\ref{fig:berry}). Bu, \cite{omarov2022}
-Şekil 9(a)'daki $\sigma^2$ geometrik fazın \emph{yörünge-uzayındaki} nicel
-karşılığıdır: sahte EDM, ölçülebilir yörüngenin bilineer bir fonksiyonelidir.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.95\columnwidth]{berry_data/berry_weights.png}
-\caption{Öğrenilen Berry ağırlığı $w_i$ (Denklem~\ref{eq:berry}) halka konumuna
-($s/C$) karşı. Farklı örnekleme $N$ ve düzenlileştirme $\lambda$ için profil
-\emph{kararlıdır} (fit hilesi değil) ve \emph{üniform değildir} --- bu nedenle
-basit $\langle xy\rangle$ yetersizdir. Kesik çizgi: $|x|$ orbit-genlik profili
-(ölçekli); $w_i$ onu basitçe izlemez, kendine ait alan-yapılı bir profildir.}
-\label{fig:berry}
-\end{figure}
+Bu \emph{yöntemimizi etkilemez}: AC-BBA, sahte-EDM'i yörüngeden \emph{öngörmeye}
+çalışmaz --- demet-quad ofsetlerini doğrudan ölçer (§\ref{sec:method}). Mekanizma
+için güvenilir nicel dayanak, basit bir fonksiyonel değil, \textbf{$\sigma^2$
+ölçeklemesidir} ($p=2.00$, Şekil~\ref{fig:sigma}; \cite{omarov2022} Şekil 9(a)).
 
 Referans ölçek: gerçek EDM (benzetimde $\eta=1.88\times10^{-15}$) tek bir demet
 yönünde $\mathrm{d}S_y/\mathrm{d}t = 9.81\times10^{-10}$ rad/s üretir ve yön
@@ -594,9 +576,9 @@ tepki-matrisinin \emph{circulant} yapısını analiz eder. Bu çalışmaların h
 \emph{geometrik-faz sahte-EDM} sistematiğine bağlamaz, (b) hizalama hatalarının
 \emph{simetrik (orbit-kör) alt-uzayını} ve onun gözlenebilirliğini ayrı analiz
 etmez, (c) bir EDM deneyinde gerçek-zamanlı + kapasitif-BPM fizibilitesini
-nicellemez. Bizim özgün katkımız tam da bu \emph{köprüdür}: ``hangi yörünge/
-hizalama kipi sahte-EDM'i sürüyor'' (Berry fonksiyoneli, §\ref{sec:mechanism};
-simetrik artık, §\ref{sec:modes}) ile ``hangi kip BBA-görünür'' (§\ref{sec:method})
+nicellemez. Bizim özgün katkımız tam da bu \emph{köprüdür}: ``hangi
+hizalama kipi sahte-EDM'i sürüyor'' ($\sigma^2$ mekanizması §\ref{sec:mechanism};
+simetrik artık §\ref{sec:modes}) ile ``hangi kip BBA-görünür'' (§\ref{sec:method})
 sorularını birleştirip, yörünge/SQUID-ayrım yolunun simetrik kipte \emph{çöktüğünü}
 ($\Delta R$ no-go'su) ama per-quad BBA'nın \emph{çökmediğini} gösteririz. Yani
 katkı tekniksel değil, \emph{problem-eşlemesi + gözlenebilirlik teoremi +
@@ -615,7 +597,7 @@ kaldırır. Yöntem yörünge-farkı inversiyonunun no-go'sunu (\S\ref{sec:negat
 
 Koşullar net ve dürüstçe ifade edilir (Tablo~\ref{tab:syst}): kalan sahte-EDM
 hedefin altına \emph{ancak} optik-model ($\beta$-beating) $\varepsilon \lesssim
-\%0.5$--$1$ \emph{ve} quad tilt $\psi \lesssim 0.1$--$0.3$~mrad düzeyinde
+\%0.5$--$1$ \emph{ve} quad tilt $\psi \lesssim 0.3$~mrad düzeyinde
 kontrol edildiğinde iner. BPM ofseti AC demodülasyonla bağışıktır ve BPM kazanç
 hatası (\%1) 48 BPM üzerinden bastırılır --- ikisi de baskın değildir. Bu
 sınırlar istatistiksel değildir (istatistiksel taban $\sim$24~nm $\to

@@ -110,24 +110,17 @@ Log-log eğim $p=2.00$ --- saf geometrik (Berry) faz, lineer kaçak yok.}
 \label{fig:sigma}
 \end{figure}
 
-Sahte-EDM'in kapalı yörüngenin bir \emph{bilineer fonksiyoneli} olduğunu, halka
-boyunca $N$ noktada örneklenen yörüngeden $f \approx \sum_i w_i x_i y_i$ formuyla
-gösteriyoruz; $w_i$ ağırlıkları veriden (ridge regresyon) öğrenilir. 64 senaryoda
-\emph{görmediği} veride çapraz-doğrulama (LOO): üniform $\langle xy\rangle$ yalnız
-$\sim$\%30, ağırlıklı $\sum_i w_i x_i y_i$ ise \textbf{\%88} açıklar
-($R^2=0.88$, permütasyon-null maks $\sim$0.2 $\to$ ezber değil). Öğrenilen $w_i$
-profili farklı $N$/$\lambda$'da kararlıdır ve üniform değildir
-(Şekil~\ref{fig:berry}) --- bu, \cite{omarov2022} Şekil 9(a)'daki $\sigma^2$
-geometrik fazın yörünge-uzayındaki nicel karşılığıdır.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.92\columnwidth]{berry_data/berry_weights.png}
-\caption{Öğrenilen Berry ağırlığı $w_i$ halka konumuna ($s/C$) karşı; farklı
-örnekleme $N$ ve düzenlileştirme $\lambda$ için kararlı ve üniform değil (basit
-$\langle xy\rangle$ yetersiz). Kesik çizgi: $|x|$ orbit-genlik profili (ölçekli).}
-\label{fig:berry}
-\end{figure}
+Sahte-EDM bir kapalı-yörünge fonksiyonelidir; ancak \emph{kapalı formu} (örneğin
+basit bir $f \approx \sum_i w_i x_i y_i$ bilineer çekirdeği) bu çalışmada güvenilir
+biçimde belirlenememiştir ve açık bir problem olarak bırakılmıştır. Empirik bir
+bilineer fit, serbest (latis-periyodik olmayan) ağırlıklarla LOO-$R^2\!\approx\!0.88$'e
+ulaşır; fakat fit, latisin \textbf{24-katlı simetrisini ihlal eder}: fiziksel olarak
+zorunlu 24-periyodik (tek-hücre) çekirdek LOO-$R^2\!\approx\!0.10$ verir
+(öngörüsüz), ve serbest ağırlıkların gücü $k\!=\!1$--$6$ harmoniklerinde + uç-nokta
+sıçramalarındadır. Yani $0.88$ örneğe-özgü bir aşırı-uyumdur, fiziksel çekirdek
+değil. \emph{Yöntemimiz buna ihtiyaç duymaz}: AC-BBA $f$'i yörüngeden öngörmez,
+demet-quad ofsetlerini \emph{doğrudan} ölçer (§\ref{sec:method}); mekanizma için
+güvenilir nicel dayanak $\sigma^2$ ölçeklemesidir (Şekil~\ref{fig:sigma}).
 
 Referans ölçek: gerçek EDM (benzetimde $\eta=1.88\times10^{-15}$) tek bir demet
 yönünde $\mathrm{d}S_y/\mathrm{d}t = 9.81\times10^{-10}$ rad/s üretir ve yön
@@ -425,7 +418,7 @@ matrisi \cite{mirza2019}, AC-uyartımlı hızlı BBA \cite{fastbba2020} ve
 dejenerasyonu \cite{wegscheider2023} ve koherent yer-hareketi kaynaklı COD
 \cite{rossbach1989} gözlenebilirlik bağlamını kurar. Bizim katkımız
 \emph{teknik değil}: (i) BBA gözlemini geometrik-faz/sahte-EDM sistematiğine
-bağlamak (Berry fonksiyoneli köprüsü); (ii) simetrik-kip gözlenebilirlik analizi;
+bağlamak ($\sigma^2$ mekanizması, $p=2.00$); (ii) simetrik-kip gözlenebilirlik analizi;
 (iii) pEDM için gerçek-zamanlı, kapasitif-BPM ile fizibilite; (iv) yörünge/SQUID-
 ayrım yolunun simetrik kiplerde çökerken BBA'nın çökmediğini göstermek.
 \cite{haciomeroglu2017} aynı sistematiğin farklı (tüm-elektrik) makinede
