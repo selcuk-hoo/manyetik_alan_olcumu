@@ -174,18 +174,52 @@ tabanına çarpmaz** — ama spin ister, orbit tarafı değildir.
 
 ---
 
-## 6. Empirik doğrulama: NN ileri-haritası (ensemble)
+## 6. Empirik doğrulama: NN ileri-haritası (ensemble, 80 örnek)
 
-> **Durum:** §3-5 karar-verici testi (inşa edilmiş simetrik/antisimetrik
-> pertürbasyonlar) sonucu **modelden bağımsızdır** — herhangi bir COD→f haritası
-> (NN dahil) §4'teki ~7 nm tabanına çarpar. Bu bölüm o sonucu **jenerik rastgele
-> desenlerde** ve **gerçek bir MLP fit'inde** doğrulayan tamamlayıcı ensemble'ı
-> içerir (80 örnek, kontrollü simetri ağırlığı w∈[0,1]; `gen_ensemble.py` +
-> `fit_forward.py`). Sonuçlar koşum bitince eklenecek (~1 saat, C++ estimator).
-> Beklenen: (a) temiz-COD MLP R² sınırlı + BPM-sistematikli COD'da çöker; (b)
-> antisim-eğit→simetrik-test genellemesi başarısız (dağılım-kayması, step 3);
-> (c) Berry yönlü-alan proxy korelasyonu ~−0.5 (`orbit_ileri_olcum.md §3` ile
-> tutarlı). Karar §3-4'te zaten verilmiştir; ensemble onu pekiştirir.
+§3-5 karar-verici testi **modelden bağımsızdır**; bu bölüm onu jenerik rastgele
+desenler + gerçek regresyonla pekiştirir. 80 örnek (kontrollü simetri ağırlığı
+w∈{0,0.25,0.5,0.75,1}, her biri 16 seed; w=0 antisim, w=1 simetrik). Girdi =
+analitik 48-BPM COD; çıktı = C++ sahte-EDM. (`gen_ensemble.py` + `fit_forward.py`.)
+
+**(a) Orbit-kör konfigler sahte-EDM'siz DEĞİL.** ⟨|f|⟩, simetri arttıkça düşer
+ama **sıfırlanmaz:**
+
+| w (Ŝ) | ⟨\|f\|⟩ rad/s | std |
+|------|-------------:|----:|
+| 0.00 (−1.0, antisim) | 3.34e-6 | 2.46e-6 |
+| 0.50 ( 0.0) | 1.48e-6 | 1.91e-6 |
+| 1.00 (+1.0, **tam orbit-kör**) | **1.82e-7** | 1.81e-7 |
+
+Tam simetrik (orbit-kör) konfig bile **182× EDM hedefi** sahte-EDM taşır →
+orbit-körlük ≠ sahte-EDM'siz. (Ham antisim/sim oranı ~18×; `orbit_ileri_olcum.md
+§6`'nın ~37×'iyle aynı mertebe.)
+
+**(b) İleri-harita yalnız orbit-GÖRÜNÜR payı öğrenir (gerekmeyen kısım).**
+5-kat CV R² (temiz COD, fiziksel öznitelikler: Berry yönlü-alan + bilineer özetler):
+
+| model | R² | yorum |
+|-------|---:|-------|
+| Ridge | **+0.32** | orbit-görünür (antisim) pay öngörülebilir — orbit-düzeltmenin zaten yaptığı |
+| MLP(64,64) | −0.88 | 80 örnekte aşırı-uyum (Ridge adil) |
+
+Tavan ~0.32; bu **antisim varyansıdır.** Önemli incelik: Berry yönlü-alan özniteliği
+Σ(xᵢyᵢ₊₁−xᵢ₊₁yᵢ) kapalı halkada **BPM ofsetine değişmezdir** (sabit ofset toplamda
+iptal) → +100μm ofset/1μm gürültüde R² **yine +0.32.** Yani *ofset, duvarın kendisi
+değil*; akıllı öznitelik ofseti aşar — ama yine de simetrik kanala **ulaşamaz.**
+
+**(c) KARAR-VERİCİ: dağılım-kayması — harita simetrik kanala taşınmıyor.**
+Antisim (w≤0.25) üzerinde eğit → simetrik (w≥0.75) üzerinde test:
+**R² = −134** (ortalamadan ~135× kötü). İleri-harita orbit-görünür rejimde
+öğrendiğini orbit-kör rejime **taşıyamaz** — tam da sahte-EDM'i süren kanal.
+
+**(d) Tutarlı fonksiyonel yok.** Berry proxy korelasyonu w'ye göre tutarsız
+(−0.53/+0.02/−0.55/−0.08/−0.36) → tek bir kapalı-form fonksiyonel empirik
+pinlenmiyor (`orbit_ileri_olcum.md §3` ile birebir).
+
+**Empirik özet:** İleri-harita sahte-EDM'in **orbit-görünür (antisim) payını**
+yakalar (orbit-düzeltmenin zaten yaptığı, gerekmeyen kısım); **orbit-kör simetrik
+kanala — sahte-EDM'i süren ve düzeltme-sonrası kalan kısma — taşınamaz** (dağılım-
+kayması R²≪0). §3-4'ün modelden-bağımsız ~7 nm tabanını doğrular.
 
 ---
 

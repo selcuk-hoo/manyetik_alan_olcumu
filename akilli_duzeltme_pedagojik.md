@@ -279,19 +279,52 @@ geometrik fazın doğrudan gözlenebiliridir. Bu da bizi Omarov ve ark.'nın
 
 ---
 
-## 10. Empirik pekiştirme: gerçek bir sinir ağı da öğrenemez
+## 10. Empirik pekiştirme: gerçek bir harita da öğrenemez
 
-<!-- ENSEMBLE_PEDAGOJIK_PLACEHOLDER -->
+§6'daki karar **modelden bağımsızdır** (ikiz makineler herhangi bir yörünge→sahte-EDM
+haritasını çürütür). Yine de somut olması için, jenerik rastgele kaçıklıklarla
+**gerçek bir regresyon** eğittik: 80 örnek, simetri ağırlığı $w$ tam-antisimetrikten
+($w=0$) tam-simetriğe ($w=1$) taranıyor; girdi = 48-BPM yörünge, çıktı = C++ ile
+ölçülen sahte-EDM. Üç bulgu, §6-9'u pekiştirir — ve bir **incelikle** öğreticidir.
 
-§6'daki karar **modelden bağımsızdır** (inşa edilmiş ikiz makineler herhangi bir
-COD→f haritasını çürütür). Yine de, somut olması için gerçek bir sinir ağını
-jenerik rastgele kaçıklıklarla eğittik. Bu bölüm, 80 örnekli ensemble bittiğinde
-şu üç ölçümle doldurulacak: (a) temiz-yörünge MLP'sinin başarısı vs gerçekçi
-BPM-ofset/gürültü eklendiğinde **çöküşü**; (b) antisimetrik desenlerde eğitip
-simetrik desenlerde test edince **genellemenin başarısızlığı** (dağılım-kayması);
-(c) Berry yönlü-alan proxy korelasyonu (şimdiden $-0.62$ ölçüldü;
-`orbit_ileri_olcum.md §3`'ün $\sim-0.5$ lead'iyle tutarlı). Bu üçü, §6-9'un
-ulaştığı sonucu deneysel olarak pekiştirir: NN, olmayan bilgiyi icat edemez.
+**Bulgu 1 — Orbit-kör konfigler "temiz" değildir.** Ortalama sahte-EDM, simetri
+arttıkça düşer ama **sıfırlanmaz:**
+
+| $w$ | karakter | ⟨\|sahte-EDM\|⟩ | hedefe göre |
+|-----|----------|----------------:|------------:|
+| 0.00 | tam antisimetrik (görünür) | $3.3\times10^{-6}$ | ~3300× |
+| 1.00 | **tam simetrik (orbit-kör)** | $1.8\times10^{-7}$ | **~180×** |
+
+Yani yörüngede neredeyse hiç iz bırakmayan kaçıklıklar bile sahte-EDM'i hedefin
+**180 katına** taşıyor. Görünmezlik, masumiyet değildir.
+
+**Bulgu 2 — Harita yalnız "kolay" (görünür) kısmı öğrenir.** Temiz yörüngeyle
+eğitilen basit bir model (Ridge), sahte-EDM varyansının ~%32'sini açıklar. Ama bu
+%32, tamamen **orbit-görünür (antisimetrik)** paydır — yani **orbit-düzeltmenin
+zaten temizlediği**, bizim ihtiyaç duymadığımız kısım.
+
+> **Öğretici incelik:** "Peki 100 μm'lik BPM ofseti haritayı bozmaz mı?" diye
+> sorabilirsiniz. Şaşırtıcı cevap: *akıllı bir öznitelik için bozmaz.* Yönlü-alan
+> $\sum_i(x_iy_{i+1}-x_{i+1}y_i)$, kapalı bir halkada **sabit ofsete değişmezdir**
+> (ofset terimleri toplamda iptal olur). Eklenen 100 μm ofsetle bile model yine
+> ~%32'de kalır. Demek ki **duvar, BPM ofsetinin kendisi değil** — duvar, simetrik
+> kanalın yörüngede *ilkesel* görünmezliğidir. Ofseti aşan akıllı öznitelik bile
+> simetrik kanala **ulaşamaz**, çünkü orada okunacak yörünge zaten yok.
+
+**Bulgu 3 (karar-verici) — harita simetrik kanala taşınmıyor.** Modeli yalnız
+**antisimetrik** (görünür) konfiglerle eğitip **simetrik** (kör) konfiglerde test
+edersek: $R^2 = -134$ — yani ortalamayı tahmin etmekten ~135 kat **daha kötü.**
+Görünür rejimde öğrenilen şey, sahte-EDM'i süren kör rejime **hiç transfer
+olmuyor.** Bu, "ikiz makine" sonucunun istatistiksel kardeşidir: bilgi girdide
+yoksa, model onu icat edemez.
+
+(Ek olarak: Berry yönlü-alan proxy'sinin korelasyonu $w$'ye göre tutarsız
+seyreder — $-0.53, +0.02, -0.55, -0.08, -0.36$ — yani tek bir temiz kapalı-form
+fonksiyonel ampirik olarak pinlenmiyor; `orbit_ileri_olcum.md §3` ile birebir.)
+
+**Özet:** Yörüngeden öğrenilen harita, sahte-EDM'in **görünür payını** yakalar
+(gerekmeyen kısım) ama **orbit-kör simetrik kanala — işin tüm bel kemiğine —
+taşınamaz.** Sinir ağı, olmayan bilgiyi icat edemez.
 
 ---
 
