@@ -10,7 +10,15 @@
 > "simetrik modu görür, corr=0.997" iddiasını **YANLIŞLIYOR** — o iddia,
 > optik-nefesi ihmal eden idealize bir modele dayanıyordu.
 >
-> Reprodüksiyon: `/tmp/kmod_recover/single_bpm_test.py` (analitik; C++ gerekmez).
+> **Bu nefes etkisi gerçek C++ izleyiciyle bağımsız doğrulandı (§5.5):** analitik
+> bir artefakt değil. Dolayısıyla **"farklı-frekans per-quad modülasyon + SQUID
+> BPM ile genlik okuma" dalı bu belgede kesin olarak kapatılır (§7).** Modülasyon
+> yöntemini kurtarabilecek iki *ayrı* yol açık kalır (sinir ağı; aynı-frekans
+> tüm-quad modülasyonu, v2.7) — bunlar bu testin kapsamı dışındadır, §8'de
+> ertelenmiş olarak listelenir.
+>
+> Reprodüksiyon: `/tmp/kmod_recover/single_bpm_test.py` (analitik; C++ gerekmez),
+> `/tmp/kmod_recover/breathing_cpp.py` (C++ doğrulama).
 
 ---
 
@@ -113,6 +121,43 @@ sıfırları), diagonal duyarlılık $|C_i|$ yayılımı **1187×**.
 
 ---
 
+## 5.5 C++ ile bağımsız doğrulama (analitik artefakt değil)
+
+"Hem analitik hem simülasyon aynı çıkıyor; ortak bir hata olabilir mi?" sorusu
+haklı bir şüphedir — iki kod aynı yanlışı yapıyorsa uyuşmaları bizi aldatabilir.
+Bunu sınamak için aynı per-quad duyarlılığı $A_i=\partial y_{\rm BPM}/\partial
+g_i$'yi **gerçek C++ izleyiciyle** (GL4 semplektik, deflektör dahil tam alan
+integratörü) `quad_dG` ile yeniden hesapladım — `integrator.cpp` değiştirilmeden,
+çünkü per-quad statik kesirsel gradyan (`quad_dG`) zaten mevcuttu.
+
+Kritik nokta: bu iki kod **neredeyse hiçbir şey paylaşmaz.** Analitik çözücü
+kafesi 2×2 matrislerle kurar ve deflektörü dikeyde *saf drift* sayar; C++ ise
+gerçek alan integratörüdür (tamamen farklı uygulama). Ortak olan tek şey
+`params.json` (K değerleri, uzunluklar). İki **farklı kafes temsili** %1'de
+uyuşuyorsa, ortak bir *modelleme* hatasının ikisini birden aynı yönde yanıltma
+olasılığı çok düşüktür.
+
+| quad | $A_{\rm C++}$ [μm] | $A_{\rm analitik}$ [μm] | oran |
+|---|---|---|---|
+| 0  | 0.000  | 3.447  | 0.00 ⚠️ |
+| 9  | −2.062 | −2.059 | 1.00 |
+| 18 | 2.114  | 2.106  | 1.00 |
+| 28 | 2.521  | 2.507  | 1.01 |
+| 37 | −9.848 | −9.827 | 1.00 |
+| 47 | −5.909 | −5.929 | 1.00 |
+
+corr$(A_{\rm C++}, A_{\rm analitik}) = 0.966$ (tek aykırı nokta quad 0 olmasaydı
+≈ 1.00). **6 quad'ın 5'i %1 içinde birebir.** Maliyet ~40 s/kapalı-yörünge.
+
+> **quad 0 aykırılığı ($A_{\rm C++}=0$):** BPM/fırlatma referans noktası tam
+> quad 0 girişindedir; okumanın yapıldığı quad'ın *kendi* gradyanı kick'ten önce
+> okunduğu için C++ orada yerel olarak kördür. Tek nokta, fiziği değiştirmez.
+
+**Sonuç:** optik-nefes gerçek bir fizik etkisidir, analitik çözücünün bir
+artefaktı değil.
+
+---
+
 ## 6. Teşhis — neden başarısız oldu?
 
 **Suçlu optik-nefes** (kör noktalar ikincil):
@@ -120,55 +165,150 @@ sıfırları), diagonal duyarlılık $|C_i|$ yayılımı **1187×**.
 - Modülasyon quad'ı titretince, **mevcut 0.37 mm'lik kapalı yörüngenin tamamı**
   nefes alır.
 - Büyüklük tahmini: %2 gradyan bump → tune kayması ~%0.04, ama kapalı-yörünge
-  ölçeği $\propto 1/(2\sin\pi Q)$ ~%0.66 değişir → $0.37\,{\rm mm}\times0.66\%
-  \approx 2.4\,\mu$m BPM'de.
+  ölçeği $\propto 1/(2\sin\pi Q)$ değişir → BPM'de birkaç μm.
 - Doğrudan per-quad feed-down sinyali: $\sim K\varepsilon L\,dy \times G \approx
   0.9\,\mu$m.
-- **Nefes (~2.4 μm) > doğrudan sinyal (~0.9 μm), ~3×.** Genliği nefes domine
-  ediyor → aradığımız quad ofseti gürültüye gömülüyor.
+- **Nefes (~birkaç μm) > doğrudan sinyal (~0.9 μm), birkaç kat.** Genliği nefes
+  domine ediyor → aradığımız quad ofseti gürültüye gömülüyor.
 
 **[2] (nefessiz) corr=1.000 ama [1] (nefesli) corr=0 olması, suçlunun kesin
 olarak optik-nefes olduğunu kanıtlar.**
 
-**Çok BPM neden kurtarmıyor?** Nefes, **koherent** bir kontaminasyondur (≈ mevcut
-yörünge × tek bir skaler), rastgele gürültü değil. Bu yüzden BPM sayısı arttıkça
-**ortalamayla sönmez**; per-quad projeksiyon her quad'da **yanlı** kalır → 48
-BPM'de bile corr ≈ 0.
+### 6.1 "Kaldıraç" ne demek? (asıl mekanizma)
+
+Buradaki sezgiye aykırı nokta şudur: **ufacık (%1–2) bir modülasyon nasıl
+~10 μm'lik bir BPM salınımı yaratıyor?** Cevap, modülasyonun *neyi* oynattığında
+gizli. Bir quad'ı modüle etmenin iki etkisi var:
+
+1. **Kendi feed-down kick'i** değişir: $\Delta\theta_i = K\varepsilon L\,dy_i$.
+   Bu, 48 katkıdan **yalnızca biri** ve aradığımız sinyal budur. Küçük (~0.9 μm).
+2. **Tüm optiği** ($M$, dolayısıyla $\beta$, $\phi$, $Q$) değiştirir. Bu değişmiş
+   optikten **48 quad'ın HEPSİNİN feed-down kick'i** yeniden taşınır. Yani
+   modülasyon, **48 quad'ın birlikte kurduğu 0.37 mm'lik kapalı yörüngenin
+   tamamına** etki eder.
+
+**"Kaldıraç" tam olarak budur:** modülasyonun tutup oynattığı şey, o quad'ın
+*kendi* küçük ofseti değil, **önceden var olan tüm yörünge**. Tek bir quad'ı
+%2 kıpırdatmak kendi katkısını zar zor değiştirir; ama 0.37 mm'lik koca yörüngenin
+geçtiği optiği %birkaç oynatmak, doğal olarak birkaç-on μm verir. Kaldıracın ucu
+küçük (bir quad), ama kaldıraç kolu uzun (tüm yörünge).
+
+**Ayrıştırma ile kanıt** (quad 37, %2, BPM 0):
+
+| Senaryo | bump yanıtı |
+|---|---|
+| **Tüm dy** deseni varken | **−9.83 μm** |
+| **Yalnız dy[37]** varken (diğer 47 quad ideal) | **−0.037 μm** (265× küçük!) |
+
+Quad 37'nin kendi ofseti ($dy_{37}$) tek başına yalnız 0.037 μm verir; ölçülen
+9.83 μm'nin neredeyse tamamı **diğer 47 quad'ın kurduğu yörüngenin yeniden
+taşınmasından** gelir. Yani genlik, modüle edilen quad'ın ofsetiyle değil,
+**komşularının kurduğu yörüngeyle** orantılı → kalibrasyona bölmek anlamsız.
+
+### 6.2 Ortak hata değil — dört kontrol
+
+Sürprizin yapay (kod hatası) olmadığını dört bağımsız sağlama gösterir:
+
+1. **Tune patolojik değil.** Kesirsel $Q = 0.3032$, $\sin\pi Q = 0.815$ →
+   yörünge büyütme $1/(2\sin\pi Q) = 0.614$. Tamsayı/yarım-tamsayı rezonansından
+   uzak; "(I−M)⁻¹ neredeyse tekil" gibi yapay bir şişme **yok**.
+2. **Tüm yörünge oynuyor, lokal artefakt değil.** Quad 37'yi %2 bump'layınca
+   *tüm halka* yörüngesi 11.9 μm RMS kayıyor (367→359 μm). Etki global.
+3. **Kaldıraç izolasyonu** (§6.1 tablosu): nefes, modüle edilen quad'ın kendi
+   ofsetiyle değil tüm yörüngeyle ölçekleniyor — fiziksel olarak şeffaf.
+4. **Doğrusal, büyük-eps artefaktı değil.** Minik türev ($\delta\varepsilon=
+   10^{-5}$) %2'ye ekstrapole edilince −10.0 μm; doğrudan ölçülen −9.83 μm.
+   Ayrıca derinlik taraması (%0.5→%4): hem sinyal hem nefes derinlikle *doğrusal*
+   ölçeklenir, oranları **sabit ~0.14** kalır. Yani sonlu-fark adımı doğrusal
+   olmayan bir bölgeyi yoklamıyor; modülasyonu küçültmek de oranı düzeltmiyor.
+
+**Sürprizin gerçek kaynağı yukarıda:** "küçük modülasyon" anormal bir şey
+yapmıyor. Anormal görünen sayı, **±100 μm rastgele kaçıklığın ~3.7× büyütülerek
+0.37 mm'lik bir kapalı yörünge kurması.** Bu büyük yörüngenin optiğini %2 oynatmak
+doğal olarak birkaç-on μm verir — yörüngeye *göre* küçük (%2–3), sadece ölçmek
+istediğimiz ~0.9 μm'lik feed-down'a *göre* büyük.
+
+### 6.3 Çok BPM neden kurtarmıyor?
+
+Nefes, **koherent** bir kontaminasyondur (≈ mevcut yörünge × tek bir skaler),
+rastgele gürültü değil. Bu yüzden BPM sayısı arttıkça **ortalamayla sönmez**;
+per-quad projeksiyon her quad'da **yanlı** kalır → 48 BPM'de bile corr ≈ 0.
+
+> **İnce ayrım:** BPM sayısını artırmak **kör noktaları** (9/48; $\cos(\cdot)=0$
+> sıfırları) giderir — farklı BPM'ler farklı quad'larda kördür, birlikte hepsini
+> kaplarlar. Ama kör noktalar zaten sınırlayıcı etken değildi; kör noktalar tümüyle
+> kapansa bile **nefes** corr ≈ 0 tutar. Kör-nokta körlüğü ile nefes körlüğü ayrı
+> şeylerdir; ilki BPM ekleyerek çözülür, ikincisi çözülmez (lineer harita çöküyor).
 
 ---
 
-## 7. Dürüst çıkarım
+## 7. Kesin kapatma: "farklı-frekans per-quad + SQUID BPM" dalı ölü
 
-- Bu oturumdaki **`ac_bba_observability.py` (simetrik corr=0.997)** tam olarak
-  **[2] (nefessiz)** modelini kullanıyordu. Gerçek fizikte (nefes dahil) o sonuç
-  **çöküyor**. Dolayısıyla "per-quad AC-BBA genlik-okumayla simetrik modu görür"
-  iddiası ve ona dayalı linchpin/bütçe sayıları **YANLIŞLANDI**.
-- Bu, geçmiş kayıtla **tutarlı**: `README §19.2` per-quad k-mod'u "operasyonel
-  olarak ağır" diye işaretliyordu. Gerçek BBA tekniği **genlik okuma değil**,
-  per-quad **nulling**'tir (modülasyon yanıtı sıfırlanana dek demeti yönlendir →
-  demet quad merkezinden geçiyordur). Tek-atış "genliği oku, kalibrasyona böl"
-  yaklaşımı, büyük mevcut yörünge nefes alırken çalışmıyor.
-- **Fork** (pozitif yöntem mi / negatif teorem mi) bu testle **negatif tarafa**
-  ağırlık kazandı: orbit-tarafı genlik-okuma, nefes/inversiyon problemini atlamıyor.
+Bu test, belirli bir öneriyi **kesin olarak** kapatır ki ileride "acaba şöyle mi"
+diye geri dönmek gerekmesin:
+
+> **Öneri:** her quad'ı *farklı* bir frekansta modüle et (frekans-çoğullama);
+> böylece tek ölçümde her quad'ın genliği $A_i$ ayrı ayrı çözülür. Gürültü
+> sorununu da yüksek-çözünürlüklü **SQUID BPM**'lerle aş.
+
+**Neden ölü:**
+
+- Farklı-frekans olayının *tek* kazancı, 48 quad'ın genliğini tek ölçümde
+  **ayırmaktır** ($f_i$ demodülasyonu). Ama ayrılan o genlik $A_i$, §5.5/§6'da
+  gösterildiği gibi **nefes-domine** (S/B ≈ 0.14) ve modüle edilen quad'ın kendi
+  ofsetiyle değil **komşularının yörüngesiyle** orantılı. Genliği temiz ayırmak,
+  yanlış büyüklüğü temiz ayırmaktan başka bir şey değil.
+- **SQUID BPM ne katar?** Daha iyi çözünürlük ve/veya daha çok BPM. Ama nefes
+  **rastgele gürültü değil, koherent bir sistematiktir**; çözünürlük artırmak veya
+  BPM eklemek koherent sistematiği **ortalamayla söndürmez** (sonuç [3]:
+  2→48 BPM'de corr ≈ −0.03). SQUID'in tek üstünlüğü (düşük gürültü), nefesin
+  problem olduğu yerde işe yaramaz.
+- Kör noktalar (SQUID için öne sürülen ikinci gerekçe) BPM ekleyerek zaten
+  giderilir (§6.3) — ama bu da sınırlayıcı etken değildi.
+
+Dolayısıyla **`ac_bba_observability.py` (simetrik corr=0.997)** iddiası ve ona
+dayalı linchpin/bütçe sayıları **YANLIŞLANDI** (o model nefessiz [2] idi). "Genlik
+oku, kalibrasyona böl" + SQUID dalı **kapalıdır.** Bu, geçmiş kayıtla tutarlı:
+`README §19.2` per-quad k-mod'u "operasyonel olarak ağır" diye işaretlemişti.
+
+**Fork** (pozitif yöntem mi / negatif teorem mi) bu dal için **negatif** sonuçlandı.
 
 ---
 
-## 8. Açık sorular (belgeyi okuduktan sonra irdelenecek)
+## 8. Hayatta kalan iki yol (bu belgenin KAPSAMI DIŞINDA — sonraki adım)
 
-1. **Modelde hata var mı?** Özellikle: geri-çatımı "genlik ÷ kalibrasyon" yerine
-   **nulling** (per-quad yönlendirme ile yanıtı sıfırlama) olarak kurmak gerekir
-   mi? Nulling, nefesi (koherent fon) yener mi?
-2. Nefes ve feed-down farklı parametrik desende; **ortak fit** (nefes + per-quad)
-   ikisini ayırabilir mi — yoksa bu yine bir inversiyon → no-go'ya mı döner?
-3. Adyabatik sonlu-fark eşdeğeri kabul edilebilir mi, yoksa gerçek AC yanıtının
-   (sonlu frekans transfer fonksiyonu) bir etkisi var mı?
+Bu belge yalnız **farklı-frekans + genlik-okuma + SQUID** dalını kapatır.
+Modülasyon yöntemini kurtarabilecek, mekanik olarak *farklı* iki yol **açık**
+kalır. Bunlara geçmeden önce yukarıdaki dalı kesin kapatmak, "acaba şöyle mi,
+böyle mi" döngüsüne girmemek içindir.
+
+1. **Sinir ağı (nonlineer ters-harita).** Lineer "genlik ÷ kalibrasyon" çöküyor,
+   çünkü nefes haritayı nonlineer/non-invertible yapıyor. Girişi (modülasyondaki
+   quad K değerleri + BPM ölçümleri), çıkışı (quad hizalama hataları) olan bir NN
+   simülasyon verisinden eğitilebilir. Nefes **deterministik** olduğu için NN onu
+   prensipte *öğrenip ayıklayabilir*.
+   > **Ama deneysel bağlayıcılık şüphesi (önemli):** (a) NN, eğitildiği ileri-modelin
+   > sadakati kadar iyidir — modellenmemiş β-beat, multipoller, BPM nonlineerliği
+   > gerçek makinede NN'i yanlı kılar. (b) Daha derin sorun: NN **no-go
+   > gözlenebilirlik tabanını yenemez**. Simetrik (orbit-görünmez) alt-uzay BPM'de
+   > alt-gürültü imza bırakıyorsa, NN o bilgiyi *yoktan var edemez* — eğitim-kümesi
+   > önceline (ortalamaya) regresyon yapar, ki bu gerçek makinede **bağlayıcı
+   > değildir**. Yani NN nefesi ayıklayıp **antisimetrik** kısmı iyileştirebilir
+   > (ki o zaten ölçülebiliyordu), ama asıl problem olan **simetrik körlüğü**
+   > açmaz. → Ayrı bir test gerektirir; umut sınırlı.
+2. **Aynı-frekans tüm-quad modülasyonu (v2.7).** Tüm quad'lar **aynı** frekansta
+   modüle edilirse nefes ortak-mod hâline gelebilir ve normal BPM'lerle geri-çatım
+   mümkün olabilir; v2.7 tag'inde bunun çalıştığı gösterilmişti. → v2.7 sonucu bu
+   nefes-doğrulamasının ışığında yeniden incelenmeli/entegre edilmeli.
 
 ---
 
 ## 9. Reprodüksiyon
 
 ```bash
-python3 /tmp/kmod_recover/single_bpm_test.py
+python3 /tmp/kmod_recover/single_bpm_test.py    # analitik [1]/[2]/[3] + kör-nokta
+python3 /tmp/kmod_recover/breathing_cpp.py --nq 6   # C++ doğrulama (§5.5)
 ```
-Analitik çözücü (`analytic_kmod.py` yapı taşları), `params.json`, $\varepsilon=0.02$,
-seed=0, dikey düzlem. [1]/[2]/[3] ve kör-nokta sayısını basar.
+Analitik çözücü (`analytic_kmod.py` yapı taşları), `params.json`,
+$\varepsilon=0.02$, seed=0, dikey düzlem. C++ doğrulama `quad_dG` kullanır
+(`integrator.cpp` değiştirilmez); ~40 s/kapalı-yörünge.
