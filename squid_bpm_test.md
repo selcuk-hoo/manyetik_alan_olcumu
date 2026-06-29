@@ -296,10 +296,19 @@ böyle mi" döngüsüne girmemek içindir.
    > değildir**. Yani NN nefesi ayıklayıp **antisimetrik** kısmı iyileştirebilir
    > (ki o zaten ölçülebiliyordu), ama asıl problem olan **simetrik körlüğü**
    > açmaz. → Ayrı bir test gerektirir; umut sınırlı.
-2. **Aynı-frekans tüm-quad modülasyonu (v2.7).** Tüm quad'lar **aynı** frekansta
-   modüle edilirse nefes ortak-mod hâline gelebilir ve normal BPM'lerle geri-çatım
-   mümkün olabilir; v2.7 tag'inde bunun çalıştığı gösterilmişti. → v2.7 sonucu bu
-   nefes-doğrulamasının ışığında yeniden incelenmeli/entegre edilmeli.
+2. **Aynı-frekans tüm-quad modülasyonu (v2.7) — İNCELENDİ (2026-06-29).** Tüm
+   quad'lar **aynı** frekansta modüle edilir; iki-gradyan farkı $\Delta y =
+   y(g{\times}1.02)-y(g)$ alınır (BPM ofseti ortak-mod iptal) ve **tam 48×48
+   $\Delta R$ matrisi** ters çevrilir (`np.linalg.solve`). Dağıtık-frekanstan farkı:
+   burada nefes **$\Delta R$'nin içinde** (köşegen-dışı kuplaj dahil) → kirlilik
+   değil. Sonuç:
+   - **Temiz limitte exact:** 48-BPM inversiyonu corr = 1.000000 (hata ~10⁻¹² μm).
+     **Nefes engel değil** — v2.7'nin "çalışıyor" iddiası temiz limitte doğru.
+   - **Ama no-go duvarı:** cond$(\Delta R)$ = 3.7×10⁴; antisim/sim yön kazanç oranı
+     ~1393×. Gerçekçi BPM gürültüsü (σ=0.1/1/10 μm) → corr 0.67/0.07/0.00.
+   - **Verdikt:** v2.7 *yeni bir kapı değil*; bilinen **no-go inversiyon sınırının**
+     başka yüzü. **Nefes ≠ no-go** (ikisi ayrı; v2.7'de suçlu no-go, dağıtık-frekansta
+     suçlu nefes). Repro: `/tmp/kmod_recover/v27_recheck.py`.
 
 ---
 

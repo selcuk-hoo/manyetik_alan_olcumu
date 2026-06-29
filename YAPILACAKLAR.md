@@ -102,6 +102,36 @@ Yörünge trimi sonrası kalan ~10⁻⁴ artığı boylamsal spin geri-beslemesi
 simetrik içerik dahil çalıştığının gösterilmesi. Mevcut altyapı yeterli
 (spin ölç-trim + yörünge-trim birleşimi; keşif scriptleri git geçmişinde / `/tmp`).
 
+### 4. ⭐ "Akıllı düzeltme" — sahte-EDM'yi sıfırla, misalignment'ı DEĞİL (öncelik: stratejik, 2026-06-29 notu)
+
+> **Fikrin özü (kullanıcı, 2026-06-29):** No-go bir *inversiyon* sınırıdır
+> (COD → misalignment, simetrik alt-uzayda cond ~10⁴; bkz. v2.7 yeniden-incelemesi
+> ve §19.2). Ama **nihai amacımız misalignment'ı ölçmek değil, sahte EDM'yi
+> sıfırlamak.** O hâlde misalignment'ı tam sıfırlamaya çalışmak yerine, doğrudan
+> sahte-EDM'yi null'layan quad düzeltmelerini ararız.
+
+**Plan:**
+1. **NN ile COD → sahte-spin (Berry) ileri-haritası** kur (demet/spin
+   simülasyonundan eğit). Bu, `orbit_ileri_olcum.md §2-3,§5,§7`'deki "f kapalı-yörünge
+   fonksiyoneli ama ⟨x·y⟩ değil; analitik pinlenemedi" açık problemini *analitik
+   yerine öğrenilmiş* harita ile aşma denemesidir.
+2. NN, **sıfır sahte-EDM için COD'un nasıl modifiye edilmesi gerektiğini** öğrenir.
+3. **Dayanıklılık testi:** tilt, β-beat, BPM ofset/gürültü değiştikçe harita
+   kayıyor mu? (Harita gizli parametrelere bağlıysa kırılır.)
+4. Dayanıklıysa: misalignment'ı sıfırlamak yerine, **orbit-görünür knob'larla
+   (quad/corrector) sahte-EDM'yi hedefleyen "akıllı düzeltme"** uygula.
+
+**Neden no-go'yu atlayabilir (hipotez):** (a) bu bir **ileri-harita** (COD→EDM),
+inversiyon değil; (b) düzeltme **orbit-görünür** kollarla **EDM-hedefli** yapılır,
+görünmez simetrik misalignment'ı geri-çatmaya çalışmaz. No-go simetrik
+misalignment'ı *ölçmeyi* yasaklar; ama sahte-EDM'yi orbit-görünür müdahaleyle
+*null'lamak* belki ayrı bir problemdir. **Açık — test edilecek.**
+
+**Bağlantı:** `orbit_ileri_olcum.md §5,§7` (ileri-ölçüm no-go'yu atlar mı — açık
+problem), `omarov.md §10`, `squid_bpm_test.md §8` (NN bağlayıcılık şüphesi: NN
+gözlenebilirlik tabanını yenemez — burada fark, NN'in misalignment yerine
+*EDM-hedefli düzeltme* öğrenmesi). **Şimdi değil; daha sonra çalışılacak.**
+
 ---
 
 ## 🔲 Ertelendi
