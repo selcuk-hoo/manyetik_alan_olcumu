@@ -9,8 +9,10 @@
 >   *engel değil* (matrisin içinde), ama tek-atış BPM gürültüsünde **no-go** duvarı
 >   (cond $\sim$10⁴).
 > - **§9 Tek-frekans + lock-in (1 kHz mod + ortalama):** BPM gürültüsü **zamanla
->   √N ile yenilir** → v2.7 *canlı aday*; sınırı artık gürültü değil, $\Delta R$'nin
->   sistematik doğruluğu. **SQUID BPM burada (tek frekansla) yeniden anlamlı (§9.4).**
+>   √N ile yenilir** → **antisimetrik (orbit-görünür)** misalignment'lar iyi
+>   kurtarılır (SQUID tek-frekansla yeniden anlamlı, §9.4). **AMA sahte-EDM'i süren
+>   simetrik (orbit-görünmez) kısım lock-in tabanında BİLE kurtarılamaz (§9.5,
+>   no-go); ΔR'de %0.5 β-beat felakettir.** corr metriği bu simetrik felaketi gizler.
 > - **§10 Kalan yollar:** NN ileri-harita + "akıllı düzeltme" (bkz. `YAPILACAKLAR.md §4`).
 
 > **Durum (2026-06).** Bu belge, "tüm quad'ları (farklı frekansta) modüle edip
@@ -371,10 +373,14 @@ doğru yol olduğunu gösterir.
 
 **σ = 1 μm:** 10 s → corr 0.992; 100 s → 0.999 (46/48).
 
-**Okuma:** no-go duvarı (cond=3.7×10⁴) *kalkmıyor*; ama beyaz gürültüyü $\sqrt N$
-ile yenince simetrik alt-uzaya erişim açılıyor. **"İmkânsız" değil, "uzun
-entegrasyon + dikkatli sistematik" problemine** dönüşüyor (σ=10μm'de ~17 dk →
-corr 0.99). Bedel zaman; kazanç simetrik gözlenebilirlik.
+**Okuma:** lock-in beyaz gürültüyü $\sqrt N$ ile yener; corr 0.99'a çıkar.
+
+> **⚠️ corr bir TUZAK — simetrik felaketi gizler (§9.5'te niceliği).** corr 0.99,
+> 48 modun çoğunu oluşturan *kolay antisimetrik* modlarca domine olur ve ölçek/
+> ofset-değişmez olduğu için **üniform (simetrik) hatayı görmez.** §9.5 gösteriyor
+> ki simetrik (orbit-görünmez, sahte-EDM'i süren) alt-uzay, **lock-in tabanında
+> bile** kurtarılamıyor. "corr 0.99 → çözüldü" çıkarımı **yanlıştır.** Doğru metrik:
+> simetrik-bileşen hatası (mean-çıkarmadan, gerçek RMS).
 
 ### 9.4 SQUID BPM'in (yeniden anlam kazanan) rolü
 §7'de SQUID *dağıtık-frekans + genlik-okuma* için işe yaramıyordu (orada sorun
@@ -384,19 +390,46 @@ gürültü değil nefesti). Burada sorun **gerçekten gürültü** — ve $\sigm
 kısa $T$). Yani **SQUID, tek bir modülasyon frekansıyla da değerlidir** —
 modülasyonu farklı frekanslara bölmek şart değil.
 
-### 9.5 Gerçek taban: $\Delta R$ sistematik doğruluğu (ortalanmaz!)
-Beyaz gürültü zamanla yenildiğine göre, v2.7'nin gerçek sınırı artık BPM gürültüsü
-**değildir**. Sınırlayıcılar — **$\sqrt N$ ile düşmeyen** her şey:
-- **$\Delta R$ model/kalibrasyon hatası** (β-beat, gradyan kalibrasyonu): bir
-  *sistematik*tir, hiç ortalanmaz. **Asıl taban budur** ve drift makalesindeki
-  LOCO-kalite / β-beat sağlamlık işine bağlanır.
-- **Modülasyonla-korelasyonlu pickup:** quad güç kaynakları 1 kHz'de darbelenirse
-  BPM elektroniğine 1 kHz'de sızabilir → **koherent** → $\sqrt N$ ile *düşmez*.
-  Deneysel tasarımda dikkat gerektirir.
-- 1/f BPM gürültüsü (1 kHz'de genelde önemsiz ama kontrol edilmeli).
+### 9.5 Gerçek taban: $\Delta R$ sistematik doğruluğu — ve simetrik no-go (ölçüldü)
 
-→ **Sıradaki test (§9.5'in niceliği):** $\Delta R$'ye %1–5 β-beat / gradyan
-kalibrasyon hatası ekleyip, beyaz gürültü yenilmişken **gerçek tabanı** ölç.
+Beyaz gürültü zamanla yenildiğine göre, v2.7'nin gerçek sınırı **$\sqrt N$ ile
+düşmeyen** şeylerdir. En önemlisi **$\Delta R$ model/kalibrasyon hatası** (β-beat,
+gradyan kalibrasyonu): bir *sistematik*tir, hiç ortalanmaz. Modeli: gerçek latiste
+per-quad gradyan hatası $\delta$ var ($\Delta R_{\rm true}$), inversiyon nominal
+$\Delta R_{\rm model}$ ile yapılır; ölçüm $\Delta y = \Delta R_{\rm true}\,dy +$
+(lock-in sonrası 10 nm artık). Sonuç (`v27_syst2.py`, 30 seed; $dy$ RMS=57.7 μm,
+sim-bileşen 41 μm, anti-bileşen 60 μm):
+
+| $\sigma_g$ | corr | gerçek hata RMS | **sim-bileşen hata** | anti-bileşen hata |
+|---|---|---|---|---|
+| %0 (lock-in tabanı, 10 nm) | 0.996 | 15 μm | **96 μm** | 0.08 μm |
+| %0.5 | 0.703 | 291 μm | 1931 μm | 11 μm |
+| %1.0 | 0.485 | 581 μm | 3848 μm | 22 μm |
+| %5.0 | 0.125 | 3971 μm | 26368 μm | 155 μm |
+
+**İki kritik bulgu:**
+
+1. **Simetrik alt-uzay lock-in tabanında BİLE kurtarılamıyor (gürültüden bağımsız
+   no-go).** $\sigma_g=0$, model mükemmel, yalnız 10 nm artık beyaz gürültü olsa
+   bile **sim-bileşen hatası 96 μm** — sinyalin kendisinden (41 μm) büyük. Sebep:
+   $\sigma_{\min}(\Delta R)\approx10^{-4}$; 10 nm ölçüm hatası bu yönde
+   $10\,{\rm nm}/10^{-4}\approx100\,\mu$m geri-çatım hatası verir. Simetriği
+   kurtarmak için $<4$ nm efektif gürültü gerekir → pratik dışı uzun entegrasyon.
+   **Antisimetrik kısım ise mükemmel (0.08 μm).**
+2. **$\Delta R$ sistematik hatası felaketi büyütür.** %0.5–1 gradyan/β-beat hatası:
+   toplam hata sinyalin 5–10 katı, corr 0.70/0.49. Antisimetrik kısım görece dayanır
+   (11–22 μm), ama simetrik yön cond=$3.7\times10^4$ ile patlar (1931–3848 μm).
+
+**Sonuç — v2.7+lock-in'in dürüst sınırı:** Lock-in BPM *gürültüsünü* yener ve
+**antisimetrik (orbit-görünür)** misalignment'ları iyi kurtarır (drift makalesinin
+kullandığı kısım), %1 model hatasına makul dayanıklı. Ama **sahte-EDM'i süren
+simetrik (orbit-görünmez) kısmı kurtaramaz** — ne lock-in tabanında, ne %0.5 model
+hatasıyla. Bu, simetrik alt-uzayın neden **spin (Omarov) veya "akıllı düzeltme"
+(§10)** gerektirdiğinin orbit-tarafı kanıtıdır.
+
+> **Diğer ortalanmayan sınırlayıcılar (tasarımda dikkat):** modülasyonla-korelasyonlu
+> pickup (quad güç kaynakları 1 kHz'de BPM'e sızarsa → koherent → $\sqrt N$ düşmez);
+> 1/f BPM gürültüsü (1 kHz'de genelde önemsiz ama kontrol edilmeli).
 
 ---
 
@@ -425,6 +458,7 @@ python3 /tmp/kmod_recover/single_bpm_test.py     # §1-7: dağıtık-frekans, ne
 python3 /tmp/kmod_recover/breathing_cpp.py --nq 6   # §5.5: nefesin C++ doğrulaması
 python3 /tmp/kmod_recover/v27_recheck.py         # §8: tek-frekans ΔR, no-go (cond, corr)
 python3 /tmp/kmod_recover/v27_lockin.py          # §9: lock-in (T vs corr, σ_eff)
+python3 /tmp/kmod_recover/v27_syst2.py           # §9.5: ΔR sistematik taban + simetrik no-go
 ```
 Tümü analitik çözücüye dayanır (`analytic_kmod.py` yapı taşları + `single_bpm_test.
 closed_orbit_at_quads`), `params.json`, $\varepsilon=0.02$, seed=0, dikey düzlem.
