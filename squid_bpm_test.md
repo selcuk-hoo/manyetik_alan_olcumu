@@ -1,4 +1,17 @@
-# squid_bpm_test.md — Tek BPM ile per-quad K-modülasyon: neden çalışmadı (pedagojik)
+# squid_bpm_test.md — K-modülasyonla quad hizalama ölçümü: toplu pedagojik kayıt
+
+> **Kapsam.** Bu belge, "K-modülasyon + BPM ile quad hizalama hatalarını
+> ölçebilir miyiz?" sorusunun **tüm dallarının tek kaydıdır** (notlar dağılmasın
+> diye burada toplandı):
+> - **§1–7 Dağıtık-frekans (her quad ayrı $f_i$) + genlik okuma:** ÖLÜ — sinyali
+>   **optik-nefes** boğuyor (koherent; çok-BPM/SQUID söndürmez).
+> - **§8 Tek-frekans tüm-quad $\Delta R$ (v2.7) + tam matris inversiyonu:** nefes
+>   *engel değil* (matrisin içinde), ama tek-atış BPM gürültüsünde **no-go** duvarı
+>   (cond $\sim$10⁴).
+> - **§9 Tek-frekans + lock-in (1 kHz mod + ortalama):** BPM gürültüsü **zamanla
+>   √N ile yenilir** → v2.7 *canlı aday*; sınırı artık gürültü değil, $\Delta R$'nin
+>   sistematik doğruluğu. **SQUID BPM burada (tek frekansla) yeniden anlamlı (§9.4).**
+> - **§10 Kalan yollar:** NN ileri-harita + "akıllı düzeltme" (bkz. `YAPILACAKLAR.md §4`).
 
 > **Durum (2026-06).** Bu belge, "tüm quad'ları (farklı frekansta) modüle edip
 > **tek bir BPM** ile 48 quad'ın 100 μm rastgele hizalama hatasını ölçebilir
@@ -11,14 +24,11 @@
 > optik-nefesi ihmal eden idealize bir modele dayanıyordu.
 >
 > **Bu nefes etkisi gerçek C++ izleyiciyle bağımsız doğrulandı (§5.5):** analitik
-> bir artefakt değil. Dolayısıyla **"farklı-frekans per-quad modülasyon + SQUID
-> BPM ile genlik okuma" dalı bu belgede kesin olarak kapatılır (§7).** Modülasyon
-> yöntemini kurtarabilecek iki *ayrı* yol açık kalır (sinir ağı; aynı-frekans
-> tüm-quad modülasyonu, v2.7) — bunlar bu testin kapsamı dışındadır, §8'de
-> ertelenmiş olarak listelenir.
+> bir artefakt değil. Dolayısıyla **"farklı-frekans per-quad modülasyon + genlik
+> okuma" dalı (ve SQUID'in onu kurtaracağı iddiası) §7'de kesin kapatılır.** Buna
+> karşılık tek-frekans v2.7 yolu (§8) lock-in ile (§9) **canlanır.**
 >
-> Reprodüksiyon: `/tmp/kmod_recover/single_bpm_test.py` (analitik; C++ gerekmez),
-> `/tmp/kmod_recover/breathing_cpp.py` (C++ doğrulama).
+> Reprodüksiyon: `/tmp/kmod_recover/{single_bpm_test,breathing_cpp,v27_recheck,v27_lockin}.py`.
 
 ---
 
@@ -261,8 +271,12 @@ diye geri dönmek gerekmesin:
 - **SQUID BPM ne katar?** Daha iyi çözünürlük ve/veya daha çok BPM. Ama nefes
   **rastgele gürültü değil, koherent bir sistematiktir**; çözünürlük artırmak veya
   BPM eklemek koherent sistematiği **ortalamayla söndürmez** (sonuç [3]:
-  2→48 BPM'de corr ≈ −0.03). SQUID'in tek üstünlüğü (düşük gürültü), nefesin
-  problem olduğu yerde işe yaramaz.
+  2→48 BPM'de corr ≈ −0.03). SQUID'in tek üstünlüğü (düşük gürültü), *bu dalda*
+  (nefes problemi) işe yaramaz.
+  > **Not:** Bu, "SQUID işe yaramaz" demek değildir — yalnız **dağıtık-frekans +
+  > genlik-okuma** dalında işe yaramaz. SQUID'in düşük gürültüsü, gürültünün
+  > gerçekten sınırlayıcı olduğu **tek-frekans + lock-in** bağlamında (§9.4)
+  > yeniden anlamlıdır.
 - Kör noktalar (SQUID için öne sürülen ikinci gerekçe) BPM ekleyerek zaten
   giderilir (§6.3) — ama bu da sınırlayıcı etken değildi.
 
@@ -275,49 +289,144 @@ oku, kalibrasyona böl" + SQUID dalı **kapalıdır.** Bu, geçmiş kayıtla tut
 
 ---
 
-## 8. Hayatta kalan iki yol (bu belgenin KAPSAMI DIŞINDA — sonraki adım)
+## 8. Tek-frekans tüm-quad $\Delta R$ (v2.7): nefes engel değil, ama no-go duvarı
 
-Bu belge yalnız **farklı-frekans + genlik-okuma + SQUID** dalını kapatır.
-Modülasyon yöntemini kurtarabilecek, mekanik olarak *farklı* iki yol **açık**
-kalır. Bunlara geçmeden önce yukarıdaki dalı kesin kapatmak, "acaba şöyle mi,
-böyle mi" döngüsüne girmemek içindir.
+Dağıtık-frekanstan **mekanik olarak farklı** bir yol: tüm quad'ları **aynı**
+frekansta (aynı fazda) modüle et. Bu, projenin eski $g_1/g_2$ K-modülasyon =
+$\Delta R$ yöntemidir (v2.7 tag'i, `test_kmod_reconstruction.py`).
 
-1. **Sinir ağı (nonlineer ters-harita).** Lineer "genlik ÷ kalibrasyon" çöküyor,
-   çünkü nefes haritayı nonlineer/non-invertible yapıyor. Girişi (modülasyondaki
-   quad K değerleri + BPM ölçümleri), çıkışı (quad hizalama hataları) olan bir NN
-   simülasyon verisinden eğitilebilir. Nefes **deterministik** olduğu için NN onu
-   prensipte *öğrenip ayıklayabilir*.
-   > **Ama deneysel bağlayıcılık şüphesi (önemli):** (a) NN, eğitildiği ileri-modelin
-   > sadakati kadar iyidir — modellenmemiş β-beat, multipoller, BPM nonlineerliği
-   > gerçek makinede NN'i yanlı kılar. (b) Daha derin sorun: NN **no-go
-   > gözlenebilirlik tabanını yenemez**. Simetrik (orbit-görünmez) alt-uzay BPM'de
-   > alt-gürültü imza bırakıyorsa, NN o bilgiyi *yoktan var edemez* — eğitim-kümesi
-   > önceline (ortalamaya) regresyon yapar, ki bu gerçek makinede **bağlayıcı
-   > değildir**. Yani NN nefesi ayıklayıp **antisimetrik** kısmı iyileştirebilir
-   > (ki o zaten ölçülebiliyordu), ama asıl problem olan **simetrik körlüğü**
-   > açmaz. → Ayrı bir test gerektirir; umut sınırlı.
-2. **Aynı-frekans tüm-quad modülasyonu (v2.7) — İNCELENDİ (2026-06-29).** Tüm
-   quad'lar **aynı** frekansta modüle edilir; iki-gradyan farkı $\Delta y =
-   y(g{\times}1.02)-y(g)$ alınır (BPM ofseti ortak-mod iptal) ve **tam 48×48
-   $\Delta R$ matrisi** ters çevrilir (`np.linalg.solve`). Dağıtık-frekanstan farkı:
-   burada nefes **$\Delta R$'nin içinde** (köşegen-dışı kuplaj dahil) → kirlilik
-   değil. Sonuç:
-   - **Temiz limitte exact:** 48-BPM inversiyonu corr = 1.000000 (hata ~10⁻¹² μm).
-     **Nefes engel değil** — v2.7'nin "çalışıyor" iddiası temiz limitte doğru.
-   - **Ama no-go duvarı:** cond$(\Delta R)$ = 3.7×10⁴; antisim/sim yön kazanç oranı
-     ~1393×. Gerçekçi BPM gürültüsü (σ=0.1/1/10 μm) → corr 0.67/0.07/0.00.
-   - **Verdikt:** v2.7 *yeni bir kapı değil*; bilinen **no-go inversiyon sınırının**
-     başka yüzü. **Nefes ≠ no-go** (ikisi ayrı; v2.7'de suçlu no-go, dağıtık-frekansta
-     suçlu nefes). Repro: `/tmp/kmod_recover/v27_recheck.py`.
+**Yöntem:** iki gradyan konfigürasyonu ($g$ ve $g\times1.02$) arasında kapalı
+yörünge farkı alınır:
+$$\Delta y \;=\; y(g{\times}1.02) - y(g) \;=\; \Delta R\,\cdot\,dy,$$
+sonra **tam 48×48 $\Delta R$ matrisi** ters çevrilir: $\widehat{dy} =
+\Delta R^{-1}\Delta y$ (`np.linalg.solve`, 48 BPM).
+
+**Dağıtık-frekanstan kritik fark — nefes neden artık engel değil:** Burada genliği
+köşegen kalibrasyona *bölmüyoruz*; **tüm matrisi** ters çeviriyoruz. Optik-nefes
+(bir quad'ı kıpırdatınca tüm optiğin değişmesi) $\Delta R$'nin **köşegen-dışı
+yapısında zaten kayıtlıdır**. Yani nefes bir *kirlilik* değil, ters-çevrilen
+haritanın *parçasıdır*. Sonuç (analitik $\Delta R$, C++ ile §5.5'te doğrulanmış):
+
+| Durum | corr | Yorum |
+|---|---|---|
+| **Temiz 48-BPM inversiyon** | **1.000000** (hata ~10⁻¹² μm) | Nefes engel DEĞİL — tam matriste |
+| BPM gürültü σ=0.1 μm (tek-atış) | 0.665 | koşul sayısı gürültüyü büyütüyor |
+| σ=1 μm | 0.075 | çöküş |
+| σ=10 μm | ≈0 | ölü |
+
+**Engel artık nefes değil, $\Delta R$'nin koşul sayısı:** cond$(\Delta R)=
+3.7\times10^4$; antisim/sim yön kazanç oranı ~**1393×** (no-go tablosuyla aynı
+mertebe). Simetrik (orbit-görünmez) alt-uzay $\Delta R$'nin **küçük tekil
+değerlerine** düşer → tek-atış BPM gürültüsü ters-çevrimde ~$1/\sigma_{\min}$ ile
+büyür.
+
+> **Kritik kavramsal ayrım — "nefes ≠ no-go":** Dağıtık-frekansta suçlu **nefes**
+> (koherent sistematik, köşegen okumayı kirletir). v2.7'de nefes çözülmüş; suçlu
+> **no-go** (kötü koşullu matrisin ters-çevriminde **rastgele** gürültünün
+> büyümesi). İkisi farklı problemlerdir — ve §9'da göreceğimiz gibi, ikincisi
+> (rastgele) *zamanla* yenilebilir, birincisi (koherent) yenilemez.
+
+Repro: `/tmp/kmod_recover/v27_recheck.py`.
 
 ---
 
-## 9. Reprodüksiyon
+## 9. Tek-frekans + lock-in: BPM gürültüsünü *zamanla* yenmek (v2.7 canlanıyor)
+
+§8'deki "σ=10 μm → corr≈0" sonucu **tek-atış bağımsız gürültü** varsayar (iki
+konfig ayrı ölçülür → farkta $\sqrt2\,\sigma$). Ama modülasyon gerçekte **~1 kHz**
+hızla yapılır. Bu, gürültü modelini kökten değiştirir.
+
+### 9.1 Üç gürültü bileşeni, üç farklı davranış
+1. **Statik ofset (~100 μm):** iki fazda aynı → **farkta tam iptal.** (K-mod'un
+   var olma sebebi; §8 zaten bunu yapıyor.)
+2. **Yavaş drift (termal, ms'ten yavaş):** 1 kHz'de iki faz ~0.5 ms arayla okunur;
+   drift bu arada değişmez → **iptal.** *(Kullanıcının kilit gözlemi: hızlı
+   modülasyon, $\Delta R$'nin hesaplandığı iki an arasında BPM ofsetinin/driftinin
+   değişmemesini garanti eder.)*
+3. **Beyaz/hızlı elektronik gürültü:** iptal olmaz — ama **lock-in (senkron
+   demodülasyon)** ile yalnız $f_{\rm mod}$ çevresindeki dar banttaki gürültü kalır;
+   $N$ modülasyon çevriminde **$\sqrt N$ ile bastırılır**:
+   $$\sigma_{\rm eff} \;=\; \frac{\sqrt2\,\sigma_{\rm tek-atış}}{\sqrt N},
+   \qquad N = T_{\rm ölçüm}\times f_{\rm mod}.$$
+
+### 9.2 Neden lock-in v2.7'ye yarar ama dağıtık-frekansa yaramaz
+Lock-in **rastgele** gürültüyü ortalar, **koherent** sistematiği değil.
+- v2.7'nin düşmanı: beyaz gürültü × kötü koşul → **rastgele** → lock-in **yener**.
+- Dağıtık-frekansın düşmanı: **nefes** → **koherent, deterministik** → lock-in
+  *yenemez* (her çevrimde aynı yanlı katkı; ortalaması sıfır değil).
+
+Bu, §8'deki "nefes ≠ no-go" ayrımının operasyonel sonucudur ve v2.7'nin neden
+doğru yol olduğunu gösterir.
+
+### 9.3 Sonuçlar ($f_{\rm mod}=1$ kHz, analitik $\Delta R$, 40 seed ort.)
+
+**σ = 10 μm tek-atış BPM gürültüsü:**
+
+| $T_{\rm ölçüm}$ | $N$ çevrim | $\sigma_{\rm eff}$ | corr | SNR>1 mod |
+|---|---|---|---|---|
+| 1 ms (ortalama yok) | 1 | 14 μm | 0.001 | 5/48 |
+| 10 s | 10⁴ | 141 nm | 0.651 | 31/48 |
+| 100 s | 10⁵ | 45 nm | 0.930 | 36/48 |
+| 1000 s (~17 dk) | 10⁶ | 14 nm | **0.992** | 43/48 |
+
+**σ = 1 μm:** 10 s → corr 0.992; 100 s → 0.999 (46/48).
+
+**Okuma:** no-go duvarı (cond=3.7×10⁴) *kalkmıyor*; ama beyaz gürültüyü $\sqrt N$
+ile yenince simetrik alt-uzaya erişim açılıyor. **"İmkânsız" değil, "uzun
+entegrasyon + dikkatli sistematik" problemine** dönüşüyor (σ=10μm'de ~17 dk →
+corr 0.99). Bedel zaman; kazanç simetrik gözlenebilirlik.
+
+### 9.4 SQUID BPM'in (yeniden anlam kazanan) rolü
+§7'de SQUID *dağıtık-frekans + genlik-okuma* için işe yaramıyordu (orada sorun
+gürültü değil nefesti). Burada sorun **gerçekten gürültü** — ve $\sigma_{\rm eff}
+\propto \sigma_{\rm tek-atış}$. SQUID'in düşük tek-atış gürültüsü, aynı corr'a
+**çok daha kısa entegrasyonda** ulaşmayı sağlar (σ: 10→1 μm, aynı corr ~100× daha
+kısa $T$). Yani **SQUID, tek bir modülasyon frekansıyla da değerlidir** —
+modülasyonu farklı frekanslara bölmek şart değil.
+
+### 9.5 Gerçek taban: $\Delta R$ sistematik doğruluğu (ortalanmaz!)
+Beyaz gürültü zamanla yenildiğine göre, v2.7'nin gerçek sınırı artık BPM gürültüsü
+**değildir**. Sınırlayıcılar — **$\sqrt N$ ile düşmeyen** her şey:
+- **$\Delta R$ model/kalibrasyon hatası** (β-beat, gradyan kalibrasyonu): bir
+  *sistematik*tir, hiç ortalanmaz. **Asıl taban budur** ve drift makalesindeki
+  LOCO-kalite / β-beat sağlamlık işine bağlanır.
+- **Modülasyonla-korelasyonlu pickup:** quad güç kaynakları 1 kHz'de darbelenirse
+  BPM elektroniğine 1 kHz'de sızabilir → **koherent** → $\sqrt N$ ile *düşmez*.
+  Deneysel tasarımda dikkat gerektirir.
+- 1/f BPM gürültüsü (1 kHz'de genelde önemsiz ama kontrol edilmeli).
+
+→ **Sıradaki test (§9.5'in niceliği):** $\Delta R$'ye %1–5 β-beat / gradyan
+kalibrasyon hatası ekleyip, beyaz gürültü yenilmişken **gerçek tabanı** ölç.
+
+---
+
+## 10. Kalan yol: NN ileri-harita + "akıllı düzeltme"
+
+Lineer inversiyon (v2.7) en iyi durumda $\Delta R$ sistematiğiyle sınırlı. Ondan
+*kavramsal olarak* farklı bir yol — misalignment'ı geri-çatmak yerine doğrudan
+**sahte-EDM'yi hedeflemek**:
+
+- NN ile **COD → sahte-EDM ileri-haritası** öğren; sıfır sahte-EDM için kapalı
+  yörüngenin nasıl modifiye edileceğini öğret; orbit-görünür knob'larla (quad/
+  corrector) sahte-EDM'yi null'la — simetrik misalignment'ı *bilmeden*.
+- **Neden no-go'yu atlayabilir (hipotez):** ileri-harita (inversiyon değil) +
+  orbit-görünür kollarla **EDM-hedefli** düzeltme.
+- **Şüphe:** NN gözlenebilirlik tabanını yenemez; tilt/β-beat dayanıklılığı kritik.
+
+Ayrıntı ve plan: **`YAPILACAKLAR.md §4`** ("akıllı düzeltme" notu). Bu, bu belgenin
+kapsamı dışında, sonraki çalışma kalemidir.
+
+---
+
+## 11. Reprodüksiyon
 
 ```bash
-python3 /tmp/kmod_recover/single_bpm_test.py    # analitik [1]/[2]/[3] + kör-nokta
-python3 /tmp/kmod_recover/breathing_cpp.py --nq 6   # C++ doğrulama (§5.5)
+python3 /tmp/kmod_recover/single_bpm_test.py     # §1-7: dağıtık-frekans, nefes [1]/[2]/[3]
+python3 /tmp/kmod_recover/breathing_cpp.py --nq 6   # §5.5: nefesin C++ doğrulaması
+python3 /tmp/kmod_recover/v27_recheck.py         # §8: tek-frekans ΔR, no-go (cond, corr)
+python3 /tmp/kmod_recover/v27_lockin.py          # §9: lock-in (T vs corr, σ_eff)
 ```
-Analitik çözücü (`analytic_kmod.py` yapı taşları), `params.json`,
-$\varepsilon=0.02$, seed=0, dikey düzlem. C++ doğrulama `quad_dG` kullanır
-(`integrator.cpp` değiştirilmez); ~40 s/kapalı-yörünge.
+Tümü analitik çözücüye dayanır (`analytic_kmod.py` yapı taşları + `single_bpm_test.
+closed_orbit_at_quads`), `params.json`, $\varepsilon=0.02$, seed=0, dikey düzlem.
+`breathing_cpp.py` gerçek C++ izleyiciyi `quad_dG` ile kullanır (`integrator.cpp`
+**değiştirilmez**); ~40 s/kapalı-yörünge. Diğerleri saniyeler içinde koşar.
