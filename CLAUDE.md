@@ -104,6 +104,8 @@ tarafındaki kesin sınır teoreminde aranıyor.
 ├── akilli_duzeltme.md          # AKILLI DÜZELTME: Kol B (NN COD→f ileri-harita) ÖLÜ
 │                               #   (COD→f tek-değerli değil; ~7nm = §9.5 duvarı);
 │                               #   Kol A (spin) çalışır; BİRLEŞİK NO-GO (3 kol 1 duvar)
+├── akilli_duzeltme_pedagojik.md # ↑ belgenin DERS KİTABI tarzı kardeşi (sıfırdan,
+│                               #   ikiz-makine anlatımı, yerel-ofset hilesi, SSS)
 ├── MAKALE_POTANSIYELI.md / PROJE_ANALIZI_VE_ONERILER.md / SIMULASYON_PLANI_HIZALAMA.md
 ├── YAPILACAKLAR.md             # Aktif yapılacaklar
 ├── injection_kick_raporu.md    # Enjeksiyon kick raporu
