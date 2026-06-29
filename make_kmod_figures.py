@@ -176,6 +176,62 @@ def fig_sigma():
     print(f"Kaydedildi: {out}  (p={p:.3f})")
 
 
+def fig_bpm_count():
+    """Geri-çatım korelasyonu vs BPM sayısı: per-quad AC-BBA (kapasitif) vs
+    ΔR orbit-inversiyonu (kapasitif ve SQUID). SQUID çözünürlüğü ΔR'yi
+    KURTARMAZ (simetrik-mod koşullanması sınırı) → çok BPM bile yetmez."""
+    with open(os.path.join(BASE, "params.json")) as f:
+        cfg = json.load(f)
+    nq = 2 * int(cfg["nFODO"])
+    T, *_ = obs.build_T(cfg, "y", 0.02)
+    dR, _, _ = obs.ak.build_analytic_dR(cfg, cfg["g1"], cfg["g1"] * 1.02, "y")
+    Ns = [3, 4, 6, 8, 12, 16, 24, 36, 48]
+    nseed = 40
+
+    def acbba(S, o, rng, sig):
+        A = T[S, :] * o[None, :] + rng.normal(0, sig, (len(S), nq))
+        num = np.einsum("ij,ij->j", T[S, :], A)
+        den = np.einsum("ij,ij->j", T[S, :], T[S, :])
+        return obs.corr(o, num / den)
+
+    def dR_inv(S, o, rng, sig):
+        d = dR[S, :] @ o + rng.normal(0, sig, len(S))
+        oh = np.linalg.pinv(dR[S, :], rcond=0.03) @ d
+        return obs.corr(o, oh)
+
+    ac, dc, ds = [], [], []
+    for N in Ns:
+        S = np.unique(np.linspace(0, nq - 1, N).astype(int))
+        a = b = c = 0.0
+        for sd in range(nseed):
+            rng = np.random.default_rng(sd); o = rng.normal(0, 1e-4, nq)
+            a += acbba(S, o, np.random.default_rng(sd), 1e-6)
+            b += dR_inv(S, o, np.random.default_rng(sd), 1e-6)
+            c += dR_inv(S, o, np.random.default_rng(sd), 1e-9)
+        ac.append(a / nseed); dc.append(b / nseed); ds.append(c / nseed)
+
+    fig, ax = plt.subplots(figsize=(3.7, 2.9))
+    ax.plot(Ns, ac, "o-", color="C0", lw=1.4, ms=5,
+            label="per-quad AC-BBA (kapasitif 1 μm)")
+    ax.plot(Ns, dc, "s--", color="C3", lw=1.2, ms=4,
+            label=r"$\Delta R$ inversiyon (kapasitif 1 μm)")
+    ax.plot(Ns, ds, "^:", color="C1", lw=1.2, ms=4,
+            label=r"$\Delta R$ inversiyon (SQUID 1 nm)")
+    ax.axhline(1.0, color="gray", lw=0.6, ls=":")
+    ax.set_xlabel("BPM sayısı"); ax.set_ylabel(r"geri-çatım korelasyonu $r$")
+    ax.set_title("Geri-çatım vs BPM sayısı")
+    ax.set_ylim(0, 1.05)
+    ax.annotate("simetrik-mod tavanı\n(SQUID kurtarmaz)", xy=(36, 0.45),
+                xytext=(18, 0.66), fontsize=6.8, color="C3",
+                arrowprops=dict(arrowstyle="->", color="C3", lw=0.7))
+    ax.legend(loc="center right", fontsize=6.5)
+    ax.grid(True, alpha=0.25)
+    fig.tight_layout()
+    out = os.path.join(BASE, "fig_kmod_bpmcount.png")
+    fig.savefig(out); plt.close(fig)
+    print("Kaydedildi:", out)
+
+
 def fig_systematics():
     """(a) tilt ψ-taraması (0.3μm kalan; 6 seed) (b) CW/CCW EVEN/ODD (10μm; 20 seed).
     Veri: kmod_drivers/{tiltscan,cwccw_ens}; özet sabitler kmod_bba_sonuclar.md §7.3."""
