@@ -99,6 +99,11 @@ tarafındaki kesin sınır teoreminde aranıyor.
 ├── orbit_ileri_olcum.md        # İLERİ-ÖLÇÜM: f∝x_CO·y_CO; no-go=inversiyon;
 │                               #   standart BPM SQUID yerine; ham=antisim/artık=sim
 │                               #   §9 make-or-break sonuçları (7.7×, 62×, p=2.00)
+├── squid_bpm_test.md           # K-mod+BPM ölçümü: §7 dağıtık-frekans ÖLÜ (nefes);
+│                               #   §8 ΔR no-go; §9 lock-in; §9.5 simetrik no-go (<4nm)
+├── akilli_duzeltme.md          # AKILLI DÜZELTME: Kol B (NN COD→f ileri-harita) ÖLÜ
+│                               #   (COD→f tek-değerli değil; ~7nm = §9.5 duvarı);
+│                               #   Kol A (spin) çalışır; BİRLEŞİK NO-GO (3 kol 1 duvar)
 ├── MAKALE_POTANSIYELI.md / PROJE_ANALIZI_VE_ONERILER.md / SIMULASYON_PLANI_HIZALAMA.md
 ├── YAPILACAKLAR.md             # Aktif yapılacaklar
 ├── injection_kick_raporu.md    # Enjeksiyon kick raporu
@@ -240,7 +245,11 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | **Omarov BOŞLUK: CR-ayrım ÖLÇÜMÜ (48-BPM/SQUID+K-mod) test edilmedi; simetrik-artığa körlük açık** | `omarov.md §9` |
 | **Dejenerasyon: idealize FODO'da CCW≡CW+polarite-flip (Eq.C2 4'lü→2'li)** | `omarov.md §6.1`, git Test 7 |
 | f kapalı-yörünge fonksiyoneli ama ⟨x·y⟩ DEĞİL; Berry yönlü-alan en tutarlı lead | `orbit_ileri_olcum.md §2-3` |
-| İleri-ölçüm no-go'yu atlar MI? — AÇIK PROBLEM; doğru fonksiyonel pinlenemedi (analitik gerek) | `orbit_ileri_olcum.md §5,§7` |
+| ~~İleri-ölçüm no-go'yu atlar MI? — AÇIK~~ → **CEVAPLANDI: HAYIR** (Kol B ölü) | `akilli_duzeltme.md` |
+| **Akıllı düzeltme Kol B (NN COD→f): COD→f tek-değerli DEĞİL; gereken BPM ~7nm = §9.5 duvarı** | `akilli_duzeltme.md §3-4` |
+| **BİRLEŞİK NO-GO: orbit-inversiyon + lock-in + ileri-harita üçü de aynı simetrik duvara çarpar** | `akilli_duzeltme.md §4` |
+| **Kol A (spin) çalışır (bilgi spinde, orbitte değil); ama orbit-tarafı katkı değil** | `akilli_duzeltme.md §5`, `§14.6` |
+| **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |
 | **Drift izleme (ikinci makale)** | |
 | Kalibrasyon-ref drift: 50 μm BPM ofsetine rağmen 6.6 μm RMS; mutlak 197 μm → 29× | `makale-taslagi-2.md §3.4`, `drift_monitor/drift_monitor_sim.py` |
 | Dualite teoremi: iki-ölçüm tam-ofset-iptal sınıfı C'de ΔR⁻¹ tek çözüm; ‖ΔR⁻¹‖~‖R⁻¹‖/ε | `makale-taslagi-2.md §2.4` |

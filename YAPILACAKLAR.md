@@ -102,7 +102,17 @@ Yörünge trimi sonrası kalan ~10⁻⁴ artığı boylamsal spin geri-beslemesi
 simetrik içerik dahil çalıştığının gösterilmesi. Mevcut altyapı yeterli
 (spin ölç-trim + yörünge-trim birleşimi; keşif scriptleri git geçmişinde / `/tmp`).
 
-### 4. ⭐ "Akıllı düzeltme" — sahte-EDM'yi sıfırla, misalignment'ı DEĞİL (öncelik: stratejik, 2026-06-29 notu)
+### 4. ⭐ "Akıllı düzeltme" — sahte-EDM'yi sıfırla, misalignment'ı DEĞİL (TEST EDİLDİ → Kol B NEGATİF, 2026-06-29)
+
+> **SONUÇ (2026-06-29, `akilli_duzeltme.md`):** **Kol B (NN COD→sahte-EDM ileri-
+> haritası) ÖLÜ.** Karar-verici test: COD'u 1.7 μm içinde uyuşan iki makinenin
+> sahte-EDM'i ~250× EDM-hedefi kadar farklılaşır → COD→f haritası tek-değerli
+> değil. Gereken BPM doğruluğu ≈ **7 nm** (100 μm ofset altında) = `squid_bpm_test.md
+> §9.5` inversiyon-no-go'sunun (<4 nm) **ileri-harita karşılığı: aynı duvar.**
+> Hipotez ("ileri-harita inversiyona girmez") çürütüldü. **Kol A (spin)** çalışır
+> ama orbit-tarafı değil (Omarov/spin-trim; §14.6). → **BİRLEŞİK NO-GO:** orbit-
+> inversiyon + orbit-lock-in + orbit-ileri-harita üçü de aynı simetrik duvara çarpar.
+> Orbit-tarafı özgün katkı = kesin sınır teoremi, pozitif kurtarma değil.
 
 > **Fikrin özü (kullanıcı, 2026-06-29):** No-go bir *inversiyon* sınırıdır
 > (COD → misalignment, simetrik alt-uzayda cond ~10⁴; bkz. v2.7 yeniden-incelemesi
