@@ -3,368 +3,253 @@
 Bu belge, proton EDM (pEDM) deneyinde bir **fikri** sıfırdan anlatır: kuadrupol
 hizalama hatalarını (misalignment) tek tek ölçüp düzeltmeye çalışmak yerine, asıl
 zararlı büyüklüğü — **sahte EDM** sinyalini — *doğrudan* sıfırlamak. Bu fikre
-"**akıllı düzeltme**" diyoruz. Belge hiçbir ön bilgi varsaymaz; her kavram ilk
-kullanıldığında tanımlanır. Teknik/terse kayıt `akilli_duzeltme.md`'de,
-sahte-EDM'in temel mekanizması `trim_yontemi_pedagojik.md`'de, ölçüm-zinciri
-boşlukları `squid_bpm_test.md` ve `orbit_ileri_olcum.md`'dedir.
+"**akıllı düzeltme**" diyoruz. Belge hiçbir ön bilgi varsaymaz.
 
-**Sonucu baştan söyleyelim (spoiler):** Fikrin "yörünge tarafı" kolu **çalışmıyor**
-ve *neden* çalışmadığı çok öğreticidir. Bu, projedeki üç ayrı "no-go"yu (imkânsızlık
-sonucunu) tek bir cümlede birleştiren temiz bir **birleşik sınır teoremine** götürür.
+> **Bu belgenin bir hikâyesi var.** İlk araştırma, fikrin "yörünge tarafı" kolunu
+> *ölü* ilan etti. Sonra kullanıcı haklı bir itirazda bulundu — *"simetrik alt-uzay
+> kapalı yörüngeyi az dahi olsa değiştirir; harita vardır, fakat basit değildir"* —
+> ve bu, akıl yürütmedeki gerçek bir hatayı açığa çıkardı. Aşağıda **hem hatayı hem
+> düzeltilmiş anlayışı** anlatıyoruz; çünkü hatanın kendisi öğreticidir. Terse
+> teknik kayıt `akilli_duzeltme.md`'dedir.
 
 İçindekiler:
 1. Hatırlatma: sahte EDM nedir, neden tehlikeli?
 2. Fikir: misalignment'ı değil, sahte-EDM'i hedeflemek
 3. İki kol: spin-gözlemli (A) vs yörüngeden-öğrenilmiş (B)
-4. Kol B neden *makul* görünüyordu? (ileri-harita ≠ inversiyon)
-5. Anahtar geometri: yörünge neyi görür, neyi göremez?
-6. Karar-verici deney: "ikiz makineler"
-7. Sonucu okumak: 7 nanometre duvarı
-8. Neden Kol A çalışır da Kol B çalışmaz? (yerel ofset hilesi)
-9. Büyük resim: birleşik no-go (üç kol, tek duvar)
-10. Empirik pekiştirme: gerçek bir sinir ağı da öğrenemez
+4. Anahtar geometri: yörünge neyi *az* görür?
+5. İlk akıl yürütme ve içindeki hata
+6. Düzeltme: ileri-harita, inversiyon DEĞİLDİR (koşullanma)
+7. Gereken hassasiyet ulaşılabilir mi? (7 nm ve ortalama)
+8. O zaman gerçek engel ne? (karmaşık fonksiyonel)
+9. Kol A vs Kol B: yine de neden farklılar?
+10. Nerede duruyoruz (dürüst durum)
 11. Sık sorulan sorular
 
 ---
 
 ## 1. Hatırlatma: sahte EDM nedir, neden tehlikeli?
 
-Proton EDM deneyi, protonun spininin (küçük bir pusula iğnesi gibi düşünün) yatay
-düzlemden **düşeye doğru çok yavaş dönmesini** arar. Gerçek bir elektrik dipol
-momenti (EDM) bu dönmeyi yaratır. Ölçtüğümüz büyüklük, dikey spin bileşeninin
-zamanla birikme hızıdır:
+Proton EDM deneyi, protonun spininin yatay düzlemden **düşeye doğru çok yavaş
+dönmesini** arar. Ölçtüğümüz büyüklük dikey spin bileşeninin birikme hızıdır:
 $$f \equiv \frac{dS_y}{dt}.$$
+Anlamlı bir ölçüm için $f \sim 1\ \text{nrad/s}$ ($10^{-9}$ rad/s) seviyesi gerekir.
+Sorun: **mıknatıs hizalama hataları da $f \neq 0$ üretir** ve gerçek EDM'den ayırt
+edilemez. Buna **sahte EDM** denir.
 
-Hedef öyle küçük ki, anlamlı bir EDM ölçümü için $f \sim 1\ \text{nrad/s}$
-($10^{-9}$ rad/s) seviyesini ölçmek gerekir. Sorun: **mıknatıs hizalama hataları
-da $f \neq 0$ üretir** ve bu, gerçek EDM'le birebir aynı görünür. Buna **sahte
-EDM** denir.
-
-Sahte EDM'in mekanizması (ayrıntısı `trim_yontemi_pedagojik.md §1`): bir kuadrupol
-yatayda $dx$, düşeyde $dy$ kadar kayarsa, demet hem radyal hem dikey sapmış alan
-görür. Spinin x-ekseni etrafındaki dönmesiyle y-ekseni etrafındaki dönmesi **sıra
-değiştirilemez** (komütatif değil); ardışık iki dönme net bir üçüncü-eksen dönmesi
-bırakır — bu **geometrik (Berry) fazıdır.** Sonuç:
-$$f \;\propto\; dx \cdot dy \quad\Rightarrow\quad f \propto \sigma^2,$$
-yani sahte EDM, hizalama hatasının RMS'inin **karesiyle** büyür. (Bu $\sigma^2$
-yasası bu projede defalarca doğrulandı; bu oturumda da: üs $p = 2.002$.)
+Mekanizma (ayrıntı `trim_yontemi_pedagojik.md §1`): bir kuadrupol yatayda $dx$,
+düşeyde $dy$ kayarsa, spinin iki farklı eksen etrafındaki dönmeleri **sıra
+değiştirilemez** → net bir **geometrik (Berry) fazı** kalır:
+$$f \;\propto\; dx \cdot dy \;\propto\; \sigma^2.$$
+($\sigma^2$ yasası bu oturumda da doğrulandı: üs $p = 2.002$.)
 
 ---
 
 ## 2. Fikir: misalignment'ı değil, sahte-EDM'i hedeflemek
 
-Önceki çalışmalarda doğal yaklaşım şuydu: **48 kuadrupolün her birinin kaçıklığını
-ölç, sonra düzelt.** Kaçıklığı ölçmek için kapalı yörüngeyi (closed orbit, COD —
-demetin halka çevresinde izlediği ortalama yol; BPM'lerle, yani konum ölçen
-dedektörlerle okunur) kullanırız.
+Doğal yaklaşım: 48 kuadrupolün kaçıklığını yörüngeden (BPM'lerle) ölç, düzelt. Ama
+bunun bir **no-go**'su var: kaçıklığı yörüngeden geri-çatmak bir **inversiyon**dur
+ve sahte-EDM'i süren kısımda **patolojik kötü koşulludur** (gürültüyü ~$10^4$ kat
+büyütür; `squid_bpm_test.md §8`).
 
-Ama bu yaklaşımın bir **no-go**'su (kanıtlanmış imkânsızlığı) var. Kaçıklığı
-yörüngeden geri-çatmak bir **inversiyon** problemidir (yörünge → kaçıklık) ve bu
-inversiyon, sahte-EDM'i süren kısımda **patolojik derecede kötü koşulludur**
-(matrisin koşul sayısı çok büyük; gürültüyü ~$10^4$ kat büyütür). Bu yüzden
-kaçıklığı tam ölçmek pratikte imkânsız (`squid_bpm_test.md §8`).
-
-**Kullanıcının fikri (akıllı düzeltme):** Ama bizim asıl amacımız kaçıklığı ölçmek
-değil ki! Asıl amaç **sahte-EDM'i sıfırlamak.** O hâlde neden kaçıklığı tam
-çözmeye uğraşalım? Belki sahte-EDM'i **doğrudan** sıfırlayan bir düzeltme buluruz,
-kaçıklığın kendisini hiç bilmeden.
-
-Bir benzetme: Bir radyoda cızırtıyı (gürültüyü) gidermek istiyorsunuz. İki yol var:
-(A) cızırtının tam kaynağını (hangi devre, hangi direnç) teşhis edip onarmak —
-zor; (B) sadece cızırtıyı dinleyip, ses sıfırlanana dek bir düğmeyi çevirmek —
-kaynağı hiç bilmeden. Akıllı düzeltme, (B) yaklaşımının pEDM'deki karşılığıdır.
+**Kullanıcının fikri:** Asıl amacımız kaçıklığı ölçmek değil, **sahte-EDM'i
+sıfırlamak.** Neden kaçıklığı tam çözmeye uğraşalım? Belki sahte-EDM'i **doğrudan**
+sıfırlayan bir düzeltme buluruz. (Radyoda cızırtıyı, kaynağını teşhis etmeden,
+sadece dinleyip düğme çevirerek susturmak gibi.)
 
 ---
 
 ## 3. İki kol: spin-gözlemli (A) vs yörüngeden-öğrenilmiş (B)
 
-"Sahte-EDM'i doğrudan sıfırla" fikrini iki şekilde gerçekleştirebiliriz. Fark,
-**neyi ölçtüğümüzde** yatar.
+**Kol A — spin-gözlemli.** Sahte-EDM'i ($f$) **spinle ölç**, düğmeyi $f$ sıfırlanana
+dek çevir. Bu "spin ölç-trim" olarak biliniyor ve **çalışıyor**
+(`false_edm_harmonic_sinir.md §14.6`, ~6000×). Dezavantajı: spin ölçmek yavaş ve
+pahalı.
 
-**Kol A — spin-gözlemli.** Sahte-EDM'i ($f = dS_y/dt$) **spinle doğrudan ölç**,
-sonra bir düzeltici-mıknatıs (corrector) düğmesini $f$ sıfırlanana dek çevir.
-Tıpkı radyo örneğindeki (B) yaklaşımı: dinle ve düğmeyi ayarla. Bu, projede
-"spin ölç-trim" olarak zaten biliniyor ve **çalışıyor** (simetrik artığı ~6000×
-temizler — `false_edm_harmonic_sinir.md §14.6`).
-
-**Kol B — yörüngeden-öğrenilmiş ileri-harita.** Burada hile: spin ölçümü pahalı ve
-yavaş (kutuplanma ölçmek dakikalar alır). **Ya sadece yörüngeye (BPM'lere) bakarak**
-sahte-EDM'i öngörebilseydik? O zaman ucuz, hızlı, sürekli bir düzeltme yapardık.
-Plan:
-- Bir **sinir ağına (NN)** simülasyon verisiyle **yörünge → sahte-EDM** haritasını
-  öğret (buna **ileri-harita** denir).
-- NN'e "sahte-EDM'i sıfırlamak için yörüngeyi nasıl değiştirmeliyim" sorusunu
-  sordur; orbit-görünür düğmelerle (corrector) düzelt.
-
-Bu oturumun **açık sorusu** Kol B'ydi: *Yörüngeden öğrenilmiş bir ileri-harita,
-inversiyon no-go'sunu atlatabilir mi?*
+**Kol B — yörüngeden-öğrenilmiş ileri-harita.** *Sadece yörüngeye (BPM'lere)
+bakarak* sahte-EDM'i öngörebilir miyiz? Bir **sinir ağına** simülasyondan
+**yörünge → sahte-EDM** haritasını (ileri-harita) öğret; orbit-görünür düğmelerle
+EDM'i hedefleyerek düzelt. Bu oturumun açık sorusu Kol B'ydi.
 
 ---
 
-## 4. Kol B neden *makul* görünüyordu? (ileri-harita ≠ inversiyon)
+## 4. Anahtar geometri: yörünge neyi *az* görür?
 
-Hipotez şuna dayanıyordu: **No-go bir *inversiyon* sınırıdır.** İnversiyon
-(yörünge → kaçıklık) kötü koşulludur. Ama Kol B inversiyon yapmıyor; o bir
-**ileri-harita** (yörünge → sahte-EDM). İleri yön genelde iyi-huyludur. Ayrıca
-düzeltmeyi **orbit-görünür** düğmelerle, doğrudan **EDM'i hedefleyerek** yapıyoruz —
-görünmez kaçıklığı geri-çatmaya hiç çalışmıyoruz.
-
-Kulağa mantıklı geliyor. Ama bir varsayım gizli: **"sahte-EDM, yörüngenin bir
-fonksiyonudur."** Yani aynı yörüngeye her zaman aynı sahte-EDM karşılık gelmeli.
-Eğer bu doğruysa, NN o fonksiyonu öğrenebilir. Eğer **yanlışsa** — aynı yörünge
-farklı sahte-EDM'lere karşılık gelebiliyorsa — hiçbir NN (ne kadar büyük olursa
-olsun) bu haritayı öğrenemez, çünkü **öğrenilecek tek-değerli bir fonksiyon
-yoktur.** İşte testimiz tam olarak bunu sınadı.
-
----
-
-## 5. Anahtar geometri: yörünge neyi görür, neyi göremez?
-
-Burası fikrin kalbi. Önce iki kavram:
-
-**Simetrik vs antisimetrik kaçıklık.** Halka 24 hücreden oluşur; her hücrede bir
-"odaklayan" (QF) ve bir "odaksızlaştıran" (QD) kuadrupol var. Bir hücredeki QF ve
-QD kaçıklıklarını **zıt işaretli** kılarsanız buna *antisimetrik*, **aynı işaretli**
-kılarsanız *simetrik* desen denir. Bu ayrım kritik çünkü:
+Bir hücrede QF ve QD kaçıklıkları **zıt işaretli** ise *antisimetrik*, **aynı
+işaretli** ise *simetrik* desen denir.
 
 - **Antisimetrik kaçıklık → büyük kapalı yörünge** (BPM'ler net görür).
-- **Simetrik kaçıklık → minik kapalı yörünge** (BPM'ler neredeyse göremez).
+- **Simetrik kaçıklık → çok küçük kapalı yörünge** (BPM'ler *zar zor* görür).
 
-Neden? Simetrik desen, yörüngeyi "yüksek frekanslı" (yüksek-$k$ harmonik) bir
-biçimde dürter; halkanın yörünge tepkisi $G_k = C/|Q^2 - k^2|$ yasasıyla yüksek-$k$'da
-**bastırılır** ($Q \approx 2.3 \ll k$). Yani simetrik kaçıklık yörüngede zar zor
-iz bırakır — ona **"orbit-kör"** (orbit-blind) deriz.
+Neden? Simetrik desen yörüngeyi yüksek-$k$ harmonikle dürter; tepki $G_k =
+C/|Q^2-k^2|$ yüksek-$k$'da bastırılır. Sayıyla (SVD, tekil değerler): simetrik
+desenler yörüngede en küçük tekil değer yönlerinde yaşar; oran
+$\sigma_\text{max}/\sigma_\text{min} = 193$. Yani **simetrik kaçıklık, yörüngede
+aynı büyüklükteki antisimetrik kaçıklığa göre 193 kat daha az iz bırakır.**
 
-**Acı gerçek:** Sahte-EDM'i asıl süren şey, tam da bu **orbit-kör simetrik**
-alt-uzaydır. Yörünge düzeltmesi antisimetrik (görünür) kısmı temizler, ama geriye
-sahte-EDM'i süren simetrik artık kalır (`orbit_ileri_olcum.md §6`).
-
-**Bunu sayıyla görmek (SVD).** Yörünge tepki matrisi $R$'yi (kaçıklık → yörünge)
-tekil-değer ayrışımıyla (SVD) parçalarız: $R = U\Sigma V^\top$. Her tekil değer
-$\sigma$, bir kaçıklık-deseninin yörüngede ne kadar görünür olduğunu söyler. Bu
-oturumda hesapladık:
-
-| | tekil değer $\sigma$ | simetri | karakter |
-|---|---|---|---|
-| en büyük modlar | 28.4 … 8.6 | antisimetrik | **orbit-GÖRÜNÜR** |
-| en küçük modlar | 0.16 … **0.147** | simetrik | **orbit-KÖR** |
-
-Koşul sayısı $\sigma_\text{max}/\sigma_\text{min} = 193$. Yani **simetrik bir
-kaçıklık, aynı büyüklükteki antisimetrik kaçıklığa göre yörüngede 193 kat daha az
-iz bırakır.** Bu sayı, projedeki bağımsız bir analizle ($\kappa = 193$,
-`drift_monitor/permode2.py`) **birebir** aynı çıktı — yani geometri doğru.
+**Kritik incelik (hikâyenin dönüm noktası): 193 kat *az*, ama *sıfır değil*.**
+Simetrik kaçıklık yörüngede minik ama **gerçek** bir iz bırakır. Bunu unutmak,
+birazdan göreceğimiz hataya yol açtı.
 
 ---
 
-## 6. Karar-verici deney: "ikiz makineler"
+## 5. İlk akıl yürütme ve içindeki hata
 
-Şimdi testin fikri çok basit hâle geliyor. **İki depolama halkası** hayal edin:
+**Deney (gerçek C++ spin izleyicisiyle).** İki makine: A, ve A + simetrik (orbit-kör)
+10 μm pertürbasyon. Ölçtük:
 
-- **Makine A:** belli bir kaçıklık deseni.
-- **Makine B:** Makine A'nın deseni + üzerine eklenmiş bir **simetrik (orbit-kör)
-  pertürbasyon** (RMS 10 μm — yani tabanla aynı büyüklükte gerçek bir kaçıklık).
+| pertürbasyon | yörünge izi (ΔCOD) | sahte-EDM değişimi \|Δf\| |
+|--------------|-------------------:|--------------------------:|
+| antisimetrik (görünür) | 115 μm | $9.3\times10^{-6}$ (~9270× hedef) |
+| **simetrik (kör)** | **1.7 μm** | $2.5\times10^{-7}$ (**~247× hedef**) |
 
-Simetrik pertürbasyon orbit-kör olduğu için, **iki makinenin BPM'lerle okunan
-yörüngesi neredeyse aynıdır.** Soru: sahte-EDM'leri de aynı mı?
+**İlk (yanlış) sonuç:** "Yörüngeyi yalnız 1.7 μm değiştiren bir kaçıklık, sahte-EDM'i
+247× hedef oynatıyor. Demek ki yörünge sahte-EDM'i belirlemiyor; Kol B ölü."
 
-Bunu gerçek C++ spin izleyicisiyle (4D kapalı yörünge + Thomas-BMT, $p=2.00$
-doğrulanmış estimator) ölçtük. **Sonuç çarpıcı:**
-
-| sınıf | yörünge ayak izi (ΔCOD) | sahte-EDM değişimi \|Δf\| | hedefe göre |
-|-------|------------------------:|--------------------------:|------------:|
-| Antisimetrik (görünür) pertürbasyon | 115 μm | $9.3\times10^{-6}$ | ~9270× |
-| **Simetrik (kör) pertürbasyon** | **1.7 μm** | $2.5\times10^{-7}$ | **~247×** |
-
-İkinci satırı okuyun: **yörüngeyi yalnızca 1.7 μm değiştiren** (toplam yörünge
-~97 μm; ve 100 μm'lik BPM ofset gürültüsünün *altında*) bir kaçıklık,
-**sahte-EDM'i EDM-hedefinin 247 katı** kadar oynatıyor.
-
-Başka bir deyişle: **BPM'leriyle ayırt edilemeyen iki makine, sahte-EDM'de
-yüzlerce kat hedef farkı taşıyabilir.** Yani:
-
-> **Sahte-EDM, kapalı yörüngenin tek-değerli bir fonksiyonu DEĞİLDİR** (kullanışlı
-> hassasiyette). Aynı yörünge → farklı sahte-EDM.
-
-Bu, §4'teki gizli varsayımı **çürütür.** Öğrenilecek bir fonksiyon yoksa, hiçbir
-sinir ağı onu öğrenemez. **Kol B kavramsal olarak ölüdür** — NN'in büyüklüğünden
-veya eğitim verisinden bağımsız.
-
-![dejenerasyon figürü](/tmp/akilli_duzeltme/fig_kolb_dejenerasyon.png)
-
-*Figür: Kırmızı üçgenler (simetrik) minik yörünge ayak izinde (~1.7 μm) ama büyük
-sahte-EDM değişiminde; mavi daireler (antisimetrik) yörüngeyi izler. Kırmızı
-gölgeli bölge BPM-ofset tabanının altıdır: simetrik kanal oraya düşer.*
+**Kullanıcının itirazı (haklı):** *Ama 1.7 μm sıfır değil. Simetrik alt-uzay
+yörüngeyi az dahi olsa değiştiriyor; bu dejenerasyonu bozar. Harita vardır, sadece
+basit değildir.* — İşte hatayı bulan cümle. "Yörünge f'i belirlemiyor" demek
+yanlıştı; doğrusu "yörünge f'i **küçük bir izle** belirliyor."
 
 ---
 
-## 7. Sonucu okumak: 7 nanometre duvarı
+## 6. Düzeltme: ileri-harita, inversiyon DEĞİLDİR
 
-Sonucu nicel bir "gereksinim"e çevirelim. Kol B'nin simetrik sahte-EDM katkısını
-(10 μm kör kaçıklık → $|\Delta f| \approx 2.5\times10^{-7}$) EDM hedefine
-($10^{-9}$) çekebilmesi için, yörüngeyi hangi *doğrulukta* ölçmesi gerekir?
+Hata neredeydi? Sahte-EDM'i (skaler $f$) yörüngeden öngörmeyi, **48 kaçıklığı
+geri-çatmakla** (inversiyon) karıştırdım. İkisi çok farklı koşullanır.
 
-$$
-\text{gereken BPM doğruluğu} \;\approx\; \underbrace{1.7\ \mu\text{m}}_{\text{COD ayak izi}}
-\times \frac{\overbrace{10^{-9}}^{\text{hedef}}}{\underbrace{2.5\times10^{-7}}_{|\Delta f|}}
-\;\approx\; 6.9\ \text{nm}.
-$$
+**İnversiyon (COD → 48 kaçıklık):** simetrik yönde hata $1/\sigma_\text{min} \approx
+7\times$ (tam k-mod matrisinde $\sim10^4\times$) **büyür.** Felaket.
 
-**Yaklaşık 7 nanometre.** Üstelik bu, ~100 μm'lik BPM ofsetlerinin *altında*
-sağlanması gerekiyor — yani ofsetten 14000 kat daha ince bir sinyali çıkarmak.
+**İleri-harita (COD → skaler $f$):** duyarlılığı doğrudan ölçtük:
+$$\frac{\partial f}{\partial \text{COD}}\Big|_\text{sim} = 0.146,\qquad
+\frac{\partial f}{\partial \text{COD}}\Big|_\text{anti} = 0.081\ \frac{\text{rad/s}}{\text{m}}.$$
+**İkisi de mütevazı ve ~eşit.** $1/\sigma_\text{min}$ büyütmesi **yok!**
 
-Şimdi sürpriz: bu 7 nm sayısı, projede **tamamen farklı bir yöntemle** bulunan
-inversiyon-no-go sınırıyla (**< 4 nm**, `squid_bpm_test.md §9.5`) **aynı mertebede.**
-Yani:
+Neden büyütme yok? Çünkü simetrik kaçıklığın *hem* yörünge izi ($\sigma_\text{min}$
+ile) *hem de* sahte-EDM üretimi küçüktür; ikisi birbirini götürür, oranları (yani
+yörünge-izi başına $f$) normal kalır. İnversiyon yörünge-izini bölmek (büyütmek)
+zorundadır; ileri-harita bölmez, doğrudan $f$'i okur.
 
-> **İleri-harita (Kol B), inversiyon (geri-çatım) ile FARKLI bir yol değildir.**
-> Her ikisi de simetrik (orbit-kör) sahte-EDM bilgisini ~nanometre-seviyesi
-> yörünge sinyalinden çıkarmak zorundadır; o bilgi BPM sistematik tabanının
-> altındadır. Hipotez ("ileri-harita inversiyonu atlatır") **çürütüldü.**
+> **Sonuç:** "Kol B = inversiyon no-go, aynı duvar" iddiası **YANLIŞTI, geri
+> çekildi.** İleri-harita iyi koşulludur; inversiyonun duvarına çarpmaz.
 
 ---
 
-## 8. Neden Kol A çalışır da Kol B çalışmaz? (yerel ofset hilesi)
+## 7. Gereken hassasiyet ulaşılabilir mi? (7 nm ve ortalama)
 
-Bu en derin ve en öğretici nokta. Sahte-EDM (Berry fazı) neyi "görür"? **Demetin
-kuadrupol merkezine göre yerel ofsetini.** Kuadrupol $i$'de demetin gördüğü yatay
-ofset:
-$$x_i^\text{yerel} = x_{\text{CO},i} - dx_i,$$
-yani *(kapalı yörünge pozisyonu)* eksi *(kuadrupolün kendi kaçıklığı)*.
+İleri-harita iyi koşullu ama yine de ince: $f$'i hedefe ($10^{-9}$) öngörmek için
+yörüngeyi $f$-yönünde
+$$\delta\text{COD} = \frac{10^{-9}}{0.146} \approx 7\ \text{nm}$$
+doğrulukta bilmek gerekir. Kulağa imkânsız geliyor (BPM'ler μm seviyesinde). Ama:
 
-Şimdi sihir: simetrik kaçıklık için kapalı yörünge $x_{\text{CO}} \approx 0$
-(orbit-kör!). Ama yerel ofset:
-$$x_i^\text{yerel} \approx 0 - dx_i = -dx_i,$$
-yani **kaçıklığın kendisi** — kaybolmaz! Berry fazı simetrik kaçıklığı **yerel
-olarak tam görür**, ama BPM (sabit bir konumda $x_{\text{CO}}$ okur) **göremez.**
+**BPM gürültüsü ortalamayla yenilir.** $\sigma_\text{eff} = \sigma_\text{BPM}/\sqrt N$.
+1 μm tek-atış gürültüden 7 nm'ye: $N = (1\,\mu\text{m}/7\,\text{nm})^2 \approx
+2\times10^4$ ölçüm $\approx$ **21 saniye** (1 kHz'de). Tamamen makul.
 
-İşte iki kolun kaderini ayıran tek cümle:
+**BPM ofseti (~100 μm) bile duvar değil.** Şaşırtıcı: Berry yönlü-alan özniteliği
+$\sum_i(x_iy_{i+1}-x_{i+1}y_i)$, kapalı bir halkada **sabit ofsete değişmezdir**
+(ofset terimleri toplamda iptal olur). Yani akıllı bir öznitelik 100 μm ofseti
+otomatik aşar.
 
-- **Kol B**'nin girdisi BPM-yörüngesidir → simetrik yerel ofset girdide **yoktur**
-  → öğrenecek bilgi yoktur. (Bölüm 6-7.)
-- **Kol A**'nın girdisi spindir → spin, Berry fazının **doğrudan** gözlenebiliridir
-  → simetrik bilgi girdide **vardır** → geri-besleme (düğmeyi $f$ sıfırlanana dek
-  çevirme) çalışır.
-
-Bir benzetme: İki hediye kutusu **dıştan birebir aynı** (aynı yörünge), ama
-içleri farklı (farklı sahte-EDM). Kutuyu hafifçe sallamak (BPM'e bakmak) içeriği
-söylemez. Ama içine bir sensör (spin) koyarsanız, ne olduğunu doğrudan görürsünüz.
-
-> **Önemli incelik:** Kol A bile kaçıklığı *onarmaz*; sahte-EDM'i sıfırlamak için
-> orbit-görünür düğmelerle **kasıtlı bir telafi-yörüngesi** ekler ($f=0$ yeter,
-> optiği eski hâline getirmek gerekmez). Bilgi spinden geldiği için bu, yörünge
-> tabanına çarpmaz. Ama spin gerektirir — yani Omarov'un SBA/spin-trim bölgesidir,
-> "ucuz yörünge tarafı" değil.
+> Demek ki **ölçüm (gürültü/ofset) Kol B'yi dışlamıyor.** 7 nm, inversiyonun
+> "< 4 nm"siyle sayısal olarak benzer ama **anlamı farklı:** inversiyonda o sayı
+> $1/\sigma_\text{min}$ büyütmesinden *sonra* gerekir ve β-beat ile felakete döner;
+> ileri-haritada doğrudan ölçülebilir bir gürültü eşiğidir, ortalamayla yenilir.
 
 ---
 
-## 9. Büyük resim: birleşik no-go (üç kol, tek duvar)
+## 8. O zaman gerçek engel ne? (karmaşık fonksiyonel)
 
-Bu oturumun asıl kazanımı, üç ayrı çabanın **aynı** duvara çarptığını göstermektir:
+Eğer gözlenebilirlik engel değilse, Kol B neden hâlâ çözülmüş değil? Çünkü **doğru
+ileri-haritayı bulmak zor.** $f$, yörüngenin **doğrusal-olmayan, yapısal** bir
+fonksiyonelidir (Berry yönlü-alan tipi); basit ⟨x·y⟩ yanlış proxy
+(`orbit_ileri_olcum.md §2-3`). Empirik olarak pinlemek 40–80 konfigürasyonla
+yakınsamıyor.
 
-| Yöntem | Ne yapmaya çalışır | Simetrik kanalda sonuç |
-|--------|--------------------|------------------------|
-| Orbit-inversiyon ($R^{-1}$) | yörünge → kaçıklık geri-çat | koşul sayısı patlar, < 4 nm gerek |
-| Orbit-lock-in (zaman-ortalama) | gürültüyü $\sqrt{N}$ ile yen | beyaz gürültüyü yener, **simetriği yenemez** |
-| **Orbit-ileri-harita (Kol B)** | yörünge → sahte-EDM öğren | **~7 nm gerek; bilgi tabanın altında** |
+Bunu somut gösterdik: 80 örnekli temiz-yörünge verisinde gerçek bir model eğittik.
 
-Üçü de aynı fiziksel gerçeğe çarpar: **sahte-EDM'i süren simetrik kaçıklık,
-yörüngede neredeyse iz bırakmaz.** Yörünge hangi akıllı işleme tabi tutulursa
-tutulsun (ters çevir, ortala, sinir ağıyla öğren) — bilgi orada olmadığından
-çıkarılamaz. Bu, **gözlenebilirlik (observability) tabanlı bir no-go**'dur:
-*ölçemediğin şeyi hiçbir algoritma kurtaramaz.*
+- **Orbit-görünür (antisimetrik) pay öğreniliyor:** $R^2 \approx 0.32$–$0.36$. Ama
+  bu, orbit-düzeltmenin zaten temizlediği, *gerekmeyen* kısım.
+- **Simetrik kanal (asıl iş) 80 örnekte zar zor:** $R^2 \approx 0.07$ (sıfıra çok
+  yakın, hafif pozitif). Yani fonksiyonel **karmaşık** ve az veriyle **pinlenmiyor.**
 
-Tek kaçış: **gözlenebiliri değiştirmek** — yani spine bakmak (Kol A). Spin,
-geometrik fazın doğrudan gözlenebiliridir. Bu da bizi Omarov ve ark.'nın
-(PRD 105, 032001) spin-tabanlı yöntemlerine geri götürür (`omarov.md`).
+Bu, kullanıcının teşhisinin tam doğrulamasıdır: **harita vardır (zar zor da olsa
+sinyal var), fakat basit değildir.** İki yol açık: (i) **çok daha fazla veri** ile
+karmaşık haritayı öğrenmek (şu an 240 örneğe genişletip trend ölçülüyor);
+(ii) **analitik türetme** — Berry fazını Thomas-BMT'den kapalı-form yazmak
+(`orbit_ileri_olcum.md §5`). Ayrıca **model-fidelity** (sim'de öğrenilen harita
+β-beat altında gerçeğe taşınır mı) henüz test edilmedi.
 
 ---
 
-## 10. Empirik pekiştirme: gerçek bir harita da öğrenemez
+## 9. Kol A vs Kol B: yine de neden farklılar?
 
-§6'daki karar **modelden bağımsızdır** (ikiz makineler herhangi bir yörünge→sahte-EDM
-haritasını çürütür). Yine de somut olması için, jenerik rastgele kaçıklıklarla
-**gerçek bir regresyon** eğittik: 80 örnek, simetri ağırlığı $w$ tam-antisimetrikten
-($w=0$) tam-simetriğe ($w=1$) taranıyor; girdi = 48-BPM yörünge, çıktı = C++ ile
-ölçülen sahte-EDM. Üç bulgu, §6-9'u pekiştirir — ve bir **incelikle** öğreticidir.
+Sahte-EDM, kuadrupoldeki **yerel demet ofsetini** ($x_{\text{CO},i} - dx_i$) görür.
+Simetrik kaçıklık için kapalı yörünge $x_\text{CO}\approx 0$ ama yerel ofset
+$\approx -dx_i$ — **büyük.** Yani:
 
-**Bulgu 1 — Orbit-kör konfigler "temiz" değildir.** Ortalama sahte-EDM, simetri
-arttıkça düşer ama **sıfırlanmaz:**
+- **Kol A** (spin) bu yerel ofseti **doğrudan** gözler → bilgi tam ve temiz →
+  geri-besleme çalışır. (Maliyeti: spin ölçümü.)
+- **Kol B** (yörünge) yerel ofseti **yalnız dolaylı**, $\sigma_\text{min}$ ile
+  bastırılmış 1.7 μm'lik bir iz olarak görür → bilgi *var* ama **küçük ve karmaşık
+  kodlanmış.** Onu çözmek mümkün (§6-7) ama doğru, karmaşık fonksiyoneli ve yeterli
+  ortalamayı gerektirir.
 
-| $w$ | karakter | ⟨\|sahte-EDM\|⟩ | hedefe göre |
-|-----|----------|----------------:|------------:|
-| 0.00 | tam antisimetrik (görünür) | $3.3\times10^{-6}$ | ~3300× |
-| 1.00 | **tam simetrik (orbit-kör)** | $1.8\times10^{-7}$ | **~180×** |
+Yani fark "var/yok" değil, **"doğrudan/temiz" vs "dolaylı/küçük/karmaşık".** Kol A
+kolay yoldan görür; Kol B zor yoldan — ama **imkânsız değil.**
 
-Yani yörüngede neredeyse hiç iz bırakmayan kaçıklıklar bile sahte-EDM'i hedefin
-**180 katına** taşıyor. Görünmezlik, masumiyet değildir.
+---
 
-**Bulgu 2 — Harita yalnız "kolay" (görünür) kısmı öğrenir.** Temiz yörüngeyle
-eğitilen basit bir model (Ridge), sahte-EDM varyansının ~%32'sini açıklar. Ama bu
-%32, tamamen **orbit-görünür (antisimetrik)** paydır — yani **orbit-düzeltmenin
-zaten temizlediği**, bizim ihtiyaç duymadığımız kısım.
+## 10. Nerede duruyoruz (dürüst durum)
 
-> **Öğretici incelik:** "Peki 100 μm'lik BPM ofseti haritayı bozmaz mı?" diye
-> sorabilirsiniz. Şaşırtıcı cevap: *akıllı bir öznitelik için bozmaz.* Yönlü-alan
-> $\sum_i(x_iy_{i+1}-x_{i+1}y_i)$, kapalı bir halkada **sabit ofsete değişmezdir**
-> (ofset terimleri toplamda iptal olur). Eklenen 100 μm ofsetle bile model yine
-> ~%32'de kalır. Demek ki **duvar, BPM ofsetinin kendisi değil** — duvar, simetrik
-> kanalın yörüngede *ilkesel* görünmezliğidir. Ofseti aşan akıllı öznitelik bile
-> simetrik kanala **ulaşamaz**, çünkü orada okunacak yörünge zaten yok.
-
-**Bulgu 3 (karar-verici) — harita simetrik kanala taşınmıyor.** Modeli yalnız
-**antisimetrik** (görünür) konfiglerle eğitip **simetrik** (kör) konfiglerde test
-edersek: $R^2 = -134$ — yani ortalamayı tahmin etmekten ~135 kat **daha kötü.**
-Görünür rejimde öğrenilen şey, sahte-EDM'i süren kör rejime **hiç transfer
-olmuyor.** Bu, "ikiz makine" sonucunun istatistiksel kardeşidir: bilgi girdide
-yoksa, model onu icat edemez.
-
-(Ek olarak: Berry yönlü-alan proxy'sinin korelasyonu $w$'ye göre tutarsız
-seyreder — $-0.53, +0.02, -0.55, -0.08, -0.36$ — yani tek bir temiz kapalı-form
-fonksiyonel ampirik olarak pinlenmiyor; `orbit_ileri_olcum.md §3` ile birebir.)
-
-**Özet:** Yörüngeden öğrenilen harita, sahte-EDM'in **görünür payını** yakalar
-(gerekmeyen kısım) ama **orbit-kör simetrik kanala — işin tüm bel kemiğine —
-taşınamaz.** Sinir ağı, olmayan bilgiyi icat edemez.
+- **Kol B kapatılmadı.** "Ölü/aynı-duvar" sonucu, ileri-harita ile inversiyonu
+  karıştıran bir hataydı (kullanıcı düzeltti). İleri-harita **iyi koşulludur**
+  ($\partial f/\partial\text{COD}\approx0.15$); gereken 7 nm yörünge **ortalamayla
+  ulaşılır**; ofset **değişmez öznitelikle** aşılır. → İnversiyon no-go'su Kol B'yi
+  **bağlamaz.**
+- **Açık alt-sorular:** (1) karmaşık simetrik fonksiyonel öğrenilebilir mi (veri
+  ölçeği / analitik form)? (2) β-beat model-fidelity altında taşınır mı? Bu,
+  `orbit_ileri_olcum.md §7`'nin "açık problem" konumunu **doğrular** (kapatmaz).
+- **Kol A** çalışır, ama spin gerektirir (orbit-tarafı değil; Omarov/spin-trim).
+- **Birleşik no-go** (orbit-inversiyon + lock-in) yalnız *misalignment geri-çatımı*
+  içindir; **ileri-harita f-öngörüsü o sınıfa girmez.**
 
 ---
 
 ## 11. Sık sorulan sorular
 
-**S: "Sahte-EDM yörüngenin fonksiyonelidir" demiştiniz; şimdi "fonksiyonu değil"
-diyorsunuz. Çelişki mi?**
-C: Hayır. Matematiksel olarak yörünge → kaçıklık tersi vardır (matris tam-ranklı),
-dolayısıyla *sonsuz hassasiyette* sahte-EDM yörüngeden belirlenir. Ama *kullanışlı*
-(deneysel) hassasiyette belirlenmez: gerekli yörünge doğruluğu ~7 nm, gerçek
-BPM ofsetleri ~100 μm. "Fonksiyonel ama pratikte tek-değerli değil" — fark budur.
+**S: Yani "yörünge sahte-EDM'i belirlemez" yanlış mıydı?**
+C: Evet. Doğrusu: yörünge sahte-EDM'i **küçük bir izle** belirler. İz küçük olduğu
+için *okumak* zor, ama bilgi oradadır (dejenerasyon tam değildir). İlk sürüm bunu
+"belirlemez"e indirgeyerek hata yaptı.
 
-**S: Daha büyük/derin bir sinir ağı veya milyonlarca örnek yardımcı olmaz mı?**
-C: Hayır. Sorun NN'in kapasitesi veya veri miktarı değil; **bilginin girdide
-olmaması.** Simetrik sahte-EDM yörünge girdisinde (BPM ofset tabanının altında)
-yok. Hiçbir model, girdisinde bulunmayan bir ayrımı öğrenemez.
+**S: İleri-harita gerçekten inversiyondan iyi koşullu mu?**
+C: Skaler $f$ için evet. İnversiyon 48 kaçıklığı çözer ve simetrik yönde
+$1/\sigma_\text{min}$ ile patlar. İleri-harita doğrudan $f$ verir; ölçülen
+duyarlılık 0.146 (mütevazı), $1/\sigma_\text{min}$ büyütmesi yok. Fark, "bir küçük
+sayıya bölmek" zorunda olup olmamaktır.
 
-**S: BPM'leri 7 nm doğruluğa çıkaramaz mıyız (örn. SQUID-BPM)?**
-C: SQUID-BPM'in tek-atış gürültüsü düşüktür, ama buradaki engel gürültü değil
-**sistematik ofset** (~100 μm). 7 nm'lik bir sinyali 100 μm ofsetin altından
-çekmek, ofseti 7 nm'de bilmeyi gerektirir — bu da inversiyon no-go'sunun ta
-kendisi. (SQUID'in nerede *işe yaradığı* için `squid_bpm_test.md §9.4`.)
+**S: O zaman Kol B çalışır mı?**
+C: Henüz bilinmiyor — ama **gözlenebilirlik yüzünden dışlanmadı.** Engel artık
+*fizik no-go'su* değil, *öğrenme/analiz* problemi: karmaşık COD→$f$ fonksiyonelini
+pinlemek (çok veri ya da analitik form) ve model-fidelity'yi (β-beat) doğrulamak.
 
-**S: O zaman akıllı düzeltme tümüyle ölü mü?**
-C: *Yörünge tarafı* (Kol B) ölü. *Spin tarafı* (Kol A) çalışır — ama o, yörünge
-gözlemine dayanmaz; spin ölçer ve bu zaten Omarov/spin-trim bölgesidir (özgün
-katkısı dar). Yani "akıllı düzeltme orbit-kör simetrik kısmı ucuz yörünge gözlemiyle
-kapatır" umudu kapandı.
+**S: 7 nm yörünge ölçümü gerçekten yapılabilir mi?**
+C: Gürültü açısından evet (ortalama: ~21 s). Sabit ofset, yönlü-alan gibi
+ofset-değişmez özniteliklerle aşılır. Kalan risk *sürüklenme* ve *model hatası*;
+bunlar tasarımda ele alınmalı.
 
-**S: Bu negatif sonuç neden değerli?**
-C: Çünkü üç bağımsız yöntemi (inversiyon, lock-in, ileri-harita) tek bir
-gözlenebilirlik sınırında birleştirir. pEDM literatüründe (Omarov dahil) geometrik-faz
-kontrolü "yörünge/ayrım ölçümüne" dayandırılır ama bu ölçümün **simetrik artığa
-körlüğü** nicel olarak gösterilmemiştir. Bizim katkımız tam burada: kesin bir
-sınır teoremi (`omarov.md §9-10`, `akilli_duzeltme.md §7`).
+**S: Bu hikâyeden ders ne?**
+C: "Küçük" ile "sıfır"ı karıştırmamak. Simetrik kanalın yörünge izi *küçük* (1.7 μm,
+193× bastırılmış) ama *sıfır değil*; ve onu okuyan ileri-harita *iyi koşullu*. Bir
+imkânsızlık ilan etmeden önce, doğru problemi (ileri-harita ≠ inversiyon)
+çözdüğümüzden emin olmalıyız.
 
 ---
 
-> **Kayıt notu (2026-06-29):** Bu belge `akilli_duzeltme.md`'nin (terse teknik
-> kayıt) pedagojik kardeşidir. Sayılar gerçek C++ izleyiciyle ($p=2.002$
-> doğrulanmış estimator) üretildi; keşif kodu `/tmp/akilli_duzeltme/` altında
-> (proje konvansiyonu), reprodüksiyon yolları `akilli_duzeltme.md §8`'de.
+> **Kayıt notu (2026-06-29, düzeltilmiş):** Bu belge `akilli_duzeltme.md`'nin
+> (terse teknik kayıt) pedagojik kardeşidir. İlk sürüm "Kol B ölü" diyordu;
+> kullanıcının haklı itirazıyla düzeltildi (ileri-harita ≠ inversiyon; iyi koşullu;
+> engel fonksiyonel karmaşıklığı, gözlenebilirlik değil). Sayılar gerçek C++
+> izleyiciyle ($p=2.002$) üretildi; keşif kodu `/tmp/akilli_duzeltme/`.
 > `integrator.cpp` değiştirilmedi.

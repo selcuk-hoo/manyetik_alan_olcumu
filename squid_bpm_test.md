@@ -435,14 +435,15 @@ hatasıyla. Bu, simetrik alt-uzayın neden **spin (Omarov) veya "akıllı düzel
 
 ## 10. Kalan yol: NN ileri-harita + "akıllı düzeltme"
 
-> **GÜNCELLEME (2026-06-29, `akilli_duzeltme.md`): Kol B TEST EDİLDİ → NEGATİF.**
-> NN ileri-haritası (COD→sahte-EDM) **ölü**: COD→f haritası kullanışlı hassasiyette
-> tek-değerli değil (COD'u 1.7 μm içinde uyuşan makineler f'te ~250× hedef
-> farklılaşır). Gereken BPM doğruluğu ≈ **7 nm** — bu §9.5'in inversiyon-no-go'su
-> (<4 nm) ile **aynı duvar.** Hipotez ("ileri-harita inversiyona girmez") çürütüldü:
-> ileri-harita da simetrik f-bilgisini ~nm COD'dan çıkarmak zorunda, o bilgi
-> tabanın altında. **Kol A (spin)** çalışır ama orbit-tarafı değil. Ayrıntı için
-> `akilli_duzeltme.md`. Aşağıdaki orijinal not (umut) tarihsel olarak korunur.
+> **GÜNCELLEME (2026-06-29, `akilli_duzeltme.md`): Kol B AÇIK (kapatılmadı).**
+> İlk değerlendirme "Kol B ölü, §9.5 ile aynı duvar" diyordu; **bu YANLIŞTI**
+> (kullanıcı düzeltti). Önemli ayrım: §9.5'in no-go'su **misalignment geri-çatımı
+> (inversiyon)** içindir ve 1/σ_min ile patlar. **İleri-harita (COD→skaler f)**
+> ise bu büyütmeyi içermez: ölçülen duyarlılık ∂f/∂COD≈0.15 rad/s/m (mütevazı),
+> gereken ~7 nm COD **ortalamayla** ulaşılır (~21 s), ofset yönlü-alanla değişmez.
+> Yani §10'daki NN ileri-harita fikri **gözlenebilirlikle dışlanmaz.** Gerçek engel
+> simetrik fonksiyonelin karmaşıklığı (öğrenme/analiz). Ayrıntı: `akilli_duzeltme.md
+> §4-7`. Aşağıdaki orijinal not geçerliliğini korur.
 
 Lineer inversiyon (v2.7) en iyi durumda $\Delta R$ sistematiğiyle sınırlı. Ondan
 *kavramsal olarak* farklı bir yol — misalignment'ı geri-çatmak yerine doğrudan

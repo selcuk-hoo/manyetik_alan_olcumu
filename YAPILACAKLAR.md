@@ -102,17 +102,21 @@ Yörünge trimi sonrası kalan ~10⁻⁴ artığı boylamsal spin geri-beslemesi
 simetrik içerik dahil çalıştığının gösterilmesi. Mevcut altyapı yeterli
 (spin ölç-trim + yörünge-trim birleşimi; keşif scriptleri git geçmişinde / `/tmp`).
 
-### 4. ⭐ "Akıllı düzeltme" — sahte-EDM'yi sıfırla, misalignment'ı DEĞİL (TEST EDİLDİ → Kol B NEGATİF, 2026-06-29)
+### 4. ⭐ "Akıllı düzeltme" — sahte-EDM'yi sıfırla, misalignment'ı DEĞİL (Kol B AÇIK, 2026-06-29)
 
-> **SONUÇ (2026-06-29, `akilli_duzeltme.md`):** **Kol B (NN COD→sahte-EDM ileri-
-> haritası) ÖLÜ.** Karar-verici test: COD'u 1.7 μm içinde uyuşan iki makinenin
-> sahte-EDM'i ~250× EDM-hedefi kadar farklılaşır → COD→f haritası tek-değerli
-> değil. Gereken BPM doğruluğu ≈ **7 nm** (100 μm ofset altında) = `squid_bpm_test.md
-> §9.5` inversiyon-no-go'sunun (<4 nm) **ileri-harita karşılığı: aynı duvar.**
-> Hipotez ("ileri-harita inversiyona girmez") çürütüldü. **Kol A (spin)** çalışır
-> ama orbit-tarafı değil (Omarov/spin-trim; §14.6). → **BİRLEŞİK NO-GO:** orbit-
-> inversiyon + orbit-lock-in + orbit-ileri-harita üçü de aynı simetrik duvara çarpar.
-> Orbit-tarafı özgün katkı = kesin sınır teoremi, pozitif kurtarma değil.
+> **DURUM (2026-06-29, `akilli_duzeltme.md` — İLK "ÖLÜ" SONUCU DÜZELTİLDİ):**
+> Kullanıcının haklı itirazı: *simetrik alt-uzay kapalı yörüngeyi az dahi olsa
+> değiştirir; harita VARDIR ama basit değil.* Yeniden türetince **ilk "Kol B ölü,
+> §9.5 ile aynı duvar" sonucu yanlıştı**: ileri-haritanın duyarlılığı
+> ∂f/∂COD≈0.15 rad/s/m'dir — MÜTEVAZI, inversiyonun 1/σ_min büyütmesini İÇERMEZ.
+> Gereken ~7 nm COD ortalamayla ulaşılır (~21 s @1kHz); ofset yönlü-alan
+> özniteliğiyle değişmez. → **Gürültü/gözlenebilirlik Kol B'yi dışlamaz; AÇIK.**
+> Gerçek engel: simetrik COD→f **fonksiyoneli karmaşık** (80 örnekte simetrik-kanal
+> R²~0.07), öğrenme/analiz problemi (240 örneğe genişletiliyor). **Birleşik no-go
+> yalnız misalignment geri-çatımı (inversiyon+lock-in) için; ileri-harita o sınıfta
+> değil.** Kol A (spin) çalışır (§14.6). `orbit_ileri_olcum.md §7` "açık problem"
+> doğrulandı. Sıradaki: büyük ensemble öğrenilebilirlik + β-beat fidelity + analitik
+> Berry fonksiyoneli.
 
 > **Fikrin özü (kullanıcı, 2026-06-29):** No-go bir *inversiyon* sınırıdır
 > (COD → misalignment, simetrik alt-uzayda cond ~10⁴; bkz. v2.7 yeniden-incelemesi
