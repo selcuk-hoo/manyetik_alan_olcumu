@@ -721,12 +721,154 @@ tilt modeli ve çapraz fit eklenmesi gerekiyor.
 | FODO antisimetri parametrelendirmesi | **Tamamlandı** |
 | Greedy/LASSO başarısızlığı analizi | **Tamamlandı** |
 | Çok-konfigürasyon yığma çerçevesi | **Kısmi** |
-| β-beat / model hatası etkisi (Test 8) | **Açık** |
-| Tilt taraması (Test 7) | **Açık** |
-| YSA ile karşılaştırma | **Açık** |
+| β-beat / model hatası etkisi (Test 8) | **Tamamlandı** (drift §, akıllı düzeltme §7) |
+| Tilt taraması (Test 7) | **Tamamlandı** (kmod_drivers) |
+| YSA ile karşılaştırma | **Tamamlandı** (NN=R⁻¹ ters problemde; §7.2) |
 | Lineer model dışı etkiler | **Açık** |
 
-En yüksek öncelikli açık konu **Test 8 (β-beat hassasiyeti)**dir.
-Beyin fırtınası önerileri arasında en düşük eşikli başlangıç noktası
-**beta fonksiyonu kalibrasyonu** (§5.3); mevcut kodla ek simülasyon
-gerektirmez.
+> **NOT (2026-06):** Yukarıdaki tablo projenin *erken* (quad-hizalama geri-çatımı)
+> fazını özetler. Proje sonradan asıl hedefe — **sahte-EDM** kontrolüne — kaydı.
+> O arc'ın sentezi ve sıradaki plan **§7**'dedir (bkz. `akilli_duzeltme.md`).
+
+---
+
+## 7. Sahte-EDM ve "Akıllı Düzeltme": Sentez ve Plan (2026-06)
+
+> Ayrıntılı kayıt: `akilli_duzeltme.md` (teknik, §1–6.9) + `akilli_duzeltme_pedagojik.md`
+> (ders kitabı). Bu bölüm üst-düzey sentez ve **2/3/4. madde planıdır.**
+
+### 7.1 Problemin doğru çerçevesi
+
+Asıl amaç quad hizalama hatasını ölçmek **değil**, **sahte-EDM'i (geometrik/Berry
+faz, dS_y/dt) sıfırlamaktır.** Kritik yapı:
+
+- **Kapalı yörünge (COD) iki alt-uzaya ayrışır** (R'nin SVD'si, cond≈193):
+  **antisimetrik** (QF/QD zıt-işaret, büyük-σ → **orbit-GÖRÜNÜR**) ve **simetrik**
+  (QF/QD aynı-işaret, küçük-σ → **orbit-KÖR**, G_k=C/|Q²−k²| ile bastırılmış).
+- **Antisim COD'u domine eder** (193× daha görünür) → simetriği okumak zorlaşır.
+- **Sahte-EDM'i süren simetrik alt-uzaydır** ama bu, COD'da ~görünmez (10 μm simetrik
+  misalignment → sahte-EDM ~247× hedef, ama COD ayak izi yalnız 1.7 μm).
+- Antisim sahte-EDM GÖRÜNÜR (orbit-düzeltmeyle silinir, 7.7×); **simetrik sahte-EDM
+  GÖRÜNMEZ** → asıl sınır budur (~62× hedef artık, paylaşılan taban).
+
+### 7.2 Kapanan kapı: yörüngeden misalignment GERİ-ÇATMAK (her yöntem aynı duvar)
+
+Simetrik misalignment'ı COD'dan geri-çatmak **bilgi-teorik olarak imkânsız**: izi
+gürültü+sistematik tabanın altında. Bu **R'nin (fiziğin)** özelliği, *algoritmanın*
+değil — dolayısıyla yöntem değiştirmek kurtarmaz:
+
+| Yöntem | Neden başarısız | Belge |
+|--------|-----------------|-------|
+| R⁻¹ / TSVD / LASSO / CLEAN / Bozoki | simetrik yönde 1/σ_min büyütme | `false_edm_harmonic_sinir §14.5` |
+| kmod (ΔR⁻¹) + SQUID-BPM | yine ΔR→misalignment ters; dağıtık-frekansta *nefes* | `squid_bpm_test §7,§8` |
+| kmod + lock-in | beyaz gürültü √N ile yenilir ama simetrik <4nm ister + β-beat felaket | `squid_bpm_test §9.5` |
+| **NN (misalignment↔COD)** | misalignment→COD LİNEER (NN=R); ters yine R⁻¹; NN=TSVD (sim. hata 5.6 vs 6.3 μm) | `akilli_duzeltme §6.8` |
+| **kmod + LSTM** | beyaz gürültüde lock-in zaten optimal (Cramér-Rao); duvar gürültü değil ΔR-sistematiği; etiket döngüsel | `akilli_duzeltme §6.9` |
+
+**Tek cümle:** "Mükemmel COD okuyabilseydik bastırırdık" doğru — ama mükemmel okuma
+simetrik alt-uzayda ~7 nm ister (100 μm ofset altında); hiçbir estimator bunu aşamaz.
+
+### 7.3 Açık kalan kapı: TERS'İ ATLAMAK (ileri-harita / doğrudan spin)
+
+Çözüm misalignment'ı geri-çatmak değil; ya sahte-EDM'i **doğrudan ölçmek** ya da
+**ileri yönde öngörmek**:
+
+- **Kol A — spin-doğrudan (KANITLI):** sahte-EDM'i spinle ölç (geometrik fazın
+  doğrudan gözlenebiliri), knob'la null'la (spin ölç-trim ~6000×, §14.6). Bilgi
+  tanımı gereği spinde. **NOT (Omarov düzeltmesi):** bu Omarov'un **SBA**'sı DEĞİL —
+  SBA, spin okumalarıyla **E-alanı/vertical-velocity eksenini** hizalar, quad
+  hizalama hatasını veya geometrik fazı düzeltmez (`omarov.md §5`). Omarov geometrik
+  fazı **CW/CCW + polarite + CR-ayrım küçültme** ile kontrol eder; doğrudan spinle
+  geometrik-faz null'lama, Omarov'un **vertical-polarizasyon** koluna karşılık gelir
+  ve o makalede **kullanılmadı**.
+- **Kol B — ileri-harita (AÇIK + POZİTİF):** COD→**skaler** sahte-EDM haritasını
+  öğren (ters DEĞİL → iyi-koşullu: ∂f/∂COD≈0.15, *1/σ_min değil*), orbit-görünür
+  knob'larla **null'la**. Bulgular: öğrenilebilir (CV R² 240 örnekte +0.77);
+  β-beat şeffaf (transfer R² 0.62 = held-out nominal); ama **çıkarma için
+  kullanılamaz** (mutlak %0.1 gerek), yalnız **null'lama**; CW/CCW β-beat
+  belirsizliğini geri ALMAZ (CW/CCW-tek, corr −0.89). (`akilli_duzeltme §4–6.9`.)
+
+---
+
+## 8. PLAN — 2/3/4. maddeler (akıllı düzeltme'yi ilerletmek)
+
+> Numaralandırma kullanıcı önceliğine göre: **(2)** ileri-harita'yı hedefe taşımak,
+> **(3)** büyük-genlik gerçek-makine kalibrasyonu, **(4)** analitik Berry fonksiyoneli.
+> Önerilen sıra (risk/kazanç): **2c → 4 → 3** (önce uçtan-uca null'lama çalışıyor mu;
+> sonra haritayı analitik temele oturt; sonra gerçek-makine kalibrasyon stratejisi).
+
+### Plan 2 — İleri-harita'yı null'lama-hedefine taşımak (Kol B operasyonel)
+
+**Amaç:** COD→sahte-EDM haritasını, simetrik sahte-EDM'i EDM-hedefine yaklaştıracak
+**kapalı-döngü null'lama**da kullanılabilir doğruluğa getirmek.
+
+- **2a — Veri-doğruluk eğrisi.** Ensemble'ı 240'tan ~1000–2000 örneğe çıkar; simetrik
+  CV R²'nin (şu an 0.77'de doygun görünüyor) ve **mutlak nispi hatanın** N ile
+  eğrisini çıkar. Çıktı: "X residual için Y örnek" tablosu. (C++ maliyeti ~saatler,
+  arka plan.)
+- **2b — Öznitelik/mimari.** Berry yönlü-alan + bilineer özniteliği ~0.32 tavanına
+  takılıyor; per-hücre çiftli, öğrenilmiş gömme veya **fizik-bilgili Berry-çekirdeği**
+  (Plan 4'ten) dene. Hedef: simetrik kanal mutlak hatasını düşürmek.
+- **2c — KAPALI-DÖNGÜ NULL'LAMA DEMOSU (make-or-break).** Simülasyonda iterasyon kur:
+  {COD ölç → harita f öngör → orbit-görünür knob'larla (corrector) öngörülen f'i
+  azalt → tekrar}. Ölç: kalan gerçek sahte-EDM vs iterasyon. **Kritik soru:** kusurlu
+  harita (çarpımsal hata hipotezi) ile null'lama hedefe yakınsıyor mu, yoksa toplamsal
+  bir tabana mı takılıyor? Bu, tüm Kol B'nin pratik geçerliliğini belirler.
+- **2d — Gerçekçi ölçüm.** BPM ofset (100 μm) + gürültü (1 μm) + ortalama (→~7 nm,
+  §4) ekle; döngü hâlâ yakınsıyor mu? Gürültü-bütçesini (entegrasyon süresi vs
+  kalan f) raporla.
+
+**Teslim:** veri-doğruluk eğrisi; kapalı-döngü residual(iterasyon); gürültü-bütçesi.
+**Risk:** toplamsal hata tabanı null'lamayı hedef-üstünde durdurur.
+**Altyapı:** `build_response_matrix.py` (corrector tepkisi için R), `false_edm_4d.py`
+(f ölçer); yeni: corrector-knob → COD + null'lama döngüsü scripti (/tmp).
+
+### Plan 3 — Büyük-genlik gerçek-makine kalibrasyonu (σ²-ölçekleme)
+
+**Amaç:** "orbit-kör deseni ~1 mm'e uyar → simetrik fonksiyoneli gerçek makinede
+temiz öğren → σ² ile operasyona ölçekle" stratejisini uçtan uca doğrulamak.
+
+- **3a — Harita-transferi (genlik).** Haritayı 1 mm (orbit-kör desen) verisinde eğit,
+  σ²-ölçekleyip 10 μm'de test et: 1 mm-haritası 10 μm f'i öngörüyor mu? (Toplam f
+  homojenliğini %5.6 gösterdik, §6.7; şimdi **harita** transferi.)
+- **3b — Optimal genlik.** Eğitim genliğini tara (100 μm / 300 μm / 1 mm) vs
+  ölçeklenmiş doğruluk + latis-lineerliği; tatlı nokta bul.
+- **3c — Sekstüpol dayanıklılığı (kritik caveat).** `sextSwitch=1` ile sekstüpolleri
+  aç, büyük genlikte homojenliği yeniden test et: simetrik kanal (küçük orbit)
+  sekstüpolle homojen kalıyor mu? Antisim (cm orbit) ne zaman bozuluyor?
+- **3d — Gerçek-makine protokol taslağı.** Hareket-ettiricilerle orbit-kör desen
+  uygulama; f'i spinle (büyük/hızlı) etiketleme; öğren+ölçek. (Kavramsal.)
+
+**Teslim:** genlik-transfer R²; tatlı-nokta genlik; sekstüpol-homojenlik eğrisi.
+**Risk:** sekstüpol simetrik kanalı da bozar; movers temiz orbit-kör desen kuramaz.
+**Altyapı:** `amp_scan.py` (genişlet), `perquad_orbit.py`, `integrator.cpp`
+(`sextSwitch`, `quad_dG` mevcut — DEĞİŞTİRME).
+
+### Plan 4 — Analitik Berry fonksiyoneli (Thomas-BMT'den türetme)
+
+**Amaç:** COD→sahte-EDM fonksiyonelini Thomas-BMT spin denkleminden **kapalı-form**
+türetip öğrenilen haritayı doğrulamak/değiştirmek (veri gerektirmeyen "altın standart").
+
+- **4a — Türetme.** Kapalı yörünge üzerindeki parçacık için tur-başına geometrik fazı
+  lider (bilineer) mertebede x_CO(s), y_CO(s) ve latis K(s) cinsinden yaz. Beklenen
+  form (orbit_ileri §5): ardışık quad'ların **yönlü-alanı** Σ(x_i y_{i+1} − x_{i+1} y_i)
+  tipi, yerel alan-ağırlıklı ∮ W(s)·(faz yoğunluğu) ds.
+- **4b — Doğrulama.** Analitik fonksiyoneli 48-quad COD'a indirgeyip ensemble'daki
+  C++ sahte-EDM ile karşılaştır (R²). Yüksekse → fonksiyonel doğrulandı; öğrenilen
+  haritayı **açıklar** (neden simetrik kanal R²→0.77, antisim neden doyar).
+- **4c — Kullanım.** Analitik fonksiyoneli (i) doğrudan ileri-harita olarak (sıfır
+  eğitim verisi) null'lamada kullan; (ii) Plan 2b'de fizik-bilgili öznitelik olarak.
+
+**Teslim:** kapalı-form fonksiyonel; C++ ile doğrulama R²; analitik-harita null'lama.
+**Risk:** türetme zor; bilineer form yetersiz (yüksek-mertebe gerekli).
+**Altyapı:** kalem-kâğıt + sembolik; doğrulama `berry_data/` ensemble'ı ile ucuz.
+
+### Önceliklendirme
+
+| Plan | Kazanç | Risk | Maliyet | Sıra |
+|------|--------|------|---------|------|
+| **2c** kapalı-döngü null demo | Kol B'nin pratik geçerliliği (make-or-break) | orta | orta (C++ döngü) | **1** |
+| **4** analitik fonksiyonel | her şeyi açıklar/doğrular; veri-bağımsız harita | yüksek | düşük (analitik) | **2** |
+| **3c** sekstüpol-homojenlik | büyük-genlik fikrini de-riske eder | düşük | düşük | **3** |
+| **2a/2b** veri+öznitelik | residual'i düşürür | düşük | yüksek (C++) | 4 |
+| **3a/3b/3d** kalibrasyon | gerçek-makine yolu | orta | orta | 5 |

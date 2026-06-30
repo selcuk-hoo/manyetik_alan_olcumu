@@ -247,7 +247,11 @@ kolay yoldan görür; Kol B zor yoldan — ama **imkânsız değil.**
   öznitelik / analitik Berry fonksiyoneli + null'lama iterasyonu) ve gerçekçi-ölçüm
   gürültü bütçesi. Bu **mühendislik/veri** işidir; `orbit_ileri_olcum.md §7`'nin
   açık problemini **pozitif yönde ilerletir** (fizik no-go'su yok).
-- **Kol A** çalışır, ama spin gerektirir (orbit-tarafı değil; Omarov/spin-trim).
+- **Kol A** çalışır, ama spin gerektirir (orbit-tarafı değil) — bizim spin
+  ölç-trim'imiz. **Omarov'un SBA'sı DEĞİL:** SBA, spin okumalarıyla *E-alanı/
+  vertical-velocity eksenini* hizalar, quad hizalama hatasını veya geometrik fazı
+  düzeltmez (`omarov.md §5`). Geometrik fazı spinle doğrudan null'lama, Omarov'un
+  *vertical-polarizasyon* fikrine yakındır — o makalede kullanılmadı.
 - **Birleşik no-go** (orbit-inversiyon + lock-in) yalnız *misalignment geri-çatımı*
   içindir; **ileri-harita f-öngörüsü o sınıfa girmez.**
 

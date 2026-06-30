@@ -34,7 +34,11 @@
 > açık problemi pozitif ilerledi. **Tek kalan:** mutlak doğruluk (veri/analitik +
 > iterasyon) ve gürültü bütçesi — mühendislik, fizik no-go'su değil.
 >
-> **Kol A** değişmedi: çalışır (bilgi spinde), ama orbit-tarafı değil (Omarov/spin-trim).
+> **Kol A** değişmedi: çalışır (bilgi spinde), ama orbit-tarafı değil — bizim
+> spin ölç-trim'imiz (§14.6). **NOT:** bu Omarov'un SBA'sı DEĞİL; SBA E-alan/
+> vertical-velocity eksenini hizalar, geometrik fazı doğrudan düzeltmez (`omarov.md
+> §5`). Geometrik fazı spinle doğrudan ölçüp null'lama, Omarov'da *vertical-
+> polarizasyon* koluna karşılık gelir — ki o makalede **kullanılmadı**.
 
 ---
 
@@ -340,9 +344,11 @@ o gürültüyü saf dışı bırakır mı? Başka çözüm?
   çalıştığımız şey o (döngüsel). → §6.8'in zaman-serisi versiyonu, aynı sonuç.
 
 **Görünen çözüm yönleri (hepsi: TERS problemi BIRAK):**
-1. **Spin-doğrudan (Kol A / Omarov):** sahte-EDM'i spinle ÖLÇ (geometrik fazın
-   doğrudan gözlenebiliri), knob'la null'la. Kanıtlı (spin-trim ~6000×, §14.6).
-   Bilgi tanımı gereği spinde. Maliyet: spin ölçümü (Omarov deneyi zaten bunu yapar).
+1. **Spin-doğrudan (Kol A):** sahte-EDM'i spinle ÖLÇ (geometrik fazın doğrudan
+   gözlenebiliri), knob'la null'la. Bizim spin ölç-trim'imiz, kanıtlı (~6000×,
+   §14.6). Bilgi tanımı gereği spinde. Maliyet: spin ölçümü. **Omarov ile ilişki:**
+   bu SBA DEĞİL (SBA E-alan hizalar); Omarov geometrik fazı CW/CCW+polarite+CR-ayrım
+   ile kontrol eder, doğrudan spin-null'lama onun *vertical-pol* kolu = kullanılmadı.
 2. **İleri-harita (Kol B):** COD→skaler sahte-EDM (iyi-koşullu, öğrenilebilir,
    β-beat-şeffaf) + null'lama. Orbit-tarafı umut; sınır: mutlak doğruluk + 7nm okuma.
 3. **Büyük-genlik kalibrasyon (§6.7):** orbit-kör deseni ~1mm'e uyar, simetrik
@@ -380,7 +386,8 @@ doğrudan ölçmek** ya da **ileri-harita ile öngörüp null'lamak** (ters'i at
 - **Açık (tek kalan):** null'lamanın mutlak hedefe ulaşması — harita doğruluğu
   (veri/öznitelik/`orbit_ileri §5` analitik form) + iterasyon + gürültü bütçesi.
   **Mühendislik/veri** problemi, fizik no-go'su değil — ama "çözüldü" de değil.
-- **Kol A (spin)** çalışır, orbit-tarafı değil (Omarov/spin-trim).
+- **Kol A (spin)** çalışır, orbit-tarafı değil — bizim spin ölç-trim'imiz (§14.6);
+  Omarov SBA'sı DEĞİL (SBA E-alan hizalar, `omarov.md §5`).
 
 > **Düzeltilmiş strateji:** Orbit-tarafı sahte-EDM null'lama umudu **kapanmadı,
 > aksine güçlendi.** İleri-harita iyi-koşullu VE öğrenilebilir olduğundan, COD→f
