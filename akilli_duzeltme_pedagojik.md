@@ -184,10 +184,34 @@ net pozitife yükseliyor ve ~0.77'de doyuyor.
 Bu, kullanıcının teşhisinin **tam doğrulamasıdır:** *harita vardır, fakat basit
 değildir* — karmaşık (az veriyle pinlenmiyor) ama **yeterli veriyle öğreniliyor.**
 `orbit_ileri_olcum.md §3`'ün "40 config ile yakınsamıyor" gözlemini de açıklar:
-veri azdı, fonksiyon yok değil. Açık kalanlar: (i) gerçekçi-ölçüm (gürültü +
-§7'deki ortalama) altında trend korunur mu; (ii) **model-fidelity** — sim'de
-öğrenilen harita β-beat altında gerçeğe taşınır mı; (iii) **analitik türetme**
-(`orbit_ileri_olcum.md §5`) öğrenilen haritayı doğrular/sadeleştirir mi.
+veri azdı, fonksiyon yok değil.
+
+### 8.1 "Ama harita sim'den öğreniliyor — gerçek makineye taşınır mı?" (β-beat)
+
+En kritik itiraz: ileri-haritayı **simülasyondan** öğreniyoruz, ama gerçek makinenin
+optiği (β fonksiyonları) sim'den farklı olacak (β-beat: kuadrupol gradyanlarındaki
+~%1 hata). Sim'de öğrenilen harita gerçeğe taşınmazsa Kol B yine kırılır. *(İnversiyon
+tam burada ölür: β-beat'i $1/\sigma_\text{min}$ ile büyütür, `squid_bpm_test §9.5`.)*
+
+Bunu doğrudan sınadık: %1 per-quad β-beat'li bir "gerçek makine" kurduk (C++,
+`quad_dG`), haritayı **β-beat'siz** 200 config'de eğittik, **β-beat'li** 40 config'de
+test ettik (test config'leri eğitimden dışlandı — sızıntı yok).
+
+| test | R² |
+|------|---|
+| held-out NOMİNAL (referans) | +0.61 |
+| **β-beat makineye transfer** | **+0.62** |
+| β-beat, simetrik kanal (w≥0.75) | **+0.83** |
+
+**Sonuç: β-beat ŞEFFAF.** %1 β-beat sahte-EDM'i ~%18 oynatıyor, ama nominal-eğitimli
+harita β-beat makineyi **held-out nominal kadar iyi** öngörüyor (0.62 vs 0.61 — **ek
+bozulma yok**). Yani **sahte-EDM, yörüngenin ~sabit bir fonksiyonelidir**; optik
+değişse de "aynı yörünge ≈ aynı sahte-EDM" kalıyor (harita β-beat kaymasını COD
+üzerinden kısmen bile izliyor). İnversiyonun aksine, ileri-harita β-beat'le **kırılmıyor.**
+
+→ Geriye **tek** açık şey kalıyor: mutlak doğruluğu EDM-hedefine indirmek (daha çok
+veri / öznitelik / analitik Berry fonksiyoneli + null'lama iterasyonu) ve gerçekçi
+gürültü bütçesi. Bunlar **mühendislik/veri** problemleri — fizik imkânsızlığı değil.
 
 ---
 
@@ -211,16 +235,18 @@ kolay yoldan görür; Kol B zor yoldan — ama **imkânsız değil.**
 
 ## 10. Nerede duruyoruz (dürüst durum)
 
-- **Kol B kapatılmadı; üstelik pozitif kanıt var.** "Ölü/aynı-duvar" sonucu,
-  ileri-harita ile inversiyonu karıştıran bir hataydı (kullanıcı düzeltti). Üç
-  bulgu Kol B'yi destekliyor: (1) **iyi koşullu** ($\partial f/\partial\text{COD}
-  \approx0.15$, $1/\sigma_\text{min}$ değil); (2) gereken 7 nm **ortalamayla
-  ulaşılır**, ofset değişmez öznitelikle aşılır; (3) orbit-kör simetrik kanal
-  temiz yörüngeden **öğreniliyor** (CV R² $\to0.77$). → İnversiyon no-go'su Kol B'yi
-  **bağlamaz.**
-- **Açık (test edilecek):** (1) gerçekçi-ölçüm (gürültü + ortalama) altında öğrenme
-  korunur mu? (2) β-beat model-fidelity? (3) analitik Berry fonksiyoneli. Bu,
-  `orbit_ileri_olcum.md §7`'nin açık problemini **pozitif yönde ilerletir.**
+- **Kol B kapatılmadı; üstelik DÖRT bulgu destekliyor.** "Ölü/aynı-duvar" sonucu,
+  ileri-harita ile inversiyonu karıştıran bir hataydı (kullanıcı düzeltti).
+  (1) **iyi koşullu** ($\partial f/\partial\text{COD}\approx0.15$, $1/\sigma_\text{min}$
+  değil); (2) gereken 7 nm **ortalamayla ulaşılır**, ofset değişmez öznitelikle
+  aşılır; (3) orbit-kör simetrik kanal temiz yörüngeden **öğreniliyor** (CV R²
+  $\to0.77$); (4) **β-beat şeffaf** — sim-eğitimli harita %1 β-beat'li makineye
+  held-out nominal kadar iyi taşınıyor (R² 0.62 vs 0.61). → İnversiyon no-go'su
+  Kol B'yi **bağlamaz.**
+- **Açık (tek kalan):** mutlak doğruluğu EDM-hedefine indirmek (daha çok veri /
+  öznitelik / analitik Berry fonksiyoneli + null'lama iterasyonu) ve gerçekçi-ölçüm
+  gürültü bütçesi. Bu **mühendislik/veri** işidir; `orbit_ileri_olcum.md §7`'nin
+  açık problemini **pozitif yönde ilerletir** (fizik no-go'su yok).
 - **Kol A** çalışır, ama spin gerektirir (orbit-tarafı değil; Omarov/spin-trim).
 - **Birleşik no-go** (orbit-inversiyon + lock-in) yalnız *misalignment geri-çatımı*
   içindir; **ileri-harita f-öngörüsü o sınıfa girmez.**

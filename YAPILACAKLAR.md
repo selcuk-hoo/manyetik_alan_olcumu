@@ -114,10 +114,14 @@ simetrik içerik dahil çalıştığının gösterilmesi. Mevcut altyapı yeterl
 > POZİTİF.** Üstelik simetrik COD→f kanalı (asıl iş) temiz COD'dan **ÖĞRENİLEBİLİR
 > çıktı:** CV R² 80 örnekte ~0, **240 örnekte +0.77** (trend −0.5→0.77). Harita
 > karmaşık ama var; orbit_ileri §3 "40 config yakınsamıyor"u veri-azlığıydı.
+> **β-beat model-fidelity ŞEFFAF (§6.5):** %1 β-beat'li makineye sim-eğitimli harita
+> held-out nominal kadar taşınıyor (R² 0.62 vs 0.61, ek bozulma yok) → f yörüngenin
+> ~sabit fonksiyoneli, inversiyonun aksine β-beat haritayı kırmıyor.
 > **Birleşik no-go yalnız misalignment geri-çatımı (inversiyon+lock-in) için;
-> ileri-harita o sınıfta değil.** Kol A (spin) çalışır (§14.6). Sıradaki açık iş:
-> (i) gerçekçi-ölçüm (gürültü+ortalama, 7nm) altında trend, (ii) β-beat
-> model-fidelity (`quad_dG`), (iii) `orbit_ileri §5` analitik Berry fonksiyoneli.
+> ileri-harita o sınıfta değil.** Kol A (spin) çalışır (§14.6). **Tek kalan açık iş:**
+> mutlak doğruluğu hedefe indirmek (daha çok veri/öznitelik/`orbit_ileri §5` analitik
+> Berry fonksiyoneli + null'lama iterasyonu) + gerçekçi gürültü bütçesi (7nm ortalama,
+> drift). Mühendislik/veri, fizik no-go'su değil.
 
 > **Fikrin özü (kullanıcı, 2026-06-29):** No-go bir *inversiyon* sınırıdır
 > (COD → misalignment, simetrik alt-uzayda cond ~10⁴; bkz. v2.7 yeniden-incelemesi

@@ -23,13 +23,16 @@
 >   ortalama** ile ulaşılır (σ_BPM/√N: 1μm tek-atıştan ~21 s @1kHz). Yani **ölçüm
 >   gürültüsü Kol B'yi dışlamaz.** (§4)
 >
-> **Doğru durum: Kol B AÇIK + POZİTİF kanıt.** Gerçek engel *gözlenebilirlik*
-> değil, fonksiyonelin karmaşıklığı. Ve o fonksiyonel **öğrenilebilir çıktı:**
-> orbit-kör simetrik kanal (sahte-EDM'i süren) temiz COD'dan öğreniliyor —
-> CV R² 80 örnekte ~0, ama 240 örnekte **+0.77** (trend −0.5→0.77, §6). Yani
-> "harita vardır, basit değildir" tam doğru: harita karmaşık ama yeterli veriyle
-> pinleniyor, ve ileri-harita iyi-koşullu olduğundan inversiyon no-go'sunu
-> **gerçekten atlar.** `orbit_ileri_olcum.md §7` açık problemi pozitif ilerledi.
+> **Doğru durum: Kol B AÇIK + POZİTİF (dört bulgu).** Gerçek engel *gözlenebilirlik*
+> değil, fonksiyonelin karmaşıklığı — ve o fonksiyonel **öğrenilebilir + dayanıklı
+> çıktı:** (1) ileri-harita iyi koşullu (∂f/∂COD≈0.15, inversiyon değil, §4);
+> (2) orbit-kör simetrik kanal temiz COD'dan öğreniliyor (CV R² 80 örnekte ~0 →
+> 240'da **+0.77**, §6); (3) **β-beat model-fidelity ŞEFFAF** — %1 β-beat'li
+> makineye sim-eğitimli harita held-out nominal kadar taşınıyor (R² 0.62 vs 0.61,
+> §6.5); (4) birleşik no-go ileri-haritayı kapsamaz. "Harita vardır, basit değildir"
+> tam doğru; inversiyon no-go'su Kol B'yi **bağlamaz.** `orbit_ileri_olcum.md §7`
+> açık problemi pozitif ilerledi. **Tek kalan:** mutlak doğruluk (veri/analitik +
+> iterasyon) ve gürültü bütçesi — mühendislik, fizik no-go'su değil.
 >
 > **Kol A** değişmedi: çalışır (bilgi spinde), ama orbit-tarafı değil (Omarov/spin-trim).
 
@@ -171,26 +174,56 @@ kullanıcının teşhisinin ("harita vardır, basit değildir") doğrudan doğru
 **(c) Ofset incelik:** yönlü-alan özniteliği BPM-ofsetine değişmez → +100μm ofset
 R²'yi düşürmez. Ofset duvar değil.
 
-**Açık kalan:** (i) gürültülü/gerçekçi-ölçüm COD'unda (§4'teki 7nm ortalama) trend
-korunur mu; (ii) model-fidelity (β-beat: sim-eğitimli harita gerçeğe taşınır mı,
-`quad_dG` ile test edilebilir).
+---
+
+## 6.5 Model-fidelity: β-beat altında harita taşınır mı? (POZİTİF)
+
+Kritik soru: ileri-harita **simülasyondan** (nominal optik) öğrenilir; gerçek makinede
+β-beat (per-quad gradyan hatası) var. Sim'de öğrenilen harita gerçeğe taşınır mı?
+(İnversiyon burada 1/σ_min ile ölür, §9.5.) Test: %1 per-quad β-beat (LOCO seviyesi,
+tek makine realizasyonu, `quad_dG` ile C++); harita 200 nominal config'de eğitilir
+(test config'leri **dışlanır**, sızıntı yok), 40 β-beat config'de test edilir.
+COD_bb, `perquad_orbit.py` (β-beat kapalı yörünge, build_R ile %0.2 doğrulanmış).
+
+| ölçüm | R² |
+|-------|---:|
+| held-out NOMİNAL (referans generalleme) | +0.61 |
+| **β-beat transfer: F(COD_bb) vs f_bb** | **+0.62** |
+| β-beat, simetrik alt-küme (w≥0.75) | **+0.83** |
+
+**Bulgu: β-beat ŞEFFAF.** %1 β-beat f'i ~%18 oynatır (COD'u 3.2μm), ama nominal-
+eğitimli harita β-beat makineyi **held-out nominal kadar iyi** öngörür (0.62 vs
+0.61 — **ek bozulma YOK**). Harita, β-beat kaymasını COD üzerinden kısmen izler
+(corr(Δpred,Δf)=+0.35). Yani **f, yörüngenin ~sabit fonksiyonelidir; β-beat haritayı
+kırmaz** (inversiyonun aksine). Kalan %52 nispi hata, β-beat değil **veri-sınırlı
+generalleme** hatasıdır (N ile düşer; §6 trendi).
+
+![β-beat fidelity](/tmp/akilli_duzeltme/fig_kolb_bbeat.png)
+
+**Açık kalan tek şey:** mutlak doğruluk (şu an N=200'de ~%52 nispi → tek-atış
+null'lama ~2×; daha çok veri/öznitelik/analitik form + iterasyon ile hedefe) ve
+gerçekçi-ölçüm gürültü bütçesi (§4: 7nm ortalama). Model-fidelity artık **engel
+değil.**
 
 ---
 
 ## 7. Sonuç ve fork (DÜZELTİLDİ → POZİTİF eğilim)
 
-- **Kol B KAPATILMADI; üstelik POZİTİF kanıt var.** İlk "ölü/aynı-duvar" sonucu,
-  ileri-harita ile inversiyonu karıştıran bir koşullanma hatasıydı (geri çekildi).
-  Üç bağımsız bulgu Kol B'yi destekliyor:
+- **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"
+  sonucu, ileri-harita ile inversiyonu karıştıran bir koşullanma hatasıydı (geri
+  çekildi).
   1. **İyi koşullu:** ∂f/∂COD≈0.15 (1/σ_min DEĞİL); 7 nm ortalamayla ulaşılır;
      ofset yönlü-alanla değişmez (§4).
   2. **Öğrenilebilir:** orbit-kör simetrik kanal temiz COD'dan öğreniliyor
      (CV R² 240 örnekte +0.77; trend −0.5→0.77) (§6).
-  3. **Birleşik no-go Kol B'yi KAPSAMAZ** — o yalnız misalignment *geri-çatımı*
+  3. **Model-fidelity:** %1 β-beat ŞEFFAF — nominal-eğitimli harita β-beat makineyi
+     held-out nominal kadar iyi öngörür (R² 0.62 vs 0.61, ek bozulma yok) (§6.5).
+  4. **Birleşik no-go Kol B'yi KAPSAMAZ** — o yalnız misalignment *geri-çatımı*
      (inversiyon+lock-in) içindir; ileri-harita f-öngörüsü o sınıfta değil.
-- **Açık (test edilecek):** (i) gerçekçi-ölçüm (gürültü+ortalama, 7nm) altında
-  trend; (ii) β-beat model-fidelity (`quad_dG`); (iii) `orbit_ileri §5` analitik
-  Berry fonksiyoneli (öğrenilen haritayı doğrular/sadeleştirir).
+- **Açık (tek kalan):** mutlak doğruluğu EDM-hedefine indirmek — daha çok veri /
+  öznitelik / `orbit_ileri §5` analitik Berry fonksiyoneli + null'lama iterasyonu;
+  ve gerçekçi-ölçüm gürültü bütçesi (§4'teki 7nm ortalama, drift). Bunlar
+  **mühendislik/veri** problemleri, fizik no-go'su DEĞİL.
 - **Kol A (spin)** çalışır, orbit-tarafı değil (Omarov/spin-trim).
 
 > **Düzeltilmiş strateji:** Orbit-tarafı sahte-EDM null'lama umudu **kapanmadı,
@@ -216,6 +249,10 @@ python3 kmod_drivers/fast_est.py calib -w 4 --seeds 3   # p=2.002
 python3 /tmp/akilli_duzeltme/gen_ensemble.py 4 48      # 240 örnek ensemble (~2 saat)
 python3 /tmp/akilli_duzeltme/fit_forward.py           # ileri-harita CV R²
 python3 /tmp/akilli_duzeltme/fig_learnability.py      # öğrenilebilirlik trendi (R²→0.77)
+python3 /tmp/akilli_duzeltme/perquad_orbit.py         # β-beat CO çözücü (build_R ile %0.2)
+python3 /tmp/akilli_duzeltme/measure_bbeat.py 4 40    # β-beat f (C++ quad_dG, ~30dk)
+python3 /tmp/akilli_duzeltme/bbeat_analyze.py         # model-fidelity transfer R²
+python3 /tmp/akilli_duzeltme/fig_bbeat.py             # β-beat fidelity figürü
 ```
 
 Çekirdek estimator `berry_data/false_edm_4d.py` (4D-CO + model-fit, p=2.00).
