@@ -101,10 +101,11 @@ tarafındaki kesin sınır teoreminde aranıyor.
 │                               #   §9 make-or-break sonuçları (7.7×, 62×, p=2.00)
 ├── squid_bpm_test.md           # K-mod+BPM ölçümü: §7 dağıtık-frekans ÖLÜ (nefes);
 │                               #   §8 ΔR no-go; §9 lock-in; §9.5 simetrik no-go (<4nm)
-├── akilli_duzeltme.md          # AKILLI DÜZELTME: Kol B (NN COD→f) AÇIK + POZİTİF (4
-│                               #   bulgu): iyi koşullu (∂f/∂COD≈0.15) + öğrenilebilir
-│                               #   (R²→0.77@240) + β-beat ŞEFFAF (transfer R²=nominal).
-│                               #   Kol A (spin) çalışır. (ilk "ölü" sonucu düzeltildi)
+├── akilli_duzeltme.md          # AKILLI DÜZELTME: Kol B (NN COD→f) kavramsal AÇIK (4
+│                               #   bulgu: iyi-koşullu/öğrenilebilir/β-beat-şeffaf) AMA
+│                               #   pratik HENÜZ ÇALIŞMIYOR (Plan 2c: null'lama orbit-
+│                               #   düzeltmeyi geçemiyor; harita kaba). Plan 4 (analitik)
+│                               #   gerek. Kol A (spin) çalışır. (ilk "ölü" düzeltildi)
 ├── akilli_duzeltme_pedagojik.md # ↑ belgenin DERS KİTABI tarzı kardeşi (sıfırdan;
 │                               #   hata+düzeltme hikâyesi, ileri-harita≠inversiyon, SSS)
 ├── MAKALE_POTANSIYELI.md / PROJE_ANALIZI_VE_ONERILER.md / SIMULASYON_PLANI_HIZALAMA.md
@@ -256,6 +257,8 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | **Harita ÇIKARMA için kullanılamaz (~%0.1 mutlak gerek); CW/CCW β-beat'i geri ALMAZ (corr −0.89, EDM-kanalı); yalnız NULL'LAMA** | `akilli_duzeltme.md §6.6` |
 | **Büyük-genlik eğitimi: simetrik (asıl) kanal 1mm'e σ²-HOMOJEN (p=2.03); antisim doyar (p=0.9) → orbit-kör deseni büyüt, gerçek makinede öğren, ölçekle** | `akilli_duzeltme.md §6.7` |
 | **Omarov CR-ayrım gözlenebilirinin simetriğe körlüğü DOĞRUDAN ölçüldü: bastırma CR 4.5× ≈ tek-yön COD 3.8× → no-go CR'ye taşınır (Omarov §9 boşluğu kapandı)** | `omarov.md §9.3` |
+| **NN ile misalignment geri-çatımı R⁻¹'den İYİ DEĞİL (lineer harita → NN=R; simetrik hata NN 5.6μm≈TSVD 6.3μm); fark algoritmada değil problemin yönünde (ileri/ters)** | `akilli_duzeltme.md §6.8` |
+| **Plan 2c (make-or-break) NEGATİF: kapalı-döngü null'lama basit orbit-düzeltmeyi GEÇEMİYOR; harita hata tabanı ~300× hedef (slope 0.36) → 240-örnek harita yetersiz; Plan 4 (analitik) gerek** | `akilli_duzeltme.md §6.10` |
 | **Birleşik no-go (inversiyon+lock-in) yalnız misalignment geri-çatımı; ileri-harita o sınıfta DEĞİL** | `akilli_duzeltme.md §4,§7` |
 | **Kol A (spin) çalışır (bilgi spinde, doğrudan); Kol B'de bilgi yörüngede ama küçük+karmaşık** | `akilli_duzeltme.md §9`, `§14.6` |
 | **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |
