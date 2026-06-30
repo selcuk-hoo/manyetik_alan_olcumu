@@ -207,6 +207,41 @@ değil.**
 
 ---
 
+## 6.6 Harita NASIL kullanılır? Çıkarma DEĞİL, null'lama (kritik ayrım)
+
+**Kullanıcı itirazı (haklı):** Haritayı "öngör + polarimetreden ÇIKAR" diye
+kullanırsak işe yaramaz. Sahte-EDM ~1000× sinyal; çıkarmanın hedefin altında artık
+bırakması için haritanın **mutlak** doğruluğu ~**%0.1** olmalı (= hedef/sahte-EDM).
+Harita %22–52'de → çıkarma sonrası artık ~%22×1000 = **220× sinyal**, hâlâ gömülü.
+**Çıkarma ÖLÜ.** Üstelik bu, β-beat değil **sonlu-veri** doğruluğuyla sınırlı.
+
+**CW/CCW + quad-flip β-beat belirsizliğini geri alır mı? — HAYIR (ölçüldü).**
+Umut: gerçek EDM=(S_CW−S_CCW)/2; harita hatası (paylaşılan optik) CW/CCW'de ortak-mod
+ise farkta iptal olur. Test (12 config × CW/CCW × nom/β-beat, signed C++):
+
+| ölçüm | sonuç |
+|-------|-------|
+| CW/CCW sahte-EDM iptali \|f_CW\|/\|D\| | ~2.2× (Omarov 3.4× ile uyumlu, zayıf) |
+| β-beat ortak-mod corr(δ_CW, δ_CCW) | **−0.89 (ANTİ-korele!)** |
+| ortak-mod iptal kazancı | **0.7× (iptal YOK)** |
+| β-beat'in EDM-kanalı D'ye etkisi | **70× hedef** (D_nom'un kendisi kadar) |
+
+**Bulgu: β-beat sahte-EDM kayması CW/CCW-TEK'tir** (δ_CW≈−δ_CCW) → tam da gerçek
+EDM gibi (CW−CCW)/2'de **hayatta kalır**, iptal olmaz. Yani CW/CCW+flip β-beat
+belirsizliğini **geri ALMAZ**; aksine β-beat doğrudan EDM-mimik kanalına düşer.
+
+![β-beat CW/CCW](/tmp/akilli_duzeltme/fig_kolb_cwccw.png)
+
+**Doğru kullanım — NULL'LAMA (çıkarma değil):** Haritayı, sahte-EDM'i orbit-görünür
+knob'larla **sıfıra sürmek** için kullan (predicted f → 0). Bu, mutlak %0.1 doğruluk
+İSTEMEZ — harita yalnız *yönü* gösterir; null'a yaklaştıkça gerçek f de küçülür
+(çarpımsal hata). β-beat burada **§6.5'teki gibi şeffaftır** çünkü haritaya **gerçek
+(ölçülen) yörünge** beslenir — nominal değil. Sınır: harita doğruluğu + iterasyon
+(veriyle iyileşir) + gürültü bütçesi. **Çıkarma yolu ölü; null'lama yolu canlı ama
+mutlak hedefe ulaşması veri/iterasyona bağlı.**
+
+---
+
 ## 7. Sonuç ve fork (DÜZELTİLDİ → POZİTİF eğilim)
 
 - **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"
@@ -220,10 +255,14 @@ değil.**
      held-out nominal kadar iyi öngörür (R² 0.62 vs 0.61, ek bozulma yok) (§6.5).
   4. **Birleşik no-go Kol B'yi KAPSAMAZ** — o yalnız misalignment *geri-çatımı*
      (inversiyon+lock-in) içindir; ileri-harita f-öngörüsü o sınıfta değil.
-- **Açık (tek kalan):** mutlak doğruluğu EDM-hedefine indirmek — daha çok veri /
-  öznitelik / `orbit_ileri §5` analitik Berry fonksiyoneli + null'lama iterasyonu;
-  ve gerçekçi-ölçüm gürültü bütçesi (§4'teki 7nm ortalama, drift). Bunlar
-  **mühendislik/veri** problemleri, fizik no-go'su DEĞİL.
+- **KULLANIM kısıtı (§6.6, kritik):** Harita **çıkarma** için kullanılamaz (sahte-EDM
+  ~1000× sinyal; çıkarma ~%0.1 mutlak doğruluk ister, harita %22). **CW/CCW+flip bu
+  belirsizliği geri ALMAZ** — β-beat kayması CW/CCW-tek (corr −0.89), EDM-kanalında
+  hayatta kalır. Harita ancak **null'lama** (predicted f→0, gerçek yörünge beslenir,
+  β-beat şeffaf) için kullanılabilir.
+- **Açık (tek kalan):** null'lamanın mutlak hedefe ulaşması — harita doğruluğu
+  (veri/öznitelik/`orbit_ileri §5` analitik form) + iterasyon + gürültü bütçesi.
+  **Mühendislik/veri** problemi, fizik no-go'su değil — ama "çözüldü" de değil.
 - **Kol A (spin)** çalışır, orbit-tarafı değil (Omarov/spin-trim).
 
 > **Düzeltilmiş strateji:** Orbit-tarafı sahte-EDM null'lama umudu **kapanmadı,
@@ -253,6 +292,9 @@ python3 /tmp/akilli_duzeltme/perquad_orbit.py         # β-beat CO çözücü (b
 python3 /tmp/akilli_duzeltme/measure_bbeat.py 4 40    # β-beat f (C++ quad_dG, ~30dk)
 python3 /tmp/akilli_duzeltme/bbeat_analyze.py         # model-fidelity transfer R²
 python3 /tmp/akilli_duzeltme/fig_bbeat.py             # β-beat fidelity figürü
+python3 /tmp/akilli_duzeltme/measure_cwccw.py 4 12    # CW/CCW×nom/bb signed (~34dk)
+python3 /tmp/akilli_duzeltme/cwccw_analyze.py         # ortak-mod testi (corr −0.89)
+python3 /tmp/akilli_duzeltme/fig_cwccw.py             # CW/CCW ortak-mod figürü
 ```
 
 Çekirdek estimator `berry_data/false_edm_4d.py` (4D-CO + model-fit, p=2.00).
