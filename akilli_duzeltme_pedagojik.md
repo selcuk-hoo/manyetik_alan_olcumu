@@ -24,6 +24,11 @@ zararlı büyüklüğü — **sahte EDM** sinyalini — *doğrudan* sıfırlamak
 9. Kol A vs Kol B: yine de neden farklılar?
 10. Nerede duruyoruz (dürüst durum)
 11. Sık sorulan sorular
+12. Tüm hikâyenin tek ayrımı: İLERİ mi, TERS mi?
+13. "β-beat bunu da öldürmedi mi?" — yaygın karışıklık
+14. Haritayı nasıl kullanırız? Çıkarma değil, null'lama
+15. Omarov'un CR-demet-ayrımı da neden aynı duvar?
+16. Büyük resim: hangi kapı açık, hangi kapalı?
 
 ---
 
@@ -290,9 +295,135 @@ imkânsızlık ilan etmeden önce, doğru problemi (ileri-harita ≠ inversiyon)
 
 ---
 
-> **Kayıt notu (2026-06-29, düzeltilmiş):** Bu belge `akilli_duzeltme.md`'nin
-> (terse teknik kayıt) pedagojik kardeşidir. İlk sürüm "Kol B ölü" diyordu;
-> kullanıcının haklı itirazıyla düzeltildi (ileri-harita ≠ inversiyon; iyi koşullu;
-> engel fonksiyonel karmaşıklığı, gözlenebilirlik değil). Sayılar gerçek C++
-> izleyiciyle ($p=2.002$) üretildi; keşif kodu `/tmp/akilli_duzeltme/`.
+## 12. Tüm hikâyenin tek ayrımı: İLERİ mi, TERS mi?
+
+Bu bölüm, dağınık gibi görünen her sonucu **tek bir fikre** bağlar. Yörüngeyi
+(kapalı yörünge, COD) sahte-EDM'i kontrol etmek için iki şekilde kullanabiliriz:
+
+- **TERS (inversiyon):** yörünge → 48 quad hizalama hatasını *geri-çat* → sonra
+  onlardan sahte-EDM'i hesapla.
+- **İLERİ (forward):** yörünge → doğrudan *skaler* sahte-EDM'i öngör (misalignment'a
+  hiç uğramadan).
+
+Neden bu ayrım her şeyi belirliyor? Çünkü **koşullanma** (gürültüye duyarlılık)
+bambaşka:
+
+| | TERS (geri-çat) | İLERİ (öngör) |
+|---|---|---|
+| ne çıkarır | 48 gizli sayı (misalignment) | 1 sayı (sahte-EDM) |
+| simetrik yönde | 1/σ_min ile **patlar** (~10⁴) | mütevazı eğim (∂f/∂COD≈0.15) |
+| gürültü/sistematik | felaket büyütülür | doğrudan, büyütülmez |
+
+**Sezgi (analoji):** Bir pastanın *çok mu tatlı* olduğunu (1 sayı = sahte-EDM)
+tahmin etmek kolay — görünüşüne bakarsın. Ama aynı pastadan **tam tarifi** (48
+malzeme = misalignment) geri-çıkarmak imkânsız: birçok farklı tarif aynı pastayı
+verir, üstelik 24 malzeme tatta neredeyse hiç iz bırakmaz. **Bilgi pastada yok →
+hiçbir dahi aşçı tarifi çıkaramaz.** Ama "çok mu tatlı" sorusu pastanın düzgün bir
+fonksiyonudur, okunabilir.
+
+**İşte bu yüzden** R⁻¹, kmod, SQUID-BPM, lock-in, NN, LSTM, hatta Omarov'un CR-ayrımı
+— *hepsi* TERS sınıfındadır ve *hepsi* aynı duvara çarpar. Algoritma değişir, fizik
+(simetrik bilginin yörüngede yokluğu) değişmez. "Akıllı düzeltme"nin tüm umudu, bu
+sınıftan **çıkıp** İLERİ tarafa geçmektir.
+
+---
+
+## 13. "β-beat bunu da öldürmedi mi?" — yaygın ve anlaşılır bir karışıklık
+
+β-beat nedir? Gerçek makinenin optiği (β fonksiyonları, odaklama) nominal modelden
+~%1 sapar (kuadrupol güçlerindeki küçük hatalar). Bu, hikâyenin **birçok** yerinde
+katil oldu — bu yüzden "β-beat her şeyi bozar" sanmak doğal. Ama dikkat: β-beat
+**TERS'i** öldürdü, **İLERİ'yi** değil.
+
+| ne | β-beat etkisi | neden |
+|----|---------------|-------|
+| **TERS** (misalignment geri-çat) | **FELAKET** (%0.5 β-beat → 1931 μm) | β-beat hatası 1/σ_min ile büyütülür |
+| **İLERİ** (sahte-EDM öngör) | **ŞEFFAF** (transfer R²=0.62 = nominal) | aşağıda |
+
+**İleri-harita β-beat'i neden umursamıyor?** Çünkü **sahte-EDM, yörüngenin ~sabit
+bir fonksiyonelidir.** β-beat hem yörüngeyi hem sahte-EDM'i *birlikte* kaydırır;
+haritaya **gerçek (ölçülen, β-beat'li) yörüngeyi** beslediğin için, harita o
+yörüngeye karşılık gelen sahte-EDM'i zaten doğru verir — β-beat'i ayrıca "bilmesi"
+gerekmez. (Deneyde harita β-beat kaymasını kısmen izledi bile.)
+
+**TERS neden ölür?** Çünkü misalignment'ı geri-çatmak için β-beat'le değişen tepki
+matrisini ters çevirmen gerekir; simetrik yönde bu ters-çevirme küçük bir hatayı
+1/σ_min kat büyütür → β-beat felakete döner.
+
+> **Özetle:** β-beat'e takılan *inversiyondu.* İleri-null'lama β-beat'e dayanıklı.
+> Karıştırmak normal (β-beat çok yerde katildi), ama bu testte katil değildi.
+
+---
+
+## 14. Haritayı nasıl KULLANIRIZ? Çıkarma değil, null'lama
+
+Diyelim ileri-haritamız var ve sahte-EDM'i öngörüyor. Onu sahte-EDM'i *yok etmek*
+için iki şekilde kullanabiliriz — biri ölü, biri canlı:
+
+**(a) ÇIKARMA — ÖLÜ.** "Sahte-EDM'i öngör, polarimetre ölçümünden çıkar, geriye
+gerçek EDM kalsın." Sorun: sahte-EDM gerçek sinyalin ~**1000 katı**. Çıkarmanın
+hedef-altı artık bırakması için haritanın **mutlak** doğruluğu ~%0.1 olmalı; harita
+%22'de → çıkarma sonrası ~%22 × 1000 = **220× sinyal**, hâlâ gömülü. Büyük bir sayıyı
+hatalı çıkarmak işe yaramaz.
+
+**(b) NULL'LAMA — CANLI.** "Orbit-görünür knob'larla (corrector) öngörülen
+sahte-EDM'i *sıfıra sür*." Bu, mutlak %0.1 İSTEMEZ: harita yalnız *yönü* gösterir,
+ve null'a yaklaştıkça gerçek sahte-EDM de küçülür (hata çarpımsal). İterasyonla
+inebilirsin.
+
+**Analoji:** Radyodaki cızırtı. (a) Cızırtının tam genliğini ölçüp sesten çıkarmaya
+çalışmak — küçük bir hata bile büyük cızırtı bırakır. (b) Düğmeyi cızırtı *susana
+dek* çevirmek — tam değeri bilmen gerekmez, sıfıra yaklaştığını duyman yeter.
+
+**Dürüst sınır:** Null'lama döngüsünün hedefe *yakınsadığı* henüz gösterilmedi
+(make-or-break testi); çarpımsal-hata umut verici ama toplamsal bir tabana takılma
+ihtimali var. Bu, projenin sıradaki belirleyici adımı.
+
+---
+
+## 15. Omarov'un CR-demet-ayrımı da neden aynı duvar?
+
+Omarov makalesi geometrik fazı, **saat-yönü (CW) ve ters (CCW) demetler arasındaki
+ayrımı** ölçüp dipol-corrector'larla küçülterek kontrol eder. Bu, ileri mi ters mi?
+
+CR-ayrım = (CW kapalı yörünge) − (CCW kapalı yörünge) = yine **bir yörünge
+gözlemi** (iki yörüngenin farkı). Simetrik mod *her iki* yörüngede de bastırılmış
+olduğundan, **farkta da bastırılmıştır.** Doğrudan ölçtük:
+
+| | bastırma (antisim/sim) |
+|---|---|
+| tek-yön yörünge | 3.8× |
+| CR-ayrım | 4.5× (biraz *daha* kör) |
+
+Yani CR-ayrım simetriğe **ekstra pencere açmaz** — sıradan yörüngenin körlüğünü
+miras alır. Ayrımı ölçüp küçültmek, simetrik geometrik fazı bırakır. Omarov'un
+*fiziği* doğru ("ayrımı küçültürsen geometrik faz düşer"), ama o ayrımı **ölçen**
+zincir simetrik bileşeni göremez — yani yine TERS/ölçüm sınıfının duvarı.
+
+---
+
+## 16. Büyük resim: hangi kapı açık, hangi kapalı?
+
+Tüm hikâye tek tabloya sığar:
+
+| Yol | Sınıf | Durum |
+|-----|-------|-------|
+| R⁻¹, kmod, SQUID, lock-in, NN, LSTM, **CR-ayrım** | yörünge-**TERS** | **kesin çıkmaz** (simetrik bilgi yörüngede yok) |
+| İleri-harita + null'lama (Kol B) | yörünge-**İLERİ** | **açık tek umut** (iyi-koşullu, β-beat-şeffaf; ama null-yakınsaması kanıtlanmadı, çıkarma değil) |
+| Spin ölç-trim (Kol A) | **spin** | **kanıtlı** (bilgi tanımı gereği spinde; ~6000×) |
+
+**Tek cümle:** *Yörüngeden geri-çatmak öldü; yörüngeden ileri öngörüp null'lamak
+açık ama kanıtlanmadı; spin kesin.* Orbit-tarafında özgün katkı ya **ileri-harita
+null'lamanın çalıştığını göstermek** (Plan 2c) ya da **analitik Berry fonksiyonelini
+türetip** (saf orbit-tabanlı, spin gerektirmeyen çözüm) ondan ibarettir.
+
+---
+
+> **Kayıt notu (2026-06-29, düzeltilmiş + genişletildi):** Bu belge
+> `akilli_duzeltme.md`'nin (terse teknik kayıt) pedagojik kardeşidir. İlk sürüm
+> "Kol B ölü" diyordu; kullanıcının haklı itirazıyla düzeltildi (ileri-harita ≠
+> inversiyon; iyi koşullu; engel fonksiyonel karmaşıklığı). §12–16 sonraki
+> diyalogun pedagojik özetidir: ileri/ters ayrımı, β-beat'in hangisini öldürdüğü,
+> çıkarma-vs-null'lama, Omarov CR-ayrımı, ve "hangi kapı açık" sentezi. Sayılar
+> gerçek C++ izleyiciyle ($p=2.002$) üretildi; keşif kodu `/tmp/akilli_duzeltme/`.
 > `integrator.cpp` değiştirilmedi.
