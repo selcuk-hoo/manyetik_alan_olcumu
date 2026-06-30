@@ -321,6 +321,44 @@ alt-uzayda ~7nm ister; bu yüzden geri-çatım değil, **ileri-harita + null'lam
 
 ---
 
+## 6.9 kmod/SQUID/lock-in/LSTM hepsi AYNI ters-problem duvarı; çözüm yönleri
+
+**Soru:** kmod + SQUID-BPM simetriği geri çatamıyordu (gürültüye gömülü); kmod+LSTM
+o gürültüyü saf dışı bırakır mı? Başka çözüm?
+
+**Önce kapatma — hepsi aynı INVERSİYON duvarı:**
+- kmod = ΔR ölçer; **ΔR→misalignment** yine *ters* problem. Simetrik alt-uzayda
+  σ_min(ΔR)≈10⁻⁴ → 1/σ_min büyütmesi (`squid_bpm_test §8`).
+- SQUID düşük gürültü verir; lock-in beyaz gürültüyü √N ile yener — **ama simetrik
+  yön <4nm efektif gürültü ister; lock-in tabanı bile yetmez ve %0.5 β-beat
+  felaket** (`§9.5`). Dağıtık-frekans ayrıca *nefes* (koherent) ile ölür (`§7`).
+- **LSTM/NN bunu yenemez.** İki sebep: (i) beyaz gürültü için **lock-in zaten
+  optimal** (eşleştirilmiş süzgeç, Cramér-Rao); öğrenilmiş model √N'i geçemez.
+  (ii) Asıl duvar gürültü değil **ΔR sistematiği (β-beat = MODEL hatası)** ve
+  **kötü-koşulluluk (fizik)**; estimator değiştirmek bunları düzeltmez. Gerçek
+  makinede LSTM eğitmek için *etiket* (gerçek misalignment) gerekir — ki ölçmeye
+  çalıştığımız şey o (döngüsel). → §6.8'in zaman-serisi versiyonu, aynı sonuç.
+
+**Görünen çözüm yönleri (hepsi: TERS problemi BIRAK):**
+1. **Spin-doğrudan (Kol A / Omarov):** sahte-EDM'i spinle ÖLÇ (geometrik fazın
+   doğrudan gözlenebiliri), knob'la null'la. Kanıtlı (spin-trim ~6000×, §14.6).
+   Bilgi tanımı gereği spinde. Maliyet: spin ölçümü (Omarov deneyi zaten bunu yapar).
+2. **İleri-harita (Kol B):** COD→skaler sahte-EDM (iyi-koşullu, öğrenilebilir,
+   β-beat-şeffaf) + null'lama. Orbit-tarafı umut; sınır: mutlak doğruluk + 7nm okuma.
+3. **Büyük-genlik kalibrasyon (§6.7):** orbit-kör deseni ~1mm'e uyar, simetrik
+   fonksiyoneli gerçek makinede temiz öğren (σ²-homojen), ölçekle.
+4. **Analitik Berry fonksiyoneli (`orbit_ileri §5`):** COD→sahte-EDM'i Thomas-BMT'den
+   kapalı-form türet → öğrenilen haritayı doğrula/değiştir (veri gerektirmez).
+5. **(Teorik, pratik değil) Latis/tune mühendisliği:** G_k=C/|Q²−k²| bastırması
+   Q'ya bağlı; Q'yu simetrik harmoniğe (k≈24) yaklaştırmak simetriği orbit-GÖRÜNÜR
+   yapar — ama Q≈24 gerekir (gerçekçi değil; ertelenen latis-redesign).
+
+**Tek cümle:** Simetrik bilgiyi *yörüngeden geri-çatmak* (kmod/SQUID/NN/LSTM)
+fizik gereği imkânsız (bilgi gürültü+sistematik tabanın altında); çözüm ya **spinle
+doğrudan ölçmek** ya da **ileri-harita ile öngörüp null'lamak** (ters'i atlamak).
+
+---
+
 ## 7. Sonuç ve fork (DÜZELTİLDİ → POZİTİF eğilim)
 
 - **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"
