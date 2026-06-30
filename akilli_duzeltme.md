@@ -285,6 +285,42 @@ okuma problemi (§4) ayrı kalır (ortalama ile).
 
 ---
 
+## 6.8 NN ile misalignment geri-çatımı R⁻¹'den iyi mi? — HAYIR (aynı taban)
+
+**Kullanıcı sorusu:** Tepki matrisi (R⁻¹) yerine NN ile misalignment↔COD haritası
+kurup, COD'den misalignment hesaplasak daha mı başarılı olur?
+
+**Kritik gözlem:** misalignment→COD **tam lineerdir** (COD = R·mis). NN bunu öğrenince
+yalnızca **R'yi** öğrenir (sömürülecek doğrusal-olmayan yapı yok). Ters yön
+(COD→misalignment) = **R⁻¹**, simetrik alt-uzayda 1/σ_min ile **kötü koşulludur.**
+Bu kötü-koşulluluk **R'nin (fiziğin)** özelliğidir, *algoritmanın* değil → hiçbir
+yöntem (NN, TSVD, LASSO, CLEAN) gürültü tabanının altındaki simetrik bilgiyi
+kurtaramaz.
+
+**Sayıyla** (`nn_vs_Rinv.py`; 10μm misalignment, 1μm BPM gürültü, NN'e 4000 örnek):
+
+| yöntem | antisim geri-çatım hatası | **simetrik geri-çatım hatası** |
+|--------|--------------------------:|-------------------------------:|
+| sinyal büyüklüğü | 10.0 μm | 9.9 μm |
+| TSVD (klasik R⁺) | 0.63 μm | **6.3 μm** |
+| NN (128,128) | 0.71 μm | **5.6 μm** |
+
+İki yöntem de antisim'i iyi kurtarır (~0.7μm); **simetrik kanalda ikisi de aynı
+tabana çarpar** (~6μm, sinyalin %60'ı kurtulamıyor). NN, TSVD'den iyi değil —
+çünkü sınır **bilgi-teorik** (simetrik misalignment'ın COD izi gürültünün altında →
+veride yok → hiçbir estimator çıkaramaz). Bu, projedeki 6-yöntem-aynı-taban
+sonucunun (`false_edm_harmonic_sinir.md §14.5`) NN'le 7.'sidir.
+
+**Ders (Kol B'nin neden farklı olduğu):** NN, *ters* problemi (COD→48 misalignment,
+kötü-koşullu) çözmek için kullanılırsa R⁻¹ kadar başarısız. Kol B'nin işe yaramasının
+sebebi, NN'i **ileri** problem için (COD→**skaler sahte-EDM**, iyi-koşullu
+∂f/∂COD≈0.15) kullanmasıdır. **Fark algoritmada (NN vs matris) değil, problemin
+yönünde:** misalignment'ı geri-çatma (kötü) vs sahte-EDM'i ileri öngör (iyi).
+"Mükemmel COD okuyabilseydik bastırırdık" doğru — ama mükemmel okuma simetrik
+alt-uzayda ~7nm ister; bu yüzden geri-çatım değil, **ileri-harita + null'lama** yolu.
+
+---
+
 ## 7. Sonuç ve fork (DÜZELTİLDİ → POZİTİF eğilim)
 
 - **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"
