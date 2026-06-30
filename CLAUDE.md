@@ -254,6 +254,7 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | **Simetrik COD→f kanalı ÖĞRENİLEBİLİR: temiz COD'dan CV R² 240 örnekte +0.77 (80'de ~0; harita karmaşık ama var)** | `akilli_duzeltme.md §6` |
 | **β-beat model-fidelity ŞEFFAF: %1 β-beat'li makineye sim-harita held-out nominal kadar taşınıyor (R² 0.62 vs 0.61)** | `akilli_duzeltme.md §6.5` |
 | **Harita ÇIKARMA için kullanılamaz (~%0.1 mutlak gerek); CW/CCW β-beat'i geri ALMAZ (corr −0.89, EDM-kanalı); yalnız NULL'LAMA** | `akilli_duzeltme.md §6.6` |
+| **Büyük-genlik eğitimi: simetrik (asıl) kanal 1mm'e σ²-HOMOJEN (p=2.03); antisim doyar (p=0.9) → orbit-kör deseni büyüt, gerçek makinede öğren, ölçekle** | `akilli_duzeltme.md §6.7` |
 | **Birleşik no-go (inversiyon+lock-in) yalnız misalignment geri-çatımı; ileri-harita o sınıfta DEĞİL** | `akilli_duzeltme.md §4,§7` |
 | **Kol A (spin) çalışır (bilgi spinde, doğrudan); Kol B'de bilgi yörüngede ama küçük+karmaşık** | `akilli_duzeltme.md §9`, `§14.6` |
 | **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |
