@@ -342,6 +342,10 @@ o gürültüyü saf dışı bırakır mı? Başka çözüm?
   **kötü-koşulluluk (fizik)**; estimator değiştirmek bunları düzeltmez. Gerçek
   makinede LSTM eğitmek için *etiket* (gerçek misalignment) gerekir — ki ölçmeye
   çalıştığımız şey o (döngüsel). → §6.8'in zaman-serisi versiyonu, aynı sonuç.
+- **Omarov CR-ayrım ölçümü de aynı duvar (DOĞRUDAN ÖLÇÜLDÜ).** CR-ayrım = CW−CCW
+  kapalı yörünge farkı; bu da bir kapalı-yörünge-farkı → simetriğe **tek-yön COD
+  kadar kör** (bastırma CR 4.5× ≈ COD 3.8×, gerçek C++; `omarov.md §9.3`). Ayrımı
+  ölçüp küçültmek simetrik geometrik fazı bırakır. Omarov'un §9 boşluğu kapatıldı.
 
 **Görünen çözüm yönleri (hepsi: TERS problemi BIRAK):**
 1. **Spin-doğrudan (Kol A):** sahte-EDM'i spinle ÖLÇ (geometrik fazın doğrudan

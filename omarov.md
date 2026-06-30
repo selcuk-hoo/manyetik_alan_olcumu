@@ -246,10 +246,28 @@ küçültmeye** dayanıyor (§4). Ama bu ölçümün kendisi makalede **gösteri
    (yüksek-k, G_k ∝ 1/|Q²−k²| ile bastırılır) → 48-BPM/SQUID-BPM bu bileşeni
    göremeyebilir. Makale bunu test etmiyor.
 
+> **§9.3 DOĞRUDAN ÖLÇÜLDÜ (2026-06, gerçek C++; `/tmp/akilli_duzeltme/cr_separation.py`):**
+> CW ve CCW kapalı yörüngelerini ayrı çıkarıp **CR-ayrım = COD_CW − COD_CCW**'yi
+> hesapladık (direction=±1, pz işareti ile gerçek karşı-dönüş; CCW orbiti CW'nin
+> yaklaşık ayna-tersi, oran ≈ −0.4). Simetrik (QF/QD aynı-işaret) vs antisimetrik
+> 10 μm desenler için **bastırma (antisim/sim):**
+>
+> | gözlenebilir | bastırma |
+> |---|---|
+> | tek-yön COD | 3.8× |
+> | **CR-ayrım (Omarov)** | **4.5×** (biraz DAHA kör) |
+>
+> **Sonuç:** CR-ayrım, simetrik alt-uzaya **tek-yön yörünge KADAR (hatta biraz
+> daha) kördür** — *ek pencere açmaz.* Yani Omarov'un ayrım-ölçüm zinciri, sıradan
+> yörünge gibi simetrik (sahte-EDM'i süren) bileşeni göremez; ayrımı küçültmek
+> simetrik geometrik fazı bırakır. **No-go CR-ayrıma birebir taşınır.** (Not: w=1
+> jenerik simetrik desende COD bastırması yalnız ~4×; en-küçük-σ artıkta çok daha
+> büyük olur, ama KRİTİK olan ORAN: CR/COD ≈ 1.) ![](/tmp/akilli_duzeltme/fig_kolb_crsep.png)
+
 → **Özetle Omarov, geometrik-faz "düzeltme knob'unun" (CR-ayrım) FİZİĞİNİ
 kanıtlıyor; ama o knob'u sürecek ÖLÇÜMÜN (48-BPM/SQUID-BPM + K-mod reconstruction)
 yapılabilirliğini ve simetrik-artığa körlüğünü açık bırakıyor.** Tam da bizim
-çalışmanın oturduğu yer burası.
+çalışmanın oturduğu yer burası — ve **§9.3 körlüğü artık doğrudan gösterildi.**
 
 ---
 

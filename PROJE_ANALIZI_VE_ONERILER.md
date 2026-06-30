@@ -764,6 +764,7 @@ değil — dolayısıyla yöntem değiştirmek kurtarmaz:
 | kmod + lock-in | beyaz gürültü √N ile yenilir ama simetrik <4nm ister + β-beat felaket | `squid_bpm_test §9.5` |
 | **NN (misalignment↔COD)** | misalignment→COD LİNEER (NN=R); ters yine R⁻¹; NN=TSVD (sim. hata 5.6 vs 6.3 μm) | `akilli_duzeltme §6.8` |
 | **kmod + LSTM** | beyaz gürültüde lock-in zaten optimal (Cramér-Rao); duvar gürültü değil ΔR-sistematiği; etiket döngüsel | `akilli_duzeltme §6.9` |
+| **Omarov CR-ayrım ölçümü** (CW−CCW yörünge farkı) | ayrım da kapalı-yörünge-farkı → simetriğe tek-yön COD KADAR kör (bastırma CR 4.5× ≈ COD 3.8×, ölçüldü) | `omarov.md §9.3` |
 
 **Tek cümle:** "Mükemmel COD okuyabilseydik bastırırdık" doğru — ama mükemmel okuma
 simetrik alt-uzayda ~7 nm ister (100 μm ofset altında); hiçbir estimator bunu aşamaz.
