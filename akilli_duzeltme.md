@@ -23,11 +23,13 @@
 >   ortalama** ile ulaşılır (σ_BPM/√N: 1μm tek-atıştan ~21 s @1kHz). Yani **ölçüm
 >   gürültüsü Kol B'yi dışlamaz.** (§4)
 >
-> **Doğru durum: Kol B AÇIK (kapatılmadı), `orbit_ileri_olcum.md §7` ile tutarlı.**
-> Gerçek engel *gözlenebilirlik* değil, **fonksiyonelin karmaşıklığı + model-fidelity**:
-> simetrik kanalın COD ayak izi küçük ama sıfırdan farklı; onu okuyan harita
-> doğrusal değil ve az veriyle pinlenmiyor (§5-6). Pinlenirse Kol B inversiyon
-> no-go'sunu **gerçekten atlayabilir** (mütevazı koşullanma sayesinde).
+> **Doğru durum: Kol B AÇIK + POZİTİF kanıt.** Gerçek engel *gözlenebilirlik*
+> değil, fonksiyonelin karmaşıklığı. Ve o fonksiyonel **öğrenilebilir çıktı:**
+> orbit-kör simetrik kanal (sahte-EDM'i süren) temiz COD'dan öğreniliyor —
+> CV R² 80 örnekte ~0, ama 240 örnekte **+0.77** (trend −0.5→0.77, §6). Yani
+> "harita vardır, basit değildir" tam doğru: harita karmaşık ama yeterli veriyle
+> pinleniyor, ve ileri-harita iyi-koşullu olduğundan inversiyon no-go'sunu
+> **gerçekten atlar.** `orbit_ileri_olcum.md §7` açık problemi pozitif ilerledi.
 >
 > **Kol A** değişmedi: çalışır (bilgi spinde), ama orbit-tarafı değil (Omarov/spin-trim).
 
@@ -140,50 +142,63 @@ Yani Kol B iki şeye bağlı, **ikisi de açık:**
 
 ---
 
-## 6. Empirik durum: ileri-harita fit'i (80 örnek; 240'a genişletiliyor)
+## 6. Empirik durum: ileri-harita ÖĞRENİLEBİLİR (240 örnek, POZİTİF)
 
-Kontrollü simetri ağırlığı w∈{0,…,1} (w=1 tam orbit-kör), girdi=analitik COD,
-çıktı=C++ f. (`gen_ensemble.py` + `fit_forward.py`.)
+Kontrollü simetri ağırlığı w∈{0,…,1} (w=1 tam orbit-kör), girdi=analitik temiz COD,
+çıktı=C++ f. (`gen_ensemble.py` 240 örnek + GradBoost ham-COD+bilineer öznitelik.)
 
 **(a) Orbit-kör konfigler sahte-EDM'siz DEĞİL:** ⟨|f|⟩ w ile düşer ama sıfırlanmaz —
-tam simetrik (w=1) bile **182× hedef** taşır. (Ham antisim/sim ~18×; §6'nın
-~37×'iyle mertebe-uyumlu.)
+tam simetrik (w=1) bile **182× hedef** taşır → simetrik kanal gerçek, kapatılmalı.
 
-**(b) Temiz-COD öğrenilebilirlik (80 örnek, 5-kat CV R²):**
+**(b) KARARLI BULGU — simetrik kanal yeterli veriyle ÖĞRENİLİYOR.** 5-kat CV R²,
+**simetrik alt-küme** (w≥0.75, orbit-kör — asıl iş) üzerinde, örnek sayısıyla:
 
-| model / öznitelik | genel R² | simetrik-alt-küme R² |
-|-------------------|---------:|---------------------:|
-| Ridge / yönlü-alan+bilineer | +0.32 | (antisim domine) |
-| GradBoost / ham COD+bilineer | +0.36 | **+0.07** (zar zor) |
+| N | genel R² | **simetrik-kanal R²** |
+|---|---------:|----------------------:|
+| 60 | +0.36 | **−0.52** (az veri, öğrenilemiyor) |
+| 100 | +0.53 | **+0.64** |
+| 180 | +0.58 | **+0.74** |
+| 240 | +0.62 | **+0.77** |
 
-Orbit-görünür (antisim) pay öğreniliyor; **simetrik kanal 80 örnekte zar zor
-(R²~0, hafif pozitif)** → fonksiyonel karmaşık, az veriyle pinlenmiyor (§5; orbit_ileri
-§3 ile tutarlı). **240 örneğe genişletilip öğrenilebilirlik trendi ölçülüyor.**
+Orbit-KÖR simetrik kanal (sahte-EDM'i süren), temiz kapalı yörüngeden **öğreniliyor**
+(R² −0.5 → 0.77, doygunluk ~0.77). Yalnız-simetrik eğitim (w≥0.5) bile CV R²=+0.40.
+→ **Harita VAR, karmaşık (80 örnek yetersizdi), yeterli veriyle pinleniyor.** Bu,
+kullanıcının teşhisinin ("harita vardır, basit değildir") doğrudan doğrulamasıdır;
+`orbit_ileri_olcum.md §3`'ün "40 config ile yakınsamıyor"unu da açıklar (veri azdı).
 
-**(c) İncelik:** yönlü-alan özniteliği BPM-ofsetine değişmez → +100μm ofset/1μm
-gürültüde R² yine ~0.32. Ofset duvar değil; engel simetrik fonksiyonelin
-karmaşıklığı (öğrenme) + henüz-test-edilmemiş model-fidelity.
+![öğrenilebilirlik](/tmp/akilli_duzeltme/fig_kolb_ogrenilebilirlik.png)
+
+**(c) Ofset incelik:** yönlü-alan özniteliği BPM-ofsetine değişmez → +100μm ofset
+R²'yi düşürmez. Ofset duvar değil.
+
+**Açık kalan:** (i) gürültülü/gerçekçi-ölçüm COD'unda (§4'teki 7nm ortalama) trend
+korunur mu; (ii) model-fidelity (β-beat: sim-eğitimli harita gerçeğe taşınır mı,
+`quad_dG` ile test edilebilir).
 
 ---
 
-## 7. Sonuç ve fork (DÜZELTİLDİ)
+## 7. Sonuç ve fork (DÜZELTİLDİ → POZİTİF eğilim)
 
-- **Kol B KAPATILMADI.** İlk "ölü/aynı-duvar" sonucu, ileri-harita ile inversiyonu
-  karıştıran bir koşullanma hatasıydı; geri çekildi. İleri-harita iyi koşulludur
-  (∂f/∂COD≈0.15, 7 nm ortalama ile ulaşılır) → **inversiyon no-go'su Kol B'yi
-  bağlamaz.** `orbit_ileri_olcum.md §7`'nin "açık problem" konumu **doğru kalır.**
-- **Açık alt-sorular:** (1) karmaşık simetrik fonksiyonel öğrenilebilir mi (veri
-  ölçeği / analitik form); (2) model-fidelity (β-beat) altında taşınır mı.
+- **Kol B KAPATILMADI; üstelik POZİTİF kanıt var.** İlk "ölü/aynı-duvar" sonucu,
+  ileri-harita ile inversiyonu karıştıran bir koşullanma hatasıydı (geri çekildi).
+  Üç bağımsız bulgu Kol B'yi destekliyor:
+  1. **İyi koşullu:** ∂f/∂COD≈0.15 (1/σ_min DEĞİL); 7 nm ortalamayla ulaşılır;
+     ofset yönlü-alanla değişmez (§4).
+  2. **Öğrenilebilir:** orbit-kör simetrik kanal temiz COD'dan öğreniliyor
+     (CV R² 240 örnekte +0.77; trend −0.5→0.77) (§6).
+  3. **Birleşik no-go Kol B'yi KAPSAMAZ** — o yalnız misalignment *geri-çatımı*
+     (inversiyon+lock-in) içindir; ileri-harita f-öngörüsü o sınıfta değil.
+- **Açık (test edilecek):** (i) gerçekçi-ölçüm (gürültü+ortalama, 7nm) altında
+  trend; (ii) β-beat model-fidelity (`quad_dG`); (iii) `orbit_ileri §5` analitik
+  Berry fonksiyoneli (öğrenilen haritayı doğrular/sadeleştirir).
 - **Kol A (spin)** çalışır, orbit-tarafı değil (Omarov/spin-trim).
-- **Birleşik no-go (orbit-inversiyon + lock-in)** misalignment *geri-çatımı* için
-  geçerli; **ileri-harita f-öngörüsü bu sınıfa girmez.**
 
-> **Düzeltilmiş strateji:** Orbit-tarafı sahte-EDM null'lama umudu **kapanmadı.**
-> İleri-harita iyi-koşullu olduğundan, *karmaşık ama öğrenilebilir* bir COD→f
-> fonksiyoneli + ortalama ile simetrik kanal kapatılabilir — bu artık **veri/analiz
-> problemi**, gözlenebilirlik no-go'su değil. Sıradaki iş: (i) büyük temiz ensemble
-> ile öğrenilebilirlik, (ii) β-beat model-fidelity, (iii) `orbit_ileri §5` analitik
-> Berry fonksiyoneli.
+> **Düzeltilmiş strateji:** Orbit-tarafı sahte-EDM null'lama umudu **kapanmadı,
+> aksine güçlendi.** İleri-harita iyi-koşullu VE öğrenilebilir olduğundan, COD→f
+> haritası + ortalama ile simetrik kanal **prensipte kapatılabilir.** Bu artık bir
+> gözlenebilirlik no-go'su değil, **mühendislik/doğrulama problemi** (gürültü bütçesi,
+> model-fidelity). `orbit_ileri_olcum.md §7`'nin "açık problem"i bu oturumda
+> **pozitif yönde ilerledi.**
 
 ---
 
@@ -200,6 +215,7 @@ python3 /tmp/akilli_duzeltme/fig_degeneracy.py   # figür
 python3 kmod_drivers/fast_est.py calib -w 4 --seeds 3   # p=2.002
 python3 /tmp/akilli_duzeltme/gen_ensemble.py 4 48      # 240 örnek ensemble (~2 saat)
 python3 /tmp/akilli_duzeltme/fit_forward.py           # ileri-harita CV R²
+python3 /tmp/akilli_duzeltme/fig_learnability.py      # öğrenilebilirlik trendi (R²→0.77)
 ```
 
 Çekirdek estimator `berry_data/false_edm_4d.py` (4D-CO + model-fit, p=2.00).

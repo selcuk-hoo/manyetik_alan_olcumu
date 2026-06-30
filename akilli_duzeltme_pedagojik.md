@@ -166,19 +166,28 @@ fonksiyonelidir (Berry yönlü-alan tipi); basit ⟨x·y⟩ yanlış proxy
 (`orbit_ileri_olcum.md §2-3`). Empirik olarak pinlemek 40–80 konfigürasyonla
 yakınsamıyor.
 
-Bunu somut gösterdik: 80 örnekli temiz-yörünge verisinde gerçek bir model eğittik.
+Bunu somut gösterdik: temiz-yörünge verisinde gerçek bir model (GradBoost) eğitip,
+**asıl iş olan orbit-kör simetrik kanalın** öğrenilebilirliğini örnek sayısıyla
+izledik:
 
-- **Orbit-görünür (antisimetrik) pay öğreniliyor:** $R^2 \approx 0.32$–$0.36$. Ama
-  bu, orbit-düzeltmenin zaten temizlediği, *gerekmeyen* kısım.
-- **Simetrik kanal (asıl iş) 80 örnekte zar zor:** $R^2 \approx 0.07$ (sıfıra çok
-  yakın, hafif pozitif). Yani fonksiyonel **karmaşık** ve az veriyle **pinlenmiyor.**
+| eğitim örneği N | simetrik-kanal CV R² |
+|---|---|
+| 60 | $-0.52$ (az veri, öğrenilemiyor) |
+| 100 | $+0.64$ |
+| 180 | $+0.74$ |
+| 240 | $+0.77$ |
 
-Bu, kullanıcının teşhisinin tam doğrulamasıdır: **harita vardır (zar zor da olsa
-sinyal var), fakat basit değildir.** İki yol açık: (i) **çok daha fazla veri** ile
-karmaşık haritayı öğrenmek (şu an 240 örneğe genişletip trend ölçülüyor);
-(ii) **analitik türetme** — Berry fazını Thomas-BMT'den kapalı-form yazmak
-(`orbit_ileri_olcum.md §5`). Ayrıca **model-fidelity** (sim'de öğrenilen harita
-β-beat altında gerçeğe taşınır mı) henüz test edilmedi.
+**Orbit-kör simetrik kanal — yani sahte-EDM'i süren kısım — temiz yörüngeden
+ÖĞRENİLİYOR** (R² $-0.5 \to 0.77$). 80 örnekte zar zordu (R²~0), ama veri arttıkça
+net pozitife yükseliyor ve ~0.77'de doyuyor.
+
+Bu, kullanıcının teşhisinin **tam doğrulamasıdır:** *harita vardır, fakat basit
+değildir* — karmaşık (az veriyle pinlenmiyor) ama **yeterli veriyle öğreniliyor.**
+`orbit_ileri_olcum.md §3`'ün "40 config ile yakınsamıyor" gözlemini de açıklar:
+veri azdı, fonksiyon yok değil. Açık kalanlar: (i) gerçekçi-ölçüm (gürültü +
+§7'deki ortalama) altında trend korunur mu; (ii) **model-fidelity** — sim'de
+öğrenilen harita β-beat altında gerçeğe taşınır mı; (iii) **analitik türetme**
+(`orbit_ileri_olcum.md §5`) öğrenilen haritayı doğrular/sadeleştirir mi.
 
 ---
 
@@ -202,14 +211,16 @@ kolay yoldan görür; Kol B zor yoldan — ama **imkânsız değil.**
 
 ## 10. Nerede duruyoruz (dürüst durum)
 
-- **Kol B kapatılmadı.** "Ölü/aynı-duvar" sonucu, ileri-harita ile inversiyonu
-  karıştıran bir hataydı (kullanıcı düzeltti). İleri-harita **iyi koşulludur**
-  ($\partial f/\partial\text{COD}\approx0.15$); gereken 7 nm yörünge **ortalamayla
-  ulaşılır**; ofset **değişmez öznitelikle** aşılır. → İnversiyon no-go'su Kol B'yi
+- **Kol B kapatılmadı; üstelik pozitif kanıt var.** "Ölü/aynı-duvar" sonucu,
+  ileri-harita ile inversiyonu karıştıran bir hataydı (kullanıcı düzeltti). Üç
+  bulgu Kol B'yi destekliyor: (1) **iyi koşullu** ($\partial f/\partial\text{COD}
+  \approx0.15$, $1/\sigma_\text{min}$ değil); (2) gereken 7 nm **ortalamayla
+  ulaşılır**, ofset değişmez öznitelikle aşılır; (3) orbit-kör simetrik kanal
+  temiz yörüngeden **öğreniliyor** (CV R² $\to0.77$). → İnversiyon no-go'su Kol B'yi
   **bağlamaz.**
-- **Açık alt-sorular:** (1) karmaşık simetrik fonksiyonel öğrenilebilir mi (veri
-  ölçeği / analitik form)? (2) β-beat model-fidelity altında taşınır mı? Bu,
-  `orbit_ileri_olcum.md §7`'nin "açık problem" konumunu **doğrular** (kapatmaz).
+- **Açık (test edilecek):** (1) gerçekçi-ölçüm (gürültü + ortalama) altında öğrenme
+  korunur mu? (2) β-beat model-fidelity? (3) analitik Berry fonksiyoneli. Bu,
+  `orbit_ileri_olcum.md §7`'nin açık problemini **pozitif yönde ilerletir.**
 - **Kol A** çalışır, ama spin gerektirir (orbit-tarafı değil; Omarov/spin-trim).
 - **Birleşik no-go** (orbit-inversiyon + lock-in) yalnız *misalignment geri-çatımı*
   içindir; **ileri-harita f-öngörüsü o sınıfa girmez.**
@@ -230,9 +241,11 @@ duyarlılık 0.146 (mütevazı), $1/\sigma_\text{min}$ büyütmesi yok. Fark, "b
 sayıya bölmek" zorunda olup olmamaktır.
 
 **S: O zaman Kol B çalışır mı?**
-C: Henüz bilinmiyor — ama **gözlenebilirlik yüzünden dışlanmadı.** Engel artık
-*fizik no-go'su* değil, *öğrenme/analiz* problemi: karmaşık COD→$f$ fonksiyonelini
-pinlemek (çok veri ya da analitik form) ve model-fidelity'yi (β-beat) doğrulamak.
+C: Pozitif yöne gidiyor. **Gözlenebilirlik yüzünden dışlanmadı**, ve temiz veriyle
+asıl zor kanal (orbit-kör simetrik) **öğrenilebilir çıktı** (CV R²→0.77). Kalan
+engeller *fizik no-go'su* değil, *mühendislik*: gerçekçi ölçüm gürültüsü/ortalama
+bütçesi ve model-fidelity (β-beat). Yani "çalışır mı" sorusu artık "ölçüm ve
+kalibrasyon yeterince iyi olur mu" sorusuna indi — kapalı bir kapı değil.
 
 **S: 7 nm yörünge ölçümü gerçekten yapılabilir mi?**
 C: Gürültü açısından evet (ortalama: ~21 s). Sabit ofset, yönlü-alan gibi

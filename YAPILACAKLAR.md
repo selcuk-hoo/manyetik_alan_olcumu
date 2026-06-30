@@ -110,13 +110,14 @@ simetrik içerik dahil çalıştığının gösterilmesi. Mevcut altyapı yeterl
 > §9.5 ile aynı duvar" sonucu yanlıştı**: ileri-haritanın duyarlılığı
 > ∂f/∂COD≈0.15 rad/s/m'dir — MÜTEVAZI, inversiyonun 1/σ_min büyütmesini İÇERMEZ.
 > Gereken ~7 nm COD ortalamayla ulaşılır (~21 s @1kHz); ofset yönlü-alan
-> özniteliğiyle değişmez. → **Gürültü/gözlenebilirlik Kol B'yi dışlamaz; AÇIK.**
-> Gerçek engel: simetrik COD→f **fonksiyoneli karmaşık** (80 örnekte simetrik-kanal
-> R²~0.07), öğrenme/analiz problemi (240 örneğe genişletiliyor). **Birleşik no-go
-> yalnız misalignment geri-çatımı (inversiyon+lock-in) için; ileri-harita o sınıfta
-> değil.** Kol A (spin) çalışır (§14.6). `orbit_ileri_olcum.md §7` "açık problem"
-> doğrulandı. Sıradaki: büyük ensemble öğrenilebilirlik + β-beat fidelity + analitik
-> Berry fonksiyoneli.
+> özniteliğiyle değişmez. → **Gürültü/gözlenebilirlik Kol B'yi dışlamaz; AÇIK +
+> POZİTİF.** Üstelik simetrik COD→f kanalı (asıl iş) temiz COD'dan **ÖĞRENİLEBİLİR
+> çıktı:** CV R² 80 örnekte ~0, **240 örnekte +0.77** (trend −0.5→0.77). Harita
+> karmaşık ama var; orbit_ileri §3 "40 config yakınsamıyor"u veri-azlığıydı.
+> **Birleşik no-go yalnız misalignment geri-çatımı (inversiyon+lock-in) için;
+> ileri-harita o sınıfta değil.** Kol A (spin) çalışır (§14.6). Sıradaki açık iş:
+> (i) gerçekçi-ölçüm (gürültü+ortalama, 7nm) altında trend, (ii) β-beat
+> model-fidelity (`quad_dG`), (iii) `orbit_ileri §5` analitik Berry fonksiyoneli.
 
 > **Fikrin özü (kullanıcı, 2026-06-29):** No-go bir *inversiyon* sınırıdır
 > (COD → misalignment, simetrik alt-uzayda cond ~10⁴; bkz. v2.7 yeniden-incelemesi

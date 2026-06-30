@@ -101,10 +101,10 @@ tarafındaki kesin sınır teoreminde aranıyor.
 │                               #   §9 make-or-break sonuçları (7.7×, 62×, p=2.00)
 ├── squid_bpm_test.md           # K-mod+BPM ölçümü: §7 dağıtık-frekans ÖLÜ (nefes);
 │                               #   §8 ΔR no-go; §9 lock-in; §9.5 simetrik no-go (<4nm)
-├── akilli_duzeltme.md          # AKILLI DÜZELTME: Kol B (NN COD→f) AÇIK (kapatılmadı).
+├── akilli_duzeltme.md          # AKILLI DÜZELTME: Kol B (NN COD→f) AÇIK + POZİTİF.
 │                               #   İleri-harita İYİ KOŞULLU (∂f/∂COD≈0.15, inversiyon
-│                               #   DEĞİL); engel fonksiyonel karmaşıklığı, gözlenebilirlik
-│                               #   değil. Kol A (spin) çalışır. (ilk "ölü" sonucu düzeltildi)
+│                               #   DEĞİL) + simetrik kanal ÖĞRENİLEBİLİR (R²→0.77@240).
+│                               #   Kol A (spin) çalışır. (ilk "ölü" sonucu düzeltildi)
 ├── akilli_duzeltme_pedagojik.md # ↑ belgenin DERS KİTABI tarzı kardeşi (sıfırdan;
 │                               #   hata+düzeltme hikâyesi, ileri-harita≠inversiyon, SSS)
 ├── MAKALE_POTANSIYELI.md / PROJE_ANALIZI_VE_ONERILER.md / SIMULASYON_PLANI_HIZALAMA.md
@@ -251,7 +251,7 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | İleri-ölçüm no-go'yu atlar MI? — **AÇIK** (Kol B kapatılmadı; orbit_ileri §7 doğru) | `akilli_duzeltme.md §7` |
 | **Akıllı düzeltme Kol B (NN COD→f): ileri-harita İYİ KOŞULLU (∂f/∂COD≈0.15, 1/σ_min DEĞİL)** | `akilli_duzeltme.md §4` |
 | **7nm COD ortalamayla ulaşılır (~21s); ofset yönlü-alanla değişmez → gürültü Kol B'yi dışlamaz** | `akilli_duzeltme.md §4` |
-| **Gerçek engel: simetrik fonksiyonel KARMAŞIK (80 örnekte R²~0.07), öğrenme/analiz problemi** | `akilli_duzeltme.md §5-6` |
+| **Simetrik COD→f kanalı ÖĞRENİLEBİLİR: temiz COD'dan CV R² 240 örnekte +0.77 (80'de ~0; harita karmaşık ama var)** | `akilli_duzeltme.md §6` |
 | **Birleşik no-go (inversiyon+lock-in) yalnız misalignment geri-çatımı; ileri-harita o sınıfta DEĞİL** | `akilli_duzeltme.md §4,§7` |
 | **Kol A (spin) çalışır (bilgi spinde, doğrudan); Kol B'de bilgi yörüngede ama küçük+karmaşık** | `akilli_duzeltme.md §9`, `§14.6` |
 | **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |
