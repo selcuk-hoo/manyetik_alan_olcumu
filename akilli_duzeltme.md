@@ -414,6 +414,32 @@ simetrik artıkta harita daha da elverişsiz olurdu — sonuç güçlenir.)*
 
 ---
 
+## 6.11 Algoritma iyileştirmesi: güvenli (belirsizlik-cezalı) null'lama
+
+§6.10'daki naif null'lama, optimize ediciyi haritanın iyimser hatalarına sürüyordu
+(model-istismarı). Üç sağlamlaştırma (`improved_null.py`): (1) **ensemble** (8 bootstrap
+harita → ortalama + belirsizlik σ); (2) **güvenli/pessimistic** (minimize μ+β·σ →
+kör-noktalardan kaç); (3) **regülarize** (μ+λ‖Δq‖).
+
+Sonuç (gerçek C++, 4 makine, geomean ×hedef):
+
+| yöntem | geomean | 
+|--------|--------:|
+| naif null (tek harita) | 236 |
+| ensemble ortalama | 130 |
+| **güvenli (ens+pessimistic)** | **67** (naif'ten 3.5×; bir makinede 1×) |
+| regülarize | 188 |
+| basit orbit-düzeltme | **2.1** (yine önde) |
+
+**İki çıkarım:** (1) İyileştirme gerçek — güvenli optimizasyon model-istismarını
+dizginler (naif 236×→67×), artık zararlı değil. (2) Ama **sınır aşılmıyor:** güvenli
+null bile orbit-düzeltmeyi (2.1×) geçemez ve tutarsız (1×–726×). Kök neden §6.10'daki
+duvar: **harita doğruluk tabanı.** Kör haritadan keskin bilgi çıkmaz. → Algoritma
+iyileştirmesi gerekli ama yeterli değil; kök çözüm **daha doğru harita (Plan 4
+analitik)**. ![](/tmp/akilli_duzeltme/fig_kolb_improved.png)
+
+---
+
 ## 7. Sonuç ve fork (DÜZELTİLDİ → kavramsal açık, pratik HENÜZ çalışmıyor)
 
 - **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"

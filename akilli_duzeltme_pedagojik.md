@@ -29,6 +29,8 @@ zararlı büyüklüğü — **sahte EDM** sinyalini — *doğrudan* sıfırlamak
 14. Haritayı nasıl kullanırız? Çıkarma değil, null'lama
 15. Omarov'un CR-demet-ayrımı da neden aynı duvar?
 16. Büyük resim: hangi kapı açık, hangi kapalı?
+17. Null'lama algoritması ve "kusurlu haritaya karşı optimize etme" tuzağı
+18. Algoritmayı iyileştirmek: güvenli (belirsizlik-cezalı) null'lama
 
 ---
 
@@ -416,6 +418,124 @@ Tüm hikâye tek tabloya sığar:
 açık ama kanıtlanmadı; spin kesin.* Orbit-tarafında özgün katkı ya **ileri-harita
 null'lamanın çalıştığını göstermek** (Plan 2c) ya da **analitik Berry fonksiyonelini
 türetip** (saf orbit-tabanlı, spin gerektirmeyen çözüm) ondan ibarettir.
+
+---
+
+## 17. Null'lama algoritması nasıl çalışır — ve neden "kusurlu haritaya karşı optimize etmek" tehlikeli?
+
+§16'da "null'lamanın çalıştığını göstermek" dedik. Peki null'lama **tam olarak nedir**,
+ve neden mevcut haritayla başarısız oldu? Bu bölüm hem algoritmayı hem de içindeki
+ince tuzağı öğretir — çünkü tuzak yalnız bize değil, tüm makine-öğrenmesi-güdümlü
+kontrol problemlerine özgüdür.
+
+### Amaç
+Sahte-EDM'i ($f$) **sıfıra sürmek** — ama yalnız **yörüngeye bakan** bir harita ve
+**orbit-görünür knob'lar** ile, spin ölçmeden. (Spin ölçebilseydik zaten Kol A'yı
+yapardık.)
+
+### Üç bileşen
+
+1. **Knob'lar (neyi oynatıyoruz):** Quad'ları *orbit-görünür* yönlerde kaydıran
+   ayarlar $\Delta q$ — R'nin en büyük-σ 12 yönü (düzlem başına, toplam 24 knob).
+   **İnce numara:** $\Delta q$ da bir misalignment olduğundan yeni yörünge
+   $\text{COD}=R(M_0+\Delta q)$ *doğal* bir yörünge olur → harita **dağılım-içi**
+   kalır. (Saf corrector kick'i besleseydik, harita hiç görmediği bir girdiyle
+   karşılaşırdı.)
+2. **Harita:** yörünge → öngörülen $|f|$ (240-örnekte eğitilmiş). Spin'i hiç görmez.
+3. **Optimize edici:** türevsiz arama (Powell).
+
+### Döngü (sözde-kod)
+
+```
+COD0 = R · M0                         # başlangıç yörüngesi (M0 bilinmiyor)
+amaç(a):                             # a = 24 knob katsayısı
+    COD = COD0 + R·(görünür-yönler·a) # yeni yörünge (analitik, ucuz)
+    return |harita(COD)|             # haritanın öngördüğü sahte-EDM
+a*  = argmin_a amaç(a)               # haritanın "f=0" dediği ayar  ← C++ YOK, ucuz
+f_gerçek = C++_spin( M0 + görünür·a* )   # DÜRÜST sınav: gerçekte ne oldu?
+```
+
+Yani optimize edici **haritanın "burada sahte-EDM sıfır" dediği** ayarı bulur; sonra
+o ayarda **gerçek** $f$'i (spin'in göreceği) ölçeriz. Aradaki fark = null'lama artığı.
+
+### İnce tuzak: kusurlu haritaya karşı optimize etmek
+
+Harita mükemmel olsaydı, öngörülen $f$'i sıfırlamak gerçek $f$'i de sıfırlardı. Ama
+harita **hatalı** — ve işte kritik nokta:
+
+> Optimize edici, 24-boyutlu uzayda **haritanın en küçük değer verdiği** yeri arar.
+> Harita hatalıysa, bu yer çoğu zaman **haritanın en çok yanıldığı** (gerçekte $f$
+> büyük ama harita "küçük" sanan) yerdir. Yani optimize edici, haritanın **iyimser
+> hatalarını/kör noktalarını AVLAR.**
+
+**Analoji:** Elinde yer yer yanlış bir **hazine haritası** var. "En derin çukur"
+işaretli yeri kazarsın — ama harita hatalıysa, en olası "en derin" işareti,
+haritanın *en çok abarttığı* yerdedir, gerçek hazine orada değildir. Haritaya ne
+kadar çok güvenip optimize edersen, onu o kadar yanlış yere sürer.
+
+Sayısal karşılığı: bazı makinelerde map-null, hiç düzeltme yapmamaktan (f0) bile
+**kötü** çıktı (364× → 1580×). Optimize edici, haritanın sahte-EDM'i en çok hafife
+aldığı konfigürasyonu buldu. Bu, ML'de "**model istismarı**" (model exploitation)
+olarak bilinen klasik başarısızlıktır: kusurlu bir modele karşı yeterince güçlü
+optimize edersen, fiziği değil modelin hatalarını optimize edersin.
+
+### Nicel sınır
+Haritanın mutlak hata tabanı ~300× hedef; basit orbit-düzeltmenin kalanı 0–6× hedef.
+Harita, *kendi hatasından* daha iyi rehberlik edemez → orbit-düzeltmeyi geçemez.
+**Ders:** ileri-harita null'lama, ancak harita *yeterince doğru* olduğunda işe yarar;
+o doğruluğa ulaşmadan optimize etmek yarardan çok zarar verebilir. Bu yüzden bir
+sonraki adım ya **çok daha doğru bir harita** (analitik Berry fonksiyoneli) ya da
+**model-istismarını önleyen "güvenli optimizasyon"** (belirsizlik-cezalı; §18).
+
+---
+
+## 18. Algoritmayı iyileştirmek: güvenli (belirsizlik-cezalı) null'lama
+
+§17'nin tuzağı — optimize edicinin haritanın *iyimser hatalarını avlaması* — aslında
+klasik bir çözümü olan bir problemdir. Fikir basit: **haritanın emin olmadığı yere
+gitme.** Üç somut iyileştirme denedik.
+
+**1. Ensemble (torbalama/bagging):** Tek harita yerine, veriyi rastgele yeniden
+örnekleyerek **8 harita** eğit. Bir yörünge için 8 tahmin → **ortalama** (daha
+doğru) + **saçılım/std** (belirsizlik ölçüsü). Haritalar bir yerde *anlaşıyorsa*
+güven; *anlaşmıyorsa* orası kör-nokta.
+
+**2. Güvenli optimizasyon (pessimistic / UCB):** Öngörülen $|f|$ yerine
+$$|f|_{\text{öngörü}} \;+\; \beta\cdot\sigma_{\text{harita}}$$
+minimize et. Yani "harita küçük diyor **ve** tüm haritalar hemfikir" olan yeri ara.
+Böylece optimize edici, tek bir haritanın *aşırı-iyimser* (yüksek-σ) blöfüne
+kanmaz.
+
+**3. Regülarizasyon:** $|f|_{\text{öngörü}} + \lambda\|\Delta q\|$ — düzeltmeyi küçük
+tut, eğitim dağılımına yakın kal, uzak kör-noktalara sapma.
+
+**Analoji:** Elinde tek yerine **sekiz hazine haritası** var. Hepsi aynı yeri
+işaretliyorsa kaz; biri "burada!" derken yedisi "hayır" diyorsa (yüksek belirsizlik)
+oraya kazma — büyük ihtimalle o bir harita hatası. Güvenli optimizasyon budur.
+
+### Sonuç (gerçek C++, 4 makine; geomean ×hedef)
+
+| yöntem | geomean | not |
+|--------|--------:|-----|
+| düzeltmesiz f0 | 419 | başlangıç |
+| naif null (tek harita) | **236** | model-istismarı; sıkça f0'dan kötü |
+| ensemble ortalama | 130 | torbalama yardım eder |
+| **güvenli (ens+pessimistic)** | **67** | naif'ten **~3.5× iyi**; bir makinede hedefe (1×) indi |
+| regülarize | 188 | kısmi |
+| basit orbit-düzeltme | **2.1** | yine de **açık ara önde** |
+
+**İki dürüst ders:**
+1. **İyileştirme gerçek:** güvenli optimizasyon model-istismarını dizginliyor
+   (naif 236× → 67×, ~3.5×); artık *zararlı* değil, hatta bazı makinede hedefe ulaştı.
+2. **Ama sınır aşılmıyor:** güvenli null bile basit orbit-düzeltmeyi (2.1×) geçemedi
+   ve tutarsız (makineden makineye 1×–726× arası). Sebep §17'deki nicel duvar:
+   **haritanın doğruluk tabanı.** Optimize ediciyi ne kadar akıllı yaparsan yap,
+   *kör bir haritadan* keskin bilgi çıkaramazsın.
+
+> **Nihai ders:** Algoritma iyileştirmesi (güvenli optimizasyon) **gerekli ama
+> yeterli değil** — zararı önler, sınırı kaldırmaz. Kök çözüm **daha doğru harita**:
+> ya mertebelerce daha fazla veri, ya da (tercihen) **analitik Berry fonksiyoneli**
+> (Plan 4) — hatasız olduğundan optimize edicinin istismar edeceği kör-nokta kalmaz.
 
 ---
 
