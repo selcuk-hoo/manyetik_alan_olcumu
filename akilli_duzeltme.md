@@ -201,12 +201,19 @@ COD_bb, `perquad_orbit.py` (β-beat kapalı yörünge, build_R ile %0.2 doğrula
 | **β-beat transfer: F(COD_bb) vs f_bb** | **+0.62** |
 | β-beat, simetrik alt-küme (w≥0.75) | **+0.83** |
 
-**Bulgu: β-beat ŞEFFAF.** %1 β-beat f'i ~%18 oynatır (COD'u 3.2μm), ama nominal-
-eğitimli harita β-beat makineyi **held-out nominal kadar iyi** öngörür (0.62 vs
-0.61 — **ek bozulma YOK**). Harita, β-beat kaymasını COD üzerinden kısmen izler
+**Bulgu: β-beat ŞEFFAF.** %1 β-beat f'i **ortalama ~%18** oynatır (COD'u 3.2μm), ama
+nominal-eğitimli harita β-beat makineyi **held-out nominal kadar iyi** öngörür (0.62
+vs 0.61 — **ek bozulma YOK**). Harita, β-beat kaymasını COD üzerinden kısmen izler
 (corr(Δpred,Δf)=+0.35). Yani **f, yörüngenin ~sabit fonksiyonelidir; β-beat haritayı
 kırmaz** (inversiyonun aksine). Kalan %52 nispi hata, β-beat değil **veri-sınırlı
 generalleme** hatasıdır (N ile düşer; §6 trendi).
+
+> **β-beat kayma dağılımı (config-bağımlı, güçlü kuyruk):** ortalama %18 ama ortanca
+> yalnız %11; std %22; **max %96** ve config'lerin **~%12'si %40'ı aşıyor.** Yani
+> bazı desenler β-beat'e çok duyarlı (%40+), bazıları neredeyse duyarsız — etki
+> desene göre değişken. (Bu kuyruk ileri-haritayı yine **bozmaz**; harita gerçek
+> yörüngeyi gördüğünden kaymış f'i izler. β-beat'in *felaket* yarattığı yer
+> inversiyondur: %0.5 β-beat → 1931 μm, `squid_bpm_test §9.5`.)
 
 ![β-beat fidelity](/tmp/akilli_duzeltme/fig_kolb_bbeat.png)
 
