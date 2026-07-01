@@ -950,11 +950,13 @@ $B_{\max}=g\cdot d = 0.2\,\text{T/m}\times 200\,\mu\text{m} = \pm40\,\mu\text{T}
 $N_{\text{knob}}$ ölçüm ister. Kol A gibi spin gerektirir (orbit-tarafı ucuz çözüm
 değil) — ama *çalışması beklenen* taraf bu.
 
-**Test planı:** en-kötü simetrik makine (orbit-null'un ~62× hedef bıraktığı) al;
-orbit-görünür corrector knob'ları; **C++ ile gerçek gradyan** (sonlu-fark = modülasyon
-karşılığı); descent; kalan $f$'i orbit-null ve hedefle karşılaştır. **Beklenti:
-spin-descent, orbit-null'u belirgin geçer** (spin simetriği gördüğü için). Koşuluyor
-(`/tmp/akilli_duzeltme/spin_descent.py`).
+**Test SONUCU (KOŞULDU → POZİTİF, `akilli_duzeltme.md §6.12`):** en-kötü orbit-kör
+simetrik makine (COD 1.6 μm); 12 orbit-görünür knob; gerçek(C++) gradyan Gauss-Newton.
+**orbit-null işe yaramadı (kazanç 1.0×, orbit-kör); SPİN-descent 2 adımda hedefin
+altına indi (8×→~0, kazanç 726×).** Fark: spin simetriği görür + gradyan gerçek →
+harita-hatası/model-istismarı YOK. Bu, tüm arc'ı doğrular: orbit-tarafı tıkalı,
+spin-tarafı (Kol A/Plan 5) çalışır. Caveat: gürültüsüz gradyan (gerçekte polarimetre
+gürültüsü/süre), tek makine — daha çok makine + gerçekçi gürültü sınanmalı.
 
 ---
 
@@ -964,7 +966,7 @@ spin-descent, orbit-null'u belirgin geçer** (spin simetriği gördüğü için)
 |------|--------|------|---------|-----------|
 | **2c** kapalı-döngü null | Kol B pratik geçerliliği | — | orta | ✗ KOŞULDU-negatif |
 | **6.11** güvenli-opt | model-istismarını dizginle | — | orta | ⚠ KOŞULDU-kısmi |
-| **5** spin-modülasyon descent | spin simetriği görür → duvarı aşar (Kol A verimli) | orta | orta-yüksek (spin) | **⭐ 1 (koşuluyor)** |
+| **5** spin-modülasyon descent | spin simetriği görür → duvarı aşar (Kol A verimli) | orta | orta-yüksek (spin) | **✓ KOŞULDU-POZİTİF (726×)** |
 | **4** analitik fonksiyonel | Kol B'yi kurtarır (veri-bağımsız harita) | yüksek | düşük (analitik) | **2** |
 | **3c** sekstüpol-homojenlik | büyük-genlik fikrini de-riske | düşük | düşük | 3 |
 | **3a/3b/3d** kalibrasyon | gerçek-makine yolu | orta | orta | 4 |
