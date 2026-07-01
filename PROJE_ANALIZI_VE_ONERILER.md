@@ -250,6 +250,24 @@ kaynağıdır:
 Bu ayrım, projenin en önemli kavramsal kazanımıdır: bilinen no-go **inversiyon**
 hakkındadır; ileri-öngörü o sınıfa girmez ve bu yüzden umut vericiydi.
 
+### 5.1b Daha derin bir tuzak: orbiti düzeltmek sahte-EDM'i null'lamaz
+
+Sık gelen bir öneri: "yörüngeyi (COD'u) düzelticilerle düzleştirir/bastırırsak
+sahte-EDM düşer." Bu **yanlıştır** ve nedeni öğreticidir. Sahte-EDM lab-çerçevesi
+orbite değil, demetin quad'ın **manyetik merkezine göre** ofsetine bağlıdır; her
+quad'da yerel geometrik-faz yoğunluğu $\propto (x_{CO}-dx)(y_{CO}-dy)$'dir. Orbiti
+düzleştirirsen ($y_{CO}\to0$) demet hâlâ **kaçık** quad'ın merkezinden $-dy$ uzakta
+geçer, dolayısıyla
+$$f \propto \sum_j dx_j\,dy_j$$
+— sahte-EDM sıfırlanmaz, **ham kaçıklık çarpımına** iner ve onun simetrik bileşeni
+tam olarak indirgenemez σ² sistematiğidir. $f=0$'ın gerçek koşulu tersidir: demet
+quad **merkezlerinden** geçmeli ($y_{CO}=dy$; orbit düz değil, kaçıklığı takip eder)
+— bu **beam-based alignment**tır ve merkezleri bilmek = simetrik kaçıklığı bilmek =
+zaten ölçemediğimiz şey. Kısaca: **orbit-tabanlı amaçlar (düzleştir, iki demeti
+çakıştır, deseni-bastır) sahte-EDM amacı DEĞİLDİR.** (Ayrıntı `akilli_duzeltme.md
+§6.13`; simetrik orbit deseninin matematiksel temsili ve "belirlenebilir-ama-
+gözlenemez" ayrımı da orada.)
+
 ### 5.2 TERS sınıfı — hepsi aynı duvara çarpar
 
 Simetrik bilgi, gürültü/sistematik tabanının altında olduğu için, kaçıklığı

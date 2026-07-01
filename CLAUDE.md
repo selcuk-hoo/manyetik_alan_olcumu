@@ -262,6 +262,7 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | **Güvenli null'lama (ensemble+pessimistic) naif model-istismarını dizginler (geomean 236×→67×) ama orbit-düzeltmeyi (2.1×) yine geçemez → algoritma gerekli-yetersiz, kök çözüm daha doğru harita** | `akilli_duzeltme.md §6.11` |
 | **Plan 5 (spin-modülasyon+gradient descent) kavramsal POZİTİF (726×) AMA pratik ZAMAN-YASAK: dS_y/dt'yi EDM-seviyesine ölçmek ~50 yıl (istatistik ∝1/√T); ~40-100 ölçüm → iteratif spin-null İMKÂNSIZ. Asıl bağ: orbit hızlı-ama-kör, spin doğru-ama-yavaş** | `akilli_duzeltme.md §6.12` |
 | **Birleşik no-go (inversiyon+lock-in) yalnız misalignment geri-çatımı; ileri-harita o sınıfta DEĞİL** | `akilli_duzeltme.md §4,§7` |
+| **Simetrik orbit deseni temsil edilir ($y_{sym}=Σσ_i(v_i·Δq)u_i$) ama İKİ duvar: (1) k-mod ofseti siler, koşullanma (193×/<4nm) kalır; (2) orbit-null≠f-null → düz orbit f'i ham Σdx·dy'ye çevirir, doğru amaç merkezlerden geçmek (BBA=ölçülemeyen simetrik kaçıklık)** | `akilli_duzeltme.md §6.13`, `PROJE_ANALIZI §5.1b` |
 | **Kol A (spin) çalışır (bilgi spinde, doğrudan); Kol B'de bilgi yörüngede ama küçük+karmaşık** | `akilli_duzeltme.md §9`, `§14.6` |
 | **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |
 | **Drift izleme (ikinci makale)** | |

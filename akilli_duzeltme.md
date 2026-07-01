@@ -508,6 +508,70 @@ iyi" 0.14× fiilen σ_pol tabanında bir seçim. Yani σ_pol = 1× hedef gürül
 
 ---
 
+## 6.13 Simetrik modu kapalı yörüngeden yakalamak: desen temsili + İKİ duvar
+
+Tekrarlayan bir soru: "BPM ofseti k-mod ile silindiğine göre, simetrik modun kapalı
+yörüngedeki desenini tespit edip bastıramaz mıyız?" Bu bölüm o soruyu matematiksel
+olarak kapatır. Sonuç: **desen belirlenebilir ama genliği gözlenemez, üstelik
+gözlense bile orbit-bastırma yanlış amaç fonksiyonudur.**
+
+**Premisin doğru kısmı (k-mod ofseti yener).** Quad'ları tek frekansta modüle edince
+ölçülen modüle-orbit $\Delta y_{CO} = \Delta R\,\Delta q$ ($\Delta R =
+(\partial R/\partial g)\Delta g$); statik BPM ofseti $b$ modülasyona cevap vermediği
+için bu sinyalde **görünmez**. Doğru — ofset problemi k-mod ile gerçekten çözülür.
+
+**Desenin matematiksel temsili.** Kaçıklığı ayır: $\Delta q = \Delta q_{\text{sym}}
++ \Delta q_{\text{anti}}$ (ortogonal projektörler $P_{\text{sym}}, P_{\text{anti}}$).
+Simetrik modun kapalı yörüngedeki katkısı, R'nin SVD'siyle
+($R=U\Sigma V^\top=\sum_i\sigma_i u_i v_i^\top$), simetrik kaçıklık modları R'nin
+**küçük tekil değerli** sağ-tekil vektörleriyle çakıştığından:
+$$y_{\text{sym}} = R\,P_{\text{sym}}\,\Delta q
+  = \sum_{i\in\text{sym}}\sigma_i\,(v_i^\top\Delta q)\,u_i.$$
+Yani desen **tam temsil edilir**: BPM uzayında $\{u_i:i\in\text{sym}\}$ alt-uzayında
+(bilinen yüksek-k, k≈24 alternatif desenler), genlikleri $\sigma_i(v_i^\top\Delta q)$.
+Sorun tek satırda: bu $\sigma_i$'ler R'nin **en küçük** tekil değerleridir (SVD
+per-mod: en kötü 8 mod %96 simetrik, `makale-taslagi-2 §3.8`).
+
+**DUVAR 1 — k-mod ofseti siler ama koşullanmayı silmez.** $y_{\text{sym}}$
+genliğini okumak için $\{u_i\}$'ye projekte edip $\Delta q_{\text{sym}}$ çekmek,
+$\sigma_i$'ye bölmek demektir → ofset gitse de **193× büyütme kalır** (cond(R)=193
+fiziğin özelliği, ofsetin değil). Bunu tam bu biçimde denedik: per-quad k-mod +
+lock-in (statik ofsete karşı kilitli, ofset-bağımsız) simetrik modu görmek için
+**<4 nm çözünürlük** ister ve **β-beat felaketi** (`squid_bpm_test §9.5`).
+Ofset ≠ tek duvar; koşullanma bağımsız ve kalıcı.
+
+**DUVAR 2 — orbit desenini bastırmak sahte-EDM'i null'LAMAZ (bu oturumda netleşti,
+önceden yazılı değildi).** Bu, önerinin varsayımını çürütür. Sahte-EDM lab-çerçevesi
+orbite değil, demetin quad **manyetik merkezine göre** ofsetine bağlıdır; her quad'da
+yerel geometrik-faz yoğunluğu
+$$\propto (x_{CO}(j)-dx_j)\,(y_{CO}(j)-dy_j),$$
+çünkü alanlar merkeze-göreli offset'le orantılı ($B_x\propto y_{\text{rel}},
+B_y\propto x_{\text{rel}}$). Orbiti düzelticilerle **düzleştirirsen** ($y_{CO}\to0$),
+her quad'da $y_{\text{rel}}=-dy_j,\ x_{\text{rel}}=-dx_j$ olur ve
+$$f\propto\sum_j dx_j\,dy_j,$$
+yani sahte-EDM **sıfırlanmaz** — **ham kaçıklık çarpımına** iner, ki onun **simetrik
+bileşeni** tam olarak indirgenemez σ² sistematiğidir. $f=0$'ın gerçek koşulu tersidir:
+demet quad **merkezlerinden** geçmeli ($y_{CO}(j)=dy_j$; orbit *düz değil*, kaçıklığı
+takip eder) → $y_{\text{rel}}=0$ → alan yok, faz yok. Bu **beam-based alignment**tır
+ve merkezleri bilmek = **simetrik kaçıklığı bilmek** = Duvar 1'de ölçemediğimiz şey.
+
+**Özet — "belirlenebilir ama gözlenemez", üstüne "yanlış amaç":**
+
+| Soru | Cevap |
+|------|-------|
+| k-mod BPM ofsetini yener mi? | ✓ evet |
+| Simetrik orbit deseni temsil edilir mi? | ✓ $y_{\text{sym}}=\sum_{i\in\text{sym}}\sigma_i(v_i^\top\Delta q)u_i$ |
+| Ofset-free ölçümle genliği okunur mu? | ✗ σ_i küçük → 193× / <4 nm / β-beat (`squid §9.5`) |
+| Orbit desenini bastırmak f'i null'lar mı? | ✗ $f\to\sum dx_j dy_j\|_{\text{sym}}\neq0$; doğru amaç merkezlerden geçmek (BBA), o da simetrik kaçıklığı ister |
+
+İki bağımsız duvar, ikisi de aynı no-go'nun yüzü: (1) ofset gitse de simetrik yön
+kötü-koşullu; (2) daha derini — **orbit-null yanlış amaç fonksiyonu**. Bu, §5.3'teki
+CR-ayrım körlüğüyle (demet çakıştırma difference-orbit'i null'lar, geometrik fazı
+değil) aynı temadır: **orbit-tabanlı amaçlar (düzleştir, çakıştır, deseni-bastır)
+sahte-EDM amacı DEĞİLDİR.**
+
+---
+
 ## 7. Sonuç ve fork (orbit-tarafı tıkalı, SPİN çalışır — Plan 5 doğruladı)
 
 - **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"
