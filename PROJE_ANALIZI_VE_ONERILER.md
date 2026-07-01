@@ -409,11 +409,22 @@ iteratif ölçüp-null yapmaz. Bunun yerine sahte-EDM'i **önceden bağlar**:
   ile (tolerans + alan kalitesi + CW/CCW) sağlanır. Bizim katkımız *neden daha
   iyisinin mümkün olmadığını* kesin biçimde göstermektir.
 
-**Dürüst açık uç.** İkilemi kıracak, denenmemiş bir ışın-fiziği tutamağı şu an
-görünmüyor; muhtemelen olmaması doğru cevap. Tek teorik çıkış, latis/tune'u yeniden
-tasarlayıp simetrik alt-uzayı *orbit-görünür* yapmaktır ($G_k$ bastırmasını kaldırıp
-$Q$'yu simetrik harmoniğe yaklaştırmak) — ama bu $Q \approx 24$ gerektirir,
-gerçekçi değil. Ertelendi.
+**Dürüst açık uç ve neden kapalı.** İkilemi kıracak, denenmemiş bir ışın-fiziği
+tutamağı şu an görünmüyor; muhtemelen olmaması doğru cevap. Tek teorik çıkış,
+latis'i yeniden düzenleyip simetrik alt-uzayı *orbit-görünür* yapmaktı. İki
+gerçekleme de **kapalı** (ayrıntı `akilli_duzeltme.md §6.14`, gerçek C++):
+- **Tune-kaydırma:** $Q$'yu simetrik harmoniğe ($k\approx24$) yaklaştırmak → $Q\approx24$
+  gerektirir, gerçekçi değil.
+- **Uniform-gradient (harmoniği kaldır):** tüm quad'ları aynı polariteye alıp
+  alternasyonu kaldırmak simetrik deseni düşük-k'ya taşır (optikte doğru) — **ama
+  makine tüm gradyan değerlerinde KARARSIZ** (Courant–Snyder: uniform statik quad'la
+  iki düzlemde birden odaklama imkânsız; deflektör tek başına yetmez).
+
+> **Kesin kapanış:** Simetrik-mod körlüğü QF/QD **alternasyonundan** doğar; o
+> alternasyon **makinenin kararlılığının** ta kendisidir. **Simetriği gizleyen
+> yapıyı, makineyi çökertmeden kaldıramazsın** — orbit-körlüğü ve stabilite tek bir
+> alternating-gradient yapısının iki yüzüdür. (Ayrıca **quad-flip** simetrik
+> sahte-EDM'i temizlemez: f gradyanda ÇİFT'tir — `§6.14`.)
 
 ---
 

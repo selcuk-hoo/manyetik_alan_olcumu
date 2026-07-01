@@ -79,6 +79,14 @@ tutar. Önemli: rastgele quad misalignment **tek başına** dikey spin birikimi
 üretmez (düz-kafes testi); etki, dikey hız + ikinci-derece sistematiklerle
 karışmadan doğar.
 
+> **Not (bizim C++ testimiz, `akilli_duzeltme.md §6.14`):** Quad-flip **geometrik-faz
+> sahte-EDM'i İPTAL ETMEZ** — f gradyanda **ÇİFT**tir (iki alan-kaynaklı dönmenin
+> çarpımı, ∝g²; flip'te $(-\theta_x)(-\theta_y)=+\theta_x\theta_y$). Ölçülen flip
+> oranları sim/antisim/genel = +2.8/+0.85/+1.17 (işaret korunur). Flip yalnız
+> **tek-in-g** sistematikleri (dipol-E vb.) temizler; geometrik faz σ² a-priori
+> toleransla sınırlanır. Ayrıca uniform-gradient ("simetriği görünür yap") modu
+> Courant–Snyder gereği TÜM |g|'de kararsız.
+
 ---
 
 ## 5. Aktif Ölçüm-Düzeltme: Spin-Tabanlı Hizalama (SBA)

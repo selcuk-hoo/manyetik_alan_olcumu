@@ -572,6 +572,79 @@ sahte-EDM amacı DEĞİLDİR.**
 
 ---
 
+## 6.14 Quad-flip sahte-EDM'i temizler mi? + "simetriği görünür yap" kaçışı KAPALI
+
+Bu bölüm iki kullanıcı fikrini gerçek C++ deneyiyle test eder (kod:
+`/tmp/akilli_duzeltme/flip_real.py`, `diag_mode.py`; stabilite/tune inline).
+
+### (a) Quad-flip sahte-EDM'i İPTAL ETMEZ — f, gradyanda ÇİFT
+
+**Fikir:** quad alanını terslersen (g→−g) sebep olduğu spin dönmesi terslenir; EDM
+(elektrik deflektörden) terslenmez → flip simetrik sahte-EDM'i temizler.
+
+**Sonuç (işaretli dS_y/dt, aynı kaçıklık, nominal g=+0.21 vs flip g=−0.21; her biri
+kendi 4D CO'suyla):**
+
+| desen | Ŝ | f_nominal (×hedef) | f_flip | f_flip/f_nom |
+|-------|---|------:|------:|:---:|
+| simetrik | +1.00 | −68.3 | −192.0 | **+2.81** |
+| antisimetrik | −1.00 | +2786 | +2377 | **+0.85** |
+| genel | +0.03 | +1041 | +1218 | **+1.17** |
+
+**Üç desende de işaret AYNI (oran > 0) → f, g'de ÇİFT → flip İPTAL ETMEZ.** Sebep:
+sahte-EDM iki alan-kaynaklı dönmenin **çarpımıdır** (geometrik/Berry faz,
+$f\propto\theta_x\theta_y$, her ikisi ∝g). Flip'te ikisi de işaret değiştirir,
+$(-\theta_x)(-\theta_y)=+\theta_x\theta_y$ → çarpım korunur. Kullanıcının "flip →
+dönme terslenir" sezgisi **birinci-mertebe** (∝g, tek) etkiler için doğru; ama
+sahte-EDM **ikinci-mertebedir** (∝g², çift). Çift/tek ayrıştırma ($f=E+O$):
+antisim/genel neredeyse saf çift ($|O|\!\approx\!0.08E$), simetrikte çift baskın
+ama $O\approx-0.48E$. **nominal+flip ortalaması** ($=E$, çift çekirdek) simetrikte
+−130× hedef → flip-ortalaması simetrik sahte-EDM'i azaltmaz. **Omarov'la tutarlı:**
+flip **tek-in-g** sistematikleri (dipol-E vb.) temizler; geometrik faz çift, flip'e
+dokunmaz → σ² a-priori toleransla sınırlanır.
+
+> **⚠️ TUZAK (kod):** cell-0'ın QF'i özel `QUAD_F_MOD` elemanıdır (integrator.cpp
+> tip 4) ve `quad_dG`'yi OKUMAZ. `quad_dG=−2` ile naif flip 47 quad'ı çevirir, cell-0
+> QF'i +g'de bırakır → tek yanlış-polariteli 2× güçlü quad makineyi PATLATIR (sahte
+> kararsızlık). Doğru flip = config'te `g0` VE `g1` işaretini çevir (cell-0 dahil
+> hepsi çevrilir → makine KARARLI, max|x|↔max|y| yer değiştirir = QF↔QD yarım-hücre
+> simetrisi). Aynı tuzak uniform-mod kurulumunda da geçerli.
+
+### (b) "Simetriği orbit-görünür yap" kaçışı (uniform-gradient tanı modu) KAPALI
+
+**Fikir (kullanıcı):** Tüm quad'ları aynı polariteye al (uniform gradient). O zaman
+simetrik kaçıklık hücre-içi **aynı-işaret** kick → düşük-k → orbit-GÖRÜNÜR olur;
+tanı modunda ölç-trimle, sonra operasyonel (alternating) moda dön. Bu, `PROJE_ANALIZI
+§7`'de "gerçekçi değil" diye elenen "simetriği görünür yap" kaçışının
+uygulanabilir görünen versiyonu (Q'yu k≈24'e taşımak yerine harmoniği KALDIR).
+
+**Optik düzeyinde DOĞRU** ama **stabilite YASAK.** Uniform mod (tüm quad −|g|;
+`g0=g1=−|g|`+QF flip) tüm |g|∈[0.03, 0.42]'de **KARARSIZ** (parçacık ~20 turda
+10⁸–10⁹× büyüyüp kaybolur). Kullanıcının naif `g=0.1` tahmini dahil hiçbir değer
+kurtarmaz (operasyonel g=0.21 alternating: büyüme 3.5×, KARARLI — kontrol).
+
+> **Yöntem notu:** `cos(2πQ)=(x_{n-1}+x_{n+1})/(2x_n)` 3-nokta recurrence'i **kararsız
+> hareket için YANILTIR** — üstel büyüyen diziye kosinüs fit edince sahte |cos|<1
+> verir (g=0.1'de +0.099 "kararlı" dedi, ama büyüme 10⁸×). Stabilite için **özdeğer
+> büyüklüğü / genlik büyüme faktörü** okunmalı, fitlenen tune değil.
+
+**Neden hiçbir |g| çalışmaz — temel sebep (Courant–Snyder güçlü-odaklama):** normal
+quad bir düzlemi odaklar, diğerini **eşit** dağıtır; uniform statik gradyanlarla
+**iki düzlemde birden** net odaklama İMKÂNSIZDIR — alternating gradient tam bu yüzden
+icat edildi. Elektrik deflektör zayıf-odaklamalı ve tek başına yetersiz (g=0.03,
+quad'lar ~kapalıyken bile kararsız). |g| büyütmek dağıtılan düzlemi daha da bozar.
+
+**Derin sonuç (kaçışı kesin kapatır):** Simetrik-mod körlüğü QF/QD **alternasyonundan**
+gelir (simetrik deseni k≈24'e taşır, $G_k$ bastırır). Ama o alternasyon **makineyi
+kararlı yapan** şeyin ta kendisidir.
+
+> **Simetrik modları gizleyen alternasyonu, makinenin kararlılığını yok etmeden
+> KALDIRAMAZSIN. Orbit-körlüğü ve stabilite, tek bir alternating-gradient yapısının
+> iki yüzüdür.** — `PROJE_ANALIZI §7`'nin "simetriği görünür yap" kaçışının hem
+> tune-kaydırma (Q≈24 gerçekçi değil) hem uniform-gradient (kararsız) versiyonu kapalı.
+
+---
+
 ## 7. Sonuç ve fork (orbit-tarafı tıkalı, SPİN çalışır — Plan 5 doğruladı)
 
 - **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"

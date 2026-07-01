@@ -263,6 +263,8 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | **Plan 5 (spin-modülasyon+gradient descent) kavramsal POZİTİF (726×) AMA pratik ZAMAN-YASAK: dS_y/dt'yi EDM-seviyesine ölçmek ~50 yıl (istatistik ∝1/√T); ~40-100 ölçüm → iteratif spin-null İMKÂNSIZ. Asıl bağ: orbit hızlı-ama-kör, spin doğru-ama-yavaş** | `akilli_duzeltme.md §6.12` |
 | **Birleşik no-go (inversiyon+lock-in) yalnız misalignment geri-çatımı; ileri-harita o sınıfta DEĞİL** | `akilli_duzeltme.md §4,§7` |
 | **Simetrik orbit deseni temsil edilir ($y_{sym}=Σσ_i(v_i·Δq)u_i$) ama İKİ duvar: (1) k-mod ofseti siler, koşullanma (193×/<4nm) kalır; (2) orbit-null≠f-null → düz orbit f'i ham Σdx·dy'ye çevirir, doğru amaç merkezlerden geçmek (BBA=ölçülemeyen simetrik kaçıklık)** | `akilli_duzeltme.md §6.13`, `PROJE_ANALIZI §5.1b` |
+| **Quad-flip sahte-EDM'i İPTAL ETMEZ: f gradyanda ÇİFT (g²; iki dönmenin çarpımı) — flip oranı sim/antisim/genel +2.8/+0.85/+1.17 (işaret korunur). Omarov flip'i tek-in-g sistematikleri temizler, geometrik fazı değil** | `akilli_duzeltme.md §6.14` |
+| **"Simetriği orbit-görünür yap" kaçışı KAPALI: uniform-gradient tanı modu TÜM \|g\|'de kararsız (Courant–Snyder: uniform quad iki düzlemi odaklayamaz). Simetrik-körlük = AG-alternasyonu = stabilite; gizleyen yapı makineyi çökertmeden kaldırılamaz** | `akilli_duzeltme.md §6.14`, `PROJE_ANALIZI §7` |
 | **Kol A (spin) çalışır (bilgi spinde, doğrudan); Kol B'de bilgi yörüngede ama küçük+karmaşık** | `akilli_duzeltme.md §9`, `§14.6` |
 | **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |
 | **Drift izleme (ikinci makale)** | |
@@ -288,6 +290,14 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
    (CO arama için bile). Onun yerine CO ölçeklemesi kullan.
 7. **Sahte-EDM estimator'ı:** 4-katlı simetri + model fit (yukarı bkz.); aksi
    halde betatron aliası / ⟨ΔxΔy⟩ artığı yapay düz/yanlış sonuç verir.
+8. **cell-0 QF özel eleman (`QUAD_F_MOD`, tip 4):** `quad_dG`'yi OKUMAZ (yalnız
+   `quadG0`+AC-mod kullanır). Quad-flip / uniform-gradient için `quad_dG=−2` ile
+   naif çevirme cell-0 QF'i atlar → tek yanlış-polariteli quad makineyi PATLATIR
+   (sahte kararsızlık). Doğru yol: config'te `g0` VE `g1` işaretini çevir. Bkz.
+   `akilli_duzeltme.md §6.14`.
+9. **Kararsız harekette tune tahmini:** `cos(2πQ)` recurrence/fit üstel büyüyen
+   diziye sahte |cos|<1 verir. Stabilite için **genlik büyüme faktörü** (özdeğer
+   büyüklüğü) oku, fitlenen tune değil.
 
 ---
 
