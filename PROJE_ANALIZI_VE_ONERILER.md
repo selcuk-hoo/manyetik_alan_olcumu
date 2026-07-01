@@ -782,21 +782,82 @@ simetrik alt-uzayda ~7 nm ister (100 μm ofset altında); hiçbir estimator bunu
   fazı **CW/CCW + polarite + CR-ayrım küçültme** ile kontrol eder; doğrudan spinle
   geometrik-faz null'lama, Omarov'un **vertical-polarizasyon** koluna karşılık gelir
   ve o makalede **kullanılmadı**.
-- **Kol B — ileri-harita (AÇIK + POZİTİF):** COD→**skaler** sahte-EDM haritasını
-  öğren (ters DEĞİL → iyi-koşullu: ∂f/∂COD≈0.15, *1/σ_min değil*), orbit-görünür
-  knob'larla **null'la**. Bulgular: öğrenilebilir (CV R² 240 örnekte +0.77);
-  β-beat şeffaf (transfer R² 0.62 = held-out nominal); ama **çıkarma için
-  kullanılamaz** (mutlak %0.1 gerek), yalnız **null'lama**; CW/CCW β-beat
-  belirsizliğini geri ALMAZ (CW/CCW-tek, corr −0.89). (`akilli_duzeltme §4–6.9`.)
+- **Kol B — ileri-harita (kavramsal AÇIK, pratik HENÜZ ÇALIŞMIYOR):** COD→**skaler**
+  sahte-EDM haritasını öğren (ters DEĞİL → iyi-koşullu), orbit-görünür knob'larla
+  **null'la**. 4 pozitif bulgu (iyi-koşullu/öğrenilebilir/β-beat-şeffaf/no-go-dışı)
+  AMA **kapalı-döngü null'lama basit orbit-düzeltmeyi geçemedi** (Plan 2c negatif) —
+  harita mutlak doğruluğu yetersiz. Tam döküm §7.4'te.
+
+### 7.4 Kol B tam bulgu dökümü (referans — kronolojik, `akilli_duzeltme.md`)
+
+Bu tablo, ileri-harita (Kol B) hattında **denenen her şeyi ve sonucunu** kaydeder
+ki sonradan referans olsun. (§ numaraları `akilli_duzeltme.md`.)
+
+| # | Ne denendi | Sonuç | Yön |
+|---|-----------|-------|-----|
+| §1 | Estimator doğrulama (4D-CO+model-fit, p=2.002) | σ² geometrik faz teyit | ✓ temel |
+| §2 | SVD ayrışım (cond=193; büyük-σ antisim, küçük-σ simetrik) | geometri kuruldu | ✓ |
+| §3 | Dejenerasyon ölçümü (simetrik 10μm → f 247× hedef, COD izi 1.7μm) | ilk yorum "COD f'i belirlemez" | ⚠ sonra düzeltildi |
+| §4 | **Koşullanma düzeltmesi:** ∂f/∂COD≈0.15 (mütevazı, 1/σ_min DEĞİL); 7nm ortalamayla ulaşılır | ileri-harita ≠ inversiyon; iyi-koşullu | ✓ POZİTİF |
+| §5-6 | Öğrenilebilirlik: simetrik kanal CV R² 80→0.07, **240→0.77** (trend) | harita var, karmaşık, öğreniliyor | ✓ POZİTİF |
+| §6.5 | **β-beat model-fidelity:** %1 β-beat şeffaf (transfer R² 0.62 = nominal 0.61) | sim-harita gerçeğe taşınır | ✓ POZİTİF |
+| §6.6 | **Kullanım:** çıkarma ÖLÜ (%0.1 gerek); CW/CCW β-beat'i geri ALMAZ (corr −0.89, EDM-kanalı); yalnız null'lama | çıkarma dışlandı | ⚠ kısıt |
+| §6.7 | **Büyük-genlik homojenlik:** simetrik kanal 1mm'e σ²-homojen (p=2.03); antisim doyar (p=0.9) | orbit-kör deseni büyüt→gerçek makinede öğren→ölçekle | ✓ strateji |
+| §6.8 | **NN vs R⁻¹:** misalignment→COD lineer→NN=R; ters simetrikte aynı taban (NN 5.6 ≈ TSVD 6.3 μm) | fark algoritmada değil, yönde (ileri/ters) | ✗ ters ölü |
+| §6.9 | **kmod/SQUID/LSTM = aynı ters duvar** (lock-in optimal; etiket döngüsel) | orbit-geri-çatım sınıfı kapalı | ✗ |
+| §6.10 | **Plan 2c — kapalı-döngü null'lama (make-or-break):** map-null orbit-düzeltmeyi GEÇEMİYOR (map kazanç 0.2–23× vs orbit 45–1692×); hata tabanı ~300× hedef (slope 0.36) | **pratik HENÜZ çalışmıyor** | ✗ NEGATİF |
+| §6.11 | **Algoritma iyileştirme (güvenli/ensemble/pessimistic):** naif model-istismarını dizginler (geomean 236→67×) ama orbit-null (2.1×) yine önde | gerekli-yetersiz | ⚠ kısmi |
+
+**Kol B özet:** kavramsal olarak sağlam ve dört bağımsız testte pozitif (iyi-koşullu,
+öğrenilebilir, β-beat-dayanıklı, no-go-dışı) — AMA mevcut 240-örnek empirik harita
+null'lama için **çok kaba** (hata tabanı ~300× hedef). Güvenli optimizasyon zararı
+önler ama sınırı kaldırmaz. **Tek kök çözüm: çok daha doğru harita → Plan 4 (analitik
+Berry fonksiyoneli).**
+
+**Ayrıca (Omarov):** CR-ayrım ölçümü de simetriğe kör (§7.2 tablosu; `omarov.md §9.3`)
+→ projenin özgün katkısı olan "Omarov ölçüm-zincirinin simetrik körlüğü" doğrudan
+gösterildi.
+
+### 7.5 Harita ömrü ve β-beat: ne sıklıkla yeniden eğitilmeli?
+
+**Önemli açıklık (yaygın karışıklık):** β-beat, ileri-haritada "büyük sahte-EDM"e
+yol açmaz. Doğru tablo:
+- β-beat sahte-EDM'i ~%18 **kaydırır** (§6.7) ve CW/CCW-tektir (§6.6). **İnversiyonu**
+  felakete sürükler (1/σ_min, §9.5).
+- Ama **ileri-harita için ŞEFFAFTIR** (§6.5): nominal-eğitimli harita, %1 β-beat'li
+  makineyi held-out nominal kadar iyi öngörür (R² 0.62=0.61, **ek bozulma yok**).
+  Sebep: haritaya **gerçek (ölçülen) yörünge** beslenir; sahte-EDM yörüngenin sabit
+  fonksiyoneli olduğundan β-beat ikisini birlikte kaydırır, harita izler.
+
+**Sonuç — harita ömrü β-beat'e bağlı DEĞİL:** Harita β-beat-şeffaf olduğundan,
+β-beat sürüklendikçe **yeniden eğitmeye gerek yoktur** — anlık ölçülen yörüngeyi
+beslersin, yeter. Yeniden eğitim yalnız **COD→f fonksiyonelini kökten değiştiren**
+şeyler için gerekir: **tune değişimi, enerji değişimi, sekstüpol/optik yeniden-
+konfigürasyon, büyük latis değişikliği.** Bunlar seyrektir (majör rekonfigürasyon
+başına, sürüklenme başına değil).
+
+**β-beat zaman ölçeği (gerçek hızlandırıcı):** güç-kaynağı sürüklenmesi (~10⁻⁴–10⁻³/
+saat), termal (saat–gün), histerezis/rampa/refill'de sıçrama. LOCO tipik olarak
+günlük/fill-başına yenilenir. Ama yukarıdaki gereği harita bunlardan **etkilenmez.**
+
+**Kullanıcı önerisi (β-beat'li eğitim):** Makul bir *veri-artırma* (augmentation) —
+haritayı β-beat çeşitliliğiyle eğitmek şeffaflığı **pekiştirir** (özellikle daha
+büyük β-beat, ör. %5, için). Ama darboğaz bu değil (harita zaten ~şeffaf); asıl
+darboğaz **mutlak doğruluk** (§6.10). Test edilmedi; ucuz-orta maliyetli robustluk
+adımı.
+
+> **Caveat:** Şeffaflık %1 β-beat'te ölçüldü; %5+ ve latis-değişikliği ayrıca
+> sınanmalı. Ve tüm bu tartışma harita *yeterince doğru* olduğunda anlamlı (§6.10).
 
 ---
 
-## 8. PLAN — 2/3/4. maddeler (akıllı düzeltme'yi ilerletmek)
+## 8. PLAN — akıllı düzeltme'yi ilerletmek
 
-> Numaralandırma kullanıcı önceliğine göre: **(2)** ileri-harita'yı hedefe taşımak,
-> **(3)** büyük-genlik gerçek-makine kalibrasyonu, **(4)** analitik Berry fonksiyoneli.
-> Önerilen sıra (risk/kazanç): **2c → 4 → 3** (önce uçtan-uca null'lama çalışıyor mu;
-> sonra haritayı analitik temele oturt; sonra gerçek-makine kalibrasyon stratejisi).
+> **GÜNCELLEME (2026-06):** Plan 2c (kapalı-döngü null'lama) KOŞULDU → **negatif**
+> (§6.10-6.11, §7.4). Mevcut empirik harita null'lama için yetersiz. Dolayısıyla
+> **kritik yol artık Plan 4 (analitik Berry fonksiyoneli)** — o olmadan Kol B pratik
+> değil. Ayrıca **Plan 5** (kullanıcı fikri: spin-modülasyon + gradient descent)
+> eklendi; spin-tabanlı olduğundan harita-doğruluğu sınırını AŞAR (aşağıda).
 
 ### Plan 2 — İleri-harita'yı null'lama-hedefine taşımak (Kol B operasyonel)
 
@@ -864,12 +925,46 @@ türetip öğrenilen haritayı doğrulamak/değiştirmek (veri gerektirmeyen "al
 **Risk:** türetme zor; bilineer form yetersiz (yüksek-mertebe gerekli).
 **Altyapı:** kalem-kâğıt + sembolik; doğrulama `berry_data/` ensemble'ı ile ucuz.
 
-### Önceliklendirme
+### Plan 5 — Spin-modülasyon + gradient descent (kullanıcı fikri, 2026-06) ⭐
 
-| Plan | Kazanç | Risk | Maliyet | Sıra |
-|------|--------|------|---------|------|
-| **2c** kapalı-döngü null demo | Kol B'nin pratik geçerliliği (make-or-break) | orta | orta (C++ döngü) | **1** |
-| **4** analitik fonksiyonel | her şeyi açıklar/doğrular; veri-bağımsız harita | yüksek | düşük (analitik) | **2** |
-| **3c** sekstüpol-homojenlik | büyük-genlik fikrini de-riske eder | düşük | düşük | **3** |
-| **2a/2b** veri+öznitelik | residual'i düşürür | düşük | yüksek (C++) | 4 |
-| **3a/3b/3d** kalibrasyon | gerçek-makine yolu | orta | orta | 5 |
+**Fikir:** Quad'lar modüle edildiğinde **sahte-EDM sinyali de modüle olur.** Bunu
+kullan: her düzeltme-knob'unu (quad'a bitişik dipol) modüle et, **sahte-EDM'in
+tepkisini spinle ölç** → böylece $\partial f/\partial(\text{knob})$ **gradyanını
+DOĞRUDAN ölçersin** → gradient descent ile sahte-EDM'i null'la. Düzeltme dipolleri:
+$B_{\max}=g\cdot d = 0.2\,\text{T/m}\times 200\,\mu\text{m} = \pm40\,\mu\text{T}$
+(≈±200 μm eşdeğer sapma; tipik misalignment/COD ~10–100 μm → **menzil yeterli**).
+
+**Neden ÖNEMLİ (Kol B'nin duvarını aşar):**
+- **Spin, simetrik modu GÖRÜR.** Sahte-EDM'i süren şey simetrik misalignment'tır;
+  dolayısıyla quad-modülasyonuna **spin tepkisi simetrik moda duyarlıdır** — orbit
+  k-mod'un (ΔR) simetriğe kör olduğu yerde spin k-mod görür. (Orbit no-go'yu atlar.)
+- **Gradyanlar ÖLÇÜLÜR, öngörülmez.** Kol B'nin çöküş sebebi öğrenilmiş haritanın
+  hatasıydı (§6.10-6.11, model-istismarı). Burada gradyan **gerçek** (spinle ölçülür)
+  → *harita-doğruluğu darboğazı YOK*, kör-nokta yok. Bu, Kol A (spin) ailesinden ama
+  **sistematik/gradyan-tabanlı** (kör spin-trim'in verimli hâli, §14.6).
+- **Yakınsama:** $f$ knob'lara ~kuadratiktir (∝ orbit çarpımı); gerçek gradyanla
+  descent/Gauss-Newton birkaç adımda gerçek null'a iner (menzil ve polarimetre
+  gürültüsüyle sınırlı).
+
+**Maliyet/dezavantaj:** Spin ölçümü yavaş (polarimetre istatistiği); her gradyan
+$N_{\text{knob}}$ ölçüm ister. Kol A gibi spin gerektirir (orbit-tarafı ucuz çözüm
+değil) — ama *çalışması beklenen* taraf bu.
+
+**Test planı:** en-kötü simetrik makine (orbit-null'un ~62× hedef bıraktığı) al;
+orbit-görünür corrector knob'ları; **C++ ile gerçek gradyan** (sonlu-fark = modülasyon
+karşılığı); descent; kalan $f$'i orbit-null ve hedefle karşılaştır. **Beklenti:
+spin-descent, orbit-null'u belirgin geçer** (spin simetriği gördüğü için). Koşuluyor
+(`/tmp/akilli_duzeltme/spin_descent.py`).
+
+---
+
+### Önceliklendirme (güncel)
+
+| Plan | Kazanç | Risk | Maliyet | Durum/Sıra |
+|------|--------|------|---------|-----------|
+| **2c** kapalı-döngü null | Kol B pratik geçerliliği | — | orta | ✗ KOŞULDU-negatif |
+| **6.11** güvenli-opt | model-istismarını dizginle | — | orta | ⚠ KOŞULDU-kısmi |
+| **5** spin-modülasyon descent | spin simetriği görür → duvarı aşar (Kol A verimli) | orta | orta-yüksek (spin) | **⭐ 1 (koşuluyor)** |
+| **4** analitik fonksiyonel | Kol B'yi kurtarır (veri-bağımsız harita) | yüksek | düşük (analitik) | **2** |
+| **3c** sekstüpol-homojenlik | büyük-genlik fikrini de-riske | düşük | düşük | 3 |
+| **3a/3b/3d** kalibrasyon | gerçek-makine yolu | orta | orta | 4 |
