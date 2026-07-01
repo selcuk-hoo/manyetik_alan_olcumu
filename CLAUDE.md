@@ -260,7 +260,7 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | **NN ile misalignment geri-çatımı R⁻¹'den İYİ DEĞİL (lineer harita → NN=R; simetrik hata NN 5.6μm≈TSVD 6.3μm); fark algoritmada değil problemin yönünde (ileri/ters)** | `akilli_duzeltme.md §6.8` |
 | **Plan 2c (make-or-break) NEGATİF: kapalı-döngü null'lama basit orbit-düzeltmeyi GEÇEMİYOR; harita hata tabanı ~300× hedef (slope 0.36) → 240-örnek harita yetersiz; Plan 4 (analitik) gerek** | `akilli_duzeltme.md §6.10` |
 | **Güvenli null'lama (ensemble+pessimistic) naif model-istismarını dizginler (geomean 236×→67×) ama orbit-düzeltmeyi (2.1×) yine geçemez → algoritma gerekli-yetersiz, kök çözüm daha doğru harita** | `akilli_duzeltme.md §6.11` |
-| **Plan 5 (spin-modülasyon+gradient descent) POZİTİF: orbit-kör simetrik makinede orbit-null işe yaramaz (1.0×), spin-descent 2 adımda hedef altına (726×) — gradyan ÖLÇÜLÜR (harita-hatası yok); spin simetriği görür. Orbit tıkalı, spin çalışır** | `akilli_duzeltme.md §6.12` |
+| **Plan 5 (spin-modülasyon+gradient descent) kavramsal POZİTİF (726×) AMA pratik ZAMAN-YASAK: dS_y/dt'yi EDM-seviyesine ölçmek ~50 yıl (istatistik ∝1/√T); ~40-100 ölçüm → iteratif spin-null İMKÂNSIZ. Asıl bağ: orbit hızlı-ama-kör, spin doğru-ama-yavaş** | `akilli_duzeltme.md §6.12` |
 | **Birleşik no-go (inversiyon+lock-in) yalnız misalignment geri-çatımı; ileri-harita o sınıfta DEĞİL** | `akilli_duzeltme.md §4,§7` |
 | **Kol A (spin) çalışır (bilgi spinde, doğrudan); Kol B'de bilgi yörüngede ama küçük+karmaşık** | `akilli_duzeltme.md §9`, `§14.6` |
 | **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |

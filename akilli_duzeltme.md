@@ -476,10 +476,24 @@ orbit-kör simetriğe dokunamaz (kazanç 1.0×); spin-gradient descent aynı sah
 **spin-tarafı (Kol A / Plan 5) çalışır** — ve modülasyon-gradyanıyla *sistematik*
 (kör spin-trim'in verimli hâli). Menzil de yeterli (±40 μT = ±200 μm eşdeğer).
 
-**Dürüst caveat'lar:** (i) gradyanlar **gürültüsüz** C++ (gerçekte polarimetre
-gürültüsü → entegrasyon-süresi sınırı; §cosy_polarimeter zaman bütçesi); (ii) tek
-makine, f0=8× (mütevazı); daha çok makine + büyük f0 + gerçekçi gürültü sınanmalı;
-(iii) bu **spin gerektirir** (orbit-ucuz çözüm değil) — ama zaten "çalışan" taraf bu.
+**Dürüst caveat'lar:** (i) tek makine, f0=8× (mütevazı); (ii) bu **spin gerektirir**.
+
+> **⚠️ KRİTİK DÜZELTME (kullanıcı, 2026-06): Plan 5 pratikte ZAMAN-YASAK.** Gürültüsüz
+> demo, sahte-EDM'i *ücretsiz/anında* ölçebildiğimizi varsaydı. Gerçekte polarimetre
+> **istatistikle sınırlı** (`cosy_polarimeter §4`): bir dolum (1000 s) → σ≈900× hedef;
+> **bir yıllık** kampanya → σ≈7× hedef; $\sigma\propto1/\sqrt T$ → **1 nrad/s'e inmek
+> ~50 yıl.** Descent ~40–100 ölçüm ister ve EDM-altına sürmek için son ölçümler
+> ~nrad/s hassasiyette olmalı → **her biri ~yıllar → toplam onyıllar-yüzyıllar.
+> İteratif spin-null'lama fiilen İMKÂNSIZ.** Aynı sınır §14.6 "spin ölç-trim
+> ~6000×" için de geçerli (o da simülasyonda ücretsiz-ölçüm varsayar).
+>
+> **Asıl bağ:** orbit-tabanlı kontrol **hızlı ama tıkalı** (simetrik-kör/harita-kaba);
+> spin-tabanlı kontrol **doğru ama istatistik-yasak** (yıllar/ölçüm). Her iki kaçış
+> da kapalı → simetrik geometrik-faz sistematiği **gerçekten zor.** Gerçek deney
+> (Omarov) iteratif spin-null YAPMAZ; CW/CCW iptal + a-priori orbit-kontrol (CR-ayrım,
+> hızlı) + kalanı 1-yıllık kampanyada bir kez ölçüp **sınırlar** — ama CR-ayrım
+> simetriğe kör (§9.3) → simetrik artık ancak **tasarım toleransıyla** (μm-misalignment
+> → ~62× hedef) sınırlanır, aktif null'lanamaz.
 
 ---
 
