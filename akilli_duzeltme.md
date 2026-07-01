@@ -495,6 +495,17 @@ orbit-kör simetriğe dokunamaz (kazanç 1.0×); spin-gradient descent aynı sah
 > simetriğe kör (§9.3) → simetrik artık ancak **tasarım toleransıyla** (μm-misalignment
 > → ~62× hedef) sınırlanır, aktif null'lanamaz.
 
+**Gerçekçi-gürültü doğrulaması (`spin_descent_noisy.py`, 5498 s / 105 ölçüm).** Yukarıdaki
+zaman-yasağını somutlaştırmak için descent'i, her sahte-EDM ölçümüne σ_pol = 1× hedef
+sentetik polarimetre gürültüsü ekleyerek çalıştırdık (kararlar gürültülü ölçümle, raporlanan
+artık son konfigin GERÇEK f'i). Sonuç, gürültüsüz demonun aksine **düzensiz ve gürültü-tabanı
+sınırlı**: f0 = 8.2× → adımlar 0.62× → **2.75×** (adım 2 adım 1'den KÖTÜ) → 0.14× → 0.28×; "en
+iyi" 0.14× fiilen σ_pol tabanında bir seçim. Yani σ_pol = 1× hedef gürültüyle descent artığı
+~σ_pol'e takılır, monoton yakınsamaz. Ve bu tek koşul (σ_pol = 1× hedef) **gerçekte ölçüm başına
+~1 yıl** demek (`cosy_polarimeter §4`) → 105 ölçüm × ~yıl ≈ **yüzyıl**. Gürültüsüz 726×'lik demo
+(üstteki tablo) böylece pratikte gerçekleşmez; §5.4/PROJE_ANALIZI ile tam tutarlı.
+(`/tmp/akilli_duzeltme/spin_descent_noisy.npz`.)
+
 ---
 
 ## 7. Sonuç ve fork (orbit-tarafı tıkalı, SPİN çalışır — Plan 5 doğruladı)
