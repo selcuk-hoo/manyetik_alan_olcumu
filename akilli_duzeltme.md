@@ -704,6 +704,57 @@ yüksek/düşük-m ayrımıyla **kesin karakterize** edilmiş: kaçış tamamen 
 ama pratikte yetersiz. (Kod: `/tmp/akilli_duzeltme/highQ_bba.py` + analitik
 kazanç/k-mod taramaları.)
 
+### 6.15.1 "Neden yüksek-Q'da kalmıyoruz?" — sahte-EDM ~g³ ile patlar
+
+**Soru (kullanıcı):** Madem yüksek-Q'da simetrik mod görünür oluyor, neden orada
+kalıp ölçüp düzeltmiyoruz? "Operasyonel Q vs yüksek Q" ayrımı neden?
+
+**Cevap — basit fizik:** Gerçek EDM sinyali **elektrik deflektörden** gelir ve quad
+gradyanından **bağımsızdır** (hedef her Q'da 1 nrad/s, sabit). Sahte-EDM ise
+quad'lardan gelir. Aynı 10 μm kaçıklığın sahte-EDM'ini farklı g'de (aynı fiziksel
+kaçıklık, C++) ölçtük:
+
+| g (T/m) | Q_y | sahte-EDM | g=0.21'e göre |
+|---|---|---|---|
+| 0.21 | 2.3 | 1399 ×hedef | 1× |
+| 0.40 | 4.6 | 5682 ×hedef | 4.1× (g²≈3.6) |
+| **0.69** | **10.3** | **45125 ×hedef** | **32×** (g²≈10.8) |
+
+Sahte-EDM, g'yle **g²'den bile hızlı (~g³, 32×)** büyüyor — çünkü hem geometrik faz
+g²'dir (iki alan-kaynaklı dönmenin çarpımı) **hem de** yüksek-Q'da betatron orbiti
+büyür (max|y| 0.16→0.80 mm), o da ekstra katkı verir.
+
+**Sonuç — yüksek-Q'da KALINAMAZ:**
+- Gerçek EDM sabit, sahte-EDM 32× büyük → **sinyal/gürültü yüksek-Q'da 32× kötü.**
+- Düzeltmeyle kurtardığın fazladan simetrik-mod (~%25 → kalan ~%76) bu 32×'i asla
+  yenmez. Yüksek-Q'da BBA sonrası bile sahte-EDM ~32×0.76×1399 ≈ **34000×hedef** —
+  operasyonel Q'da op-BBA'nın (120×hedef) **~280 katı kötü.**
+- Dolayısıyla yüksek-Q **yalnız geçici bir TANI aracı** olabilir (simetriği ölç),
+  sonra düşük-Q'ya dönmelisin. Ama o zaman da "yüksek-Q'da ölçtüğünü düşük-Q'ya
+  taşı" (rekonstrüksiyon-transferi) sorunu kalır: transfer ancak simetriğin
+  yüksek-m ~%25'ini taşır (§6.15).
+
+**Yani yüksek-Q kaçışı İKİ bağımsız sebepten yetersiz:** (a) orada **kalırsan**
+sahte-EDM arka planı g³ ile patlar (32×); (b) tanı yapıp **dönersen** rekonstrüksiyon
+simetriğin ancak yüksek-m ~%25'ini kurtarır (düşük-m stopband arkasında).
+
+### 6.15.2 Dürüstlük notu — bu tartışmada iki kez yanıldım
+
+Bu arc'ta metodolojik iki hata yaptım; kullanıcı ikisini de yakaladı:
+1. **"min-gain → simetrik körlük kaldırılamaz" (§6.14):** yanıltıcıydı; tek en-kötü
+   modu ölçtü. Doğrusu: yüksek-m simetrik yüksek-Q'da açılır (§6.15).
+2. **"Duvar 2 köktür, gözlenebilirlik semptom":** **tek seed'lik** bir sonuçtan
+   (yüksek-Q BBA o koşumda f'i kötüleştirdi) aceleyle çıkardığım güçlü hükümdü.
+   g-ölçekleme testi asıl somut sebebi gösterdi (yüksek-Q'da f 32× büyür — farklı,
+   ölçülebilir bir etki). Operasyonel Q'da "simetrik gizli → ölçemiyoruz → taban"
+   çerçevesi büyük ölçüde **doğru**; hata, kaçış ararken yaptığım aceleci
+   genellemelerdi. **Kullanıcının "güçlü kickler → f büyür" sezgisi doğru çıktı.**
+
+**Ders (yönteme):** Tek seed'lik bir sonuçtan kök-sebep çıkarma; bilineer f
+küçük-RMS artıkta bile korelasyona göre şişebilir → çok-seed gerekir. Ve "hemen
+kabul edip düzeltme moduna girme" — önce bağımsız düşün, ölç.
+(Kod: `/tmp/akilli_duzeltme/` g-ölçekleme + `random_highQ.py`.)
+
 ---
 
 ## 7. Sonuç ve fork (orbit-tarafı tıkalı, SPİN çalışır — Plan 5 doğruladı)
