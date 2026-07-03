@@ -643,6 +643,67 @@ kararlı yapan** şeyin ta kendisidir.
 > iki yüzüdür.** — `PROJE_ANALIZI §7`'nin "simetriği görünür yap" kaçışının hem
 > tune-kaydırma (Q≈24 gerçekçi değil) hem uniform-gradient (kararsız) versiyonu kapalı.
 
+> **⚠️ NÜANS (§6.15, kullanıcı düzeltmesi):** Yukarıdaki "kaldıramazsın" fazla
+> kategoriktir. Alternasyonu KALDIRMAK (uniform) kararsız; ama alternasyonu KORUYUP
+> **tune'u yükseltmek** (Q~10) simetriğin **yüksek-m parçasını** kararlı biçimde açar.
+> Yine de düşük-m stopband'in arkasında kalır → pratik kazanç marjinal. Aşağı bkz.
+
+---
+
+## 6.15 Tune'u yükseltmek simetriği açar mı? — kısmen (yüksek-m evet, düşük-m stopband)
+
+**Kullanıcı fikri:** Simetrik mod gizli, çünkü betatron tune Q küçük (~2.3). Q'yu
+yükseltirsek (11<Q<12) yan-yana quadların arasında faz ilerlemesi büyür → zıt
+kickleri artık iptal olmaz → simetrik mod BPM'lere görünür olur.
+
+**"Yüksek-m / düşük-m" (basit resim):** Simetrik kaçıklık deseni halka boyunca (24
+hücre) değişir. m = desenin halka etrafında kaç tam dalga yaptığı. **Düşük-m**
+(m=0-4): pürüzsüz, yavaş değişim. **Yüksek-m** (m=10-12): hücre-hücre hızlı değişen.
+Bir simetrik mod-m, kick'i **k=24−m** ring-harmoniğinde üretir; orbit kazancı
+$G_k=C/|Q^2-k^2|$, rezonans k≈Q'da.
+
+**Bulgu 1 — kullanıcı HAKLI, benim önceki hükmüm YANLIŞTI.** Simetrik-mod orbit
+kazancını her m için doğrudan hesapladım (tepki matrisi R·desen), Q=2.3 vs Q=10.3:
+
+| m (hücre-harmoniği) | sim kazanç Q=2.3 | sim kazanç Q=10.3 | antisim (Q=10.3) |
+|---|---|---|---|
+| 0–4 (düşük) | ~0.1–1 | ~1–1.5 | ~2–3 |
+| 8 | 0.42 | 6.3 | 7.9 |
+| **10** | 0.36 | **71** | 74 |
+| **12** | 0.34 | **28** | 28 |
+
+Yüksek-m (m≥10) Q=10.3'te antisimetrikle **eşit kazançta** (71!) → görünür.
+(Önceki §6.14'te "min kazanç" raporlamıştım — o, tek en kötü modu ölçtüğü için
+yanıltıcıydı.) Ve C++ doğruladı: g=0.69 (Q~10.3) alternating latis **kararlı**
+(uniform-gradient'in aksine — alternasyon korunuyor).
+
+**Bulgu 2 — ama pratikte marjinal (iki ayrı sınır):**
+1. **BPM ofseti (mutlak BBA):** tek orbit'ten geri-çatım 100μm ofsete takılır.
+   Yüksek-Q kazancı artırır ama ofseti kaldırmaz → yalnız m=10-12 (kazanç>28,
+   sinyal>ofset) geri-çatılır → simetrik gücün ~%25'i, kalan 9.4μm.
+2. **k-mod (ofset-free) — asıl sınır burada ortaya çıkar:** ofseti kaldırdım (gradyan
+   modülasyon farkı), yine kalan **8.76μm (~%12)**. Sebep ofset DEĞİL, **kazanç**:
+   düşük-m simetriğin rezonansı k=24−m ≥ 16 → Q≥16 ister, ama **Q_max=12 (μ=180°/hücre
+   stopband)**. Yani düşük-m simetrik temelde erişilemez.
+
+**Nihai sahte-EDM (C++, düzeltme sonrası):** yüksek-Q k-mod ile geri-çat + trim →
+f0 = −20×hedef → **f_res = 10×hedef, bastırma yalnız ~2×.** Marjinal, çünkü kaçıklığın
+ancak ~%8'i kurtarıldı (yüksek-m); geri kalanı stopband arkasında.
+
+**Gradient descent farklı sonuç verir mi? HAYIR (bu lineer problemde).** COD = R·d
+lineer; GD ile ||R·d_est − COD||² minimize etmek, sözde-tersle **aynı** en-küçük-kareler
+çözümüne yakınsar → aynı ~%8-25 kurtarma → aynı ~2×. GD ancak lineer-olmayan problemde
+(ya da ölçülen spin-gradyanında, §6.13-6.14) farklı olur. COD'yi **düzleştirmek** ise
+zaten yanlış amaç (Duvar 2, §6.13: düz orbit ≠ sıfır sahte-EDM).
+
+**Düzeltilmiş sonuç:** Tune-yükseltme, "simetriği görünür yap" kaçışının **kısmen
+çalışan** ilk versiyonu — yüksek-m simetrik kararlı biçimde açılır (kullanıcı fizik
+olarak haklı). Ama düşük-m simetrik μ=180° stopband'inin arkasında kalır (Q≤12
+sınırı), o yüzden pratik bastırma marjinal (~2×). Aynı stopband duvarı, artık
+yüksek/düşük-m ayrımıyla **kesin karakterize** edilmiş: kaçış tamamen kapalı değil,
+ama pratikte yetersiz. (Kod: `/tmp/akilli_duzeltme/highQ_bba.py` + analitik
+kazanç/k-mod taramaları.)
+
 ---
 
 ## 7. Sonuç ve fork (orbit-tarafı tıkalı, SPİN çalışır — Plan 5 doğruladı)

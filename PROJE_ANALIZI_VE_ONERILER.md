@@ -413,8 +413,11 @@ iteratif ölçüp-null yapmaz. Bunun yerine sahte-EDM'i **önceden bağlar**:
 tutamağı şu an görünmüyor; muhtemelen olmaması doğru cevap. Tek teorik çıkış,
 latis'i yeniden düzenleyip simetrik alt-uzayı *orbit-görünür* yapmaktı. İki
 gerçekleme de **kapalı** (ayrıntı `akilli_duzeltme.md §6.14`, gerçek C++):
-- **Tune-kaydırma:** $Q$'yu simetrik harmoniğe ($k\approx24$) yaklaştırmak → $Q\approx24$
-  gerektirir, gerçekçi değil.
+- **Tune-kaydırma (kısmi):** $Q$'yu yükseltmek simetriğin **yüksek-m** parçasını
+  (halka çevresinde hızlı-değişen) kararlı biçimde açar — Q~10'da kazanç antisimle
+  eşit (`akilli_duzeltme §6.15`). AMA **düşük-m** simetrik $Q\geq16$ ister; oysa
+  $Q_{\max}=12$ (μ=180°/hücre stopband). Sonuç: k-mod ile ~%8-25 kurtarma → sahte-EDM
+  bastırma **yalnız ~2× (marjinal)**. Kaçış tamamen kapalı değil ama pratikte yetersiz.
 - **Uniform-gradient (harmoniği kaldır):** tüm quad'ları aynı polariteye alıp
   alternasyonu kaldırmak simetrik deseni düşük-k'ya taşır (optikte doğru) — **ama
   makine tüm gradyan değerlerinde KARARSIZ** (Courant–Snyder: uniform statik quad'la
