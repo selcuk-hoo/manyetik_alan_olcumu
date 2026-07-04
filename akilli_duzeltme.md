@@ -757,6 +757,79 @@ kabul edip düzeltme moduna girme" — önce bağımsız düşün, ölç.
 
 ---
 
+## 6.16 Off-momentum spin-polarimetre ile sahte-EDM'i amplifiye et? — telafi çalışır, sensing σ¹'e gömülü (KAPSAMLI NEGATİF)
+
+**Fikir (kullanıcı):** Frozen-spin yerine parçacığı **magic-olmayan** momentumda tut
+(E-alanı `E0=−(p·β/R0)·1e9` ile yeniden ölçekle → ideal yörünge R0'da **sabit**,
+doğrulandı: betatron 0, kararsızlık yok). Spin artık ν_s=aγ−(a+1)/γ hızıyla presesse
+eder. Böylece geometrik-faz sahte-EDM'i amplifiye olup hızlı ölçülür → gradient
+descent / tek-knob telafi ile null'lanabilir. (Momentum ν_s'e zayıf knob:
+dν_s/dδ≈1.6; ν_s≈24 için δ≈15 gerekir. Alternatif temiz knob **B0long** teğetsel
+alan — yörünge bükmez, ν_s≈24'e ulaşır ama frozen-spin bozar = tanı-modu.)
+
+**Bulgular (10 test, hepsi C++; `/tmp/akilli_duzeltme/momentum_*.py`):**
+
+1. **Multipleks duvarı (`momentum_mob.py`):** Tek off-momentum ayarı + tek
+   polarimetre, invariant spin ekseninin **2 bileşenini** okur → yanıt matrisi
+   **rank≈2** (tekil değerler [1, 0.28, 0.016, 0…]). Make-or-break: rastgele 10μm
+   kaçıklık → spin-trim yalnız **2.0×** bastırır, yörünge-BBA (k-mod, 48 BPM) **10.4×**.
+   Algoritma (GD/koordinat-iniş) bunu aşamaz: tek skaler sinyal 2 dof kısıtlar.
+
+2. **Telafi ÇEKİRDEĞİ çalışıyor (`momentum_null.py`):** Sahte-EDM tek skaler → tek
+   quad ofseti (steering; gradyan DEĞİL — gradyan optiği bozar+cell-0 tuzağı) onu
+   **lineer** biçimde sıfırdan geçirir: magic sahte-EDM +182.6 → 0 @ **+22 μm** ofset.
+   Kontrol edilebilirlik sorun değil; **gözlenebilirlik** (f'i hızlı okumak) sorun.
+
+3. **Ama off-momentum proxy YANILTIR (`momentum_null`, `momentum_4fold.py`):**
+   off-momentum sinyalin minimumu **+47..+60 μm**, magic sahte-EDM'in sıfırı +22 μm.
+   Çakışmaz; proxy'yi null'larsan magic sahte-EDM **−214..−325** (başlangıçtan KÖTÜ).
+   4-fold + model-fit seküler eğim de aynı: sıfır +46.9 (ISA), +22 (geometrik) değil.
+
+4. **MODEL (`momentum_model.py`) — kullanıcı sezgisi DOĞRU ama σ¹ gömüyor:**
+   Boylamsal spin enjekte, off-magic (ν_s≠0):
+   `S_y(n) ≈ V_ISA·σ·sin(2πν_s n+φ₁) + [g_geo·σ²/(2πν_s)]·sin(2πν_s n+φ₂)`
+   - **Terim 1 (σ¹, ISA-eğimi):** misalignment invariant spin ekseni n̂'yi dikeyden
+     eğer (1. mertebe); enjekte spin eğik n̂ etrafında koni çizer → S_y ν_s'te salınır,
+     genlik ∝σ, ν_s-bağımsız (payda 1/(ν_s−k)≈−1/k).
+   - **Terim 2 (σ², geometrik/EDM):** magic'te seküler rampa g_geo·n; off-magic'te
+     presesyon onu salınıma çevirir, genlik **∝1/ν_s AMPLİFİYE** (frozen-spin fiziği:
+     EDM yalnız ν_s=0'da seküler birikir). **Geometrik faz gerçekten amplifiye**
+     (|V_geo| δ↓ ile büyür; hatta |V_geo|·2πν_s = magic eğimin 55–167 katı → ek
+     rezonans kazancı). AMA ikisi **aynı ν_s frekansında** → frekansla ayrılamaz;
+     10μm'de σ¹ ≫ σ² (~3600–13000×) → salınım ISA-domine.
+
+5. **Tüm AYIRMA kanalları kapalı (test edildi):**
+   - **δ tarama (`momentum_delta`,`_delta2`):** off/magic eğim duyarlılığı hep <1
+     (0.01–0.16, amplifikasyon YOK); sıfır δ↓ ile magic'e yakınsamıyor (non-monoton
+     +34..+66); σ¹=σ² kesişimi ν_s~5e-7 (δ~3e-7) → pencere ~10⁶ tur, ulaşılamaz.
+     ("2110× amplifikasyon" ilk FFT-estimator'ın ISA-sızıntı artefaktıydı; analitik
+     ν_s ile giderildi.)
+   - **Faz (`momentum_phase`):** Δφ=arg(V_geo)−arg(V_ISA) **desene bağlı** (3 seed:
+     +106°,−91°,−85°; yayılım 91°) → a priori bilinemez, lock-in ile σ¹ söndürülemez.
+   - **4-fold (`momentum_rms` A):** tek-parçacık vs 4-fold salınım genliği = **1.000**
+     (birebir). 4-fold *betatron* σ¹'i söndürür; ISA-eğimi σ¹'i (kapalı-yörünge,
+     4 parçacıkta ortak) söndürmez.
+   - **RMS (`momentum_rms` B):** σ¹∝RMS, σ²∝RMS² (temiz); σ¹/σ² = 12366(5μm)→
+     1546(40μm); kesişim **RMS≈62 mm** = fiziksel 10μm'nin 6000× üstü. Gerçekçi hiçbir
+     RMS'te σ² baskın değil.
+
+6. **Fiziğin özü — magic neden TEK çalışma noktası:** ISA-eğimi misalignment'a
+   **1. mertebe**, sahte-EDM **2. mertebe** yanıt; küçük pertürbasyonda 1. her zaman
+   2.'yi ezer. Off-magic her ν_s'te bu 1.-mertebe ISA-eğimini açar. **Magic (ν_s=0)
+   özeldir çünkü baskın 1.-mertebe etkiyi zararsız SABİT ofsete çevirir** (presesyon
+   yok → sallanma yok → seküler eğimi bozmaz), geriye yalnız 2.-mertebe birikim kalır.
+   Bu, `false_edm_4d.py`'nin magic'te p=2.00 vermesinin de nedeni.
+
+**Sonuç:** Amplifikasyon GERÇEK (kullanıcı sezgisi teyit) ve telafi (tek knob→net f
+sıfırı) çalışır; ama off-momentum-sensing **σ¹ ISA-eğimine gömülü** ve ölçülebilir
+ayırma tutamağı yok → hızlı geri-besleme için kullanılamaz. Asıl engel değişmedi:
+sahte-EDM'i (σ²) hızlı ölçmek, ve off-momentum bunu kolaylaştırmıyor, üstüne 3600×
+büyük ilgisiz bir σ¹ salınımı ekliyor. (Simülasyonda σ-ölçekleme ile ayrılabilir ama
+gerçek makinede misalignment ölçeklenemez.) Kol A (spin ölç-trim, §14.6) hâlâ tek
+çalışan spin yolu; o da istatistik-yavaş.
+
+---
+
 ## 7. Sonuç ve fork (orbit-tarafı tıkalı, SPİN çalışır — Plan 5 doğruladı)
 
 - **Kol B KAPATILMADI; DÖRT bağımsız bulgu destekliyor.** İlk "ölü/aynı-duvar"
@@ -825,6 +898,15 @@ python3 /tmp/akilli_duzeltme/nulling_floor.py        # Plan 2c proxy (hata taban
 python3 /tmp/akilli_duzeltme/closed_loop.py          # Plan 2c kapalı-döngü null'lama
 python3 /tmp/akilli_duzeltme/improved_null.py        # §6.11 güvenli/ensemble null
 python3 /tmp/akilli_duzeltme/spin_descent.py         # Plan 5 spin-gradient descent (POZİTİF)
+# ── §6.16 off-momentum spin-sensing (E-rescale, magic-olmayan momentum) ──
+python3 /tmp/akilli_duzeltme/momentum_mob.py         # make-or-break: rank≈2, spin 2× vs orbit 10.4× (FAZ A ~20dk + B)
+python3 /tmp/akilli_duzeltme/momentum_null.py        # tek-knob telafi: magic f 182→0 @+22μm; off-proxy min +50 (yanıltır)
+python3 /tmp/akilli_duzeltme/momentum_4fold.py       # 4-fold seküler eğim sıfırı +47 (ISA), +22 değil
+python3 /tmp/akilli_duzeltme/momentum_delta.py       # E-rescale doğrulama + analitik-ν_s estimator; δ=0.01→+34.6
+python3 /tmp/akilli_duzeltme/momentum_delta2.py      # δ→0 non-monoton; off/magic<1 (amplifikasyon YOK)
+python3 /tmp/akilli_duzeltme/momentum_model.py       # MODEL: |V_geo|∝1/ν_s amplifiye ama |V_ISA|~3600× büyük
+python3 /tmp/akilli_duzeltme/momentum_phase.py       # Δφ desene bağlı (yayılım 91°) → faz-ayrım kapalı
+python3 /tmp/akilli_duzeltme/momentum_rms.py         # 4-fold/tek=1.000 (σ¹ sönmez); σ¹=σ² kesişimi RMS≈62mm
 ```
 
 Çekirdek estimator `berry_data/false_edm_4d.py` (4D-CO + model-fit, p=2.00).
