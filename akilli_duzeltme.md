@@ -812,6 +812,18 @@ alan — yörünge bükmez, ν_s≈24'e ulaşır ama frozen-spin bozar = tanı-m
    - **RMS (`momentum_rms` B):** σ¹∝RMS, σ²∝RMS² (temiz); σ¹/σ² = 12366(5μm)→
      1546(40μm); kesişim **RMS≈62 mm** = fiziksel 10μm'nin 6000× üstü. Gerçekçi hiçbir
      RMS'te σ² baskın değil.
+   - **Tam 3D n̂-fit (`momentum_3d`):** üç spin bileşeninden (S_x,S_y,S_z) invariant
+     eksen n̂ SVD ile belirlenir (koni temizliği sig3/sig1=8e-14, mükemmel presesyon).
+     n̂ dikey (n_y=1.000); eğim bileşenleri σ¹: n_x sıfırı ~+75μm, n_z ~+32μm, sahte-EDM
+     +22μm ile çakışmaz. **n̂-presesyonu çıkarınca ARTIK ~0** (gürültü tabanı 1e-12,
+     düzensiz) — tek ideal parçacığın tek-tur haritası sabit dönme → hareket tam
+     periyodik → sahte-EDM ayrı artık DEĞİL, n̂'nin σ² eğiminde (σ¹'in 3600× altında).
+     "Presesyonu çıkar, artığı fit et" için ortada artık yok.
+   - **Boylamsal S_z (`momentum_long`):** "sahte-EDM boyunadan çalınıyor" MAGIC'e ait
+     doğru (orada n̂=boylamsal, S_z≈1, EDM dikeye tepince S_z azalır). Off-magic'te
+     n̂=DİKEY, boylamsal presesse eder (⟨S_z⟩≈0), "çalınacak özel boylamsal" yok →
+     S_z seküler eğim knob'a DUYARSIZ (sabit −2.51e-7, magic f 182→−393 salınırken).
+     Magic'te bile çalma σ⁴ (S_z=√(1−S_y²), S_y∝σ²) → S_y zaten optimal (1.-mertebe).
 
 6. **Fiziğin özü — magic neden TEK çalışma noktası:** ISA-eğimi misalignment'a
    **1. mertebe**, sahte-EDM **2. mertebe** yanıt; küçük pertürbasyonda 1. her zaman
@@ -907,6 +919,8 @@ python3 /tmp/akilli_duzeltme/momentum_delta2.py      # δ→0 non-monoton; off/m
 python3 /tmp/akilli_duzeltme/momentum_model.py       # MODEL: |V_geo|∝1/ν_s amplifiye ama |V_ISA|~3600× büyük
 python3 /tmp/akilli_duzeltme/momentum_phase.py       # Δφ desene bağlı (yayılım 91°) → faz-ayrım kapalı
 python3 /tmp/akilli_duzeltme/momentum_rms.py         # 4-fold/tek=1.000 (σ¹ sönmez); σ¹=σ² kesişimi RMS≈62mm
+python3 /tmp/akilli_duzeltme/momentum_3d.py          # 3D n̂-fit: koni 8e-14 temiz, artık~0; sahte-EDM n̂'de gömülü
+python3 /tmp/akilli_duzeltme/momentum_long.py        # boylamsal S_z: off-magic knob-duyarsız; çalma magic'te σ⁴
 ```
 
 Çekirdek estimator `berry_data/false_edm_4d.py` (4D-CO + model-fit, p=2.00).
