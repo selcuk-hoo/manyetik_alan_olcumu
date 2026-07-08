@@ -123,6 +123,13 @@ cond ≈ 1160.
 - **SVD ~6–10× daha iyi**, AMA yalnız (a) tam-şekil kullanırsan (b) null modu regularize
   edersen. Aksi halde harmonikten çok daha kötü.
 
+> ⚠️ **KRİTİK ÇEKİNCE (§7):** Bu SVD-TSVD karşılaştırması, alan sütunu `A_field`'i
+> **artefakt bir DC bileşeniyle** kullandı (§7'de gösterildi: DC N'den bağımsız,
+> uniform-tepkiye eşit → implementasyon artefaktı, "N=2 imzası" değil). Gerçek makinede
+> DC olmayacağından alan kaçıklıkla daha dejeneredir → **~5-8 nT iyimserdir**. SVD'nin
+> harmonik-fit'i geçen kısmı yalnız gerçek n≥3 şekil farkına dayanmalı; bu tek başına
+> ne kadar ayırır — **artefakt-DC çıkarılıp yeniden ölçülmeli** (açık iş).
+
 **Önemli metodolojik ders:** Aynı problemi **analitik Twiss R** ile çözdüğümüzde
 cond=193 (gerçek 1.2×10⁸'in çok altında) çıkıp SVD'yi yanıltıcı biçimde ~71 nT gösterdi.
 **Tepki matrisi mutlaka gerçek demet dinamiğiyle kurulmalı**; analitik kısayol
@@ -148,27 +155,48 @@ kurtarmaz.
 
 ---
 
-## 7. Yeni bulgu: N=2 alanın DC (n=0) imzası
+## 7. DC (n=0) imzası: doğrulandı → **İMPLEMENTASYON ARTEFAKTI** (ayrım kanalı DEĞİL)
 
-Şekil karşılaştırmasında, alanın yörüngesi kaçıklığınkinden farklı çıktı: **alan net
-bir DC (n=0) dikey kayma üretir, saf N=2 kaçıklık üretmez.** Doğrulandı (A_r taraması):
+Taslağın erken sürümünde, alanın yörüngesinin kaçıklığınkinden farklı bir **DC (n=0)
+dikey kayma** (~1.01 μm/nT) ürettiğini gözledik ve bunu SVD'nin alanı kaçıklıktan
+ayırmasının bir nedeni saydık. **Bu yanlıştı.** N-taraması + fizik argümanı ile
+doğrudan test ettik (`field_n2_dcmech.py`, `integrator.cpp` DEĞİŞTİRİLMEDİ):
 
-| A_r | n=0 (DC) | n=2 | n0/A_r | işaret |
-|---|---|---|---|---|
-| +100 nT | +101 μm | 136 μm | +1.01 | — |
-| −100 nT | −101 μm | 136 μm | +1.01 | **çevirir** |
-| +300 nT | +303 μm | 408 μm | +1.01 | **lineer (3×)** |
-| 0 | ~0 | ~0 | — | alan yok → DC yok |
+| kaynak | DC (μm/nT) | k=N (μm/nT) | ⟨cos Nθ⟩_eff = DC_harm/DC_uniform |
+|---|---|---|---|
+| **uniform B0rad** | −0.999 | — | (referans) |
+| harmonik N=1 | +1.003 | 0.413 | **−1.00** |
+| harmonik N=2 | +1.009 | 1.359 | **−1.01** |
+| harmonik N=3 | +0.967 | 0.487 | −0.97 |
+| harmonik N=4 | +0.952 | 0.172 | −0.95 |
+| harmonik N=6 | +0.899 | 0.061 | −0.90 |
+| harmonik N=8 | +0.826 | 0.032 | −0.83 |
 
-(find_co artığı res=3×10⁻⁹ → kapalı yörünge, artefakt değil.) Yani alan
-`(DC, k2) = A_r·(1.01, 1.36)` — **sabit oranlı iki-kanallı imza**. Saf cos2θ kaçıklık
-yalnız k=2 verir. **SVD'nin alanı ayırabilmesinin bir nedeni bu DC + n≥3 şekil farkıdır.**
+**İki kanıt, kesin sonuç:**
 
-**Açık uç (kritik):** DC'nin **mekanizması** anlaşılmadı. cos(2θ) radyal alanın v×B
-dikey kickinin ortalaması analitik olarak **sıfır** çıkıyor (−v·A_r cos2θ). Demek ki
-DC ya bir kuplaj/2.-mertebe etkisi ya da **alan implementasyonuna özgü** (deflektör-only
-maske, E-alan kuplajı). Gerçek makinede ayrım-kanalı olarak güvenmeden önce **mekanizma
-doğrulanmalı** (ör. alanı deflektör-dışında da uygulamak, v×B'yi izole etmek).
+1. **DC, N'den ~bağımsız ve uniform-alan tepkisine ~eşit** (⟨cos Nθ⟩_eff ≈ −1.0, N=1..8).
+   Yani harmonik alan, DC bakımından neredeyse **uniform radyal alan gibi** davranıyor —
+   "N=2'ye özgü bir imza" DEĞİL. (Buna karşılık k=N sütunu **gerçek**: G_k=C/\|Q²−N²\| ile
+   N=2'de rezonant tepe, doğru fizik.)
+
+2. **Fizik:** gerçek bir cos(Nθ) radyal alanın dikey kicki ∝ B_r = A_r cos(Nθ); azimutal
+   ortalaması ∫cos(Nθ)dθ = 0 (her N≥1). Yani **dikey DC teorik olarak SIFIR olmalı.**
+   Simülasyonun ~1 μm/nT DC'si fiziksel olarak imkânsız → **artefakt.**
+
+**Kök neden** (`integrator.cpp` §"Harmonic radial magnetic field", satır ~257-268):
+deflektör dalı alanı sürekli φ=atan2(Y,X) ile radyal yöne **projekte eder**
+(`B[0]+=B_r0·cosφ; B[1]+=B_r0·sinφ`) → temiz k=N, DC yok. Düz-bölüm dalı ise
+projeksiyonsuz `B[0]+=B_r0` ekler; düz bölümün yerel-radyal ekseni lab-çerçevesinde
+dönmediğinden, halka boyunca **iptal olması gereken** dikey kick iptal olmaz → sahte
+net DC (≈ uniform tepkisi, N'den bağımsız).
+
+**Sonuç (kritik, yayın için):** DC bir **ayrım kanalı değil**; svd.md'nin özgün
+"iki-kanallı imza" iddiası **düşer**. §4–5'teki SVD-TSVD, `A_field` sütununu bu artefakt
+DC ile birlikte kullandı → **~5-8 nT rakamı iyimser** (gerçek makinede, DC olmadan,
+alan kaçıklıkla daha dejenere olur → ayrım zayıflar). SVD'nin harmonik-fit'i geçen
+kısmı yalnız gerçek **n≥3 şekil farkına** dayanmalı; onun tek başına ne kadar ayırdığı
+**artefakt-DC çıkarılıp yeniden ölçülmeli** (açık iş). Bu bulgu, dejenerasyonun
+svd.md'nin sonucundan **daha temel** olduğunu gösteriyor.
 
 ---
 
@@ -252,17 +280,20 @@ o rejimde harmonik (~500 nT) de SVD de kullanılamaz. Reprodüksiyon:
 ## 10. Sonuç ve açık sorular
 
 **Sonuç.**
-1. N=2 alan → dikey k=2 kapalı yörünge (+ DC); alan ile kaçıklık k=2'de dejenere.
+1. N=2 alan → dikey k=2 kapalı yörünge; alan ile kaçıklık k=2'de **dejenere** (aynı imza).
 2. **Harmonik fit** basit ve ofsete-dayanıklı ama **yanlı** (~53 nT/10μm) — ayıramaz.
-3. **SVD-TSVD** alanı kaçıklıktan **ayırır**, ~5-8 nT — ama (a) tepki matrisi **gerçek
-   demet dinamiğiyle** kurulmalı, (b) **null mod regularize** edilmeli, (c) BPM ofseti
-   ılımlı büyür.
+3. **SVD-TSVD** alanı kaçıklıktan görünürde **ayırır** (~5-8 nT) — ama (a) tepki matrisi
+   **gerçek demet dinamiğiyle** kurulmalı, (b) **null mod regularize** edilmeli, (c) BPM
+   ofseti ılımlı büyür. **ÇEKİNCE:** bu ayrım kısmen §7 artefakt-DC'sine dayandı →
+   ~5-8 nT **iyimser**; gerçek n≥3-şekil ayrımı ayrıca ölçülmeli.
 4. **BPM ofseti** naif ters-çevirmenin katili; TSVD ehlileştirir; harmonikte büyütülmez.
-5. Alanın **DC imzası** (1.01 μm/nT) kaçıklıkta yok — potansiyel ayrım kanalı.
+5. **DC imzası ARTEFAKT** (§7): N'den bağımsız, uniform-tepkiye eşit, fiziksel DC=0
+   olmalı → düz-bölüm alan-uygulamasının çerçeve hatası. **Ayrım kanalı değil.**
 
 **Açık sorular (makale öncesi).**
-- **DC mekanizması** gerçek fizik mi, implementasyon mu? (§7 doğrulaması)
-- DC kanalını açıkça kullanan bir estimator eşiği ne kadar düşürür?
+- ~~DC mekanizması gerçek mi implementasyon mu~~ **YANITLANDI (§7): implementasyon
+  artefaktı** (N-bağımsız + fiziksel DC=0). → SVD ayrımı artefakt-DC çıkarılıp
+  **yeniden ölçülmeli**; gerçek n≥3-şekil ne kadar ayırıyor?
 - Rezonant-yakınlığın (Q≈2.24) rolü: N=3,4 için eşik nasıl değişir (G_k düşer)?
 - ~~Model hatası (β-beat) SVD-TSVD tabanını ne kadar yükseltir~~ **YANITLANDI (§8.5):**
   β-beat ≤%2 tabanı yükseltmiyor; asıl belirleyici kaçıklık RMS'i (10μm→9, 100μm→55 nT)
@@ -281,6 +312,10 @@ python3 field_n2_shape.py       # alan vs N=2-kaçıklık azimut spektrumu + kor
 python3 field_n2_dc.py          # DC doğrulama: A_r taraması (lineer, işaret-çeviren)
 python3 field_n2_clean.py       # FAZ A: temiz C++ R_dy (48×48) + A_field (~28 dk, 49 koşu)
 python3 field_n2_clean.py B     # FAZ B: cond, DC/k2, harmonik vs naif-SVD
+python3 field_n2_dcmech.py      # §7: DC ARTEFAKT testi (uniform vs harmonik N-tarama)
+python3 field_n2_betabeat_tilt.py            # §8.5: β-beat/tilt kalibrasyon+arka plan
+python3 field_n2_svdfloor.py                 # §8.5: SVD tabanı (β-beat/tilt, 10μm)
+DMIS_UM=100 python3 field_n2_svdfloor.py     # §8.5: 100μm kaçıklık varyantı
 # TSVD adil karşılaştırma + SV spektrumu: field_n2_clean.npz üzerinden inline (bkz. §5,§4)
 ```
 
