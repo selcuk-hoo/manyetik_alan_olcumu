@@ -182,12 +182,59 @@ doğrulanmalı** (ör. alanı deflektör-dışında da uygulamak, v×B'yi izole 
 **SVD-TSVD (yansız):** ofset-sınırlı gürültü tabanı:
 - 100 μm ofset → ~8.5 nT ; 30 μm → ~5.4 nT ; ofset giderilmiş → ~4.9 nT.
 - + regularizasyon ölçek-yanlılığı (kalibre edilebilir) + null-mod farkındalığı şart.
-- Model kalitesi (β-beat, R doğruluğu) taban belirler; %1 model hatası tabanı yükseltir.
+- Model kalitesi (β-beat, tilt): **doğrudan C++ ile ölçüldü → tabanı YÜKSELTMİYOR** (§8.5);
+  asıl belirleyici kaçıklık RMS'inin kendisi (ofset + truncation kaçağı).
 
 **Özet eşik:** Bu koşullar altında (100 μm ofset, 1 μm gürültü, 10 μm kaçıklık) N=2 alan
 pratik tabanı **~5–8 nT (SVD-TSVD)**; harmonik fit ~53 nT'de yanlı. Sub-nT için hem
 **daha iyi hizalama** (μm) hem **ofset giderme/kalibrasyon** hem **doğru R (demet
-dinamiği + düşük model hatası)** gerekir.
+dinamiği)** gerekir.
+
+---
+
+## 8.5. β-beat, quad tilt ve hizalama-ölçekleme sistematikleri (doğrudan C++)
+
+§8'de "model hatası tabanı yükseltir" dedik; bunu **doğrudan demet dinamiğiyle** ölçtük
+(analitik-Twiss/Test-8 analojisi YOK). Yöntem: geri-çatım **nominal R** ile yapılır ama
+ölçümler **β-beat/tilt'li GERÇEK makineden** C++ ile üretilir → model hatası (R_gerçek ≠
+R_nominal) doğrudan A_r tabanına yansır. İki kaçıklık seviyesinde (rcond=1e-2, 100μm ofset,
+1μm gürültü; NSAMP=8 makine gerçeklemesi):
+
+| senaryo | **10 μm** SVD-TSVD | **100 μm** SVD-TSVD | **100 μm** harmonik |
+|---|---|---|---|
+| analitik baz (model-hatasız) | ±8.6 nT | **±49.8 nT** | — |
+| C++ baz (β-beat/tilt YOK) | ±9.4 | ±58.5 | 707 ± 358 |
+| β-beat %1 (quad_dG) | ±8.4 | ±57.5 | 419 ± 221 |
+| β-beat %2 | ±8.1 | ±44.7 | 542 ± 249 |
+| tilt 1 mrad (+ dx) | ±9.1 (dx=10μm) | **+45 ± 71** (dx=99μm) | 385 ± 314 |
+
+**Üç bulgu:**
+
+1. **Asıl kaldıraç kaçıklık RMS'inin KENDİSİ.** SVD tabanı ~lineer ölçekleniyor
+   (10μm→~9 nT, 100μm→~55 nT). Model-hatasız (analitik) baz bile 100μm'de ±50 nT: bu
+   **TSVD-truncation kaçağı** — büyük dy'nin, koşullanma için atılan küçük-tekil-değerli
+   modlara düşen kısmı geri-çatılamaz, kalan orbit A_r'ye sızar. Sonuç: ~1 nT hedefe
+   **BBA ile ~10 μm hizalama şart**; hizalama β-beat/tilt'ten çok daha belirleyici.
+
+2. **β-beat (≤%2): ölçülebilir etki YOK.** Her iki seviyede de taban gürültü içinde
+   sabit (10μm: 9→8-9; 100μm: 58→45-57). Neden: rcond=1e-2 regularizasyonu zaten
+   ofset+kaçıklık-sınırlı tabana oturuyor, %birkaç R-hatası bu tabanın altında kalıyor;
+   kalibrasyon kayması (§8'deki ~−2/−4%) de A_r≈1 nT üzerinde ~0.02 nT → 9-50 nT tabanda
+   görünmez. (Not: bu, §8.5-öncesi taslaktaki "Test 8 → %1 β-beat 6μm" **analojisini
+   geçersiz kılar**; doğrudan ölçüm o dolaylı kıyası gereksiz kılıyor.)
+
+3. **quad tilt: iyi hizalamada önemsiz, kötü hizalamada gerçek.** 10μm dx'te SVD'ye
+   etkisiz (skew arka planı ~0.3 nT, tabanın altında). Ama **99μm dx'te +45 nT sistematik
+   yanlılık**: modellenmemiş skew-kuplaj (büyük yatay kapalı yörünge → dikeye kaçak),
+   ill-conditioned ters-çevirmede büyütülür. Yani tilt yalnız **yatay kaçıklık büyükse**
+   sorun → yine BBA'ya (küçük dx) işaret eder.
+
+**Sonuç:** "Hiçbiri sonucu ciddi bozmuyor" ifadesi **iyi hizalanmış makinede (≤10 μm)
+doğru** — β-beat ve tilt ihmal edilebilir; tabanı hizalama + BPM ofseti belirler.
+Kötü hizalamada (100 μm) SVD tabanı zaten ~55 nT'ye çıkar ve tilt +45 nT ekler; ama
+o rejimde harmonik (~500 nT) de SVD de kullanılamaz. Reprodüksiyon:
+`field_n2_betabeat_tilt.py` (kalibrasyon+arka plan), `field_n2_svdfloor.py`
+(SVD tabanı; `DMIS_UM=100` ile 100μm).
 
 ---
 
@@ -217,8 +264,10 @@ dinamiği + düşük model hatası)** gerekir.
 - **DC mekanizması** gerçek fizik mi, implementasyon mu? (§7 doğrulaması)
 - DC kanalını açıkça kullanan bir estimator eşiği ne kadar düşürür?
 - Rezonant-yakınlığın (Q≈2.24) rolü: N=3,4 için eşik nasıl değişir (G_k düşer)?
-- Model hatası (β-beat) SVD-TSVD tabanını ne kadar yükseltir (v3.0 Test 8 bağlantısı)?
-- Gerçekçi çok-mod, rastgele-faz kaçıklıkta SVD-TSVD tabanı (burada 10μm tek-seviye).
+- ~~Model hatası (β-beat) SVD-TSVD tabanını ne kadar yükseltir~~ **YANITLANDI (§8.5):**
+  β-beat ≤%2 tabanı yükseltmiyor; asıl belirleyici kaçıklık RMS'i (10μm→9, 100μm→55 nT)
+  + BPM ofseti; tilt yalnız büyük dx'te (+45 nT @99μm) devreye giriyor.
+- Gerçekçi çok-mod, rastgele-faz kaçıklıkta SVD-TSVD tabanı (burada tek-seviye Gauss).
 
 ---
 
