@@ -8,6 +8,16 @@
 > karşılaştırır, sınırlayıcıları (dejenerasyon, BPM ofseti, koşullanma, orbit-görünmez
 > null mod) ayrıştırır ve ölçülebilecek en düşük alanı verir.
 
+> **⚠️ NİHAİ DÜZELTME (bu belgenin başı yanıltıcı olabilir — §5.1 ve §7 esastır):**
+> İlk yazımdaki "SVD-TSVD ~5-8 nT ile harmoniği (~53 nT) geçer" **iddiası ÇÖKTÜ.**
+> İki hata bulundu: (1) SVD'nin ayrımı bir **implementasyon artefaktına** (alanın sahte
+> DC imzası, §7) dayanıyordu; (2) ham std tahminin **gain'ini** saymıyordu (gain-kalibre
+> taban ~17 nT, 8.5 değil). Artefakt çıkarılıp gain-kalibre edilince gerçekçi BPM ofsetinde
+> (100μm) SVD tabanı **~45 nT ≈ harmonik** — üstünlük yok. Asıl duvar **BPM ofseti**dir;
+> yalnız ideal BPM'de (~2.6 nT) ayrım iyileşir. **Sonuç negatif** (offset-sınırı = false-EDM
+> no-go fiziği). Aşağıdaki §2–6 yöntem/mekanizma olarak geçerli; sayısal üstünlük iddiası
+> §5.1'de düzeltildi.
+
 > **Durum notu:** Bu çalışma bir günlük yoğun keşif+hesabın kaydıdır; ileride bir
 > makaleye temel olması için yeterli detay ve yönlendirmeyle yazıldı. Sayılar C++
 > (`integrator.cpp`) demet dinamiğine dayanır; keşif kodu `/tmp/akilli_duzeltme/field_n2_*.py`.
@@ -114,26 +124,55 @@ cond ≈ 1160.
 | 30 μm  | 52.5 ± 27.8 nT | **0.5 ± 5.4 nT** |
 | 0 (ideal) | 52.3 ± 26.6 nT | **0.4 ± 4.9 nT** |
 
-**Okuma:**
+**Okuma (DÜZELTİLMİŞ — bkz. §5.1):**
 - **Harmonik fit ~53 nT YANLI** (ortalama 53, gerçek 1) — alanı 10 μm kaçıklığın k=2
   bileşeninden ayıramıyor; ±30 nT saçılım kaçıklık gerçeklemesinden. Stabil (ofsetle
   değişmiyor) ama **işe yaramaz**: 1 nT alanı 53 nT arka planda göremezsin.
-- **SVD-TSVD ~5–8 nT** — alanı kaçıklıktan **ayırıyor** (ortalama ≈ gerçek); ofset-sınırlı
-  (8.5→4.9). Regularizasyon bir ölçek-yanlılığı getirir (kalibre edilebilir).
-- **SVD ~6–10× daha iyi**, AMA yalnız (a) tam-şekil kullanırsan (b) null modu regularize
-  edersen. Aksi halde harmonikten çok daha kötü.
+- ~~**SVD-TSVD ~5–8 nT** — alanı kaçıklıktan ayırıyor~~ **BU YANLIŞTI.** Yukarıdaki
+  tablodaki ham std, tahminin **gain'ini (alana tepkisini) saymaz**; TSVD regularizasyonu
+  A_r'yi bastırdığından gain≪1. Gain-kalibre gerçek **tespit tabanı ~17 nT** (§5.1),
+  ve bu bile §7 artefakt-DC'sine dayanıyor. Artefakt çıkınca **~45 nT ≈ harmonik.**
 
-> ⚠️ **KRİTİK ÇEKİNCE (§7):** Bu SVD-TSVD karşılaştırması, alan sütunu `A_field`'i
-> **artefakt bir DC bileşeniyle** kullandı (§7'de gösterildi: DC N'den bağımsız,
-> uniform-tepkiye eşit → implementasyon artefaktı, "N=2 imzası" değil). Gerçek makinede
-> DC olmayacağından alan kaçıklıkla daha dejeneredir → **~5-8 nT iyimserdir**. SVD'nin
-> harmonik-fit'i geçen kısmı yalnız gerçek n≥3 şekil farkına dayanmalı; bu tek başına
-> ne kadar ayırır — **artefakt-DC çıkarılıp yeniden ölçülmeli** (açık iş).
+> ⚠️ **KRİTİK (§5.1, §7): "SVD harmoniği geçer, ~5-8 nT" iddiası ÇÖKTÜ.** İki hata:
+> (1) ham std gain'i saymadı → gerçek taban ~17 nT (8.5 değil); (2) o ~17 nT bile §7
+> artefakt-DC'sinden geliyordu — çıkarınca ~45 nT ≈ harmonik ~53 nT. Asıl duvar
+> dejenerasyon değil **BPM ofseti**: ofset=0'da temiz ayrım ~2.6 nT'ye iner, 100μm'de
+> ~45 nT. n≥3 şekil hiç yardım etmez. Ayrıntı §5.1.
 
 **Önemli metodolojik ders:** Aynı problemi **analitik Twiss R** ile çözdüğümüzde
 cond=193 (gerçek 1.2×10⁸'in çok altında) çıkıp SVD'yi yanıltıcı biçimde ~71 nT gösterdi.
 **Tepki matrisi mutlaka gerçek demet dinamiğiyle kurulmalı**; analitik kısayol
 koşullanmayı ve null modu gizliyor.
+
+---
+
+## 5.1. Gain-kalibre tespit tabanı: artefakt-DC ve BPM-ofsetinin gerçek payı
+
+§5'teki ham std yanıltıcıdır: TSVD regularizasyonu A_r yönünü bastırır → tahmin **yanlı**
+(gain = birim-alana tepki ≪ 1), ham std küçük görünür ama alanı ölçmez. Doğru metrik:
+**tespit tabanı = arka-plan std / gain** (rcond bunu minimize edecek şekilde seçilir).
+`A_field`'i 3 sürümde test ettik (`field_n2_nodc.py`; yeni C++ yok):
+(a) tam (artefakt-DC), (b) DC-çıkarılmış (Af−mean), (c) saf k=2 projeksiyonu.
+
+| BPM ofset | (a) artefakt-DC | (b) DC-çıkarılmış | (c) saf k=2 |
+|---|---|---|---|
+| **100 μm** | **16.9 nT** (gain 0.51) | 45.2 nT (gain 0.05) | 45.7 nT |
+| 30 μm | 10.7 | 42.8 | 42.4 |
+| **0 μm** | 9.9 | **2.6** (gain 0.97) | **2.7** |
+
+**Dört sonuç:**
+1. **svd.md'nin "8.5 nT"si gain-hatası:** gain=0.51 → gerçek taban **~17 nT** (100μm ofset).
+2. **Artefakt-DC çıkınca (b): ~45 nT ≈ harmonik ~53 nT** → gerçekçi ofsette SVD'nin
+   üstünlüğü **YOK** (artefaktın verdiği ~2.7× sahteydi).
+3. **Asıl duvar BPM ofseti, dejenerasyon değil:** ofset=0'da (b) ve (c) **~2.6 nT**'ye
+   iner (gain~0.97) — saf-k2 bile ayrılır. Duvar §6 dualitesindeki ofset-inversiyonudur.
+4. **n≥3 şekil işe yaramaz:** (b)≈(c) her ofsette → ayrım tümüyle "k=N vs ofset".
+
+**Nihai (düzeltilmiş):** Pasif orbit okumasıyla N=2 alan tespit tabanı gerçekçi BPM
+ofsetinde (~100μm) **~45 nT** (harmonikle aynı mertebe); yalnız ~ideal BPM'de (~2.6 nT)
+iyileşir. svd.md'nin ilk pozitif iddiası (SVD harmoniği geçer) **geçersiz** — hem
+artefakt hem gain hatasıydı. Bu bir **negatif** sonuç: ofset-sınırı ile squid_bpm/
+false-EDM no-go'suyla aynı fizik.
 
 ---
 
@@ -279,14 +318,14 @@ o rejimde harmonik (~500 nT) de SVD de kullanılamaz. Reprodüksiyon:
 
 ## 10. Sonuç ve açık sorular
 
-**Sonuç.**
+**Sonuç (DÜZELTİLMİŞ — §5.1, §7).**
 1. N=2 alan → dikey k=2 kapalı yörünge; alan ile kaçıklık k=2'de **dejenere** (aynı imza).
 2. **Harmonik fit** basit ve ofsete-dayanıklı ama **yanlı** (~53 nT/10μm) — ayıramaz.
-3. **SVD-TSVD** alanı kaçıklıktan görünürde **ayırır** (~5-8 nT) — ama (a) tepki matrisi
-   **gerçek demet dinamiğiyle** kurulmalı, (b) **null mod regularize** edilmeli, (c) BPM
-   ofseti ılımlı büyür. **ÇEKİNCE:** bu ayrım kısmen §7 artefakt-DC'sine dayandı →
-   ~5-8 nT **iyimser**; gerçek n≥3-şekil ayrımı ayrıca ölçülmeli.
-4. **BPM ofseti** naif ters-çevirmenin katili; TSVD ehlileştirir; harmonikte büyütülmez.
+3. **SVD-TSVD'nin harmoniği geçtiği iddiası GEÇERSİZ** (§5.1): (a) ~5-8 nT ham std gain'i
+   saymadı → gain-kalibre ~17 nT; (b) o da §7 artefakt-DC'sine dayanıyordu → çıkarınca
+   gerçekçi ofsette **~45 nT ≈ harmonik**. n≥3 şekil ayrıma katkı yapmıyor.
+4. **Asıl duvar BPM ofseti** (dejenerasyon değil): ofset=0'da temiz ayrım ~2.6 nT, 100μm'de
+   ~45 nT. §6 dualitesindeki ofset-inversiyon katili; false-EDM no-go'suyla aynı fizik.
 5. **DC imzası ARTEFAKT** (§7): N'den bağımsız, uniform-tepkiye eşit, fiziksel DC=0
    olmalı → düz-bölüm alan-uygulamasının çerçeve hatası. **Ayrım kanalı değil.**
 
@@ -313,6 +352,7 @@ python3 field_n2_dc.py          # DC doğrulama: A_r taraması (lineer, işaret-
 python3 field_n2_clean.py       # FAZ A: temiz C++ R_dy (48×48) + A_field (~28 dk, 49 koşu)
 python3 field_n2_clean.py B     # FAZ B: cond, DC/k2, harmonik vs naif-SVD
 python3 field_n2_dcmech.py      # §7: DC ARTEFAKT testi (uniform vs harmonik N-tarama)
+python3 field_n2_nodc.py        # §5.1: gain-kalibre taban; artefakt-DC/ofset payı (a/b/c)
 python3 field_n2_betabeat_tilt.py            # §8.5: β-beat/tilt kalibrasyon+arka plan
 python3 field_n2_svdfloor.py                 # §8.5: SVD tabanı (β-beat/tilt, 10μm)
 DMIS_UM=100 python3 field_n2_svdfloor.py     # §8.5: 100μm kaçıklık varyantı
