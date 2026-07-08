@@ -1,5 +1,36 @@
 # kmod_bba_sonuclar.md — All-quad AC-BBA linchpin: sonuçlar ve doğrulama
 
+> # ⛔ SUPERSEDED (2026-07) — bu belgenin ana sonucu YANLIŞLANDI
+>
+> Aşağıdaki "per-quad AC-BBA simetrik modu corr **0.997** ile görür, no-go'yu atlar"
+> sonucu **artık geçerli değildir.** Sebebi tek kelimeyle: **optik-nefes.**
+>
+> Bu belgedeki gözlenebilirlik modeli (`ac_bba_observability.py`), bir kuadı modüle
+> etmenin **tüm optiği "nefes aldırdığını"** (β/φ halka boyunca salınır) hesaba
+> katmıyordu — yani *nefessiz* bir idealizasyondu. `squid_bpm_test.md §7` bunu gerçek
+> C++ izleyiciyle test etti ve şunu buldu: demodüle edilen per-quad genlik, modüle
+> edilen kuadın **kendi ofsetiyle değil, komşularının yörüngesiyle** orantılı ve
+> **nefes-domine** (S/B ≈ 0.14, nefes sinyalin ~7 katı). Nefessiz modelde corr=1.000,
+> **nefes dahil corr ≈ 0.07 (≈0)**; üstelik nefes *koherent bir sistematik* olduğundan
+> BPM sayısını artırmak veya SQUID kullanmak (ortalama) onu **söndürmez** (2→48 BPM'de
+> corr ≈ −0.03).
+>
+> **Sonuç:** "Genlik oku, köşegen kalibrasyona böl" biçimindeki per-quad/dağıtık-frekans
+> dalı **ölüdür** (`squid_bpm_test.md §7`). Tek-frekans tüm-quad + **tam matris
+> inversiyonu** dalında nefes engel değildir ama o da **no-go duvarına** çarpar
+> (`squid_bpm_test.md §8`; %0.5 β-beat simetrik modda felaket). Yani her iki dal da
+> kapalı — biri nefesle, biri no-go'yla.
+>
+> **Neden burada durdu:** Bu belge (2026-06) LINCHPIN'in *ilk* nicel kaydıydı ve
+> nefes etkisi henüz modele girmemişti; §4'teki β-beating-sınırlı bütçe (ε≲%0.5–1)
+> de o nedenle iyimserdir. Aşağıdaki metin **tarihsel kayıt** olarak korunur (yöntemin
+> nasıl kurulduğu ve nerede yanıldığı görünsün diye); güncel ve doğru hüküm için
+> **`squid_bpm_test.md §7–§8`** esas alınmalıdır.
+>
+> *(Bu düzeltme, orbit-tarafındaki tüm yöntemlerin — ΔR, per-quad, harmonik, SVD —
+> aynı temel bariyere çarptığı tablosuyla tutarlıdır; bkz. `svd.md §5.1` ve oradaki
+> "simetrik mod orbit-görünmez" birleştirici çerçevesi.)*
+
 > **Durum (2026-06):** Bu belge, `kmod_bba_plani.md`'deki LINCHPIN testinin
 > (all-quad K-modülasyon → per-quad demet-tabanlı hizalama → kalan geometrik-faz
 > sahte-EDM) ilk nicel sonuçlarını kaydeder. Bağımsız okunur. Kod:

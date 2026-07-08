@@ -105,7 +105,8 @@ tarafındaki kesin sınır teoreminde aranıyor.
 │                               #   bulgu: iyi-koşullu/öğrenilebilir/β-beat-şeffaf) AMA
 │                               #   pratik HENÜZ ÇALIŞMIYOR (Plan 2c: null'lama orbit-
 │                               #   düzeltmeyi geçemiyor; harita kaba). Plan 4 (analitik)
-│                               #   gerek. Kol A (spin) çalışır. (ilk "ölü" düzeltildi)
+│                               #   gerek. (2026-07: Kol A/spin de GEÇERSİZ — sahte/
+│                               #   gerçek EDM aynı kanal; spin-null gerçek EDM'i de null'lar)
 ├── akilli_duzeltme_pedagojik.md # ↑ belgenin DERS KİTABI tarzı kardeşi (sıfırdan;
 │                               #   hata+düzeltme hikâyesi, ileri-harita≠inversiyon, SSS)
 ├── MAKALE_POTANSIYELI.md / PROJE_ANALIZI_VE_ONERILER.md / SIMULASYON_PLANI_HIZALAMA.md
@@ -236,7 +237,7 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | Sahte EDM ∝ dx·dy geometrik faz, σ² ölçekleme; dy-only doğrusal/küçük | `false_edm_harmonic_sinir.md §13` |
 | Yörünge-trim k≤4 tek başına ~2.7× (yetmez); simetrik taban ~3×10⁻⁴ gerçek | `false_edm_harmonic_sinir.md §14` |
 | 6 rekonstrüksiyon metodu aynı gözlenebilirlik tabanına çarpar | `false_edm_harmonic_sinir.md §14.5` |
-| Spin ölç-trim simetrik artığı ~6000× temizler (→1.6×10⁻⁷) | `false_edm_harmonic_sinir.md §14.6` |
+| ~~Spin ölç-trim simetrik artığı ~6000× temizler~~ **GEÇERSİZ (2026-07):** `EDMSwitch=0` artefaktı; sahte/gerçek EDM aynı kanal → spin-null gerçek EDM'i de siler | `false_edm_harmonic_sinir.md §14.6` (⛔ düzeltme), `omarov.md §10` |
 | İki-kademe (orbit + spin) pedagojik anlatım | `trim_yontemi_pedagojik.md` |
 | COSY polarimetre performansı + EDM zaman bütçesi (dS_y/dt~1nrad/s tabanı) | `cosy_polarimeter.md` |
 | Omarov SBA + yükselt-söndür; quad-flip neden simetrik alt-uzayı açmaz | `omarov_symmetric_hybrid.md §5,§9` |
@@ -268,7 +269,7 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 | **Tune-yükseltme (Q~10, alternasyon korunur → C++ kararlı) simetriğin YÜKSEK-m parçasını açar (kazanç 71 ≈ antisim; "min-gain" hükmüm yanlıştı). Ama DÜŞÜK-m Q≥16 ister, Q_max=12 (μ=180° stopband) → k-mod ile ~%8-25 kurtarma → sahte-EDM bastırma yalnız ~2× (marjinal). Kaçış kısmen açık ama pratikte yetersiz** | `akilli_duzeltme.md §6.15` |
 | **Yüksek-Q'da KALINAMAZ: sahte-EDM ~g³ ile büyür (g=0.21→0.69'da AYNI kaçıklık için 32×, C++), gerçek EDM (E-alan) sabit → S/N 32× kötü. Yüksek-Q yalnız geçici TANI; kalırsan arka plan patlar, dönersen rekonstrüksiyon ~%25 taşır. (Kullanıcının "güçlü kick→f büyür" sezgisi doğru.)** | `akilli_duzeltme.md §6.15.1` |
 | **Off-momentum spin-sensing (magic-olmayan p + E-rescale): telafi ÇALIŞIR (tek quad ofseti magic f'i 182→0 @+22μm null'lar, rank duvarı yok) AMA off-momentum proxy YANILTIR — geometrik faz σ² AMPLİFİYE olur (∝1/ν_s, kullanıcı sezgisi doğru) fakat 1.-mertebe ISA-eğimi σ¹ aynı ν_s'te ~3600× büyük gömüyor. Tüm ayırma kapalı: δ(kesişim δ~3e-7), faz(desene bağlı 91°), 4-fold(σ¹ sönmez, oran 1.000), RMS(kesişim 62mm), 3D n̂-fit(artık~0, koni 8e-14 temiz), boylamsal S_z(off-magic knob-duyarsız; çalma magic'te σ⁴). Magic ν_s=0 = 1.-mertebeyi nötrleyen TEK nokta** | `akilli_duzeltme.md §6.16` |
-| **Kol A (spin) çalışır (bilgi spinde, doğrudan); Kol B'de bilgi yörüngede ama küçük+karmaşık** | `akilli_duzeltme.md §9`, `§14.6` |
+| ~~Kol A (spin) çalışır; Kol B orbit'te küçük+karmaşık~~ **İKİSİ DE GEÇERSİZ (2026-07): Kol A (spin-trim) sahte/gerçek EDM degenerasyonundan çalışmaz (spin-null gerçek EDM'i de siler); Kol B zaten pratikte çalışmıyordu (§6.10). Simetrik artık hem orbit hem spin tarafından kaldırılamaz → açık problem** | `akilli_duzeltme.md §9` (⛔ düzeltme), `omarov.md §10` |
 | **K-mod+BPM ölçüm zinciri: dağıtık-frekans ÖLÜ (nefes); v2.7 ΔR no-go; lock-in antisim kurtarır, sim kurtaramaz** | `squid_bpm_test.md §7,§8,§9.5` |
 | **Drift izleme (ikinci makale)** | |
 | Kalibrasyon-ref drift: 50 μm BPM ofsetine rağmen 6.6 μm RMS; mutlak 197 μm → 29× | `makale-taslagi-2.md §3.4`, `drift_monitor/drift_monitor_sim.py` |

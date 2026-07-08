@@ -1,5 +1,23 @@
 # akilli_duzeltme.md — "Akıllı düzeltme": sahte-EDM'i null'lamak (misalignment'ı DEĞİL)
 
+> # ⛔ DÜZELTME (2026-07) — "Kol A (spin) çalışır" iddiası GEÇERSİZ
+>
+> Bu belgede tekrar eden **"Kol A (spin ölç-trim) çalışır"** hükmü YANLIŞTIR ve
+> aşağıdaki tüm geçtiği yerler bu notla geçersiz kılınır. Sebep: spin gözlenebiliri
+> dS_y/dt, **sahte-EDM ile gerçek-EDM'i aynı kanalda** (dikey presesyon) taşır.
+> Corrector'la dS_y/dt'yi null'larsan **gerçek EDM'i de null'larsın** → makine EDM-kör.
+> "Sahte-EDM'i spinle ölç-trimle" kendi kendini yok eder. Kol A'nın dayandığı
+> `§14.6` "6000×" sonucu **`EDMSwitch=0`** (gerçek EDM kapalı) ölçümünün artefaktıdır;
+> gerçekte sahte/gerçek ayrılamaz. Sahte'yi gerçek'ten ayıran tek araç CW/CCW farkıdır
+> (Omarov Eq. C1), o da simetrik orbit-kör artığı bırakır (**62× EDM**, `omarov.md §10`);
+> o artık hiçbir spin-trim'le kaldırılamaz. (§6.12'deki zaman-yasağı ikincildir; asıl
+> kusur bu degenerasyondur.)
+>
+> **Güncel doğru tablo:** simetrik orbit-kör artık, **hem orbit** (no-go: ΔR/per-quad/
+> SVD, `svd.md §5.1`, `kmod_bba §superseded`) **hem spin-trim** (bu degenerasyon)
+> tarafından kaldırılamaz → **açık problem.** Kol B (orbit ileri-harita) zaten pratikte
+> çalışmıyordu (§6.10). Aşağıdaki "Kol A çalışır" ifadeleri tarihsel kayıttır.
+
 > **Durum (2026-06-29, DÜZELTİLDİ).** Bu belge, `SONRAKI_OTURUM_PROMPT.md`'de
 > tanımlanan "akıllı düzeltme" fikrinin testidir. Fikir: quad misalignment'ı
 > geri-çatmak yerine (bu *inversiyon* no-go'su), sahte-EDM'i **doğrudan** null'lamak.

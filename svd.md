@@ -402,6 +402,37 @@ o rejimde harmonik (~500 nT) de SVD de kullanılamaz. Reprodüksiyon:
 
 ---
 
+## 9.1. Birleştirici çerçeve: simetrik mod hem orbit hem spin tarafından kaldırılamaz
+
+Bu belgedeki N=2 alan problemi izole değil; repodaki **tüm** yöntemler aynı tek
+bariyere — **orbit-görünmez simetrik alt-uzay** (R_dy'nin S≈2.4×10⁻⁷ null modu) —
+çarpar. Tam tablo (hepsi aynı fiziğin farklı yüzü):
+
+| Yöntem | Neden simetrik modu kaldıramaz | Belge |
+|---|---|---|
+| Harmonik fit (bu belge) | dejenerasyon → yanlı (§3) | `svd.md §3, §5.1` |
+| SVD-TSVD (bu belge) | null mod + BPM-ofset duvarı; gain-kalibre ~45 nT | `svd.md §4, §5.1` |
+| ΔR (iki-gradyan k-mod) | fark operatörü R'nin kötü koşullanmasını miras alır **×** 1/A norm cezası (ikisi çarpışır) | `deltaR_cond.py` demo; `makale-taslagi-2.md §2.4` dualite |
+| Per-quad AC-BBA | **optik-nefes**: modüle edilen kuadın genliği nefes-domine (∝ komşuların yörüngesi), koherent → ortalamayla/SQUID'le sönmez | `squid_bpm_test.md §7`; `kmod_bba_sonuclar.md` (⛔ superseded) |
+| **Spin ölç-trim** | **sahte/gerçek EDM aynı kanalda** (dikey presesyon): sahte'yi null'lamak gerçek EDM'i de null'lar | `omarov.md §10`; `false_edm_harmonic_sinir.md §14.6` (⛔ düzeltme) |
+
+**Kilit içgörü — spin de kaçış DEĞİL:** Uzun süre "orbit göremez ama spin görür,
+spinle ölç-trimle" (`§14.6`, `akilli_duzeltme §9`) diye yazılmıştı; **bu YANLIŞ.**
+Sahte-EDM ile gerçek-EDM **aynı gözlenebilirdir** (dS_y/dt dikey presesyon). Spinle
+sahte-EDM'i sıfırlamak, ölçmek istediğin gerçek EDM'i de sıfırlar. Sahte'yi gerçek'ten
+ayıran **tek** araç CW/CCW farkıdır (Omarov Eq. C1); o da **ortak-mod** sahte-EDM'i
+söndürür ama simetrik artığın CW−CCW (=gerçek EDM) kanalına sızan kısmını bırakır
+(`omarov.md §10`: **62× gerçek EDM**, kimse kapatamıyor). Omarov da geometrik-fazı
+spinle düzeltmeyi **önermez** (SBA "unused in this study", `omarov.md §5`).
+
+**Sonuç:** Simetrik orbit-kör artık, *ölçüm* tarafında (orbit: no-go/koşullanma/nefes;
+spin: gerçek/sahte degenerasyonu) **kaldırılamaz** — geriye yalnız *önleme* kalır:
+misalignment'ı (dolayısıyla CR-ayrımı) baştan küçük tutmak (mekanik hizalama + BBA'nın
+**orbit-görünür** kısmı). Bu, projenin en sağlam ve birleştirici negatif sonucudur;
+`MAKALE_POTANSIYELI.md`'deki "elenen alternatifler + mekanizma" tezine tam oturur.
+
+---
+
 ## 10. Sonuç ve açık sorular
 
 **Sonuç (DÜZELTİLMİŞ — §5.1, §7).**

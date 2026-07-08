@@ -1634,6 +1634,31 @@ parçacık + model fit ile ölçüldü:
 
 ### 14.6 Stage 2 — spin ölç-trim zinciri tamamlıyor (COD + spin uçtan uca)
 
+> # ⛔ DÜZELTME (2026-07) — bu bölümün "6000×" sonucu GERÇEKTE GEÇERSİZ
+>
+> Aşağıdaki "spin ölç-trim simetrik artığı ~6000× temizler → hedef altı" zinciri,
+> sahte EDM'i **`EDMSwitch=0` ile (gerçek EDM KAPALI)** ölçüp null'lar. **Gerçek
+> deneyde bu yapılamaz:** spin gözlenebiliri dS_y/dt, sahte-EDM ile gerçek-EDM'i
+> **aynı kanalda** (dikey presesyon) taşır; ayrılamazlar. Corrector'larla ölçülen
+> dS_y/dt'yi sıfırlarsan **gerçek EDM sinyalini de sıfırlarsın** → makine EDM-kör olur.
+> Yani "sahte-EDM'i spinle ölç, trimle" işlemi kendi kendini yok eder.
+>
+> Sahte ile gerçek EDM'i ayıran **tek** araç CW/CCW farkıdır (Omarov Eq. C1:
+> EDM=½(CW−CCW)); bu, **ortak-mod** sahte-EDM'i söndürür ama simetrik (orbit-kör)
+> artığın CW−CCW kanalına sızan kısmını bırakır — ve **o kısım gerçek EDM'le aynı
+> kanalda olduğundan hiçbir spin-trim'le kaldırılamaz.** `omarov.md §10` bunu doğru
+> nicelemiş: CW/CCW + orbit-düzeltme sonrası simetrik artık **62× gerçek EDM** ve
+> "ne biz, ne SQUID-BPM, ne CW/CCW kapatıyor."
+>
+> **Ayrıca** (ikincil, `akilli_duzeltme.md §6.12`): dS_y/dt'yi EDM seviyesinde
+> ölçmek istatistik-yavaştır (~yıllar) → iteratif spin-null pratikte de imkânsız.
+> Ama **asıl kusur degenerasyondur** (yukarıdaki), zaman değil.
+>
+> **Özet:** Simetrik orbit-kör artık, orbit tarafından (no-go) **ve** spin-trim
+> tarafından (gerçek/sahte degenerasyonu) kaldırılamaz → **açık problem.** Omarov da
+> onu spinle düzeltmeyi önermez (SBA geometrik-faz için "unused in this study",
+> `omarov.md §5`). Aşağıdaki metin tarihsel kayıttır; hüküm için `omarov.md §10`.
+
 Orbit-trim'in çarptığı simetrik-alt-uzay tabanı (orbit-görünmez) spin kademesiyle
 temizlendi. Senaryo: 200μm dx+dy (seed 0), orbit-trim sonrası artık ≈ simetrik kısım
 (QF/QD hücre-içi ortalaması, RMS ~141μm), f₀ ölçüldü; simetrik mod S₂'nin spin
