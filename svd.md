@@ -60,31 +60,71 @@ açıkça kaydeder (bkz. §12).
 
 ## 1.1. Literatür bağlamı ve bu çalışmanın konumu
 
-Bu problem üç yerleşik literatür koluyla kesişir; katkı iddiası ancak onlara karşı
-tanımlanabilir:
+Bu problem yerleşik literatürün dört koluyla kesişir; her birinin ne yaptığını,
+bizim hangi parçamızı **öncelediğini (preempt)** ve neyi **açık bıraktığını** ayrı
+ayrı vermek, özgünlük iddiasını dürüstçe konumlamanın tek yoludur.
 
-- **SVD ile yörünge gözlenebilirliği (çekirdek makine — ÖZGÜN DEĞİL).** §4'te kullandığımız
-  her şey — tepki matrisinin SVD'si, tekil-değer spektrumu, harmonik baz vektörlerinin
-  tam-sayı tune'a oturması (R_ij ∝ √(β_iβ_j)cos(|φ_i−φ_j|−πν) = bizim G_k yasamız),
-  "decoupled"/gözlenemez modlar ve ε-truncation (=TSVD) — **Chung, Decker & Evans
-  (PAC 1993, s.2263)** tarafından kurulmuştur. Yani SVD-gözlenebilirlik *aygıtı* 1993'tür.
-- **Dejenerasyon → yanlı estimator (KAVRAMSAL komşu).** §3/§5.1'in iskeleti — dejenere
-  ters-problemde estimatorün *yanlı* olması, bias/varyans/MSE ayrışımı — **Wegscheider,
-  Vilsmeier vd. (PRAB 26, 032803, 2023)** tarafından çember örgülerde formelleştirilir.
-  Fark: onlar *gradyan/optik* dejenerasyonuna (LOCO), biz *alan↔transvers-kaçıklık*
-  dejenerasyonuna bakar; ama estimator-teorisi dili birebir aynıdır.
-- **Aktif BBA (DAHA GÜÇLÜ rakip kanal).** Bu belgedeki *pasif* orbit okuması, per-quad
-  demet-tabanlı hizalamanın (AC-BBA: *Fast beam-based alignment using ac excitations*,
-  PRAB 23, 012802; *Simultaneous BBA*, arXiv:2203.14869) zayıf bir alternatifidir;
-  kendi repomuzda `kmod_bba_sonuclar.md` bunun no-go'yu nasıl atladığını (simetrik+antisim
-  modları eşit, corr 0.997, ofsete bağışık) gösterir. Pasif okumanın buna karşı üstünlüğü
-  yoktur — bu belgenin negatif sonucu (§5.1) bunu niceliksel doğrular.
+**(1) SVD ile kapalı-yörünge gözlenebilirliği — Chung, Decker & Evans (PAC 1993,
+s.2263).** Bu makale, depolama halkasında **global yörünge düzeltmesi** için tepki
+matrisi R'nin (BPM ↔ korektör) tekil-değer ayrışımını (SVD) kurar. Getirdiği ve
+bizim §4'te birebir kullandığımız kavramlar: (i) R = UWVᵀ ayrışımı; her tekil değer
+$w_n$ bir "t-BPM ↔ t-korektör" kanalının **verimini** verir; (ii) küçük/sıfır tekil
+değerli **"decoupled" (gözlenemez) modlar** düzeltilemez — yörünge o modlarda
+korunur; (iii) bu modları atan **singülerlik-reddi parametresi ε** (= bizim
+TSVD kesme eşiğimiz); (iv) baz vektörlerin **tam-sayı tune harmoniğine** oturması
+($R_{ij}\propto\sqrt{\beta_i\beta_j}\cos(|\phi_i-\phi_j|-\pi\nu)$; harmonik-limitte
+tam bizim $G_k=C/|Q^2-k^2|$ yasamız), yani en verimli düzeltme harmonik ≈ tune'da.
+**Öncelediği:** §4'ün *tüm* SVD-gözlenebilirlik aygıtı ve null-mod/TSVD mantığı.
+**Açık bıraktığı (bizim probleme özgü):** alanı kaçıklıktan **ayırma** ($[R_{dy}|A_{field}]$),
+BPM-ofset dualitesi ve sahte-EDM alt-uzayı — bunlar 1993'te yok. (Ama §5.1 bu
+"özgün kalıntının" da tutmadığını gösterir.)
 
-**Kendi git-içi denemelerimizle bağ:** bu çalışma tek başına durmaz; repodaki dört iş
-koluyla iç içedir — drift-izleme + dualite teoremi (`makale-taslagi-2.md`), false-EDM
-harmonik sınırı (`false_edm_harmonic_sinir.md`), K-mod+BPM ölçüm zinciri
-(`squid_bpm_test.md`) ve AC-BBA linchpin (`kmod_bba_sonuclar.md`). Aşağıda ilgili
-yerlerde bu belgelere atıf verilir; toplu değerlendirme `MAKALE_POTANSIYELI.md`'dedir.
+**(2) Dejenerasyon → yanlı estimator — Wegscheider, Vilsmeier vd. (PRAB 26,
+032803, 2023).** Çember örgülerin **ters-modellemesinde** (orbit-response'tan
+parametre çıkarımı) dejenerasyonu formelleştirir: bir parametre-kombinasyonu
+ölçümde iz bırakmıyorsa estimator o yönde **yanlı** (biased) olur, ve toplam hata
+**MSE = Varyans + Yanlılık²** olarak ayrışır (pür-dejenerasyon vs kuazi-dejenerasyon
+ayrımı, Jacobian rank-eksikliği). **İlişki:** §3'teki harmonik-fit'imiz tam bir
+"pür-dejenere → Yanlılık-domine" estimatordür (Var küçük, Bias ~53 nT); §5.1'deki
+gain-varyans takası da bu MSE ayrışımının operasyonel yüzüdür. **Fark:** Wegscheider
+*kuadrupol gücü/optik* (LOCO-tipi gradyan) dejenerasyonuna bakar; biz
+*alan ↔ transvers-kaçıklık* dejenerasyonuna. Estimator-teorisi dili özdeş, fiziksel
+parametre farklı → komşu ama tam-eş değil.
+
+**(3) Aktif demet-tabanlı hizalama (BBA) — daha güçlü rakip kanal.** Bu belgedeki
+*pasif* yörünge okuması, kuad gücünü modüle edip demet-kuad ofsetini okuyan **aktif**
+yöntemlerin zayıf bir alternatifidir: *Fast beam-based alignment using ac excitations*
+(PRAB 23, 012802; her kuadı ayrı AC frekansta uyarıp lock-in ile ofset okur) ve
+*Simultaneous BBA for multiple magnets* (arXiv:2203.14869; çoklu-mıknatısı eşzamanlı).
+Aktif BBA'nın *prensipteki* üstünlüğü matris-inversiyonu değil **ileri-projeksiyon**
+yapması ve statik ofseti demodülasyonla söndürmesidir. **AMA** kendi repomuzda
+(`kmod_bba_sonuclar.md`, ⛔ superseded) bu üstünlüğün **optik-nefes** yüzünden gerçek
+makinede çöktüğünü gösterdik (`squid_bpm_test.md §7`; modüle edilen kuadın demodüle
+genliği kendi ofsetiyle değil komşuların yörüngesiyle orantılı, koherent → sönmez).
+Yani pasif okumanın aktif BBA'ya *pratik* üstünlüğü yok; her ikisi de simetrik-mod +
+ofset duvarına çarpar (§9.1).
+
+**(4) Yakın ama eş-olmayan diğerleri.** *Mirza vd.* (PRAB 22, 072804): simetrik/
+near-simetrik örgüde circulant-ORM ile yörünge **düzeltmesi** — gözlenebilirlik/
+drift/EDM yok. *Ziemann & Ziemann* (arXiv:2104.05300): dither ile korektör↔yörünge
+ORM'sini online **günceller** — misalignment/drift izleme değil. *Rossbach* (Particle
+Accel. 23, 1989): koherent yer-hareketi → COD *büyüklüğü* fiziği; tanı/gözlenebilirlik
+çerçevesi değil. Bunlar bizim problemi preempt etmez ama komşu literatürdür.
+
+**Fiziksel motivasyon zinciri (EDM bütçesi).** N=2 alanın *neden* ölçülmek istendiği,
+sahte-EDM bütçesine bağlıdır: *Hacıömeroğlu & Semertzidis* (arXiv:1709.01208, all-
+elektrik halka) kaçıklık→sahte-EDM'i, *Omarov vd.* (PRD 105, 032001, 2022) manyetik-
+quad FODO için tam bütçeyi türetir (hedef ~1 nrad/s ≈ 10⁻²⁹ e·cm). Radyal alan bu
+bütçenin doğrudan bir kalemidir — ama §1'de belirtildiği gibi asıl EDM taklidi N=0
+(ortalama) radyal alandır; N=2'nin fiziksel gerekçesi henüz bu bütçeye bağlanmamıştır.
+
+**Kendi git-içi denemelerimizle bağ.** Bu çalışma tek başına durmaz; repodaki iş
+kollarının kesişimidir ve onların sonuçlarını pekiştirir: drift-izleme + dualite
+teoremi (`makale-taslagi-2.md §2.4`, ‖ΔR⁻¹‖~‖R⁻¹‖/ε), false-EDM harmonik sınırı ve
+simetrik alt-uzay (`false_edm_harmonic_sinir.md §14`), K-mod+BPM ölçüm zinciri
+(`squid_bpm_test.md §7–9.5`) ve AC-BBA (`kmod_bba_sonuclar.md`). Aşağıda ilgili
+yerlerde bu belgelere atıf verilir; toplu yayın değerlendirmesi `MAKALE_POTANSIYELI.md`,
+tam kaynakça §13'tedir.
 
 ---
 
