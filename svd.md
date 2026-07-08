@@ -42,6 +42,48 @@ magnetic field".)
 (nT mertebesinde) tahmin etmek. Zorluk: aynı k=2 yörüngeyi **quad hizalama hataları**
 da üretir → alan ile kaçıklık **dejeneredir**; ayrıca BPM ofsetleri ve gürültü vardır.
 
+**Neden nT ölçeği önemli? (EDM cetveli.)** Bu deneyin birincil sistematiği, EDM
+sinyalini (dikey spin presesyonu) taklit eden alanlardır. Hacıömeroğlu & Semertzidis
+(all-elektrik halka, arXiv:1709.01208) elektrostatik elemanların kaçıklığından doğan
+sahte-EDM'i türetir; Omarov vd. (PRD 105, 032001) manyetik-quad'lı FODO tasarımı için
+tam sistematik bütçeyi çıkarır ve hedefi **~1 nrad/s ≈ 10⁻²⁹ e·cm** olarak sabitler.
+Radyal manyetik alan bu bütçenin doğrudan bir kalemidir. **Önemli incelik:** asıl EDM
+taklidi **ortalama (N=0) radyal alandır**; bir N=2 alanın *birinci-mertebe* net dikey
+presesyonu sıfırdır (§7'deki ∫cos2θ=0). Dolayısıyla N=2'yi ölçmenin fiziksel
+motivasyonu, doğrudan EDM taklidi değil, ya belirli bir hata-kaynağının imzası ya da
+bir tanı-vekilidir — ve bu belge, o motivasyonun **henüz EDM bütçesine bağlanmadığını**
+açıkça kaydeder (bkz. §12).
+
+---
+
+## 1.1. Literatür bağlamı ve bu çalışmanın konumu
+
+Bu problem üç yerleşik literatür koluyla kesişir; katkı iddiası ancak onlara karşı
+tanımlanabilir:
+
+- **SVD ile yörünge gözlenebilirliği (çekirdek makine — ÖZGÜN DEĞİL).** §4'te kullandığımız
+  her şey — tepki matrisinin SVD'si, tekil-değer spektrumu, harmonik baz vektörlerinin
+  tam-sayı tune'a oturması (R_ij ∝ √(β_iβ_j)cos(|φ_i−φ_j|−πν) = bizim G_k yasamız),
+  "decoupled"/gözlenemez modlar ve ε-truncation (=TSVD) — **Chung, Decker & Evans
+  (PAC 1993, s.2263)** tarafından kurulmuştur. Yani SVD-gözlenebilirlik *aygıtı* 1993'tür.
+- **Dejenerasyon → yanlı estimator (KAVRAMSAL komşu).** §3/§5.1'in iskeleti — dejenere
+  ters-problemde estimatorün *yanlı* olması, bias/varyans/MSE ayrışımı — **Wegscheider,
+  Vilsmeier vd. (PRAB 26, 032803, 2023)** tarafından çember örgülerde formelleştirilir.
+  Fark: onlar *gradyan/optik* dejenerasyonuna (LOCO), biz *alan↔transvers-kaçıklık*
+  dejenerasyonuna bakar; ama estimator-teorisi dili birebir aynıdır.
+- **Aktif BBA (DAHA GÜÇLÜ rakip kanal).** Bu belgedeki *pasif* orbit okuması, per-quad
+  demet-tabanlı hizalamanın (AC-BBA: *Fast beam-based alignment using ac excitations*,
+  PRAB 23, 012802; *Simultaneous BBA*, arXiv:2203.14869) zayıf bir alternatifidir;
+  kendi repomuzda `kmod_bba_sonuclar.md` bunun no-go'yu nasıl atladığını (simetrik+antisim
+  modları eşit, corr 0.997, ofsete bağışık) gösterir. Pasif okumanın buna karşı üstünlüğü
+  yoktur — bu belgenin negatif sonucu (§5.1) bunu niceliksel doğrular.
+
+**Kendi git-içi denemelerimizle bağ:** bu çalışma tek başına durmaz; repodaki dört iş
+koluyla iç içedir — drift-izleme + dualite teoremi (`makale-taslagi-2.md`), false-EDM
+harmonik sınırı (`false_edm_harmonic_sinir.md`), K-mod+BPM ölçüm zinciri
+(`squid_bpm_test.md`) ve AC-BBA linchpin (`kmod_bba_sonuclar.md`). Aşağıda ilgili
+yerlerde bu belgelere atıf verilir; toplu değerlendirme `MAKALE_POTANSIYELI.md`'dedir.
+
 ---
 
 ## 2. Orbit yanıtının kalibrasyonu (C++ demet dinamiği)
@@ -88,6 +130,13 @@ $$\text{ölçülen } k{=}2 = \underbrace{A_0 A_r}_{\text{alan}} + \underbrace{M_
 Alanın k=2'si ile kaçıklığın k=2'si **ayrılamaz** (dejenere). Tek sayı, dört katkıyı
 çözemez → tahmin **kaçıklık+ofsetle yanlı**.
 
+> **Estimator-teorisi dili (Wegscheider 2023).** Bu tam olarak dejenere ters-problemde
+> "yanlı estimator" durumudur: ölçülen k=2 katsayısı, gerçek A_r'nin *biased* bir
+> tahminidir çünkü kaçıklık katkısı (M₀·D_{k2}) sistematik olarak eklenir. Wegscheider
+> vd. (PRAB 26, 032803) bu yanlılığı MSE = Var + Bias² ayrışımıyla nicelerler; bizim
+> harmonik-fit'imiz **Bias-domine** (Var küçük, Bias~53 nT), SVD ise Bias'ı azaltmaya
+> çalışırken Var'ı büyütür (§5.1'deki gain-varyans takası tam bu ayrışımdır).
+
 ---
 
 ## 4. SVD geri-çatım yöntemi (tam-şekil, ters-çevirme VAR)
@@ -103,11 +152,22 @@ $$\mathbf{y} = R_{dy}\,\mathbf{dy} + A_{field}\,A_r + \mathbf{ofset} + \mathbf{g
 harmonik fit'in attığı bilgiyi kullanır. **R_dy TEMİZ C++ ile kuruldu** (48 quad'a tek
 tek dy perturbasyonu → C++ kapalı yörünge → 48-BPM sütunu; analitik Twiss DEĞİL).
 
+> **Bu makine 1993'ten (PAC 1993, Chung–Decker–Evans).** Tepki matrisinin SVD'si,
+> tekil değerlerin fiziksel yorumu (her mod bir "t-BPM ↔ t-corrector" kanalı, verimi
+> tekil değer), harmonik baz vektörlerinin tam-sayı tune harmoniğine oturması ve küçük
+> tekil değerli **decoupled/gözlenemez** modların ε ile atılması — hepsi o makalede
+> vardır. Bizim k-uzayı köşegen yaklaşımımız R_k = G_k = C/|Q²−k²| onların
+> R_ij ∝ √(β_iβ_j)cos(|φ_i−φ_j|−πν) ifadesinin harmonik-limitidir. Yani §4'ün *aygıtı*
+> özgün değildir; özgünlük iddiası (varsa) uygulamada — alanı kaçıklıktan ayırmada —
+> aranmalı ve §5.1 bunun da tutmadığını gösterir.
+
 **Kritik: R_dy korkunç ill-conditioned.** Tekil değer spektrumu:
 `28.1, 27.8, 9.96, ... , 0.043, 0.030, 2.4×10⁻⁷`. **Son mod ~sıfır** — bu, çok az
-kapalı yörünge üreten **orbit-görünmez** mod (false-EDM çalışmasındaki simetrik/yüksek-k
-alt-uzay). cond(R_dy) ≈ 1.2×10⁸, tamamı bu **tek null moddan**; onu dışlarsak etkin
-cond ≈ 1160.
+kapalı yörünge üreten **orbit-görünmez** mod. Aynı mod repomuzda tekrar tekrar çıkar:
+false-EDM'in simetrik/yüksek-k alt-uzayı (`false_edm_harmonic_sinir.md §14`), drift
+makalesinin "en kötü 8 modu %96 simetrik, 193× gürültü" bulgusu (`makale-taslagi-2.md
+§3.8`) ve squid_bpm'in simetrik no-go'su (`squid_bpm_test.md §9.5`). cond(R_dy) ≈ 1.2×10⁸,
+tamamı bu **tek null moddan**; onu dışlarsak etkin cond ≈ 1160.
 
 **Sonuç: regularizasyon ŞART.**
 - **Naif ters-çevirme** (`lstsq`, tüm modlar): null mod ofseti ~4×10⁶ büyütür →
@@ -151,6 +211,15 @@ koşullanmayı ve null modu gizliyor.
 §5'teki ham std yanıltıcıdır: TSVD regularizasyonu A_r yönünü bastırır → tahmin **yanlı**
 (gain = birim-alana tepki ≪ 1), ham std küçük görünür ama alanı ölçmez. Doğru metrik:
 **tespit tabanı = arka-plan std / gain** (rcond bunu minimize edecek şekilde seçilir).
+
+> **"Gain" nedir? (sezgi.)** Çok gevşek yaylı bir terazi düşünün: 1 kg koyunca ibre
+> yalnız 0.05 birim oynuyor (gain=0.05). İbre titreşimi (gürültü) ±2 birimse, ağırlığı
+> ancak ±2/0.05 = ±40 kg belirsizlikle okursunuz. TSVD, dejenere A_r yönünü "gevşetir"
+> → gain düşer; ham ±2'lik titreşimi "±2 kg hassasiyet" sanmak (svd.md'nin ilk hatası)
+> yanlıştır, gerçek hassasiyet gain'e bölünür. Bu, Wegscheider'ın MSE=Var+Bias²
+> ayrışımının (§3) operasyonel yüzüdür ve ters-problem makalelerinde sık yapılan bir
+> okuma hatasıdır — tek başına aktarılabilir bir metodolojik ders.
+
 `A_field`'i 3 sürümde test ettik (`field_n2_nodc.py`; yeni C++ yok):
 (a) tam (artefakt-DC), (b) DC-çıkarılmış (Af−mean), (c) saf k=2 projeksiyonu.
 
@@ -191,6 +260,14 @@ Yani "BPM ofseti geri-çatımın katilidir" sezgisi **naif** ters-çevirme için
 proper TSVD onu ehlileştirir (100μm ofset → ~7 nT katkı, felaket değil). Harmonik
 okumada ofset zaten büyütülmez ama fit dejenerasyonla yanlı olduğundan bu avantaj
 kurtarmaz.
+
+> **Bu, kendi dualite teoremimizin bir örneğidir.** `makale-taslagi-2.md §2.4`, iki-ölçümlü
+> tam-ofset-iptal eden estimator sınıfında ‖ΔR⁻¹‖ ~ ‖R⁻¹‖/ε yapısal alt sınırını türetir:
+> ofseti iptal etmek için ödenen bedel, ters-matris normunun 1/ε büyümesidir. Burada
+> aynı fizik tek-ölçümde görünür — ofset, R⁻¹'in küçük-tekil-değerli (1/G_k dev) modlarında
+> patlar. §5.1'in "asıl duvar dejenerasyon değil BPM ofseti" sonucu, o teoremin bu probleme
+> yansımasıdır; squid_bpm zincirinde de aynı duvar var (`squid_bpm_test.md §8 ΔR no-go`,
+> `§9.5 simetrik no-go <4nm`).
 
 ---
 
@@ -361,3 +438,73 @@ DMIS_UM=100 python3 field_n2_svdfloor.py     # §8.5: 100μm kaçıklık varyant
 
 Çekirdek: `integrator.cpp` (GL4 semplektik izleyici, `B0rad_harm_amp/N` radyal harmonik
 alan), `false_edm_4d.find_co_4d` (4D kapalı yörünge). `integrator.cpp` DEĞİŞTİRİLMEDİ.
+
+---
+
+## 12. İlişkili çalışmalar ve özgünlük konumu
+
+**(A) Dış literatür.** Aşağıdaki tablo, bu belgenin her ana bileşeninin literatürdeki
+karşılığını ve "preempt ediyor mu?" durumunu verir (tam metin analizleri `literatur/`):
+
+| Bileşen (bu belge) | En yakın literatür | Durum |
+|---|---|---|
+| SVD-gözlenebilirlik, G_k, ε-truncation (§4) | Chung–Decker–Evans, PAC 1993 s.2263 | **Preempt (aygıt 1993'lük)** |
+| Dejenerasyon → yanlı estimator, MSE (§3, §5.1) | Wegscheider–Vilsmeier, PRAB 26, 032803 (2023) | **Komşu** (onlar gradyan/optik, biz alan↔kaçıklık) |
+| Radyal alan → sahte-EDM bütçesi (§1) | Hacıömeroğlu–Semertzidis, arXiv:1709.01208 (all-elektrik); Omarov vd., PRD 105, 032001 | Motivasyon; N=2 için cetvel **yok** |
+| Aktif per-quad ölçüm (daha güçlü kanal) | Fast-BBA (PRAB 23, 012802); Simultaneous-BBA (arXiv:2203.14869) | Pasif okumanın **üstünü** çizer |
+| Simetrik/near-simetrik örgüde ORM | Mirza vd., PRAB 22, 072804 (circulant) | Düzeltme; gözlenebilirlik/EDM yok |
+| Sürekli/online ORM güncelleme | Ziemann & Ziemann, arXiv:2104.05300 | Corrector↔orbit dither; misalignment değil |
+| Koherent yer-hareketi → COD | Rossbach, Particle Accel. 23 (1989) | Bozulma büyüklüğü; tanı çerçevesi değil |
+
+**(B) Kendi git-içi denemelerimiz.** Bu belge repodaki iş kollarının bir *kesişimidir*
+ve onların sonuçlarını tekrar üretir/pekiştirir:
+
+| Bağ | Belge | İlişki |
+|---|---|---|
+| Ofset-inversiyon duvarı = dualite teoremi | `makale-taslagi-2.md §2.4` | §5.1/§6 duvarı o teoremin bu probleme yansıması |
+| Orbit-görünmez null mod (simetrik alt-uzay) | `false_edm_harmonic_sinir.md §14`, `makale-taslagi-2.md §3.8` | §4'teki S=2.4×10⁻⁷ modu aynı fizik |
+| BPM-ofset + ΔR no-go, simetrik <4nm | `squid_bpm_test.md §8, §9.5` | §6 ofset katili; simetriğe körlük |
+| AC-BBA no-go'yu atlar (corr 0.997) | `kmod_bba_sonuclar.md` | §1.1'deki "aktif kanal üstün" iddiasının kanıtı |
+| Sahte-EDM ∝ σ², geometrik faz | `false_edm_harmonic_sinir.md §13`, `orbit_ileri_olcum.md §9` | N=2 alanın 1.-mertebe EDM taklidinin niçin sıfır olduğuyla tutarlı |
+| Toplu yayın değerlendirmesi | `MAKALE_POTANSIYELI.md` | Bu belgenin hangi makaleye ekleneceği |
+
+**(C) Bu belgenin özgün kalıntısı (dürüst).** SVD-gözlenebilirlik aygıtı (PAC1993) ve
+dejenerasyon-estimator çerçevesi (Wegscheider) verildiğinde, geriye kalan savunulabilir
+katkı **bir negatif sonuç + iki metodolojik uyarıdır**: (1) alan↔kaçıklık dejenerasyonu
+ve BPM-ofset duvarı nedeniyle pasif orbit okumasının N=2 alanı gerçekçi koşulda
+harmonik-fit'ten daha iyi ölçemediği (§5.1); (2) tepki matrisi analitik-Twiss yerine
+**demet dinamiğiyle** kurulmazsa koşullanma/null-mod gizlenir (§4–5); (3) regularize
+tahminlerde **ham std ≠ tespit tabanı**, gain-kalibrasyon şarttır (§5.1). Üçü de bağımsız
+makale taşımaz; drift-izleme (`makale-taslagi-2.md`) veya trim makalesine **sistematik/
+metodoloji bölümü** olarak eklenir.
+
+---
+
+## 13. Kaynaklar
+
+**Dış literatür** (tam metinler `literatur/`; telif — yalnız iç referans):
+1. Y. Chung, G. Decker, K. Evans, "Closed Orbit Correction Using SVD of the Response
+   Matrix," Proc. PAC 1993, s.2263. → `literatur/ref_pac1993_2263.md`
+2. S. Wegscheider, A. Vilsmeier vd., "Inverse modeling of circular lattices via orbit
+   response in the presence of degeneracy," PRAB **26**, 032803 (2023). →
+   `literatur/ref_wegscheider_degeneracy.md`
+3. S. Hacıömeroğlu, Y. Semertzidis, "Systematic errors related to quadrupole misplacement
+   in an all-electric storage ring for proton EDM," arXiv:1709.01208. →
+   `literatur/ref_allelectric_quad_misplacement.md`
+4. Z. Omarov vd., "Comprehensive symmetric-hybrid ring design for a proton EDM experiment
+   at below 10⁻²⁹ e·cm," PRD **105**, 032001 (2022). → `omarov.md`, `omarov_symmetric_hybrid.md`
+5. "Fast beam-based alignment using ac excitations," PRAB **23**, 012802. →
+   `literatur/ref_fast_bba_ac.md`
+6. "Simultaneous beam-based alignment measurement for multiple magnets," arXiv:2203.14869.
+   → `literatur/ref_simultaneous_bba.md`
+7. M. Mirza vd., "Closed orbit correction for symmetric/near-symmetric lattices," PRAB
+   **22**, 072804. → `literatur/ref_mirza_symmetric_circulant.md`
+8. V. Ziemann, M. Ziemann, "Noninvasively improving the ORM…," arXiv:2104.05300. →
+   `literatur/ref_continuous_orm.md`
+9. J. Rossbach, "…ground motion…," Particle Accel. **23**, 121 (1989). →
+   `literatur/ref_rossbach_groundwaves.md`
+
+**Repo-içi belgeler** (bağımsız okunur): `makale-taslagi-2.md` (drift + dualite),
+`false_edm_harmonic_sinir.md` (sahte-EDM sınırı), `squid_bpm_test.md` (K-mod+BPM zinciri),
+`kmod_bba_sonuclar.md` (AC-BBA linchpin), `MAKALE_POTANSIYELI.md` (yayın değerlendirmesi),
+`literatur/README.md` (özgünlük karşılaştırma tablosu).
