@@ -8,15 +8,17 @@
 > karşılaştırır, sınırlayıcıları (dejenerasyon, BPM ofseti, koşullanma, orbit-görünmez
 > null mod) ayrıştırır ve ölçülebilecek en düşük alanı verir.
 
-> **⚠️ NİHAİ DÜZELTME (bu belgenin başı yanıltıcı olabilir — §5.1 ve §7 esastır):**
-> İlk yazımdaki "SVD-TSVD ~5-8 nT ile harmoniği (~53 nT) geçer" **iddiası ÇÖKTÜ.**
-> İki hata bulundu: (1) SVD'nin ayrımı bir **implementasyon artefaktına** (alanın sahte
-> DC imzası, §7) dayanıyordu; (2) ham std tahminin **gain'ini** saymıyordu (gain-kalibre
-> taban ~17 nT, 8.5 değil). Artefakt çıkarılıp gain-kalibre edilince gerçekçi BPM ofsetinde
-> (100μm) SVD tabanı **~45 nT ≈ harmonik** — üstünlük yok. Asıl duvar **BPM ofseti**dir;
-> yalnız ideal BPM'de (~2.6 nT) ayrım iyileşir. **Sonuç negatif** (offset-sınırı = false-EDM
-> no-go fiziği). Aşağıdaki §2–6 yöntem/mekanizma olarak geçerli; sayısal üstünlük iddiası
-> §5.1'de düzeltildi.
+> **NİHAİ SONUÇ (negatif).** Pasif orbit okumasıyla N=2 alanın pratik tespit tabanı,
+> gerçekçi BPM ofsetinde (~100 μm) **~45 nT** — harmonik-fit ile aynı mertebe, yani
+> **SVD'nin üstünlüğü yoktur** ve 1 nT ölçülemez. Taban yalnız ~ideal BPM ofsetinde
+> (~2.6 nT) iyileşir; **asıl kısıt dejenerasyon değil BPM ofsetidir** (§5.1, §6). Sub-nT
+> için pasif orbit yetmez → aktif per-quad BBA gerekir (`kmod_bba_sonuclar.md`).
+>
+> **Not (dürüstlük/günlük):** Bu belgenin ilk sürümü "SVD ~5-8 nT ile harmoniği geçer"
+> diyordu; bu **iki hatadan** ötürü YANLIŞTI — (1) ayrım bir implementasyon artefaktına
+> (sahte DC imzası, §7) dayanıyordu; (2) ham std tahminin **gain'ini** saymıyordu (§5.1).
+> İkisi de düzeltildi ve doğru sonuç yukarıdadır. Yanlış sürümü, nasıl aşıldığını
+> göstermek için §5/§5.1/§7'de etiketli olarak sakladık (araştırma-günlüğü kaydı).
 
 > **Durum notu:** Bu çalışma bir günlük yoğun keşif+hesabın kaydıdır; ileride bir
 > makaleye temel olması için yeterli detay ve yönlendirmeyle yazıldı. Sayılar C++
@@ -178,13 +180,17 @@ tamamı bu **tek null moddan**; onu dışlarsak etkin cond ≈ 1160.
 
 ## 5. Doğrudan karşılaştırma (temiz C++, gerçek A_r = 1 nT, 10 μm rastgele kaçıklık)
 
-| BPM ofset | Harmonik fit A_r | SVD-TSVD A_r (regularize) |
-|---|---|---|
-| 100 μm | 56.6 ± 29.5 nT | **0.4 ± 8.5 nT** |
-| 30 μm  | 52.5 ± 27.8 nT | **0.5 ± 5.4 nT** |
-| 0 (ideal) | 52.3 ± 26.6 nT | **0.4 ± 4.9 nT** |
+> **Bu bölümün ham SVD rakamları YANILTICIDIR; gerçek sonuç §5.1'dedir.** Aşağıdaki
+> tablo ham istatistikleri gösterir; "SVD std" sütunu gain'i saymadığından tespit
+> tabanı SANILMAMALIDIR (§5.1'de gain-kalibre edilince ~45 nT çıkar, 8.5 değil).
 
-**Okuma (DÜZELTİLMİŞ — bkz. §5.1):**
+| BPM ofset | Harmonik fit A_r (ort±std) | SVD-TSVD A_r **ham** (ort±std, gain'siz) |
+|---|---|---|
+| 100 μm | 56.6 ± 29.5 nT | 0.4 ± 8.5 nT  *(gain 0.51 → gerçek ~17→§7'siz ~45)* |
+| 30 μm  | 52.5 ± 27.8 nT | 0.5 ± 5.4 nT |
+| 0 (ideal) | 52.3 ± 26.6 nT | 0.4 ± 4.9 nT *(gain~1 → gerçek ~2.6)* |
+
+**Okuma (DÜZELTİLMİŞ — asıl sonuç §5.1):**
 - **Harmonik fit ~53 nT YANLI** (ortalama 53, gerçek 1) — alanı 10 μm kaçıklığın k=2
   bileşeninden ayıramıyor; ±30 nT saçılım kaçıklık gerçeklemesinden. Stabil (ofsetle
   değişmiyor) ama **işe yaramaz**: 1 nT alanı 53 nT arka planda göremezsin.
@@ -308,11 +314,11 @@ net DC (≈ uniform tepkisi, N'den bağımsız).
 
 **Sonuç (kritik, yayın için):** DC bir **ayrım kanalı değil**; svd.md'nin özgün
 "iki-kanallı imza" iddiası **düşer**. §4–5'teki SVD-TSVD, `A_field` sütununu bu artefakt
-DC ile birlikte kullandı → **~5-8 nT rakamı iyimser** (gerçek makinede, DC olmadan,
-alan kaçıklıkla daha dejenere olur → ayrım zayıflar). SVD'nin harmonik-fit'i geçen
-kısmı yalnız gerçek **n≥3 şekil farkına** dayanmalı; onun tek başına ne kadar ayırdığı
-**artefakt-DC çıkarılıp yeniden ölçülmeli** (açık iş). Bu bulgu, dejenerasyonun
-svd.md'nin sonucundan **daha temel** olduğunu gösteriyor.
+DC ile birlikte kullanmıştı; artefakt-DC çıkarılıp gain-kalibre edilince gerçekçi ofsette
+taban **~45 nT ≈ harmonik** olur (§5.1'de doğrudan ölçüldü — artık "açık iş" değil,
+**yanıtlandı**). SVD'nin harmonik-fit'i geçen kısmı yalnız gerçek n≥3 şekil farkına
+dayanabilirdi; §5.1 (b)≈(c) testi onun da **ayrım sağlamadığını** gösterdi. Yani bu bulgu,
+dejenerasyon+ofset duvarının svd.md'nin ilk sonucundan **daha temel** olduğunu doğruluyor.
 
 ---
 
@@ -323,16 +329,18 @@ svd.md'nin sonucundan **daha temel** olduğunu gösteriyor.
 - BPM ofseti: **~0.15 nT/μm** (R'den geçmez, büyütülmez).
 - Örnek: 10 μm kaçıklık + 100 μm ofset → ~53 nT; 3 μm + 30 μm → ~5 nT.
 
-**SVD-TSVD (yansız):** ofset-sınırlı gürültü tabanı:
-- 100 μm ofset → ~8.5 nT ; 30 μm → ~5.4 nT ; ofset giderilmiş → ~4.9 nT.
-- + regularizasyon ölçek-yanlılığı (kalibre edilebilir) + null-mod farkındalığı şart.
+**SVD-TSVD (gain-kalibre gerçek taban — §5.1):**
+- 100 μm ofset → **~45 nT** (harmonik ile aynı mertebe; SVD üstünlüğü YOK).
+- 30 μm ofset → ~43 nT ; **ofset=0 (ideal BPM) → ~2.6 nT** (tek iyileşme burada).
+- (Uyarı: ham std 8.5/5.4/4.9 nT rakamları **gain'i saymaz** → yanıltıcı; §5.1.)
 - Model kalitesi (β-beat, tilt): **doğrudan C++ ile ölçüldü → tabanı YÜKSELTMİYOR** (§8.5);
-  asıl belirleyici kaçıklık RMS'inin kendisi (ofset + truncation kaçağı).
+  asıl belirleyici kaçıklık RMS'i ve **BPM ofseti** (ofset + truncation kaçağı).
 
-**Özet eşik:** Bu koşullar altında (100 μm ofset, 1 μm gürültü, 10 μm kaçıklık) N=2 alan
-pratik tabanı **~5–8 nT (SVD-TSVD)**; harmonik fit ~53 nT'de yanlı. Sub-nT için hem
-**daha iyi hizalama** (μm) hem **ofset giderme/kalibrasyon** hem **doğru R (demet
-dinamiği)** gerekir.
+**Özet eşik (düzeltilmiş):** Bu koşullar altında (100 μm ofset, 1 μm gürültü, 10 μm
+kaçıklık) N=2 alan pratik tabanı **~45 nT** — hem SVD hem harmonik aynı mertebede, yani
+pasif orbit okuması 1 nT'yi ölçemez. Yalnız ~ideal BPM ofsetinde (→0) taban ~2.6 nT'ye
+iner; asıl kısıt **BPM ofseti**dir (§5.1, §6). Sub-nT için pasif orbit yetmez — aktif
+per-quad BBA gerekir (§1.1, `kmod_bba_sonuclar.md`).
 
 ---
 
@@ -386,8 +394,9 @@ o rejimde harmonik (~500 nT) de SVD de kullanılamaz. Reprodüksiyon:
 
 - **v4.0 / v2.1 (git tag'leri):** tek/birkaç-quad k-mod ile k=2 geri-çatımı rank çöküşüyle
   başarısızdı (%4307). Bu, buradaki "naif ters-çevirme null modda patlar" ile aynı fizik
-  (ill-conditioned inversion). Fark: burada **global tam-R + TSVD** kullanıp regularize
-  edince ~5-8 nT'ye iniyoruz; tek-quad k-mod rank-1 olduğundan oraya hiç ulaşamıyordu.
+  (ill-conditioned inversion). Global tam-R + TSVD bu felaketi ehlileştirir (ham std
+  ~5-8 nT'ye "iner" gibi görünür) **ama gain-kalibre gerçek taban ~45 nT'dir (§5.1)** —
+  yani v4.0'ın başarısızlığı esasen aşılmadı, yalnız daha düzgün regularize edildi.
 - **false-EDM / squid_bpm:** orbit-görünmez simetrik mod = R_dy'nin null modu (S=2.4×10⁻⁷);
   BPM ofsetinin ters-problemdeki katil rolü aynı modda yaşıyor.
 
