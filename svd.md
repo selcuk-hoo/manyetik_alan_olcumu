@@ -12,7 +12,8 @@
 > gerçekçi BPM ofsetinde (~100 μm) **~45 nT** — harmonik-fit ile aynı mertebe, yani
 > **SVD'nin üstünlüğü yoktur** ve 1 nT ölçülemez. Taban yalnız ~ideal BPM ofsetinde
 > (~2.6 nT) iyileşir; **asıl kısıt dejenerasyon değil BPM ofsetidir** (§5.1, §6). Sub-nT
-> için pasif orbit yetmez → aktif per-quad BBA gerekir (`kmod_bba_sonuclar.md`).
+> için pasif orbit yetmez; aktif per-quad AC-BBA da kurtarmaz — optik-nefesle ölü
+> (`squid_bpm_test.md §7`; `kmod_bba_sonuclar.md` ⛔ superseded). Bkz. §9.1.
 >
 > **Not (dürüstlük/günlük):** Bu belgenin ilk sürümü "SVD ~5-8 nT ile harmoniği geçer"
 > diyordu; bu **iki hatadan** ötürü YANLIŞTI — (1) ayrım bir implementasyon artefaktına
@@ -379,8 +380,9 @@ dejenerasyon+ofset duvarının svd.md'nin ilk sonucundan **daha temel** olduğun
 **Özet eşik (düzeltilmiş):** Bu koşullar altında (100 μm ofset, 1 μm gürültü, 10 μm
 kaçıklık) N=2 alan pratik tabanı **~45 nT** — hem SVD hem harmonik aynı mertebede, yani
 pasif orbit okuması 1 nT'yi ölçemez. Yalnız ~ideal BPM ofsetinde (→0) taban ~2.6 nT'ye
-iner; asıl kısıt **BPM ofseti**dir (§5.1, §6). Sub-nT için pasif orbit yetmez — aktif
-per-quad BBA gerekir (§1.1, `kmod_bba_sonuclar.md`).
+iner; asıl kısıt **BPM ofseti**dir (§5.1, §6). Sub-nT için pasif orbit yetmez — ve
+aktif per-quad AC-BBA da kurtarmaz: optik-nefesle ölü (§1.1(3), `squid_bpm_test.md §7`;
+`kmod_bba_sonuclar.md` ⛔ superseded). Simetrik-mod duvarı her iki kanalda (§9.1).
 
 ---
 
@@ -531,7 +533,7 @@ karşılığını ve "preempt ediyor mu?" durumunu verir (tam metin analizleri `
 | SVD-gözlenebilirlik, G_k, ε-truncation (§4) | Chung–Decker–Evans, PAC 1993 s.2263 | **Preempt (aygıt 1993'lük)** |
 | Dejenerasyon → yanlı estimator, MSE (§3, §5.1) | Wegscheider–Vilsmeier, PRAB 26, 032803 (2023) | **Komşu** (onlar gradyan/optik, biz alan↔kaçıklık) |
 | Radyal alan → sahte-EDM bütçesi (§1) | Hacıömeroğlu–Semertzidis, arXiv:1709.01208 (all-elektrik); Omarov vd., PRD 105, 032001 | Motivasyon; N=2 için cetvel **yok** |
-| Aktif per-quad ölçüm (daha güçlü kanal) | Fast-BBA (PRAB 23, 012802); Simultaneous-BBA (arXiv:2203.14869) | Pasif okumanın **üstünü** çizer |
+| Aktif per-quad ölçüm | Fast-BBA (PRAB 23, 012802); Simultaneous-BBA (arXiv:2203.14869) | Prensipte üstün; bu makinede **optik-nefesle çöker** (§1.1(3), `squid_bpm_test.md §7`) |
 | Simetrik/near-simetrik örgüde ORM | Mirza vd., PRAB 22, 072804 (circulant) | Düzeltme; gözlenebilirlik/EDM yok |
 | Sürekli/online ORM güncelleme | Ziemann & Ziemann, arXiv:2104.05300 | Corrector↔orbit dither; misalignment değil |
 | Koherent yer-hareketi → COD | Rossbach, Particle Accel. 23 (1989) | Bozulma büyüklüğü; tanı çerçevesi değil |
@@ -544,7 +546,7 @@ ve onların sonuçlarını tekrar üretir/pekiştirir:
 | Ofset-inversiyon duvarı = dualite teoremi | `makale-taslagi-2.md §2.4` | §5.1/§6 duvarı o teoremin bu probleme yansıması |
 | Orbit-görünmez null mod (simetrik alt-uzay) | `false_edm_harmonic_sinir.md §14`, `makale-taslagi-2.md §3.8` | §4'teki S=2.4×10⁻⁷ modu aynı fizik |
 | BPM-ofset + ΔR no-go, simetrik <4nm | `squid_bpm_test.md §8, §9.5` | §6 ofset katili; simetriğe körlük |
-| AC-BBA no-go'yu atlar (corr 0.997) | `kmod_bba_sonuclar.md` | §1.1'deki "aktif kanal üstün" iddiasının kanıtı |
+| AC-BBA corr=0.997 iddiası (⛔ superseded) | `kmod_bba_sonuclar.md` (⛔), `squid_bpm_test.md §7` | Nefessiz idealizasyondu; nefes dahil corr≈0 → aktif kanal da simetrik duvara çarpar (§9.1) |
 | Sahte-EDM ∝ σ², geometrik faz | `false_edm_harmonic_sinir.md §13`, `orbit_ileri_olcum.md §9` | N=2 alanın 1.-mertebe EDM taklidinin niçin sıfır olduğuyla tutarlı |
 | Toplu yayın değerlendirmesi | `MAKALE_POTANSIYELI.md` | Bu belgenin hangi makaleye ekleneceği |
 
@@ -586,5 +588,5 @@ metodoloji bölümü** olarak eklenir.
 
 **Repo-içi belgeler** (bağımsız okunur): `makale-taslagi-2.md` (drift + dualite),
 `false_edm_harmonic_sinir.md` (sahte-EDM sınırı), `squid_bpm_test.md` (K-mod+BPM zinciri),
-`kmod_bba_sonuclar.md` (AC-BBA linchpin), `MAKALE_POTANSIYELI.md` (yayın değerlendirmesi),
+`kmod_bba_sonuclar.md` (AC-BBA linchpin; ⛔ superseded), `MAKALE_POTANSIYELI.md` (yayın değerlendirmesi),
 `literatur/README.md` (özgünlük karşılaştırma tablosu).
