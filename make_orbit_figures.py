@@ -378,10 +378,54 @@ def fig_lockin(nseed=40, noise_floor=10e-9):
            for sg in sigma_g_list})
 
 
+# ═════════════════════════════════════════════════════
+# FIG 5 (C++): σ² doğrulaması — kmod_drivers/paper_runs.py sigma çıktısından
+# ═════════════════════════════════════════════════════
+
+def fig_sigma():
+    import json as _j
+    path = os.path.join(BASE, "kmod_drivers", "paper_runs_results.json")
+    with open(path) as fh:
+        rows = _j.load(fh)["sigma"]["rows"]
+
+    fig, ax = plt.subplots(figsize=(6.4, 5.0))
+    sig = np.array([r["sigma_um"] for r in rows])
+    fm = np.array([r["f_mean"] for r in rows])
+    for r in rows:
+        ax.loglog([r["sigma_um"]] * len(r["f_all"]), r["f_all"], "o",
+                  color="tab:blue", alpha=0.45, ms=6)
+    ax.loglog(sig, fm, "s-", color="tab:blue", ms=9, lw=2,
+              label="ensemble mean (3 seeds)")
+
+    # log-log fit → üs p
+    p, b = np.polyfit(np.log(sig), np.log(fm), 1)
+    xs = np.linspace(2, 12, 50)
+    ax.loglog(xs, np.exp(b) * xs ** p, "--", color="tab:red", lw=1.5,
+              label=f"power-law fit:  $f \\propto \\sigma^{{{p:.2f}}}$")
+
+    ax.set_xlabel("rms quadrupole misalignment $\\sigma$  [μm]")
+    ax.set_ylabel("|false EDM|  $|dS_y/dt|$  [rad/s]")
+    ax.set_title("False EDM scales as $\\sigma^2$ — geometric-phase signature\n"
+                 "(C++ spin tracking, 4D closed orbit + model-fit estimator)",
+                 fontsize=11)
+    ax.text(0.03, 0.72, "quadratic scaling = product of two\nmisalignment-driven "
+            "spin rotations\n(no linear leakage)", transform=ax.transAxes,
+            fontsize=9, style="italic", color="tab:gray")
+    ax.legend(loc="lower right", fontsize=9)
+    fig.tight_layout()
+    fig.savefig("fig_orbit_sigma.png")
+    plt.close(fig)
+    print(f"fig_orbit_sigma.png yazıldı (p={p:.3f})")
+
+
 if __name__ == "__main__":
     fig_suppression()
     fig_modes()
     fig_breathing()
     fig_lockin()
+    try:
+        fig_sigma()
+    except FileNotFoundError:
+        print("fig_sigma atlandı (paper_runs_results.json yok)")
     print("\nTüm analitik figürler üretildi. C++ gerektiren figürler için bkz. "
           "makale_orbit_bastirma.md §5 (kmod_drivers/fast_est.py vb.).")

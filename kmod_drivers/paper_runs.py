@@ -63,6 +63,37 @@ def measure_fourparticle(dx, dy, delta=100e-6, t2=3e-4):
     return float(measure_dSy_dt_model(sy_avg, times[:n]))
 
 
+def measure_fourparticle_co(dx, dy, delta=100e-6, n_turns=14, t2=3e-4):
+    """4-katlının DOĞRU sürümü: dört simetrik parçacık KAPALI YÖRÜNGE etrafında
+    (v_co ± (±δ,±δ)); S_y izleri ortalanır → betatron çiftler hâlinde söner,
+    model-fit seküler eğim. 4D-CO+model-fit ile eşdeğerlik testi."""
+    from false_edm_mode_scan import setup_fields, _make_state, measure_dSy_dt_model
+    from false_edm_4d import find_co_4d, _T_rev
+    from integrator import integrate_particle
+    with open(os.path.join(BASE, "params.json")) as f:
+        cfg = json.load(f)
+    DT = float(cfg["dt"])
+    tilt = np.zeros(NQ)
+    fields, y0, beta0, R0, p_mag, direction = setup_fields(cfg)
+    T_rev = _T_rev(fields, beta0, R0)
+    v_co, resid = find_co_4d(fields, p_mag, direction, dx, dy, tilt, T_rev,
+                             n_turns=n_turns, n_iter=2)
+    traces, times = [], None
+    for sx in (+1, -1):
+        for sy in (+1, -1):
+            v = [v_co[0] + sx * delta, v_co[1] + sy * delta, v_co[2], v_co[3]]
+            launch = _make_state(v, p_mag, direction, [0.0, 0.0, direction])
+            fields.poincare_quad_index = 0.0
+            _, poin, pt = integrate_particle(launch, 0.0, t2, DT, fields=fields,
+                                             return_steps=4000, quad_dx=dx,
+                                             quad_dy=dy, quad_tilt=tilt)
+            traces.append(np.asarray(poin[:, 7], float))
+            times = np.asarray(pt, float)
+    n = min(len(tr) for tr in traces)
+    sy_avg = np.mean([tr[:n] for tr in traces], axis=0)
+    return float(measure_dSy_dt_model(sy_avg, times[:n])), resid
+
+
 def fast_measure_g(dx, dy, g_scale=1.0, n_turns=14, t2=3e-4):
     """fast_est.fast_measure eşdeğeri + gradyan ölçekleme (g0 VE g1 birlikte)."""
     from false_edm_mode_scan import setup_fields, _make_state, measure_dSy_dt_model
@@ -157,6 +188,12 @@ def _worker(task):
         rng = np.random.default_rng(3000 + 0)
         dx = rng.normal(0, 10e-6, NQ); dy = rng.normal(0, 10e-6, NQ)
         f, resid = measure_fourparticle(dx, dy, delta=delta_um * 1e-6), 0.0
+    elif mode == "fourpart_co":
+        # 4-katlı, CO ETRAFINDA: (delta_um,) — eşdeğerlik testi
+        (delta_um,) = payload
+        rng = np.random.default_rng(3000 + 0)
+        dx = rng.normal(0, 10e-6, NQ); dy = rng.normal(0, 10e-6, NQ)
+        f, resid = measure_fourparticle_co(dx, dy, delta=delta_um * 1e-6)
     else:  # gscale: AYNI 10 μm desen (seed sabitler), g ölçeklenir
         gsc, seed, co_turns = payload
         rng = np.random.default_rng(3000 + seed)
@@ -181,7 +218,8 @@ def save_result(key, obj):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["sigma", "gscale", "fourfold", "fourpart"])
+    ap.add_argument("mode", choices=["sigma", "gscale", "fourfold", "fourpart",
+                                     "fourpart_co"])
     ap.add_argument("-w", "--workers", type=int, default=4)
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--seed-offset", type=int, default=0)
@@ -201,6 +239,8 @@ def main():
                  for (sx, sy) in combos]
     elif args.mode == "fourpart":
         tasks = [("fourpart", (d,)) for d in (50.0, 100.0, 200.0)]
+    elif args.mode == "fourpart_co":
+        tasks = [("fourpart_co", (d,)) for d in (50.0, 100.0, 200.0)]
     else:
         gscales = [float(g) / 0.21 for g in args.gvals.split(",")]
         tasks = [("gscale", (gs, sd + args.seed_offset, args.co_turns))
@@ -213,8 +253,9 @@ def main():
     for r in res:
         d.setdefault(r["payload"][0], []).append(r["f"])
 
-    if args.mode == "fourpart":
-        print("=== PARÇACIK-TABANLI 4-KATLI (CO araması YOK; seed 0, 10 μm) ===")
+    if args.mode in ("fourpart", "fourpart_co"):
+        yer = "CO ETRAFINDA" if args.mode == "fourpart_co" else "ideal eksenden (CO YOK)"
+        print(f"=== PARÇACIK-TABANLI 4-KATLI ({yer}; seed 0, 10 μm) ===")
         print("  Referans (4D-CO+model-fit, aynı desen): f = +1.089e-06 rad/s")
         out = {}
         for dlt in sorted(d):
@@ -222,7 +263,7 @@ def main():
             print(f"  δ = {dlt:5.0f} μm: 4-parçacık ortalama eğim = {f:+.3e} "
                   f"(CO'ya oran {f/1.089e-06:+.2f})")
             out[str(dlt)] = f
-        save_result("fourpart", out)
+        save_result(args.mode, out)
 
     if args.mode == "fourfold":
         F = {}
