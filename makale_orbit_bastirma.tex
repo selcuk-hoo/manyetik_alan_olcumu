@@ -1,0 +1,899 @@
+% makale_orbit_bastirma.tex — English paper draft (REVTeX 4.2, PRAB style)
+% Kaynak taslak: makale_orbit_bastirma.md (Türkçe iskelet + düz metin)
+% Figürler: make_orbit_figures.py (fig_orbit_*.png); C++ verisi kmod_drivers/paper_runs.py
+\documentclass[aps,prab,reprint,superscriptaddress,nofootinbib]{revtex4-2}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\begin{document}
+
+\title{Suppression of the quadrupole-misalignment false EDM signal by
+orbit-based methods in a proton EDM storage ring, and its limits}
+
+\author{S. Hac{\i}\"omero\u{g}lu}
+\affiliation{Affiliation}
+
+\date{\today}
+
+\begin{abstract}
+In the proposed symmetric-hybrid storage ring for measuring the proton
+electric dipole moment (EDM), micron-scale transverse misalignments of the
+focusing quadrupoles generate a vertical spin precession that mimics a genuine
+EDM.  This ``false EDM'' arises as a geometric (Berry) phase, scales
+quadratically with the misalignment amplitude, and at a typical alignment of
+$\sigma = 10~\mu$m exceeds the target sensitivity of
+$10^{-29}\,e\!\cdot\!$cm ($dS_y/dt \approx 1$~nrad/s) by three orders of
+magnitude.  Using a symplectic spin-tracking simulation of the ring, we
+determine how far this systematic can be suppressed by orbit-based
+measurement and correction --- the beam-based alignment (BBA) toolbox of
+modern accelerators.  Standard orbit correction combined with simultaneous
+counter-rotating beams reduces the false EDM by a factor $\sim\!26$, to about
+$6\times10^{-28}\,e\!\cdot\!$cm at $\sigma=10~\mu$m, with the residual scaling
+as $\sigma^2$.  The residual is driven by the \emph{symmetric} component of
+the misalignment pattern, in which neighboring quadrupoles kick the beam in
+opposite directions: its orbit signature is suppressed by roughly two orders
+of magnitude relative to the antisymmetric component.  We show that this
+component cannot be recovered from the orbit at the required level by any of
+the standard techniques --- $K$-modulation at a common or at per-quadrupole
+frequencies, SVD inversion of the response matrix with or without
+regularization, neural-network estimators, an initial LOCO correction
+followed by drift monitoring, or harmonic fits --- and that the limit is set
+not by beam-position-monitor (BPM) noise but by coherent systematics (optics
+``breathing'' and $\beta$-beating) that do not average down, so that improved
+BPM technology, including SQUID-based BPMs, does not change the floor.  The
+counter-rotating beam separation proposed as the control observable shares
+the same blindness.  Reaching $10^{-29}\,e\!\cdot\!$cm therefore requires
+bounding the symmetric misalignment component a priori at the
+$\sim\!1~\mu$m level, which no orbit-based measurement can verify.
+\end{abstract}
+
+\maketitle
+
+% ═══════════════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:intro}
+
+\subsection{The experiment: searching for a proton EDM}
+
+A permanent electric dipole moment (EDM) of a particle is a minute separation
+of its positive and negative charge distributions along the spin axis.  A
+nonzero EDM requires the violation of time-reversal (hence CP) symmetry.
+Because the matter--antimatter asymmetry of the universe points to sources of
+CP violation much stronger than those contained in the Standard Model,
+finding a proton EDM above the Standard-Model expectation
+($\lesssim 10^{-31}\,e\!\cdot\!$cm) would be direct evidence of new physics.
+The proposed storage-ring experiment \cite{omarov} targets a sensitivity of
+$d = 10^{-29}\,e\!\cdot\!$cm.
+
+The measurement principle is the \emph{frozen-spin} method.  Protons are
+stored at the ``magic'' momentum ($p \approx 0.7$~GeV/$c$) in a ring with
+electric bending and magnetic quadrupole focusing.  At this momentum the spin
+remains locked to the momentum vector: it neither leads nor lags in the ring
+plane.  If the proton carries an EDM, the radial electric field exerts a
+torque on it and the spin rotates \emph{very slowly out of the ring plane}.
+The measured quantity is this rate,
+\begin{equation}
+  f \equiv \frac{dS_y}{dt}, \qquad
+  d = 10^{-29}\,e\!\cdot\!\text{cm} \;\leftrightarrow\;
+  f \approx 1~\text{nrad/s},
+  \label{eq:target}
+\end{equation}
+one radian per billion seconds.  The entire difficulty of the experiment
+follows from this number: every other effect capable of turning the spin out
+of plane at this level must either be eliminated or safely bounded.  Effects
+that mimic the EDM are called \emph{false EDM} signals, and this paper is
+about the most stubborn of them.
+
+\subsection{The false EDM: a geometric phase from misalignments}
+
+Each of the 48 quadrupole magnets of the ring will in practice be displaced
+from its ideal position by a few microns.  The field at the center of a
+quadrupole vanishes; a beam passing off-center experiences a field
+proportional to the offset.  The direction of the displacement determines
+what it does to the spin: a vertical offset $dy$ exposes the beam to a radial
+field $B_x$, rotating the spin about the $x$ axis; a horizontal offset $dx$
+exposes it to a vertical field $B_y$, rotating the spin about the $y$ axis.
+
+Either rotation alone is nearly harmless: averaged around the ring it largely
+cancels.  The danger arises when both are present, because rotations about
+different axes \emph{do not commute} --- rotating first about $x$ and then
+about $y$ is not the same as the reverse --- and the difference accumulates,
+turn after turn, as a small net rotation about the third axis: precisely the
+vertical precession channel in which the EDM is sought.  This is an instance
+of the well-known geometric (Berry) phase.  The consequence is
+\begin{equation}
+  f_{\text{false}} \;\propto\; dx \cdot dy
+  \;\;\Longrightarrow\;\;
+  f_{\text{false}} \propto \sigma^2 ,
+  \label{eq:sigma2}
+\end{equation}
+i.e., the false EDM scales with the \emph{square} of the rms misalignment
+$\sigma$ (verified in Sec.~\ref{sec:estimator}: exponent
+$p = 2.00 \pm 0.01$, reproducing Fig.~9(a) of Ref.~\cite{omarov}).  The
+numerical scale is unforgiving: a typical alignment of $\sigma = 10~\mu$m
+produces a false EDM of $\sim\!1000\times$ the target, living in the
+\emph{same observable} $dS_y/dt$ as the genuine signal.
+
+The natural question is then: \emph{is the beam not itself a measuring
+device?}  The ring's 48 beam position monitors (BPMs) continuously read the
+closed orbit; misaligned quadrupoles distort that orbit; so measuring the
+misalignments from the orbit and correcting them --- the standard
+\emph{beam-based alignment} (BBA) practice of the accelerator community ---
+should also clean up the false EDM.  This paper quantifies how far this
+natural expectation holds, and where and why it stops.
+
+\subsection{What is already known}
+
+Most ingredients of the problem are, separately, well-solved problems; the
+contribution of this work is to combine them around the false-EDM question.
+
+\paragraph{Orbit correction and observability.}
+Global orbit correction using the singular-value decomposition (SVD) of the
+orbit response matrix --- including the notion of poorly-observable
+(``decoupled'') modes and their regularized rejection --- goes back to Chung,
+Decker, and Evans \cite{chung1993}.  The harmonic gain law used throughout
+this paper, $G_k = C/|Q^2-k^2|$, is the harmonic limit of that framework.
+The systematics of biased estimators in degenerate orbit-response inversion
+were formalized by Wegscheider and Vilsmeier \cite{wegscheider}; their
+degenerate parameter is the quadrupole strength, ours the transverse offset.
+
+\paragraph{Beam-based alignment.}
+Steering the beam through quadrupole magnetic centers is standard practice:
+varying a quadrupole's gradient and finding the beam position at which the
+orbit does not respond, accelerating the procedure with ac excitations
+\cite{marti}, and performing it for many magnets simultaneously
+\cite{huang}.  None of the measurement techniques examined in this paper is
+new in that sense; \emph{what is new is the determination of their
+performance on the specific misalignment component that drives the false
+EDM.}
+
+\paragraph{False-EDM budgets.}
+The forward calculation misalignment~$\to$~false EDM was performed for an
+all-electric ring in Ref.~\cite{haciomeroglu2017}; the full systematic
+budget of the magnetic-quadrupole symmetric-hybrid design is given by Omarov
+\emph{et al.}~\cite{omarov}, who show that the geometric-phase false EDM can
+be brought below target by the combination of simultaneous clockwise (CW) and
+counter-clockwise (CCW) beams, quadrupole polarity switching, and the
+reduction of the counter-rotating (CR) beam separation with dipole
+correctors.
+
+\paragraph{Neighboring work.}
+Circulant-response orbit correction in symmetric lattices \cite{mirza};
+on-line updating of the orbit response matrix \cite{ziemann}; the orbit
+imprint of coherent ground motion \cite{rossbach}; polarimeter performance
+and statistics \cite{polarimeter}.
+
+\subsection{The open gap}
+
+The control chain of Ref.~\cite{omarov} relies on \emph{measuring} the CR
+beam separation and reducing it.  However, (i) the measurement chain itself
+(48 BPMs or SQUID-based pickups plus $K$-modulation reconstruction) is not
+simulated there; (ii) a possible blindness to the misalignment component
+that is \emph{invisible to the orbit} is not addressed; and (iii) whether
+polarity switching is a knob independent of the CW/CCW reversal is not
+quantified.  These gaps are critical because --- as shown below --- the part
+of the misalignment that drives the post-correction false EDM is precisely
+the part least visible to the orbit.
+
+\subsection{This paper}
+
+Under realistic BPM systematics (offsets, gain errors, noise) and
+optics-model errors ($\beta$-beating, quadrupole tilt), we determine the
+false-EDM floor reachable by the orbit-based measurement-and-correction
+chain, as a function of the alignment tolerance: at $\sigma = 10~\mu$m the
+floor is $\sim\!6\times10^{-28}\,e\!\cdot\!$cm, scaling as $\sigma^2$.  We
+show that the floor is \emph{independent of BPM technology}: the limit is set
+not by white noise but by two coherent systematics that do not average down
+--- optics ``breathing'' under per-quadrupole modulation, and
+$\beta$-beating combined with the conditioning of the response-matrix
+inversion --- and we measure directly that the CR beam separation proposed
+as the control observable shares the same blindness.
+
+Section~\ref{sec:method} defines the simulation infrastructure, the
+false-EDM estimator, the symmetric/antisymmetric decomposition, and the
+systematic-error models.  Section~\ref{sec:results} first establishes the
+achievable suppression chain (the positive result), then presents the
+attempted methods for recovering the symmetric component from the orbit and
+where each stops.  Section~\ref{sec:conclusions} collects the conclusions
+with practical implications for the experiment.
+
+% ═══════════════════════════════════════════════════════════════════
+\section{Method}
+\label{sec:method}
+
+\subsection{Simulation infrastructure: two layers}
+
+All numbers in this paper were produced with two complementary tools.
+
+\paragraph{Full particle-and-spin tracker (C++).}
+The ring --- electric deflection sections and 24 FODO cells with 48 magnetic
+quadrupoles ($R_0 = 95.49$~m, $g \approx 0.2$~T/m, vertical tune
+$Q_y \approx 2.3$) --- is integrated element by element through the actual
+fields with a fourth-order Gauss--Legendre \emph{symplectic} integrator; the
+spin is propagated in the same step by the Thomas-BMT equation.  Symplecticity
+guarantees that energy and amplitude errors do not accumulate over long
+tracking, which is what makes nrad/s-level slopes measurable at all.  The
+genuine EDM enters through a switch
+($\eta = 1.88\times10^{-15} \rightarrow dS_y/dt = 9.81\times10^{-10}$~rad/s,
+odd under the CW/CCW difference, in exact agreement with Eq.~(C1) of
+Ref.~\cite{omarov}); all false-EDM measurements are taken with the EDM switch
+\emph{off}, so that any measured vertical precession is by definition
+systematic.
+
+\paragraph{Analytic Twiss / closed-orbit solver.}
+From the $2\times2$ transfer matrices of the quadrupoles and drifts, the
+lattice functions $\beta(s)$, $\phi(s)$, the tune $Q$, and the orbit response
+matrix
+\begin{equation}
+  R_{ij} = \frac{\sqrt{\beta_i\beta_j}}{2\sin\pi Q}\,(KL)_j
+  \cos\!\big(|\phi_i-\phi_j| - \pi Q\big)
+  \label{eq:R}
+\end{equation}
+are built in closed form.  This layer runs in seconds and is used for wide
+scans (noise Monte Carlo, $\beta$-beating sweeps); it agrees with the C++
+tracker to within 1\%, and the two codes share nothing but the configuration
+file, so their agreement cannot come from a common modeling error.
+
+\paragraph{A methodological caution.}
+In inverse-problem analyses the response matrix must be built from
+\emph{real beam dynamics}, not from idealized Twiss formulas: the idealized
+$R$ can hide the smallest-singular-value (unobservable) mode.  In this work
+the analytic $R$ shows a condition number of 193 while the beam-dynamics $R$
+contains an additional near-null mode at the $10^{-7}$ level.
+
+\subsection{Measuring the false EDM correctly}
+\label{sec:estimator}
+
+The goal looks simple: the slope of $S_y(t)$.  The difficulty is that the
+betatron oscillation around the closed orbit feeds oscillatory components
+into the spin that exceed the sought secular slope by orders of magnitude; a
+naive linear fit mistakes them for signal.  Two measures are used together:
+
+\begin{enumerate}
+\item \emph{4D closed orbit.}  The tracked particle is placed, by Newton
+iteration in $(x,x',y,y')$, at the point of vanishing betatron variance ---
+exactly on the closed orbit --- so there is no betatron amplitude to cancel
+in the first place.
+\item \emph{Model fit.}  From
+$S_y(t) = a + bt + \sum_k \left[c_k\cos\omega_k t + d_k\sin\omega_k t\right]$
+only the secular slope $b$ is retained; residual oscillatory content is
+absorbed by the fit.  (A plain polynomial fit is \emph{never} used.)
+\end{enumerate}
+
+The estimator was validated by three independent tests:
+\begin{itemize}
+\item \textbf{$\sigma^2$ test:} scanning $\sigma = 2.5/5/10~\mu$m gives
+$|f| \propto \sigma^p$ with $p = 2.00 \pm 0.01$
+[Fig.~\ref{fig:sigma}] --- pure quadratic geometric phase, no linear
+leakage, reproducing Fig.~9(a) of Ref.~\cite{omarov}.
+\item \textbf{Sign test:} under sign flips of the misalignment pattern,
+$f(+dx,-dy) = -f(+dx,+dy)$ and $f(-dx,-dy) = +f(+dx,+dy)$ hold to the
+$10^{-3}$ level --- the measured quantity is purely \emph{bilinear}
+($dx\cdot dy$).
+\item \textbf{Four-particle equivalence:} the averaged $S_y(t)$ of four
+symmetric starts placed \emph{around the closed orbit},
+$v_{\rm CO} \pm (\pm\delta, \pm\delta)$ with $\delta = 50$--$200~\mu$m,
+yields the same slope as the single on-orbit particle to within 1\%.
+\end{itemize}
+
+\paragraph{A trap worth reporting.}
+If the four symmetric starts are placed around the \emph{ideal axis} (i.e.,
+without knowledge of the closed orbit), the method fails: the $\pm\delta$
+betatron oscillations cancel pairwise in the average, but the betatron
+component induced by the closed-orbit offset itself is \emph{common} to all
+four particles and survives.  The measurement then collapses to the same
+betatron artifact as a single off-orbit particle
+($-3.0\times10^{-4}$~rad/s, $\sim\!300\times$ the signal).  Symmetric
+sampling does not substitute for closed-orbit knowledge; it works around it.
+
+\subsection{Two faces of a misalignment pattern:\\ symmetric and antisymmetric}
+\label{sec:symanti}
+
+All results of this paper rest on one decomposition, defined here explicitly.
+Write the 48 quadrupole offsets as a vector $v$, with QF at index $2k$ and QD
+at $2k{+}1$ in cell $k$.  Separate, in each cell, the amounts by which the
+two quadrupoles move \emph{together} and \emph{oppositely}:
+\begin{align}
+  (P_{\rm sym}\,v)[2k] &= (P_{\rm sym}\,v)[2k{+}1] =
+      \tfrac{1}{2}\big(v[2k]+v[2k{+}1]\big),
+  \nonumber\\
+  (P_{\rm anti}\,v)[2k] &= -(P_{\rm anti}\,v)[2k{+}1] =
+      \tfrac{1}{2}\big(v[2k]-v[2k{+}1]\big),
+  \label{eq:projectors}
+\end{align}
+with $P_{\rm sym} + P_{\rm anti} = I$ and $P_{\rm sym}P_{\rm anti} = 0$.
+
+The physics of the split is this: QF and QD have gradients of \emph{opposite
+sign}.  Two neighboring quadrupoles displaced in opposite directions (the
+antisymmetric part) kick the beam in the \emph{same} direction --- the kicks
+add up into a smooth, low-azimuthal-harmonic pattern close to the betatron
+resonance, and a \emph{large} closed-orbit distortion results.  Two neighbors
+displaced in the same direction (the symmetric part) kick
+\emph{oppositely} --- the kicks cancel within the cell, and what remains is a
+cell-to-cell alternating pattern at $k \approx 24$, crushed by the orbit gain
+\begin{equation}
+  G_k = \frac{C}{|Q^2 - k^2|}, \qquad C \approx 24.8,\; Q^2 \approx 5
+  \label{eq:Gk}
+\end{equation}
+since $Q \approx 2.3 \ll 24$ [Fig.~\ref{fig:modes}, right].
+
+This is not an assumption but a property of the response matrix itself,
+demonstrated directly [Fig.~\ref{fig:modes}, left]: computing the symmetric
+content $\|P_{\rm sym} v_i\|^2$ of each right-singular vector of
+$R = U\Sigma V^{\!\top}$ shows the \emph{large}-singular-value modes to be
+nearly purely antisymmetric and the \emph{small}-singular-value modes nearly
+purely symmetric; the visibility gap between the two families is summarized
+by $\mathrm{cond}(R) = 193$.  Concretely, the same 10-$\mu$m-rms pattern
+leaves a $\sim\!115~\mu$m orbit trace if antisymmetric but only
+$\sim\!1.7~\mu$m if symmetric.
+
+The whole of Sec.~\ref{sec:results} is built on the resulting tension:
+\emph{the part of the misalignment that drives the post-correction false EDM
+is the symmetric one --- the part least visible to the orbit.}
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{fig_orbit_sigma.png}
+\caption{Validation of the false-EDM estimator: the measured $|dS_y/dt|$
+scales as $\sigma^{2.00}$ across $\sigma = 2.5$--$10~\mu$m (C++ tracking,
+three seeds per point), the signature of a pure geometric phase with no
+linear leakage.  The per-seed scatter reflects the bilinear character of $f$:
+individual patterns can conspire to small values.}
+\label{fig:sigma}
+\end{figure}
+
+\begin{figure*}[tb]
+\includegraphics[width=0.95\textwidth]{fig_orbit_modes.png}
+\caption{Mode structure of the orbit response (analytic lattice,
+$Q_y = 2.30$).  Left: singular values of $R$, colored by the symmetric
+content of the corresponding misalignment mode; large-singular-value
+(orbit-visible) modes are antisymmetric, small-singular-value (orbit-blind)
+modes are symmetric; $\mathrm{cond}(R)=193$.  Right: the orbit gain law
+$G_k = C/|Q^2-k^2|$; antisymmetric patterns produce low-$k$ kicks near the
+betatron resonance, symmetric patterns produce $k\approx24$ kicks far above
+it.}
+\label{fig:modes}
+\end{figure*}
+
+\subsection{How success is measured: the correlation trap}
+\label{sec:metrics}
+
+Two metrics are used for reconstruction quality; their difference will be
+decisive several times, so we define both explicitly.
+
+\paragraph{Pearson correlation.}
+Between reconstruction $\hat v$ and truth $v$, over 48 components,
+$\mathrm{corr} = \sum_j (\hat v_j - \langle\hat v\rangle)
+(v_j - \langle v\rangle)/(48\,\sigma_{\hat v}\sigma_v)$.  This common metric
+is misleading here for two reasons: (i) it is scale- and offset-invariant ---
+the mean subtraction in its definition removes precisely the worst (uniform)
+member of the symmetric family from the error; (ii) it is dominated by the
+many well-reconstructed antisymmetric components.  As a result
+\emph{$\mathrm{corr}=0.99$ is compatible with a completely wrong symmetric
+component} (a concrete example appears in Fig.~\ref{fig:lockin}).
+
+\paragraph{Component-error metric (the correct one).}
+The rms, \emph{without} mean subtraction, of the symmetric and antisymmetric
+parts of the error vector $e = \hat v - v$:
+$\|P_{\rm sym}\,e\|_{\rm rms}$ and $\|P_{\rm anti}\,e\|_{\rm rms}$, compared
+against the corresponding components of the signal itself (both
+$\approx 41~\mu$m for $\pm100~\mu$m uniform misalignments).  A method
+``sees'' the symmetric component only if its symmetric error is below the
+symmetric signal.
+
+\subsection{Systematic error models}
+\label{sec:systematics}
+
+Four systematics enter the model at realistic magnitudes:
+
+\begin{itemize}
+\item \textbf{BPM offsets} (static, $\sim\!100~\mu$m per BPM; variant
+$30~\mu$m): each BPM's electronic zero differs from the true axis by an
+unknown constant, stable over hours.  The prime killer of single-orbit
+inversion; cancels in difference-based measurements ($K$-modulation, drift).
+\item \textbf{BPM noise} (white, $\sim\!1~\mu$m single shot): averages down
+as $\sqrt{N}$; with synchronous detection it ceases to be a practical limit.
+One of the main messages of this paper is that the real limit is \emph{not}
+this.
+\item \textbf{BPM gain errors} (multiplicative, $\sigma_g = 1$--$10\%$
+scans): percent-scale errors of the readings; partially softened by
+multi-BPM averaging.
+\item \textbf{$\beta$-beating / gradient model error} (per-quadrupole
+$\varepsilon = 0.5$--$5\%$, applied in the tracker as per-quadrupole
+gradient deviations): represents the difference between the real machine
+optics and the model used in reconstruction (typical LOCO-calibrated
+residual $\sim\!1\%$).  A \emph{coherent} model systematic that does not
+average down; it will prove to be the decisive wall of the inverse methods.
+\item \textbf{Quadrupole tilt} (roll angle $\psi$): two distinct channels,
+cross-plane leakage into the measurement and a direct geometric-phase
+contribution to the false EDM; the latter dominates and is reported as a
+separate tolerance item.
+\end{itemize}
+
+\paragraph{Seed policy.}
+The bilinear $f$ can be accidentally small or large for a single misalignment
+realization; every claim is therefore reported over multi-seed ensembles
+(typically 3--40 realizations) and no root cause is inferred from a
+single-seed result.
+
+% ═══════════════════════════════════════════════════════════════════
+\section{Simulation results}
+\label{sec:results}
+
+\subsection{The achievable suppression chain}
+\label{sec:chain}
+
+We first establish what orbit-based control \emph{does} deliver.  For white
+misalignments of $\sigma = 10~\mu$m in both planes the raw false EDM is
+$|f| \approx 10^{-6}$~rad/s, about $1000\times$ target
+[Eq.~(\ref{eq:target})].  Two standard measures reduce it
+(Table~\ref{tab:chain}, Fig.~\ref{fig:suppression}):
+
+\begin{enumerate}
+\item \emph{Simultaneous counter-rotating beams.}  The genuine EDM is odd
+under beam reversal [Eq.~(C1) of \cite{omarov}], so the CW/CCW difference
+cancels the part of the false EDM that is even.  Measured gain: a factor
+$3.4$ (ensemble median), leaving $474\times$ target.
+\item \emph{Orbit correction.}  Flattening the closed orbit with correctors
+removes the orbit-visible (antisymmetric) part of the misalignment
+imprint.  Measured additional gain: $7.7\times$, leaving
+$\bm{62\times}$ \textbf{target}
+($6.05\times10^{-8}$~rad/s $\approx 6\times10^{-28}\,e\!\cdot\!$cm).
+\end{enumerate}
+
+The residual after both steps lives almost entirely in the symmetric,
+orbit-blind subspace of Sec.~\ref{sec:symanti}, and by
+Eq.~(\ref{eq:sigma2}) it scales as $\sigma^2$: the central deliverable of
+this paper is therefore the curve of Fig.~\ref{fig:suppression}.  Reaching
+the target along this curve requires the \emph{symmetric} misalignment
+component to be at or below $\sigma_{\rm sym} \approx 1.3~\mu$m.  Two facts
+make that requirement problematic.  First, as the rest of this section
+shows, no orbit-based measurement can verify it.  Second, mechanical
+surveying cannot verify it either, because the relevant quantity is the
+\emph{magnetic} center: stray dipole components at the $\sim\!20~\mu$T level
+displace the magnetic center from the mechanical one by tens of microns, and
+only the beam sees the magnetic center.
+
+\begin{table}[tb]
+\caption{The suppression chain at $\sigma = 10~\mu$m (C++ tracking).
+The equivalent EDM uses $1~\text{nrad/s} \leftrightarrow
+10^{-29}\,e\!\cdot\!$cm.}
+\label{tab:chain}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+Stage & $|f|$ / target & equiv.\ EDM [$e\!\cdot\!$cm] \\
+\hline
+raw (no correction)          & $\sim1000\times$ & $\sim10^{-26}$ \\
+$+$ CW/CCW difference        & $474\times$      & $\sim5\times10^{-27}$ \\
+$+$ orbit correction         & $62\times$       & $\sim6\times10^{-28}$ \\
+$+$ any method of Sec.~\ref{sec:inverse} & $62\times$ & floor \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{fig_orbit_suppression.png}
+\caption{Main result: the false EDM reachable by orbit-based correction as a
+function of the rms quadrupole misalignment.  Points at $\sigma=10~\mu$m are
+C++ tracking results; all curves scale as $\sigma^2$ (verified exponent
+$p=2.00$).  The corrected floor crosses the target only at
+$\sigma_{\rm sym}\approx1.3~\mu$m --- a level that no orbit-based
+measurement can verify.}
+\label{fig:suppression}
+\end{figure}
+
+\subsection{Attempts to measure the symmetric component from the orbit}
+\label{sec:inverse}
+
+Everything in this subsection belongs to one class: reconstruct the
+misalignments (or their symmetric component) from orbit readings, then
+correct.  Five independent implementations hit the same wall.
+
+\subsubsection{Common-frequency $K$-modulation with matrix inversion}
+\label{sec:deltaR}
+
+Modulating all quadrupole gradients together between two settings
+($g$ and $1.02g$) and taking the difference of the two closed orbits removes
+the static BPM offsets exactly and yields
+$\Delta y = \Delta R\,\Delta q$ with
+$\Delta R = R(1.02g) - R(g)$.  Inverting the full $48\times48$ matrix
+reconstructs the offsets perfectly in the absence of errors
+($\mathrm{corr}=1.000000$); optics breathing (below) is no obstacle here
+because it is contained in $\Delta R$ itself.  The obstacle is conditioning:
+$\mathrm{cond}(\Delta R) = 3.7\times10^{4}$ with
+$\sigma_{\min} \approx 10^{-4}$, and the small-singular-value directions are
+the symmetric ones.
+
+White BPM noise \emph{can} be beaten: with the modulation at
+$\sim\!1$~kHz and synchronous (lock-in) detection the effective noise falls
+as $\sqrt{N}$, reaching $\sim\!14$~nm in $\sim\!17$~minutes.  The genuine
+limits are the ones that do not average [Fig.~\ref{fig:lockin}]:
+even at a 10~nm effective noise floor with a \emph{perfect} optics model the
+symmetric-component error is already a third of the symmetric signal; with a
+realistic optics-model error the inversion collapses ---
+$\varepsilon = 0.5\%$ of $\beta$-beating drives the symmetric error to
+$\sim\!7\times$ the signal (283~$\mu$m vs.\ 41~$\mu$m) while the correlation
+still reads a deceptively healthy $0.69$.  Because $\beta$-beating is a
+coherent systematic, no BPM technology --- including SQUID-based BPMs, whose
+low noise would only shorten the integration time --- changes this floor.
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{fig_orbit_lockin.png}
+\caption{Single-frequency $\Delta R$ inversion at the lock-in noise floor
+(10~nm, 40 seeds).  Symmetric- and antisymmetric-component reconstruction
+errors vs.\ the optics-model error $\sigma_g$; the dashed line is the
+symmetric signal itself.  Any realistic model error ($\geq0.5\%$) drives the
+symmetric error far above the signal while the Pearson correlation (gray
+labels) remains deceptively high --- the correlation trap of
+Sec.~\ref{sec:metrics}.}
+\label{fig:lockin}
+\end{figure}
+
+\paragraph{An offset-cancellation lower bound.}
+The pattern above is not an accident of this scheme.  Cancelling the static
+BPM offsets by any two-setting difference means that the available
+information is no longer $R$ but $\Delta R \sim \varepsilon_g\,\partial
+R/\partial g$ for a relative setting difference $\varepsilon_g$; its inverse
+grows as $\|\Delta R^{-1}\| \sim \|R^{-1}\|/\varepsilon_g$.  Within the
+natural class of linear, unbiased estimators that cancel static offsets
+exactly by a two-setting difference, offset immunity is thus purchased at the
+price of a $1/\varepsilon_g$ noise amplification.  We state this as a
+structural lower bound for that class --- estimators outside it (e.g.,
+partial Bayesian modeling of the offsets) are not covered by the argument.
+
+\subsubsection{Per-quadrupole $K$-modulation at distributed frequencies:
+optics breathing}
+\label{sec:breathing}
+
+A seemingly stronger idea avoids matrix inversion altogether.  Modulate each
+quadrupole at its \emph{own} frequency ($\sim\!2\%$ depth); the amplitude
+$A_i$ of frequency $f_i$ in a BPM signal should be proportional to the
+beam--quadrupole offset $o_i$, giving a direct per-quadrupole readout ---
+the ac-BBA concept of Ref.~\cite{marti} transplanted to this ring.  Since the
+modulation ($1$--$10$~kHz) is far below the betatron frequency
+($\sim\!515$~kHz), the beam adiabatically follows the instantaneous closed
+orbit and each amplitude equals a static derivative
+$\partial y_{\rm BPM}/\partial g_i$, computable from two static closed
+orbits.
+
+The method fails for a reason worth understanding
+[Fig.~\ref{fig:breathing}].  Modulating quadrupole $i$ does two things: it
+modulates the quadrupole's own feed-down kick (the sought signal,
+$\sim\!0.9~\mu$m at the BPM), and it modulates the \emph{one-turn matrix} ---
+hence $\beta(s)$, $\phi(s)$, and $Q$ everywhere.  The pre-existing closed
+orbit ($\sim\!0.37$~mm rms, built by all 48 offsets together) is re-transported
+through this modulated optics, producing a few-$\mu$m response at the BPM:
+the optics ``breathes.''  The breathing-to-signal ratio is
+$\sim\!7$ ($S/B \approx 0.14$).  A decisive decomposition: the response to
+modulating one quadrupole is $-9.83~\mu$m with the full misalignment pattern
+present, but only $-0.037~\mu$m when only that quadrupole's own offset is
+kept --- a factor 266.  The demodulated amplitude measures \emph{the orbit
+built by the neighbors}, not the quadrupole's own offset; dividing by a
+calibration is meaningless.
+
+Because the breathing term is \emph{coherent} (approximately the existing
+orbit times a scalar), it does not average away: going from 1 to 48 BPMs
+leaves the reconstruction correlation at zero ($+0.07 \to -0.03$), and a
+SQUID's low noise is of no help, since noise was never the problem.  In a
+breathing-free idealization the same pipeline reconstructs perfectly
+($\mathrm{corr}=1.000$), pinning the failure unambiguously on the breathing.
+The C++ tracker confirms the analytic breathing amplitudes to $\sim\!1\%$.
+BPM offsets, incidentally, are irrelevant in this branch --- ac demodulation
+suppresses the static offset exactly when the modulation frequencies are
+locked to the integration window --- so improving offsets from 100 to
+$30~\mu$m changes nothing.
+
+We emphasize the conceptual distinction between the two $K$-modulation
+failures: breathing is a coherent \emph{contamination} that kills the
+per-quadrupole readout; conditioning is a \emph{noise-amplification} property
+of the inversion.  They are different walls, and each closes its branch.
+
+\begin{figure*}[tb]
+\includegraphics[width=0.95\textwidth]{fig_orbit_breathing.png}
+\caption{Distributed-frequency per-quadrupole $K$-modulation.  Left:
+reconstructed vs.\ true offsets --- perfect without breathing (green), zero
+correlation with breathing included, for 1 BPM (red) and even for 48 BPMs
+(purple).  Right: the ``lever'' --- the demodulated amplitude responds to the
+whole pre-existing orbit ($266\times$ the quadrupole's own contribution);
+being coherent, this contamination does not average away with more BPMs or
+better (SQUID) resolution.}
+\label{fig:breathing}
+\end{figure*}
+
+\subsubsection{Neural-network reconstruction}
+\label{sec:nn}
+
+Could a learned estimator outperform the linear algebra?  No --- and the
+reason is informative.  The map misalignment~$\to$~orbit is \emph{exactly
+linear} ($y = R\,\Delta q$), so a network trained on it can only relearn $R$;
+the inverse direction is then $R^{-1}$ with the same conditioning.
+Numerically, a multilayer perceptron (two hidden layers of 128, 4000 training
+samples, 1~$\mu$m BPM noise) reconstructs the antisymmetric component as well
+as truncated SVD (0.71 vs.\ 0.63~$\mu$m error) and fails on the symmetric
+component exactly as badly (5.6 vs.\ 6.3~$\mu$m error against a 9.9~$\mu$m
+signal).  The limit is information-theoretic: the symmetric imprint is below
+the noise-plus-systematics floor, and no estimator can extract information
+that is not in the data.  For the same reason more expressive architectures
+(convolutional, attention-based, graph networks) cannot help --- capacity is
+not the bottleneck in a linear problem; and for white noise the matched
+filter (lock-in) is already optimal, so learned time-series estimators
+(LSTMs) cannot beat it either.  Any real gain would have to come from
+\emph{prior information}; sparsity priors (LASSO, CLEAN, greedy harmonic
+selection) were tried and hit the same observability floor.
+
+\subsubsection{LOCO-style calibration plus drift monitoring}
+\label{sec:drift}
+
+A pragmatic strategy accepts that absolute alignment cannot be measured and
+asks only for its \emph{changes}: calibrate the machine once (LOCO), then
+monitor the orbit difference $y(t) - y_0$, in which the static BPM offsets
+cancel exactly.  This works well --- for what it sees: drifts are tracked
+with $6.5~\mu$m rms accuracy under $50~\mu$m BPM offsets (a $29\times$
+improvement over the absolute reconstruction), degrading only mildly with
+$1\%$ $\beta$-beating.  But the difference orbit passes through the same
+response matrix: the eight worst-observable modes are $96\%$ symmetric with a
+$193\times$ noise amplification.  The drift monitor is a useful, cheap
+watchdog for the antisymmetric part --- and is blind to the symmetric part
+like everything else in this class.
+
+\subsubsection{Harmonic approaches}
+\label{sec:harmonic}
+
+Two harmonic-domain variants deserve a note.  \emph{Targeted Fourier
+reconstruction:} if the harmonic content of the misalignment is known in
+advance, restricting the basis improves the conditioning from
+$\sim\!13000$ to 186 and reconstruction works; but for unknown patterns
+greedy or LASSO harmonic selection collapses from rank deficiency ---
+knowing \emph{which} harmonics is precisely the unavailable information.
+\emph{Harmonic fit of a known signature:} reading a known field imprint
+(e.g., an $N{=}2$ stray radial field, which drives a vertical $k{=}2$ orbit)
+by projecting the 48-BPM data on $\cos2\theta/\sin2\theta$ is perfectly
+conditioned but \emph{biased}: the $k{=}2$ coefficient sums the field, the
+$k{=}2$ content of the misalignments, and the $k{=}2$ content of the BPM
+offsets, which one number cannot separate --- a $\sim\!53$~nT bias at
+$10~\mu$m misalignments against a 1~nT target in our case study.  Full
+SVD-with-regularization does not beat it under realistic offsets: after
+gain calibration of the regularized estimator its detection floor is
+$\sim\!45$~nT at $100~\mu$m offsets (2.6~nT only for ideal, offset-free
+BPMs).  In the language of Ref.~\cite{wegscheider}: the forward projection is
+bias-dominated, the inversion is variance-dominated, and neither reaches the
+degenerate information.
+
+\subsubsection{The counter-rotating beam separation}
+\label{sec:crsep}
+
+Reference~\cite{omarov} proposes controlling the geometric phase by
+measuring and zeroing the \emph{separation} of the CW and CCW closed orbits.
+The separation, however, is itself an orbit difference, and inherits the
+orbit's mode structure.  We measured this directly [Fig.~\ref{fig:crsep}]:
+for 10-$\mu$m-rms vertical patterns the ratio of the antisymmetric to the
+symmetric signature is $5.7\times$ in the single-beam closed orbit and
+$8.0\times$ in the CR separation (three seeds; an independent pattern set
+gave $3.8\times$ and $4.5\times$).  The suppression factors are similar:
+\emph{the CR separation opens no additional window on the symmetric
+component}.  Measuring and zeroing it controls the orbit-visible part of the
+geometric phase --- consistent with Ref.~\cite{omarov} --- and leaves the
+symmetric residual of Table~\ref{tab:chain} untouched.  This closes gap~(ii)
+of the Introduction.
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{fig_orbit_crsep.png}
+\caption{The counter-rotating beam separation (right group) suppresses the
+symmetric pattern by a factor similar to the ordinary single-beam orbit
+(left group): Omarov's control observable shares the orbit's blindness to
+the component that drives the residual false EDM.}
+\label{fig:crsep}
+\end{figure}
+
+\subsection{Attempts to open the symmetric window}
+\label{sec:escape}
+
+Two lattice-level escapes were examined and quantified.
+
+\subsubsection{Quadrupole polarity switching}
+\label{sec:flip}
+
+Reversing all quadrupole currents ($g \to -g$) reverses each
+misalignment-driven spin rotation, so one might hope it reverses the false
+EDM while leaving the genuine (electric-field-driven) EDM intact.  It does
+not: the geometric phase is the \emph{product of two} field-driven rotations,
+each $\propto g$, so $f$ is \emph{even} in $g$.  Measured flip ratios
+$f(-g)/f(+g)$ are $+2.8$, $+0.85$, and $+1.17$ for symmetric, antisymmetric,
+and generic patterns respectively --- the sign never reverses.  Moreover, in
+the idealized periodic lattice the polarity flip is \emph{degenerate} with
+the beam-direction reversal: $f({\rm CCW}, +g) = f({\rm CW}, -g)$ to a
+measured ratio of $1.00$, so the four-fold combination of Eq.~(C2) of
+Ref.~\cite{omarov} collapses to the two-fold CW/CCW difference, and polarity
+switching provides no independent cancellation knob for the geometric phase.
+(It remains useful against systematics that are odd in $g$.)  This closes
+gap~(iii) of the Introduction.
+
+\subsubsection{Raising the betatron tune}
+\label{sec:highQ}
+
+The symmetric pattern is hidden because its kick harmonic ($k \approx 24$)
+lies far above the tune [Eq.~(\ref{eq:Gk})]; raising $Q$ toward $k$ should
+make it visible.  This partially works: at $Q_y \approx 10.3$ (alternating
+focusing preserved, machine stable) the high-$m$ part of the symmetric family
+reaches orbit gains comparable to the antisymmetric ones.  But the low-$m$
+part requires $Q \geq 16$, while the 180$^\circ$-per-cell stopband caps the
+tune at $Q \leq 12$; only $\sim$8--25\% of the symmetric content becomes
+recoverable, worth only a factor $\sim\!2$ in false-EDM suppression.
+
+More decisively, the price of a high tune is \emph{strong quadrupoles}:
+$Q_y\!: 2.3 \to 10.3$ requires $g\!: 0.21 \to 0.69$~T/m.  Stronger gradients
+kick the beam harder at the same misalignment; since the geometric phase is
+a product of two such rotations ($\propto g^2$), with an additional
+contribution from the enlarged betatron orbit, the false EDM grows steeply
+--- a single-pattern C++ measurement gave a factor $\sim\!32$
+($\sim g^{3}$) from $g = 0.21$ to $0.69$~T/m --- while the genuine EDM
+signal, generated by the electric deflectors, is independent of $g$.  The
+signal-to-background thus \emph{worsens} by the same large factor: one
+cannot operate at high tune, and a temporary high-tune diagnostic transfers
+at most the recoverable $\sim$25\% back to the operating point.  (We note
+that at $Q\approx10$ the closed-orbit determination itself becomes
+delicate; our ensemble scans at $g=0.69$~T/m carried residual-betatron
+contamination and we therefore quote only the robust qualitative
+conclusion and the single clean pattern above.)
+
+\subsection{Outside the orbit: off-momentum spin sensing (brief)}
+\label{sec:offmomentum}
+
+For completeness we record one attempted escape outside the orbit toolbox.
+Storing the beam slightly off the magic momentum makes the in-plane spin
+precess at $\nu_s \neq 0$, and the geometric-phase contribution to the
+vertical spin oscillation is indeed \emph{amplified} $\propto 1/\nu_s$ ---
+suggesting a fast, resonant readout of the false EDM.  The idea fails
+because misalignments also tilt the invariant spin axis at \emph{first}
+order in $\sigma$: this $\mathcal{O}(\sigma)$ oscillation sits at the same
+frequency $\nu_s$ and exceeds the $\mathcal{O}(\sigma^2)$ geometric-phase
+term by a factor $\sim\!3600$ at $\sigma=10~\mu$m.  Every separation channel
+was tested and closed: the two terms do not separate in $\delta p/p$, their
+relative phase is pattern-dependent (91$^\circ$ spread), four-fold sampling
+does not cancel the first-order term (it is common to the four particles),
+the amplitude crossing lies at an unphysical $\sigma \approx 62$~mm, a full
+3D fit of the invariant axis leaves no residual to fit, and the longitudinal
+component is knob-insensitive off-magic.  The magic momentum is the
+\emph{unique} working point in that it converts the dominant first-order
+effect into a harmless constant offset --- which is also why the estimator
+of Sec.~\ref{sec:estimator} works there.
+
+% ═══════════════════════════════════════════════════════════════════
+\section{Conclusions}
+\label{sec:conclusions}
+
+\paragraph{Quantitative result.}
+The orbit-based chain --- simultaneous counter-rotating beams, standard
+orbit correction, and continuous drift monitoring --- bounds the
+quadrupole-misalignment false EDM at
+$\sim\!6\times10^{-28}\,e\!\cdot\!$cm for $\sigma = 10~\mu$m rms
+misalignments, and the bound scales as $\sigma^2$
+(Fig.~\ref{fig:suppression}).  If the required suppression were only to the
+$10^{-27}\,e\!\cdot\!$cm level, existing BBA technology would thus suffice.
+Reaching $10^{-29}\,e\!\cdot\!$cm requires the \emph{symmetric} component of
+the magnetic-center misalignments to be at the $\sim\!1.3~\mu$m level.
+
+\paragraph{Limit theorem.}
+That symmetric component is unobservable in the orbit at the required level
+in every channel we tested: common-frequency $K$-modulation with (regularized)
+matrix inversion, distributed-frequency per-quadrupole modulation,
+neural-network estimators, LOCO-plus-drift monitoring, harmonic fits, and
+the counter-rotating beam separation.  The limit is set not by white BPM
+noise --- which synchronous detection beats --- but by two coherent
+systematics that do not average down: optics breathing under
+per-quadrupole modulation, and $\beta$-beating amplified by the
+conditioning of the inversion; and by the lattice itself, whose
+stopband caps the tune far below the symmetric kick harmonic.
+\emph{Consequently no BPM technology, including SQUID-based BPMs, changes
+this floor.}  Polarity switching provides no independent cancellation
+(it is degenerate with beam reversal, and the geometric phase is even in
+$g$), and mechanical metrology cannot substitute because the driving
+quantity is the beam-defined magnetic center.
+
+\paragraph{Scope.}
+Active spin-based nulling is outside the scope of this paper for a
+fundamental reason: the false and genuine EDM live in the same observable
+$dS_y/dt$, so a feedback that nulls the measured precession nulls the
+signal as well; the only discriminator is the CW/CCW difference, which is
+precisely what leaves the $62\times$ residual above.  (Its statistics are
+also prohibitive: polarimetry reaches the nrad/s level only on year
+timescales \cite{polarimeter}.)  Forward-predicting the false EDM from the
+measured orbit --- as opposed to reconstructing misalignments --- is a
+separate open problem not covered by the present limit.
+
+\paragraph{Implications for the experiment.}
+Our results support the control philosophy of Ref.~\cite{omarov} while
+sharpening its boundaries: (a) the CW/CCW combination and orbit-based
+separation control handle the orbit-visible part of the geometric phase,
+and a standard-BPM orbit monitor is an inexpensive substitute for
+SQUID-based pickups for that part (a $7.7\times$ gain), with drift
+monitoring providing a free, continuous watchdog; (b) the symmetric residual
+must be controlled \emph{a priori} --- by construction tolerances on the
+magnetic-center alignment and by field quality --- because it can be
+neither measured nor actively nulled afterwards; (c) the $\sigma^2$ law
+makes this tolerance requirement concrete: every factor of two in symmetric
+alignment buys a factor of four in false EDM.
+
+\paragraph{Validity.}
+All numbers refer to one lattice (24 FODO cells, $Q_y \approx 2.3$) in a
+linear model (no sextupoles); the suppression factors ($3.4\times$,
+$7.7\times$, $62\times$) carry finite ensemble statistics; and the
+quadrupole roll angle constitutes a separate direct channel with a
+$\sim\!0.3$~mrad tolerance, outside the misalignment budget quantified
+here.  The qualitative structure --- the symmetric/antisymmetric visibility
+gap and the coherent-systematic walls --- follows from the alternating-
+gradient principle itself and is expected to carry over to any strong-
+focusing implementation.
+
+\begin{acknowledgments}
+%
+\end{acknowledgments}
+
+% ═══════════════════════════════════════════════════════════════════
+\begin{thebibliography}{99}
+
+\bibitem{omarov}
+Z.~Omarov, H.~Davoudiasl, S.~Hac{\i}\"omero\u{g}lu, V.~Lebedev,
+W.~M.~Morse, Y.~K.~Semertzidis, A.~J.~Silenko, E.~J.~Stephenson, and
+R.~Suleiman,
+``Comprehensive symmetric-hybrid ring design for a proton EDM experiment at
+below $10^{-29}\,e\!\cdot\!$cm,''
+Phys.\ Rev.\ D \textbf{105}, 032001 (2022).
+
+\bibitem{haciomeroglu2017}
+S.~Hac{\i}\"omero\u{g}lu and Y.~K.~Semertzidis,
+``Systematic errors related to quadrupole misplacement in an all-electric
+storage ring for proton EDM experiment,''
+arXiv:1709.01208.
+
+\bibitem{chung1993}
+Y.~Chung, G.~Decker, and K.~Evans,
+``Closed orbit correction using singular value decomposition of the response
+matrix,''
+in \emph{Proceedings of PAC 1993}, p.~2263.
+
+\bibitem{wegscheider}
+S.~Wegscheider and J.~Vilsmeier \emph{et al.},
+``Inverse modeling of circular lattices via orbit response in the presence
+of degeneracy,''
+Phys.\ Rev.\ Accel.\ Beams \textbf{26}, 032803 (2023).
+
+\bibitem{marti}
+Z.~Mart\'{\i}, G.~Benedetti, U.~Iriso, and A.~Franchi,
+``Fast beam-based alignment using ac excitations,''
+Phys.\ Rev.\ Accel.\ Beams \textbf{23}, 012802 (2020).
+
+\bibitem{huang}
+X.~Huang,
+``Simultaneous beam based alignment measurement for multiple magnets,''
+arXiv:2203.14869.
+
+\bibitem{mirza}
+S.~H.~Mirza, R.~Singh, P.~Forck, and H.~Klingbeil,
+``Closed orbit correction at synchrotrons for symmetric and near-symmetric
+lattices,''
+Phys.\ Rev.\ Accel.\ Beams \textbf{22}, 072804 (2019).
+
+\bibitem{ziemann}
+V.~Ziemann and M.~Ziemann,
+``Noninvasively improving the orbit response matrix while continuously
+correcting the orbit,''
+arXiv:2104.05300.
+
+\bibitem{rossbach}
+J.~Rossbach,
+``Closed-orbit distortions of periodic FODO lattices due to plane ground
+waves,''
+Part.\ Accel.\ \textbf{23}, 121 (1989).
+
+\bibitem{polarimeter}
+F.~M\"uller \emph{et al.} (JEDI Collaboration),
+``A new beam polarimeter at COSY to search for electric dipole moments of
+charged particles,''
+arXiv:2010.13536.
+
+\end{thebibliography}
+
+\end{document}
