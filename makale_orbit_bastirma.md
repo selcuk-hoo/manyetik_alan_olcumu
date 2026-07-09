@@ -17,6 +17,13 @@
 > - Off-momentum spin-sensing Results sonunda KISA alt bölüm (yörünge-dışı kaçış).
 > - Metod'a giren sistematikler: **β-beat, quad tilt, BPM ofset/kazanç/gürültü**
 >   (nihai sayılarda belirleyici olanlar).
+> - **Uniform-gradient / zayıf-odaklama tartışması makaleye GİRMEZ** (kullanıcı).
+>
+> **ÜSLUP (kullanıcı talebi):** Makale, konuya aşina olmayan okur için **mümkün
+> olduğunca basit ve açıklayıcı** yazılacak — her kavram ilk kullanımda tanımlanır
+> (BPM, kapalı yörünge, tune, k-modülasyon, geometrik faz...), her sonuçtan önce
+> "neyi neden denedik" sezgisi verilir, formüller sözle de anlatılır.
+> `PROJE_ANALIZI_VE_ONERILER.md` ve `akilli_duzeltme_pedagojik.md` üslup şablonudur.
 
 ---
 
@@ -86,22 +93,54 @@ belirlendiğini gösteriyoruz."
   (cond 193 vs gerçek 1.2×10⁸, `svd.md §5`).
 
 2.2 **Sahte-EDM estimatörü (kritik reçete):**
-- 4D kapalı yörünge + model-fit seküler eğim (`berry_data/false_edm_4d.py`);
-  alternatif: 4-katlı simetrik örnekleme (sx,sy)=±1. **Düz polyfit yasak**
-  (betatron aliası).
+- Ana yöntem: **4D kapalı yörünge + model-fit seküler eğim**
+  (`berry_data/false_edm_4d.py`) — tek ideal parçacık kapalı yörüngeye oturtulur,
+  S_y(t) = a + bt + Σ_k[c_k cos + d_k sin] fitinden yalnız seküler eğim b çekilir.
+  **Düz polyfit yasak** (betatron salınımını sinyal sanır).
+- Çapraz-doğrulama: **dört-parçacık simetrik başlangıç** — aynı betatron genliğinde
+  başlangıç konumları (+Δx,+Δy), (+Δx,−Δy), (−Δx,+Δy), (−Δx,−Δy) olan dört
+  parçacığın ortalaması; betatron katkısı ve ⟨ΔxΔy⟩ artığı simetriyle söner.
+  *(Makalede "(sx,sy)=±1" kısaltması KULLANILMAZ — spin bileşeni sanılıyor;
+  açıkça "dört simetrik başlangıç konumu kombinasyonu" diye yazılır.)*
 - Doğrulama: σ=10→5→2.5 μm taramasında **p = 2.00 ± 0.01** (saf kuadratik
   geometrik faz, lineer kaçak yok; Omarov Fig. 9a'nın birebir reprodüksiyonu).
 
-2.3 **Antisimetrik/simetrik ayrışım ve gözlenebilirlik dili:**
-- QF/QD zıt-işaret (antisim, düşük-k, orbit-görünür; 25 boyut) vs aynı-işaret
-  (simetrik, k≈24, orbit-kör; 23 boyut).
-- Kazanç yasası G_k = C/|Q²−k²| (C≈24.8, Q²≈5); cond(R)=193.
+2.3 **Antisimetrik/simetrik ayrışım — TANIM ve KANIT (kullanıcı: "ikna edici
+göster"):**
+- **Tanım (projektörlerle, açık formül):** 48-bileşenli kaçıklık vektörü v için,
+  her FODO hücresinde (QF=2k, QD=2k+1 indisleri):
+  - simetrik bileşen: (P_sym v)[2k] = (P_sym v)[2k+1] = (v[2k]+v[2k+1])/2
+    (QF ve QD **birlikte** kayar),
+  - antisimetrik bileşen: (P_anti v)[2k] = −(P_anti v)[2k+1] = (v[2k]−v[2k+1])/2
+    (QF ve QD **zıt** kayar).
+  P_sym + P_anti = I, P_sym·P_anti = 0 (ortogonal ayrışım; kod:
+  `make_orbit_figures.sym_anti_projectors`).
+- **Neden bu ayrım fizikseldir:** QF ve QD gradyanları zıt işaretli olduğundan,
+  zıt-yönlü kayma (antisim) **aynı-yönlü** kick verir (üst üste biner → düşük-k,
+  büyük yörünge); aynı-yönlü kayma (sim) **zıt** kick verir (hücre içinde iptal →
+  k≈24 hızlı-değişen desen, bastırılmış yörünge).
+- **Kanıt (Fig. 2):** R'nin SVD'sinde her sağ-tekil vektörün simetrik içeriği
+  ‖P_sym v_i‖² hesaplanır: büyük tekil değerli modlar ~saf antisimetrik (mavi),
+  küçük tekil değerli modlar ~saf simetrik (kırmızı) — ayrışım varsayım değil,
+  R'nin kendi yapısından ÇIKIYOR. cond(R)=193.
+- Kazanç yasası G_k = C/|Q²−k²| (C≈24.8, Q²≈5) aynı gerçeğin harmonik dili.
 - COD izi (aynı 10 μm RMS): antisim 114.7 μm vs simetrik 1.69 μm
   (`akilli_duzeltme.md §3`).
-- **Metrik tuzağı:** corr simetrik felaketi gizler → daima simetrik-bileşen
-  hatası (mean-çıkarmadan RMS) raporlanır (`squid_bpm_test.md §9.3` uyarısı).
 
-2.4 **Sistematik hata modelleri (nihai sayılarda belirleyici olanlar):**
+2.4 **Metrikler — korelasyonu NASIL hesaplıyoruz ve tuzağı (kullanıcı talebi):**
+- **corr tanımı:** geri-çatılan v̂ ile gerçek v arasında 48 bileşen üzerinden
+  **Pearson korelasyon katsayısı**: corr = Σ(v̂−⟨v̂⟩)(v−⟨v⟩) / (48·σ_v̂·σ_v).
+  Makalede her kullanımda bu tanım verilecek.
+- **Tuzak:** Pearson corr **ölçek- ve ofset-değişmezdir**; 48 modun çoğunu
+  oluşturan kolay antisimetrik modlarca domine olur ve **üniform/simetrik hatayı
+  görmez** (mean-çıkarma tam da simetrik ailenin en kötü modunu siler).
+  corr=0.99 iken simetrik bileşen tamamen yanlış olabilir (Fig. 4'te gösterilir).
+- **Doğru metrik:** hata vektörü e = v̂ − v'nin simetrik-bileşen RMS'i
+  ‖P_sym e‖_RMS (mean-ÇIKARMADAN) ve antisimetrik eşi — sinyalin kendi
+  bileşen RMS'iyle (41/41 μm @ ±100 μm uniform) karşılaştırılır.
+  (`squid_bpm_test.md §9.3` uyarısının formelleştirilmesi.)
+
+2.5 **Sistematik hata modelleri (nihai sayılarda belirleyici olanlar):**
 - **BPM ofseti:** statik, per-BPM ~100 μm (varyant: 30 μm); k-mod/farkta iptal,
   tek-yörünge inversiyonunda katil (`svd.md §5.1, §6`).
 - **BPM gürültüsü:** ~1 μm tek-atış (beyaz); lock-in ile √N.
@@ -142,12 +181,35 @@ belirlendiğini gösteriyoruz."
   tabanı** (gain-kalibrasyon şart, §5.1); N=2 stray-alan örneğinde gerçekçi
   ofsette taban ~45 nT ≈ harmonik-fit (SVD üstünlüğü yok).
 
-**3.2.2 Dağıtık-frekans per-quad K-mod (AC-BBA):**
-- Demodüle genlik **nefes-domine** (S/B ≈ 0.14): modüle edilen quad'ın kendi
-  ofsetini değil, diğer 47 quad'ın kurduğu yörüngeyi okur (kaldıraç ayrıştırması:
-  −9.83 μm vs kendi katkısı −0.037 μm) (`squid_bpm_test.md §6`).
-- corr: tek BPM +0.07; **48 BPM'de ≈ −0.03** — nefes koherent, ortalamayla/
-  SQUID'le sönmez (§7). C++ ile bağımsız doğrulandı (analitik/C++ oranı ~1.00, §5.5).
+**3.2.2 Dağıtık-frekans per-quad K-mod (AC-BBA) — NEFES, DETAYLI ANLATIM
+(kullanıcı talebi; kaynak `squid_bpm_test.md §2-7`, Fig. 3):**
+- **Yöntemin vaadi:** her quad ayrı frekansta (%2 derinlik) modüle edilir; BPM
+  sinyalinde f_i frekansının genliği A_i, o quad'ın demet-merkez ofsetiyle
+  orantılı sanılır → per-quad okuma, matris-inversiyonu yok → no-go'yu atlama
+  umudu. (Işık kaynaklarındaki AC-BBA'nın [Martí PRAB 23, 012802] bu makineye
+  uyarlanması.)
+- **Simülasyon inceliği (adyabatik eşdeğer):** 1–10 kHz modülasyon, betatron
+  frekansından (~515 kHz) çok yavaş → demet her an o anki gradyanın kapalı
+  yörüngesinde oturur → genlik = kapalı yörüngenin gradyana göre **statik
+  türevi**; iki statik kapalı yörünge farkıyla hesaplanır (zaman-takibi
+  gerekmez, adyabatik limitte exact).
+- **Neden çöküyor — iki etki:** quad i'yi modüle etmek (1) kendi feed-down
+  kick'ini değiştirir (aranan sinyal, ~0.9 μm) VE (2) **bir-tur matrisini** —
+  dolayısıyla β(s), φ(s), Q'yu — tüm halkada değiştirir. Mevcut ~0.37 mm'lik
+  kapalı yörünge (48 quad'ın ortak eseri) bu değişmiş optikten yeniden taşınır →
+  BPM'de birkaç μm'lik "**optik-nefes**" terimi. **Nefes/sinyal ≈ 7** (S/B≈0.14).
+- **Kaldıraç ayrıştırması (kesin kanıt):** quad 37 modülasyonuna tepki, tüm
+  kaçıklık deseni varken −9.83 μm; yalnız dy[37] varken −0.037 μm (**265×
+  küçük**). Yani genlik, modüle edilen quad'ın ofsetini değil **komşuların
+  kurduğu yörüngeyi** ölçer; kalibrasyona bölmek anlamsız.
+- **Sayısal sonuç:** corr tek BPM'de +0.07, **48 BPM'de ≈ −0.03**. Nefes
+  **koherenttir** (≈ mevcut yörünge × tek skaler): BPM sayısı/SQUID çözünürlüğü
+  onu **ortalamayla söndüremez**. Nefessiz idealizasyonda corr=1.000 —
+  suçlunun nefes olduğunun kontrolü. C++ ile bağımsız doğrulandı
+  (analitik/C++ duyarlılık oranı ~1.00; iki kod yalnız params.json paylaşır).
+- **Dört sağlama** (kod hatası değil): tune patolojik değil (sinπQ=0.815);
+  etki global (tüm halka 12 μm kayar); derinlikle lineer (oran sabit ~0.14 —
+  modülasyonu küçültmek kurtarmaz); minik-türev ekstrapolasyonu tutarlı.
 - **BPM ofseti bu dalda alakasız:** AC demodülasyon DC'yi söndürür (100 μm →
   65 nm sızıntı; pencere-kilitli frekansta tam sıfır) — ofseti 30 μm'e indirmek
   hiçbir şey değiştirmez.
@@ -157,18 +219,59 @@ belirlendiğini gösteriyoruz."
 
 **3.2.3 NN ile kaçıklık geri-çatımı:**
 - misalignment→COD **lineer** → NN yalnız R'yi öğrenir; ters yön = R⁻¹.
-- Sayı: simetrik geri-çatım hatası NN 5.6 μm ≈ TSVD 6.3 μm (sinyal 9.9 μm) —
-  sınır bilgi-teorik, algoritmik değil (`akilli_duzeltme.md §6.8`).
+- Sayı: simetrik geri-çatım hatası NN (MLP 128,128; 4000 örnek) 5.6 μm ≈ TSVD
+  6.3 μm (sinyal 9.9 μm) — sınır bilgi-teorik, algoritmik değil
+  (`akilli_duzeltme.md §6.8`).
+- **"Daha iyi mimari kurtarır mı?" (kullanıcı sorusu) — HAYIR, ve makalede bu
+  gerekçeyle söylenecek:** öğrenilecek harita **tam lineer** olduğundan
+  (COD = R·mis) MLP zaten yeterli kapasitede; CNN/transformer/GNN gibi mimariler
+  ancak sömürülecek doğrusal-olmayan yapı varsa kazandırır — burada yok.
+  Simetrik iz gürültü+sistematik tabanının ALTINDA → hiçbir estimator veride
+  olmayan bilgiyi çıkaramaz (Cramér-Rao; beyaz gürültüde lock-in/en-küçük-kareler
+  zaten optimal). Kazanç ancak ek **ön-bilgiden** gelebilirdi (seyreklik →
+  LASSO/CLEAN zaten denendi, aynı taban, `false_edm_harmonic_sinir.md §14.5`);
+  zaman-serisi mimarileri (LSTM) de aynı duvara çarpar — asıl engel gürültü
+  değil, koherent sistematik + koşullanma (`akilli_duzeltme.md §6.9`).
 
 **3.2.4 LOCO ile başlangıç düzeltmesi + drift izleme:**
 - **Çalışan kısım (pozitif):** ofset-iptalli drift modu — 50 μm BPM ofseti
   altında 6.5 μm RMS drift hassasiyeti (mutlağa göre 29×); %1 β-beat'te 6.1 μm
   (`makale-taslagi-2.md §3.4, §3.7`).
 - **Sınır:** en kötü 8 mod %96 simetrik, 193× gürültü büyütmesi (§3.8) —
-  drift gözcüsü de simetriğe kör. Dualite teoremi: ofset-iptal eden her lineer
-  estimator ‖ΔR⁻¹‖~‖R⁻¹‖/ε alt sınırına tabidir (§2.4).
+  drift gözcüsü de simetriğe kör.
+- **Ofset-iptal alt sınırı (MÜTEVAZI sunum — kullanıcı: "çok iddialı olma"):**
+  Sezgi önce: BPM ofsetini iptal etmenin bedavası yok. Ofseti iki-ölçüm farkıyla
+  (k-mod: g₁/g₂) sildiğinde, elindeki bilgi artık R değil **ΔR = R(g₂)−R(g₁)**
+  olur; iki konfigürasyon birbirine yakınsa (ε = göreli fark) ΔR ~ ε·(∂R/∂g)
+  küçülür ve tersi ~1/ε büyür: ‖ΔR⁻¹‖ ~ ‖R⁻¹‖/ε. Yani **ofset bağışıklığının
+  bedeli, gürültü büyütmesinin 1/ε katına çıkmasıdır.** Makalede bu, "teorem"
+  iddiasından çok **belirli bir estimator sınıfı için yapısal alt sınır** olarak
+  sunulur: (i) lineer, (ii) ön-yargısız, (iii) statik ofseti TAM iptal eden
+  iki-ölçüm estimatorları sınıfında geçerli; sınıf dışı yollar (ör. ofseti
+  Bayesçi ön-bilgiyle kısmen modellemek) kapsam dışıdır ve açıkça söylenir.
+  (`makale-taslagi-2.md §2.4` türetmesi; burada iddia "başka hiçbir şey
+  yapılamaz" DEĞİL, "bu doğal sınıfın tabanı budur".)
 
-**3.2.5 CR-ayrım gözlenebiliri (Omarov'un önerdiği knob):**
+**3.2.5 Harmonik yaklaşımlar (kullanıcı: "unutmuşum, ekleyelim"):**
+- **Hedefli Fourier geri-çatımı:** kaçıklığın harmonik içeriği önceden
+  biliniyorsa taban Fourier modlarıyla kurulur → koşullanma 13000→186'ya iner
+  ve geri-çatım çalışır; ama **keyfî (bilinmeyen) desen** için greedy/LASSO
+  harmonik seçimi rank-yoksulluğundan çöker (`FOURIER_REKONSTRUKSIYON.md`,
+  `README §`; R-LS/CLEAN/Bozoki aynı gözlenebilirlik tabanı,
+  `false_edm_harmonic_sinir.md §14.5` — 6 yöntem tek duvar).
+- **Harmonik fit (tek-mod okuma) — svd.md vaka çalışması:** bilinen bir alan
+  imzasını (örn. N=2 radyal stray alan → dikey k=2 yörünge) 48-BPM verisinin
+  cos2θ/sin2θ izdüşümüyle okumak **iyi-koşulludur (cond=1) ama YANLIDIR**:
+  k=2 katsayısına alan + kaçıklığın-k=2'si + ofsetin-k=2'si birlikte düşer,
+  tek sayı dördünü ayıramaz → 10 μm kaçıklıkta ~53 nT yanlılık (gerçek 1 nT
+  görünmez). SVD-TSVD ile "ayırma" da gerçekçi BPM ofsetinde harmonik fit'e
+  üstünlük sağlamaz (gain-kalibre taban ~45 nT ≈ harmonik ~53 nT; `svd.md §5.1`).
+  **Ders:** ileri-okuma (izdüşüm) ofseti büyütmez ama dejenerasyonla yanlıdır;
+  ters-çevirme dejenerasyonu çözer ama ofseti büyütür — iki yol da simetrik/
+  dejenere bilgiye ulaşamaz (Wegscheider MSE=Var+Bias² dilinde: biri
+  Bias-domine, öbürü Var-domine).
+
+**3.2.6 CR-ayrım gözlenebiliri (Omarov'un önerdiği knob):**
 - Doğrudan C++ ölçümü: simetrik bastırma **CR-ayrımda 4.5× ≈ tek-yön COD'da
   3.8×** → ayrım da bir yörünge-farkı, **ek pencere açmaz**; no-go CR-ayrıma
   birebir taşınır (`omarov.md §9.3`). **Omarov §9 boşluğunun kapanışı.**
@@ -184,17 +287,23 @@ belirlendiğini gösteriyoruz."
   (`kmod_drivers/fast_est cwccw`; 20-seed ensemble ile pekiştirildi).
 
 **3.3.2 Yüksek betatron tune:**
-- Q=2.3→10.3 (alternasyon korunur, C++ kararlı): simetriğin **yüksek-m** parçası
-  açılır (m=10 kazanç 71 ≈ antisim). Ama **düşük-m** k=24−m≥16 → Q≥16 ister;
-  Q_max=12 (μ=180°/hücre stopband) → k-mod ile kurtarma ~%8–25 → bastırma **~2×**.
-- **Yüksek-Q'da kalınamaz:** aynı kaçıklık için f ~g³ ile büyür (g 0.21→0.69'da
-  32×), gerçek EDM sabit → S/N 32× kötü (`akilli_duzeltme.md §6.15, §6.15.1`).
-
-**3.3.3 Uniform-gradient tanı modu:**
-- Tüm |g|∈[0.03, 0.42] **kararsız** (Courant–Snyder: uniform statik quad iki
-  düzlemi birden odaklayamaz; deflektör zayıf-odaklama yetmez).
-- **Kapanış cümlesi:** simetrik körlük = QF/QD alternasyonu = makinenin
-  kararlılığı; gizleyen yapı çökertmeden kaldırılamaz (`§6.14b`).
+- Fikir: Q'yu simetrik desenin harmoniğine (k≈24) yaklaştır → rezonans paydası
+  |Q²−k²| küçülür → simetrik mod orbit-görünür olur.
+- Kısmen çalışır: Q=2.3→10.3 (alternasyon korunur, C++ kararlı): simetriğin
+  **yüksek-m** parçası açılır (m=10 kazanç 71 ≈ antisim). Ama **düşük-m**
+  k=24−m≥16 → Q≥16 ister; Q_max=12 (μ=180°/hücre stopband) → k-mod ile kurtarma
+  ~%8–25 → bastırma **~2×** (marjinal).
+- **Asıl bedel — quad güçleri (VURGULANACAK, kullanıcı):** Q'yu yükseltmek
+  ancak **gradyanı büyüterek** olur: Q 2.3→10.3 için g = 0.21→0.69 T/m
+  (~3.3×). Daha güçlü quad'lar, AYNI kaçıklık için demete daha sert kick verir
+  → geometrik faz iki dönmenin çarpımı olduğundan sahte-EDM ~g² büyür, üstüne
+  büyüyen betatron orbiti eklenir → net ölçüm **~g³: 32× daha büyük sahte-EDM.**
+  Gerçek EDM sinyali ise elektrik deflektörden gelir ve **quad gradyanından
+  bağımsızdır** → sinyal/arka-plan yüksek-Q'da 32× KÖTÜLEŞİR. Yani yüksek-Q'da
+  kalınamaz; geçici tanı olarak kullanılıp dönülse bile rekonstrüksiyon
+  simetriğin ancak ~%25'ini taşır (`akilli_duzeltme.md §6.15, §6.15.1`).
+- *(Uniform-gradient / zayıf-odaklama varyantı makaleye alınmıyor — kullanıcı
+  kararı.)*
 
 ### 3.4 Yörünge-dışı kısa not: off-momentum spin-sensing (kaçış değil)
 
@@ -226,9 +335,9 @@ drift izleme) sahte-EDM'i σ=10 μm'de **~6×10⁻²⁸ e·cm**'e bağlar; taban
 4.2 **Sınır teoremi (negatif çekirdek):** simetrik (orbit-kör) bileşen, denenen
 tüm yörünge-tabanlı kanallarda (ΔR/SVD/lock-in, per-quad AC, NN, LOCO+drift,
 CR-ayrım) gerekli seviyede **gözlenemez**; sınır beyaz gürültü değil, iki
-koherent sistematik (optik-nefes; β-beat×koşullanma) + latis yapısı
-(alternasyon=stabilite). **Dolayısıyla SQUID dahil hiçbir BPM teknolojisi tabanı
-değiştirmez.**
+koherent sistematik (optik-nefes; β-beat×koşullanma) + latis yapısı (düşük-m
+simetrik modların rezonansı Q≥16 ister, stopband Q≤12'ye izin verir).
+**Dolayısıyla SQUID dahil hiçbir BPM teknolojisi tabanı değiştirmez.**
 
 4.3 **Kapsam/pozisyon notları:**
 - Spin-tabanlı aktif null'lama kapsam dışı: sahte/gerçek EDM aynı gözlenebilirde
@@ -249,18 +358,30 @@ bütçesinin dışında raporlanır.
 
 ---
 
-## 5. Figür planı (öneri)
+## 5. Figürler — durum (üretici: `make_orbit_figures.py`, İngilizce etiketli)
 
-1. **Fig. 1:** Mekanizma + σ² doğrulaması (p=2.00; Omarov Fig. 9a karşılığı).
-2. **Fig. 2:** Antisim/sim ayrışım + G_k yasası + cond(R)=193 (SV spektrumu).
-3. **Fig. 3 (ANA):** Ulaşılabilir sahte-EDM (e·cm) vs σ — ham/CW-CCW/orbit-düzeltme
-   basamakları + simetrik taban; 10⁻²⁹ çizgisi ve σ_sym≈1.3 μm kesişimi.
-4. **Fig. 4:** Ters-sınıf duvarı — lock-in corr vs T + sim-bileşen hatası
-   (corr tuzağı görselleştirmesi); β-beat taraması.
-5. **Fig. 5:** Nefes — per-quad genlik ayrıştırması (kendi ofseti vs komşu
-   yörünge; 2→48 BPM corr≈0).
-6. **Fig. 6:** CR-ayrım körlüğü (4.5× vs 3.8×) + flip dejenerasyonu.
-7. **Fig. 7:** Yüksek-Q: m-bazında kazanç (Q=2.3 vs 10.3) + g³ ölçekleme.
+**ÜRETİLDİ (analitik; repoda, 2026-07):**
+1. **`fig_orbit_suppression.png` (ANA):** Ulaşılabilir sahte-EDM vs σ —
+   ham/CW-CCW/orbit-düzeltme basamakları (σ=10 μm C++ noktaları) + σ² eğrileri,
+   10⁻²⁹ hedef çizgisi, σ_sym≈1.3 μm kesişimi, sağ eksen e·cm.
+2. **`fig_orbit_modes.png`:** R'nin SV spektrumu — her mod ‖P_sym v_i‖² ile
+   renkli (büyük-σ=antisim mavi, küçük-σ=sim kırmızı; cond=193, analitik
+   üretimde belge değeriyle birebir) + G_k=C/|Q²−k²| kazanç yasası paneli.
+3. **`fig_orbit_breathing.png`:** Nefes — nefessiz corr=1.000 vs nefesli
+   1-BPM corr=+0.07 / 48-BPM corr=−0.03 saçılımı + kaldıraç barları (266×;
+   belgedeki 265× ile birebir).
+4. **`fig_orbit_lockin.png`:** Tek-frekans ΔR inversiyonu, lock-in tabanında
+   (10 nm): sim/antisim bileşen hatası vs β-beat (%0→283 μm@%0.5→3967 μm@%5;
+   sinyal 41 μm çizgisi) + corr'un yanıltıcı yüksek kalışı
+   (cond(ΔR)=3.74×10⁴, σ_min≈10⁻⁴ — belge değerleriyle birebir).
+
+**C++ GEREKTİRENLER (üretilecek; uzun koşum):**
+5. σ² doğrulaması p=2.00 (Omarov Fig. 9a karşılığı) —
+   `kmod_drivers/fast_est.py calib` (~saatler, 3 seed).
+6. CR-ayrım körlüğü (4.5× vs 3.8×) + flip dejenerasyonu — `cr_separation.py`
+   ve `kmod_drivers/fast_est.py cwccw` desenleri /tmp'den yeniden kurulacak.
+7. Yüksek-Q g³ ölçeklemesi (0.21/0.40/0.69 T/m → 1×/4.1×/32×) — üç ayar ×
+   C++ estimatör koşumu.
 
 ## 6. Sayı → kaynak eşleme (iç referans; makaleye girmez)
 
