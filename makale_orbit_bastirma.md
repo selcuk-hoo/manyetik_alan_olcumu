@@ -232,52 +232,89 @@ hâlinde söner ama kapalı-yörünge-kaynaklı **ortak** betatron bileşeni kal
 sinyalin ~300 katı) düşer. Yani simetrik örnekleme kapalı-yörünge bilgisinin
 yerine geçmez; onun etrafında çalışır.
 
-2.3 **Antisimetrik/simetrik ayrışım — TANIM ve KANIT (kullanıcı: "ikna edici
-göster"):**
-- **Tanım (projektörlerle, açık formül):** 48-bileşenli kaçıklık vektörü v için,
-  her FODO hücresinde (QF=2k, QD=2k+1 indisleri):
-  - simetrik bileşen: (P_sym v)[2k] = (P_sym v)[2k+1] = (v[2k]+v[2k+1])/2
-    (QF ve QD **birlikte** kayar),
-  - antisimetrik bileşen: (P_anti v)[2k] = −(P_anti v)[2k+1] = (v[2k]−v[2k+1])/2
-    (QF ve QD **zıt** kayar).
-  P_sym + P_anti = I, P_sym·P_anti = 0 (ortogonal ayrışım; kod:
-  `make_orbit_figures.sym_anti_projectors`).
-- **Neden bu ayrım fizikseldir:** QF ve QD gradyanları zıt işaretli olduğundan,
-  zıt-yönlü kayma (antisim) **aynı-yönlü** kick verir (üst üste biner → düşük-k,
-  büyük yörünge); aynı-yönlü kayma (sim) **zıt** kick verir (hücre içinde iptal →
-  k≈24 hızlı-değişen desen, bastırılmış yörünge).
-- **Kanıt (Fig. 2):** R'nin SVD'sinde her sağ-tekil vektörün simetrik içeriği
-  ‖P_sym v_i‖² hesaplanır: büyük tekil değerli modlar ~saf antisimetrik (mavi),
-  küçük tekil değerli modlar ~saf simetrik (kırmızı) — ayrışım varsayım değil,
-  R'nin kendi yapısından ÇIKIYOR. cond(R)=193.
-- Kazanç yasası G_k = C/|Q²−k²| (C≈24.8, Q²≈5) aynı gerçeğin harmonik dili.
-- COD izi (aynı 10 μm RMS): antisim 114.7 μm vs simetrik 1.69 μm
-  (`akilli_duzeltme.md §3`).
+### 2.3 Kaçıklığın iki yüzü: simetrik ve antisimetrik desenler
 
-2.4 **Metrikler — korelasyonu NASIL hesaplıyoruz ve tuzağı (kullanıcı talebi):**
-- **corr tanımı:** geri-çatılan v̂ ile gerçek v arasında 48 bileşen üzerinden
-  **Pearson korelasyon katsayısı**: corr = Σ(v̂−⟨v̂⟩)(v−⟨v⟩) / (48·σ_v̂·σ_v).
-  Makalede her kullanımda bu tanım verilecek.
-- **Tuzak:** Pearson corr **ölçek- ve ofset-değişmezdir**; 48 modun çoğunu
-  oluşturan kolay antisimetrik modlarca domine olur ve **üniform/simetrik hatayı
-  görmez** (mean-çıkarma tam da simetrik ailenin en kötü modunu siler).
-  corr=0.99 iken simetrik bileşen tamamen yanlış olabilir (Fig. 4'te gösterilir).
-- **Doğru metrik:** hata vektörü e = v̂ − v'nin simetrik-bileşen RMS'i
-  ‖P_sym e‖_RMS (mean-ÇIKARMADAN) ve antisimetrik eşi — sinyalin kendi
-  bileşen RMS'iyle (41/41 μm @ ±100 μm uniform) karşılaştırılır.
-  (`squid_bpm_test.md §9.3` uyarısının formelleştirilmesi.)
+Bu makalenin bütün sonuçları tek bir ayrıma dayanır; onu burada açık formülle
+tanımlayıp doğruluğunu göstereceğiz. 48 kuadrupolün kaçıklıklarını bir vektör
+v olarak yazalım (her FODO hücresinde QF'nin indisi 2k, QD'ninki 2k+1). Her
+hücrede iki kuadrupolün **birlikte** ve **zıt** kayma miktarlarını ayırırız:
 
-2.5 **Sistematik hata modelleri (nihai sayılarda belirleyici olanlar):**
-- **BPM ofseti:** statik, per-BPM ~100 μm (varyant: 30 μm); k-mod/farkta iptal,
-  tek-yörünge inversiyonunda katil (`svd.md §5.1, §6`).
-- **BPM gürültüsü:** ~1 μm tek-atış (beyaz); lock-in ile √N.
-- **BPM kazanç hatası:** çarpımsal δg_i, σ_g=%1–10 taraması.
-- **β-beat:** per-quad gradyan hatası ε (C++ `quad_dG`); LOCO-artığı temsili
-  (%0.5–5). **Ortalamayla sönmeyen model-sistematiği** — belirleyici kalem.
-- **Quad tilt (roll) ψ:** iki kanal — (a) ölçüme çapraz-düzlem sızıntısı,
-  (b) doğrudan geometrik-faz katkısı (C++ estimatörle; kmod_drivers/tiltscan).
-- Seed/ensemble politikası: her iddia çok-seed (tipik 3–40); tek-seed'den
-  kök-sebep çıkarılmaz (`akilli_duzeltme.md §6.15.2` dersi).
+$$(P_{\text{sym}}\,v)[2k] = (P_{\text{sym}}\,v)[2k{+}1] =
+\frac{v[2k]+v[2k{+}1]}{2}, \qquad
+(P_{\text{anti}}\,v)[2k] = -(P_{\text{anti}}\,v)[2k{+}1] =
+\frac{v[2k]-v[2k{+}1]}{2}.$$
+
+P_sym + P_anti = I ve P_sym·P_anti = 0: her kaçıklık deseni bu iki ortogonal
+parçanın toplamıdır. Ayrımın fiziği şudur: QF ve QD'nin gradyanları **zıt
+işaretlidir**. Zıt yönde kayan iki komşu kuadrupol (antisimetrik parça) demete
+**aynı yönde** tekme verir — tekmeler üst üste biner, düşük azimutal harmonikli
+(k küçük), betatron rezonansına yakın, dolayısıyla **büyük** bir kapalı yörünge
+bozulması doğar. Aynı yönde kayan iki komşu (simetrik parça) ise **zıt** tekme
+verir — tekmeler hücre içinde birbirini söndürmeye çalışır; kalan, hücreden
+hücreye işaret değiştiren k ≈ 24'lük bir desendir ve yörünge kazancı
+G_k = C/|Q²−k²| ile ezilir (Q ≈ 2.3 ≪ 24; Fig. 2 sağ panel).
+
+Bu ayrım bir varsayım değil, tepki matrisinin kendi yapısıdır ve doğrudan
+gösterilir (Fig. 2 sol panel): R = UΣVᵀ ayrışımında her sağ-tekil vektörün
+simetrik içeriği ‖P_sym v_i‖² hesaplanınca, **büyük** tekil değerli modların
+~saf antisimetrik, **küçük** tekil değerli modların ~saf simetrik olduğu
+görülür; iki aile arasındaki görünürlük uçurumu tek sayıda cond(R) = 193'tür.
+Somut ölçüm: aynı 10 μm RMS'lik desen, antisimetrikse ~115 μm, simetrikse
+yalnız ~1.7 μm yörünge izi bırakır.
+
+Sonraki bölümün tamamı şu gerilim üzerine kuruludur: sahte-EDM'i **düzeltme
+sonrası** süren parça simetrik olandır — yani yörüngeye en az görünen parça.
+
+### 2.4 Başarı nasıl ölçülür: korelasyon tanımı ve tuzağı
+
+Geri-çatım kalitesi için iki metrik kullanıyoruz; ikisinin farkı bu makalede
+birkaç kez belirleyici olacak, o yüzden burada açıkça tanımlıyoruz.
+
+**Pearson korelasyonu.** Geri-çatılan v̂ ile gerçek v arasında, 48 bileşen
+üzerinden standart korelasyon katsayısı:
+$$\text{corr} = \frac{\sum_j (\hat v_j - \langle \hat v\rangle)
+(v_j - \langle v\rangle)}{48\,\sigma_{\hat v}\,\sigma_v}.$$
+Bu metrik yaygın ve sezgiseldir, ama iki nedenle **yanıltıcıdır**: (i) ölçek-
+ve ofset-değişmezdir — tanımdaki ortalama-çıkarma, tam da simetrik ailenin en
+kötü (üniform) modunu hatadan siler; (ii) 48 bileşenin çoğunu iyi geri-çatılan
+antisimetrik modlar domine eder. Sonuç: **corr = 0.99 iken simetrik bileşen
+tamamen yanlış olabilir** — bu makalede somut örneğiyle gösterilir (Fig. 4:
+corr 0.69'da simetrik hata sinyalin ~7 katı).
+
+**Bileşen-hata metriği (doğru olan).** Hata vektörü e = v̂ − v'nin simetrik ve
+antisimetrik parçalarının, ortalama-ÇIKARMADAN alınmış RMS'leri:
+‖P_sym e‖_RMS ve ‖P_anti e‖_RMS. Bunlar, sinyalin kendi bileşen RMS'leriyle
+karşılaştırılır (±100 μm üniform kaçıklıkta her iki bileşen ~41 μm). Bir yöntem
+ancak simetrik-bileşen hatası simetrik sinyalin altındaysa "simetriği görüyor"
+sayılır.
+
+### 2.5 Sistematik hata modelleri
+
+Nihai sayıları belirleyen dört sistematik, gerçekçi büyüklükleriyle modele
+girer:
+
+- **BPM ofseti (statik, ~100 μm/BPM; varyant 30 μm).** Her BPM'in elektronik
+  sıfırı gerçek eksenden bilinmeyen, saatler boyunca sabit bir miktar kayar.
+  Tek-yörünge inversiyonunun baş katilidir; fark-tabanlı (K-modülasyon, drift)
+  ölçümlerde iptal olur — hangi yöntemin neden etkilendiği §3'te tek tek
+  belirtilir.
+- **BPM gürültüsü (beyaz, ~1 μm tek-atış).** Zamanla ortalanabilir (√N);
+  senkron demodülasyonla (lock-in) pratik sınır olmaktan çıkar. Bu makalenin
+  ana mesajlarından biri, asıl sınırın bu OLMADIĞIdır.
+- **BPM kazanç hatası (çarpımsal, σ_g = %1–10 taraması).** Okumaların yüzdesel
+  ölçek hatası; çok-BPM ortalamasında kısmen yumuşar.
+- **β-beating / gradyan model hatası (per-quad ε, %0.5–5; C++'ta per-quad
+  gradyan sapmasıyla).** Gerçek makinenin optiğinin, geri-çatımda kullanılan
+  modelden farkını temsil eder (LOCO kalibrasyonu sonrası tipik artık ~%1).
+  **Ortalamayla sönmeyen bir model-sistematiğidir** ve ileride görüleceği gibi
+  ters-problemlerin belirleyici duvarıdır.
+- **Kuadrupol tilt'i (boylamsal eksen etrafında dönme, ψ).** İki ayrı kanal:
+  ölçüme çapraz-düzlem sızıntısı ve sahte-EDM'e doğrudan geometrik-faz katkısı;
+  ikincisi baskındır ve ayrı bir tolerans kalemi olarak raporlanır.
+
+**Seed politikası.** Bilineer f, tek bir kaçıklık gerçeklemesinde şans eseri
+küçük ya da büyük çıkabilir; bu yüzden her iddia çok-seed ensemble ile (tipik
+3–40 gerçekleme) raporlanır ve tek-seed sonuçtan kök-sebep çıkarılmaz.
 
 ---
 
