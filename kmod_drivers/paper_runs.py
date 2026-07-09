@@ -36,6 +36,33 @@ JSONL = "/tmp/kmod_recover/paper_runs.jsonl"
 RESULT = os.path.join(HERE, "paper_runs_results.json")
 
 
+def measure_fourparticle(dx, dy, delta=100e-6, t2=3e-4):
+    """CLAUDE.md reçetesinin PARÇACIK-tabanlı 4-katlısı: ideal eksenden
+    (±δ, ±δ) dört simetrik başlangıç; S_y(t) izleri ORTALANIR (betatron
+    çiftler hâlinde söner), sonra model-fit seküler eğim. CO araması YOK."""
+    from false_edm_mode_scan import setup_fields, _make_state, measure_dSy_dt_model
+    from integrator import integrate_particle
+    with open(os.path.join(BASE, "params.json")) as f:
+        cfg = json.load(f)
+    DT = float(cfg["dt"])
+    tilt = np.zeros(NQ)
+    traces, times = [], None
+    for sx in (+1, -1):
+        for sy in (+1, -1):
+            fields, y0, beta0, R0, p_mag, direction = setup_fields(cfg)
+            launch = _make_state([sx * delta, sy * delta, 0.0, 0.0],
+                                 p_mag, direction, [0.0, 0.0, direction])
+            fields.poincare_quad_index = 0.0
+            _, poin, pt = integrate_particle(launch, 0.0, t2, DT, fields=fields,
+                                             return_steps=4000, quad_dx=dx,
+                                             quad_dy=dy, quad_tilt=tilt)
+            traces.append(np.asarray(poin[:, 7], float))
+            times = np.asarray(pt, float)
+    n = min(len(tr) for tr in traces)
+    sy_avg = np.mean([tr[:n] for tr in traces], axis=0)
+    return float(measure_dSy_dt_model(sy_avg, times[:n]))
+
+
 def fast_measure_g(dx, dy, g_scale=1.0, n_turns=14, t2=3e-4):
     """fast_est.fast_measure eşdeğeri + gradyan ölçekleme (g0 VE g1 birlikte)."""
     from false_edm_mode_scan import setup_fields, _make_state, measure_dSy_dt_model
@@ -124,11 +151,17 @@ def _worker(task):
             f, resid = fast_measure_signed(dx, dy)
         else:
             f, resid = measure_noCO(dx, dy), 0.0
+    elif mode == "fourpart":
+        # parçacık-tabanlı 4-katlı: (delta_um,) — seed 0 deseni, CO araması yok
+        (delta_um,) = payload
+        rng = np.random.default_rng(3000 + 0)
+        dx = rng.normal(0, 10e-6, NQ); dy = rng.normal(0, 10e-6, NQ)
+        f, resid = measure_fourparticle(dx, dy, delta=delta_um * 1e-6), 0.0
     else:  # gscale: AYNI 10 μm desen (seed sabitler), g ölçeklenir
-        gsc, seed = payload
+        gsc, seed, co_turns = payload
         rng = np.random.default_rng(3000 + seed)
         dx = rng.normal(0, 10e-6, NQ); dy = rng.normal(0, 10e-6, NQ)
-        f, resid = fast_measure_g(dx, dy, g_scale=gsc)
+        f, resid = fast_measure_g(dx, dy, g_scale=gsc, n_turns=co_turns)
     rec = {"mode": mode, "payload": list(payload), "f": f, "resid": float(resid),
            "t": time.time()}
     with open(JSONL, "a") as fh:
@@ -148,10 +181,12 @@ def save_result(key, obj):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["sigma", "gscale", "fourfold"])
+    ap.add_argument("mode", choices=["sigma", "gscale", "fourfold", "fourpart"])
     ap.add_argument("-w", "--workers", type=int, default=4)
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--seed-offset", type=int, default=0)
+    ap.add_argument("--co-turns", type=int, default=14)
+    ap.add_argument("--gvals", type=str, default="0.21,0.40,0.69")
     args = ap.parse_args()
     t0 = time.time()
 
@@ -164,9 +199,11 @@ def main():
         combos = [(+1, +1), (+1, -1), (-1, +1), (-1, -1)]
         tasks = [("fourfold", (sx, sy, m)) for m in ("co", "noco")
                  for (sx, sy) in combos]
+    elif args.mode == "fourpart":
+        tasks = [("fourpart", (d,)) for d in (50.0, 100.0, 200.0)]
     else:
-        gscales = [1.0, 0.40 / 0.21, 0.69 / 0.21]
-        tasks = [("gscale", (gs, sd + args.seed_offset))
+        gscales = [float(g) / 0.21 for g in args.gvals.split(",")]
+        tasks = [("gscale", (gs, sd + args.seed_offset, args.co_turns))
                  for gs in gscales for sd in range(args.seeds)]
 
     with ProcessPoolExecutor(args.workers, initializer=brm._worker_init) as pool:
@@ -175,6 +212,17 @@ def main():
     d = {}
     for r in res:
         d.setdefault(r["payload"][0], []).append(r["f"])
+
+    if args.mode == "fourpart":
+        print("=== PARÇACIK-TABANLI 4-KATLI (CO araması YOK; seed 0, 10 μm) ===")
+        print("  Referans (4D-CO+model-fit, aynı desen): f = +1.089e-06 rad/s")
+        out = {}
+        for dlt in sorted(d):
+            f = d[dlt][0]
+            print(f"  δ = {dlt:5.0f} μm: 4-parçacık ortalama eğim = {f:+.3e} "
+                  f"(CO'ya oran {f/1.089e-06:+.2f})")
+            out[str(dlt)] = f
+        save_result("fourpart", out)
 
     if args.mode == "fourfold":
         F = {}
@@ -210,7 +258,7 @@ def main():
         p = np.polyfit(lgs, lgf, 1)[0]
         print(f"  üs p (log-log fit, 3 nokta) = {p:.3f}   (beklenen 2.00)")
         save_result("sigma", {"rows": rows, "p": p})
-    else:
+    elif args.mode == "gscale":
         print("=== GRADYAN TARAMASI (yüksek-Q g³ cezası) ===")
         rows = []
         f0 = None
@@ -223,7 +271,7 @@ def main():
                   f"{a.std():.1e}  → g=0.21'e göre {a.mean()/f0:.1f}×")
             rows.append({"g_scale": gs, "g_Tm": g_tm, "f_mean": a.mean(),
                          "f_std": a.std(), "f_all": list(a)})
-        save_result("gscale", {"rows": rows})
+        save_result(f"gscale_co{args.co_turns}", {"rows": rows})
 
     print(f"[toplam {time.time()-t0:.0f}s]")
 
