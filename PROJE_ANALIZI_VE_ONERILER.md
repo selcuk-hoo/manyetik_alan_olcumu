@@ -395,6 +395,47 @@ iteratif ölçüp-null yapmaz. Bunun yerine sahte-EDM'i **önceden bağlar**:
 + **yapım toleransı** (mekanik + alan kalitesi). Bunlar artığı ~62× hedefte
 **bağlar**, sonra 1-yıllık kampanyada bir kez ölçülür.
 
+### 6.1 İngilizce özet — makale/abstract için hazır paragraf (BBA neden yetmez)
+
+> Bu blok, §5–6'nın makaleye taşınabilir İngilizce özetidir (2026-07). Sayıların
+> kaynakları: 7.7×/62× `omarov.md §10`; G_k yasası ve cond(R)=193 `README §19` /
+> `akilli_duzeltme.md §2`; 0.3 μm eşiği `kmod_bba_sonuclar.md §4` (σ² yasası);
+> ~10 nm orbit-izi `akilli_duzeltme.md §4` (7 nm) + `squid_bpm_test.md §9.5`
+> (<4 nm); nefes `squid_bpm_test.md §7`; β-beat felaketi `squid_bpm_test.md §9.5`;
+> CR-ayrım körlüğü `omarov.md §9.3`.
+
+In the proposed symmetric-hybrid ring, the false EDM signal cannot be suppressed
+below the target sensitivity of 10⁻²⁹ e·cm (dS_y/dt ≈ 1 nrad/s) by existing
+beam-based alignment (BBA) techniques.
+
+The closed orbit is dominated by the low-spatial-frequency content of the
+quadrupole misalignments. When two neighboring quadrupoles kick the beam in
+opposite directions, the resulting high-harmonic (k ≈ 24) orbit perturbation is
+suppressed as G_k = C/|Q²−k²|, since the tune (Q ≈ 2.3) is far below k. This
+orbit-blind "symmetric" pattern nevertheless dominates the false EDM *after*
+orbit correction: removing the orbit-visible (antisymmetric) part gains a factor
+~7.7, but leaves a symmetric residual of ~60× the target (at σ = 10 μm).
+
+Quantitatively, ~10 μm beam-to-quad alignment is routine for existing BBA;
+however, since the false EDM scales as σ², reaching 1 nrad/s requires
+controlling the symmetric misalignment component to ~0.3 μm, whose orbit
+signature is only at the ~10 nm level (a further ~10²× suppression). This is
+not merely a resolution problem: white BPM noise can be averaged down by
+synchronous detection, but the limiting errors are coherent systematics —
+optics "breathing" under per-quad AC modulation, and β-beating at the 0.5–1%
+level in response-matrix inversion — which do not average down and close this
+channel regardless of BPM technology.
+
+We verified this limit on several independent channels: K-modulation of all
+quadrupoles at a common frequency (ΔR inversion, condition number ~4×10⁴),
+K-modulation at per-quad frequencies (amplitude readout destroyed by optics
+breathing), SVD/TSVD-regularized inversions, an initial LOCO correction
+followed by drift monitoring, and learned (NN) estimators. All hit the same
+wall: the high-spatial-frequency (neighbor-quad, symmetric) component of the
+misalignments is unobservable in the orbit at the required level — and the
+counter-rotating-beam separation proposed as the control observable shares the
+same blindness, being itself an orbit difference.
+
 ---
 
 ## 7. Bu ne anlama geliyor? (Konumlandırma)
