@@ -39,42 +39,132 @@
 
 ---
 
-## 1. Giriş (Introduction)
+## 1. Giriş (Introduction) — DÜZ METİN v0.1 (pedagojik)
 
-1.1 **pEDM ve frozen-spin:** hedef 10⁻²⁹ e·cm ↔ dS_y/dt ≈ 1 nrad/s; MDM≫EDM
-kuplajı → katı hizalama gereksinimi. Ana referans: Omarov ve ark., PRD 105,
-032001 (2022) — simetrik-hibrit halka, CW/CCW, polarite-switch, CR-ayrım.
+### 1.1 Deney: protonun elektrik dipol momentini aramak
 
-1.2 **Sahte-EDM mekanizması:** quad kaçıklığı → geometrik (Berry) faz;
-f ∝ dx·dy → σ² (Omarov Fig. 9a; bizim p=2.00 doğrulaması Metod'da).
-Öncül: Hacıömeroğlu & Semertzidis, arXiv:1709.01208 (all-elektrik halkada
-misplacement→sahte-EDM ileri hesabı).
+Bir parçacığın **elektrik dipol momenti (EDM)**, pozitif ve negatif yük
+dağılımlarının parçacığın spin ekseni boyunca birbirinden çok küçük bir miktar
+ayrışması demektir. Sıfırdan farklı bir EDM, zaman-tersinme (T) — dolayısıyla
+CP — simetrisinin kırılmasını gerektirir. Evrende gözlediğimiz madde–antimadde
+dengesizliği, Standart Model'in içerdiğinden çok daha güçlü CP-kırılması
+kaynaklarına işaret ettiği için, proton EDM'ini Standart Model öngörüsünün
+(~10⁻³¹ e·cm'nin altı) üstünde bir seviyede bulmak yeni fiziğin doğrudan kanıtı
+olur. Önerilen deney [Omarov ve ark., PRD 105, 032001] duyarlılık hedefini
+**d = 10⁻²⁹ e·cm** olarak koyar.
 
-1.3 **Literatür incelemesi (çözülmüş problemler / belirlenmiş etkiler),
-`literatur/` tam-metin karşılaştırmalı:**
-- SVD-gözlenebilirlik aygıtı: Chung–Decker–Evans, PAC 1993 s.2263 (tekil-değer
-  kanalları, decoupled modlar, ε-truncation, harmonik≈tune) → bizim
-  G_k=C/|Q²−k²| bunun harmonik-limiti. **Aygıt 1993'lük; özgünlük uygulamada.**
-- Dejenerasyon → yanlı estimator (MSE=Var+Bias²): Wegscheider–Vilsmeier,
-  PRAB 26, 032803 (2023) — onlar gradyan/optik, biz transvers kaçıklık.
-- BBA prior-art: Martí ve ark., PRAB 23, 012802 (fast AC-BBA); Huang,
-  arXiv:2203.14869 (simultaneous BBA). **Bizim özgünlük teknik değil:**
-  bu yöntemlerin sahte-EDM'i süren simetrik alt-uzaydaki performansı.
-- Komşu: Mirza (PRAB 22, 072804, circulant ORM), Ziemann & Ziemann
-  (arXiv:2104.05300, online ORM), Rossbach (Particle Accel. 23, 1989,
-  koherent yer-hareketi → COD).
-- Polarimetre/zaman bütçesi: arXiv:2010.13536 (`cosy_polarimeter.md`).
+Ölçüm ilkesi **frozen-spin (donmuş spin)** yöntemidir. Protonlar, elektrik
+alanla bükülen ve manyetik kuadrupollerle odaklanan bir depolama halkasında,
+özel "magic" momentumda (p ≈ 0.7 GeV/c) döndürülür. Bu momentumda spin,
+momentum vektörüne kilitli kalır — halka düzleminde ne öne geçer ne geri kalır.
+Protonun bir EDM'i varsa, halkanın radyal elektrik alanı bu dipole tork uygular
+ve spin **çok yavaşça halka düzleminden dışarı, dikeye döner**. Ölçülen
+büyüklük bu dönme hızıdır:
 
-1.4 **Omarov'un açık bıraktığı boşluk (`omarov.md §9`):** geometrik-faz kontrolü
-CR-ayrımını ölçüp küçültmeye dayanır; ama (i) ölçüm zinciri (48-BPM/SQUID +
-K-mod geri-çatım) test edilmemiş, (ii) simetrik (orbit-kör) bileşene körlük
-ihtimali ele alınmamış, (iii) polarite-switch'in CW/CCW'ye dejenere olup
-olmadığı nicelenmemiş. **Bu makale üçünü de nicel kapatır.**
+$$f \equiv \frac{dS_y}{dt}, \qquad d = 10^{-29}\,e\!\cdot\!\text{cm}
+\;\leftrightarrow\; f \approx 1\ \text{nrad/s}.$$
 
-1.5 **Katkı cümlesi:** "Yörünge-tabanlı ölçüm+düzeltme zincirinin ulaşabileceği
-sahte-EDM tabanını (σ'ya bağlı eğri) belirliyoruz; tabanın BPM teknolojisiyle
-değil, iki koherent sistematikle ve latis yapısının kendisiyle (AG-alternasyonu)
-belirlendiğini gösteriyoruz."
+Saniyede bir milyarda-bir radyan: deneyin bütün zorluğu, spin yönünü bu
+hassasiyette etkileyebilecek **başka her etkinin** ya yok edilmesi ya da
+güvenle sınırlanması gereğinden doğar. EDM'i taklit eden böyle etkilere
+**sahte EDM (false EDM)** denir; bu makalenin konusu, bunların en inatçısıdır.
+
+### 1.2 Sahte EDM: hizalama hatalarının geometrik fazı
+
+Halkadaki 48 kuadrupol mıknatısın her biri, ideal konumundan gerçekte birkaç
+mikron kaymış olacaktır. Kuadrupolün merkezinde manyetik alan sıfırdır; demet
+merkezden geçmezse, kaymayla orantılı bir alan görür. **Kaymanın yönü neyi
+etkilediğini belirler:** dikey kayma dy demete radyal alan B_x gösterir ve
+spin **x-ekseni** etrafında döner; yatay kayma dx dikey alan B_y gösterir ve
+spin **y-ekseni** etrafında döner.
+
+Tek başına bu dönmeler zararsızdır: halka boyunca ortalamaları büyük ölçüde
+sıfırlanır. Tehlike, ikisinin **birlikte** var olmasından doğar. Farklı
+eksenler etrafındaki dönmeler **sıra değiştirmez** (önce x sonra y etrafında
+döndürmek, tersini yapmakla aynı sonucu vermez); aradaki fark, her turda
+üçüncü eksende — tam da EDM'in görüneceği dikey dönme kanalında — küçük bir
+net artık bırakır. Bu, fizikte iyi bilinen **geometrik (Berry) fazının** bir
+örneğidir. Sonuç:
+
+$$f_{\text{sahte}} \;\propto\; dx \cdot dy \;\;\Rightarrow\;\;
+f_{\text{sahte}} \propto \sigma^2,$$
+
+yani sahte EDM, kaçıklıkların RMS büyüklüğü σ'nın **karesiyle** ölçeklenir
+(simülasyon doğrulaması: üs p = 2.00 ± 0.01, §2.2; Omarov Fig. 9a ile birebir).
+Sayısal ölçek acımasızdır: σ = 10 μm'lik tipik bir hizalama, hedefin
+**~1000 katı** sahte EDM üretir. Yani aranan sinyal, hizalama kaynaklı arka
+planın bin kat altındadır ve bu arka plan, gerçek EDM ile **aynı
+gözlenebilirde** (dS_y/dt) yaşar.
+
+Bu noktada doğal soru şudur: *demetin kendisi bir ölçüm aleti değil midir?*
+Halkadaki 48 konum monitörü (BPM), demetin kapalı yörüngesini sürekli okur;
+kaçık kuadrupoller yörüngeyi bozar; öyleyse yörüngeden kaçıklıkları ölçüp
+düzeltmek — hızlandırıcı dünyasının standart **beam-based alignment (BBA)**
+pratiği — sahte EDM'i de temizlemeli. Bu makale, bu doğal beklentinin **nereye
+kadar doğru olduğunu ve nerede, neden durduğunu** nicel olarak belirler.
+
+### 1.3 Bilinenler: literatürde çözülmüş problemler ve belirlenmiş etkiler
+
+Sorunun parçalarının çoğu, ayrı ayrı, iyi çözülmüş problemlerdir; bu çalışmanın
+yaptığı, onları sahte-EDM sorusu etrafında birleştirmektir. (Karşılaştırmalar
+tam metin üzerinden yapılmıştır; `literatur/`.)
+
+- **Yörünge düzeltme ve gözlenebilirlik matematiği.** Tepki matrisinin
+  tekil-değer ayrışımıyla (SVD) yörünge düzeltme, hangi hata desenlerinin
+  yörüngede iyi/kötü görüneceği ("decoupled" modlar), küçük tekil değerlerin
+  atılması (regularizasyon) — bu aygıtın tamamı Chung, Decker ve Evans'a
+  (PAC 1993) kadar gider. Bizim kullandığımız harmonik kazanç yasası
+  G_k = C/|Q²−k²| bu çerçevenin harmonik limitidir. Dejenere ters-problemlerde
+  estimator yanlılığının sistematiği Wegscheider ve Vilsmeier tarafından
+  (PRAB 26, 032803) formelleştirilmiştir — onların parametresi kuadrupol
+  gücü, bizimki transvers kaçıklıktır.
+- **Beam-based alignment.** Demeti kuadrupolün manyetik merkezinden geçirme
+  teknikleri modern hızlandırıcılarda standarttır: gradyanı değiştirip
+  yörünge tepkisinin sıfırlandığı noktayı bulmak, bunu AC uyarımla
+  hızlandırmak (Martí ve ark., PRAB 23, 012802) ve çok mıknatısta eşzamanlı
+  yapmak (Huang, arXiv:2203.14869). Bu makaledeki hiçbir ölçüm tekniği bu
+  anlamda yeni değildir; **yeni olan, bu tekniklerin sahte-EDM'i süren belirli
+  bir kaçıklık bileşeni üzerindeki performansının belirlenmesidir.**
+- **Sahte-EDM bütçesi.** Kaçıklık→sahte-EDM ileri hesabı all-elektrik halka
+  için Hacıömeroğlu ve Semertzidis'te (arXiv:1709.01208); manyetik-kuadrupollü
+  simetrik-hibrit tasarımın tam sistematik bütçesi Omarov ve ark.'da vardır.
+  Omarov, geometrik-faz sahte-EDM'inin **CW/CCW eşzamanlı karşı-dönen
+  demetlerin farkı** + **kuadrupol polarite değiştirme** + **karşı-dönen
+  demet ayrımının (CR-ayrım) dipol düzelticilerle küçültülmesi** ile hedefin
+  altına indirilebileceğini fiziksel olarak gösterir.
+- **Komşu çalışmalar.** Simetrik örgülerde circulant tepki matrisiyle yörünge
+  düzeltme (Mirza, PRAB 22, 072804); tepki matrisinin işletim sırasında
+  güncellenmesi (Ziemann & Ziemann, arXiv:2104.05300); koherent yer
+  hareketinin yörüngeye etkisi (Rossbach, 1989); polarimetre performansı ve
+  istatistik bütçesi (arXiv:2010.13536).
+
+### 1.4 Açık kalan soru (bu makalenin boşluğu)
+
+Omarov'un kontrol zinciri, CR-ayrımını **ölçüp** küçültmeye dayanır; ama
+makalede (i) bu ölçümün kendisi (48 BPM/SQUID + K-modülasyon geri-çatımı)
+simüle edilmemiş, (ii) kaçıklığın **yörüngeye görünmeyen** bileşenine karşı
+körlük ihtimali ele alınmamış, (iii) polarite değiştirmenin CW/CCW'den
+bağımsız bir düğme olup olmadığı nicelenmemiştir. Bu üç boşluk kritiktir,
+çünkü — bu makalede gösterileceği gibi — kaçıklığın sahte-EDM'i süren kısmı
+tam da yörüngeye en az görünen kısmıdır.
+
+### 1.5 Bu makalenin katkısı ve planı
+
+Gerçekçi BPM sistematikleri (ofset, kazanç, gürültü) ve optik-model hataları
+(β-beating, kuadrupol tilt'i) altında, yörünge-tabanlı ölçüm+düzeltme
+zincirinin ulaşabileceği **sahte-EDM tabanını** hizalama toleransının
+fonksiyonu olarak belirliyoruz: σ = 10 μm'de taban ~6×10⁻²⁸ e·cm'dir ve σ² ile
+ölçeklenir. Tabanın **BPM teknolojisinden bağımsız** olduğunu — sınırın beyaz
+gürültü değil, ortalamayla sönmeyen iki koherent sistematik (per-quad
+modülasyonda optik "nefes"; matris inversiyonunda β-beating × koşullanma)
+olduğunu — gösteriyoruz ve Omarov'un önerdiği CR-ayrım gözlenebilirinin aynı
+körlüğü paylaştığını doğrudan ölçüyoruz.
+
+Makalenin planı: §2 simülasyon altyapısını, sahte-EDM estimatörünü,
+simetrik/antisimetrik ayrışımı ve sistematik hata modellerini tanımlar. §3
+önce ulaşılabilir bastırma zincirini (pozitif sonuç), sonra simetrik bileşeni
+yörüngeden ölçmeye yönelik denenen yöntemleri ve her birinin nerede durduğunu
+sunar. §4 sonuçları, deney tasarımına pratik çıkarımlarla birlikte toplar.
 
 ---
 
