@@ -104,3 +104,12 @@ test4_drift_monitor.png
 # mantık drift_monitor/ vendored lib + .md referanslarına taşınacak)
 false_edm_mode_scan.py
 false_edm_correction_test.py
+
+# LaTeX derleme artıkları
+*.aux
+*.log
+*.out
+*Notes.bib
+*.toc
+*.bbl
+*.blg
