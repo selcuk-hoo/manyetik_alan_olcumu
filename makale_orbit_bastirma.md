@@ -187,11 +187,17 @@ sunar. §4 sonuçları, deney tasarımına pratik çıkarımlarla birlikte topla
   (`berry_data/false_edm_4d.py`) — tek ideal parçacık kapalı yörüngeye oturtulur,
   S_y(t) = a + bt + Σ_k[c_k cos + d_k sin] fitinden yalnız seküler eğim b çekilir.
   **Düz polyfit yasak** (betatron salınımını sinyal sanır).
-- Çapraz-doğrulama: **dört-parçacık simetrik başlangıç** — aynı betatron genliğinde
-  başlangıç konumları (+Δx,+Δy), (+Δx,−Δy), (−Δx,+Δy), (−Δx,−Δy) olan dört
-  parçacığın ortalaması; betatron katkısı ve ⟨ΔxΔy⟩ artığı simetriyle söner.
-  *(Makalede "(sx,sy)=±1" kısaltması KULLANILMAZ — spin bileşeni sanılıyor;
-  açıkça "dört simetrik başlangıç konumu kombinasyonu" diye yazılır.)*
+- Çapraz-doğrulama (YAPILDI, 2026-07): **dört-parçacık simetrik başlangıç** —
+  **kapalı yörünge etrafına** kurulan (v_CO ± (±δ, ±δ)) dört parçacığın S_y(t)
+  izleri ortalanır (betatron çiftler hâlinde söner), model-fit eğim alınır.
+  Sonuç 4D-CO+model-fit ile **birebir**: +1.090/+1.092/+1.100×10⁻⁶ (δ=50/100/
+  200 μm) vs +1.089×10⁻⁶ (oran 1.00). *(Tuzak — Metod'da uyarı olarak yazılacak:
+  dört başlangıç ideal eksenden kurulursa CO-kaynaklı ortak betatron bileşeni
+  ortalamada sönmez; ölçüm tek CO'suz parçacıkla aynı betatron artefaktına
+  (−3.0×10⁻⁴, sinyalin ~300 katı) düşer. Yani simetrik örnekleme CO bilgisinin
+  YERİNE geçmez; onun etrafında çalışır.)* *(Makalede "(sx,sy)=±1" kısaltması
+  KULLANILMAZ — spin bileşeni sanılıyor; açıkça "dört simetrik başlangıç
+  konumu" diye yazılır.)*
 - Doğrulama: σ=10→5→2.5 μm taramasında **p = 2.00 ± 0.01** (saf kuadratik
   geometrik faz, lineer kaçak yok; Omarov Fig. 9a'nın birebir reprodüksiyonu).
 

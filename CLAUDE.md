@@ -212,17 +212,25 @@ tutulmaz, `/tmp` altında yazılıp ilgili `.md` günlüğünden referans verili
 Yeniden çalıştırmak için o günlüklerdeki snippet/yol notlarına bakın.
 
 ### Sahte-EDM ölçümü için doğru reçete (kritik)
-- **4-katlı simetrik parçacık örneklemesi:** (sx, sy)=±1 dört kombinasyon ortalaması
-  → betatron + ⟨ΔxΔy⟩ artığını tam söndürür (CO arama gerektirmez).
+- **4-katlı simetrik parçacık örneklemesi (DÜZELTİLDİ 2026-07, doğrudan test):**
+  dört simetrik başlangıç (±δx, ±δy) **kapalı yörünge ETRAFINA** kurulmalı; o
+  zaman 4D-CO+model-fit ile birebir eşdeğer (oran 1.00, δ=50–200 μm;
+  `kmod_drivers/paper_runs.py fourpart_co`). Eski "CO arama gerektirmez" notu
+  **YANLIŞTI**: ideal eksenden fırlatılan 4-parçacık ortalaması, CO-kaynaklı
+  ORTAK betatron bileşenini söndüremez ve tek CO'suz parçacıkla AYNI betatron
+  artefaktını verir (−3.0×10⁻⁴, sinyalin ~300 katı; `fourpart` testi). Desen
+  işaret-çevrimi (±dx, ±dy kombinasyonu) de CO'suz ölçümü kurtarmaz (`fourfold`).
 - **Model-fit estimator:** S_y(t)=a+bt+Σ_k[c_k cos+d_k sin]; yalnız sekuler eğim b
   çekilir. Düz polyfit KULLANMAYIN.
-- **NOT (2026-06, doğrulandı):** 4D-CO + model-fit (tek ideal parçacık kapalı
-  yörünge üzerinde; `berry_data/false_edm_4d.py`) **σ²-testinde p=2.00 verir**
-  (σ=10/5/2.5μm; geometrik faz, lineer kaçak yok — `omarov.md §10`,
-  `orbit_ileri_olcum.md §9`). Yani CO+model-fit, geometrik-faz sahte-EDM'i DOĞRU
-  ölçer; 4-katlı simetrik örnekleme alternatif/eşdeğer yoldur, şart değil. Eski
-  "tek-parçacık CO=True kullanma" uyarısı **düz polyfit + CO** kombinasyonu içindir
-  (model-fit ile değil). Omarov da aynı yöntemi kullanır (Fig. 9a, Eq. C3–C5).
+- **NOT (2026-06, doğrulandı; 2026-07'de 4-katlı-CO ile çapraz-teyit):** 4D-CO +
+  model-fit (tek ideal parçacık kapalı yörünge üzerinde;
+  `berry_data/false_edm_4d.py`) **σ²-testinde p=2.00 verir** (σ=10/5/2.5μm;
+  geometrik faz, lineer kaçak yok — `omarov.md §10`, `orbit_ileri_olcum.md §9`)
+  ve işaret-yapısı saf bilineerdir (desen-çevriminde f(+,−)=−f(+,+); `fourfold`
+  co-bloğu). Yani CO+model-fit geometrik-faz sahte-EDM'i DOĞRU ölçer; 4-katlı
+  simetrik örnekleme (CO etrafında) eşdeğer alternatiftir. Eski "tek-parçacık
+  CO=True kullanma" uyarısı **düz polyfit + CO** kombinasyonu içindir (model-fit
+  ile değil). Omarov da aynı yöntemi kullanır (Fig. 9a, Eq. C3–C5).
 
 ### Bağımlılıklar
 Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
