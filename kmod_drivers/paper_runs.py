@@ -164,10 +164,47 @@ def fast_measure_signed(dx, dy, n_turns=14, t2=3e-4):
     return float(measure_dSy_dt_model(sv, np.asarray(pt, float))), resid
 
 
+def sym_anti_patterns(seed, rms=10e-6):
+    """Rastgele 48-vektörün hücre-içi simetrik/antisimetrik projeksiyonları,
+    RMS'e normalize (dikey desenler; CR-ayrım körlük testi, omarov.md §9.3)."""
+    rng = np.random.default_rng(9000 + seed)
+    v = rng.normal(0, 1.0, NQ)
+    sym = np.empty(NQ); anti = np.empty(NQ)
+    for k in range(NQ // 2):
+        s = 0.5 * (v[2*k] + v[2*k+1]); a = 0.5 * (v[2*k] - v[2*k+1])
+        sym[2*k] = sym[2*k+1] = s
+        anti[2*k] = a; anti[2*k+1] = -a
+    sym *= rms / np.sqrt(np.mean(sym**2))
+    anti *= rms / np.sqrt(np.mean(anti**2))
+    return sym, anti
+
+
+def measure_cod(dy, direction):
+    """48-quad dikey COD (C++, zaman-ortalamalı; ideal eksenden fırlatma)."""
+    import build_response_matrix as brm
+    with open(os.path.join(BASE, "params.json")) as f:
+        cfg = json.load(f)
+    cfg["direction"] = float(direction)
+    alanlar, state0 = brm.setup_fields(cfg)
+    x, y = brm.run_sim(alanlar, state0, cfg, dy, np.zeros(NQ))
+    return y  # [m]
+
+
 def _worker(task):
     import tempfile
     os.chdir(tempfile.mkdtemp())
     mode, payload = task
+    if mode == "crsep":
+        # (desen, seed, direction): dikey COD ölç
+        kind, seed, direction = payload
+        sym, anti = sym_anti_patterns(seed)
+        dy = sym if kind == "sym" else anti
+        y = measure_cod(dy, direction)
+        rec = {"mode": mode, "payload": list(payload),
+               "y_cod": [float(v) for v in y], "t": time.time()}
+        with open(JSONL, "a") as fh:
+            fh.write(json.dumps(rec) + "\n")
+        return rec
     if mode == "sigma":
         sg, seed = payload
         rng = np.random.default_rng(3000 + seed)          # fast_est 'white' ile aynı
@@ -219,7 +256,7 @@ def save_result(key, obj):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["sigma", "gscale", "fourfold", "fourpart",
-                                     "fourpart_co"])
+                                     "fourpart_co", "crsep"])
     ap.add_argument("-w", "--workers", type=int, default=4)
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--seed-offset", type=int, default=0)
@@ -241,6 +278,9 @@ def main():
         tasks = [("fourpart", (d,)) for d in (50.0, 100.0, 200.0)]
     elif args.mode == "fourpart_co":
         tasks = [("fourpart_co", (d,)) for d in (50.0, 100.0, 200.0)]
+    elif args.mode == "crsep":
+        tasks = [("crsep", (kind, sd, dirn)) for kind in ("sym", "anti")
+                 for sd in range(args.seeds) for dirn in (+1, -1)]
     else:
         gscales = [float(g) / 0.21 for g in args.gvals.split(",")]
         tasks = [("gscale", (gs, sd + args.seed_offset, args.co_turns))
@@ -251,7 +291,33 @@ def main():
 
     d = {}
     for r in res:
-        d.setdefault(r["payload"][0], []).append(r["f"])
+        if "f" in r:
+            d.setdefault(r["payload"][0], []).append(r["f"])
+
+    if args.mode == "crsep":
+        Y = {}
+        for r in res:
+            kind, sd, dirn = r["payload"]
+            Y[(kind, int(sd), int(dirn))] = np.array(r["y_cod"])
+        print("=== CR-AYRIM KÖRLÜĞÜ (COD_CW − COD_CCW; sym vs anti, 10 μm) ===")
+        rms = lambda a: float(np.sqrt(np.mean(a**2)))
+        out = {"seeds": args.seeds}
+        stats = {}
+        for kind in ("sym", "anti"):
+            cod1 = [rms(Y[(kind, sd, +1)]) for sd in range(args.seeds)]
+            cr = [rms(Y[(kind, sd, +1)] - Y[(kind, sd, -1)])
+                  for sd in range(args.seeds)]
+            stats[kind] = (np.mean(cod1), np.mean(cr))
+            print(f"  {kind:4s}: tek-yön COD RMS = {np.mean(cod1)*1e6:7.2f} μm   "
+                  f"CR-ayrım RMS = {np.mean(cr)*1e6:7.2f} μm")
+            out[kind] = {"cod_rms": cod1, "cr_rms": cr}
+        s_cod = stats["anti"][0] / stats["sym"][0]
+        s_cr = stats["anti"][1] / stats["sym"][1]
+        print(f"  BASTIRMA (anti/sym): tek-yön COD {s_cod:.1f}×   CR-ayrım {s_cr:.1f}×")
+        print("  → oran ≈ 1 ise CR-ayrım simetriğe sıradan yörünge kadar kör")
+        out["suppression_cod"] = s_cod
+        out["suppression_cr"] = s_cr
+        save_result("crsep", out)
 
     if args.mode in ("fourpart", "fourpart_co"):
         yer = "CO ETRAFINDA" if args.mode == "fourpart_co" else "ideal eksenden (CO YOK)"

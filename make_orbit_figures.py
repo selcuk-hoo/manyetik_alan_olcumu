@@ -418,14 +418,58 @@ def fig_sigma():
     print(f"fig_orbit_sigma.png yazıldı (p={p:.3f})")
 
 
+# ═════════════════════════════════════════════════════
+# FIG 6 (C++): CR-ayrım körlüğü — paper_runs.py crsep çıktısından
+# ═════════════════════════════════════════════════════
+
+def fig_crsep():
+    import json as _j
+    path = os.path.join(BASE, "kmod_drivers", "paper_runs_results.json")
+    with open(path) as fh:
+        d = _j.load(fh)["crsep"]
+
+    labels = ["single-beam closed orbit\n(ordinary BPM reading)",
+              "counter-rotating beam separation\n(CW $-$ CCW, Omarov's observable)"]
+    sym_v = [np.mean(d["sym"]["cod_rms"]) * 1e6, np.mean(d["sym"]["cr_rms"]) * 1e6]
+    anti_v = [np.mean(d["anti"]["cod_rms"]) * 1e6, np.mean(d["anti"]["cr_rms"]) * 1e6]
+
+    fig, ax = plt.subplots(figsize=(7.2, 5.0))
+    x = np.arange(2)
+    w = 0.36
+    ax.bar(x - w/2, anti_v, w, color="tab:blue",
+           label="antisymmetric pattern (orbit-visible)")
+    ax.bar(x + w/2, sym_v, w, color="tab:red",
+           label="symmetric pattern (drives the false EDM)")
+    ax.set_ylim(0, max(anti_v) * 1.3)
+    for xi, (a, s) in enumerate(zip(anti_v, sym_v)):
+        ax.text(xi, max(a, s) * 1.04, f"suppression {a/s:.1f}×",
+                ha="center", fontsize=10, fontweight="bold")
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=9.5)
+    ax.set_ylabel("orbit signature, rms  [μm]  (10 μm rms pattern)")
+    ax.set_title("The counter-rotating-beam separation shares the orbit's "
+                 "blindness\nto the symmetric misalignment pattern "
+                 "(C++ tracker, 3 seeds)", fontsize=11)
+    ax.legend(fontsize=9, loc="upper left")
+    ax.text(0.30, 0.60, "similar suppression factors →\nmeasuring and zeroing "
+            "the CR separation\ncannot see (or fix) the symmetric\ncomponent "
+            "either", transform=ax.transAxes, ha="center",
+            fontsize=9, style="italic", color="tab:gray")
+    fig.tight_layout()
+    fig.savefig("fig_orbit_crsep.png")
+    plt.close(fig)
+    print("fig_orbit_crsep.png yazıldı")
+
+
 if __name__ == "__main__":
     fig_suppression()
     fig_modes()
     fig_breathing()
     fig_lockin()
-    try:
-        fig_sigma()
-    except FileNotFoundError:
-        print("fig_sigma atlandı (paper_runs_results.json yok)")
+    for fn in (fig_sigma, fig_crsep):
+        try:
+            fn()
+        except (FileNotFoundError, KeyError) as e:
+            print(f"{fn.__name__} atlandı ({e})")
     print("\nTüm analitik figürler üretildi. C++ gerektiren figürler için bkz. "
           "makale_orbit_bastirma.md §5 (kmod_drivers/fast_est.py vb.).")

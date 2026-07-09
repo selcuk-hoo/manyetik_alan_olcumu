@@ -168,38 +168,69 @@ sunar. §4 sonuçları, deney tasarımına pratik çıkarımlarla birlikte topla
 
 ---
 
-## 2. Metod
+## 2. Metod — DÜZ METİN v0.1 (pedagojik)
 
-2.1 **Simülasyon altyapısı:**
-- C++ izleyici (`integrator.cpp`): GL4 semplektik parçacık + Thomas-BMT spin;
-  elektrik defleksiyon + manyetik FODO; `EDMSwitch` ile gerçek EDM açılır
-  (η=1.88×10⁻¹⁵ → 9.81×10⁻¹⁰ rad/s, Eq. C1 ile birebir).
-- Latis: 24 FODO, 48 quad, R0=95.49 m, g=0.2 T/m, Q_y≈2.3 (`params.json` tek kaynak).
-- Analitik Twiss/R çözücüsü (`analytic_kmod.py`): C++ ile **%1 içinde**
-  çapraz-doğrulanmış (`squid_bpm_test.md §5.5`) — hızlı taramalar analitik,
-  tüm kritik sonuçlar C++ ile teyit.
-- **Metodolojik uyarı (svd.md dersi):** tepki matrisi analitik-Twiss ile değil
-  **gerçek demet dinamiğiyle** kurulmalı; aksi hâlde null-mod/koşullanma gizlenir
-  (cond 193 vs gerçek 1.2×10⁸, `svd.md §5`).
+### 2.1 Simülasyon altyapısı: iki katman
 
-2.2 **Sahte-EDM estimatörü (kritik reçete):**
-- Ana yöntem: **4D kapalı yörünge + model-fit seküler eğim**
-  (`berry_data/false_edm_4d.py`) — tek ideal parçacık kapalı yörüngeye oturtulur,
-  S_y(t) = a + bt + Σ_k[c_k cos + d_k sin] fitinden yalnız seküler eğim b çekilir.
-  **Düz polyfit yasak** (betatron salınımını sinyal sanır).
-- Çapraz-doğrulama (YAPILDI, 2026-07): **dört-parçacık simetrik başlangıç** —
-  **kapalı yörünge etrafına** kurulan (v_CO ± (±δ, ±δ)) dört parçacığın S_y(t)
-  izleri ortalanır (betatron çiftler hâlinde söner), model-fit eğim alınır.
-  Sonuç 4D-CO+model-fit ile **birebir**: +1.090/+1.092/+1.100×10⁻⁶ (δ=50/100/
-  200 μm) vs +1.089×10⁻⁶ (oran 1.00). *(Tuzak — Metod'da uyarı olarak yazılacak:
-  dört başlangıç ideal eksenden kurulursa CO-kaynaklı ortak betatron bileşeni
-  ortalamada sönmez; ölçüm tek CO'suz parçacıkla aynı betatron artefaktına
-  (−3.0×10⁻⁴, sinyalin ~300 katı) düşer. Yani simetrik örnekleme CO bilgisinin
-  YERİNE geçmez; onun etrafında çalışır.)* *(Makalede "(sx,sy)=±1" kısaltması
-  KULLANILMAZ — spin bileşeni sanılıyor; açıkça "dört simetrik başlangıç
-  konumu" diye yazılır.)*
-- Doğrulama: σ=10→5→2.5 μm taramasında **p = 2.00 ± 0.01** (saf kuadratik
-  geometrik faz, lineer kaçak yok; Omarov Fig. 9a'nın birebir reprodüksiyonu).
+Bütün sayılar iki tamamlayıcı araçla üretildi.
+
+**Birinci katman — tam parçacık+spin izleyici (C++).** Halka, elektrik
+defleksiyon bölümleri ile 24 FODO hücresinin (48 manyetik kuadrupol; R₀ =
+95.49 m, g ≈ 0.2 T/m, dikey tune Q_y ≈ 2.3) gerçek alanları üzerinden, dördüncü
+derece Gauss–Legendre **semplektik** integratörle adım adım izlenir; spin aynı
+adımda Thomas-BMT denklemiyle taşınır. "Semplektik" olması uzun izlemelerde
+enerji/genlik hatasının birikmemesini garanti eder — nrad/s'lik eğimler ancak
+böyle güvenle ölçülür. Gerçek EDM bir anahtar ile açılıp kapanır
+(η = 1.88×10⁻¹⁵ → dS_y/dt = 9.81×10⁻¹⁰ rad/s; CW/CCW farkında TEK işaretli,
+Omarov Eq. C1 ile birebir); sahte-EDM ölçümleri EDM **kapalıyken** yapılır, yani
+ölçülen her dikey presesyon tanım gereği sistematiktir. Tüm parametreler tek
+konfigürasyon dosyasından okunur.
+
+**İkinci katman — analitik Twiss/kapalı-yörünge çözücüsü.** Kuadrupol ve
+drift'lerin 2×2 transfer matrislerinden β(s), φ(s), Q ve tepki matrisi
+R[i,j] = √(βᵢβⱼ)/(2 sin πQ) · KL_j · cos(|φᵢ−φⱼ| − πQ) kapalı formda kurulur.
+Bu katman saniyeler içinde koştuğundan geniş taramalar (gürültü Monte Carlo'su,
+β-beat süpürmeleri) burada yapılır; C++ izleyiciyle **%1 içinde** çapraz
+doğrulanmıştır ve iki kod, konfigürasyon dosyası dışında hiçbir şey paylaşmaz —
+uyuşmaları ortak bir modelleme hatasından gelemez.
+
+**Metodolojik uyarı.** Ters-problem analizlerinde tepki matrisi analitik
+Twiss'le değil **gerçek demet dinamiğiyle** kurulmalıdır: idealize R, en küçük
+tekil değerli (gözlenemez) modu gizleyebilir (bu çalışmada analitik cond=193'e
+karşı demet-dinamiği 1.2×10⁸'lik null-mod gördü).
+
+### 2.2 Sahte-EDM'i doğru ölçmek: estimatör ve tuzakları
+
+Ölçmek istediğimiz şey basit görünür: S_y(t)'nin eğimi. Zorluk şudur: kapalı
+yörünge etrafındaki **betatron salınımı**, spinde aranan seküler eğimden
+mertebelerce büyük salınımlı bileşenler yaratır; naif bir doğrusal fit bu
+salınımı "eğim" sanır. İki önlem birlikte kullanılır:
+
+1. **4D kapalı yörünge:** izlenen parçacık, (x, x′, y, y′) uzayında betatron
+   varyansını Newton iterasyonuyla sıfırlayan noktaya — kapalı yörüngenin tam
+   üstüne — oturtulur; söndürülecek betatron genliği baştan kalmaz.
+2. **Model-fit:** S_y(t) = a + bt + Σ_k [c_k cos ω_k t + d_k sin ω_k t]
+   fitinden yalnız seküler eğim b alınır; kalan salınımlı içerik fit tarafından
+   ayrıştırılır. (Düz polinom fit **kullanılmaz**.)
+
+Estimatör üç bağımsız testle doğrulandı:
+
+- **σ² testi:** σ = 2.5/5/10 μm taramasında |f| ∝ σ^p ile **p = 2.00 ± 0.01**
+  (Fig. σ²) — saf kuadratik geometrik faz; lineer kaçak yok. (Omarov Fig. 9a'nın
+  birebir reprodüksiyonu.)
+- **İşaret testi:** kaçıklık deseninin işaret çevrimlerinde f(+dx,−dy) =
+  −f(+dx,+dy) ve f(−dx,−dy) = +f(+dx,+dy) binde-bir hassasiyetle sağlanır —
+  ölçülen büyüklük saf **bilineer** (dx·dy) yapıdadır.
+- **Dört-parçacık eşdeğerliği:** kapalı yörünge **etrafına** kurulan dört
+  simetrik başlangıcın (v_CO ± (±δ, ±δ); δ = 50–200 μm) ortalanmış S_y izinden
+  alınan eğim, tek-parçacık 4D-CO sonucuyla **birebir** örtüşür (oran 1.00).
+
+**Tuzak (raporlamaya değer):** dört simetrik başlangıç ideal eksenden (kapalı
+yörüngeyi bilmeden) kurulursa yöntem ÇALIŞMAZ: ±δ betatronu ortalamada çiftler
+hâlinde söner ama kapalı-yörünge-kaynaklı **ortak** betatron bileşeni kalır;
+ölçüm, tek CO'suz parçacıkla aynı betatron artefaktına (−3.0×10⁻⁴ rad/s,
+sinyalin ~300 katı) düşer. Yani simetrik örnekleme kapalı-yörünge bilgisinin
+yerine geçmez; onun etrafında çalışır.
 
 2.3 **Antisimetrik/simetrik ayrışım — TANIM ve KANIT (kullanıcı: "ikna edici
 göster"):**
