@@ -77,8 +77,22 @@ def main():
     m_dx = rng.normal(0.0, 10e-6, NQ); m_dx[0] = 0.0   # quad 0: tuzak #8
     m_dy = rng.normal(0.0, 10e-6, NQ); m_dy[0] = 0.0
 
-    # bump ölçekleme için analitik kılavuz (yalnız knob seçimi/ölçek; sonuç değil)
-    R0y_model, _ = R_perquad(np.full(NQ, G_NOM))
+    # Bump ölçekleme/knob seçimi için DÜZLEM-ÖZEL analitik tepki (yalnız kılavuz;
+    # sonuç değil). x-düzlemi için dikey R'yi kullanmak yanlış düzeltici + yanlış
+    # genlik verir (dx hatası ~4× şişer) — bu yüzden her düzlem kendi R'siyle.
+    from analytic_kmod import (compute_twiss_at_quads, signed_KL,
+                               build_R_analytic, compute_Brho)
+    with open(os.path.join(BASE, "params.json")) as _f:
+        _cfg = json.load(_f)
+    _nF = int(_cfg["nFODO"]); _Lq = float(_cfg["quadLen"])
+    _Brho = compute_Brho(_cfg)
+
+    def _build_R0(plane):
+        beta, phi, Q = compute_twiss_at_quads(_cfg, G_NOM, plane)
+        KL = signed_KL(_nF, abs(G_NOM) / _Brho, _Lq, plane)
+        return build_R_analytic(beta, phi, Q, KL)
+
+    R0_model = {"y": _build_R0("y"), "x": _build_R0("x")}
 
     quads = list(range(1, NQ))
     # görevler: her quad × düzlem × {−δ, +δ} × {mod aç, kapa}
@@ -86,15 +100,16 @@ def main():
     meta = []
     for i in quads:
         cands = [(i - 1) % NQ, (i + 1) % NQ, (i - 2) % NQ, (i + 2) % NQ]
-        j = max(cands, key=lambda jj: abs(R0y_model[i, jj]))
         for plane in ("y", "x"):
+            Rp = R0_model[plane]
+            j = max(cands, key=lambda jj: abs(Rp[i, jj]))   # düzlem-özel düzeltici
             for sgn in (-1.0, +1.0):
                 dxx, dyy = m_dx.copy(), m_dy.copy()
-                shift = sgn * args.scan / R0y_model[i, j]
+                shift = sgn * args.scan / Rp[i, j]          # düzlem-özel genlik
                 if plane == "y":
                     dyy[j] += shift
                 else:
-                    dxx[j] += shift          # x-düzlem bump (ölçek kılavuz)
+                    dxx[j] += shift
                 dG_on = np.zeros(NQ); dG_on[i] = EPS
                 for on in (1, 0):
                     tasks.append((list(dxx), list(dyy),
