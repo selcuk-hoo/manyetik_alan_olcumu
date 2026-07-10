@@ -157,9 +157,57 @@ TAŞINMADI.
 **Teşhis (hipotez):** `run_sim` yörüngeyi ideal eksenden fırlatıp zaman-
 ortalamayla okur; betatron artığı okumaya ~0.2 μm kirlilik bırakır ve bu,
 null kestiriminde 1/eğim ≈ 25× büyüyerek ~5 μm sahte bias verir — büyüklük
-tutuyor. Test: yörüngeleri **4D-CO'ya oturtarak** oku (betiğin CO-seeded
-sürümü) → bias çökerse artefakt, kalırsa gerçek dinamik bias'ı.
-**Koşum 2 (CO-seeded) sürüyor; sonuç buraya işlenecek** [bba_cpp_check].
+tutuyor.
+
+**Koşum 2 (CO-oturtmalı okuma) — HİPOTEZ DOĞRULANDI, BIAS ÇÖKTÜ:**
+aynı üç quad, gürültüsüz, yörüngeler 4D-CO'dan fırlatılarak okundu:
+
+| quad | koşum-1 bias (ideal-eksen) | **koşum-2 bias (CO-oturtmalı)** |
+|---|---|---|
+| 5 | −3.852 μm | **−0.006 μm** |
+| 20 | −5.223 μm | **+0.167 μm** |
+| 33 | +7.666 μm | **−0.137 μm** |
+| RMS | 5.8 μm | **0.125 μm** (46× düşüş) |
+
+→ 5.8 μm tümüyle okuma artefaktıydı. **Gerçek dinamikte klasik-BBA null'u,
+manyetik merkezi ~0.1 μm seviyesinde buluyor** (kalan: okuma hassasiyeti +
+CO-arama artığı + ε² düzeyi; hangisi olduğu tam-zincir sonucunda önemsizleşir).
+Operasyonel ders (gerçek makine karşılığı): null-tarama sırasında yörünge
+okuması betatrondan arındırılmış olmalı (çok-turluk ortalama bunu doğal yapar).
+
+**Koşum 3 — UÇTAN-UCA TAM ZİNCİR (`classic_bba_full.py`; 376 CO-oturtmalı
+koşum + 2 spin ölçümü, ~3.1 saat): ✅ POZİTİF.**
+47 quad × 2 düzlem BBA (2-noktalı tarama; cell-0 QF quad_dG okumadığından
+quad 0 hariç, kaçıklığı 0 alındı) → kestirilen merkezler düşüldü (düzeltici ≡
+merkez kayması) → kalan sahte-EDM **spin izleyicisiyle DOĞRUDAN** ölçüldü:
+
+| Büyüklük | Değer (C++, seed 0, gürültüsüz) |
+|---|---|
+| Merkez-kestirim hatası dy | RMS 0.185 μm (**sym 0.156**, anti 0.099) |
+| Merkez-kestirim hatası dx | RMS 0.834 μm (**sym 0.485**, anti 0.679) |
+| Ham sahte-EDM | 3.56×10⁻⁷ rad/s (356× hedef) |
+| **BBA-düzeltme sonrası** | **1.62×10⁻⁹ rad/s = 1.62× hedef** |
+| **Bastırma** | **220×** |
+
+**Hüküm (C++, uçtan uca):** null-arayan klasik BBA, gerçek dinamikte simetrik
+mod dahil merkezleri sub-μm ölçüyor ve sahte-EDM'i hedefin kapı eşiğine
+(1.6×) indiriyor — orbit-tabanlı yöntemler için kayıtlı no-go, bu ölçüm
+sınıfını KAPSAMIYOR. Üstelik bu ilk geçiş: iterasyonsuz, 2-noktalı tarama,
+x-düzlemi bump ölçeği kaba (dx hatası 4× daha büyük — iyileştirilebilir).
+İkinci bir BBA geçişi/iyileştirilmiş x-taraması muhtemelen hedefin altına
+iner (test edilecek).
+
+**Dürüst sınırlar:** (i) gürültüsüz — istatistik kalemi üstüne gelir
+(analitik kılavuz: saf gürültü-sınırlı, ortalamayla yenilir; C++ ile ayrıca
+doğrulanmalı); (ii) tek seed; (iii) quad 0 sim-kısıtı; (iv) donanım
+sistematikleri (modülasyonda merkez oynaması, histerezis) simülasyon dışı —
+gerçek makinede muhtemel asıl taban; (v) tilt dahil değil.
+
+**MAKALEYE ETKİSİ (kritik):** `makale_orbit_bastirma.tex`'in ana negatif
+iddiası ("simetrik bileşen orbitten hiçbir standart teknikle gerekli seviyede
+ölçülemez") bu sonuçla REVİZE EDİLMELİ: doğru sınıflandırma "global/tek-atış
+yöntemler (inversiyon, genlik-okuma, ayrım-sürme) göremez; YEREL NULL-ARAYAN
+sınıf (klasik BBA) görür". Revizyon kullanıcı onayıyla yapılacak.
 
 **Gerçek-makine kalemleri (C++ pozitif çıksa bile makalede tartışılacak):**
 gradyan modülasyonunda manyetik merkezin oynaması (histerezis/ısınma —
