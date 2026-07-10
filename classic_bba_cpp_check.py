@@ -60,7 +60,7 @@ def _orbit(task):
     integrate_particle(launch, 0.0, float(cfg.get("t2", 1e-3)),
                        float(cfg["dt"]), fields=fields, return_steps=10,
                        quad_dy=dy, quad_dx=zeros, quad_tilt=zeros, quad_dG=dG)
-    x, y = read_cod_quads(NQ)
+    x, y = read_cod_quads(NQ // 2)      # nFODO bekler (24), quad sayısı değil
     return y
 
 
