@@ -1,24 +1,31 @@
 # Klasik BBA Neden Çalıştı? — Öğretici Açıklama
 
-> ## ⚠️ GÜNCEL DURUM UYARISI (2026-07): β-beat sonucu çelişkili — açık soru
+> ## ⚠️ ÖNEMLİ DÜZELTME (2026-07): β-beat, ham yörüngede BBA'yı bozuyor (§3–5 fazla iddialıydı)
 >
-> Bu belge, klasik BBA'nın **temiz optikte** (β-beat yok) çalıştığını doğru
-> anlatır: C++ ile ham sahte-EDM 356× → 1.62× hedef (220× bastırma), merkezler
-> sub-μm. **Ancak** gerçekçi sistematik koşumu (β-beat %1 + BPM ofset + gürültü)
-> **beklenmedik bir negatif** verdi: β-beat %1 altında bastırma ~1× (merkez
-> hataları dx 5.3 μm'e fırladı). Bu, aşağıda §3–§5'te yazdığım "null model-
-> bağımsız, β-beat şeffaf" iddiasıyla **çelişiyor.**
+> Bu belge klasik BBA'nın **temiz optikte** çalıştığını doğru anlatır (C++:
+> 356× → 1.62× hedef, sub-μm merkezler). **Ama** §3–§5'teki "null model-
+> bağımsız, β-beat şeffaf" iddiası **fazla güçlüydü ve C++ tarafından
+> düzeltildi.** Gerçek durum:
 >
-> Şu an bunun **fizik mi yoksa uygulama artefaktı mı** olduğunu araştırıyorum
-> (2-noktalı taramanın kabalığı? nominal-optikle boyutlanan bump? yoksa gerçek
-> bir nefes-β-beat etkileşimi mi?). CO artıkları temiz (0.018 μm) → betatron-
-> yakınsama sorunu değil. Tanı (`diag_bbeat.py`, ince tarama) sürüyor.
+> - β-beat %1 + **düzeltilmemiş 0.37 mm yörünge** altında BBA çöküyor
+>   (bastırma ~1×). Sebep FİZİK: modülasyon tüm optiği esnetir, diğer kaçık
+>   quad'ların kurduğu **büyük yörüngeyi** yeniden taşır ("optik-nefes"), ve
+>   β-beat bu nefesin desenini feed-down'dan saptırınca her BPM'in null'u ayrı
+>   yere kayar (~2 μm). Yani null, katıksız model-bağımsız DEĞİL — **nefes
+>   terimi** kadar model-duyarlı.
+> - **AMA çözülebilir:** izole test kesin gösterdi ki bias **diğer quad'ların
+>   yörüngesinden** gelir (o yörünge sıfırlanınca bias 2 μm → 0.02 μm). Nefes
+>   ∝ (düzeltilmemiş yörünge × β-beat); yörüngeyi domine eden antisimetrik
+>   kısım kolay-düzeltilebilir → **BBA'dan önce orbit düzelt / iterasyon** ile
+>   bias küçülmeli. (Standart BBA pratiği zaten "önce orbit düzelt"tir; ilk
+>   kodum bunu atlamıştı.)
 >
-> **Dolayısıyla §3–§5'teki β-beat-şeffaflık cümlelerini KESİNLEŞMİŞ sayma.**
-> "Temiz optikte çalışır" sağlam; "gerçek makinede (β-beat'li) çalışır" **açık.**
-> Sonuç netleşince bu belge ve `separation_bba_testleri.md §5.2` düzeltilecek.
-> (Analitik prototipin "şeffaf" öngörüsü C++'la teyit edilemedi — kuralımız
-> gereği C++ esastır.)
+> **Okuma kuralı:** Aşağıda §3–§5'te "β-beat şeffaf / null tamamen model-
+> bağımsız" diyen cümleleri şöyle oku: *bu, yörünge küçükken (nefes ihmal
+> edilebilirken) doğrudur; ham büyük yörüngede nefes terimi devreye girer ve
+> β-beat'e duyarlılık doğar.* İteratif çözümün C++ testi sürüyor; sonuç
+> `separation_bba_testleri.md §5.2`'ye. (Analitik prototipin "şeffaf" öngörüsü
+> yörünge nefesini eksik modelledi; kural gereği C++ esas.)
 
 > **Bu belge ne için?** Aylarca "bu sinyal demetten ölçülemez" diye
 > düşündüğümüz bir problemi, hızlandırıcı dünyasının standart bir tekniği

@@ -218,10 +218,37 @@ Kullanıcı: "beta beat, BPM offset ve noise" eklensin. Fizik-doğru modelleme
 - **BPM gürültü (1 μm/atış):** okuma-katmanı; N_avg=100/10⁴ taraması, her N_avg'de
   merkez-hata RMS (60 gerçekleme) + **C++ fast_measure çapası** (formül değil).
 
-Non-C++ mantık sentetik veriyle doğrulandı: temiz kestirim 0 nm, ofset iptali
-0 nm, gürültü 1/√N_avg (75→7 nm). **C++ koşumu SÜRÜYOR** (`classic_bba_full.py
---bbeat 0.01 --bpm-offset 100e-6 --bpm-noise 1e-6`); sonuç [bba_full_syst] ve
-buraya işlenecek.
+**C++ SONUCU — BEKLENMEDİK NEGATİF, sonra teşhis edildi:**
+
+| ölçüm (C++ spin izleyici) | değer |
+|---|---|
+| BPM ofset iptali (golden-orbit) | 9 nm artık → İPTAL ✓ (Huang ile tutarlı) |
+| ham sahte-EDM | 356× hedef |
+| **BBA sonrası (β-beat %1)** | **419× hedef — bastırma ~1× (İŞE YARAMADI)** |
+| merkez hataları | dx sym 3.8 μm, dy sym 1.0 μm |
+
+β-beat %1 altında BBA çöktü. **Kritik:** 419× > ham 356× — merkez-RMS küçüldüğü
+hâlde sahte-EDM arttı, çünkü nefes-biası dx ve dy'yi **korele** kaydırıyor
+(Σdx·dy koherent). Bu, "merkez-RMS'e bakma, son-artığın spin-sahte-EDM'ine bak"
+ilkesini doğruluyor (kullanıcı).
+
+**Teşhis (`diag_bbeat.py`, ince tarama):** çöküş fizik, artefakt değil:
+- Tepki MÜKEMMEL LİNEER (2-nokta = 9-nokta) → tarama kabalığı DEĞİL.
+- Temiz optikte null gerçek merkeze oturuyor (hata <0.03 μm); β-beat'te ~0.4–2 μm
+  kayıyor. Farklı BPM'ler farklı null veriyor → **nefes deseni feed-down'dan
+  sapıyor** (optik-nefes).
+- **İzole test kesin:** ölçülen quad hariç tüm kaçıklıklar sıfırlanınca β-beat
+  biası 2.0/0.43 μm → **0.02 μm** (~80-100× düşüş). Yani kayma **diğer kaçık
+  quad'ların yörüngesinin nefesinden**; içsel değil.
+
+**Sonuç ve çözüm yönü:** Nefes-biası ∝ (düzeltilmemiş yörünge × β-beat). BBA'yı
+ham 0.37 mm yörüngeli makinede yapmak hataydı (standart pratik: önce orbit
+düzelt). Yörüngeyi domine eden antisimetrik kısım kolay-düzeltilebilir →
+**iterasyon** (BBA → merkezlere sür → yörünge küçülür → yeniden BBA) nefes-biasını
+her geçişte ~geometrik oranla küçültmeli. Kaba hesap: yörünge 10-20× küçülünce
+419× → hedef civarı. **İteratif test kurulacak; son-artığın spin-sahte-EDM'iyle
+ölçülecek.** (Analitik prototip "β-beat şeffaf" demişti — C++ çürüttü; kural
+gereği C++ esas.)
 
 **MAKALEYE ETKİSİ (kritik):** `makale_orbit_bastirma.tex`'in ana negatif
 iddiası ("simetrik bileşen orbitten hiçbir standart teknikle gerekli seviyede
