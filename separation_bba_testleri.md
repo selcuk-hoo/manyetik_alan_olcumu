@@ -203,6 +203,26 @@ doğrulanmalı); (ii) tek seed; (iii) quad 0 sim-kısıtı; (iv) donanım
 sistematikleri (modülasyonda merkez oynaması, histerezis) simülasyon dışı —
 gerçek makinede muhtemel asıl taban; (v) tilt dahil değil.
 
+### 5.2 GERÇEKÇİ SİSTEMATİKLERLE (β-beat + BPM ofset + gürültü) — C++ koşum
+
+Kullanıcı: "beta beat, BPM offset ve noise" eklensin. Fizik-doğru modelleme
+(her sistematik farklı katmanda):
+- **β-beat (%1):** per-quad statik gradyan hatası, C++ dinamiğine gömülü
+  (quad_dG, modülasyonun üstüne). ASIL TEST: global inversiyonu %0.5'te
+  öldüren (283 μm) sistematik, null-aramayı da kaydırıyor mu? (Analitik: hayır,
+  sıfır-geçişi model bilgisi istemez.)
+- **BPM ofset (100 μm):** okuma-katmanı; golden-orbit sürüşünde iptal (demet
+  BBA-belirlenen okumaya sürülür → ofset hem ölçümde hem hedefte → düşer;
+  Huang: "electrical offsets have no negative impact"). Post-işlemde nicel
+  gösterilir (dinamiği değiştirmez).
+- **BPM gürültü (1 μm/atış):** okuma-katmanı; N_avg=100/10⁴ taraması, her N_avg'de
+  merkez-hata RMS (60 gerçekleme) + **C++ fast_measure çapası** (formül değil).
+
+Non-C++ mantık sentetik veriyle doğrulandı: temiz kestirim 0 nm, ofset iptali
+0 nm, gürültü 1/√N_avg (75→7 nm). **C++ koşumu SÜRÜYOR** (`classic_bba_full.py
+--bbeat 0.01 --bpm-offset 100e-6 --bpm-noise 1e-6`); sonuç [bba_full_syst] ve
+buraya işlenecek.
+
 **MAKALEYE ETKİSİ (kritik):** `makale_orbit_bastirma.tex`'in ana negatif
 iddiası ("simetrik bileşen orbitten hiçbir standart teknikle gerekli seviyede
 ölçülemez") bu sonuçla REVİZE EDİLMELİ: doğru sınıflandırma "global/tek-atış
