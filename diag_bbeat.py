@@ -54,6 +54,8 @@ def main():
     ap.add_argument("--quads", type=int, nargs="+", default=[5, 20])
     ap.add_argument("--npts", type=int, default=9)
     ap.add_argument("--half", type=float, default=200e-6)
+    ap.add_argument("--orbit-scale", type=float, default=1.0,
+                    help="ölçülen quad HARİÇ diğer kaçıklıkları ölçekle (yörünge→nefes proxy)")
     args = ap.parse_args()
     t0 = time.time()
 
@@ -71,9 +73,12 @@ def main():
     for i in args.quads:
         j = max([(i-1) % NQ, (i+1) % NQ, (i-2) % NQ, (i+2) % NQ],
                 key=lambda jj: abs(R0[i, jj]))
+        # ölçülen quad i'nin merkezi SABİT; diğerleri ×orbit_scale (nefes kaynağı)
+        m_base = m_dy * args.orbit_scale
+        m_base[i] = m_dy[i]
         for bb_lbl, bb in (("bb0", np.zeros(NQ)), ("bb1", bbeat)):
             for kd, d in enumerate(deltas):
-                dy = m_dy.copy(); dy[j] += d / R0[i, j]
+                dy = m_base.copy(); dy[j] += d / R0[i, j]
                 for on in (1, 0):
                     dG = bb.copy()
                     if on:
