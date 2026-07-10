@@ -310,6 +310,14 @@ Python 3.6+, `numpy`, `matplotlib`; `ctypes`/`concurrent.futures` (stdlib).
 9. **Kararsız harekette tune tahmini:** `cos(2πQ)` recurrence/fit üstel büyüyen
    diziye sahte |cos|<1 verir. Stabilite için **genlik büyüme faktörü** (özdeğer
    büyüklüğü) oku, fitlenen tune değil.
+10. **`dipole_tilt` spin-duyarlı işte KULLANILMAZ:** elektrik deflektör tiltini
+    değil, "eşdeğer manyetik deflektör" tiltini uygular — ΔB_r = B_eq·sin(φ)
+    **radyal-B enjeksiyonu** (integrator.cpp:153-170). Yörünge için E-tilt ile
+    ~eşdeğer (COD çalışmalarına uygun) ama spin için değil: radyal-B, MDM
+    üzerinden doğrudan dikey presesyon verir (EDM'in birinci-sınıf taklidi).
+    Düzeltici modellemek için doğru yol: quad-üstü B-düzeltici ≡ `quad_dy`
+    ek terimi (etkin merkez kayması; hem yörünge hem spin için özdeş).
+    Bkz. `separation_bba_testleri.md §2.4-2.5`.
 
 ---
 
