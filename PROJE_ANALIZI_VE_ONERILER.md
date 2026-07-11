@@ -395,7 +395,45 @@ iteratif ölçüp-null yapmaz. Bunun yerine sahte-EDM'i **önceden bağlar**:
 + **yapım toleransı** (mekanik + alan kalitesi). Bunlar artığı ~62× hedefte
 **bağlar**, sonra 1-yıllık kampanyada bir kez ölçülür.
 
-### 6.1 İngilizce özet — makale/abstract için hazır paragraf (BBA neden yetmez)
+> ## ⚠️ ÖNEMLİ EKLEME (2026-07): sınır teoreminin kapsamadığı bir sınıf — null-BBA
+>
+> Yukarıdaki 8-kanal tablosu ve "hızlı gözlem bilgiyi taşımaz" kolu, listelenen
+> ölçüm sınıfları (orbit-ters R⁻¹/k-mod/SQUID/NN/LSTM/CR-ayrım; orbit-ileri;
+> spin; metroloji) için sağlamdır. **Ama tabloda olmayan bir sınıf var:
+> null-arayan klasik BBA** (quad gradyan-modülasyonu + demet tarama + sıfır-geçişi).
+> Bu, "hızlı = kapalı yörünge → simetrik iz tabanın altında → görünmez" öncülünü
+> **doğrudan zorluyor:** null-BBA hızlı bir orbit-ölçümüdür ve **temiz optikte
+> simetrik modu ÖLÇÜYOR** (C++: sahte-EDM 356× → 1.6× hedef;
+> `separation_bba_testleri.md §5`).
+>
+> **Neden tabloya girmemişti:** proje "per-quad k-mod"u genlik-okuma çeşidiyle
+> denemiş (nefesle ölmüş) ve tüm aileyi kapatmış saymıştı; null-arayan çeşit hiç
+> koşulmamıştı (`why_bba_works.md §9`).
+>
+> **Dürüst güncel durum:** null-BBA temiz optikte kanıtlı; gerçekçi β-beat
+> altında ham yörüngede çöküyor (nefes geri dönüyor), iterasyonla **dikey
+> düzlemde** kurtarılıyor (0.14 μm, temiz-optik seviyesi), **yatay düzlem açık**
+> (birkaç dikiş-quad'ı ıraksatıyor; `separation_bba_testleri.md §5.2`). Ayrıca
+> donanım tabanı (modülasyon-altı merkez hareketi) hiç simüle edilmedi.
+>
+> **Sonuç:** Bu §6 sınır teoremi **denenmiş sınıflar için** geçerli kalır; ama
+> "aktif ölçmenin hiçbir yolu çalışmaz" hükmü null-BBA çözülürse **düşer.** Yani
+> bu artık *kapalı bir no-go değil, açık ve ümit verici bir rakip.* Makale bu
+> ayrımı yapmalı (bkz. güncel makale çerçevesi).
+
+### 6.1 İngilizce özet — makale/abstract için hazır paragraf (BBA-ÖNCESİ çerçeve)
+
+> ## ⚠️ SUPERSEDED (2026-07): bu paragraf null-BBA bulgusundan ÖNCE yazıldı
+> Aşağıdaki İngilizce özet, "existing BBA cannot suppress below target" ve "the
+> symmetric component is unobservable in the orbit — verified on several
+> channels" diyor. **Bu, o dönemde denenen sınıflar (inversiyon, genlik-okuma,
+> SVD, LOCO+drift, NN) için doğruydu; ama null-arayan klasik BBA'yı kapsamıyordu**
+> — ki o sınıf temiz optikte simetriği ölçüyor (`separation_bba_testleri.md §5`).
+> Dolayısıyla "unobservable in the orbit" ifadesi **fazla geneldir.** Bu blok
+> tarihsel kayıt olarak duruyor; makalenin **güncel** özeti/çerçevesi
+> `makale_orbit_bastirma.*`'da (revizyon sonrası) esas alınmalı — orada doğru
+> ayrım: *inversiyon/genlik sınıfları kör; null-BBA ayrı ve ümit verici (temiz
+> optik kanıtlı, β-beat/yatay açık).*
 
 > Bu blok, §5–6'nın makaleye taşınabilir İngilizce özetidir (2026-07). Sayıların
 > kaynakları: 7.7×/62× `omarov.md §10`; G_k yasası ve cond(R)=193 `README §19` /

@@ -17,6 +17,14 @@
 > SVD, `svd.md §5.1`, `kmod_bba §superseded`) **hem spin-trim** (bu degenerasyon)
 > tarafından kaldırılamaz → **açık problem.** Kol B (orbit ileri-harita) zaten pratikte
 > çalışmıyordu (§6.10). Aşağıdaki "Kol A çalışır" ifadeleri tarihsel kayıttır.
+>
+> **⚠️ EKLEME (2026-07):** "orbit tarafından kaldırılamaz" burada **inversiyon
+> (ΔR/SVD) ve genlik-okuma (per-quad AC)** sınıfları içindir. **Null-arayan
+> klasik BBA** (gradyan-mod + tarama + sıfır-geçişi) AYRI bir sınıftır ve temiz
+> optikte simetriği ÖLÇÜYOR (`separation_bba_testleri.md §5`,
+> `why_bba_works.md`). Yani bu belgedeki "orbit kaldıramaz" hükmü null-BBA'yı
+> **kapsamaz**; o dal açık ve ümit verici (temiz optik kanıtlı; β-beat/yatay
+> açık). Kol A/B (spin-trim, NN ileri-harita) tartışması geçerliliğini korur.
 
 > **Durum (2026-06-29, DÜZELTİLDİ).** Bu belge, `SONRAKI_OTURUM_PROMPT.md`'de
 > tanımlanan "akıllı düzeltme" fikrinin testidir. Fikir: quad misalignment'ı

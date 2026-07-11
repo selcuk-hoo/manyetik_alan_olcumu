@@ -467,11 +467,28 @@ söndürür ama simetrik artığın CW−CCW (=gerçek EDM) kanalına sızan kı
 (`omarov.md §10`: **62× gerçek EDM**, kimse kapatamıyor). Omarov da geometrik-fazı
 spinle düzeltmeyi **önermez** (SBA "unused in this study", `omarov.md §5`).
 
-**Sonuç:** Simetrik orbit-kör artık, *ölçüm* tarafında (orbit: no-go/koşullanma/nefes;
-spin: gerçek/sahte degenerasyonu) **kaldırılamaz** — geriye yalnız *önleme* kalır:
-misalignment'ı (dolayısıyla CR-ayrımı) baştan küçük tutmak (mekanik hizalama + BBA'nın
-**orbit-görünür** kısmı). Bu, projenin en sağlam ve birleştirici negatif sonucudur;
-`MAKALE_POTANSIYELI.md`'deki "elenen alternatifler + mekanizma" tezine tam oturur.
+**Sonuç (bu belgedeki ölçüm SINIFLARI için):** Yukarıdaki tabloda listelenen
+yöntemler simetrik orbit-kör modu kaldıramaz — hepsi ya inversiyon (koşullanma),
+ya genlik-okuma (nefes), ya spin-degenerasyonu duvarına çarpar.
+
+> ## ⚠️ ÖNEMLİ EKLEME (2026-07): ayrı bir ölçüm sınıfı — null-arayan BBA
+>
+> Yukarıdaki tablo iki BBA *çeşidini karıştırmamalı*. Listedeki "per-quad
+> AC-BBA", **genlik-okuyan** çeşittir (nefesle ölür). Ondan **mekanik olarak
+> farklı** bir üçüncü sınıf var: **null-arayan klasik BBA** — quad'ı gradyan-
+> modüle et, demeti tarayarak tepkinin **sıfırlandığı** noktayı bul. Bu sınıf
+> matris ters çevirmez (koşullanma yok) ve genlik okumaz (kalibrasyona bölme
+> yok); nefesi bir *kalibrasyon kirliliği* olarak değil, sıfır-geçişinin **yeri**
+> üzerinden atlatır. **Temiz optikte simetrik modu ÖLÇÜYOR** (C++: sahte-EDM
+> 356× → 1.6× hedef; `separation_bba_testleri.md §5`, `why_bba_works.md`).
+>
+> Yani "hiçbir orbit yöntemi simetriği ölçemez" hükmü **bu sınıf için henüz
+> verilemez.** Dürüst güncel durum: null-BBA temiz optikte kanıtlı; gerçekçi
+> β-beat altında ham yörüngede çöküyor (nefes geri dönüyor), iterasyonla dikey
+> düzlemde kurtarılıyor, yatay düzlem açık (`separation_bba_testleri.md §5.2`).
+> Yani **açık ve ümit verici bir istisna** — kapatılmış bir no-go değil.
+> Bu belgenin negatif sonucu inversiyon/genlik/spin sınıfları için sağlam kalır;
+> "en sağlam birleştirici negatif" ifadesi *o sınıflarla* sınırlandırılmalı.
 
 ---
 
