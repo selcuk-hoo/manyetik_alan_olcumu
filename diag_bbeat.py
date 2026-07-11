@@ -28,13 +28,13 @@ def _orbit(task):
     from false_edm_4d import find_co_4d, _T_rev
     from integrator import integrate_particle
     from build_response_matrix import read_cod_quads
-    dy, dG, tag = task
-    dy = np.array(dy); dG = np.array(dG); zeros = np.zeros(NQ)
+    dx, dy, dG, tag = task
+    dx = np.array(dx); dy = np.array(dy); dG = np.array(dG); zeros = np.zeros(NQ)
     with open(os.path.join(BASE, "params.json")) as f:
         cfg = json.load(f)
     fields, y0, beta0, R0, p_mag, direction = setup_fields(cfg)
     T_rev = _T_rev(fields, beta0, R0)
-    v_co, resid = find_co_4d(fields, p_mag, direction, zeros, dy, zeros,
+    v_co, resid = find_co_4d(fields, p_mag, direction, dx, dy, zeros,
                              T_rev, n_turns=14, n_iter=2)
     launch = _make_state(v_co, p_mag, direction, [0.0, 0.0, direction])
     fields.poincare_quad_index = 999.0
@@ -43,9 +43,9 @@ def _orbit(task):
             os.remove(fn)
     integrate_particle(launch, 0.0, float(cfg.get("t2", 1e-3)), float(cfg["dt"]),
                        fields=fields, return_steps=10, quad_dy=dy,
-                       quad_dx=zeros, quad_tilt=zeros, quad_dG=dG)
+                       quad_dx=dx, quad_tilt=zeros, quad_dG=dG)
     x, y = read_cod_quads(NQ // 2)
-    return {"tag": tag, "y": [float(v) for v in y]}
+    return {"tag": tag, "x": [float(v) for v in x], "y": [float(v) for v in y]}
 
 
 def main():
@@ -56,16 +56,22 @@ def main():
     ap.add_argument("--half", type=float, default=200e-6)
     ap.add_argument("--orbit-scale", type=float, default=1.0,
                     help="ölçülen quad HARİÇ diğer kaçıklıkları ölçekle (yörünge→nefes proxy)")
+    ap.add_argument("--plane", choices=["x", "y"], default="y")
     args = ap.parse_args()
     t0 = time.time()
+    PL = args.plane
 
     rng = np.random.default_rng(0)
+    # ölçülen düzlemin kaçıklık deseni; iki düzlem de aynı seed-akışıyla üretilir
+    m_dx = rng.normal(0, 10e-6, NQ); m_dx[0] = 0.0
     m_dy = rng.normal(0, 10e-6, NQ); m_dy[0] = 0.0
-    bbeat = rng.normal(0, 0.01, NQ); bbeat[0] = 0.0        # aynı seed/desen
+    m_meas = m_dx if PL == "x" else m_dy
+    bbeat = rng.normal(0, 0.01, NQ); bbeat[0] = 0.0
 
-    beta, phi, Q = compute_twiss_at_quads(json.load(open("params.json")), G_NOM, "y")
-    Brho = compute_Brho(json.load(open("params.json")))
-    KL = signed_KL(NQ // 2, abs(G_NOM) / Brho, 0.4, "y")
+    cfg = json.load(open("params.json"))
+    beta, phi, Q = compute_twiss_at_quads(cfg, G_NOM, PL)
+    Brho = compute_Brho(cfg)
+    KL = signed_KL(NQ // 2, abs(G_NOM) / Brho, 0.4, PL)
     R0 = build_R_analytic(beta, phi, Q, KL)
 
     deltas = np.linspace(-args.half, args.half, args.npts)
@@ -74,30 +80,36 @@ def main():
         j = max([(i-1) % NQ, (i+1) % NQ, (i-2) % NQ, (i+2) % NQ],
                 key=lambda jj: abs(R0[i, jj]))
         # ölçülen quad i'nin merkezi SABİT; diğerleri ×orbit_scale (nefes kaynağı)
-        m_base = m_dy * args.orbit_scale
-        m_base[i] = m_dy[i]
+        base_x = (m_dx * args.orbit_scale).copy()
+        base_y = (m_dy * args.orbit_scale).copy()
+        base_x[i] = m_dx[i]; base_y[i] = m_dy[i]
         for bb_lbl, bb in (("bb0", np.zeros(NQ)), ("bb1", bbeat)):
             for kd, d in enumerate(deltas):
-                dy = m_base.copy(); dy[j] += d / R0[i, j]
+                dx = base_x.copy(); dy = base_y.copy()
+                if PL == "x":
+                    dx[j] += d / R0[i, j]
+                else:
+                    dy[j] += d / R0[i, j]
                 for on in (1, 0):
                     dG = bb.copy()
                     if on:
                         dG[i] += EPS
-                    tasks.append((list(dy), list(dG), f"q{i}_{bb_lbl}_{kd}_{on}"))
+                    tasks.append((list(dx), list(dy), list(dG),
+                                  f"q{i}_{bb_lbl}_{kd}_{on}"))
 
-    print(f"{len(tasks)} koşum ({args.workers} işçi)...")
+    print(f"{len(tasks)} koşum ({args.workers} işçi), düzlem={PL}...")
     import build_response_matrix as brm
     with ProcessPoolExecutor(args.workers, initializer=brm._worker_init) as pool:
         recs = list(pool.map(_orbit, tasks))
     by = {r["tag"]: r for r in recs}
 
     for i in args.quads:
-        print(f"\n=== quad {i}  (gerçek merkez m = {m_dy[i]*1e6:+.3f} μm) ===")
+        print(f"\n=== quad {i}  (düzlem {PL}; gerçek merkez m = {m_meas[i]*1e6:+.3f} μm) ===")
         for bb_lbl in ("bb0", "bb1"):
             xs, As = [], []
             for kd in range(args.npts):
-                on = np.array(by[f"q{i}_{bb_lbl}_{kd}_1"]["y"])
-                off = np.array(by[f"q{i}_{bb_lbl}_{kd}_0"]["y"])
+                on = np.array(by[f"q{i}_{bb_lbl}_{kd}_1"][PL])
+                off = np.array(by[f"q{i}_{bb_lbl}_{kd}_0"][PL])
                 xs.append(off[i]); As.append(on - off)
             xs = np.array(xs); As = np.array(As)
             # en güçlü BPM'de lineerlik + null
@@ -122,8 +134,8 @@ def main():
                   f"kuad/lin={abs(p2[0]*args.half/p1[0])*100:.1f}%")
             print(f"         ağırlıklı null: 2-nokta={null_2pt*1e6:+.3f} μm  "
                   f"ince(9pt-LSQ)={null_fine*1e6:+.3f} μm  "
-                  f"→ hata 2pt={((null_2pt-m_dy[i]))*1e6:+.3f}, "
-                  f"ince={((null_fine-m_dy[i]))*1e6:+.3f} μm")
+                  f"→ hata 2pt={((null_2pt-m_meas[i]))*1e6:+.3f}, "
+                  f"ince={((null_fine-m_meas[i]))*1e6:+.3f} μm")
     print(f"\n[toplam {time.time()-t0:.0f}s]")
 
 
