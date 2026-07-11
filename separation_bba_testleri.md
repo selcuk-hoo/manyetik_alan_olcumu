@@ -241,14 +241,39 @@ ilkesini doğruluyor (kullanıcı).
   biası 2.0/0.43 μm → **0.02 μm** (~80-100× düşüş). Yani kayma **diğer kaçık
   quad'ların yörüngesinin nefesinden**; içsel değil.
 
-**Sonuç ve çözüm yönü:** Nefes-biası ∝ (düzeltilmemiş yörünge × β-beat). BBA'yı
-ham 0.37 mm yörüngeli makinede yapmak hataydı (standart pratik: önce orbit
-düzelt). Yörüngeyi domine eden antisimetrik kısım kolay-düzeltilebilir →
-**iterasyon** (BBA → merkezlere sür → yörünge küçülür → yeniden BBA) nefes-biasını
-her geçişte ~geometrik oranla küçültmeli. Kaba hesap: yörünge 10-20× küçülünce
-419× → hedef civarı. **İteratif test kurulacak; son-artığın spin-sahte-EDM'iyle
-ölçülecek.** (Analitik prototip "β-beat şeffaf" demişti — C++ çürüttü; kural
-gereği C++ esas.)
+**Çözüm yönü:** Nefes-biası ∝ (düzeltilmemiş yörünge × β-beat). BBA'yı ham
+0.37 mm yörüngeli makinede yapmak hataydı (standart pratik: önce orbit düzelt).
+→ **iterasyon** (BBA → merkezlere sür → yörünge küçülür → yeniden BBA).
+
+**İTERASYON SONUCU (2 geçiş; `classic_bba_iter.py`):**
+
+| geçiş | sahte-EDM | dikey artık (sym) | yatay artık (sym) | dikey yörünge |
+|---|---|---|---|---|
+| ham | 356× | — | — | 48 μm |
+| 1 | 419× | 1.05 μm | 3.84 μm | 9.8 μm |
+| 2 | **92×** | **0.14 μm** ✓ | **12.1 μm** ✗ | 0.8 μm |
+
+- **DİKEY: çözüm çalıştı** — yörünge 48→0.8 μm, dikey artık temiz-optik tabanına
+  (0.14 μm) indi. Nefes-çözümü dikeyde kanıtlandı.
+- **YATAY: ıraksadı** (3.84→12.1 μm) → tıkanma.
+
+**YATAY TANI (`diag_bbeat.py --plane x`):** ıraksama temel fizik DEĞİL, **birkaç
+kötü quad**:
+- Tek-quad yatay ölçüm çoğunlukla İYİ (quad 5/20 hata 0.15/0.38 μm, dikeyden
+  bile iyi; tepki lineer).
+- Birkaç quad **temiz optikte bile** felaket: quad 45 gerçek −3.14 → tahmin
+  +1.37 μm (4.5 μm, yanlış işaret); quad 3 orta.
+- Kötü quad'lar **latis dikişine (cell-0 başlangıç) yakın** (45 en kötü; 11–41
+  temiz). Analitik düzeltici gücü tüm quad'larda aynı (0.986) → sorun düzeltici
+  gücü değil; gerçek C++ x-tepkisi o quad'larda analitikten sapıyor (muhtemel:
+  yatay **dispersiyon** başlangıç noktasında kenar-etkisi).
+- İterasyon bu birkaç quad'ı her geçişte kötüleştiriyor → ıraksama.
+
+**Durum:** yatay ıraksama **uygulama/robustluk** sorunu (fizik sınırı değil;
+tek ölçüm çoğu quad'da temiz). Fix seçenekleri: (a) düzelticiyi ölçülen eğime
+göre seç / çok-düzeltici lokal bump; (b) fit-kalite kesmesi; (c) under-relaxation;
+(d) dikiş/dispersiyon kenar-etkisini modelle. **Karar kullanıcıya** (her C++
+iterasyonu ~3 saat + restart riski).
 
 **MAKALEYE ETKİSİ (kritik):** `makale_orbit_bastirma.tex`'in ana negatif
 iddiası ("simetrik bileşen orbitten hiçbir standart teknikle gerekli seviyede
