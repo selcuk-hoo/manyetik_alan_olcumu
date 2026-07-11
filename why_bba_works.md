@@ -1,44 +1,32 @@
 # Klasik BBA Neden Çalıştı? — Öğretici Açıklama
 
-> ## ⚠️ ÖNEMLİ DÜZELTME (2026-07): β-beat, ham yörüngede BBA'yı bozuyor (§3–5 fazla iddialıydı)
+> **Bu belge ne anlatıyor?** Aylarca "sahte EDM'i süren kaçıklık demetten
+> ölçülemez" dedik. Sonra standart bir hızlandırıcı tekniği — klasik
+> demet-tabanlı hizalama (BBA) — o duvarı deldi. Bu belge, hiçbir ön bilgi
+> varsaymadan, adım adım anlatır: sinyal nedir, aynı ölçümü kullanmanın neden
+> üç ayrı yolu var, ikisi neden çöküp üçüncüsü neden çalıştı, simülasyonu nasıl
+> kurdum ve yolda hangi hatalardan ne öğrendim.
 >
-> Bu belge klasik BBA'nın **temiz optikte** çalıştığını doğru anlatır (C++:
-> 356× → 1.62× hedef, sub-μm merkezler). **Ama** §3–§5'teki "null model-
-> bağımsız, β-beat şeffaf" iddiası **fazla güçlüydü ve C++ tarafından
-> düzeltildi.** Gerçek durum:
->
-> - β-beat %1 + **düzeltilmemiş 0.37 mm yörünge** altında BBA çöküyor
->   (bastırma ~1×). Sebep FİZİK: modülasyon tüm optiği esnetir, diğer kaçık
->   quad'ların kurduğu **büyük yörüngeyi** yeniden taşır ("optik-nefes"), ve
->   β-beat bu nefesin desenini feed-down'dan saptırınca her BPM'in null'u ayrı
->   yere kayar (~2 μm). Yani null, katıksız model-bağımsız DEĞİL — **nefes
->   terimi** kadar model-duyarlı.
-> - **AMA çözülebilir:** izole test kesin gösterdi ki bias **diğer quad'ların
->   yörüngesinden** gelir (o yörünge sıfırlanınca bias 2 μm → 0.02 μm). Nefes
->   ∝ (düzeltilmemiş yörünge × β-beat); yörüngeyi domine eden antisimetrik
->   kısım kolay-düzeltilebilir → **BBA'dan önce orbit düzelt / iterasyon** ile
->   bias küçülmeli. (Standart BBA pratiği zaten "önce orbit düzelt"tir; ilk
->   kodum bunu atlamıştı.)
->
-> **Okuma kuralı:** Aşağıda §3–§5'te "β-beat şeffaf / null tamamen model-
-> bağımsız" diyen cümleleri şöyle oku: *bu, yörünge küçükken (nefes ihmal
-> edilebilirken) doğrudur; ham büyük yörüngede nefes terimi devreye girer ve
-> β-beat'e duyarlılık doğar.* İteratif çözümün C++ testi sürüyor; sonuç
-> `separation_bba_testleri.md §5.2`'ye. (Analitik prototipin "şeffaf" öngörüsü
-> yörünge nefesini eksik modelledi; kural gereği C++ esas.)
+> **En baştan iki kural:** (1) Aşağıdaki kâğıt-kalem (analitik) hesaplar yalnız
+> *nereye bakacağımızı* söyler; nihai hüküm daima tam simülasyona
+> (`integrator.cpp`, gerçek parçacık + spin) aittir — hangisinin hangisi
+> olduğunu her yerde belirtiyorum. (2) Başarı ölçütü asla "merkez kaç mikron
+> hassas ölçüldü" değil, **son artığın gerçekten ne kadar sahte EDM ürettiği**
+> (spinle ölçülür); çünkü sahte EDM yatay ve dikey artığın *çarpımına* bağlı,
+> ve düşük RMS bile kötü korelasyonla büyük sahte EDM verebilir.
 
-> **Bu belge ne için?** Aylarca "bu sinyal demetten ölçülemez" diye
-> düşündüğümüz bir problemi, hızlandırıcı dünyasının standart bir tekniği
-> (klasik demet-tabanlı hizalama, BBA) çözdü. Bu şaşırtıcı bir sonuç ve
-> "neden?" sorusunu hak ediyor. Burada hiçbir ön bilgi varsaymadan, sezgiyle
-> kurarak anlatıyorum: sinyal nedir, neden üç farklı ölçüm yolu var, neden
-> ikisi çöküp üçüncüsü çalıştı, simülasyonu nasıl kurdum ve yol boyunca
-> hangi hatalardan ne öğrendim.
+> ## 📍 GÜNCEL DURUM (2026-07) — bir cümlede nerede olduğumuz
 >
-> **Bir uyarı, en baştan:** Aşağıdaki analitik (kâğıt-kalem) hesaplar yalnızca
-> *nereye bakacağımızı* söyler. Nihai hüküm her zaman tam simülasyona
-> (`integrator.cpp` — gerçek parçacık + spin izleyici) aittir. Sayıların
-> hangisinin C++, hangisinin analitik-kılavuz olduğunu her yerde belirtiyorum.
+> Yöntem **temiz optikte çalışıyor** (C++: sahte EDM 356× → 1.6× hedef). Ama
+> gerçekçi **β-beat** (%1 optik-model hatası) eklenince, ham düzeltilmemiş
+> yörünge altında **çöküyor** — sebebi teşhis edildi (aşağıda §6a): modülasyon
+> büyük yörüngeyi "esnetiyor" (optik-nefes) ve β-beat bunu ölçüme sızdırıyor.
+> **Çözüm** (yörüngeyi önce küçültmek / iterasyon) **dikey düzlemde işe yaradı**
+> (artık temiz-optik seviyesine indi) ama **yatay düzlemde ıraksadı** — muhtemel
+> sebep yatay dispersiyon, şu an ayrıca teşhis ediliyor. Yani: *ilke sağlam,
+> dikey kanıtlandı, yatay açık.* Bu yüzden §3–§5'teki güçlü "null her koşulda
+> model-bağımsız" cümlelerini "**yörünge küçükken** model-bağımsız" diye okuyun;
+> §6a bu nüansı tam açıklar.
 
 ---
 
@@ -156,6 +144,33 @@ tahterevallinin ağırlığından (Yol 2'nin çıkmazı) da, odadaki diğer eşy
 (Yol 1'in çıkmazı) da bağımsızdır.
 
 Bu üçüncü yol, projede hiç denenmemişti. Şimdi neden çalıştığını görelim.
+
+### "Titretmek" pratikte ne demek? (kmod'un ta kendisi — yeni bir şey değil)
+
+Burada bir yanlış anlamayı baştan kapatalım: **modülasyon yeni bir teknik
+değil.** Bu projede en baştan beri kullandığımız **k-modülasyonun (kmod) iki-
+gradyan farkının** ta kendisi.
+
+- **Fiziksel modülasyon** demek, bir kuadrupolün gücünü gerçek zamanda hafifçe
+  sallamaktır (mesela saniyede bin kez %2 aşağı-yukarı). Simülasyonda bunu
+  yapamayız: bir salınım periyodu milyarlarca zaman-adımı tutar.
+- **Onun yerine** o kuadrupolü iki ayrı sabit güçte çalıştırıp — "normal
+  gradyan" ve "%2 artırılmış gradyan" — her biri için bir **statik kapalı
+  yörünge** hesaplayıp **farkını** alırız. Modülasyon (kHz), demetin
+  hareketinden (yüzlerce kHz) çok yavaş olduğu için, bu iki-statik-yörünge
+  farkı, gerçek sallamayla **birebir aynı** cevabı verir (adyabatik limit).
+- İşte bu "iki gradyan, farkını al" tam olarak projenin başından beri **kmod**
+  dediğimiz şey. Kodda tek bir düğmeyle yapılır: ölçülen kuadrupolün
+  `quad_dG`'sini 0 → 0.02 yapıp iki yörüngeyi çıkar.
+
+Yani üç yolun (inversiyon, genlik-okuma, null) hepsi **aynı kmod farkını**
+kullanır. Fark, o farkla **ne yaptıklarında**: matrisi ters çevirmek,
+genliğini okumak, ya da (bizim yolumuz) sıfırını aramak.
+
+**İkinci netlik:** Kuadrupolleri **birer birer** modüle ediyorum — bir
+kuadrupolü titret, merkezini bul, sıradakine geç. (Eski ölü "genlik" yolu,
+hepsini *aynı anda farklı frekanslarda* titretiyordu; nefes onu bu yüzden
+boğuyordu. Burada teker teker, her biri kendi taramasıyla.)
 
 ---
 
@@ -309,34 +324,81 @@ okuma katmanındadır; farklı ortalama sayılarında ($N_{\rm avg}$) merkez hat
 
 ---
 
-## 7. Şimdiye kadarki C++ sonuçları
+## 7. Şimdiye kadarki C++ sonuçları (dürüst tablo)
 
-| Adım | Sonuç |
-|---|---|
-| Null doğrulaması (3 quad, kapalı-yörünge okumalı, gürültüsüz) | merkez biası ortalama **0.13 μm** (ideal-eksen okumada 5.8 μm idi) |
-| Uçtan uca ilk geçiş (47 quad × 2 düzlem; yatay bump henüz yanlış ölçekli) | merkez hataları dikey 0.19 μm, yatay 0.83 μm; **ham sahte EDM hedefin 356 katı → düzeltme sonrası 1.62 katı (220× bastırma)** |
-| Yatay bump düzeltmesi + β-beat + ofset + gürültü | *(koşum bitmek üzere; sonuç `separation_bba_testleri.md §5.2`'ye)* |
+| Adım | Koşul | Sonuç (sahte EDM = son artığın spin ölçümü) |
+|---|---|---|
+| Null doğrulaması | temiz optik, gürültüsüz | merkez biası **0.13 μm** ✓ |
+| Uçtan uca, tek geçiş | **temiz optik** | ham 356× → **1.6× hedef** (220× bastırma) ✓ |
+| Uçtan uca, tek geçiş | **β-beat %1** | ham 356× → **419×** (bastırma ~1×) ✗ **ÇÖKTÜ** |
+| İterasyon, geçiş 2 | β-beat %1 | **92×** (dikey artık 0.14 μm ✓ ama yatay 12 μm ✗) |
 
-1.62× hedef değeri, **düzeltilmemiş yatay bump'lı, iterasyonsuz tek geçişin**
-sonucudur — yani muhtemelen daha da iyileşecek. Sahte EDM $\propto d_x d_y$
-olduğundan, yatay hatayı (0.49 μm) dikey seviyesine (0.16 μm) indirmek kalan
-sinyali hedefin altına taşımalı; bu bir *beklenti*dir, yerini biten koşumun
-ölçümüne bırakacak.
+Okuması: **temiz optikte yöntem çalışıyor.** Gerçekçi β-beat eklenince ham
+yörüngede çöküyor; bunun sebebini bulduk (§6a) ve çözümü (iterasyon) dikey
+düzlemde işe yaradı (dikey artık temiz-optik seviyesine, 0.14 μm'e indi) ama
+yatay düzlem ıraksadı. Yani şu an: *ilke ve dikey düzlem kanıtlı, yatay açık.*
+
+---
+
+## 6a. β-beat komplikasyonu: nefes geri döndü (dürüst düzeltme)
+
+Yukarıda §3–§5, null'un "model-bağımsız" olduğunu, β-beat'in onu kaydıramayacağını
+savundu. **Bu, yörünge küçükken doğru; ama ham büyük yörüngede eksik.** C++ bunu
+yakaladı ve düzeltmek gerekiyor.
+
+**Ne oldu?** Bir kuadrupolü titretmek iki şey yapar: (a) o kuadrupolün kendi
+feed-down kick'ini değiştirir — sıfırı tam merkezde olan, aradığımız sinyal;
+(b) tüm optiği hafifçe esnetir ve halkada **zaten var olan büyük yörüngeyi**
+(diğer 47 kaçık kuadrupolün kurduğu ~0.4 mm'lik yörünge) yeniden taşır. Buna
+**optik-nefes** diyoruz. Temiz optikte (b) terimi küçük bir sabit gibi davranıp
+null'u pek kaydırmaz. Ama %1 β-beat, nefes terimini feed-down deseninden
+saptırır (artık farklı BPM'ler farklı sıfır noktası görür) ve null gerçek
+merkezden ~2 μm kayar. §2'de "genlik okuma yolunu öldüren nefes" işte buraya,
+zayıflamış ama β-beat'le yeniden canlanmış hâlde, geri döner.
+
+**Bunu nasıl kanıtladık? (izole test — çok temiz bir deney):** Ölçtüğümüz
+kuadrupol hariç *tüm diğer kaçıklıkları sıfırladık* — yani nefesin taşıyacağı
+büyük yörüngeyi ortadan kaldırdık. β-beat null-kayması **2 μm → 0.02 μm**'e
+düştü (100 kat). Demek ki kayma içsel değil; tamamen **diğer kuadrupollerin
+kurduğu yörüngenin nefesinden** geliyor.
+
+**Çözüm — standart BBA pratiği:** Nefes ∝ (mevcut yörünge × β-beat). Mevcut
+yörüngeyi domine eden **antisimetrik** kısım kolayca düzeltilebilir (o kısım
+orbit'e *görünür*, no-go simetrik kısım içindi). O yüzden gerçek makinelerde
+BBA hep **önce yörünge düzeltilip, sonra** yapılır. İlk kodum bu adımı atlamış,
+BBA'yı ham yörüngede yapmıştı. Doğrusu **iterasyon**: ölç → merkezlere taşı
+(yörünge küçülür) → yeniden ölç (nefes küçülür) → tekrarla.
+
+**İterasyon işe yaradı mı? Kısmen (dürüst):**
+- **Dikey düzlem: EVET.** İki geçişte yörünge ~48 → 0.8 μm küçüldü ve dikey
+  artık 1.05 → **0.14 μm**'e indi — bu neredeyse mükemmel-optik tabanı. Nefes
+  çözümü dikeyde kanıtlandı.
+- **Yatay düzlem: HAYIR (henüz).** Dikey düzelirken yatay artık kötüleşti
+  (3.8 → 12 μm) — ıraksama. Muhtemel sebep: halka **yatayda** büküyor (elektrik
+  alanla) → yatay düzlemde **dispersiyon** var, dikeyde yok. Bu ek karmaşıklık
+  yatay ölçümü bozuyor gibi görünüyor. Şu an ayrı bir tanıyla araştırılıyor.
+
+Yani nefes-hikâyesinin bilançosu: teşhis kesin, dikey çözüm kanıtlı, yatay
+düzlem açık bir problem. (`separation_bba_testleri.md §5.2`, `diag_bbeat.py`.)
 
 ---
 
 ## 8. Analitik kılavuz (sonuç değil, sadece nereye bakacağımızı söyler)
 
-Hızlı analitik prototip (`classic_bba_sim.py`; per-quad Twiss, nefes dâhil)
-şunları öngördü ve C++ koşumlarında aranacak yeri işaretledi:
-- Simetrik ve antisimetrik yönlerde **eşit** hassasiyet (körlük yok).
-- β-beat'e **şeffaflık** (%1 β-beat merkez hatasını 0.32 → 0.31 μm, yani
-  neredeyse hiç değiştirmiyor).
-- Hata saf $1/\sqrt{N_{\rm avg}}$ ile düşüyor; ~0.1 μm'e kadar bir taban yok.
-- Kaba kural: null hassasiyeti $\approx$ (BPM okuma gürültüsü) $\times$ 25
-  (titretme derinliği %2 iken eğimin tersi).
+Hızlı analitik prototip (`classic_bba_sim.py`; per-quad Twiss) şunları öngördü:
+- Simetrik ve antisimetrik yönlerde **eşit** hassasiyet (körlük yok). → C++
+  temiz-optikte **doğrulandı.**
+- Hata saf $1/\sqrt{N_{\rm avg}}$ ile düşüyor (gürültü ortalamayla yenilir). →
+  makul, ama gerçek taban β-beat/nefes tarafından belirleniyor.
+- **⚠️ β-beat'e "şeffaflık" (%1 β-beat merkez hatasını 0.32 → 0.31 μm
+  değiştirmiyor) — bu ÖNGÖRÜ YANLIŞ ÇIKTI.** C++ tam tersini gösterdi (§6a):
+  ham yörüngede %1 β-beat merkez hatasını μm'lere fırlatıyor. Prototip nefes
+  terimini eksik modellediği için β-beat'e duyarlılığı kaçırdı.
 
-Bu öngörüler C++ ile teyit edilene kadar *hipotez*tir.
+**Ders (kuralımızın neden var olduğu):** Analitik kılavuz *nereye bakılacağını*
+söyler ama *hüküm veremez* — burada tam da yanıldığı yer (β-beat) en kritik
+yerdi. Nihai söz her zaman C++'ın. Bu bölüm, analitik-yanılgının canlı bir
+örneği olarak duruyor.
 
 ---
 
