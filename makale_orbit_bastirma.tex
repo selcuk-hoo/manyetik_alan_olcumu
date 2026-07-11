@@ -1,6 +1,19 @@
 % makale_orbit_bastirma.tex — English paper draft (REVTeX 4.2, PRAB style)
 % Kaynak taslak: makale_orbit_bastirma.md (Türkçe iskelet + düz metin)
 % Figürler: make_orbit_figures.py (fig_orbit_*.png); C++ verisi kmod_drivers/paper_runs.py
+%
+% ============================================================================
+% REVİZYON DURUMU (2026-07): Bu taslak başta SAF NEGATİF tezle yazıldı
+% ("yörünge simetrik modu ölçemez"). Sonradan NULL-ARAYAN BBA'nın (ayrı ölçüm
+% sınıfı) temiz optikte simetriği ÖLÇTÜĞÜ bulundu (separation_bba_testleri.md
+% §5, why_bba_works.md). Abstract ve Conclusions bu doğrultuda güncellendi:
+% negatif iddia "response-matrix + amplitude-readout SINIFLARI" için
+% daraltıldı; null-BBA "ayrı sınıf, temiz optik kanıtlı, β-beat/yatay AÇIK"
+% olarak eklendi. Results'a null-BBA bölümü (§ III.?) ve gövde prose'u
+% null-BBA sonucu TAMAMLANINCA yazılacak. Yeni çerçeve/karar:
+% makale_orbit_bastirma.md üst "ÇERÇEVE REVİZYONU" bloğu. AŞIRI-İDDİADAN KAÇIN:
+% null-BBA henüz tam çözüm değil (yatay düzlem + donanım tabanı açık).
+% ============================================================================
 \documentclass[aps,prab,reprint,superscriptaddress,nofootinbib]{revtex4-2}
 
 \usepackage{graphicx}
@@ -36,16 +49,26 @@ as $\sigma^2$.  The residual is driven by the \emph{symmetric} component of
 the misalignment pattern, in which neighboring quadrupoles kick the beam in
 opposite directions: its orbit signature is suppressed by roughly two orders
 of magnitude relative to the antisymmetric component.  We show that this
-component cannot be recovered from the orbit at the required level by any of
-the standard techniques --- $K$-modulation at a common or at per-quadrupole
-frequencies, SVD inversion of the response matrix with or without
+component cannot be recovered from the orbit at the required level by the
+\emph{response-matrix and amplitude-readout} classes of techniques ---
+$K$-modulation at a common or at per-quadrupole frequencies read as an
+amplitude, SVD inversion of the response matrix with or without
 regularization, neural-network estimators, an initial LOCO correction
-followed by drift monitoring, or harmonic fits --- and that the limit is set
-not by beam-position-monitor (BPM) noise but by coherent systematics (optics
-``breathing'' and $\beta$-beating) that do not average down, so that improved
-BPM technology, including SQUID-based BPMs, does not change the floor.  The
-counter-rotating beam separation proposed as the control observable shares
-the same blindness.  Reaching $10^{-29}\,e\!\cdot\!$cm therefore requires
+followed by drift monitoring, or harmonic fits --- and that for these the
+limit is set not by beam-position-monitor (BPM) noise but by coherent
+systematics (optics ``breathing'' and $\beta$-beating) that do not average
+down, so that improved BPM technology, including SQUID-based BPMs, does not
+change the floor.  The counter-rotating beam separation proposed as the
+control observable shares the same blindness.  We further identify a
+\emph{distinct} class --- null-finding beam-based alignment, which locates
+each magnetic center by the zero-crossing of the local gradient-modulation
+response rather than by inverting a matrix or reading an amplitude --- that
+is not subject to this wall and recovers the symmetric component in
+idealized optics; its robustness under realistic optics errors
+($\beta$-beating) requires iterative orbit reduction and is established here
+for the vertical plane, with the horizontal plane and the hardware floor
+(magnetic-center motion under modulation) left as open items.  Reaching
+$10^{-29}\,e\!\cdot\!$cm by the response-matrix classes therefore requires
 bounding the symmetric misalignment component a priori at the
 $\sim\!1~\mu$m level, which no orbit-based measurement can verify.
 \end{abstract}
@@ -775,22 +798,44 @@ $10^{-27}\,e\!\cdot\!$cm level, existing BBA technology would thus suffice.
 Reaching $10^{-29}\,e\!\cdot\!$cm requires the \emph{symmetric} component of
 the magnetic-center misalignments to be at the $\sim\!1.3~\mu$m level.
 
-\paragraph{Limit theorem.}
-That symmetric component is unobservable in the orbit at the required level
-in every channel we tested: common-frequency $K$-modulation with (regularized)
-matrix inversion, distributed-frequency per-quadrupole modulation,
-neural-network estimators, LOCO-plus-drift monitoring, harmonic fits, and
-the counter-rotating beam separation.  The limit is set not by white BPM
-noise --- which synchronous detection beats --- but by two coherent
-systematics that do not average down: optics breathing under
-per-quadrupole modulation, and $\beta$-beating amplified by the
-conditioning of the inversion; and by the lattice itself, whose
-stopband caps the tune far below the symmetric kick harmonic.
-\emph{Consequently no BPM technology, including SQUID-based BPMs, changes
-this floor.}  Polarity switching provides no independent cancellation
+\paragraph{Wall for the response-matrix and amplitude classes.}
+The symmetric component is unobservable at the required level in every
+channel of these classes that we tested: common-frequency $K$-modulation
+with (regularized) matrix inversion, distributed-frequency per-quadrupole
+modulation read as an amplitude, neural-network estimators, LOCO-plus-drift
+monitoring, harmonic fits, and the counter-rotating beam separation.  For
+these the limit is set not by white BPM noise --- which synchronous
+detection beats --- but by two coherent systematics that do not average
+down: optics breathing under per-quadrupole modulation, and $\beta$-beating
+amplified by the conditioning of the inversion; and by the lattice itself,
+whose stopband caps the tune far below the symmetric kick harmonic.
+\emph{For these classes no BPM technology, including SQUID-based BPMs,
+changes the floor.}  Polarity switching provides no independent cancellation
 (it is degenerate with beam reversal, and the geometric phase is even in
 $g$), and mechanical metrology cannot substitute because the driving
 quantity is the beam-defined magnetic center.
+
+\paragraph{A distinct class that overcomes the wall: null-finding BBA.}
+The walls above are specific to inverting a response matrix or dividing a
+demodulated amplitude by a calibration.  Standard quadrupole beam-based
+alignment (BBA) does neither: it steers the beam through each quadrupole and
+locates the magnetic center as the beam position at which the
+gradient-modulation response \emph{vanishes}.  Because a zero-crossing is
+independent of the response slope, this measurement is not amplified by the
+conditioning and is, in idealized optics, transparent to $\beta$-beating; it
+carries no ``symmetric blindness.''  In our tracking it measures the
+symmetric centers and suppresses the false EDM from $\sim\!356\times$ to
+$\sim\!1.6\times$ target in idealized optics.  Under realistic $1\%$
+$\beta$-beating the naive single-pass measurement fails, because modulating a
+quadrupole re-transports the large uncorrected orbit (optics breathing) and
+$\beta$-beating makes this bias mode-dependent; correcting the orbit first
+and iterating restores it in the vertical plane (residual $0.14~\mu$m, the
+clean-optics floor).  The horizontal plane, where a few quadrupoles near the
+lattice seam are corrupted by dispersion, and the hardware floor set by any
+magnetic-center motion under gradient modulation, remain open.  We therefore
+present null-finding BBA not as a completed solution but as the one
+measurement class that is \emph{not} excluded by the walls above --- an open
+and promising route to the symmetric component.
 
 \paragraph{Scope.}
 Active spin-based nulling is outside the scope of this paper for a

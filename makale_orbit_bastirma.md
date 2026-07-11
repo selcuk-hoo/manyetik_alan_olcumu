@@ -27,15 +27,54 @@
 
 ---
 
-## 0. Özet (Abstract) — yazılacak
+> ## ⚠️ ÇERÇEVE REVİZYONU (2026-07) — null-BBA bulgusu tezi değiştirdi
+>
+> Bu iskeletin ilk hâli **saf negatif** bir tezdi: "yörünge-tabanlı hiçbir
+> yöntem simetrik modu ölçemez; taban 6×10⁻²⁸ e·cm." **Sonradan null-arayan
+> klasik BBA'nın (ayrı ölçüm sınıfı) temiz optikte simetriği ÖLÇTÜĞÜNÜ** bulduk
+> (`separation_bba_testleri.md §5`, `why_bba_works.md`). Bu, negatif tezi
+> geçersiz kılmaz ama **daraltır ve bir pozitif eksen ekler.**
+>
+> **Revize tez (ölçüm-sınıfı taksonomisi):**
+> 1. **İnversiyon sınıfı** (ΔR/SVD/TSVD/NN) simetrik moda kör — koşullanma
+>    (1/σ_min) × β-beat. (Nicel, sağlam.)
+> 2. **Genlik-okuma sınıfı** (dağıtık-frekans per-quad k-mod) — optik-nefes
+>    öldürür (koherent, SQUID söndürmez). (Nicel, sağlam.)
+> 3. **CR-ayrım gözlenebiliri** (Omarov'un knob'u) — yörünge-farkı olduğundan
+>    aynı körlüğü paylaşır (4.5×≈3.8×). (Nicel, sağlam.)
+> 4. **Null-arayan BBA sınıfı** (gradyan-mod + tarama + sıfır-geçişi) — 1-3'ün
+>    duvarına çarpmaz; **temiz optikte simetriği ölçüp sahte-EDM'i 356×→1.6×
+>    hedefe indirir.** Gerçekçi β-beat'te ham yörüngede çöküyor (nefes geri
+>    dönüyor), **iterasyonla dikey düzlemde** kurtarılıyor (0.14 μm), **yatay
+>    düzlem açık** (dikiş-quad'ları ıraksatıyor). Donanım tabanı (mod-altı
+>    merkez hareketi) **simüle edilmedi.**
+>
+> **Makalenin yeni ekseni:** "yörünge yapamaz" değil, **"hangi ölçüm sınıfı
+> yapar/yapamaz ve neden."** 1-3 keskin negatiflerdir (Omarov §9 boşluğunu
+> nicelliyor); 4 pozitif çekirdek adayıdır **ama tamamlanmamıştır.** Makale
+> ancak 4 tamamlanınca (iki düzlem + gerçekçi sistematik + donanım-tabanı
+> argümanı) "çözüm" olarak yazılabilir; o zamana dek 4 "açık, ümit verici" diye
+> sunulur. **Karar (kullanıcı): 4'ün tamamlanma durumu makalenin türünü belirler**
+> — tamamlanırsa birleşik (duvar+çözüm) yüksek-etki makale; tamamlanmazsa keskin
+> negatif (1-3) + "null-BBA açık yön" olarak yayınlanır.
+>
+> Aşağıdaki eski §0–§4 iskeleti **1-3 (negatif) için geçerli**; §3'e null-BBA
+> (madde 4) bölümü eklenecek (`separation_bba_testleri.md §5` malzemesiyle) ve
+> §4 Conclusions taksonomiye göre yeniden yazılacak.
 
-Çekirdek iddia (İngilizcesi `PROJE_ANALIZI §6.1`'de):
+## 0. Özet (Abstract) — REVİZE EDİLECEK (yukarıdaki taksonomiye göre)
+
+**Eski (saf negatif — 1-3 için geçerli, tek başına artık eksik):**
 - Yörünge-tabanlı hizalama kontrolü, quad-kaynaklı sahte-EDM'i σ=10 μm toleransta
   **~6×10⁻²⁸ e·cm**'e (62× hedef) kadar bastırır; taban **σ² ile ölçeklenir**.
-- Bu taban **BPM teknolojisinden bağımsızdır**: sınır beyaz gürültü değil,
-  ortalamayla sönmeyen koherent sistematikler (optik-nefes; β-beat × koşullanma).
-- 10⁻²⁹ e·cm'e inmek, yörüngeyle **doğrulanamayan** ≲1.3 μm simetrik
+- Bu taban **inversiyon/genlik sınıflarında** BPM teknolojisinden bağımsızdır:
+  sınır beyaz gürültü değil, koherent sistematikler (optik-nefes; β-beat×koşullanma).
+- 10⁻²⁹ e·cm'e inmek, **bu sınıflarla** doğrulanamayan ≲1.3 μm simetrik
   manyetik-merkez hizalaması gerektirir (manyetik ≠ mekanik merkez).
+
+**Eklenecek (pozitif eksen):** null-arayan BBA bu sınıfların duvarına çarpmaz;
+temiz optikte simetriği ölçer. Nihai abstract, madde 4'ün tamamlanma durumuna
+göre yazılacak (yukarıdaki karar).
 
 ---
 
