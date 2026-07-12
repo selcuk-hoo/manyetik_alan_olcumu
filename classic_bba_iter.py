@@ -43,12 +43,21 @@ def build_meta(R0_model, scan):
     return meta
 
 
-def run_pass(base_x, base_y, bbeat, meta, pool):
+def _pass_ckpt(pass_no):
+    """Geçiş-özel orbit ara-kayıt dosyası (restart içi kurtarma)."""
+    return f"/tmp/kmod_recover/bba_iter_orbits_p{pass_no}.jsonl"
+
+
+def run_pass(base_x, base_y, bbeat, meta, pool, pass_no):
     """Kalan-kaçıklık makinesinde bir BBA geçişi → est_x, est_y, KALİTE (C++).
 
     Kalite = BPM'ler arası null tutarlılığı. Kötü quad'da (dikiş/dispersiyon)
     farklı BPM'ler farklı sıfır-geçişi görür; o quad'ın düzeltmesi kısılır.
     q = 1/(1 + (BPM-null yayılımı / scan)²) ∈ (0,1].
+
+    Restart-içi kurtarma: her tamamlanan orbit koşumu geçiş-özel JSONL'e
+    yazılır; yeniden başlatmada bitmiş tag'ler tekrar koşulmaz (bir geçiş
+    ~376 koşum × ~90s → restart en fazla tek koşumu yakar).
     """
     tasks = []
     for (i, plane, j, shift) in meta:
@@ -64,8 +73,28 @@ def run_pass(base_x, base_y, bbeat, meta, pool):
                 tasks.append((list(dxx), list(dyy),
                               list(dG_on if on else dG_off),
                               f"q{i}_{plane}_{'p' if sgn>0 else 'm'}_{on}"))
-    recs = list(pool.map(_orbit_xy, tasks))
-    by = {r["tag"]: r for r in recs}
+
+    # zaten hesaplanmış tag'leri geçiş-özel ara-kayıttan yükle
+    ckpt = _pass_ckpt(pass_no)
+    by = {}
+    if os.path.exists(ckpt):
+        for line in open(ckpt):
+            line = line.strip()
+            if not line:
+                continue
+            r = json.loads(line)
+            by[r["tag"]] = r
+    todo = [t for t in tasks if t[3] not in by]
+    if by:
+        print(f"    [resume] geçiş {pass_no}: {len(by)}/{len(tasks)} koşum "
+              f"ara-kayıttan, {len(todo)} kaldı", flush=True)
+
+    # kalan koşumları çalıştır; her sonucu geldikçe ara-kayda ekle (flush)
+    with open(ckpt, "a") as fh:
+        for r in pool.map(_orbit_xy, todo):
+            by[r["tag"]] = r
+            fh.write(json.dumps({"tag": r["tag"], "x": r["x"], "y": r["y"]}) + "\n")
+            fh.flush()
 
     est_x = np.zeros(NQ); est_y = np.zeros(NQ)
     qual_x = np.ones(NQ); qual_y = np.ones(NQ)
@@ -146,10 +175,15 @@ def main():
         res_x = np.array(st["res_x"]); res_y = np.array(st["res_y"])
         hist = st["hist"]; p0 = st["next_pass"]
         print(f"  [resume] geçiş {p0}'dan devam (kayıtlı {len(hist)} geçiş)")
+    elif not args.resume:
+        # taze başlangıç: eski geçiş ara-kayıtları farklı residual'a ait → temizle
+        import glob as _glob
+        for f in _glob.glob("/tmp/kmod_recover/bba_iter_orbits_p*.jsonl"):
+            os.remove(f)
 
     with ProcessPoolExecutor(args.workers, initializer=__import__('build_response_matrix')._worker_init) as pool:
         for p in range(p0, args.passes + 1):
-            est_x, est_y, qx, qy = run_pass(res_x, res_y, bbeat, meta, pool)
+            est_x, est_y, qx, qy = run_pass(res_x, res_y, bbeat, meta, pool, p)
             # under-relaxation × kalite: kötü/tutarsız quad'ın düzeltmesi kısılır
             res_x = res_x - args.relax * qx * est_x
             res_y = res_y - args.relax * qy * est_y
@@ -170,6 +204,9 @@ def main():
             json.dump(dd, open(pth, "w"), indent=1)
             json.dump({"res_x": list(res_x), "res_y": list(res_y), "hist": hist,
                        "next_pass": p + 1}, open(STATE, "w"))
+            # geçiş tam işlendi → o geçişin orbit ara-kaydı artık gereksiz
+            if os.path.exists(_pass_ckpt(p)):
+                os.remove(_pass_ckpt(p))
 
     print(f"\n  ham {f_raw/1e-9:.0f}× → {args.passes} geçiş sonrası "
           f"{hist[-1]['f']/1e-9:.2f}× hedef  (toplam bastırma {f_raw/max(hist[-1]['f'],1e-30):.0f}×)")
