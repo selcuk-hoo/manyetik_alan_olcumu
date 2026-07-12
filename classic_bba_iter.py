@@ -43,12 +43,12 @@ def build_meta(R0_model, scan):
     return meta
 
 
-def _pass_ckpt(pass_no):
+def _pass_ckpt(pass_no, rkey="bba_iter"):
     """Geçiş-özel orbit ara-kayıt dosyası (restart içi kurtarma)."""
-    return f"/tmp/kmod_recover/bba_iter_orbits_p{pass_no}.jsonl"
+    return f"/tmp/kmod_recover/{rkey}_orbits_p{pass_no}.jsonl"
 
 
-def run_pass(base_x, base_y, bbeat, meta, pool, pass_no):
+def run_pass(base_x, base_y, bbeat, meta, pool, pass_no, rkey="bba_iter"):
     """Kalan-kaçıklık makinesinde bir BBA geçişi → est_x, est_y, KALİTE (C++).
 
     Kalite = BPM'ler arası null tutarlılığı. Kötü quad'da (dikiş/dispersiyon)
@@ -75,7 +75,7 @@ def run_pass(base_x, base_y, bbeat, meta, pool, pass_no):
                               f"q{i}_{plane}_{'p' if sgn>0 else 'm'}_{on}"))
 
     # zaten hesaplanmış tag'leri geçiş-özel ara-kayıttan yükle
-    ckpt = _pass_ckpt(pass_no)
+    ckpt = _pass_ckpt(pass_no, rkey)
     by = {}
     if os.path.exists(ckpt):
         for line in open(ckpt):
@@ -132,6 +132,9 @@ def main():
                     help="under-relaxation kazancı: res -= relax·kalite·est")
     ap.add_argument("--resume", action="store_true",
                     help="kayıtlı residual'dan devam et (restart-güvenli)")
+    ap.add_argument("--rmatrix", choices=["analytic", "cpp"], default="analytic",
+                    help="yönlendirme tümseği için tepki matrisi: analitik "
+                         "(deflektör=drift) veya cpp (ölçülen, R_d{x,y}_1.npy)")
     args = ap.parse_args()
     t0 = time.time()
 
@@ -146,7 +149,14 @@ def main():
     def R0(plane):
         beta, phi, Q = compute_twiss_at_quads(cfg, G_NOM, plane)
         return build_R_analytic(beta, phi, Q, signed_KL(nF, abs(G_NOM)/Brho, Lq, plane))
-    R0_model = {"y": R0("y"), "x": R0("x")}
+    if args.rmatrix == "cpp":
+        # ölçülen (C++) tepki matrisi: deflektör odaklaması+dispersiyon DAHİL
+        # (analitik model deflektörü drift sayıyordu → yatay yönlendirme yanlış)
+        R0_model = {"y": np.load(os.path.join(BASE, "R_dy_1.npy")),
+                    "x": np.load(os.path.join(BASE, "R_dx_1.npy"))}
+        print(f"  [rmatrix=cpp] ölçülen tepki matrisi yüklendi (R_d{{x,y}}_1.npy)")
+    else:
+        R0_model = {"y": R0("y"), "x": R0("x")}
     meta = build_meta(R0_model, args.scan)
     P_sym, _ = sym_anti_projectors()
     rms = lambda a: float(np.sqrt(np.mean(a**2)))
@@ -165,7 +175,9 @@ def main():
           f"başlangıç yörünge ~{orbit_rms(m_dx,m_dy):.0f} μm (dikey)")
 
     # restart-güvenli durum dosyası (residual arrayleri) → --resume ile devam
-    STATE = "/tmp/kmod_recover/bba_iter_state.json"
+    # rmatrix'e göre ayrı anahtar: cpp koşumu analitik koşumu ezmez
+    RKEY = "bba_iter" if args.rmatrix == "analytic" else "bba_iter_cpp"
+    STATE = f"/tmp/kmod_recover/{RKEY}_state.json"
     os.makedirs("/tmp/kmod_recover", exist_ok=True)
     hist = []
     res_x, res_y = m_dx.copy(), m_dy.copy()
@@ -178,12 +190,12 @@ def main():
     elif not args.resume:
         # taze başlangıç: eski geçiş ara-kayıtları farklı residual'a ait → temizle
         import glob as _glob
-        for f in _glob.glob("/tmp/kmod_recover/bba_iter_orbits_p*.jsonl"):
+        for f in _glob.glob(f"/tmp/kmod_recover/{RKEY}_orbits_p*.jsonl"):
             os.remove(f)
 
     with ProcessPoolExecutor(args.workers, initializer=__import__('build_response_matrix')._worker_init) as pool:
         for p in range(p0, args.passes + 1):
-            est_x, est_y, qx, qy = run_pass(res_x, res_y, bbeat, meta, pool, p)
+            est_x, est_y, qx, qy = run_pass(res_x, res_y, bbeat, meta, pool, p, RKEY)
             # under-relaxation × kalite: kötü/tutarsız quad'ın düzeltmesi kısılır
             res_x = res_x - args.relax * qx * est_x
             res_y = res_y - args.relax * qy * est_y
@@ -199,23 +211,23 @@ def main():
             # artımlı kayıt: sonuç + restart durumu
             pth = os.path.join(BASE, "kmod_drivers", "paper_runs_results.json")
             dd = json.load(open(pth)) if os.path.exists(pth) else {}
-            dd["bba_iter"] = {"bbeat": args.bbeat, "seed": args.seed, "relax": args.relax,
-                              "f_raw": f_raw, "passes": hist}
+            dd[RKEY] = {"bbeat": args.bbeat, "seed": args.seed, "relax": args.relax,
+                        "rmatrix": args.rmatrix, "f_raw": f_raw, "passes": hist}
             json.dump(dd, open(pth, "w"), indent=1)
             json.dump({"res_x": list(res_x), "res_y": list(res_y), "hist": hist,
                        "next_pass": p + 1}, open(STATE, "w"))
             # geçiş tam işlendi → o geçişin orbit ara-kaydı artık gereksiz
-            if os.path.exists(_pass_ckpt(p)):
-                os.remove(_pass_ckpt(p))
+            if os.path.exists(_pass_ckpt(p, RKEY)):
+                os.remove(_pass_ckpt(p, RKEY))
 
     print(f"\n  ham {f_raw/1e-9:.0f}× → {args.passes} geçiş sonrası "
           f"{hist[-1]['f']/1e-9:.2f}× hedef  (toplam bastırma {f_raw/max(hist[-1]['f'],1e-30):.0f}×)")
     path = os.path.join(BASE, "kmod_drivers", "paper_runs_results.json")
     data = json.load(open(path)) if os.path.exists(path) else {}
-    data["bba_iter"] = {"bbeat": args.bbeat, "seed": args.seed, "f_raw": f_raw,
-                        "passes": hist}
+    data[RKEY] = {"bbeat": args.bbeat, "seed": args.seed, "rmatrix": args.rmatrix,
+                  "f_raw": f_raw, "passes": hist}
     json.dump(data, open(path, "w"), indent=1)
-    print(f"  kaydedildi → [bba_iter]   [toplam {time.time()-t0:.0f}s]")
+    print(f"  kaydedildi → [{RKEY}]   [toplam {time.time()-t0:.0f}s]")
 
 
 if __name__ == "__main__":
