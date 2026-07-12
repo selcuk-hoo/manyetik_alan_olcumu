@@ -705,6 +705,52 @@ depend on how big the response is, so it is not amplified by the conditioning,
 and it is transparent to $\beta$-beating in ideal optics.  It carries no
 ``symmetric blindness.''
 
+\paragraph{How the measurement works, step by step.}
+The procedure is the standard one, applied to each of the 47 alignable
+quadrupoles in turn (the special modulated quadrupole of cell 0 is excluded, so
+its offset is set to zero and reported).  To find the center of quadrupole $i$:
+\begin{enumerate}
+\item \emph{Steer the beam across it.}  Using the nearest corrector, scaled by
+the single response-matrix element $R_{ij}$ so that the applied setting moves the
+beam by a chosen amount ($\sim\!150~\mu$m) at quadrupole $i$, place the beam at
+two positions bracketing the expected center.
+\item \emph{Modulate the gradient.}  At each of the two beam positions, change
+quadrupole $i$'s gradient by a small step $\delta g$ and record the difference of
+the closed orbits, ``on'' minus ``off,'' at all 48 BPMs.  This orbit difference
+is the imprint of a thin lens of strength $\delta g$ placed at the beam's offset
+from the magnetic center, so it is proportional to that offset.
+\item \emph{Find the zero-crossing.}  Because the imprint is proportional to the
+offset, it changes sign as the beam crosses the center.  From the two bracketing
+positions the center is the offset where every BPM's imprint would vanish; we
+take the least-squares zero over the 48 BPMs, weighting each by how strongly it
+responds.  The spread of the individual BPM zero-crossings is a built-in
+quality flag for that magnet.
+\end{enumerate}
+Every closed orbit in steps~1--2 is read with the tracked particle sitting on the
+4D closed orbit (Sec.~\ref{sec:estimator}), so the reading is free of the
+betatron artifact.  The 47 centers found this way \emph{are} the misalignments;
+subtracting them from the corrector pattern flattens the orbit.
+
+\paragraph{Why the response matrix appears here, yet the blindness does not.}
+It is fair to ask how this method can lean on the \emph{same} response matrix $R$
+whose inversion failed in Sec.~\ref{sec:inverse}.  The answer is that BBA never
+inverts $R$.  The inversion methods ask one \emph{global} question --- given the
+whole orbit, which 48-component misalignment produced it? --- and the symmetric
+pattern lies almost in the null space of $R$, so answering it means dividing by
+the tiny symmetric singular values and amplifying every error by
+$\mathrm{cond}(R)=193$.  BBA instead asks 47 \emph{local} questions --- where is
+the center of this one magnet? --- each answered by a direct zero-crossing of the
+beam, with no global inverse anywhere.  The response matrix enters only in the
+\emph{forward} direction, and only through the single well-conditioned element
+$R_{ij}$ that sizes the steering bump; it positions the ruler, it is not the
+quantity solved for.  The symmetric-versus-antisymmetric distinction exists only
+in the 48-vector of \emph{answers}, and BBA measures every component of that
+vector directly and equally well, so it has no preferential blindness to the
+symmetric combination.  This same picture explains the horizontal stall: a wrong
+forward element $R_{ij}$ --- the deflector-as-drift error above --- mis-sizes the
+bump and shifts the reading, but it does not bring back the symmetric null space.
+It is a separate, local, and fixable error, not a return of the wall.
+
 \paragraph{Idealized optics: it works.}
 In clean optics, null-finding BBA measures the symmetric centers and cuts the
 false EDM from $\sim\!356\times$ to $\sim\!1.6\times$ target --- the wall of
