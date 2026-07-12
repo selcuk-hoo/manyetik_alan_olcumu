@@ -245,7 +245,7 @@ ilkesini doğruluyor (kullanıcı).
 0.37 mm yörüngeli makinede yapmak hataydı (standart pratik: önce orbit düzelt).
 → **iterasyon** (BBA → merkezlere sür → yörünge küçülür → yeniden BBA).
 
-**İTERASYON SONUCU (2 geçiş; `classic_bba_iter.py`):**
+**İTERASYON SONUCU — NAİF (relax=1, kalite-kapısı yok; 2 geçiş):**
 
 | geçiş | sahte-EDM | dikey artık (sym) | yatay artık (sym) | dikey yörünge |
 |---|---|---|---|---|
@@ -255,7 +255,31 @@ ilkesini doğruluyor (kullanıcı).
 
 - **DİKEY: çözüm çalıştı** — yörünge 48→0.8 μm, dikey artık temiz-optik tabanına
   (0.14 μm) indi. Nefes-çözümü dikeyde kanıtlandı.
-- **YATAY: ıraksadı** (3.84→12.1 μm) → tıkanma.
+- **YATAY: ıraksadı** (3.84→12.1 μm) → tıkanma. Naif relax birkaç kötü quad'ı
+  her geçişte kötüleştiriyor; f=92× geçici (yatay patlamadan önceki an).
+
+**İTERASYON SONUCU — ROBUST (relax=0.5 × kalite-kapısı; 3 geçiş, TAMAMLANDI):**
+
+Robustluk fixi (`classic_bba_iter.py`, under-relaxation × BPM-null-yayılımı kalitesi;
+geçiş-içi checkpoint'li, 10.8 saat C++):
+
+| geçiş | sahte-EDM | dikey artık (sym) | yatay artık (sym) | dikey yörünge | min-kalite x/y |
+|---|---|---|---|---|---|
+| ham | 356× | — | — | 48 μm | — |
+| 1 | 368× | 3.30 μm | 4.48 μm | 24.1 μm | 0.00 / 0.99 |
+| 2 | 238× | 1.72 μm | 2.99 μm | 12.6 μm | 0.00 / 1.00 |
+| 3 | **145×** | **0.91 μm** ✓ | **2.38 μm** ✗ | 6.9 μm | 0.00 / 1.00 |
+
+- **DİKEY temiz** — sym dy her geçişte ~yarıya (3.30→1.72→0.91), kalite 1.00.
+- **YATAY dondu, ıraksamadı** — sym dx 4.48→2.99→2.38: kalite-kapısı bir quad'ı
+  (dikiş/dispersiyon) 0.00'a kısıp o quad'ın düzeltmesini keserek NAİF ıraksamayı
+  (12.1 μm) durdurdu, ama o quad düzeltilemediği için yatay ~2.4 μm'de takıldı.
+- **Sonuç: sahte-EDM ∝ dx·dy → dy iyi düştüğü için f monoton iniyor (356→145×,
+  toplam 2.4×) ama dx tabanı f'i sınırlıyor.** Robustluk fixi divergensi çözdü
+  ama HEDEFE ULAŞTIRMADI: yatay kalite-kapalı quad kalıcı taban (~145×).
+- **Trade-off açık:** naif relax daha derin f'e (92×) iner ama yatay patlar
+  (kararsız); robust relax kararlı ama daha sığ (145×). İkisi de hedeften
+  (1×) uzak → **1% β-beat altında iteratif null-BBA tek başına yetmiyor.**
 
 **YATAY TANI (`diag_bbeat.py --plane x`):** ıraksama temel fizik DEĞİL, **birkaç
 kötü quad**:
@@ -272,8 +296,15 @@ kötü quad**:
 **Durum:** yatay ıraksama **uygulama/robustluk** sorunu (fizik sınırı değil;
 tek ölçüm çoğu quad'da temiz). Fix seçenekleri: (a) düzelticiyi ölçülen eğime
 göre seç / çok-düzeltici lokal bump; (b) fit-kalite kesmesi; (c) under-relaxation;
-(d) dikiş/dispersiyon kenar-etkisini modelle. **Karar kullanıcıya** (her C++
-iterasyonu ~3 saat + restart riski).
+(d) dikiş/dispersiyon kenar-etkisini modelle.
+
+**(b)+(c) DENENDİ (robust koşum yukarıda):** kalite-kapısı × under-relaxation
+ıraksamayı DURDURDU (yatay 12.1→2.38 μm) ama kalite-kapalı quad'ı DÜZELTMEDİĞİ
+için yatay ~2.4 μm'de dondu → f 145×'te takıldı. Yani (b)+(c) "kararlılık" fixi,
+"çözüm" fixi değil. Geriye (a) ölçülen-eğime-göre-düzeltici ve (d) dikiş/dispersiyon
+kenar-etkisi modeli kalıyor — asıl kök: o birkaç quad'da C++ x-tepkisinin
+analitikten sapması (kötü düzeltici seçimi), kalite-kapısıyla maskelenmek yerine
+düzeltilmeli. **Açık iş.**
 
 **MAKALEYE ETKİSİ (kritik):** `makale_orbit_bastirma.tex`'in ana negatif
 iddiası ("simetrik bileşen orbitten hiçbir standart teknikle gerekli seviyede
