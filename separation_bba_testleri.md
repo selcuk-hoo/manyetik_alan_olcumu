@@ -298,6 +298,23 @@ tek ölçüm çoğu quad'da temiz). Fix seçenekleri: (a) düzelticiyi ölçüle
 göre seç / çok-düzeltici lokal bump; (b) fit-kalite kesmesi; (c) under-relaxation;
 (d) dikiş/dispersiyon kenar-etkisini modelle.
 
+**YATAY TIKANMANIN KÖKÜ — HIZLI TANI (DOĞRULANDI, `/tmp/quick_tune_test.py`):**
+Analitik yönlendirme modeli (`analytic_kmod.compute_twiss_at_quads`) deflektörleri
+DRIFT sayıyor → iki düzlem ayna-simetrik → analitik `Q_x = Q_y = 2.3032`. Gerçek
+C++ tune (ideal halka, betatron salınımı FFT):
+
+| düzlem | analitik | C++ kesirli | sapma |
+|---|---|---|---|
+| dikey (y) | 2.3032 | 0.3032 | **0.0000** (birebir) |
+| yatay (x) | 2.3032 | 0.3555 | **0.0523** |
+
+Dikey tune 4 hanede eşleşiyor → dikey model DOĞRU → dikey BBA çalışıyor. Yatay
+0.052 sapıyor → deflektör YATAY ODAKLAMASI (+ dispersiyon) modelde yok. Deflektör
+iki düzlemi ayıran TEK eleman olduğundan yatay tıkanma **fizik değil MODEL** sorunu.
+Dürüst düzeltme: yönlendirme tümseklerini idealize model yerine makinenin ÖLÇÜLEN
+yatay tepkisinden kur (standart BBA pratiği). Eski "muhtemelen dispersiyon" notu
+eksikti; kullanıcının deflektör-odaklama sezgisi doğru çıktı.
+
 **(b)+(c) DENENDİ (robust koşum yukarıda):** kalite-kapısı × under-relaxation
 ıraksamayı DURDURDU (yatay 12.1→2.38 μm) ama kalite-kapalı quad'ı DÜZELTMEDİĞİ
 için yatay ~2.4 μm'de dondu → f 145×'te takıldı. Yani (b)+(c) "kararlılık" fixi,
