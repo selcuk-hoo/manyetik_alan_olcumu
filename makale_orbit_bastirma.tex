@@ -330,7 +330,12 @@ and the part in which they move \emph{oppositely},
 \end{align}
 with $P_{\rm sym} + P_{\rm anti} = I$.  The projectors act within one plane;
 they are applied independently to the horizontal and to the vertical offset
-vectors.
+vectors.  Note that the symmetric component has, by construction,
+\emph{equal values} on the two magnets --- not merely equal signs.  The
+decomposition is exact and unique: an arbitrary pair of offsets $(a,b)$
+splits as $(m,m) + (d,-d)$ with $m = (a+b)/2$ and $d = (a-b)/2$, so a
+same-sign pair of unequal size is a mixture of the two components, not a
+member of either.
 
 The physical distinction between the two components follows from the
 opposite-sign gradients of QF and QD.  A misaligned quadrupole deflects the
@@ -356,12 +361,21 @@ orbit trace of $\sim\!115~\mu$m if antisymmetric but only $\sim\!1.7~\mu$m if
 symmetric.
 
 The same conclusion can be read off the response matrix itself without
-reference to harmonics.  Ranking the independent misalignment patterns by the
-strength of the orbit they produce (formally, by the singular values of $R$),
-the strongly-coupled patterns are found to be almost purely antisymmetric and
-the weakly-coupled ones almost purely symmetric; the overall visibility ratio
-between the strongest and weakest patterns is $\mathrm{cond}(R) = 193$
-[Fig.~\ref{fig:modes}, left].  Orbit correction, which by construction removes
+reference to harmonics.  The singular-value decomposition of $R$ supplies 48
+mutually orthogonal, unit-normalized misalignment patterns $v_i$, each with
+its own orbit strength $\sigma_i$ (pattern $v_i$ produces an orbit of size
+$\sigma_i$).  For each pattern we compute its \emph{symmetric fraction}
+\begin{equation}
+  s_i = \|P_{\rm sym}\,v_i\|^2 \in [0,1],
+  \label{eq:symfrac}
+\end{equation}
+i.e.\ the squared length of the pattern's projection onto the symmetric
+subspace: $s_i = 0$ for a purely antisymmetric pattern, $s_i = 1$ for a
+purely symmetric one.  Plotting $\sigma_i$ against $s_i$
+[Fig.~\ref{fig:modes}, left] shows the strongly-coupled patterns to be almost
+purely antisymmetric ($s_i \approx 0$) and the weakly-coupled ones almost
+purely symmetric ($s_i \approx 1$); the overall visibility ratio between the
+strongest and weakest patterns is $\mathrm{cond}(R) = 193$.  Orbit correction, which by construction removes
 what the orbit sees, therefore removes the antisymmetric component and leaves
 the symmetric one.
 
@@ -381,25 +395,33 @@ far above it.}
 \subsection{The false EDM as a bilinear form: four channels}
 \label{sec:bilinear}
 
-The connection between this decomposition and the false EDM can be stated in
-closed form.  The closed orbit is linear in the offsets of each plane,
-$x_{\rm CO} = R_x\,v_x$ and $y_{\rm CO} = R_y\,v_y$.  The geometric phase, at
-leading (second) order in the orbit, is the directed area swept by the spin,
-a quantity bilinear in the two transverse orbits:
+The connection between this decomposition and the false EDM follows directly
+from the physics of Sec.~\ref{sec:problem}, with no further formalism.  A
+horizontally misaligned quadrupole precesses the spin about the vertical axis
+by a small angle proportional to its offset $v_{x,i}$; a vertically
+misaligned one precesses it about the radial axis by an angle proportional to
+$v_{y,j}$.  Two precessions about different axes do not commute, and the
+out-of-plane residue left by each ordered pair of them is proportional to the
+\emph{product} of the two small angles.  Summing this over all pairs of
+quadrupoles around the ring,
 \begin{equation}
-  f \propto \sum_j w_j
-      \big[x_{\rm CO}\,y'_{\rm CO} - y_{\rm CO}\,x'_{\rm CO}\big]_{s_j}
-      = x_{\rm CO}^{\!\top} K\, y_{\rm CO}
-  \label{eq:area}
-\end{equation}
-for a lattice-dependent kernel $K$.  Substituting the orbit response,
-\begin{equation}
-  f = v_x^{\!\top}\,\big(R_x^{\!\top} K R_y\big)\,v_y \;\equiv\; B(v_x, v_y).
+  f \;=\; \sum_{i}\sum_{j} W_{ij}\; v_{x,i}\, v_{y,j}
+  \;\equiv\; B(v_x, v_y),
   \label{eq:bilinear}
 \end{equation}
+where the pairwise weights $W_{ij}$ depend only on the lattice --- on where
+the two magnets sit and on how the orbit deflection started by one is carried
+around the ring to the other [the orbit response, Eq.~(\ref{eq:R})] --- and
+not on the
+misalignments themselves.  Equation~(\ref{eq:bilinear}) states that the false
+EDM is \emph{bilinear}: every term contains exactly one horizontal and one
+vertical offset, never two of the same plane.  This is the sign structure
+verified directly in Sec.~\ref{sec:estimator}.
+
 Splitting each plane independently into its symmetric and antisymmetric parts,
 $v_x = v_x^{\rm s} + v_x^{\rm a}$ and $v_y = v_y^{\rm s} + v_y^{\rm a}$
-[Eq.~(\ref{eq:projectors})], bilinearity separates $f$ into four channels,
+[Eq.~(\ref{eq:projectors})], and expanding the double sum, the terms fall
+into four groups:
 \begin{equation}
   f = \underbrace{B(v_x^{\rm s},v_y^{\rm s})}_{f_{ss}}
     + \underbrace{B(v_x^{\rm s},v_y^{\rm a})}_{f_{sa}}
@@ -407,11 +429,23 @@ $v_x = v_x^{\rm s} + v_x^{\rm a}$ and $v_y = v_y^{\rm s} + v_y^{\rm a}$
     + \underbrace{B(v_x^{\rm a},v_y^{\rm a})}_{f_{aa}} .
   \label{eq:channels}
 \end{equation}
-The two planes are coupled by the kernel $B$, not by the projectors.  Since
-each factor $R\,v$ is large for an antisymmetric pattern and
-$G_k$-suppressed for a symmetric one, the pure-symmetric channel $f_{ss}$ is
-by far the smallest, and every channel containing an antisymmetric factor is
-larger.
+The two planes are mixed by the weights $W_{ij}$, not by the projectors.
+Because a misalignment component acts on the spin mainly through the orbit it
+drives, and that orbit is large for an antisymmetric component and
+$G_k$-suppressed for a symmetric one [Eq.~(\ref{eq:Gk})], the pure-symmetric
+channel $f_{ss}$ is by far the smallest, and every channel containing an
+antisymmetric factor is larger.
+
+We stress that $f_{sa}$ and $f_{as}$ are two distinct physical quantities,
+not a double counting.  In $f_{sa}$ the \emph{horizontal} pattern is
+symmetric and the \emph{vertical} one antisymmetric; in $f_{as}$ the roles
+are exchanged.  Nothing forces these to be equal: the two planes enter the
+ring differently (only the horizontal plane carries the bending), and the
+weights $W_{ij}$ are not symmetric under exchanging the planes, because the
+order of two non-commuting precessions matters.  The tracker confirms the
+difference directly: for the representative pattern, $f_{as} = -272\times$
+target while $f_{sa} = +28\times$ --- an order of magnitude apart and of
+opposite sign.
 
 The channels are measured directly, and this measurement method underlies all
 symmetric/antisymmetric attributions in this paper: the misalignment vectors
@@ -426,9 +460,9 @@ seed; and each channel individually scales as $\sigma^{2}$.  The gain law
 accounts for the ordering but not fully for its magnitude: the orbit-trace
 ratio between antisymmetric and symmetric patterns of equal rms is
 $\sim\!70$, while the measured channel ratios are one to two orders of
-magnitude, the difference arising because the kernel of
-Eq.~(\ref{eq:area}) weights orbit \emph{derivatives}, which partially
-compensates the suppression of the high-harmonic symmetric orbit.  The
+magnitude, the difference arising because the pairwise weights respond to
+the rapid azimuthal variation of the symmetric orbit (its slopes), which
+partially compensates its small amplitude.  The
 measured channels, rather than the harmonic estimate, are therefore used as
 the quantitative reference throughout.
 
@@ -464,7 +498,8 @@ amplitude readout}
 
 Before presenting the measurement that succeeds, we summarize the techniques
 that do not, and why.  All of them attempt to reconstruct the misalignments
-(or their symmetric part) from orbit readings.  The realistic error model
+(including, crucially, their symmetric part) from orbit readings.  The
+realistic error model
 includes static BPM offsets ($\sim\!100~\mu$m each, the electronic zero of a
 monitor relative to the true axis), white BPM noise ($\sim\!1~\mu$m per
 reading, reducible by averaging), and a coherent optics-model error
@@ -477,8 +512,12 @@ between two settings and subtracting the orbits cancels the static BPM
 offsets exactly and leaves a linear system $\Delta y = \Delta R\,\Delta q$.
 With no errors the inversion is exact.  Its weakness is conditioning:
 $\mathrm{cond}(\Delta R) = 3.7\times10^{4}$, with the weak directions being
-precisely the symmetric ones, so reconstruction errors are amplified along
-the component of interest.  White noise can be beaten by synchronous
+precisely the symmetric ones (established by the same symmetric-fraction
+analysis as in Fig.~\ref{fig:modes}, applied to $\Delta R$), so
+reconstruction errors are amplified along the component of interest.
+Regularizing the inversion --- truncated SVD or Tikhonov damping --- does not
+help here: truncation discards precisely the symmetric directions, trading
+their noise amplification for a full bias of the sought component.  White noise can be beaten by synchronous
 detection --- modulating at $\sim\!1$~kHz and averaging reaches an effective
 noise of $\sim\!14$~nm within minutes --- but the optics-model error cannot:
 it is coherent, identical in every average, and at $\beta$-beating of only
@@ -516,17 +555,24 @@ a direct, inversion-free readout: a quadrupole whose center is offset from
 the beam by $o_i$ imprints, when its gradient is modulated, a dipole-like
 deflection proportional to $o_i$ (the \emph{feed-down} kick, the dipole field
 component seen by a beam passing off-center).  The method fails in this ring
-for an instructive reason [Fig.~\ref{fig:breathing}].  Modulating the
-gradient of one quadrupole modulates two things at once: the feed-down kick
-of that quadrupole (the sought signal, $\sim\!0.9~\mu$m at a BPM), and the
-focusing of the ring as a whole --- the lattice functions and the tune
-change slightly, so the \emph{entire pre-existing closed orbit}, built by all
-48 offsets together and much larger ($\sim\!0.37$~mm rms) than any single
-feed-down kick, is re-transported through slightly different optics.  This
-global response, which we refer to as optics \emph{breathing}, appears at the
-same modulation frequency as the signal and exceeds it about sevenfold; a
-decomposition test shows the demodulated amplitude to be dominated by the
-neighbors' orbit rather than the quadrupole's own offset by a factor of 266.
+for an instructive reason [Fig.~\ref{fig:breathing}].  The problem is caused
+by the modulated quadrupole itself, acting globally.  A quadrupole is a
+focusing element: changing its gradient by even $2\%$ slightly shifts the
+tune and the focusing functions of the \emph{entire} ring.  The pre-existing
+closed orbit --- built by the offsets of all the other quadrupoles, and at
+$\sim\!0.37$~mm rms several hundred times larger than the
+$\sim\!0.9$-$\mu$m feed-down signal being sought --- is re-transported
+through this slightly altered focusing and moves by a few $\mu$m at every
+BPM.  This global response, which we call optics \emph{breathing}, appears
+at exactly the modulation frequency of the quadrupole being measured, so no
+frequency filter can separate it from the signal; it exceeds the signal
+about sevenfold.  A decomposition test isolates the two contributions
+cleanly: with the full misalignment pattern present, modulating one
+quadrupole moves a BPM reading by $-9.83~\mu$m; deleting every offset except
+that quadrupole's own leaves only $-0.037~\mu$m.  The demodulated amplitude
+is therefore reading the orbit built by the \emph{neighbors}, 266 times more
+strongly than the offset it was meant to measure, and dividing it by a
+calibration cannot repair a number that measures the wrong quantity.
 Because breathing is coherent with the modulation, it does not average away
 with more BPMs or lower noise; removing it in an idealized model restores
 perfect reconstruction, which pins the failure entirely on this mechanism.
@@ -544,25 +590,18 @@ average down.}
 \end{figure*}
 
 \emph{Learned and structured estimators.}  Because the misalignment-to-orbit
-map is linear, a neural network trained on simulated orbit data converges to
-the regularized pseudo-inverse of $R$ and inherits its conditioning; in our
-tests a multilayer perceptron matched truncated-SVD inversion on both
-components (symmetric error 5.6 vs.\ 6.3~$\mu$m against a 9.9-$\mu$m signal)
-and improved on it nowhere.  In this linear, noise-limited setting the
-limitation is the information content of the data, not the expressiveness of
-the estimator, though we note that this argument does not extend to settings
-with useful nonlinearity or strong priors.  Sparsity-based reconstructions
-(LASSO, CLEAN, greedy harmonic selection) reach the same floor.  Restricting
-the reconstruction basis to \emph{a priori known} harmonics improves the
-conditioning by two orders of magnitude and works --- but which harmonics are
-present is precisely what is unknown; and fitting a known signature (for
-example a $k{=}2$ stray-field imprint) is well-conditioned but biased, since
-one harmonic coefficient lumps together the field, the misalignment content,
-and the BPM-offset content at that harmonic.  A calibrate-then-monitor
-strategy (LOCO followed by drift monitoring of the difference orbit) tracks
-\emph{changes} of the antisymmetric component well --- $6.5~\mu$m rms under
-$50~\mu$m BPM offsets --- but the difference orbit passes through the same
-response matrix and is equally blind to the symmetric component.
+map is linear, a trained neural network can at best relearn the (regularized)
+inverse of $R$; in our tests it matched truncated-SVD inversion on both
+components without improving either (symmetric error 5.6 vs.\ 6.3~$\mu$m
+against a 9.9-$\mu$m signal) --- the limit is the information in the data,
+not the flexibility of the estimator.  Sparsity priors (LASSO, CLEAN, greedy
+harmonic selection) reach the same floor, and harmonic fits of a known
+signature trade the conditioning problem for a bias problem (one harmonic
+coefficient lumps together field, misalignment, and BPM-offset content).  A
+calibrate-then-monitor strategy (LOCO followed by drift monitoring) tracks
+\emph{changes} of the antisymmetric component well ($6.5~\mu$m rms under
+$50~\mu$m BPM offsets) but passes through the same response matrix and is
+equally blind to the symmetric one.
 
 \emph{Counter-rotating beams, polarity switching, and the tune.}  The control
 chain of Ref.~\cite{omarov} monitors the \emph{separation} of the two
@@ -687,7 +726,11 @@ vertically.  Re-building the steering from the \emph{measured} response
 matrix --- ordinary practice on a real machine --- repairs the horizontal
 plane: the per-magnet quality ceases to throttle the horizontal corrections,
 and the false EDM after three passes improves ninefold over the
-analytic-model steering (Table~\ref{tab:bba}).
+analytic-model steering (Table~\ref{tab:bba}).  The measured matrix is
+obtained in the simulation exactly as it would be on the machine: each
+quadrupole in turn is displaced by a known amount, the resulting
+closed-orbit change is recorded at all 48 BPMs, and the ratio
+(orbit change)/(displacement) fills one column of the matrix.
 
 \begin{table}[tb]
 \caption{Iterated null-finding BBA under $1\%$ $\beta$-beating (tracking,
@@ -731,15 +774,25 @@ correction removes the antisymmetric channels of Eq.~(\ref{eq:channels});
 null-finding BBA reduces the symmetric channel that orbit correction cannot
 see; in combination they reach the target, while each alone stalls}
 ($62\times$ for orbit correction, $\sim\!20\times$ for BBA without the final
-correction).  Table~\ref{tab:chain} summarizes the chain.  Two caveats bound
+correction).  The division of labor is also one of \emph{precision}: each
+per-magnet zero crossing carries a $\sim\!\mu$m-level measurement floor
+(residual breathing and steering-model error), so iterating BBA alone
+approaches that floor only slowly; the antisymmetric residue, by contrast,
+needs no per-magnet measurement at all --- the orbit displays it directly and
+resonantly amplified, and nulling it collectively with a truncated-SVD
+correction (the ``depth'' above is the singular-value cutoff) is far more
+precise than measuring it magnet by magnet.  Table~\ref{tab:chain}
+summarizes the chain.  Two caveats bound
 the claim.  The sub-target endpoint is a single misalignment seed of a
 signed, bilinear quantity whose value scatters from seed to seed
 (Fig.~\ref{fig:channels}); the robust statement is suppression to the
 symmetric floor of a few times the target, and a multi-seed campaign to fix
 the distribution is in progress.  And the entire analysis assumes that
-gradient modulation does not itself move the magnetic centers; hysteresis or
-thermal effects at the micron level would enter the measurement directly,
-and this hardware floor has not been modeled.
+gradient modulation does not itself move the magnetic centers.  The air-core
+(iron-free) quadrupoles foreseen for the experiment eliminate magnetic
+hysteresis, but thermal or mechanical motion of the coil geometry at the
+micron level would enter the measurement directly, and this hardware floor
+has not been modeled.
 
 \begin{table}[tb]
 \caption{The suppression chain at $\sigma = 10~\mu$m (single beam, tracking).
@@ -768,9 +821,9 @@ budget}
 \label{sec:operation}
 
 An alignment campaign is useful only if its result survives on the machine.
-Quadrupole positions drift --- thermally, with ground motion, and with
-magnetic history --- so the corrected state of Sec.~\ref{sec:bba} is a
-snapshot, onto which the machine continuously re-loads random misalignment.
+Quadrupole positions drift --- thermally and with ground motion --- so the
+corrected state of Sec.~\ref{sec:bba} is a snapshot, onto which the machine
+continuously re-loads random misalignment.
 We simulated this directly by adding fresh random offsets of rms
 $\sigma_{\rm d}$ to the corrected state and re-measuring the false EDM, with
 and without orbit feedback.
@@ -798,13 +851,19 @@ campaign.
 
 These sensitivities translate into a time budget whose absolute numbers
 require one machine-specific input that simulation cannot supply: the drift
-rate.  The initial BBA campaign (47 magnets $\times$ 2 planes, iterated)
-costs hours to a day of dedicated beam time.  Continuous orbit correction
-runs during data taking.  If the total random drift is of order $1~\mu$m/day
---- a representative figure for a thermally stabilized installation, to be
-confirmed for the actual site --- its symmetric part reaches the $2~\mu$m
-scale in roughly three days, setting the BBA repetition cadence; at hours per
-campaign this is a duty-cycle loss at the percent level.  The dominant time
+rate.  The arithmetic is simple enough to display.  One BBA pass consists of
+$47~\text{magnets} \times 2~\text{planes} \times 2~\text{beam positions}
+\times 2~\text{gradient settings} \approx 400$ orbit acquisitions; at
+$\sim\!10$~s per acquisition (orbit settling plus averaging) a pass costs
+about an hour of beam time, and the three-pass iteration with its
+intervening orbit corrections a few hours --- of order half a day with
+overheads.  Continuous orbit correction runs during data taking at no extra
+cost.  The re-alignment cadence follows from the drift rate: if the total
+random drift is of order $1~\mu$m/day --- a representative figure for a
+thermally stabilized installation, to be confirmed for the actual site ---
+its symmetric part ($\approx 1/\sqrt{2}$ of it, i.e.\ $\sim\!0.7~\mu$m/day)
+reaches the $2~\mu$m scale in about three days.  A few-hour BBA campaign
+every $\sim\!3$ days is a duty-cycle loss at the percent level.  The dominant time
 scale of the experiment remains the statistical one: polarimetry reaches the
 nrad/s level only over months to a year of running~\cite{polarimeter}, and
 the alignment maintenance described here fits inside that schedule provided
