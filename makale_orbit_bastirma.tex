@@ -360,20 +360,30 @@ bilinear form directly in the misalignments,
   f = v_x^{\!\top}\,\big(R_x^{\!\top} K R_y\big)\,v_y \;\equiv\; B(v_x, v_y).
   \label{eq:bilinear}
 \end{equation}
-Inserting $I = P_{\rm sym} + P_{\rm anti}$ [Eq.~(\ref{eq:projectors})] on both
-sides splits $f$ into four channels,
+The projectors act \emph{within} each plane and never couple the two: split each
+plane's misalignment separately into its symmetric and antisymmetric parts,
 \begin{equation}
-  f = \underbrace{B(P_{\rm s}v_x,P_{\rm s}v_y)}_{f_{ss}}
-    + \underbrace{B(P_{\rm s}v_x,P_{\rm a}v_y)}_{f_{sa}}
-    + \underbrace{B(P_{\rm a}v_x,P_{\rm s}v_y)}_{f_{as}}
-    + \underbrace{B(P_{\rm a}v_x,P_{\rm a}v_y)}_{f_{aa}}.
+  v_x = v_x^{\rm s} + v_x^{\rm a}, \quad v_y = v_y^{\rm s} + v_y^{\rm a},
+  \qquad v^{\rm s} \equiv P_{\rm sym} v,\; v^{\rm a} \equiv P_{\rm anti} v ,
+  \label{eq:vparts}
+\end{equation}
+where the \emph{same} operator $P_{\rm sym}$ is applied independently to $v_x$
+and to $v_y$ (it is valid in both planes because QF and QD have opposite gradient
+in each, so ``move together'' cancels the kicks in both).  What couples the two
+planes is the kernel $B$ of Eq.~(\ref{eq:bilinear}), not the projectors.
+Bilinearity then splits $f$ into four channels,
+\begin{equation}
+  f = \underbrace{B(v_x^{\rm s},v_y^{\rm s})}_{f_{ss}}
+    + \underbrace{B(v_x^{\rm s},v_y^{\rm a})}_{f_{sa}}
+    + \underbrace{B(v_x^{\rm a},v_y^{\rm s})}_{f_{as}}
+    + \underbrace{B(v_x^{\rm a},v_y^{\rm a})}_{f_{aa}}.
   \label{eq:channels}
 \end{equation}
 Because every factor $R\,v$ is large when the misalignment is antisymmetric and
 $G_k$-suppressed when it is symmetric, the pure-symmetric channel $f_{ss}$ is by
 far the smallest, and every channel containing the antisymmetric part is larger.
 We confirm this directly with the spin tracker [Fig.~\ref{fig:channels}]: feeding
-each projected pair $(P_a v_x, P_b v_y)$ separately to the C++ integrator, the
+each part pair $(v_x^{a},v_y^{b})$ separately to the C++ integrator, the
 four signed channels reproduce the full false EDM to $0.1\%$
 ($f/\!\sum = 0.999$--$1.001$ over three seeds), a clean check of
 Eq.~(\ref{eq:channels}); the pure-symmetric channel is $\sim\!5$--$30\times$
