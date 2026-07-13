@@ -415,3 +415,58 @@ Tam yeniden-kurgu tamamlandı (10 sayfa, 0 overfull, 0 kırık ref):
   artık ayrışımı (sym 3.5×/anti 16×), son-OC 0.03–0.8×, σ²-taban-yok, drift geri-yükleme
   (feedback'le 5μm tolerans), CW/CCW 2–3×, zaman bütçesi. Çok-seed "in progress" işaretli.
 - BEKLEYEN: çok-seed dağılımı + ensemble CW/CCW sayıları gelince tablo/metin güncelle.
+
+---
+
+## F. ChatGPT hakem-taklidi yorumları (2026-07-13) — değerlendirme
+
+> Kullanıcı: "neredeyse tamamen katılıyorum; yalnız sim/antisim'in matematiksel
+> KATI ispatına gerek yok — simülasyonla gösterebiliriz." Karar: katı ispat YOK;
+> sınıf-kapsamlı iddia + simülasyon-doğrulaması net beyan edilecek.
+
+**ÖNEMLİ BAĞLAM:** Yorumların bir kısmı ESKİ sürüme ait (yeniden-kurgudan önce):
+"null-BBA future work bırakılmış" → artık gösterilmiş çözüm (Tablo I, §V);
+"%70 negatif" → katalog tek sıkıştırılmış bölüme indi (§IV); "NN cannot help"
+→ zaten yumuşatıldı ("does not extend to nonlinear/prior settings"). Bunlar STALE.
+
+**F1. "Fundamental unobservability kanıtı matematiksel değil" (EN BÜYÜK İTİRAZ):**
+Kullanıcı kararı: katı ispat gerekmez. Doğru duruş (ve zarif savunma): iddiamız
+zaten information-theoretic DEĞİL, SINIF-kapsamlı — ve makalenin kendisi karşı-örneği
+içeriyor: null-BBA da orbit-tabanlı bir ölçüm ama o sınıfta değil ve BAŞARIYOR.
+→ UYGULA: §IV girişine/sonuna açık cümle: "evrensel imkânsızlık iddia etmiyoruz;
+tersine, bu sınıfların dışında kalan ve başaran bir orbit-tabanlı ölçüm sergiliyoruz.
+Sınıf-içi sınırın yapısal nedeni koşullanma/nefes (koherent); doğrulama simülasyonla."
+Tek yarı-rigorous eleman zaten var (ΔR ~ ‖R⁻¹‖/ε alt sınırı) — yeterli.
+
+**F2. Mutlak dil ("no method/impossible/no BPM technology"):** Yeni sürümde
+büyük ölçüde giderilmiş (grep-denetlendi: iddialar "inversion and amplitude-readout
+families"e bağlı). → UYGULA: kalan 2-3 yerde kapsam hatırlatması ("of this class").
+
+**F3. Sim/antisim baskınlığının teorisi:** Yeni sürümde ZATEN var: projektörler
+(eq:projectors), bilineer form (eq:bilinear), dört kanal (eq:channels), kazanç
+yasası (eq:Gk) + %0.1 kanal doğrulaması. ChatGPT'nin istediği "projection operator
+bölümü" fiilen mevcut (eski sürümü okumuş olabilir). → UYGULA (hafif): kanal
+büyüklük sıralamasının kazanç-yasası beklentisiyle bağını bir cümleyle nicele;
+kernelin türev yapısının yüksek-k'yı kısmen telafi ettiğini dürüstçe not et
+(ölçülen oran net hakem).
+
+**F4. "Ne kadar lattice-specific?" (EN CİDDİ KALAN AÇIK):** Haklı. Tek latis.
+→ ORTA VADE (pipeline sonrası sim işi): (a) integrator2 (alternatif topoloji,
+QF-d-QD-d-DEFL-d, g≈0.5) ile görünürlük-ayrışmasının persistansını göster; ve/veya
+(b) analitik katmanla Q/g taraması + birkaç C++ nokta. Şimdilik metinde "Validity"
+dürüst; bu sim eklenirse iddia güçlenir.
+
+**F5. Fig 2 (modes) büyüt — "makalenin kalbi":** Kısmen katılıyorum; yeni kurguda
+kalp artık KANAL figürü (channels). → UYGULA: modes figürünü tam genişlik yap;
+channels zaten tek-kolon ama net.
+
+**F6. "Diagnosis mi solution mı — açık söyle":** Yeni sürümde çözüm gösterildi ama
+tek-seed. → UYGULA: Conclusions'a tek net cümle: "bu makale hem teşhis hem de
+proof-of-principle çözüm sunar; tolerans-belgesi değildir (çok-seed sürüyor)."
+
+**F7. İki makaleye bölme önerisi:** KATILMIYORUM (yeniden-kurgu scope'u zaten
+daralttı; off-momentum Appendix'te; drift-izleme zaten ayrı ikinci-makale hattı).
+Tek makale kalsın.
+
+**Uygulama:** F1/F2/F3/F5/F6 ucuz metin işleri → ŞİMDİ uygulanıyor (kullanıcı
+onayı "neredeyse tamamen katılıyorum"). F4 = pipeline sonrası simülasyon adayı.

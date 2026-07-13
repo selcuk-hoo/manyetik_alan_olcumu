@@ -417,7 +417,15 @@ Figure~\ref{fig:channels} shows the result at $\sigma = 10~\mu$m: the four
 signed channels sum to the full false EDM within $0.1\%$
 ($f/\!\sum = 0.999$--$1.001$ over three seeds), confirming
 Eq.~(\ref{eq:channels}); the pure-symmetric channel is the smallest in every
-seed; and each channel individually scales as $\sigma^{2}$.
+seed; and each channel individually scales as $\sigma^{2}$.  The gain law
+accounts for the ordering but not fully for its magnitude: the orbit-trace
+ratio between antisymmetric and symmetric patterns of equal rms is
+$\sim\!70$, while the measured channel ratios are one to two orders of
+magnitude, the difference arising because the kernel of
+Eq.~(\ref{eq:area}) weights orbit \emph{derivatives}, which partially
+compensates the suppression of the high-harmonic symmetric orbit.  The
+measured channels, rather than the harmonic estimate, are therefore used as
+the quantitative reference throughout.
 
 Two consequences frame the rest of the paper.  First, the false EDM is not a
 function of the rms misalignment: it is $\sigma^{2}$-homogeneous, but at fixed
@@ -432,8 +440,8 @@ correction removes the antisymmetric factors and with them the three large
 channels; the remaining floor is $f_{ss}$, and any further progress requires a
 measurement that reaches the symmetric component itself.
 
-\begin{figure}[tb]
-\includegraphics[width=\columnwidth]{fig_orbit_channels.png}
+\begin{figure*}[tb]
+\includegraphics[width=0.9\textwidth]{fig_orbit_channels.png}
 \caption{The four false-EDM channels of Eq.~(\ref{eq:channels}), measured by
 projecting the misalignments and tracking each part separately.  (a) At
 $\sigma=10~\mu$m the pure-symmetric channel $f_{ss}$ is the smallest, and
@@ -442,7 +450,7 @@ three seeds; dots: individual seeds; the spread reflects the signed, bilinear
 character of $f$).  (b) Each channel scales as $\sigma^2$.  The four signed
 channels sum to the full signal within $0.1\%$.}
 \label{fig:channels}
-\end{figure}
+\end{figure*}
 
 % ═══════════════════════════════════════════════════════════════════
 \section{The symmetric component cannot be recovered by inversion or
@@ -600,7 +608,14 @@ The common conclusion of this section is structural.  For every technique in
 the inversion and amplitude-readout families, the limiting effect is
 coherent --- conditioning amplified by $\beta$-beating, or optics
 breathing --- and coherent effects do not average down.  \emph{No BPM
-technology, including SQUID-based BPMs, changes these floors.}
+technology, including SQUID-based BPMs, changes these floors.}  We emphasize
+the scope of this statement.  It is a structural property of the estimator
+classes considered, established by class-level arguments (the conditioning
+bound and the coherence of the breathing term) together with systematic
+simulation; it is not an information-theoretic impossibility claim for all
+conceivable orbit-based measurements.  Indeed, the next section exhibits an
+orbit-based measurement outside these classes that does reach the symmetric
+component.
 
 % ═══════════════════════════════════════════════════════════════════
 \section{Reaching the symmetric component: null-finding BBA}
@@ -843,10 +858,14 @@ and only the symmetric drift component requires periodic re-alignment, at a
 cadence compatible with the statistical time scale of the experiment for
 drift rates of order $1~\mu$m/day.
 
-The principal open items are the magnetic-center stability under gradient
-modulation (the hardware floor of the BBA measurement, not yet modeled), the
-multi-seed distribution of the final residual, and the ensemble determination
-of the CW/CCW factor.  All numbers refer to one lattice in a linear model
+The paper thus both diagnoses the limitation of orbit-based control and
+demonstrates its resolution at the proof-of-principle level; it is not yet a
+tolerance document.  The principal open items are the magnetic-center
+stability under gradient modulation (the hardware floor of the BBA
+measurement, not yet modeled), the multi-seed distribution of the final
+residual, the ensemble determination of the CW/CCW factor, and the
+portability of the quantitative results to other lattices, which we have
+argued structurally but verified on one lattice only.  All numbers refer to one lattice in a linear model
 without sextupoles; the structural conclusions --- the visibility split, the
 bilinear channel decomposition, and the complementarity of orbit correction
 and BBA --- follow from the alternating-gradient principle and are expected
