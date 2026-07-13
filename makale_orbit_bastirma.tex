@@ -340,6 +340,21 @@ splits as $(m,m) + (d,-d)$ with $m = (a+b)/2$ and $d = (a-b)/2$, so a
 same-sign pair of unequal size is a mixture of the two components, not a
 member of either.
 
+Carrying this out for all $24$ cells re-expresses the $48$ offsets of one
+plane as $24$ symmetric numbers $m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big)$ and
+$24$ antisymmetric numbers $d_k = \tfrac12\big(v[2k]-v[2k{+}1]\big)$.  Because
+the originals are recovered by $v[2k] = m_k + d_k$ and $v[2k{+}1] = m_k - d_k$,
+this is a reversible relabeling that loses nothing ($24 + 24 = 48$): the
+symmetric pattern $v^{\rm s} = P_{\rm sym}v$ collects the $m_k$ (all $d_k = 0$),
+the antisymmetric pattern $v^{\rm a} = P_{\rm anti}v$ collects the $d_k$ (all
+$m_k = 0$), and every misalignment vector is the sum of exactly one of each,
+$v = v^{\rm s} + v^{\rm a}$.  The two families of patterns are orthogonal and
+each spans half of the $48$-dimensional misalignment space, so they form a
+complete pair of bases into which \emph{any} pattern resolves; applied
+separately to the two planes this gives $v_x = v_x^{\rm s} + v_x^{\rm a}$ and
+$v_y = v_y^{\rm s} + v_y^{\rm a}$, the representation used in the channel
+decomposition of Sec.~\ref{sec:bilinear}.
+
 The physical distinction between the two components follows from the
 opposite-sign gradients of QF and QD.  A misaligned quadrupole deflects the
 beam by an angle proportional to (gradient)$\times$(offset).  When two
