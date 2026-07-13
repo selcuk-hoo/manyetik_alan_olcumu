@@ -335,6 +335,67 @@ The whole tension of Sec.~\ref{sec:results} follows: \emph{the part of the
 misalignment that drives the leftover false EDM is the symmetric part --- the
 part the orbit sees least.}
 
+\subsection{The false EDM as a bilinear form: four channels}
+\label{sec:bilinear}
+
+The link between the misalignment split and the false EDM can be written in one
+line, and it organizes the entire paper.  Each quadrupole offset $v_j$ gives the
+beam a dipole kick, so the closed orbit is linear in the offsets,
+\begin{equation}
+  x_{\rm CO} = R_x\,v_x, \qquad y_{\rm CO} = R_y\,v_y,
+  \label{eq:orbit}
+\end{equation}
+with $R$ the response matrix of Eq.~(\ref{eq:R}).  The geometric phase, to leading
+(second) order in the orbit, is the \emph{directed area} the spin sweeps --- a
+quantity bilinear in the two transverse orbits,
+\begin{equation}
+  f = \frac{dS_y}{dt} \;\propto\; \sum_j w_j
+      \big[x_{\rm CO}(s_j)\,y'_{\rm CO}(s_j) - y_{\rm CO}(s_j)\,x'_{\rm CO}(s_j)\big]
+      \;=\; x_{\rm CO}^{\!\top} K\, y_{\rm CO},
+  \label{eq:area}
+\end{equation}
+for an antisymmetric kernel $K$.  Substituting Eq.~(\ref{eq:orbit}) makes $f$ a
+bilinear form directly in the misalignments,
+\begin{equation}
+  f = v_x^{\!\top}\,\big(R_x^{\!\top} K R_y\big)\,v_y \;\equiv\; B(v_x, v_y).
+  \label{eq:bilinear}
+\end{equation}
+Inserting $I = P_{\rm sym} + P_{\rm anti}$ [Eq.~(\ref{eq:projectors})] on both
+sides splits $f$ into four channels,
+\begin{equation}
+  f = \underbrace{B(P_{\rm s}v_x,P_{\rm s}v_y)}_{f_{ss}}
+    + \underbrace{B(P_{\rm s}v_x,P_{\rm a}v_y)}_{f_{sa}}
+    + \underbrace{B(P_{\rm a}v_x,P_{\rm s}v_y)}_{f_{as}}
+    + \underbrace{B(P_{\rm a}v_x,P_{\rm a}v_y)}_{f_{aa}}.
+  \label{eq:channels}
+\end{equation}
+Because every factor $R\,v$ is large when the misalignment is antisymmetric and
+$G_k$-suppressed when it is symmetric, the pure-symmetric channel $f_{ss}$ is by
+far the smallest, and every channel containing the antisymmetric part is larger.
+We confirm this directly with the spin tracker [Fig.~\ref{fig:channels}]: feeding
+each projected pair $(P_a v_x, P_b v_y)$ separately to the C++ integrator, the
+four signed channels reproduce the full false EDM to $0.1\%$
+($f/\!\sum = 0.999$--$1.001$ over three seeds), a clean check of
+Eq.~(\ref{eq:channels}); the pure-symmetric channel is $\sim\!5$--$30\times$
+target while the antisymmetric-bearing channels are $\sim\!100$--$900\times$; and
+each channel scales as $\sigma^2$.  The consequence, used throughout
+Sec.~\ref{sec:results}, is immediate: \emph{ordinary orbit correction removes the
+antisymmetric part of the misalignment and with it the three large channels,
+leaving the residual false EDM equal to the small $f_{ss}$ --- the one channel
+that only a measurement of the symmetric offsets can reduce.}
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{fig_orbit_channels.png}
+\caption{The four false-EDM channels of Eq.~(\ref{eq:channels}), measured with
+the C++ spin tracker.  (a) At $\sigma=10~\mu$m the pure-symmetric channel
+$f_{ss}$ is the smallest; every channel containing the antisymmetric part is
+larger (bars: mean of three seeds; dots: individual seeds --- the per-seed
+scatter reflects the bilinear, signed nature of $f$).  (b) Each channel scales
+as $\sigma^2$, the signature of the geometric phase.  Orbit correction removes
+the antisymmetric part, collapsing all channels but $f_{ss}$.}
+\label{fig:channels}
+\end{figure}
+
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_sigma.png}
 \caption{Validation of the false-EDM estimator: the measured $|dS_y/dt|$ scales
@@ -822,6 +883,30 @@ would measure it on the actual, beating machine), and because residual breathing
 and dispersion still bias the reading.  Closing this last gap, and the hardware
 floor below, is the remaining work.
 
+\paragraph{Completing the chain: a final orbit correction.}
+The $\sim\!17$--$28\times$ residual of the measured-matrix run is not, in fact,
+the symmetric floor: it is dominated by an \emph{antisymmetric} leftover.
+Decomposing the third-pass residual with the spin tracker, the symmetric part
+contributes only $3.5\times$ target, while the antisymmetric part (a
+$\sim\!2~\mu$m leftover from the still-imperfect horizontal centering)
+contributes $16\times$, with cross terms making up the rest --- exactly the
+channel ordering of Eq.~(\ref{eq:channels}).  The antisymmetric part is
+orbit-visible, so it is removed by an ordinary SVD orbit correction, the very
+first step of the chain.  Applying one to the BBA residual collapses the false
+EDM from $28\times$ to below target ($0.0$--$0.8\times$, single beam), leaving a
+residual that scales as $\sigma^2$ with no floor down to the $0.25\times$-residual
+point we tested.  The picture is thus complete and consistent: \emph{orbit
+correction removes the antisymmetric channels; null-finding BBA reduces the
+symmetric channel $f_{ss}$ that orbit correction cannot see; together they reach
+target}, where each alone stalls (orbit correction at $62\times$, BBA at
+$\sim\!20\times$).  We flag two caveats before reading this as a solved problem:
+the sub-target endpoint is a single misalignment seed, and $f$ is a signed
+bilinear form whose value scatters seed to seed (Fig.~\ref{fig:channels}), so the
+\emph{robust} statement is ``down to the symmetric floor, a few times target,''
+with a multi-seed campaign needed to fix the number; and this is the single-beam
+false EDM, to which the CW/CCW cancellation of Ref.~\cite{omarov} would add
+further margin.
+
 \begin{table}[tb]
 \caption{Iterated null-finding BBA under $1\%$ $\beta$-beating (C++ tracking,
 three passes), steering with the idealized analytic model vs.\ the measured
@@ -856,16 +941,18 @@ buy robustness; the physics fix is the correct steering matrix.
 
 \paragraph{Summary of the method.}
 Null-finding BBA is the one measurement class not excluded by the walls of
-Sec.~\ref{sec:inverse}.  In clean optics it recovers the symmetric component
-outright.  Under realistic $\beta$-beating it solves the vertical plane cleanly,
-and --- once steered with the measured rather than the idealized response matrix
---- it also corrects the horizontal plane, lowering the false-EDM floor by about
-nine (to $\sim\!17\times$ target).  The horizontal plane still trails the
-vertical and the floor is an order of magnitude above the goal, so we present
-null-finding BBA as the promising route with a demonstrated, physics-based fix
-for its main obstacle, not yet as a finished solution: closing the residual
-horizontal gap (measuring the response on the $\beta$-beating machine, stopping
-at the best pass) and the hardware floor below remain to be done.
+Sec.~\ref{sec:inverse}, and it reduces the one channel of
+Eq.~(\ref{eq:channels}) --- the symmetric $f_{ss}$ --- that ordinary orbit
+correction cannot see.  In clean optics it recovers the symmetric component
+outright.  Under realistic $\beta$-beating it solves the vertical plane cleanly
+and, once steered with the measured response matrix, the horizontal plane too;
+followed by a final orbit correction to clear the antisymmetric leftover, the
+single-beam false EDM reaches the target for the seed we tested.  This is a
+proof of principle rather than a finished tolerance: the horizontal plane still
+trails the vertical, the endpoint carries single-seed bilinear scatter, and the
+hardware floor below is not yet modeled.  What is established is the mechanism
+--- BBA reaches the symmetric channel, orbit correction the antisymmetric one,
+and together they cross a target that each misses alone.
 
 \subsection{Outside the orbit: off-momentum spin sensing (brief)}
 \label{sec:offmomentum}
@@ -929,12 +1016,21 @@ deflectors focus and create dispersion (the model even mispredicts the
 horizontal tune and picks the wrong steering corrector for most magnets).
 Steering instead with the ring's \emph{measured} response matrix --- ordinary
 BBA practice --- confirmed the diagnosis: the horizontal magnets then correct,
-and the false-EDM floor drops about nine-fold, from $145\times$ to $17\times$
-target.  We therefore present null-finding BBA as the one route \emph{not}
-excluded by the walls above, with its main obstacle understood and demonstrably
-fixed, though not yet a finished solution: the horizontal plane still trails the
-vertical, the floor is an order of magnitude above the goal, and the hardware
-floor below remains.
+and the false-EDM floor drops about nine-fold, from $145\times$ to $\sim\!20\times$
+target.  What remains at that level is an \emph{antisymmetric} leftover from the
+still-imperfect horizontal centering, not the symmetric residual; being
+orbit-visible, it is removed by a final orbit correction, which brings the
+single-beam false EDM to target for the seed we tested.  The two operations are
+complementary in the language of Eq.~(\ref{eq:channels}): orbit correction
+removes the antisymmetric channels, null-finding BBA reduces the symmetric
+channel $f_{ss}$ that orbit correction cannot see, and together they cross a
+target that each misses alone (orbit correction stalls at $62\times$, BBA at
+$\sim\!20\times$).  We therefore present null-finding BBA, in a chain with orbit
+correction, as the one route \emph{not} excluded by the walls above --- a proof
+of principle that the symmetric floor can be reached --- while cautioning that
+the sub-target endpoint is a single seed of a scattering bilinear quantity, that
+the horizontal plane still trails the vertical, and that a hardware floor
+(magnetic-center motion under modulation) remains to be modeled.
 
 \paragraph{The hardware floor.}
 One caveat applies to any modulation-based method, including null-finding BBA:

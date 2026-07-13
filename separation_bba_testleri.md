@@ -350,6 +350,28 @@ Yani analitik yatay matris gerçekle neredeyse ilişkisiz (çoğu ters işaret) 
   artık nefes/dispersiyon okuma sapması; donanım tabanı. Sonraki adım: β-beat'li
   makinede R ölç, ya da geçişte en iyi sonucu al (erken durdurma).
 
+**KANAL AYRIŞIMI + BORU HATTI (C++ spin, `/tmp/gen_channel_decomp.py`,
+`/tmp/test_orbit_corr_after_bba.py`, `/tmp/diag_residual_f.py`):**
+Sahte-EDM bilineer: f=B(v_x,v_y); v=P_s v+P_a v → dört kanal f=f_ss+f_sa+f_as+f_aa.
+İşaretli C++ ölçümüyle bilineerlik DOĞRULANDI (f/Σ4 = 0.999–1.001, 3 seed).
+σ=10μm kanal büyüklükleri (×hedef): f_ss (saf simetrik) EN KÜÇÜK (~1–50),
+antisimetrik-içeren kanallar büyük (~100–900). Her kanal σ² (fig_orbit_channels.png).
+
+Boru hattı (hepsi C++ spin, tek seed):
+| adım | sahte-EDM | kaldırdığı |
+|---|---|---|
+| ham (σ=10μm) | 356× | — |
+| yörünge düzeltme tek başına | ~62× | antisim (simetrik görünmez → taban) |
+| BBA (ölçülen R) | 28× | simetrik 7→2μm (62× tabanını KIRAR) |
+| BBA + yörünge düzeltme | **0.0–0.8×** | BBA'nın bıraktığı antisim artık |
+
+BBA artığının ayrışımı: sym 3.5×, antisim 16.1×, çapraz kalan → 28×. Antisim
+yörünge-görünür → SVD yörünge düzeltmesi siler → f taban f_ss'e (~birkaç×) iner;
+σ²-ölçekli, taban yok (0.25× artıkta bile). KÖK: BBA simetrik kanalı azaltır
+(matris-terslemenin yapamadığı), yörünge düzeltme antisimetriği; BİRLİKTE hedefe
+varır, TEK BAŞINA hiçbiri varmaz. ÇEKİNCE: alt-hedef uç tek seed (bilineer
+saçılım); tek-demet (Omarov CW/CCW ek pay); çok-seed kampanyası + donanım tabanı açık.
+
 **(b)+(c) DENENDİ (robust koşum yukarıda):** kalite-kapısı × under-relaxation
 ıraksamayı DURDURDU (yatay 12.1→2.38 μm) ama kalite-kapalı quad'ı DÜZELTMEDİĞİ
 için yatay ~2.4 μm'de dondu → f 145×'te takıldı. Yani (b)+(c) "kararlılık" fixi,
