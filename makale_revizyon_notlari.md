@@ -87,8 +87,229 @@ yeni yapıda "yörünge düzeltme standart bir araçtır (kaynaklar...)" anlatı
 içine yedir. Ayrı bir "bilinenler listesi" olarak durmasın. "Neighboring work"
 tek-cümle kaynak yığını da düzyazıya çekilsin ya da azaltılsın.
 
-### A6. (kullanıcı devam edecek — mesaj "*" ile açık bırakıldı)
-Bekleyen ek yorumlar buraya eklenecek.
+### A6. Method: "Analytic Twiss/CO solver" alt başlığı + "A methodological caution" → metne yedir
+**Yorum:** "b. Analytic Twiss/closed-orbit solver" alt başlığını metodun uygulamasını
+anlatırken metne yedir. "A methodological caution." başlığı tamamen gereksiz;
+zaruri bir şey varsa onu da metne yedir.
+**Değerlendirme:** Katılıyorum. İki-katmanlı araç anlatımı alt-başlıklara bölünmüş;
+akıcı olmuyor. Analitik çözücü "hızlı taramalar için C++'ı doğrulayan ikinci,
+bağımsız katman" olarak tek paragrafta anılabilir. "Methodological caution"
+(idealize R en küçük tekil modu gizleyebilir) önemli ama tek cümleyle tersleme
+tartışmasının içine girer. **Öneri:** alt-başlıkları kaldır, akıcı prose.
+
+### A7. "4D closed orbit" — Newton iterasyonunu kısaca açıkla
+**Yorum:** Newton iteration'ı kısaca açıkla.
+**Değerlendirme:** Makul. **Öneri:** bir cümle: "kapalı yörünge, bir turluk harita
+M'nin sabit noktasıdır (v* = M(v*)); (x,x',y,y') uzayında v_{n+1}=v_n−(M−I)⁻¹(M(v_n)−v_n)
+Newton adımıyla birkaç iterasyonda bulunur." Jargonu az, sezgi net.
+
+### A8. "A trap worth reporting" (ideal-eksen 4-parçacık tuzağı) — gerekli mi?
+**Yorum:** Gerekli mi? Değilse at.
+**Değerlendirme:** Katılıyorum, ATILABİLİR. Bu, bizim geliştirme sürecimizdeki bir
+tuzaktı (ideal eksenden fırlatılan 4 parçacık CO betatron'unu söndürmez); okuyucu
+için gerekli değil, estimator'ın doğruluğu zaten σ²/işaret testleriyle kanıtlı.
+**Öneri:** çıkar (belki tek dipnot cümle kalır ya da hiç).
+
+### A9. Genel ton: "yukarıdan bakan" değil, resmi-ama-pedagojik; yazar-okuyucu denk
+**Yorum:** "Measuring the false EDM correctly" (ve genel metin) daha resmi ama
+pedagojik olsun. Anlatım okuyucuya yukarıdan bakar gibi; yazarla okuyucuyu denk
+tut, sadece okuyucunun bazı kavramlara aşina olmadığını unutma.
+**Değerlendirme:** Çok haklı ve ÖNEMLİ. Şu an bazı yerler "the goal looks simple...
+the difficulty is..." / "a trap worth reporting" gibi hafif tepeden. **Öneri:**
+tüm metinde: (1) "we"/"one" dengeli, öğretici ama eşit; (2) "looks simple/naive/
+trap/unforgiving" gibi dramatik-tepeden ifadeleri sadeleştir; (3) kavramları
+tanımla ama "işte bu kadar basit" havası verme. Bu bir GENEL geçiş; her bölümde
+uygulanacak.
+
+### A10. Başta hybrid-symmetric örgü yapısını tanıt (KRİTİK — okuyucu için temel)
+**Yorum:** Başlarda pEDM'de öngörülen hybrid-symmetric örgünün yapısını anlat:
+FODO hücresi nasıl, deflektör/quad/drift nasıl yerleşiyor, elektrik mi manyetik mi.
+Okuyucu komşu quad'lar arasında ELEKTRİKSEL deflektör + drift olduğunu anlasın.
+**Değerlendirme:** Kesinlikle gerekli — makalenin geri kalanı (deflektör=drift model
+hatası, yatay odaklama, sim/antisim) buna dayanıyor. Şu an örgü ancak Method'ta
+dağınık geçiyor. **Öneri:** Giriş sonrası (ya da Method başında) kısa bir "The ring"
+alt-bölümü: hücre dizilişi QF–drift–DEFL–drift–QD–drift–DEFL–drift–(QF...),
+elektrik deflektörler (bükme + magic momentum), manyetik quad'lar (odaklama),
+R0=95.49m, 24 hücre/48 quad, Q_y≈2.3. Bir küçük şema figürü bile düşünülebilir.
+Bu, A2 yeniden-kurgunun doğal parçası.
+
+### A11. Orbit gain formülü ile paragraf uyumlu mu? (kontrol edildi → uyumlu, ama netleştir)
+**Yorum:** G_k = C/|Q²−k²| formülü ile onu anlatan paragraf gerçekten uyumlu mu?
+**Değerlendirme (kontrol ettim):** Niteliksel olarak UYUMLU. Q²≈5 (Q≈2.24):
+düşük-k (antisim, k=2→G≈24.8, k=3→G≈6.2) büyük yörünge; k≈24 (sim) → G≈0.043,
+ezik. Yani "antisim düşük-k rezonansa yakın büyük, sim k≈24 uzak küçük" doğru.
+**Ancak:** "115μm vs 1.7μm" oranı (~68) ile cond(R)=193 aynı şey değil (biri tek
+mod genliği, diğeri koşullanma). Uygularken bu iki sayıyı karıştırmayacak şekilde
+netleştir; C≈24.8 ve Q²≈5 değerlerini sayısal olarak bir kez daha doğrula.
+
+### A12. "right-singular vector of R=UΣV^⊤ ... modes nearly purely antisym..." → dünyevileştir
+**Yorum:** Bu cümle deneysel fizikçiler için korkutucu; daha dünyevi anlat :-)
+**Değerlendirme:** Haklı. **Öneri:** SVD jargonunu düşür: "Tepki matrisini
+inceleyince, demetin yörüngesini GÜÇLÜ bozan kaçıklık desenleri neredeyse tümüyle
+antisimetrik; yörüngeyi neredeyse hiç bozmayan (görünmez) desenler ise simetrik
+çıkıyor. İkisi arasındaki görünürlük farkı ~193 kat." Tekil-vektör/UΣVᵀ dilini
+ya kaldır ya dipnota al.
+
+### A13. Şekil 1 ↔ Şekil 3 çok benziyor + "sahte EDM vs RMS hata" iyi gösterge mi?
+**Yorum:** Şekil 1 (σ² doğrulama) ve Şekil 3 (bastırma eğrisi) çok benziyor. Ayrıca
+sim/antisim örüntü olduğu için "RMS hataya göre sahte EDM" ne kadar iyi gösterge?
+**Değerlendirme:** Çok yerinde — hem A4 hem A27 ile bağlı. İki figür de "sahte-EDM
+vs σ, log-log, σ² eğim" gösteriyor → gereksiz tekrar. Ve asıl mesele: **RMS tek
+başına gösterge DEĞİL** (bilineer, desene bağlı). **Öneri:** (1) σ² doğrulamasını
+tek figürde birleştir (validation + suppression aynı eksende ya da biri kalksın);
+(2) figür/metinde açıkça "σ yalnız ölçekleme; verilen σ'da değer sim/antisim
+içeriğe göre onlarca kat değişir" de (kanal figürü bunu gösteriyor). Yani RMS-eksenli
+grafiği koru AMA "bu bir banttır, tek eğri değil; genişliği desen-bağımlılığıdır"
+mesajını ver.
+
+### A14. Korelasyon final işte kullanılıyor mu? "correlation trap" başlığı net değil
+**Yorum:** Değerlendirmede korelasyon kullanmıyoruz sanırım; kullanıyorsak sadece
+tersleme-reconstruction'da. Final işte hiç kullanmıyoruz değil mi? "How success is
+measured: the correlation trap" açık/net değil.
+**Değerlendirme (kontrol ettim):** Doğru. Korelasyon metinde 64 yerde ama HEPSİ
+tersleme/genlik-okuma yöntemlerinin eleştirisinde (lock-in corr 0.69, breathing
+0.07, NN...). **Final BBA+yörünge-düzeltme boru hattında korelasyon YOK** — sahte-EDM
+(fast_measure) ve bileşen-RMS kullanılıyor. **Öneri:** A2 ile başarısız-yöntem
+kataloğu kısalınca "correlation trap" da küçülür → ayrı bir metrik bölümü olmaktan
+çıkıp, tersleme eleştirisinin içinde tek uyarı cümlesine iner: "bu yöntemlerde
+korelasyon aldatıcı yüksek çıkabilir (0.99), oysa simetrik bileşen tümüyle yanlış."
+Final metriğimiz ise doğrudan sahte-EDM.
+
+### A15. BPM gain error'u çalışmaya kattık mı? (kontrol → HAYIR, sadece tanımda)
+**Yorum:** BPM gain error sistematiğini dahil ettik mi?
+**Değerlendirme (kontrol ettim):** Sistematikler listesinde tanımlı (1–10%) ama
+HİÇBİR sonuçta fiilen kullanılmıyor (ona özel bir koşum yok). **Öneri:** ya (a)
+listeden çıkar / tek cümleye indir ("çok-BPM ortalamasıyla yumuşar, baskın değil"),
+ya da (b) dürüstçe "modellenmedi, baskın sınır değil" de. Kullanılmayan bir
+sistematiği "kattık" gibi sunmak dürüst değil → çıkarmaya meyilliyim.
+
+### A16. Tablo 1 sayıları güncel değil (eski no-go çerçevesi)
+**Yorum:** Tablo 1'deki sayılar güncel değil sanırım.
+**Değerlendirme (kontrol ettim):** Haklı. Tablo 1 "raw ~1000× → CW/CCW 474× →
+orbit 62× → herhangi tersleme yöntemi 62× (taban)" — bu ESKİ pesimist çerçeve.
+İki sorun: (1) raw ~1000× ile BBA işindeki 356× (belirli seed) tutarsız; (2)
+tablo BBA+yörünge-düzeltmenin hedefe indiğini İÇERMİYOR. **Öneri:** yeni çerçevede
+(A2) tabloyu güncelle: raw → CW/CCW → orbit-corr (62×, simetrik taban) → **+BBA
+(simetriği ölçer)** → **+son orbit-corr (antisim temizler) → hedef**. raw sayısını
+tek referansla (356× ya da ensemble) tutarlı kıl.
+
+### A17. Şekil 2 referansı geç/yok + grafikleri basitleştir
+**Yorum:** Şekil 2'ye referans yok ya da çok sonra; kontrol et. O grafikleri
+(anlatımı) basitleştirmek?
+**Değerlendirme (kontrol ettim):** fig:modes (mod yapısı) tanım satır 427,
+referans 324/327 — aslında referans var ve önce geliyor (float). Ama figür
+SIRALAMASI karışık (kanal figürünü sigma'dan önce ekledim → PDF numaraları
+kaydı). **Öneri:** tüm figür sırası+referanslarını A2 sonrası bir kerede gözden
+geçir. Mod-yapısı figürünü (SVD sol panel + G_k sağ panel) basitleştir: sol
+paneli A12'deki dünyevi dille "görünür=antisim / görünmez=sim" olarak sunan sade
+bir çizime indir; iki panelden biri yeterli olabilir.
+
+### A18. K-mod optics breathing + feed-down kick açıklaması net değil
+**Yorum:** K-modülasyondaki optics breathing'i uygun yerde güzelce açıkla; feed-down
+kick ve etkisi net değil; o iki paragraf anlaşılır değil.
+**Değerlendirme:** Katılıyorum. **Öneri:** "breathing" için somut resim: bir quad'ın
+gradyanını değiştirince (a) o quad'ın KENDİ kaçıklığından gelen dipol kick'i modüle
+olur (aradığımız sinyal, ~0.9μm) AMA (b) tüm halkanın optiği (β, faz, Q) de modüle
+olur → mevcut BÜYÜK yörünge (0.37mm, 48 quad'ın toplamı) bu değişen optikten yeniden
+taşınır → BPM'de birkaç-μm "nefes". Sinyal/nefes ~1/7. Feed-down = quad-merkezinden
+kaçık geçen demetin gördüğü dipol bileşen; bunu tek cümlede tanımla. İki paragrafı
+tek net paragrafa indir, "266×" gibi çarpıcı tek sayıyı koru.
+
+### A19. Şekil 4/6'daki sim/antisim ayrımı NASIL yapılıyor — uygun yerde açıkla
+**Yorum:** Şekil 4 ve 6'daki sim/antisim kaynaklı sahte-EDM'in nasıl ayırt edildiğini
+açıkla; belki başta "sim/antisim etkilerinin ayrıştırılması" alt-başlığında.
+**Değerlendirme:** Evet — ve elimizde tam bu var (kanal ayrışımı: P_s/P_a ile
+projekte edip her parçayı AYRI C++ izleyiciye verip f ölçüyoruz; fig_orbit_channels).
+**Öneri:** Mekanizma bölümüne (A2-4) "How we separate the two channels" diye kısa
+bir yer: "kaçıklığı sim/antisim parçalarına ayırıp her birini ayrı ayrı spin
+izleyiciye veririz; ölçülen f'ler bilineer toplamı %0.1'de doğrular." Böylece
+sonraki tüm sim/antisim sayıları (Fig crsep dahil) bu yönteme dayanır.
+
+### A20. Bazı cümleler benim sorularımı cevaplıyor, normal okuyucuda o soru yok
+**Yorum:** Bazı cümleler doğrudan benim takıldığım yerleri cevaplamak için yazılmış;
+normal okuyucuda o sorular yok, sırıtıyor.
+**Değerlendirme:** Çok haklı, ve iyi bir gözlem. Örn. "the natural question is then:
+is the beam not itself a measuring device?", bazı "trap"/"caution" kutuları, "one
+might hope..." savunmaları. **Öneri:** metni tarayıp bu "iç-diyalog" cümlelerini
+ya kaldır ya nesnel önermelere çevir. Genel ilke: her cümle okuyucunun bilmesi
+gerekeni söylesin, bizim keşif yolculuğumuzu değil.
+
+### A21. NN backprop ≈ ters matris → NN argümanını zayıflat (YORUM, makaleye ekleme değil)
+**Yorum:** NN'deki backpropagation aslında inverse matrix gibi değil mi? Bu özellik
+kullanılarak NN daha verimli olamaz mı? (Yorum için soruyorum.) Açık sorular varsa
+NN argümanını zayıflatmak iyi olabilir.
+**Değerlendirme (senin sezgin doğru):** Lineer haritada (y=Rq) backprop, kayıp
+fonksiyonunu en-küçük-kareye indirir → sonuç PSEUDO-İNVERS (R⁺). Yani lineer+Gauss
+gürültü rejiminde NN, R⁺'yi yeniden öğrenmekten fazlasını yapamaz; sınır ESTIMATOR
+değil, BİLGİ (SNR). Nonlineerlik/prior olsa NN kazanabilir ama bizim problem lineer.
+**Sonuç:** senin dediğin gibi NN argümanını ZAYIFLATALIM — "NN asla yardım edemez"
+DEME; "bu lineer, gürültü-sınırlı kuruluşta NN pseudo-inverse'e iner; sınır
+estimator-bağımsız bir bilgi tabanıdır" DE. A2 ile başarısız-yöntem kataloğu
+kısalınca NN zaten tek cümleye iner; bu da aşırı-iddiayı önler. (Verimli-NN açık
+sorusu gerçek; onu kapatan iddia kurmayalım.)
+
+### A22. "Harmonic approaches" — basitleştir, çok bilgi sıkışmış
+**Yorum:** Anlatım çok yoğun; basitleştir.
+**Değerlendirme:** Katılıyorum. **Öneri:** İki alt-fikri (bilinen-harmonik Fourier;
+bilinen-imza fit) tek kısa paragrafa indir; sayı yığınını (13000→186, 53nT, 45nT,
+2.6nT) azalt, tek temsili sayı bırak. A2 kataloğu-kısaltma ile uyumlu.
+
+### A23. CR beams neden tam temizlemiyor — sezgisel anlat (quad sırasının tersi ≠ simetri)
+**Yorum:** CR (karşı-dönen) demetlerin sahte-EDM'i neden tam temizlemediğini sezgisel
+anlat. Bir FODO hücresindeki quad'ları TERS sıradan görmek, düz sıradan görmenin
+simetrisi değil gibi. Bunu nasıl daha net görürüz?
+**Değerlendirme (güzel fizik sorusu):** İki tamamlayıcı sezgi:
+(1) **Komütatör pariteli:** geometrik faz ≈ Σ_{i<j}[θ_i,θ_j] (SIRALI kick
+komütatörleri; dönmeler komüte etmez). Demet yönünü çevirince kick SIRASI ters
+döner → Σ_{i<j} → Σ_{i>j} = −Σ_{i<j}; yani ideal-simetrik halkada geometrik faz
+sıra-tersine ~TEK. Ama gerçek makinede kick'ler demetin OTURDUĞU yere (kapalı
+yörüngeye) bağlı ve CW/CCW yörüngeleri tıpatıp aynı değil → iptal KISMİ (~3.4×),
+tam değil. "Ters sıra = düz sıranın simetrisi" varsayımı bu yüzden yanlış.
+(2) **Yörünge-körlüğü:** CR-AYRIMI bir yörünge gözlenebiliridir; tüm yörünge
+gözlemleri gibi SİMETRİK kaçıklığa kör. CR-ayrımını sıfırlasan bile simetrik parça
+sahte-EDM üretmeye devam eder. Fig crsep tam bunu ölçüyor (antisim/sim oranı
+tek-demette ~5.7×, CR-ayrımında ~8× → ek pencere YOK).
+**Öneri:** Bu iki cümleyi CR bölümüne koy. **Sim ile netleştirilebilir** (opsiyonel,
+sonra): f'in (a) demet-ters, (b) quad-sıra-ters, (c) polarite-flip altındaki
+paritesini ölçüp hangi simetriye uyduğunu göster (omarov Test 7 kısmen var).
+
+### A24. "polarity switching...geometric phase" → "...quad alignment based geometric phase"
+**Yorum:** Bu ifadeyi "...for the quad alignment based geometric phase" yap; çünkü
+başka yerlerde polarite-flip işe yarıyor gibi.
+**Değerlendirme:** Haklı, kapsam düzeltmesi. Polarite-flip g'de TEK olan
+sistematikleri temizler; bizim quad-kaçıklık geometrik fazı g²'de (çift) olduğu
+için onu temizlemez. **Öneri:** ifadeyi aynen önerildiği gibi daralt. (Aynı yerde
+"geometrik faz g'de çift" argümanı zaten var; sadece cümleyi kapsamla.)
+
+### A25. Yüksek-Q bölümünde k ve m'yi açıkla
+**Yorum:** "raising Q toward k... the high-m part" — k ve m nedir açıkla.
+**Değerlendirme:** Gerekli. **k** = kick dağılımının halka etrafındaki AZİMUTAL
+harmoniği (G_k'daki k). **m** = simetrik kaçıklık ailesinin KENDİ içindeki harmonik
+indeksi (simetrik desenlerin yavaş/hızlı değişenleri; "high-m" = hızlı değişen
+simetrik alt-desenler, düşük-k'ya karşılık gelenler ilk açılır). **Öneri:** her
+ikisini ilk geçişte bir yan-cümleyle tanımla.
+
+### A26. Off-momentum paragrafını aç
+**Yorum:** Biraz daha aç.
+**Değerlendirme:** Makul (şu an çok sıkışık, tek paragrafta 6 kapatma-testi). **Öneri:**
+mekanizmayı (magic-olmayan p → ν_s≠0 → geometrik faz ∝1/ν_s yükselir AMA 1.-mertebe
+ISA-eğimi aynı frekansta ~3600× daha büyük) 2-3 cümleye yay; 6 test yerine en güçlü
+2'sini anlat, gerisini "ve diğer ayırma kanalları da kapandı (δp/p, faz, 4-fold,
+RMS, 3D fit, boylamsal)" diye özetle. Magic momentumun neden tek çalışan nokta
+olduğunu vurgula.
+
+### A27. ANA DERS: yörünge düzeltme rastgeleliği sim/antisim ÖRÜNTÜLERE çeviriyor
+**Yorum:** Önemli ders: yörünge düzeltme yöntemleri sonucunda rastgeleliğin yerini
+sim/antisim bazlarda ÖRÜNTÜLER alıyor; bunların sahte-EDM üzerindeki etkisi rastgele
+hatalardan farklı bir örüntüye sahip.
+**Değerlendirme:** Bu, makalenin ASIL KAVRAMSAL KATKISI olabilir — öne çıkar. A4
+(tek-RMS yetmez) + A13 (RMS gösterge değil) + drift testi (rastgele drift'in sim/
+antisim parçaları farklı davranıyor) hepsi buna bağlanıyor. **Öneri:** Sonuç ve
+mekanizma bölümüne net tema cümlesi: "Düzeltme, sahte-EDM'i azaltmaktan çok onun
+İSTATİSTİĞİNİ değiştirir: rastgele kaçıklık → yapılı sim/antisim artık; sim/antisim
+kanalları farklı ölçeklenir (biri yörünge-görünür ve düzeltilebilir, biri kör), bu
+yüzden 'ne kadar küçük' değil 'hangi kanalda' sorusu belirleyici." Bu, bütün
+bulguları birleştiren bir ders.
 
 ---
 
@@ -131,10 +352,35 @@ oynaması) BBA'nın kendi tekrar-doğruluğunu sınırlayabilir — modellenmedi
 ---
 
 ## C. Uygulama planı (onay sonrası, toplu)
-1. A2 iskeletini kesinleştir (en büyük iş — yeniden kurgu).
-2. Abstract'ı kısalt (A1).
-3. Mekanizma bölümüne "tek-RMS yetmez" çıkarımı (A4) + precession düzeltmesi (A3).
-4. "What is already known" → akıcı prose (A5).
-5. Zamansal bütçe bölümü ekle (B).
-6. Kalan kullanıcı yorumları (A6) + çok-seed/CW-CCW sonuçları geldiğinde sayıları
-   güncelle.
+
+**Sıra (bağımlılığa göre):**
+1. **A2 iskeletini kesinleştir** (en büyük iş — anlatı yeniden-kurgu: problem →
+   yörünge düzeltme → keşif → mekanizma → çözüm). Diğer her şey buna oturur.
+2. **A10** örgü tanıtımı ("The ring" alt-bölümü) — mekanizmanın ön-koşulu.
+3. **Mekanizma bölümü** (merkez): sim/antisim (A12 dünyevi dil) + bilineer dört
+   kanal + **A19** kanal-ayırma yöntemi + **A4/A27** "tek-RMS yetmez / örüntü"
+   çıkarımı + **A11** formül-paragraf tutarlılığı.
+4. **Çözüm bölümü:** null-BBA + yörünge düzeltme (mevcut §III.G içeriği, sadeleşmiş).
+5. **Başarısız-yöntemler → SIKIŞTIR** (A2): tersleme/K-mod/**A18** breathing-net/
+   **A21** NN-zayıflat/**A22** harmonik-sadeleştir/**A14** korelasyon-tek-uyarı/
+   **A23** CR-sezgisel/**A24** polarite-kapsam.
+6. **Abstract kısalt** (A1) — gövde bittikten sonra.
+7. **Zamansal bütçe** bölümü (B).
+8. **Genel geçişler:** A9 ton (resmi-pedagojik, tepeden bakma yok), A20 iç-diyalog
+   cümlelerini temizle, A8 gereksiz tuzak-kutusunu at, A6 method alt-başlıklarını
+   yedir, A7 Newton bir cümle, A25 k/m tanımla, A26 off-momentum aç.
+9. **Figürler** (A13/A17): σ²-doğrulama ve bastırma figürlerini birleştir/sadeleştir;
+   mod figürünü dünyevileştir; figür sırası+referanslarını tek elden gözden geçir;
+   Tablo 1'i (A16) yeni çerçeveyle güncelle; A15 gain-error'u çıkar/indir.
+10. Çok-seed pipeline + (opsiyonel) ensemble CW/CCW sonuçları gelince sayıları
+    kesinleştir.
+
+**Açık/opsiyonel simülasyonlar (yorumlardan doğan, sonra):**
+- A23: f'in demet-ters / quad-sıra-ters / polarite-flip paritesi (CR sezgisini
+  sağlamlaştırmak için).
+- Ensemble CW/CCW (doğru Omarov Eq.C1–C2 kombinasyonu; ~2–3× faktörünü kesinleştir).
+- Zamansal bütçe için makine drift-hızı (literatür/varsayım → kadans).
+
+## D. Bekleyen
+- Kullanıcının ek yorumları (varsa) buraya.
+- Onay: A2 iskeleti + genel ton kararı → sonra toplu uygulama.
