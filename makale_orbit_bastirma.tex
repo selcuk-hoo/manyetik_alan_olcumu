@@ -57,14 +57,18 @@ locates each magnet center by the beam position where the orbit stops
 responding.  A zero-crossing does not care about the response size, so it is
 not blocked by these walls.  In idealized optics it recovers the hidden
 pattern and cuts the false EDM from $356\times$ to $1.6\times$ target.  Under
-realistic optics errors it works in the vertical plane after the orbit is
-first flattened and the procedure iterated, but stalls in the horizontal plane
-because our steering model treats the electric deflectors as field-free
-drifts, which is accurate vertically but not horizontally.  We present this as
-the one promising --- but not yet finished --- route, and conclude that
-reaching the target by the other techniques would require the symmetric
-misalignment to be held below about $1~\mu$m by construction, a tolerance that
-no orbit measurement can verify.
+realistic optics errors it works in the vertical plane after the orbit is first
+flattened and the procedure iterated.  The horizontal plane at first stalled;
+we traced this to the steering model, which treats the electric deflectors as
+field-free drifts --- accurate vertically but not in the bending plane --- and
+showed that steering with the ring's measured response matrix instead corrects
+the horizontal magnets and lowers the false-EDM floor about nine-fold, to
+$\sim\!17\times$ target.  We present this as the one promising route, its main
+obstacle understood and demonstrably fixed but not yet a finished solution (the
+horizontal plane still trails the vertical and a hardware floor remains), and
+conclude that reaching the target by the other techniques would require the
+symmetric misalignment to be held below about $1~\mu$m by construction, a
+tolerance that no orbit measurement can verify.
 \end{abstract}
 
 \maketitle
@@ -765,83 +769,103 @@ The cure is the natural one: correct the orbit first so it is small, then repeat
 --- ``align, flatten, re-align.''  Each pass shrinks the orbit, so each pass
 breathes less.
 
-\paragraph{What the completed run shows.}
-We ran the full iteration in the C++ tracker with $1\%$ $\beta$-beating, three
-passes (Table~\ref{tab:bba}).  The vertical plane behaves exactly as hoped: the
-orbit shrinks $48 \to 6.9~\mu$m, the vertical symmetric residual falls roughly
-by half each pass ($3.3 \to 1.7 \to 0.9~\mu$m), and it is heading for the
-clean-optics floor.  The horizontal plane does not: its symmetric residual
-sticks near $2.4~\mu$m.  Because the false EDM is the product $dx\cdot dy$, the
-falling vertical part still pulls it down --- from $356\times$ to $145\times$
-target over the three passes --- but the stuck horizontal part sets a floor
-well above the goal.
+\paragraph{Why vertical works and horizontal stalls: a testable diagnosis.}
+Before giving the numbers we state, and then test, the cause of the difference
+between the two planes.  It is not a law of physics; it is a limitation of the
+\emph{model we steer with}.  The local bumps are built from an optics model, and
+the fast analytic solver of Sec.~\ref{sec:method} treats the electric deflectors
+as field-free drifts.  In the vertical plane that is nearly exact --- the ring's
+radial deflector field barely focuses vertically --- so the model matches the
+machine and the bumps land where intended.  The horizontal plane is the plane the
+ring bends in, and there the deflectors do two things the model omits: they focus
+the beam horizontally, and they bend it, which creates dispersion.  A one-line
+check exposes the gap.  Treating the deflectors as drifts, the model predicts
+\emph{identical} tunes in the two planes, $Q_x = Q_y = 2.303$.  The real ring
+matches this vertically to four decimals ($0.3032$ measured vs.\ $0.3032$) but
+its horizontal tune is higher by $0.052$ in fractional part --- the deflector
+focusing the model leaves out.  A direct comparison of the response matrices is
+even starker: element by element the measured horizontal response is essentially
+uncorrelated with the analytic one (median ratio near zero, often opposite sign),
+so the analytic model picks the \emph{wrong} steering corrector for 36 of the 47
+magnets, whereas vertically it agrees to $5\%$ and picks the wrong corrector only
+12 times.  A wrong corrector means the beam is scanned across the wrong range and
+the zero-crossing is biased.  The diagnosis therefore predicts a concrete fix:
+steer with the \emph{measured} response matrix, not the idealized one.
+
+\paragraph{Testing the fix: idealized vs.\ measured steering.}
+We ran the full iteration two ways, identical but for the steering matrix ---
+the idealized analytic model, and the ring's measured response matrix (obtained
+by displacing each magnet in the tracker and recording the orbit)
+--- both under $1\%$ $\beta$-beating, three passes
+(Table~\ref{tab:bba}).  Both solve the \emph{vertical} plane identically: the
+orbit shrinks $48\to9~\mu$m and the vertical symmetric residual halves each pass
+($3.3\to1.7\to0.9~\mu$m).  They differ sharply in the \emph{horizontal} plane.
+With the idealized model the horizontal magnets never really correct (the first
+pass is even worse than no correction) and the false EDM bottoms out at
+$145\times$ target.  With the measured matrix the horizontal magnets correct too:
+the false EDM falls to $17\times$ target by the second pass --- nine times lower
+--- and the horizontal residual drops from $4.3$ to $2.3~\mu$m.  This confirms
+the diagnosis directly: the horizontal stall was a fault of the steering model,
+not of the method.
+
+Two honest caveats remain.  First, the measured-matrix run is
+\emph{non-monotonic}: the third pass ($28\times$) is worse than the second
+($17\times$).  Because the false EDM is a product $dx\cdot dy$ and the horizontal
+residual is still a few times larger than the vertical, the bilinear value
+bounces as the residual pattern shifts from pass to pass; the procedure should be
+stopped at its best pass rather than run open-loop.  Second, it does not reach the
+target: the best floor is $\sim\!17\times$ ($\approx2\times10^{-28}\,e\!\cdot\!$cm),
+still an order of magnitude high.  The horizontal plane is much improved but still
+trails the vertical, plausibly because the response matrix here was measured on
+the ideal lattice while the run carries $\beta$-beating (on a real machine one
+would measure it on the actual, beating machine), and because residual breathing
+and dispersion still bias the reading.  Closing this last gap, and the hardware
+floor below, is the remaining work.
 
 \begin{table}[tb]
 \caption{Iterated null-finding BBA under $1\%$ $\beta$-beating (C++ tracking,
-three passes).  ``sym'' is the symmetric-component residual of
-Eq.~(\ref{eq:projectors}).  The vertical residual falls toward the clean floor;
-the horizontal one sticks, and the product $dx\cdot dy$ sets the false-EDM
-floor.}
+three passes), steering with the idealized analytic model vs.\ the measured
+response matrix.  ``sym $dx$/$dy$'' are the symmetric-component residuals
+[Eq.~(\ref{eq:projectors})] of the measured-matrix run.  Both solve the vertical
+plane; only the measured matrix also corrects the horizontal one, lowering the
+false-EDM floor by about nine.}
 \label{tab:bba}
 \begin{ruledtabular}
 \begin{tabular}{lcccc}
-pass & orbit & sym $dy$ & sym $dx$ & $|f|$ / target \\
-     & [$\mu$m] & [$\mu$m] & [$\mu$m] & \\
+     & sym $dy$ & sym $dx$ & \multicolumn{2}{c}{$|f|$ / target} \\
+pass & [$\mu$m] & [$\mu$m] & analytic & measured \\
 \hline
-raw  & 48   & ---  & ---  & $356\times$ \\
-1    & 24.1 & 3.30 & 4.48 & $368\times$ \\
-2    & 12.6 & 1.72 & 2.99 & $238\times$ \\
-3    & 6.9  & 0.91 & 2.38 & $\bm{145\times}$ \\
+raw  & ---  & ---  & $356\times$ & $356\times$ \\
+1    & 3.27 & 4.27 & $368\times$ & $73\times$ \\
+2    & 1.70 & 2.90 & $238\times$ & $\bm{17\times}$ \\
+3    & 0.91 & 2.29 & $145\times$ & $28\times$ \\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
 
-\paragraph{Why vertical works and horizontal stalls.}
-This is the honest crux, and it is not a law of physics --- it is a limitation
-of the \emph{model we steer with}.  The local bumps are built from the analytic
-optics solver of Sec.~\ref{sec:method}, which treats the electric deflectors as
-field-free drifts.  In the vertical plane that is nearly exact: the ring's
-radial deflector field barely focuses vertically, so the model matches the real
-machine, the bumps land where intended, and the vertical BBA reaches its floor.
-The horizontal plane is the plane the ring bends in, and there the deflectors do
-two things the model omits --- they focus the beam horizontally, and they bend
-it, which creates dispersion (a coupling between momentum and position).  With
-both missing from the steering model, the bumps are mis-sized, worst at the few
-locations where the accumulated model error is largest (near the start of the
-lattice), and there the zero-crossing is biased and the correction stalls.  A
-one-line check confirms the cause.  Because the model treats the deflectors as
-drifts, it predicts \emph{identical} tunes in the two planes,
-$Q_x = Q_y = 2.303$.  The real ring matches this in the vertical plane to four
-decimals ($0.3032$ measured vs.\ $0.3032$), but its horizontal tune is higher by
-$0.052$ in fractional part --- the horizontal focusing of the deflectors, absent
-from the model.  Since the deflectors are the \emph{only} element that
-distinguishes the two planes, this pins the horizontal stall on the model, not on
-physics; even in perfectly clean optics (no $\beta$-beating) the same few
-horizontal magnets are already mis-measured while the vertical ones are not.  The
-standard fix is exactly
-what real machines do --- build the bumps from the \emph{measured} horizontal
-response of the ring rather than an idealized model --- and is left for future
-work.
-
-\paragraph{Two knobs, one trade-off.}
-The iteration has two settings: how aggressively to apply each correction, and a
-quality cut that throttles magnets whose zero-crossing is inconsistent across
-BPMs.  Applied at full strength with no quality cut, the horizontal plane
-diverges (its residual blows up to $\sim\!12~\mu$m).  With under-relaxation and
-the quality cut, the divergence is stopped ($2.4~\mu$m), but the throttled
-horizontal magnet is simply never corrected, so the false EDM plateaus at
-$145\times$ rather than reaching the target.  The quality cut buys
-\emph{stability}, not a \emph{solution}: the real fix is the better horizontal
-model above, not a smarter iteration.
+\paragraph{On the stabilizing knobs.}
+The iteration carries two settings: how aggressively each correction is applied
+(under-relaxation), and a quality cut that throttles magnets whose zero-crossing
+is inconsistent across BPMs.  With the idealized steering these merely prevent the
+horizontal plane from diverging (without them its residual blows up to
+$\sim\!12~\mu$m) without curing it --- stability, not a solution.  With the
+measured steering the horizontal magnets are consistent enough that the quality
+cut stops throttling them (its minimum horizontal quality rises from $0$ to
+$0.3$ across the passes), which is why the plane finally corrects.  The knobs
+buy robustness; the physics fix is the correct steering matrix.
 
 \paragraph{Summary of the method.}
 Null-finding BBA is the one measurement class not excluded by the walls of
 Sec.~\ref{sec:inverse}.  In clean optics it recovers the symmetric component
-outright; under realistic optics it already solves the vertical plane, and the
-horizontal plane is a well-understood, fixable modeling gap rather than a
-fundamental limit.  We present it as the promising open route, not as a
-finished solution --- the horizontal model and the hardware floor below remain
-to be done.
+outright.  Under realistic $\beta$-beating it solves the vertical plane cleanly,
+and --- once steered with the measured rather than the idealized response matrix
+--- it also corrects the horizontal plane, lowering the false-EDM floor by about
+nine (to $\sim\!17\times$ target).  The horizontal plane still trails the
+vertical and the floor is an order of magnitude above the goal, so we present
+null-finding BBA as the promising route with a demonstrated, physics-based fix
+for its main obstacle, not yet as a finished solution: closing the residual
+horizontal gap (measuring the response on the $\beta$-beating machine, stopping
+at the best pass) and the hardware floor below remain to be done.
 
 \subsection{Outside the orbit: off-momentum spin sensing (brief)}
 \label{sec:offmomentum}
@@ -895,18 +919,22 @@ because the driving quantity is the beam-defined magnetic center.
 Standard BBA locates each magnetic center by a zero-crossing rather than by
 inverting a matrix or dividing an amplitude, so the walls above do not apply.
 In clean optics it recovers the symmetric component and cuts the false EDM from
-$356\times$ to $1.6\times$ target.  Under realistic $1\%$ $\beta$-beating, a
+$356\times$ to $1.6\times$ target.  Under realistic $1\%$ $\beta$-beating a
 single pass is spoiled by the same optics breathing, but flattening the orbit
 first and iterating recovers the \emph{vertical} plane cleanly ($0.9~\mu$m
-residual and falling; false EDM $356\times \to 145\times$ over three passes).
-The \emph{horizontal} plane stalls, but for an understood and fixable reason:
-our steering model treats the electric deflectors as drifts, which is accurate
-vertically but not in the bending (horizontal) plane, where the deflectors focus
-and create dispersion.  Building the horizontal bumps from the machine's
-measured response --- ordinary BBA practice --- is the natural next step.  We
-therefore present null-finding BBA as the one route \emph{not} excluded by the
-walls above: promising, partly demonstrated, and not yet finished (the
-horizontal model and the hardware floor below remain).
+residual and falling).  The \emph{horizontal} plane at first stalled, and we
+traced this to the steering model, which treats the electric deflectors as
+drifts --- accurate vertically but not in the bending plane, where the
+deflectors focus and create dispersion (the model even mispredicts the
+horizontal tune and picks the wrong steering corrector for most magnets).
+Steering instead with the ring's \emph{measured} response matrix --- ordinary
+BBA practice --- confirmed the diagnosis: the horizontal magnets then correct,
+and the false-EDM floor drops about nine-fold, from $145\times$ to $17\times$
+target.  We therefore present null-finding BBA as the one route \emph{not}
+excluded by the walls above, with its main obstacle understood and demonstrably
+fixed, though not yet a finished solution: the horizontal plane still trails the
+vertical, the floor is an order of magnitude above the goal, and the hardware
+floor below remains.
 
 \paragraph{The hardware floor.}
 One caveat applies to any modulation-based method, including null-finding BBA:
