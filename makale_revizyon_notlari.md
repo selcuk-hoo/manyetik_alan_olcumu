@@ -381,6 +381,37 @@ oynaması) BBA'nın kendi tekrar-doğruluğunu sınırlayabilir — modellenmedi
 - Ensemble CW/CCW (doğru Omarov Eq.C1–C2 kombinasyonu; ~2–3× faktörünü kesinleştir).
 - Zamansal bütçe için makine drift-hızı (literatür/varsayım → kadans).
 
-## D. Bekleyen
-- Kullanıcının ek yorumları (varsa) buraya.
-- Onay: A2 iskeleti + genel ton kararı → sonra toplu uygulama.
+## D. Karşı-görüşler (kullanıcı "kesin emir değil, tartışalım" dedi → benim farklı önerilerim)
+- **A13:** birleştirme yerine σ²-doğrulama figürünü (fig_orbit_sigma) TAMAMEN AT;
+  p=2.00 tek cümle metne. Bastırma figürü kalır + "bant, tek eğri değil" notu.
+- **A26:** off-momentum ana metinden APPENDIX'e (orada daha açık anlatılır;
+  ana akış sıkışmaz). Katalog-kısaltma ile "aç" çelişkisinin temiz çözümü.
+- **A23:** genel "yörüngeler farklı" yerine ÖLÇÜLÜ mekanizma: idealize halkada
+  CCW ≡ CW+polarite-flip (oran 1.00, Test 7) ve polarite-flip geometrik fazın
+  simetrisi DEĞİL (flip oranları +2.8/+0.85/+1.17 desene bağlı; komüte etmeyen
+  presesyonların sıralı çarpımı sıra-tersine invaryant değil) → CW/CCW farkı
+  desene-bağlı kısmı (~3×) iptal eder, tamamını değil.
+- **A1:** hedef ~170–200 kelime (130–160 fazla agresif).
+- **A2:** başarısız-yöntemler bölümü sıkışık ama GERÇEK bölüm kalır (hakem +
+  kolaborasyon sorusu); alt-alt-başlık enflasyonu gider, içerik korunur.
+
+## E. UYGULAMA (2026-07-13): onay geldi → toplu revizyon YAPILDI.
+
+Tam yeniden-kurgu tamamlandı (10 sayfa, 0 overfull, 0 kırık ref):
+- **Yeni yapı:** I. Giriş (problem A3-precession düzeltmeli → örgü A10 → orbit-düzeltme
+  standart araç + literatür prose A5 → bulgular/plan) → II. Metot (araçlar tek akış A6,
+  Newton A7, tuzak-kutusu dipnota A8) → III. MEKANİZMA (62× artık → sim/antisim A12-dünyevi
+  → bilineer dört kanal + kanal-ayırma yöntemi A19 + tek-RMS-yetmez/örüntü dersi A4/A27)
+  → IV. Tersleme/genlik başarısızlıkları (sıkıştırılmış tek bölüm; breathing net A18,
+  korelasyon tek-uyarı A14, NN zayıflatılmış A21, harmonik kısa A22, CR sezgisel-ölçülü
+  A23, polarite kapsam A24, k/m tanımlı A25) → V. ÇÖZÜM (BBA prosedür + ileri-R + tanı
+  + ölçülen-R tablo + son orbit düzeltme → hedef; tek-seed çekince) → VI. OPERASYON
+  (drift geri-yükleme ~5μm tolerans, CW/CCW 2–3×, zaman bütçesi B) → VII. Sonuçlar
+  (A27 dersi madde 2) → Appendix: off-momentum (A26/D).
+- Abstract ~200 kelime (A1/D). fig_orbit_sigma ATILDI (D-A13; p=2.00 metinde).
+- Tablo 1 güncellendi (A16: raw 356× → orbit+CW/CCW 62× → BBA 17–28× → +OC 0.03–0.8×).
+- Gain-error listeden çıktı (A15). İç-diyalog cümleleri temizlendi (A20). Ton A9.
+- SON SİM BULGULARI DAHİL: kanal ayrışımı figür+%0.1 doğrulama, ölçülen-R BBA tablosu,
+  artık ayrışımı (sym 3.5×/anti 16×), son-OC 0.03–0.8×, σ²-taban-yok, drift geri-yükleme
+  (feedback'le 5μm tolerans), CW/CCW 2–3×, zaman bütçesi. Çok-seed "in progress" işaretli.
+- BEKLEYEN: çok-seed dağılımı + ensemble CW/CCW sayıları gelince tablo/metin güncelle.
