@@ -514,3 +514,49 @@ Conclusions açılışına "central conceptual result = bilinear four-channel
 structure" cümlesi.
 
 Puanlama: özgünlük 8.5, içgörü 9, genellenebilirlik 6 (→G1/G3 kapatınca yükselir).
+
+---
+
+## H. Kullanıcı soru/yorum turu (2026-07-14, 24 madde) — makale-düzeltme adayları
+
+> Cevaplar sohbette verildi; buradakiler METNE yansıyacak kalemler (onayla toplu).
+
+- **H4 (soru 4):** Fig-1'de düzeltilmiş aşamalar yalnız σ=10μm'de ölçülü; σ²
+  uzantısı ham/kanal p=2.00'a dayanıyor. GÜÇLENDİRME (ucuz sim): σ=5μm'de
+  düzeltilmiş-aşama noktaları ekle (OC analitik + birkaç fast_measure).
+- **H5 (soru 5):** Eq.4 sonrası bir cümle: simetrik BİLEŞEN tanım gereği eşit
+  DEĞERLİDİR; "aynı işaretli ama eşit olmayan" çift = simetrik+antisimetrik
+  karışımı (ayrışım tam ve tek).
+- **H8 (soru 8):** Eq.7'ye kernel'siz sezgisel türetme cümlesi: bilineerlik iki
+  komüte-etmeyen küçük dönüşün çarpımından (çift toplam Σ w_ij dx_i dy_j);
+  matris gösterimi yalnız defter tutma.
+- **H11 (soru 11):** "or their symmetric part" → "including their symmetric
+  part" (yanlış anlaşılıyor).
+- **H14 (soru 14):** "Learned and structured estimators" paragrafını 2-3
+  cümleye KISALT (NN→pseudo-inverse; matched-filter; prior'lar aynı taban).
+- **H15 (soru 15):** SVD kesme/regülarizasyon açıkça söylensin: OC kesik-SVD
+  (rcond taraması Tablo/metinde); ΔR inversiyonunda Tikhonov/TSVD tarandı,
+  yardımı yok (gürültüyü simetrik-yön yanlılığına takas eder).
+- **H16 (soru 16):** 266× cümlesi metin içinde açık anlatım: tek quad'ın
+  kendi ofset sinyali (0.037μm) vs komşuların kurduğu orbitin nefes tepkisi
+  (9.83μm) — ölçülen genlik ikincisini okuyor.
+- **H18 (soru 18):** "measured response matrix" nasıl ölçüldü: simülasyonda her
+  quad'a sırayla Δ=0.1mm ofset verilip 48-BPM kapalı yörünge kaydı; sütun =
+  Δorbit/Δq (build_response_matrix.py). Gerçek makinede standart ölçülü orbit
+  tepkisi. Metne 1-2 cümle.
+- **H21 (soru 21):** pEDM quad'ları HAVA-ÇEKİRDEKLİ → histerezis YOK. Metinde
+  "hysteresis or heating" → "thermal/mechanical stability of the coil geometry"
+  (air-core notuyla). Donanım-tabanı bilinmezi kalır ama kaynak listesi düzelir.
+- **H22 (soru 22):** Zaman bütçesi aritmetiği açık yazılsın: BBA süresi =
+  47 quad × 2 düzlem × 2 konum × 2 (aç/kapa) × (yerleşme+ortalama τ~10s) ≈
+  ~4000 nokta ≈ saatler; drift: 1μm/gün → sim parçası ~0.7μm/gün → ~3 günde
+  2μm → kadans; kayıp ~%birkaç.
+- **H23 (soru 23):** Polarite-flip HAM rastgele dağılımda da iptal etmiyor
+  (ölçülü: generic +1.17, antisim +0.85 — işaret korunuyor). Metin zaten uyumlu;
+  gerekirse "including for uncorrected random misalignments" yarım cümle.
+- **H20/H24 (soru 20-24):** BBA'nın antisim artığı kendi başına daha ileri
+  götürememesi: per-magnet ölçüm hata tabanı (~1μm; nefes+model artığı) ↔ OC'nin
+  kolektif hassasiyeti (BPM-gürültüsü + rezonant görünürlük). Metne kısa cümle:
+  "the division of labor is also one of precision: per-magnet zero-crossing
+  errors exceed the collective orbit-nulling precision in the antisymmetric
+  subspace" tarzı.
