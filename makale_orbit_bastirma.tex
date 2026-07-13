@@ -39,7 +39,8 @@ orders of magnitude.  Using symplectic spin tracking, we examine how far this
 false signal can be removed by measuring and correcting the beam orbit.  We
 find that standard orbit correction alone does not guarantee suppression: the
 misalignment pattern separates into an orbit-visible antisymmetric component
-and an orbit-blind symmetric component, and the false EDM is a bilinear
+and a symmetric component to which the orbit response is nearly blind (two
+orders of magnitude weaker in this lattice), and the false EDM is a bilinear
 functional of the two transverse misalignment patterns, so that it cannot be
 characterized by a single rms alignment tolerance.  Null-finding beam-based
 alignment reaches the symmetric component that response-matrix inversion
@@ -299,8 +300,10 @@ consists of.
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_suppression.png}
 \caption{False EDM before and after orbit-based correction versus the rms
-quadrupole misalignment (tracking results at $\sigma=10~\mu$m; all curves
-scale as $\sigma^2$, verified exponent $p=2.00$).  Each curve should be read
+quadrupole misalignment.  Each stage is anchored at the ensemble median of
+tracking results at $\sigma=10~\mu$m (several random misalignment patterns
+per stage, not a single seed); all curves scale as $\sigma^2$ (verified
+exponent $p=2.00$).  Each curve should be read
 as the center of a band rather than a line: at fixed $\sigma$ the false EDM
 varies by more than an order of magnitude with the symmetric/antisymmetric
 content of the pattern (Sec.~\ref{sec:bilinear}), so the rms alone does not
@@ -607,8 +610,9 @@ component that drives the residual false EDM.}
 The common conclusion of this section is structural.  For every technique in
 the inversion and amplitude-readout families, the limiting effect is
 coherent --- conditioning amplified by $\beta$-beating, or optics
-breathing --- and coherent effects do not average down.  \emph{No BPM
-technology, including SQUID-based BPMs, changes these floors.}  We emphasize
+breathing --- and coherent effects do not average down.  \emph{Within the
+simulated model, no BPM technology --- including SQUID-based BPMs --- changes
+these floors.}  We emphasize
 the scope of this statement.  It is a structural property of the estimator
 classes considered, established by class-level arguments (the conditioning
 bound and the coherence of the breathing term) together with systematic
@@ -813,13 +817,16 @@ open item on the operational side.
 
 The quadrupole-misalignment false EDM of the symmetric-hybrid proton EDM ring
 is controlled by the interplay of two misalignment components with sharply
-different orbit visibility.  Our tracking study yields the following
-quantitative picture.
+different orbit visibility.  The central conceptual result of this work is
+the bilinear four-channel structure of Eq.~(\ref{eq:channels}), which
+explains both why standard orbit correction stalls and which measurement
+completes it; the quantitative picture is as follows.
 
 (1) Standard orbit-based control --- orbit flattening together with the
 counter-rotating--beam difference --- suppresses the false EDM by roughly an
 order of magnitude and no further: it removes the orbit-visible,
-antisymmetric component of the misalignment, and the orbit-blind symmetric
+antisymmetric component of the misalignment, and the weakly observable
+symmetric
 component sets a floor of $\sim\!6\times10^{-28}\,e\!\cdot\!$cm at
 $\sigma = 10~\mu$m, scaling as $\sigma^{2}$.
 
@@ -832,10 +839,10 @@ generally, a correction procedure changes the statistics of the misalignment
 component the procedure cannot see --- so the driving question is not how
 small the residual is, but in which component it lies.
 
-(3) The symmetric component is unreachable from orbit readings by the
-inversion and amplitude-readout families of techniques, for coherent reasons
-(conditioning amplified by optics-model error; optics breathing) that no BPM
-technology mitigates.  The counter-rotating beam separation, being an orbit
+(3) In our model, the symmetric component is unreachable from orbit readings
+by the inversion and amplitude-readout families of techniques, for coherent
+reasons (conditioning amplified by optics-model error; optics breathing) that
+improved BPM technology does not mitigate.  The counter-rotating beam separation, being an orbit
 observable, shares this blindness; polarity switching provides no independent
 cancellation for the quadrupole-alignment geometric phase; and tune elevation
 is capped by the stopband well below the symmetric kick harmonic.
@@ -850,7 +857,11 @@ removes.  The full chain, BBA with measured-matrix steering plus orbit
 correction, suppresses the single-beam false EDM from $356\times$ to the
 target level in our simulations (single seed; multi-seed campaign in
 progress), with the CW/CCW difference contributing a further factor of
-$2$--$3$.
+$2$--$3$.  Two qualifications belong to this statement.  The ninefold gain of
+the measured over the idealized steering matrix is a property of the fidelity
+of the optics model supplied to the procedure, not of the algorithm, which is
+standard; and the chain assumes throughout that the magnetic centers remain
+stationary under the gradient modulation itself.
 
 (5) Operationally, the corrected state need not be held statically:
 continuous orbit correction absorbs random drift up to $\sim\!5~\mu$m rms,

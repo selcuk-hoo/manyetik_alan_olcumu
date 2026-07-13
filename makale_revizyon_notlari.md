@@ -468,5 +468,49 @@ proof-of-principle çözüm sunar; tolerans-belgesi değildir (çok-seed sürüy
 daralttı; off-momentum Appendix'te; drift-izleme zaten ayrı ikinci-makale hattı).
 Tek makale kalsın.
 
-**Uygulama:** F1/F2/F3/F5/F6 ucuz metin işleri → ŞİMDİ uygulanıyor (kullanıcı
-onayı "neredeyse tamamen katılıyorum"). F4 = pipeline sonrası simülasyon adayı.
+**Uygulama:** F1/F2/F3/F5/F6 ucuz metin işleri → UYGULANDI. F4 = pipeline
+sonrası simülasyon adayı.
+
+---
+
+## G. ChatGPT hakem-taklidi, TUR 2 — DOĞRU sürüm için (2026-07-13)
+
+Genel karar tahmini: major revision %55. İki büyük itiraz zaten programda:
+
+**G1. Tek latis → "structural" iddiası gösterilmeli:** = F4. integrator2
+(alternatif topoloji) koşumu pipeline sonrası. AYRICA ucuz ara-adım: analitik
+katmanla Q-taraması (cond(R) ve sim/antisim ayrışmasının Q ile değişimi) —
+"yapısal" iddiaya çok-latis olmadan da destek. NOT: yüksek-Q bölümü zaten
+kısmi tarama içeriyor.
+
+**G2. "orbit blind" fazla kesin → "poorly observable":** UYGULA — abstract'ta
+"orbit-blind" yerine tanımlayıcı ifade; metinde ilk kullanımda "we refer to it
+as orbit-blind for brevity" tarzı tanımla; mutlak değil nicel (bu latiste ~2
+mertebe) olarak sun.
+
+**G3. TEK SEED (en zayıf nokta):** Çok-seed pipeline ZATEN KOŞUYOR (5 seed;
+seed 0 bitti 0.03×, seed 1 geçiş 2'de). Sonuç gelince tablo+metin medyan/aralıkla
+güncellenecek. 100-500 seed pratik değil (seed başına ~10 saat C++); 5 seed +
+kanal-saçılım figürü + σ²-homojenlik argümanıyla savunulacak; gerekirse ucuz
+"BBA-taklidi artık + OC" Monte Carlo (yüzlerce seed, BBA'sız) eklenebilir —
+tabanın istatistiği için iyi bir ara yol. NOT ET.
+
+**G4. "Başarı algoritmanın değil model doğruluğunun":** Haklı ve zaten kısmen
+metinde; Conclusions'ta AÇIKÇA söyle: kazanç ölçülen-R'nin (model sadakati),
+algoritma standart. UYGULA.
+
+**G5. Hardware floor bilinmezken "target achieved" iddialı:** UYGULA —
+Conclusions (4)'e "assuming magnetic centers remain stable under modulation"
+şartı; zaten open-items'ta var, iddia cümlesine de bağla.
+
+**G6. Dil (fails/impossible/cannot/no BPM technology):** UYGULA — "within the
+simulated model / in this lattice" sınırlayıcıları 2-3 kritik yere.
+
+**G7. Fig 1 (suppression) tek seed mi ensemble mı belirsiz:** UYGULA — caption'a
+provenans (ensemble medyanı, kaç realizasyon).
+
+**G8. Asıl katkı kavramsal (4 kanal + neden durduğu) — öne çıkar:** UYGULA —
+Conclusions açılışına "central conceptual result = bilinear four-channel
+structure" cümlesi.
+
+Puanlama: özgünlük 8.5, içgörü 9, genellenebilirlik 6 (→G1/G3 kapatınca yükselir).
