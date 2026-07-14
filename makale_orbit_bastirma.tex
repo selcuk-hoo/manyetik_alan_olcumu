@@ -320,25 +320,43 @@ determine the signal.}
 \label{sec:symanti}
 
 Let the 48 offsets of one plane form a vector $v$, with QF at index $2k$ and
-QD at index $2k{+}1$ in cell $k$.  In each cell, the offsets of the two
-quadrupoles can be separated into the part in which they move \emph{together}
-and the part in which they move \emph{oppositely},
+QD at index $2k{+}1$ in cell $k$.  The offsets of the two quadrupoles in a
+cell can be separated into the part in which they move \emph{together} and the
+part in which they move \emph{oppositely}.  This separation is carried by two
+$48\times48$ projectors, $P_{\rm sym}$ and $P_{\rm anti}$, which are
+block-diagonal: an identical $2\times2$ block for each of the 24 cells, with
+zeros linking different cells,
 \begin{align}
-  (P_{\rm sym}\,v)[2k] &= (P_{\rm sym}\,v)[2k{+}1] =
-      \tfrac{1}{2}\big(v[2k]+v[2k{+}1]\big),
-  \nonumber\\
-  (P_{\rm anti}\,v)[2k] &= -(P_{\rm anti}\,v)[2k{+}1] =
-      \tfrac{1}{2}\big(v[2k]-v[2k{+}1]\big),
+  P_{\rm sym} &= \frac{1}{2}
+    \begin{pmatrix}
+      1 & 1 & & & \\
+      1 & 1 & & & \\
+        &   & 1 & 1 & \\
+        &   & 1 & 1 & \\
+        &   &   &   & \ddots
+    \end{pmatrix},
+  \nonumber\\[4pt]
+  P_{\rm anti} &= \frac{1}{2}
+    \begin{pmatrix}
+      1 & -1 & & & \\
+      -1 & 1 & & & \\
+        &   & 1 & -1 & \\
+        &   & -1 & 1 & \\
+        &   &   &   & \ddots
+    \end{pmatrix}.
   \label{eq:projectors}
 \end{align}
-with $P_{\rm sym} + P_{\rm anti} = I$.  The projectors act within one plane;
-they are applied independently to the horizontal and to the vertical offset
-vectors.  Note that the symmetric component has, by construction,
-\emph{equal values} on the two magnets --- not merely equal signs.  The
-decomposition is exact and unique: an arbitrary pair of offsets $(a,b)$
-splits as $(m,m) + (d,-d)$ with $m = (a+b)/2$ and $d = (a-b)/2$, so a
-same-sign pair of unequal size is a mixture of the two components, not a
-member of either.
+Acting on a cell's pair of offsets, $P_{\rm sym}$ replaces both by their
+average $\tfrac12\big(v[2k]+v[2k{+}1]\big)$, and $P_{\rm anti}$ returns
+$\pm\tfrac12\big(v[2k]-v[2k{+}1]\big)$; they are complementary,
+$P_{\rm sym}+P_{\rm anti}=I$, and each is a projector
+($P^2 = P$).  The same pair of matrices is applied independently to the
+horizontal and to the vertical offset vectors.  Note that the symmetric
+component has, by construction, \emph{equal values} on the two magnets --- not
+merely equal signs.  The decomposition is exact and unique: an arbitrary pair
+of offsets $(a,b)$ splits as $(m,m) + (d,-d)$ with $m = (a+b)/2$ and
+$d = (a-b)/2$, so a same-sign pair of unequal size is a mixture of the two
+components, not a member of either.
 
 Carrying this out for all $24$ cells re-expresses the $48$ offsets of one
 plane as $24$ symmetric numbers $m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big)$ and
@@ -382,14 +400,18 @@ The same conclusion can be read off the response matrix itself without
 reference to harmonics.  The singular-value decomposition of $R$ supplies 48
 mutually orthogonal, unit-normalized misalignment patterns $v_i$, each with
 its own orbit strength $\sigma_i$ (pattern $v_i$ produces an orbit of size
-$\sigma_i$).  For each pattern we compute its \emph{symmetric fraction}
+$\sigma_i$).  We ask how symmetric each of these patterns is by applying to it
+the very same projector $P_{\rm sym}$ of Eq.~(\ref{eq:projectors}): the
+\emph{symmetric fraction}
 \begin{equation}
-  s_i = \|P_{\rm sym}\,v_i\|^2 \in [0,1],
+  s_i = \|P_{\rm sym}\,v_i\|^2 \in [0,1]
   \label{eq:symfrac}
 \end{equation}
-i.e.\ the squared length of the pattern's projection onto the symmetric
-subspace: $s_i = 0$ for a purely antisymmetric pattern, $s_i = 1$ for a
-purely symmetric one.  Plotting $\sigma_i$ against $s_i$
+is the squared length of the pattern's projection onto the symmetric
+subspace, so that $s_i = 0$ for a purely antisymmetric pattern and $s_i = 1$
+for a purely symmetric one.  Equation~(\ref{eq:symfrac}) thus turns the
+decomposition of Eq.~(\ref{eq:projectors}) into a single number per SVD mode
+that can be plotted against its orbit strength.  Plotting $\sigma_i$ against $s_i$
 [Fig.~\ref{fig:modes}, left] shows the strongly-coupled patterns to be almost
 purely antisymmetric ($s_i \approx 0$) and the weakly-coupled ones almost
 purely symmetric ($s_i \approx 1$); the overall visibility ratio between the
