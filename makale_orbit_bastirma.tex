@@ -320,43 +320,35 @@ determine the signal.}
 \label{sec:symanti}
 
 Let the 48 offsets of one plane form a vector $v$, with QF at index $2k$ and
-QD at index $2k{+}1$ in cell $k$.  The offsets of the two quadrupoles in a
-cell can be separated into the part in which they move \emph{together} and the
-part in which they move \emph{oppositely}.  This separation is carried by two
-$48\times48$ projectors, $P_{\rm sym}$ and $P_{\rm anti}$, which are
-block-diagonal: an identical $2\times2$ block for each of the 24 cells, with
-zeros linking different cells,
+QD at index $2k{+}1$ in cell $k$.  Within one cell the two offsets can be
+separated into the part in which the quadrupoles move \emph{together} and the
+part in which they move \emph{oppositely} --- a simple $2\times2$ operation on
+the pair,
 \begin{align}
-  P_{\rm sym} &= \frac{1}{2}
-    \begin{pmatrix}
-      1 & 1 & & & \\
-      1 & 1 & & & \\
-        &   & 1 & 1 & \\
-        &   & 1 & 1 & \\
-        &   &   &   & \ddots
-    \end{pmatrix},
+  \begin{pmatrix} v^{\rm s}[2k] \\ v^{\rm s}[2k{+}1] \end{pmatrix}
+    &= \frac12\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}
+       \begin{pmatrix} v[2k] \\ v[2k{+}1] \end{pmatrix},
   \nonumber\\[4pt]
-  P_{\rm anti} &= \frac{1}{2}
-    \begin{pmatrix}
-      1 & -1 & & & \\
-      -1 & 1 & & & \\
-        &   & 1 & -1 & \\
-        &   & -1 & 1 & \\
-        &   &   &   & \ddots
-    \end{pmatrix}.
+  \begin{pmatrix} v^{\rm a}[2k] \\ v^{\rm a}[2k{+}1] \end{pmatrix}
+    &= \frac12\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
+       \begin{pmatrix} v[2k] \\ v[2k{+}1] \end{pmatrix} .
   \label{eq:projectors}
 \end{align}
-Acting on a cell's pair of offsets, $P_{\rm sym}$ replaces both by their
-average $\tfrac12\big(v[2k]+v[2k{+}1]\big)$, and $P_{\rm anti}$ returns
-$\pm\tfrac12\big(v[2k]-v[2k{+}1]\big)$; they are complementary,
-$P_{\rm sym}+P_{\rm anti}=I$, and each is a projector
-($P^2 = P$).  The same pair of matrices is applied independently to the
-horizontal and to the vertical offset vectors.  Note that the symmetric
-component has, by construction, \emph{equal values} on the two magnets --- not
-merely equal signs.  The decomposition is exact and unique: an arbitrary pair
-of offsets $(a,b)$ splits as $(m,m) + (d,-d)$ with $m = (a+b)/2$ and
-$d = (a-b)/2$, so a same-sign pair of unequal size is a mixture of the two
-components, not a member of either.
+The first matrix replaces both offsets by their average
+$\tfrac12\big(v[2k]+v[2k{+}1]\big)$, giving the symmetric part $v^{\rm s}$; the
+second replaces them by $\pm$ half their difference
+$\tfrac12\big(v[2k]-v[2k{+}1]\big)$, giving the antisymmetric part $v^{\rm a}$.
+The full projectors $P_{\rm sym}$ and $P_{\rm anti}$ simply apply this same
+$2\times2$ block to each of the 24 cells in turn (so $v^{\rm s} = P_{\rm sym}v$
+and $v^{\rm a} = P_{\rm anti}v$); they are complementary,
+$P_{\rm sym}+P_{\rm anti}=I$, and each is a projector ($P^2 = P$).  The same
+pair of matrices is applied independently to the horizontal and to the
+vertical offset vectors.  Note that the symmetric component has, by
+construction, \emph{equal values} on the two magnets --- not merely equal
+signs.  The decomposition is exact and unique: an arbitrary pair of offsets
+$(a,b)$ splits as $(m,m) + (d,-d)$ with $m = (a+b)/2$ and $d = (a-b)/2$, so a
+same-sign pair of unequal size is a mixture of the two components, not a
+member of either.
 
 Carrying this out for all $24$ cells re-expresses the $48$ offsets of one
 plane as $24$ symmetric numbers $m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big)$ and
