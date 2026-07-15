@@ -199,11 +199,25 @@ therefore not subject to the visibility gap; the final orbit correction
 removes the antisymmetric residue that BBA leaves behind.  In our tracking
 simulations the combination suppresses the false EDM from several hundred
 times the target to the target level, where each operation alone stalls an
-order of magnitude or more above it.  Section~\ref{sec:operation} examines the
-operational side --- alignment drift, counter-rotating beams, and the time
-budget --- and Sec.~\ref{sec:conclusions} collects the conclusions.  The
-simulation infrastructure and the spin-signal estimator, on which all
-quantitative statements rest, are described first in Sec.~\ref{sec:method}.
+order of magnitude or more above it.
+
+These results fix the place of orbit correction within the alignment program
+of Ref.~\cite{omarov}, which combines BBA with a four-fold measurement --- the
+counter-rotating difference repeated at reversed quadrupole polarity --- that
+cancels the magnetic-lattice false EDM exactly when the machine is identical
+between the two polarity states.  We find, first, that orbit correction cannot
+substitute for BBA, because the symmetric component is invisible to the orbit
+in every configuration; and second, that added to BBA it can substitute for
+the polarity reversal, removing the antisymmetric channel continuously and
+without a second pass of the experiment, while BBA supplies the symmetric
+alignment that the polarity cancellation itself requires to survive drift
+(Sec.~\ref{sec:polarity}).
+
+Section~\ref{sec:operation} examines the operational side --- alignment drift,
+counter-rotating beams, the polarity reversal, and the time budget --- and
+Sec.~\ref{sec:conclusions} collects the conclusions.  The simulation
+infrastructure and the spin-signal estimator, on which all quantitative
+statements rest, are described first in Sec.~\ref{sec:method}.
 
 % ═══════════════════════════════════════════════════════════════════
 \section{Simulation method}
@@ -934,13 +948,72 @@ BBA campaign.  The alignment therefore does not need to be \emph{held} at the
 micron level mechanically; it needs to be re-established at a cadence set by
 the symmetric drift rate.
 
-The counter-rotating beam difference adds a further, independent factor.
-Applied to the corrected state, the CW/CCW combination suppresses the
-residual false EDM by an additional factor of $2$--$3$ in our single-seed
-tests, consistent with the pattern-dependent parity discussed in
-Sec.~\ref{sec:inverse}; an ensemble determination of this factor, using the
-full sign bookkeeping of Ref.~\cite{omarov}, is left for the multi-seed
-campaign.
+\subsection{Where orbit correction substitutes for the polarity reversal}
+\label{sec:polarity}
+
+The systematic-error program of Ref.~\cite{omarov} pairs beam-based alignment
+with a signed combination of measurements: the genuine EDM is odd under beam
+reversal, so it survives the counter-rotating difference $(dS_y/dt)_{\rm CW} -
+(dS_y/dt)_{\rm CCW}$, while common-mode systematics cancel [Eq.~(C1) of
+Ref.~\cite{omarov}].  Two beams stored simultaneously make this difference
+drift-free.  A false EDM that were purely beam-reversal-even would vanish here;
+the geometric phase is not, because the counter-rotating beams ride slightly
+different closed orbits, and a beam-reversal-\emph{odd} remnant survives.  In
+our tracker this remnant, at $\sigma = 10~\mu$m, is $14\times$ the target for a
+purely symmetric misalignment and $491\times$ for a purely antisymmetric one.
+Orbit correction removes the antisymmetric part; the symmetric remnant is the
+same orbit-blind floor as before, now reached only by BBA.
+
+Reference~\cite{omarov} removes even this remnant with a second knob:
+\emph{reversing the polarity of all focusing quadrupoles} and repeating the
+counter-rotating difference [its Eq.~(C2)].  Under simultaneous reversal of the
+beam direction and the magnetic gradient the Lorentz force $q\,\bm v\times\bm
+B$ is unchanged, so a counter-rotating beam in the reversed lattice retraces
+the trajectory of a co-rotating beam in the nominal one; the magnetic-lattice
+false EDM is therefore identical between the two configurations and cancels in
+the four-fold combination, whereas the electric-field EDM signal, untouched by
+the polarity reversal, does not.  We confirm this directly: the four-fold
+combination removes the false EDM of \emph{both} the symmetric and the
+antisymmetric patterns to the estimator floor ($0.009\times$ and
+$-0.017\times$ the target), independently of quadrupole roll or
+$\beta$-beating, which respect the same $\bm v\times\bm B$ symmetry.
+
+The four-fold cancellation is thus exact in principle, but it is not free, and
+it does not displace the alignment.  The two polarity states cannot be stored
+at once; they are measured in sequence, and the cancellation requires the
+machine to present the \emph{same} misalignment in both.  Any change of
+alignment between them re-opens the false EDM, and the sensitivity is steep:
+a $1~\mu$m symmetric misalignment drift between the two polarity states
+produces a residual of tens of times the target in our tracker.  Crucially,
+this residual scales with the ambient alignment level --- the same $1~\mu$m
+drift gives $5\times$ the target on an orbit-corrected machine (symmetric rms
+$\sim\!5~\mu$m) but only $0.07\times$ after BBA (symmetric rms
+$\sim\!2~\mu$m).  The drift that matters is the symmetric one, invisible to the
+orbit and therefore outside the reach of the continuous orbit feedback that
+holds the antisymmetric alignment; only a BBA-level symmetric alignment, held
+by periodic re-alignment, keeps the polarity-reversal cancellation intact.
+The air-core quadrupoles foreseen for the experiment make the electrical
+reversal clean and reproducible, but the change in the inter-coil Lorentz
+forces upon reversal is a direct source of exactly this inter-configuration
+displacement.
+
+Two conclusions follow, and they set the role of orbit correction in the
+alignment program.  First, orbit correction cannot replace BBA: the symmetric
+component is invisible to it in every configuration.  Second, added to BBA,
+orbit correction can replace the polarity reversal.  It removes the
+antisymmetric channel --- the part the polarity difference would otherwise
+cancel --- continuously, non-invasively, and without a second pass of the
+experiment, while BBA reaches the symmetric channel that neither orbit
+correction nor a single polarity state resolves.  In our tracking the
+drift-free counter-rotating difference after BBA and orbit correction reaches
+$1.6\times$ the target for the representative seed, at the same level the
+polarity reversal targets, without doubling the beam time and without exposing
+the measurement to the inter-configuration displacement.  Should the polarity
+reversal be used in addition, the analysis above shows it still requires the
+BBA-level symmetric alignment to deliver its cancellation --- so BBA is
+required on either path, and orbit correction is what stands in for the
+polarity reversal.  An ensemble determination of the residual on both paths is
+left for the multi-seed campaign.
 
 These sensitivities translate into a time budget whose absolute numbers
 require one machine-specific input that simulation cannot supply: the drift
