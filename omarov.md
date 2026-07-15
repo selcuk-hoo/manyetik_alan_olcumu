@@ -364,3 +364,78 @@ konfigürasyon, C++ spin izleyici (`fast_est.fast_measure`, direction/gflip/gsca
 > `/tmp/omarov_sym_tilt.py` + `/tmp/omarov_tilt2.py` (tilt),
 > `/tmp/flip_calib.py` (ε=10⁻³). `fast_est.fast_measure`'a `gscale` parametresi
 > eklendi (flip-kalibrasyon hatası: `gflip=True, gscale=1+ε`).
+
+---
+
+## 12. MAKE-OR-BREAK ÇÖZÜLDÜ (2026-07-15): 4'lü egzakt ama drift-kırılgan; OC+BBA polarite-switch'in yerini tutar
+
+**Bağlam:** Kullanıcı haklı olarak sordu — "CW/CCW + quad flip zaten uygulanınca
+sahte EDM tam iptal oluyorsa, simetrik-mod tezimiz (BBA şart) çöküyor mu?"
+Doğrudan C++ testleriyle çözüldü. **Eski "quad flip işe yaramaz" bulgum
+YANLIŞTI** — tek-demet flip'i (f(−g)/f(+g)≈0.8, iptal yok) test etmiştim, ama
+Omarov'un reçetesi **4'lü diferansiyel** (C2); onu hiç hesaplamamıştım ve
+dejenerasyonu ters yorumlamıştım (§6.1 ⛔).
+
+### 12.1 Saf-mod C2 ölçümleri (seed 1, 10μm)
+
+| desen | tek-demet | 2'li (CW−CCW)/2 | 4'lü mükemmel | 4'lü ε=10⁻³ |
+|---|---|---|---|---|
+| saf-SİMETRİK | 50–77× | **14×** | 0.009× | 0.48× |
+| saf-ANTİSİM | 2100–3080× | **491×** | −0.017× | −4.04× |
+
+- **Mükemmel 4'lü ikisini de egzakt siler** (dejenerasyon CCW(g)≡CW(−g),
+  v×B değişmezliği). → "statik indirgenemez simetrik taban" çerçevesi YANLIŞ.
+- **Drift-siz 2'li** (eşzamanlı counter-rotating) simetrik-mod tabanı bırakır:
+  **14×**. Antisim 491× → OC siler → geriye 14× simetrik → **BBA olmadan inilmez.**
+- Kusurlu 4'lü ε=10⁻³: antisim 4× (OC siler), sim 0.48× (hedef altı).
+
+### 12.2 4'lü KONFİG-ARASI DRİFT'e kırılgan (asıl bulgu)
+
+4'lü, +g ve −g konfigürasyonlarının **özdeş** olmasını ister (ardışık ölçüm,
+eşzamanlı olamaz). Konfig-arası simetrik drift dejenerasyonu bozar:
+
+| δ_sym (konfig-arası) | C2 (10μm hizalanmamış taban) |
+|---|---|
+| 0 | −0.02× |
+| 1 μm | +37.55× |
+| 2 μm | +21.79× (işaretli-bilineer saçılma) |
+
+**Duyarlılık hizalama-seviyesine bağlı** (C2-drift ∝ σ_taban×δ + δ² öz-terim).
+Sabit 1μm drift deseni, iki taban:
+
+| taban | sim rms | C2 (δ=1μm) |
+|---|---|---|
+| OC-only | 5 μm | **−5.05×** (hedef üstü) |
+| BBA+OC | 1.9 μm | **+0.07×** (hedef altı) |
+
+→ **BBA-seviyesi hizalama 4'lüyü drift'e ~70× dayanıklı kılar.** Simetrik drift
+orbit-kör → sürekli OC yakalayamaz → **yalnız BBA sınırlar.** Air-core quad'da
+flip elektriksel temiz (histerezissiz, küçük ε) AMA bobinler-arası Lorentz
+kuvveti flip'te değişir → mekanik kayma = konfig-arası drift kaynağı.
+
+### 12.3 BBA + OC drift-siz 2'li ile hedefe iner (polarite-switch'siz)
+
+| durum | tek-demet | 2'li (CW−CCW)/2 |
+|---|---|---|
+| BBA artığı | 7.96× | 10.24× |
+| BBA + OC | 3.25× | **1.57×** (tek seed, ~hedef) |
+
+### 12.4 MAKALE ÇERÇEVESİ (kullanıcı onaylı, 2026-07-15)
+
+> **Omarov: BBA + 4'lü (polarite-switch).**
+> **Bu çalışma: yörünge düzeltmesi BBA'nın yerini tutmaz (sim/antisim mod), ama
+> BBA'ya EKLENDİĞİNDE polarite-switch'in yerini tutar.**
+
+- OC, antisimetrik (orbit-görünür) kanalı **sürekli, girişimsiz** siler —
+  polarite-switch diferansiyelinin işi.
+- BBA, simetrik kanalı kaynakta halleder — ne OC ne tek-polarite oraya erişir.
+- BBA+OC+2'li ≈ hedef, **flip'siz** → (a) ışın zamanını ~2 kat azaltır,
+  (b) konfig-arası mekanik-kayma sistematiğini tamamen kaldırır.
+- 4'lüyü kullanmayı seçersen bile: drift-kırılganlığı yüzünden **yine BBA gerekir**
+  (§12.2). Yani BBA her iki yolda da zorunlu; OC polarite-switch'i ikame eder.
+
+> **Reprodüksiyon:** `/tmp/sym_c2_test.py` (saf-mod C2), `/tmp/drift_breaks_c2.py`
+> (konfig-arası drift), `/tmp/drift_vs_align.py` (hizalama-bağımlı duyarlılık),
+> `/tmp/bba_cwccw.py` (BBA+OC 2'li). `fast_est.fast_measure`'a `gflip`, `gscale`
+> (flip-kalibrasyon), `dG` (β-beat) parametreleri eklendi. β-beat/tilt 4'lüyü
+> BOZMAZ (§11): C2 sırasıyla −0.086× / +0.08×.
