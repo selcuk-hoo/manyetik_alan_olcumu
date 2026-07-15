@@ -124,10 +124,28 @@ plt.rcParams.update({"font.size": 11, "figure.dpi": 150,
 #   σ=10 μm'de ham≈1000×, +CW/CCW→474×, +orbit-düzeltme→62× hedef; f ∝ σ².
 # ═════════════════════════════════════════════════════
 
+# C++ izleyiciyle ölçülen orbit-düzeltme sonrası sahte-EDM (× hedef), her σ'da
+# 3 taze seed (10,11,12), derin kesik-SVD yörünge düzeltmesi (rcond=0.01);
+# kaynak: /tmp/sigma5_corrected.py, /tmp/sigma20_corrected.py (fast_est C++).
+# Bu noktalar σ² EĞİMİNİ doğrular; mutlak taban seed'e bağlı saçılır (bkz. metin).
+MEAS_SIGMA_UM = np.array([5.0, 10.0, 20.0])
+MEAS_F = {5.0:  [0.52, 0.62, 1.42],
+          10.0: [1.79, 2.72, 5.73],
+          20.0: [7.36, 11.09, 23.13]}
+
+
 def fig_suppression():
     sigma = np.logspace(0, 2, 200)          # 1–100 μm
     scale = (sigma / 10.0) ** 2
     raw, cwccw, corrected = 1000.0 * scale, 474.0 * scale, 62.0 * scale
+
+    # ── ölçülen noktalar + σ² eğim uydurma ──
+    xs = np.array([s for s in MEAS_SIGMA_UM for _ in MEAS_F[s]])
+    ys = np.array([f for s in MEAS_SIGMA_UM for f in MEAS_F[s]])
+    p_fit, c_fit = np.polyfit(np.log(xs), np.log(ys), 1)  # log f = p log σ + c
+    med = np.array([np.median(MEAS_F[s]) for s in MEAS_SIGMA_UM])
+    lo  = np.array([np.min(MEAS_F[s]) for s in MEAS_SIGMA_UM])
+    hi  = np.array([np.max(MEAS_F[s]) for s in MEAS_SIGMA_UM])
 
     fig, ax = plt.subplots(figsize=(7.0, 5.2))
     ax.loglog(sigma, raw, "-", color="#888", lw=2,
@@ -135,9 +153,19 @@ def fig_suppression():
     ax.loglog(sigma, cwccw, "-", color="tab:orange", lw=2,
               label="+ CW/CCW difference (×3.4)")
     ax.loglog(sigma, corrected, "-", color="tab:blue", lw=2.5,
-              label="+ orbit correction (×7.7)\n→ symmetric, orbit-blind floor")
+              label="+ orbit correction (ensemble $+$ CW/CCW)\n"
+                    "$\\to$ symmetric, orbit-blind floor")
     for y, c in ((1000, "#888"), (474, "tab:orange"), (62, "tab:blue")):
         ax.plot(10, y, "o", color=c, ms=7, zorder=5)
+
+    # ölçülen orbit-düzeltme noktaları (derin SVD, 3 seed) — σ² doğrulaması
+    ax.loglog(sigma, np.exp(c_fit) * sigma ** p_fit, "--", color="tab:green",
+              lw=1.3, zorder=4)
+    ax.errorbar(MEAS_SIGMA_UM, med,
+                yerr=[med - lo, hi - med], fmt="s", color="tab:green",
+                ms=8, capsize=4, zorder=6, ecolor="tab:green",
+                label=f"measured (deep-SVD orbit corr., 3 seeds)\n"
+                      f"$\\to$ $\\sigma^2$ slope verified, $p={p_fit:.2f}$")
 
     ax.axhline(1.0, color="tab:red", ls="--", lw=1.5)
     ax.text(1.1, 1.25, "target: $10^{-29}\\,e\\!\\cdot\\!$cm  (1 nrad/s)",
@@ -146,11 +174,8 @@ def fig_suppression():
     ax.axvline(s_cross, color="tab:blue", ls=":", lw=1.2)
     ax.annotate(f"$\\sigma_{{sym}} \\approx {s_cross:.1f}\\,\\mu$m needed\n"
                 "(not verifiable from the orbit)",
-                xy=(s_cross, 1.0), xytext=(1.8, 0.08), fontsize=9,
+                xy=(s_cross, 1.0), xytext=(1.6, 0.06), fontsize=9,
                 arrowprops=dict(arrowstyle="->", color="tab:blue"))
-    ax.annotate("simulated points\n($\\sigma$ = 10 μm, C++ tracker)",
-                xy=(10, 62), xytext=(22, 8), fontsize=9,
-                arrowprops=dict(arrowstyle="->", color="k"))
 
     ax.set_xlabel("rms quadrupole misalignment $\\sigma$  [μm]")
     ax.set_ylabel("false EDM  [units of target, $10^{-29}\\,e\\!\\cdot\\!$cm]")
@@ -160,12 +185,12 @@ def fig_suppression():
     ax.set_title("Achievable false-EDM suppression by orbit-based correction\n"
                  "(false EDM scales as $\\sigma^2$; slope verified: $p = 2.00 \\pm 0.01$)",
                  fontsize=11)
-    ax.legend(loc="upper left", fontsize=9)
+    ax.legend(loc="upper left", fontsize=8.5)
     ax.set_xlim(1, 100); ax.set_ylim(3e-2, 2e5)
     fig.tight_layout()
     fig.savefig("fig_orbit_suppression.png")
     plt.close(fig)
-    print("fig_orbit_suppression.png yazıldı")
+    print(f"fig_orbit_suppression.png yazıldı (ölçülen σ² eğimi p={p_fit:.3f})")
 
 
 # ═════════════════════════════════════════════════════
@@ -461,7 +486,93 @@ def fig_crsep():
     print("fig_orbit_crsep.png yazıldı")
 
 
+# ═════════════════════════════════════════════════════
+# FIG 7 (C++): BBA yakınsaması — simetriği indirir, antisimetrikte tıkanır
+#   Kaynak: kmod_drivers/paper_runs_results.json ["bba_iter_cpp"]
+#   (ölçülen-matris BBA, %1 β-beat, 3 geçiş; f = C++ spin izleyici).
+#   Per-geçiş anti artık kaydedilmediğinden gömülü sayılarla çizilir.
+# ═════════════════════════════════════════════════════
+
+# bba_iter_cpp (ölçülen matris, %1 β-beat); f × hedef, artıklar μm
+BBA_PASS   = [1, 2, 3]
+BBA_F      = [72.8, 16.7, 28.4]
+BBA_SYM_DX = [4.27, 2.90, 2.29]
+BBA_SYM_DY = [3.27, 1.70, 0.91]
+BBA_F_RAW  = 356.0
+# geçiş-3 artığının kanal ayrışımı (× hedef): antisimetrik domine eder
+BBA_P3_FSYM, BBA_P3_FANTI = 3.5, 16.0
+# BBA + son yörünge düzeltmesi sonrası (tek seed aralığı)
+BBA_OC_LO, BBA_OC_HI = 0.03, 0.8
+
+
+def fig_bba_convergence():
+    fig, ax = plt.subplots(figsize=(7.4, 5.3))
+
+    # sol eksen: simetrik artık (μm) — düzenli düşüş
+    ax.set_yscale("log")
+    ax.plot(BBA_PASS, BBA_SYM_DX, "o-", color="tab:blue", ms=7,
+            label="symmetric residual, horizontal  $|P_{\\rm sym}v_x|$")
+    ax.plot(BBA_PASS, BBA_SYM_DY, "s-", color="tab:cyan", ms=7,
+            label="symmetric residual, vertical  $|P_{\\rm sym}v_y|$")
+    ax.set_xlabel("BBA pass")
+    ax.set_ylabel("symmetric residual, rms  [μm]", color="tab:blue")
+    ax.tick_params(axis="y", labelcolor="tab:blue")
+    ax.set_xticks(BBA_PASS)
+    ax.set_ylim(0.5, 12)
+    ax.set_xlim(-0.3, 4.3)
+    ax.annotate("symmetric residual falls steadily\n"
+                "$\\to$ BBA reaches the orbit-blind part",
+                xy=(3, BBA_SYM_DY[-1]), xytext=(0.35, 0.60),
+                fontsize=9, color="tab:blue", ha="left",
+                arrowprops=dict(arrowstyle="->", color="tab:blue"))
+
+    # sağ eksen: sahte-EDM f (× hedef) — plato/saçılma
+    ax2 = ax.twinx()
+    ax2.set_yscale("log")
+    ax2.plot(BBA_PASS, BBA_F, "D-", color="tab:red", ms=8, lw=2,
+             label="false EDM  $|f|$ / target")
+    ax2.plot(0, BBA_F_RAW, "D", color="tab:red", ms=8)
+    ax2.annotate("raw\n356×", xy=(0, BBA_F_RAW), xytext=(-0.22, 500),
+                 fontsize=8.5, color="tab:red", ha="center")
+    ax2.set_ylabel("false EDM  $|f|$  [units of target]", color="tab:red")
+    ax2.tick_params(axis="y", labelcolor="tab:red")
+    ax2.set_ylim(1e-2, 1e4)
+    ax2.axhline(1.0, color="k", ls=":", lw=1)
+    ax2.text(3.7, 1.25, "target", fontsize=8.5)
+    # ana mesaj: f platosu + kanal ayrışımı (metne gömülü, inset yok)
+    ax2.annotate("but $|f|$ stalls at $\\sim$20$\\times$ — dominated by the\n"
+                 "orbit-VISIBLE antisymmetric residue ($\\sim$2 μm):\n"
+                 "pass-3 channel split  $f_{\\rm anti}\\!=\\!16\\times \\gg "
+                 "f_{\\rm sym}\\!=\\!3.5\\times$",
+                 xy=(2, BBA_F[1]), xytext=(0.35, 1600),
+                 fontsize=9, color="tab:red", ha="left",
+                 arrowprops=dict(arrowstyle="->", color="tab:red"))
+    # son yörünge düzeltmesi: antisimetriği sil → hedef-altı
+    ax2.plot([3.5], [0.12], "*", color="tab:green", ms=18, zorder=6)
+    ax2.annotate("+ one final orbit\ncorrection removes it\n"
+                 f"$\\to$ {BBA_OC_LO}–{BBA_OC_HI}× target",
+                 xy=(3.5, 0.12), xytext=(2.45, 0.018),
+                 fontsize=9, color="tab:green", ha="left",
+                 arrowprops=dict(arrowstyle="->", color="tab:green"))
+
+    ln1, lb1 = ax.get_legend_handles_labels()
+    ln2, lb2 = ax2.get_legend_handles_labels()
+    ax2.legend(ln1 + ln2, lb1 + lb2, loc="upper center",
+               bbox_to_anchor=(0.5, -0.11), ncol=3, fontsize=8,
+               framealpha=0.95, columnspacing=1.0, handletextpad=0.4)
+    ax.set_title("Beam-based alignment lowers the symmetric misalignment but\n"
+                 "stalls on the antisymmetric residue "
+                 "(measured-matrix BBA, 1% $\\beta$-beat, C++ tracker)",
+                 fontsize=10.5)
+    fig.subplots_adjust(bottom=0.20)
+    fig.tight_layout()
+    fig.savefig("fig_orbit_bba_convergence.png", dpi=150)
+    plt.close(fig)
+    print("fig_orbit_bba_convergence.png yazıldı")
+
+
 if __name__ == "__main__":
+    fig_bba_convergence()
     fig_suppression()
     fig_modes()
     fig_breathing()

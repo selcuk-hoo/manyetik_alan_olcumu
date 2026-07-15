@@ -305,14 +305,20 @@ consists of.
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_suppression.png}
 \caption{False EDM before and after orbit-based correction versus the rms
-quadrupole misalignment.  Each stage is anchored at the ensemble median of
-tracking results at $\sigma=10~\mu$m (several random misalignment patterns
-per stage, not a single seed); all curves scale as $\sigma^2$ (verified
-exponent $p=2.00$).  Each curve should be read
-as the center of a band rather than a line: at fixed $\sigma$ the false EDM
-varies by more than an order of magnitude with the symmetric/antisymmetric
-content of the pattern (Sec.~\ref{sec:bilinear}), so the rms alone does not
-determine the signal.}
+quadrupole misalignment.  The three lines (raw, $+$CW/CCW, $+$orbit
+correction) are anchored at the ensemble median of tracking results at
+$\sigma=10~\mu$m (several random misalignment patterns per stage, not a single
+seed).  The green squares are directly measured orbit-corrected residuals
+(deep truncated-SVD correction, median and full spread of three random seeds
+at each of $\sigma=5,10,20~\mu$m); the dashed line is their power-law fit,
+$|f|\propto\sigma^{p}$ with $p=2.00$, confirming the quadratic scaling
+empirically over a factor of four in $\sigma$.  (These measured points use a
+deeper correction on favorable seeds than the ensemble line, so they verify
+the slope rather than the absolute floor.)  Each line should be read as the
+center of a band rather than a curve: at fixed $\sigma$ the false EDM varies by
+more than an order of magnitude with the symmetric/antisymmetric content of the
+pattern (Sec.~\ref{sec:bilinear}), so the rms alone does not determine the
+signal.}
 \label{fig:suppression}
 \end{figure}
 
@@ -789,17 +795,41 @@ raw  & ---  & ---  & $356\times$ & $356\times$ \\
 \label{sec:chainclose}
 
 The $17$--$28\times$ residual of the measured-matrix run is not the symmetric
-floor.  Decomposing the third-pass residual with the channel method of
-Sec.~\ref{sec:bilinear}: the symmetric part contributes $3.5\times$ the
-target, the antisymmetric part --- a $\sim\!2~\mu$m leftover of the
-still-imperfect horizontal centering --- contributes $16\times$, and cross
-terms account for the remainder, in the ordering expected from
-Eq.~(\ref{eq:channels}).  The antisymmetric leftover is orbit-visible, and a
-single standard orbit correction removes it: applied to the BBA residual, it
-brings the single-beam false EDM from $28\times$ to $0.03$--$0.8\times$ the
-target, depending on the correction depth.  Scaling the corrected residual
-down confirms a clean $\sigma^{2}$ dependence with no additive floor over the
+floor.  This is the central point of the whole scheme, and
+Fig.~\ref{fig:bbaconv} makes it visible: across the BBA passes the symmetric
+residual falls steadily (the vertical component to below the target-equivalent
+level), yet the false EDM $|f|$ does not follow it down --- it stalls near
+$20\times$ and even scatters upward, because $f$ is a signed bilinear quantity
+dominated by a different component of the residual.  Decomposing the
+third-pass residual with the channel method of Sec.~\ref{sec:bilinear} shows
+what that component is: the symmetric part contributes $3.5\times$ the target,
+the antisymmetric part --- a $\sim\!2~\mu$m leftover of the still-imperfect
+horizontal centering --- contributes $16\times$, and cross terms account for
+the remainder, in the ordering expected from Eq.~(\ref{eq:channels}).  So BBA
+does the job only it can do --- reaching the orbit-blind symmetric part --- but
+leaves an antisymmetric residue at its per-magnet precision floor that more
+passes do not remove.  That leftover is orbit-visible, and a single standard
+orbit correction removes it: applied to the BBA residual, it brings the
+single-beam false EDM from $28\times$ to $0.03$--$0.8\times$ the target,
+depending on the correction depth.  Scaling the corrected residual down
+confirms a clean $\sigma^{2}$ dependence with no additive floor over the
 tested range.
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{fig_orbit_bba_convergence.png}
+\caption{Beam-based alignment lowers the symmetric misalignment but stalls on
+the antisymmetric residue (measured-matrix BBA under $1\%$ $\beta$-beating,
+C++ tracking).  Blue/cyan (left axis): the symmetric residual of the two
+planes falls steadily with each pass, the vertical one below the
+target-equivalent level --- BBA reaches the orbit-blind component that
+response-matrix inversion cannot.  Red (right axis): the false EDM $|f|$
+nonetheless stalls near $20\times$ the target, because it is dominated by the
+orbit-visible antisymmetric residue ($\sim\!2~\mu$m); the channel
+decomposition of the third-pass residual gives $f_{\rm anti}=16\times \gg
+f_{\rm sym}=3.5\times$.  A single final orbit correction removes that residue
+(green star), bringing $|f|$ below the target for this seed.}
+\label{fig:bbaconv}
+\end{figure}
 
 The resulting picture is consistent and complementary: \emph{orbit
 correction removes the antisymmetric channels of Eq.~(\ref{eq:channels});
