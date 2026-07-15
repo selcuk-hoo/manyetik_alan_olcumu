@@ -165,6 +165,15 @@ alt-uzay yapısı** açık bırakılmış. Net olmayan üç nokta:
    dejenerasyonun ne kadar kırıldığı makalede **nicelenmiş değil**. Eğer kırılmıyorsa
    Eq. (C2)'nin ekstra bastırması beklenenden az olur.
 
+   > **⛔ DÜZELTME (2026-07-15, doğrudan C++ testi — bkz. §11):** Yukarıdaki
+   > çıkarımın YÖNÜ YANLIŞTI. Dejenerasyon (CCW≡CW+flip) Eq. C2'yi zayıflatmaz,
+   > tam tersine **egzakt yapar**: [CW−CCW]₊g = −[CW−CCW]₋g olduğundan 4'lü
+   > kombinasyon sahte EDM'i **birebir sıfırlar** (ölçüm: 871× → −0.02×).
+   > Gerçek EDM dejenerasyona uymadığı (E-alan kökenli: terslemede tek,
+   > flip'te çift) için hayatta kalır. "Ek iptal vermiyor" ifadesi 4'lünün
+   > 2'liden farksız olduğu izlenimi veriyordu — oysa 2'li 87× artık bırakır,
+   > 4'lü sıfırlar.
+
 2. **Simetrik (orbit-kör) artık.** Omarov kontrolü **CR-ayrım** üzerinden kuruyor;
    ama simetrik misalignment (QF/QD aynı-işaret, yüksek-k) **küçük CR-ayrımı**
    üretir (orbit-kör) → dipole-korektör/SQUID-BPM **göremez**. Bizim ölçtüğümüz:
@@ -306,3 +315,52 @@ küçültmeyle hedefin altına indirdiğini **fiziksel olarak** gösteriyor (Fig
 > (`measure_false_edm`, 4D-CO + model-fit). Yön/polarite: `CFG["direction"]=±1`,
 > `CFG["g0"]/["g1"]=±0.21`. Gerçek EDM: `fields.EDMSwitch=1.0`. σ-testi p=2.00 ile
 > estimator doğrulanmıştır.
+
+---
+
+## 11. Eq. C2 DOĞRUDAN TEST (2026-07-15): 4'lü kombinasyon idealize latiste EGZAKT; tilt bozmuyor; flip-kalibrasyonu asıl gereksinim
+
+**Motivasyon:** Kullanıcı, Omarov Fig. 9 ("CW/CCW+flip sahte EDM'i sinyal
+seviyesine indirir") ile bizim bulgular ("flip fayda etmiyor, CW/CCW <1 mertebe")
+arasındaki tutarsızlığı sordu. Doğrudan test: sabit 10 μm desen (seed 1), dört
+konfigürasyon, C++ spin izleyici (`fast_est.fast_measure`, direction/gflip/gscale).
+
+**Sonuçlar (× hedef):**
+
+| konfigürasyon | idealize | +1 mrad tilt | +ε=10⁻³ flip hatası |
+|---|---|---|---|
+| f_CW | +870.90 | +889.03 | — |
+| f_CCW | +696.36 | +672.12 | — |
+| f_CW(−g) | +696.28 | +672.19 | +686.22 |
+| f_CCW(−g) | +870.91 | +888.79 | +864.30 |
+| **ayna testi** f_CCW−f_CW(−g) | +0.08 | −0.07 | — |
+| **Eq. C1 2'li** (CW−CCW)/2 | 87.3 | 108.5 | — |
+| **Eq. C2 4'lü** | **−0.02** | **+0.08** | **−0.89** |
+
+**Çıkarımlar:**
+
+1. **Tutarsızlık yok.** Omarov'un TAM reçetesi (Eq. C2) sahte EDM'i idealize
+   latiste **egzakt** siler (871× → 0.02×, estimator tabanı). Ayna dejenerasyonu
+   (CCW(g) ≡ CW(−g), %0.01 hassasiyetle doğrulandı) iptali garanti eder:
+   [CW−CCW]₊g = −[CW−CCW]₋g. Gerçek EDM (E-kökenli; terslemede tek, flip'te
+   çift) dejenerasyona uymaz → C2'den sağ çıkar (Eq. C1 doğrulaması: ±9.8e-10).
+2. **Eski bulgularımız yanlış değil, eksik kombinasyondu:** "flip fayda etmiyor"
+   = tek-demet flip (f(−g)/f(+g)≈0.8, iptal yok — doğru); "CW/CCW <1 mertebe" =
+   2'li fark (87×/108× artık — doğru). 4'lü diferansiyel hiç test edilmemişti.
+3. **Tilt (1 mrad) ayna simetrisini BOZMUYOR** → β-beat dahil tüm *göreli*
+   manyetik-latis kusurları da bozmaz (aynı yön-tersleme argümanı; akım
+   çevrildiğinde geometri-kaynaklı alan hataları da çevrilir).
+4. **C2'nin gerçek gereksinimleri manyetik-latis-DIŞI:** ölçülen duyarlılık
+   **artık ≈ 885× × ε** (ε = flip bağıl akım hatası). Ham makinede (871×)
+   hedef-altı kalmak için **ε ≲ 10⁻⁴** akım tekrarlanabilirliği gerekir. Ayrıca:
+   dört konfigürasyon arasında hizalama kayması, flip'le dönmeyen ortam/artık
+   alanlar, E-deflektör kusurları — hepsi ayna-dışı, hepsi C2 artığı bırakır.
+5. **BBA+OC'nin yeni konumu (savunma derinliği):** C2 artığı kaynaktaki sahte
+   EDM ile orantılı → BBA+OC kaynağı ~10³× düşürünce C2'nin tekrarlanabilirlik
+   gereksinimleri aynı oranda gevşer (ε=10⁻³ bile ~0.001× hedef bırakır).
+   Makalenin CW/CCW bölümü bu çerçeveyle güncellenecek (kullanıcı onayı bekliyor).
+
+> **Reprodüksiyon:** `/tmp/omarov_ideal_sym.py` (idealize 4'lü),
+> `/tmp/omarov_sym_tilt.py` + `/tmp/omarov_tilt2.py` (tilt),
+> `/tmp/flip_calib.py` (ε=10⁻³). `fast_est.fast_measure`'a `gscale` parametresi
+> eklendi (flip-kalibrasyon hatası: `gflip=True, gscale=1+ε`).
