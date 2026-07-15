@@ -2,6 +2,10 @@ __pycache__/
 *.pyc
 *.npy
 *.npz
+# İstisna: pipeline'ın gerektirdiği tepki matrisleri repoda tutulur
+# (latise bağlı, deterministik; her ortamda yeniden üretmeye gerek kalmasın)
+!R_dx_1.npy
+!R_dy_1.npy
 *.csv
 scan_quad_tilt.png
 simulation_data.txt
