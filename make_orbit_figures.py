@@ -124,57 +124,72 @@ plt.rcParams.update({"font.size": 11, "figure.dpi": 150,
 #   σ=10 μm'de ham≈1000×, +CW/CCW→474×, +orbit-düzeltme→62× hedef; f ∝ σ².
 # ═════════════════════════════════════════════════════
 
-# C++ izleyiciyle ölçülen orbit-düzeltme sonrası sahte-EDM (× hedef), her σ'da
-# 3 taze seed (10,11,12), derin kesik-SVD yörünge düzeltmesi (rcond=0.01);
-# kaynak: /tmp/sigma5_corrected.py, /tmp/sigma20_corrected.py (fast_est C++).
-# Bu noktalar σ² EĞİMİNİ doğrular; mutlak taban seed'e bağlı saçılır (bkz. metin).
-MEAS_SIGMA_UM = np.array([5.0, 10.0, 20.0])
+# ── C++ izleyiciyle ÖLÇÜLEN ensemble noktaları (× hedef) ──
+# RAW: düzeltme yok, 3 seed; kaynak paper_runs_results.json ["sigma"] (kmod_drivers).
+RAW_F = {2.5: [67.7, 3.6, 99.1],
+         5.0: [271.4, 14.5, 396.6],
+         10.0: [1089.0, 58.2, 1587.2]}
+# ORBIT-CORR: derin kesik-SVD (rcond=0.01), 3 seed (10,11,12); her σ'da fast_est C++.
+# kaynak: /tmp/sigma5_corrected.py, /tmp/sigma20_corrected.py.
 MEAS_F = {5.0:  [0.52, 0.62, 1.42],
           10.0: [1.79, 2.72, 5.73],
           20.0: [7.36, 11.09, 23.13]}
+# Standart-derinlik yörünge düzeltmesi + CW/CCW ENSEMBLE tabanı (σ=10, çok seed);
+# muhafazakâr taban referansı (omarov.md §10; Tablo tab:chain 2. satır).
+ENS_FLOOR_SIGMA, ENS_FLOOR_F = 10.0, 62.0
+
+
+def _sig_fit(data):
+    """log f = p log σ + c uydur; medyan/min/max döndür."""
+    sig = np.array(sorted(data))
+    xs = np.array([s for s in sig for _ in data[s]])
+    ys = np.array([f for s in sig for f in data[s]])
+    p, c = np.polyfit(np.log(xs), np.log(ys), 1)
+    med = np.array([np.median(data[s]) for s in sig])
+    lo  = np.array([np.min(data[s]) for s in sig])
+    hi  = np.array([np.max(data[s]) for s in sig])
+    return sig, med, lo, hi, p, c
 
 
 def fig_suppression():
     sigma = np.logspace(0, 2, 200)          # 1–100 μm
-    scale = (sigma / 10.0) ** 2
-    raw, cwccw, corrected = 1000.0 * scale, 474.0 * scale, 62.0 * scale
 
-    # ── ölçülen noktalar + σ² eğim uydurma ──
-    xs = np.array([s for s in MEAS_SIGMA_UM for _ in MEAS_F[s]])
-    ys = np.array([f for s in MEAS_SIGMA_UM for f in MEAS_F[s]])
-    p_fit, c_fit = np.polyfit(np.log(xs), np.log(ys), 1)  # log f = p log σ + c
-    med = np.array([np.median(MEAS_F[s]) for s in MEAS_SIGMA_UM])
-    lo  = np.array([np.min(MEAS_F[s]) for s in MEAS_SIGMA_UM])
-    hi  = np.array([np.max(MEAS_F[s]) for s in MEAS_SIGMA_UM])
+    r_sig, r_med, r_lo, r_hi, r_p, r_c = _sig_fit(RAW_F)
+    m_sig, m_med, m_lo, m_hi, m_p, m_c = _sig_fit(MEAS_F)
 
-    fig, ax = plt.subplots(figsize=(7.0, 5.2))
-    ax.loglog(sigma, raw, "-", color="#888", lw=2,
-              label="raw false EDM (no correction)")
-    ax.loglog(sigma, cwccw, "-", color="tab:orange", lw=2,
-              label="+ CW/CCW difference (×3.4)")
-    ax.loglog(sigma, corrected, "-", color="tab:blue", lw=2.5,
-              label="+ orbit correction (ensemble $+$ CW/CCW)\n"
-                    "$\\to$ symmetric, orbit-blind floor")
-    for y, c in ((1000, "#888"), (474, "tab:orange"), (62, "tab:blue")):
-        ax.plot(10, y, "o", color=c, ms=7, zorder=5)
+    fig, ax = plt.subplots(figsize=(7.2, 5.4))
 
-    # ölçülen orbit-düzeltme noktaları (derin SVD, 3 seed) — σ² doğrulaması
-    ax.loglog(sigma, np.exp(c_fit) * sigma ** p_fit, "--", color="tab:green",
-              lw=1.3, zorder=4)
-    ax.errorbar(MEAS_SIGMA_UM, med,
-                yerr=[med - lo, hi - med], fmt="s", color="tab:green",
-                ms=8, capsize=4, zorder=6, ecolor="tab:green",
-                label=f"measured (deep-SVD orbit corr., 3 seeds)\n"
-                      f"$\\to$ $\\sigma^2$ slope verified, $p={p_fit:.2f}$")
+    # RAW — ölçülen ensemble (düzeltme yok)
+    ax.loglog(sigma, np.exp(r_c) * sigma ** r_p, "-", color="#888", lw=1.6,
+              zorder=3)
+    ax.errorbar(r_sig, r_med, yerr=[r_med - r_lo, r_hi - r_med],
+                fmt="o", color="#555", ms=8, capsize=4, zorder=6,
+                ecolor="#999",
+                label=f"raw false EDM, measured (3 seeds)\n"
+                      f"$\\to$ $\\sigma^2$, $p={r_p:.2f}$ (no correction)")
+
+    # ORBIT-CORR — ölçülen (derin SVD)
+    ax.loglog(sigma, np.exp(m_c) * sigma ** m_p, "--", color="tab:green",
+              lw=1.6, zorder=3)
+    ax.errorbar(m_sig, m_med, yerr=[m_med - m_lo, m_hi - m_med],
+                fmt="s", color="tab:green", ms=8, capsize=4, zorder=6,
+                ecolor="tab:green",
+                label=f"deep-SVD orbit correction, measured (3 seeds)\n"
+                      f"$\\to$ $\\sigma^2$, $p={m_p:.2f}$")
+
+    # muhafazakâr ensemble tabanı (std. düzeltme + CW/CCW), tek referans nokta
+    ax.plot(ENS_FLOOR_SIGMA, ENS_FLOOR_F, "D", color="tab:blue", ms=9,
+            zorder=7, label="ensemble floor, std. correction $+$ CW/CCW\n"
+                            "(conservative; multi-$\\sigma$ ensemble in progress)")
 
     ax.axhline(1.0, color="tab:red", ls="--", lw=1.5)
-    ax.text(1.1, 1.25, "target: $10^{-29}\\,e\\!\\cdot\\!$cm  (1 nrad/s)",
+    ax.text(1.1, 1.3, "target: $10^{-29}\\,e\\!\\cdot\\!$cm  (1 nrad/s)",
             color="tab:red", fontsize=10)
-    s_cross = 10.0 / np.sqrt(62.0)
+    s_cross = 10.0 / np.sqrt(ENS_FLOOR_F)
     ax.axvline(s_cross, color="tab:blue", ls=":", lw=1.2)
     ax.annotate(f"$\\sigma_{{sym}} \\approx {s_cross:.1f}\\,\\mu$m needed\n"
                 "(not verifiable from the orbit)",
-                xy=(s_cross, 1.0), xytext=(1.6, 0.06), fontsize=9,
+                xy=(s_cross, 1.0), xytext=(1.5, 0.05), fontsize=9,
                 arrowprops=dict(arrowstyle="->", color="tab:blue"))
 
     ax.set_xlabel("rms quadrupole misalignment $\\sigma$  [μm]")
@@ -182,15 +197,16 @@ def fig_suppression():
     sec = ax.secondary_yaxis("right",
                              functions=(lambda v: v * 1e-29, lambda v: v / 1e-29))
     sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]")
-    ax.set_title("Achievable false-EDM suppression by orbit-based correction\n"
-                 "(false EDM scales as $\\sigma^2$; slope verified: $p = 2.00 \\pm 0.01$)",
-                 fontsize=11)
-    ax.legend(loc="upper left", fontsize=8.5)
-    ax.set_xlim(1, 100); ax.set_ylim(3e-2, 2e5)
+    ax.set_title("False-EDM suppression by orbit-based correction, from tracking\n"
+                 "(both stages measured; $\\sigma^2$ scaling verified, "
+                 "$p = 2.00$)", fontsize=11)
+    ax.legend(loc="lower right", fontsize=8.2)
+    ax.set_xlim(1, 100); ax.set_ylim(2e-2, 1e5)
     fig.tight_layout()
     fig.savefig("fig_orbit_suppression.png")
     plt.close(fig)
-    print(f"fig_orbit_suppression.png yazıldı (ölçülen σ² eğimi p={p_fit:.3f})")
+    print(f"fig_orbit_suppression.png yazıldı "
+          f"(raw p={r_p:.3f}, orbit-corr p={m_p:.3f})")
 
 
 # ═════════════════════════════════════════════════════
