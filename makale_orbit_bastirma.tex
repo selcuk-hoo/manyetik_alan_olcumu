@@ -37,20 +37,27 @@ In the storage ring proposed for measuring the proton electric dipole moment
 (EDM), quadrupole misalignments of a few microns generate, through a geometric
 (Berry) phase, a vertical spin-precession signal that mimics a genuine EDM and
 exceeds the target sensitivity of $10^{-29}\,e\!\cdot\!$cm by up to three
-orders of magnitude.  Using symplectic spin tracking, we examine how far this
-false signal can be removed by measuring and correcting the beam orbit.  We
-find that standard orbit correction alone does not guarantee suppression: the
-misalignment pattern separates into an orbit-visible antisymmetric component
-and a symmetric component to which the orbit response is nearly blind (up to
-two orders of magnitude weaker mode by mode), and the false EDM is a bilinear
-functional of the two transverse misalignment patterns, so that it cannot be
-characterized by a single rms alignment tolerance.  Null-finding beam-based
-alignment reaches the symmetric component that response-matrix inversion
-cannot; combined with orbit correction, it suppresses the false EDM from
-several hundred times the target to the target level in our simulations.  We
-quantify the remaining requirements: the fidelity of the steering optics
-model, the re-alignment cadence against alignment drift, and the stability of
-the magnetic centers under gradient modulation, which is not yet modeled.
+orders of magnitude.  The proposed program controls this systematic with
+beam-based alignment (BBA) and a four-fold measurement --- the
+counter-rotating--beam difference repeated at reversed quadrupole polarity ---
+that cancels it exactly when the machine is identical between the two polarity
+states.  Using symplectic spin tracking, we determine the place of standard
+orbit correction within this program.  The false EDM is a bilinear functional
+of the two transverse misalignment patterns, which separate into an
+orbit-visible antisymmetric component and a symmetric component to which the
+orbit response is weaker by up to two orders of magnitude, mode by mode.  From
+this we find, first, that orbit correction cannot replace BBA: the symmetric
+component is invisible to every orbit-based readout we test, including the
+counter-rotating separation, whereas null-finding BBA reaches it.  Second, that
+added to BBA it can replace the polarity reversal: the four-fold cancellation,
+though exact in principle, is undone by a micron-scale symmetric alignment
+drift between the two sequential polarity states --- a drift the orbit cannot
+sense and only BBA can bound --- while orbit correction removes the
+antisymmetric channel continuously, reaching the target after BBA without the
+second, polarity-reversed pass of the experiment.  We quantify the remaining
+requirements: the fidelity of the steering optics model, the BBA re-alignment
+cadence against drift, and the stability of the magnetic centers under
+gradient modulation and polarity reversal, which is not yet modeled.
 \end{abstract}
 
 \maketitle
@@ -140,81 +147,78 @@ gradients make the two transverse planes behave identically in the idealized
 lattice, with betatron tunes $Q_x \approx Q_y \approx 2.3$ (the tune is the
 number of transverse oscillations per revolution).
 
-\subsection{Orbit-based alignment as the natural remedy}
+\subsection{The proposed control program and the question of this paper}
 \label{sec:remedy}
 
-Since the false EDM originates in the beam--quadrupole offsets, the natural
-strategy is to measure and correct them using the beam itself.  This is
-standard accelerator practice.  The closed orbit --- the periodic trajectory
-about which the stored beam oscillates --- is read continuously by beam
-position monitors (BPMs), located in our model at each of the 48 quadrupoles.
-Misaligned quadrupoles deflect the closed orbit, and the deflections are
-related to the offsets through the orbit response matrix; correcting the orbit
-with steering elements, guided by the singular-value decomposition of that
-matrix, has been routine since the work of Chung, Decker, and
-Evans~\cite{chung1993}.  Beyond orbit correction, the accelerator community
-locates individual quadrupole centers by \emph{beam-based alignment} (BBA):
-the quadrupole gradient is varied and the beam position at which the orbit
-stops responding marks the magnetic center, a procedure that has been
-accelerated with ac excitation~\cite{marti} and parallelized over many
-magnets~\cite{huang}.  Related tools include orbit-response modeling in the
-presence of degeneracy~\cite{wegscheider}, correction schemes exploiting
-lattice symmetry~\cite{mirza}, and on-line response-matrix
-refinement~\cite{ziemann}.  None of the measurement techniques examined in
-this paper is new in itself; building on the ring design and systematic-error
-analysis of Ref.~\cite{omarov}, we quantify how these standard tools perform
-on the specific misalignment component that drives the false EDM in this
-ring, and what alignment program they add up to --- an answer that turns out
-to be structured.
+The design study of Ref.~\cite{omarov} already specifies a program to control
+this systematic, with two ingredients.  The first is \emph{beam-based
+alignment} (BBA): the accelerator community locates individual quadrupole
+centers by varying the quadrupole gradient and finding the beam position at
+which the orbit stops responding, a procedure accelerated with ac
+excitation~\cite{marti} and parallelized over many magnets~\cite{huang}.  The
+second is a \emph{four-fold measurement}: the genuine EDM is odd under beam
+reversal, so the counter-rotating difference of the two stored beams isolates
+it from common-mode systematics [Eq.~(C1) of Ref.~\cite{omarov}], and
+repeating that difference with the polarity of all focusing quadrupoles
+reversed [its Eq.~(C2)] cancels the magnetic-lattice false EDM exactly ---
+provided the machine presents the same misalignment in both polarity states.
+This four-fold cancellation is powerful, but it is not free: the two polarity
+states cannot be stored at once, so the experiment must be run a second time
+at reversed polarity, and, as we show in Sec.~\ref{sec:polarity}, the
+cancellation is undone by any change of alignment between the two runs.
+
+Against this backdrop the natural question is what \emph{standard orbit
+correction} --- flattening the closed orbit with steering elements, guided by
+the singular-value decomposition of the response matrix, routine since the
+work of Chung, Decker, and Evans~\cite{chung1993}, and continuous and
+non-invasive during data taking --- can contribute.  The closed orbit is read
+by beam position monitors (BPMs) at each of the 48 quadrupoles; related tools
+include orbit-response modeling under degeneracy~\cite{wegscheider}, symmetry
+correction~\cite{mirza}, and on-line response-matrix
+refinement~\cite{ziemann}.  None of these techniques is new in itself.  What
+we examine is how each performs on the specific misalignment component that
+drives the false EDM in this ring, and the result is structured: it fixes both
+what orbit correction \emph{cannot} do (replace BBA) and what it \emph{can}
+(replace the polarity reversal).
 
 \subsection{Findings and outline}
 \label{sec:outline}
 
 Three results organize the paper.
 
-First, \emph{standard orbit correction alone does not guarantee suppression of
-the false EDM} (Sec.~\ref{sec:mechanism}).  The misalignment pattern separates
-into two components with sharply different orbit visibility: an
-\emph{antisymmetric} component (neighboring QF and QD displaced oppositely),
-which produces a large orbit distortion and is removed by orbit correction,
-and a \emph{symmetric} component (QF and QD displaced together), whose orbit
-signature is strongly suppressed --- by up to two orders of magnitude mode by
-mode --- and which therefore survives correction.  The false EDM is a bilinear functional of the horizontal
-and vertical misalignment patterns, and the surviving symmetric--symmetric
-term sets the post-correction floor.  An immediate corollary is that the false
-EDM cannot be characterized by a single rms alignment tolerance: at fixed
-$\sigma$ its value varies by more than an order of magnitude with the
-symmetric/antisymmetric content of the pattern.
+First, \emph{the false EDM has a structure that a single alignment tolerance
+cannot capture} (Sec.~\ref{sec:mechanism}).  It is a bilinear functional of the
+horizontal and vertical misalignment patterns, and each pattern separates into
+an \emph{antisymmetric} component (neighboring QF and QD displaced oppositely),
+which produces a large orbit distortion, and a \emph{symmetric} component (QF
+and QD displaced together), whose orbit signature is suppressed by up to two
+orders of magnitude mode by mode.  Orbit correction removes the antisymmetric
+component and leaves the symmetric one; at fixed rms $\sigma$ the false EDM
+varies by more than an order of magnitude with which component the misalignment
+carries.
 
-Second, \emph{the symmetric component cannot be recovered from orbit readings
-by response-matrix inversion or amplitude-readout techniques}
-(Sec.~\ref{sec:inverse}), for reasons that are coherent and therefore
-independent of BPM technology.  The counter-rotating beam separation of
-Ref.~\cite{omarov} shares this property of the orbit.
+Second, \emph{orbit correction cannot replace BBA} (Sec.~\ref{sec:inverse}).
+The symmetric component cannot be recovered from orbit readings by
+response-matrix inversion or amplitude-readout techniques, for coherent reasons
+independent of BPM technology, and the counter-rotating beam separation, being
+an orbit observable, shares this blindness.  Null-finding BBA, which locates
+each magnetic center by a local zero crossing rather than a global inverse, is
+not subject to the visibility gap and does reach the symmetric component
+(Sec.~\ref{sec:bba}).
 
-Third, \emph{null-finding BBA, followed by a final orbit correction, does
-reach the symmetric component} (Sec.~\ref{sec:bba}).  BBA locates each
-magnetic center by a zero-crossing rather than by inverting a matrix, and is
-therefore not subject to the visibility gap; the final orbit correction
-removes the antisymmetric residue that BBA leaves behind.  In our tracking
-simulations the combination suppresses the false EDM from several hundred
-times the target to the target level, where each operation alone stalls an
-order of magnitude or more above it.
-
-These results fix the place of orbit correction within the alignment program
-of Ref.~\cite{omarov}, which combines BBA with a four-fold measurement --- the
-counter-rotating difference repeated at reversed quadrupole polarity --- that
-cancels the magnetic-lattice false EDM exactly when the machine is identical
-between the two polarity states.  We find, first, that orbit correction cannot
-substitute for BBA, because the symmetric component is invisible to the orbit
-in every configuration; and second, that added to BBA it can substitute for
-the polarity reversal, removing the antisymmetric channel continuously and
-without a second pass of the experiment, while BBA supplies the symmetric
-alignment that the polarity cancellation itself requires to survive drift
-(Sec.~\ref{sec:polarity}).
+Third, \emph{added to BBA, orbit correction can replace the polarity reversal}
+(Sec.~\ref{sec:polarity}).  The four-fold combination cancels the false EDM
+exactly when the machine is identical in the two polarity states, but that
+identity is fragile: a micron-scale symmetric alignment drift between the two
+sequential states re-opens the false EDM to tens of times the target, and that
+drift is invisible to the orbit --- only BBA bounds it.  Orbit correction
+removes the antisymmetric channel continuously, so that after BBA the
+drift-free counter-rotating difference alone reaches the target, without the
+second polarity-reversed pass of the experiment.  BBA is thus required on
+either path, and orbit correction is what stands in for the polarity reversal.
 
 Section~\ref{sec:operation} examines the operational side --- alignment drift,
-counter-rotating beams, the polarity reversal, and the time budget --- and
+the re-alignment cadence, and the time budget --- and
 Sec.~\ref{sec:conclusions} collects the conclusions.  The simulation
 infrastructure and the spin-signal estimator, on which all quantitative
 statements rest, are described first in Sec.~\ref{sec:method}.
@@ -299,7 +303,7 @@ retains the common betatron component induced by the orbit offset itself and
 fails by orders of magnitude.}
 
 % ═══════════════════════════════════════════════════════════════════
-\section{Why orbit correction alone is not sufficient}
+\section{What orbit correction removes, and the floor it leaves}
 \label{sec:mechanism}
 
 \subsection{The residual after standard correction}
@@ -310,7 +314,7 @@ EDM is of order $10^{3}$ times the target [Eq.~(\ref{eq:target})]; a
 representative pattern used throughout this paper gives $356\times$.  Standard
 orbit correction --- flattening the closed orbit with steering correctors ---
 reduces the ensemble median by a factor of about eight; combined with the
-counter-rotating--beam difference discussed in Sec.~\ref{sec:operation}, the
+counter-rotating--beam difference discussed in Sec.~\ref{sec:polarity}, the
 residual is about $62\times$ the target
 ($\approx 6\times10^{-28}\,e\!\cdot\!$cm), scaling as $\sigma^{2}$
 (Fig.~\ref{fig:suppression}).  Orbit correction is thus effective but not
@@ -665,40 +669,31 @@ calibrate-then-monitor strategy (LOCO followed by drift monitoring) tracks
 $50~\mu$m BPM offsets) but passes through the same response matrix and is
 equally blind to the symmetric one.
 
-\emph{Counter-rotating beams, polarity switching, and the tune.}  The control
-chain of Ref.~\cite{omarov} monitors the \emph{separation} of the two
-counter-rotating (CR) closed orbits and reduces it with correctors.  The CR
-separation, however, is itself an orbit observable and inherits the orbit's
-visibility structure: in our tracking the antisymmetric-to-symmetric
-signature ratio is $5.7\times$ in a single-beam orbit and $8.0\times$ in the
-CR separation (an independent pattern set gives $3.8\times$ and $4.5\times$)
-[Fig.~\ref{fig:crsep}] --- the CR separation opens no additional window on
-the symmetric component.  A related question is why the beam-reversal
-comparison does not cancel the geometric phase outright.  In the idealized
-periodic lattice we measure the reversed beam to be exactly equivalent to the
-forward beam with all quadrupole polarities flipped (ratio $1.00$); and the
-polarity flip is \emph{not} a symmetry of the geometric phase, because the
-phase is an ordered accumulation of non-commuting precessions --- reversing
-the traversal order is not equivalent to reversing the sign.  Measured flip
-ratios $f(-g)/f(+g)$ of $+2.8$, $+0.85$, and $+1.17$ for symmetric,
-antisymmetric, and generic patterns confirm that the phase is approximately
-even in the gradient but with pattern-dependent deviations; consequently the
-CW/CCW difference cancels a pattern-dependent fraction of the false EDM ---
-a factor $\sim\!3$ in practice (Sec.~\ref{sec:operation}) --- rather than all
-of it, and polarity switching provides no independent cancellation knob for
-the quadrupole-alignment geometric phase (it remains effective against
-systematics that are odd in the gradient).  Finally, raising the betatron
-tune toward the symmetric kick harmonic would make the symmetric component
-visible in principle; in practice the stopband limit ($180^\circ$ phase
-advance per cell) caps the tune at $Q \leq 12$, recovering only the
-fast-varying part of the symmetric family (its high azimuthal harmonics
-$m$, where $m$ indexes the harmonics \emph{within} the 24-dimensional
-symmetric subspace, the slowly-varying members requiring $Q \geq 16$), and
-the stronger gradients required ($0.21 \to 0.69$~T/m for $Q_y: 2.3 \to 10.3$)
-raise the false EDM itself steeply ($\sim\!g^{3}$, a measured factor of 32)
-while the genuine EDM signal, set by the electric field, is unchanged.  A
-further alternative outside the orbit toolbox --- operating slightly off the
-magic momentum to sense the geometric phase resonantly --- fails for reasons
+\emph{Counter-rotating beam separation and the tune.}  The control chain of
+Ref.~\cite{omarov} monitors the \emph{separation} of the two counter-rotating
+(CR) closed orbits and reduces it with correctors.  The CR separation,
+however, is itself an orbit observable and inherits the orbit's visibility
+structure: in our tracking the antisymmetric-to-symmetric signature ratio is
+$5.7\times$ in a single-beam orbit and $8.0\times$ in the CR separation (an
+independent pattern set gives $3.8\times$ and $4.5\times$)
+[Fig.~\ref{fig:crsep}] --- the CR separation opens no additional window on the
+symmetric component.  The polarity reversal of Ref.~\cite{omarov} is a
+different matter: it cancels the geometric phase directly, not through an orbit
+reading, and it does so for the symmetric component as well.  That cancellation
+is central to the present work, but it is exact only when the alignment is
+stable between the two polarity states; we return to it, and to the role
+orbit correction plays there, in Sec.~\ref{sec:polarity}.  Finally, raising
+the betatron tune toward the symmetric kick harmonic would make the symmetric
+component visible in principle; in practice the stopband limit ($180^\circ$
+phase advance per cell) caps the tune at $Q \leq 12$, recovering only the
+fast-varying part of the symmetric family (its high azimuthal harmonics $m$,
+where $m$ indexes the harmonics \emph{within} the 24-dimensional symmetric
+subspace, the slowly-varying members requiring $Q \geq 16$), and the stronger
+gradients required ($0.21 \to 0.69$~T/m for $Q_y: 2.3 \to 10.3$) raise the
+false EDM itself steeply ($\sim\!g^{3}$, a measured factor of 32) while the
+genuine EDM signal, set by the electric field, is unchanged.  A further
+alternative outside the orbit toolbox --- operating slightly off the magic
+momentum to sense the geometric phase resonantly --- fails for reasons
 detailed in Appendix~\ref{app:offmomentum}.
 
 \begin{figure}[tb]
@@ -923,32 +918,7 @@ BBA $+$ final orbit corr.      & $0.03$--$0.8\times$ & $\lesssim10^{-29}$ \\
 \end{table}
 
 % ═══════════════════════════════════════════════════════════════════
-\section{Operating the scheme: drift, counter-rotating beams, and the time
-budget}
-\label{sec:operation}
-
-An alignment campaign is useful only if its result survives on the machine.
-Quadrupole positions drift --- thermally and with ground motion --- so the
-corrected state of Sec.~\ref{sec:bba} is a snapshot, onto which the machine
-continuously re-loads random misalignment.
-We simulated this directly by adding fresh random offsets of rms
-$\sigma_{\rm d}$ to the corrected state and re-measuring the false EDM, with
-and without orbit feedback.
-
-Without any re-correction the false EDM returns quickly: $\sigma_{\rm d} =
-10~\mu$m restores hundreds of times the target.  With \emph{continuous orbit
-correction} --- routine, fast, and non-invasive on any storage ring --- the
-picture changes qualitatively, because random drift is shared between the
-two components and the orbit feedback continuously removes its antisymmetric
-part: the false EDM stays below the target for $\sigma_{\rm d}$ up to about
-$5~\mu$m ($0.05\times$ at $2~\mu$m, $0.3$--$0.6\times$ at $5~\mu$m) and
-reaches only a few times the target at $10~\mu$m.  Only the slowly
-accumulating \emph{symmetric} part of the drift requires a repetition of the
-BBA campaign.  The alignment therefore does not need to be \emph{held} at the
-micron level mechanically; it needs to be re-established at a cadence set by
-the symmetric drift rate.
-
-\subsection{Where orbit correction substitutes for the polarity reversal}
+\section{Orbit correction substitutes for the polarity reversal}
 \label{sec:polarity}
 
 The systematic-error program of Ref.~\cite{omarov} pairs beam-based alignment
@@ -1015,6 +985,31 @@ required on either path, and orbit correction is what stands in for the
 polarity reversal.  An ensemble determination of the residual on both paths is
 left for the multi-seed campaign.
 
+% ═══════════════════════════════════════════════════════════════════
+\section{Operating the scheme: drift and the time budget}
+\label{sec:operation}
+
+An alignment campaign is useful only if its result survives on the machine.
+Quadrupole positions drift --- thermally and with ground motion --- so the
+corrected state of Sec.~\ref{sec:bba} is a snapshot, onto which the machine
+continuously re-loads random misalignment.
+We simulated this directly by adding fresh random offsets of rms
+$\sigma_{\rm d}$ to the corrected state and re-measuring the false EDM, with
+and without orbit feedback.
+
+Without any re-correction the false EDM returns quickly: $\sigma_{\rm d} =
+10~\mu$m restores hundreds of times the target.  With \emph{continuous orbit
+correction} --- routine, fast, and non-invasive on any storage ring --- the
+picture changes qualitatively, because random drift is shared between the
+two components and the orbit feedback continuously removes its antisymmetric
+part: the false EDM stays below the target for $\sigma_{\rm d}$ up to about
+$5~\mu$m ($0.05\times$ at $2~\mu$m, $0.3$--$0.6\times$ at $5~\mu$m) and
+reaches only a few times the target at $10~\mu$m.  Only the slowly
+accumulating \emph{symmetric} part of the drift requires a repetition of the
+BBA campaign.  The alignment therefore does not need to be \emph{held} at the
+micron level mechanically; it needs to be re-established at a cadence set by
+the symmetric drift rate.
+
 These sensitivities translate into a time budget whose absolute numbers
 require one machine-specific input that simulation cannot supply: the drift
 rate.  The arithmetic is simple enough to display.  One BBA pass consists of
@@ -1037,78 +1032,76 @@ the drift rate is not far above the representative figure.  The unmodeled
 hardware floor --- magnetic-center motion under gradient modulation --- enters
 this budget as a repeatability limit of each BBA campaign and is the main
 open item on the operational side.
-
 % ═══════════════════════════════════════════════════════════════════
 \section{Conclusions}
 \label{sec:conclusions}
 
-The quadrupole-misalignment false EDM of the symmetric-hybrid proton EDM ring
-is controlled by the interplay of two misalignment components with sharply
-different orbit visibility.  The central conceptual result of this work is
-the bilinear four-channel structure of Eq.~(\ref{eq:channels}), which
-explains both why standard orbit correction stalls and which measurement
-completes it; the quantitative picture is as follows.
+The control program proposed for the symmetric-hybrid proton EDM ring pairs
+beam-based alignment with a four-fold measurement --- the counter-rotating
+difference at both quadrupole polarities --- that cancels the
+quadrupole-misalignment false EDM exactly~\cite{omarov}.  This work fixes the
+place of standard orbit correction within that program, and the answer is set
+by the bilinear four-channel structure of Eq.~(\ref{eq:channels}) and by the
+sharply different orbit visibility of the two misalignment components.  The
+quantitative picture is as follows.
 
-(1) Standard orbit-based control --- orbit flattening together with the
-counter-rotating--beam difference --- suppresses the false EDM by roughly an
-order of magnitude and no further: it removes the orbit-visible,
-antisymmetric component of the misalignment, and the weakly observable
-symmetric
-component sets a floor of $\sim\!6\times10^{-28}\,e\!\cdot\!$cm at
-$\sigma = 10~\mu$m, scaling as $\sigma^{2}$.
-
-(2) The false EDM is a bilinear functional of the two transverse misalignment
+(1) The false EDM is a bilinear functional of the two transverse misalignment
 patterns [Eq.~(\ref{eq:channels})], verified in tracking at the $0.1\%$
-level.  It is therefore not characterized by an rms tolerance: at fixed
-$\sigma$ it varies by more than an order of magnitude with the pattern.  More
-generally, a correction procedure changes the statistics of the misalignment
---- it converts random errors into a structured residual concentrated in the
-component the procedure cannot see --- so the driving question is not how
-small the residual is, but in which component it lies.
+level, and it separates into an orbit-visible antisymmetric part and a
+symmetric part to which the orbit response is weaker by up to two orders of
+magnitude, mode by mode.  It is therefore not characterized by an rms
+tolerance: at fixed $\sigma$ it varies by more than an order of magnitude with
+the pattern, and a correction procedure changes not the size but the
+\emph{component} in which the residual lies.
 
-(3) In our model, the symmetric component is unreachable from orbit readings
-by the inversion and amplitude-readout families of techniques, for coherent
-reasons (conditioning amplified by optics-model error; optics breathing) that
-improved BPM technology does not mitigate.  The counter-rotating beam separation, being an orbit
-observable, shares this blindness; polarity switching provides no independent
-cancellation for the quadrupole-alignment geometric phase; and tune elevation
-is capped by the stopband well below the symmetric kick harmonic.
+(2) Orbit correction cannot replace BBA.  In our model the symmetric component
+is unreachable from orbit readings by the inversion and amplitude-readout
+families of techniques, for coherent reasons (conditioning amplified by
+optics-model error; optics breathing) that improved BPM technology does not
+mitigate; the counter-rotating beam separation, being an orbit observable,
+shares this blindness, and tune elevation is capped by the stopband well below
+the symmetric kick harmonic.  Null-finding BBA is not subject to these limits,
+because it locates each magnetic center by a local zero crossing rather than
+through a global inverse; it requires a faithful \emph{horizontal} steering
+model --- an idealized model that neglects the horizontal focusing of the
+electric deflectors selects wrong correctors and stalls that plane --- and it
+leaves an antisymmetric residue that a final orbit correction removes.
 
-(4) Null-finding BBA is not subject to these limits, because it locates each
-magnetic center by a local zero crossing rather than through a global
-inverse.  It requires a faithful \emph{horizontal} steering model --- in this
-lattice the electric deflectors focus horizontally, and an idealized model
-that neglects this selects wrong correctors and stalls the horizontal plane
---- and it leaves an antisymmetric residue that a final orbit correction
-removes.  The full chain, BBA with measured-matrix steering plus orbit
-correction, suppresses the single-beam false EDM from $356\times$ to the
-target level in our simulations (single seed; multi-seed campaign in
-progress), with the CW/CCW difference contributing a further factor of
-$2$--$3$.  Two qualifications belong to this statement.  The ninefold gain of
-the measured over the idealized steering matrix is a property of the fidelity
-of the optics model supplied to the procedure, not of the algorithm, which is
-standard; and the chain assumes throughout that the magnetic centers remain
-stationary under the gradient modulation itself.
+(3) Added to BBA, orbit correction can replace the polarity reversal.  The
+four-fold cancellation is exact in principle --- in tracking it removes the
+false EDM of both misalignment components to the estimator floor,
+insensitively to quadrupole roll and $\beta$-beating --- but it requires the
+same alignment in the two sequential polarity states, and a symmetric
+misalignment drift of $1~\mu$m between them re-opens the false EDM to tens of
+times the target.  That drift is invisible to the orbit and outside the reach
+of continuous orbit feedback; its sensitivity falls with the ambient alignment
+level, so only a BBA-level symmetric alignment keeps the cancellation intact.
+Orbit correction, meanwhile, removes the antisymmetric channel --- the part
+the polarity difference would otherwise cancel --- continuously and without a
+second pass of the experiment: after BBA and orbit correction, the drift-free
+counter-rotating difference reaches $1.6\times$ the target for the
+representative seed, at the level the polarity reversal targets, without
+doubling the beam time and without exposing the measurement to the
+inter-configuration drift.  BBA is thus required on either path, and orbit
+correction is what stands in for the polarity reversal.
 
-(5) Operationally, the corrected state need not be held statically:
-continuous orbit correction absorbs random drift up to $\sim\!5~\mu$m rms,
-and only the symmetric drift component requires periodic re-alignment, at a
-cadence compatible with the statistical time scale of the experiment for
-drift rates of order $1~\mu$m/day.
+(4) Operationally, the corrected state need not be held statically:
+continuous orbit correction absorbs random antisymmetric drift up to
+$\sim\!5~\mu$m rms, and only the symmetric drift component requires periodic
+BBA re-alignment, at a cadence compatible with the statistical time scale of
+the experiment for drift rates of order $1~\mu$m/day.
 
-The paper thus both diagnoses the limitation of orbit-based control and
-demonstrates its resolution at the proof-of-principle level; it is not yet a
-tolerance document.  The principal open items are the magnetic-center
-stability under gradient modulation (the hardware floor of the BBA
-measurement, not yet modeled), the multi-seed distribution of the final
-residual, the ensemble determination of the CW/CCW factor, and the
-verification of the quantitative results on other lattice variants.  All
-numbers refer to the symmetric-hybrid ring designed for the proton EDM
-experiment~\cite{omarov}, in a linear model without sextupoles; the
-structural conclusions --- the visibility split, the bilinear channel
-decomposition, and the complementarity of orbit correction and BBA --- follow
-from the alternating-gradient principle on which that ring, like any
-strong-focusing machine, is built.
+The paper thus locates orbit correction within the proposed control program
+at the proof-of-principle level; it is not yet a tolerance document.  The
+principal open items are the magnetic-center stability under gradient
+modulation and under polarity reversal (the hardware floor, not yet modeled),
+the multi-seed distribution of the final residual, and the verification of the
+quantitative results on other lattice variants.  All numbers refer to the
+symmetric-hybrid ring designed for the proton EDM experiment~\cite{omarov}, in
+a linear model without sextupoles; the structural conclusions --- the
+visibility split, the bilinear channel decomposition, and the two roles of
+orbit correction --- follow from the alternating-gradient principle on which
+that ring, like any strong-focusing machine, is built.
 
 \begin{acknowledgments}
 %
