@@ -157,51 +157,39 @@ def fig_suppression():
     r_sig, r_med, r_lo, r_hi, r_p, r_c = _sig_fit(RAW_F)
     m_sig, m_med, m_lo, m_hi, m_p, m_c = _sig_fit(MEAS_F)
 
-    fig, ax = plt.subplots(figsize=(7.2, 5.4))
+    fig, ax = plt.subplots(figsize=(7.0, 5.0))
 
-    # RAW — ölçülen ensemble (düzeltme yok)
+    # RAW — ölçülen tek-demet (düzeltme yok)
     ax.loglog(sigma, np.exp(r_c) * sigma ** r_p, "-", color="#888", lw=1.6,
               zorder=3)
     ax.errorbar(r_sig, r_med, yerr=[r_med - r_lo, r_hi - r_med],
                 fmt="o", color="#555", ms=8, capsize=4, zorder=6,
                 ecolor="#999",
-                label=f"raw false EDM, measured (3 seeds)\n"
-                      f"$\\to$ $\\sigma^2$, $p={r_p:.2f}$ (no correction)")
+                label=f"raw (no correction): $p={r_p:.2f}$")
 
-    # ORBIT-CORR — ölçülen (derin SVD)
+    # ORBIT-CORR — ölçülen tek-demet
     ax.loglog(sigma, np.exp(m_c) * sigma ** m_p, "--", color="tab:green",
               lw=1.6, zorder=3)
     ax.errorbar(m_sig, m_med, yerr=[m_med - m_lo, m_hi - m_med],
                 fmt="s", color="tab:green", ms=8, capsize=4, zorder=6,
                 ecolor="tab:green",
-                label=f"deep-SVD orbit correction, measured (3 seeds)\n"
-                      f"$\\to$ $\\sigma^2$, $p={m_p:.2f}$")
+                label=f"after orbit correction: $p={m_p:.2f}$")
 
-    # muhafazakâr ensemble tabanı (std. düzeltme + CW/CCW), tek referans nokta
-    ax.plot(ENS_FLOOR_SIGMA, ENS_FLOOR_F, "D", color="tab:blue", ms=9,
-            zorder=7, label="ensemble floor, std. correction $+$ CW/CCW\n"
-                            "(conservative; multi-$\\sigma$ ensemble in progress)")
-
-    ax.axhline(1.0, color="tab:red", ls="--", lw=1.5)
-    ax.text(1.1, 1.3, "target: $10^{-29}\\,e\\!\\cdot\\!$cm  (1 nrad/s)",
-            color="tab:red", fontsize=10)
-    s_cross = 10.0 / np.sqrt(ENS_FLOOR_F)
-    ax.axvline(s_cross, color="tab:blue", ls=":", lw=1.2)
-    ax.annotate(f"$\\sigma_{{sym}} \\approx {s_cross:.1f}\\,\\mu$m needed\n"
-                "(not verifiable from the orbit)",
-                xy=(s_cross, 1.0), xytext=(1.5, 0.05), fontsize=9,
-                arrowprops=dict(arrowstyle="->", color="tab:blue"))
+    ax.axhline(1.0, color="tab:red", ls="--", lw=1.3)
+    ax.text(1.1, 1.3, "target ($10^{-29}\\,e\\!\\cdot\\!$cm)",
+            color="tab:red", fontsize=9.5)
 
     ax.set_xlabel("rms quadrupole misalignment $\\sigma$  [μm]")
-    ax.set_ylabel("false EDM  [units of target, $10^{-29}\\,e\\!\\cdot\\!$cm]")
+    ax.set_ylabel("single-beam false EDM  [units of target]")
     sec = ax.secondary_yaxis("right",
                              functions=(lambda v: v * 1e-29, lambda v: v / 1e-29))
     sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]")
-    ax.set_title("False-EDM suppression by orbit-based correction, from tracking\n"
-                 "(both stages measured; $\\sigma^2$ scaling verified, "
-                 "$p = 2.00$)", fontsize=11)
-    ax.legend(loc="lower right", fontsize=8.2)
-    ax.set_xlim(1, 100); ax.set_ylim(2e-2, 1e5)
+    ax.set_title("The false EDM scales as $\\sigma^2$ before and after orbit\n"
+                 "correction (single beam, tracking; slope verification)",
+                 fontsize=11)
+    ax.legend(loc="upper left", fontsize=9, title="measured, 3 seeds "
+              "(median, full spread)")
+    ax.set_xlim(1, 100); ax.set_ylim(2e-2, 3e3)
     fig.tight_layout()
     fig.savefig("fig_orbit_suppression.png")
     plt.close(fig)
@@ -220,7 +208,7 @@ def fig_modes():
     P_sym, _ = sym_anti_projectors()
     fsym = np.array([np.linalg.norm(P_sym @ Vt[i]) ** 2 for i in range(NQ)])
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.6))
+    fig, (ax2, ax1) = plt.subplots(1, 2, figsize=(10.5, 4.6))  # ax2=sol(gain), ax1=sağ(SVD)
 
     sc = ax1.scatter(np.arange(NQ), s / s[0], c=fsym, cmap="coolwarm",
                      vmin=0, vmax=1, s=42, edgecolors="k", linewidths=0.4)
@@ -306,39 +294,26 @@ def fig_breathing(eps=0.02, seed=0):
     A_own = ((Ri - R0m) @ e)[0]
     A_all = A_full[0, i_big]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.6))
+    ratio = abs(A_all / A_own)
+    fig, ax1 = plt.subplots(figsize=(6.4, 4.8))
 
     um = 1e6
-    ax1.scatter(dy * um, dy_fd_1 * um, s=28, color="tab:green", alpha=0.8,
+    ax1.scatter(dy * um, dy_fd_1 * um, s=30, color="tab:green", alpha=0.85,
                 label=f"no breathing (feed-down only): corr = {cf:+.3f}")
-    ax1.scatter(dy * um, dy_full_48 * um, s=28, marker="s", color="tab:purple",
+    ax1.scatter(dy * um, dy_full_48 * um, s=30, marker="s", color="tab:purple",
                 alpha=0.7, label=f"with breathing, 48 BPMs: corr = {c48:+.2f}")
-    ax1.scatter(dy * um, dy_full_1 * um, s=30, marker="x", color="tab:red",
+    ax1.scatter(dy * um, dy_full_1 * um, s=34, marker="x", color="tab:red",
                 label=f"with breathing, 1 BPM: corr = {c1:+.2f}")
     lim = 110
     ax1.plot([-lim, lim], [-lim, lim], "k--", lw=1)
     ax1.set_xlim(-lim, lim); ax1.set_ylim(-4 * lim, 4 * lim)
     ax1.set_xlabel("true quad offset $dy_j$  [μm]")
     ax1.set_ylabel("reconstructed offset  [μm]")
-    ax1.set_title("Per-quad AC modulation readout fails")
+    ax1.set_title("Per-quad AC-modulation readout fails: optics breathing\n"
+                  "swamps the feed-down signal ($%.0f\\times$ at the worst quad)"
+                  % ratio)
     ax1.legend(fontsize=8.5, loc="upper left")
 
-    ax2.bar([0, 1], [abs(A_all) * um, abs(A_own) * um],
-            color=["tab:red", "tab:green"], width=0.55)
-    ax2.set_xticks([0, 1])
-    ax2.set_xticklabels(["full machine\n(existing orbit from\nall 48 offsets)",
-                         "only own offset\n$dy_i$ (others ideal)"])
-    ax2.set_ylabel("demodulated amplitude at BPM  [μm]")
-    ax2.set_yscale("log")
-    ratio = abs(A_all / A_own)
-    ax2.set_title(f"The 'lever': modulating quad {i_big} moves the whole\n"
-                  f"pre-existing orbit — {ratio:.0f}× its own signal")
-    ax2.text(0.5, 0.62, "optics breathing:\ncoherent — does not\naverage away with\n"
-             "more BPMs or SQUIDs", transform=ax2.transAxes,
-             ha="center", fontsize=9, color="tab:red")
-
-    fig.suptitle("Distributed-frequency K-modulation: optics breathing dominates "
-                 "the per-quad amplitude", y=1.02, fontsize=12)
     fig.tight_layout()
     fig.savefig("fig_orbit_breathing.png", bbox_inches="tight")
     plt.close(fig)
