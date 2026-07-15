@@ -803,9 +803,15 @@ $20\times$ and even scatters upward, because $f$ is a signed bilinear quantity
 dominated by a different component of the residual.  Decomposing the
 third-pass residual with the channel method of Sec.~\ref{sec:bilinear} shows
 what that component is: the symmetric part contributes $3.5\times$ the target,
-the antisymmetric part --- a $\sim\!2~\mu$m leftover of the still-imperfect
-horizontal centering --- contributes $16\times$, and cross terms account for
-the remainder, in the ordering expected from Eq.~(\ref{eq:channels}).  So BBA
+the antisymmetric part --- a $\sim\!2~\mu$m residual centering error, largest
+in the horizontal plane, which remains the harder one at BBA's per-magnet
+precision floor even after the measured-matrix steering repair of
+Sec.~\ref{sec:bbareal} --- contributes $16\times$, and cross terms account for
+the remainder, in the ordering expected from Eq.~(\ref{eq:channels}).  (This
+residue is the ordinary precision floor of the centering, not the
+analytic-steering failure of Sec.~\ref{sec:bbareal}, which the measured matrix
+has already removed --- it is what cuts the antisymmetric channel from
+$\sim\!145\times$ to $\sim\!16\times$.)  So BBA
 does the job only it can do --- reaching the orbit-blind symmetric part --- but
 leaves an antisymmetric residue at its per-magnet precision floor that more
 passes do not remove.  That leftover is orbit-visible, and a single standard
@@ -824,10 +830,13 @@ planes falls steadily with each pass, the vertical one below the
 target-equivalent level --- BBA reaches the orbit-blind component that
 response-matrix inversion cannot.  Red (right axis): the false EDM $|f|$
 nonetheless stalls near $20\times$ the target, because it is dominated by the
-orbit-visible antisymmetric residue ($\sim\!2~\mu$m); the channel
-decomposition of the third-pass residual gives $f_{\rm anti}=16\times \gg
-f_{\rm sym}=3.5\times$.  A single final orbit correction removes that residue
-(green star), bringing $|f|$ below the target for this seed.}
+orbit-visible antisymmetric residue ($\sim\!2~\mu$m), the residual centering
+error at BBA's precision floor (largest horizontally) --- not the
+analytic-steering failure, which the measured steering matrix has already
+removed; the channel decomposition of the third-pass residual gives $f_{\rm
+anti}=16\times \gg f_{\rm sym}=3.5\times$.  A single final orbit correction
+removes that residue (green star), bringing $|f|$ below the target for this
+seed.}
 \label{fig:bbaconv}
 \end{figure}
 
