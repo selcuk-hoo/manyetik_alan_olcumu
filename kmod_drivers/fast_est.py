@@ -22,11 +22,13 @@ CFG = L.CFG
 
 
 def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=False,
-                 gscale=1.0):
+                 gscale=1.0, dG=None):
     """Azaltılmış CO-tur ile measure_false_edm eşdeğeri (tilt/yön/polarite opsiyonel).
 
     direction: +1/-1 (CW/CCW); gflip=True → tüm quad polariteleri çevrilir (g→-g).
     gscale: tüm gradyanlara çarpan (flip-kalibrasyon hatası testi: gflip+gscale=1+ε).
+    dG: per-quad fraksiyonel gradyan sapması (β-beat), boy 2*nFODO. Polarite-flip'te
+        gradyanla birlikte döner (bağıl hata korunur) — flip dejenerasyonuna uyar.
     """
     from false_edm_mode_scan import setup_fields, _make_state, measure_dSy_dt_model
     from false_edm_4d import find_co_4d, _T_rev
@@ -48,12 +50,12 @@ def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=F
     if tilt is None:
         tilt = np.zeros(NQ)
     v_co, resid = find_co_4d(fields, p_mag, direction, dx, dy, tilt, T_rev,
-                             n_turns=n_turns, n_iter=2)
+                             n_turns=n_turns, n_iter=2, dG=dG)
     launch = _make_state(v_co, p_mag, direction, [0.0, 0.0, direction])
     fields.poincare_quad_index = 0.0
     _, poin, pt = integrate_particle(launch, 0.0, t2, DT, fields=fields,
                                      return_steps=4000, quad_dx=dx, quad_dy=dy,
-                                     quad_tilt=tilt)
+                                     quad_tilt=tilt, quad_dG=dG)
     sv = np.asarray(poin[:, 7], float)
     slope = float(measure_dSy_dt_model(sv, np.asarray(pt, float)))
     return abs(slope), resid

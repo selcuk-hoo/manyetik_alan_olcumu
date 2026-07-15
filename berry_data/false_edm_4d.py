@@ -43,7 +43,7 @@ def _T_rev(fields, beta0, R0):
 
 
 def find_co_4d(fields, p_mag, direction, dx, dy, tilt, T_rev,
-               n_turns=28, n_iter=2):
+               n_turns=28, n_iter=2, dG=None):
     """4D kapalı yörünge (x,x',y,y'): betatron pozisyon varyansını minimize et."""
     from integrator import integrate_particle
     spin = [0.0, 0.0, direction]
@@ -54,7 +54,7 @@ def find_co_4d(fields, p_mag, direction, dx, dy, tilt, T_rev,
         st = _make_state(v, p_mag, direction, spin)
         _, poin, _ = integrate_particle(st, 0.0, t_probe, DT, fields=fields,
                                         return_steps=10, quad_dx=dx, quad_dy=dy,
-                                        quad_tilt=tilt)
+                                        quad_tilt=tilt, quad_dG=dG)
         if poin is None or len(poin) < 5:
             return 1e30
         return float(np.var(poin[:, 0]) + np.var(poin[:, 1]))
