@@ -8,7 +8,7 @@
 % Yeni anlatı yayı: problem → yörünge düzeltme (standart araç) → KEŞİF: tek
 % başına yetmiyor → sim/antisim + bilineer kanal mekanizması → ÇÖZÜM: null-BBA
 % + yörünge düzeltme → operasyon (drift, CW/CCW, zaman bütçesi). Başarısız
-% yöntemler sıkıştırılmış tek bölüm; off-momentum Appendix'e; fig_orbit_sigma
+% yöntemler sıkıştırılmış tek bölüm; fig_orbit_sigma
 % atıldı (p=2.00 metinde); ton resmi-pedagojik, iç-diyalog cümleleri temizlendi.
 % Sayı durumu: BBA+OC uç değeri TEK SEED (çok-seed pipeline koşuyor) — metinde
 % açıkça işaretli. Donanım tabanı modellenmedi — açıkça işaretli.
@@ -323,21 +323,15 @@ consists of.
 
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_suppression.png}
-\caption{False EDM before and after orbit-based correction versus the rms
-quadrupole misalignment, from tracking.  Both stages are directly measured
-points, not drawn curves.  Grey circles: the raw false EDM (no correction,
-median and full spread of three random seeds at $\sigma=2.5,5,10~\mu$m).  Green
-squares: the residual after a deep truncated-SVD orbit correction (three seeds
-at $\sigma=5,10,20~\mu$m).  The lines through each are power-law fits
-$|f|\propto\sigma^{p}$ with $p=2.00$, confirming the quadratic scaling
-empirically over a factor of four in $\sigma$ at both stages.  The blue diamond
-marks the conservative ensemble floor of a standard-depth correction with the
-counter-rotating--beam difference at $\sigma=10~\mu$m (Table~\ref{tab:chain});
-the deep-SVD points reach lower, so they bound the slope while the conservative
-floor bounds the absolute level, and a multi-$\sigma$ ensemble at the
-standard depth is in progress.  The large vertical spread of the measured
-points is physical: at fixed $\sigma$ the false EDM varies by more than an
-order of magnitude with the symmetric/antisymmetric content of the pattern
+\caption{False EDM versus rms quadrupole misalignment, from tracking (measured
+points, not drawn curves).  Grey circles: the raw false EDM (no correction);
+green squares: the residual after orbit correction; each is the median and full
+spread of three random seeds, and the lines are power-law fits with $p=2.00$,
+confirming the $\sigma^2$ scaling over a factor of four in $\sigma$.  The blue
+diamond marks the conservative ensemble floor of a standard-depth correction
+with the counter-rotating--beam difference (Table~\ref{tab:chain}).  The large
+vertical spread is physical: at fixed $\sigma$ the false EDM varies by more than
+an order of magnitude with the symmetric/antisymmetric content of the pattern
 (Sec.~\ref{sec:bilinear}), so the rms alone does not determine the signal.}
 \label{fig:suppression}
 \end{figure}
@@ -631,17 +625,14 @@ $\sim\!0.9$-$\mu$m feed-down signal being sought --- is re-transported
 through this slightly altered focusing and moves by a few $\mu$m at every
 BPM.  This global response, which we call optics \emph{breathing}, appears
 at exactly the modulation frequency of the quadrupole being measured, so no
-frequency filter can separate it from the signal; it exceeds the signal
-about sevenfold.  A decomposition test isolates the two contributions
-cleanly: with the full misalignment pattern present, modulating one
-quadrupole moves a BPM reading by $-9.83~\mu$m; deleting every offset except
-that quadrupole's own leaves only $-0.037~\mu$m.  The demodulated amplitude
-is therefore reading the orbit built by the \emph{neighbors}, 266 times more
-strongly than the offset it was meant to measure, and dividing it by a
-calibration cannot repair a number that measures the wrong quantity.
-Because breathing is coherent with the modulation, it does not average away
-with more BPMs or lower noise; removing it in an idealized model restores
-perfect reconstruction, which pins the failure entirely on this mechanism.
+frequency filter can separate it from the signal.  A decomposition test shows
+the demodulated amplitude to be reading the orbit built by the \emph{neighbors}
+$266$ times more strongly than the quadrupole's own feed-down offset
+[Fig.~\ref{fig:breathing}], so dividing it by a calibration cannot repair a
+number that measures the wrong quantity.  Because breathing is coherent with
+the modulation it does not average away, and removing it in an idealized model
+restores perfect reconstruction, which pins the failure entirely on this
+mechanism.
 
 \begin{figure*}[tb]
 \includegraphics[width=0.95\textwidth]{fig_orbit_breathing.png}
@@ -655,19 +646,14 @@ average down.}
 \label{fig:breathing}
 \end{figure*}
 
-\emph{Learned and structured estimators.}  Because the misalignment-to-orbit
-map is linear, a trained neural network can at best relearn the (regularized)
-inverse of $R$; in our tests it matched truncated-SVD inversion on both
-components without improving either (symmetric error 5.6 vs.\ 6.3~$\mu$m
-against a 9.9-$\mu$m signal) --- the limit is the information in the data,
-not the flexibility of the estimator.  Sparsity priors (LASSO, CLEAN, greedy
-harmonic selection) reach the same floor, and harmonic fits of a known
-signature trade the conditioning problem for a bias problem (one harmonic
-coefficient lumps together field, misalignment, and BPM-offset content).  A
-calibrate-then-monitor strategy (LOCO followed by drift monitoring) tracks
-\emph{changes} of the antisymmetric component well ($6.5~\mu$m rms under
-$50~\mu$m BPM offsets) but passes through the same response matrix and is
-equally blind to the symmetric one.
+\emph{Learned and structured estimators} do not escape the limit either:
+because the misalignment-to-orbit map is linear, a trained neural network,
+sparsity priors (LASSO, CLEAN), and a calibrate-then-monitor strategy (LOCO)
+all pass through the same response matrix and inherit its blindness to the
+symmetric component --- in our tests a neural network matched truncated-SVD
+inversion to within its noise ($5.6$ vs.\ $6.3~\mu$m symmetric error against a
+$9.9~\mu$m signal), confirming that the limit is the information in the data,
+not the flexibility of the estimator.
 
 \emph{Counter-rotating beam separation and the tune.}  The control chain of
 Ref.~\cite{omarov} monitors the \emph{separation} of the two counter-rotating
@@ -683,18 +669,10 @@ reading, and it does so for the symmetric component as well.  That cancellation
 is central to the present work, but it is exact only when the alignment is
 stable between the two polarity states; we return to it, and to the role
 orbit correction plays there, in Sec.~\ref{sec:polarity}.  Finally, raising
-the betatron tune toward the symmetric kick harmonic would make the symmetric
-component visible in principle; in practice the stopband limit ($180^\circ$
-phase advance per cell) caps the tune at $Q \leq 12$, recovering only the
-fast-varying part of the symmetric family (its high azimuthal harmonics $m$,
-where $m$ indexes the harmonics \emph{within} the 24-dimensional symmetric
-subspace, the slowly-varying members requiring $Q \geq 16$), and the stronger
-gradients required ($0.21 \to 0.69$~T/m for $Q_y: 2.3 \to 10.3$) raise the
-false EDM itself steeply ($\sim\!g^{3}$, a measured factor of 32) while the
-genuine EDM signal, set by the electric field, is unchanged.  A further
-alternative outside the orbit toolbox --- operating slightly off the magic
-momentum to sense the geometric phase resonantly --- fails for reasons
-detailed in Appendix~\ref{app:offmomentum}.
+the betatron tune toward the symmetric kick harmonic, which would make that
+component visible in principle, is capped by the stopband ($Q \leq 12$,
+against the $Q \geq 16$ the slowly-varying symmetric modes require) and in
+any case raises the false EDM itself steeply (a measured $\sim\!g^{3}$).
 
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_crsep.png}
@@ -1106,40 +1084,6 @@ that ring, like any strong-focusing machine, is built.
 \begin{acknowledgments}
 %
 \end{acknowledgments}
-
-% ═══════════════════════════════════════════════════════════════════
-\appendix
-
-\section{Off-momentum spin sensing}
-\label{app:offmomentum}
-
-For completeness we document an attempted escape outside the orbit toolbox:
-sensing the geometric phase with the spin itself by storing the beam slightly
-off the magic momentum.  Away from the magic momentum the in-plane spin
-precession unfreezes and the spin precesses at a tune $\nu_s \neq 0$; the
-geometric-phase contribution to the vertical spin component then appears as
-an oscillation whose amplitude is \emph{enhanced} by $1/\nu_s$, suggesting a
-fast, resonant readout of the misalignment channel that could bypass the
-orbit entirely.
-
-The idea fails against a first-order background.  Misalignments not only
-generate the second-order geometric phase; they also tilt the stable spin
-direction (the invariant spin axis) at \emph{first} order in $\sigma$.
-Off-magic, this tilt produces a vertical spin oscillation at the same
-frequency $\nu_s$ as the sought signal and exceeds it, at
-$\sigma = 10~\mu$m, by a factor of order $3600$.  We tested the available
-separation channels and found all closed: the two terms scale
-indistinguishably with the momentum offset; their relative phase is
-pattern-dependent (spread of $91^\circ$ over seeds), so no fixed phase gate
-isolates the signal; symmetric four-particle sampling does not cancel the
-first-order term, which is common to the four particles; the amplitude
-crossing between the two terms lies at an unphysical
-$\sigma \approx 62$~mm; a full three-dimensional fit of the invariant axis
-absorbs the oscillation entirely, leaving no residual to read; and the
-longitudinal spin component is insensitive to the relevant knobs off-magic.
-The magic momentum is the unique operating point at which the dominant
-first-order effect is converted into a harmless constant offset --- which is
-also why the estimator of Sec.~\ref{sec:estimator} functions there.
 
 % ═══════════════════════════════════════════════════════════════════
 \begin{thebibliography}{99}
