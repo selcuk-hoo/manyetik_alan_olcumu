@@ -21,10 +21,12 @@ NQ = L.NQ
 CFG = L.CFG
 
 
-def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=False):
+def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=False,
+                 gscale=1.0):
     """Azaltılmış CO-tur ile measure_false_edm eşdeğeri (tilt/yön/polarite opsiyonel).
 
     direction: +1/-1 (CW/CCW); gflip=True → tüm quad polariteleri çevrilir (g→-g).
+    gscale: tüm gradyanlara çarpan (flip-kalibrasyon hatası testi: gflip+gscale=1+ε).
     """
     from false_edm_mode_scan import setup_fields, _make_state, measure_dSy_dt_model
     from false_edm_4d import find_co_4d, _T_rev
@@ -37,6 +39,9 @@ def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=F
     if gflip:                                    # polarite çevirme (CW/CCW telafi)
         cfg["g1"] = -float(cfg.get("g1", 0.21))
         cfg["g0"] = -float(cfg.get("g0", cfg["g1"]))
+    if gscale != 1.0:                            # flip-kalibrasyon hatası
+        cfg["g1"] = float(cfg.get("g1", 0.21)) * gscale
+        cfg["g0"] = float(cfg.get("g0", cfg["g1"])) * gscale
     DT = float(cfg["dt"])
     fields, y0, beta0, R0, p_mag, direction = setup_fields(cfg)
     T_rev = _T_rev(fields, beta0, R0)

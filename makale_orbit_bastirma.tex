@@ -41,8 +41,8 @@ orders of magnitude.  Using symplectic spin tracking, we examine how far this
 false signal can be removed by measuring and correcting the beam orbit.  We
 find that standard orbit correction alone does not guarantee suppression: the
 misalignment pattern separates into an orbit-visible antisymmetric component
-and a symmetric component to which the orbit response is nearly blind (two
-orders of magnitude weaker in this lattice), and the false EDM is a bilinear
+and a symmetric component to which the orbit response is nearly blind (up to
+two orders of magnitude weaker mode by mode), and the false EDM is a bilinear
 functional of the two transverse misalignment patterns, so that it cannot be
 characterized by a single rms alignment tolerance.  Null-finding beam-based
 alignment reaches the symmetric component that response-matrix inversion
@@ -161,10 +161,11 @@ magnets~\cite{huang}.  Related tools include orbit-response modeling in the
 presence of degeneracy~\cite{wegscheider}, correction schemes exploiting
 lattice symmetry~\cite{mirza}, and on-line response-matrix
 refinement~\cite{ziemann}.  None of the measurement techniques examined in
-this paper is new in itself; the question we address is how they perform on
-the specific misalignment component that drives the false EDM --- a question
-that, to our knowledge, has not been examined, and whose answer turns out to
-be structured.
+this paper is new in itself; building on the ring design and systematic-error
+analysis of Ref.~\cite{omarov}, we quantify how these standard tools perform
+on the specific misalignment component that drives the false EDM in this
+ring, and what alignment program they add up to --- an answer that turns out
+to be structured.
 
 \subsection{Findings and outline}
 \label{sec:outline}
@@ -177,8 +178,8 @@ into two components with sharply different orbit visibility: an
 \emph{antisymmetric} component (neighboring QF and QD displaced oppositely),
 which produces a large orbit distortion and is removed by orbit correction,
 and a \emph{symmetric} component (QF and QD displaced together), whose orbit
-signature is suppressed by roughly two orders of magnitude and which therefore
-survives correction.  The false EDM is a bilinear functional of the horizontal
+signature is strongly suppressed --- by up to two orders of magnitude mode by
+mode --- and which therefore survives correction.  The false EDM is a bilinear functional of the horizontal
 and vertical misalignment patterns, and the surviving symmetric--symmetric
 term sets the post-correction floor.  An immediate corollary is that the false
 EDM cannot be characterized by a single rms alignment tolerance: at fixed
@@ -188,8 +189,8 @@ symmetric/antisymmetric content of the pattern.
 Second, \emph{the symmetric component cannot be recovered from orbit readings
 by response-matrix inversion or amplitude-readout techniques}
 (Sec.~\ref{sec:inverse}), for reasons that are coherent and therefore
-independent of BPM technology.  This includes the counter-rotating beam
-separation proposed as a control observable in Ref.~\cite{omarov}.
+independent of BPM technology.  The counter-rotating beam separation of
+Ref.~\cite{omarov} shares this property of the orbit.
 
 Third, \emph{null-finding BBA, followed by a final orbit correction, does
 reach the symmetric component} (Sec.~\ref{sec:bba}).  BBA locates each
@@ -348,14 +349,9 @@ $\tfrac12\big(v[2k]-v[2k{+}1]\big)$, giving the antisymmetric part $v^{\rm a}$.
 The full projectors $P_{\rm sym}$ and $P_{\rm anti}$ simply apply this same
 $2\times2$ block to each of the 24 cells in turn (so $v^{\rm s} = P_{\rm sym}v$
 and $v^{\rm a} = P_{\rm anti}v$); they are complementary,
-$P_{\rm sym}+P_{\rm anti}=I$, and each is a projector ($P^2 = P$).  The same
+$P_{\rm sym}+P_{\rm anti}=I$.  The same
 pair of matrices is applied independently to the horizontal and to the
-vertical offset vectors.  Note that the symmetric component has, by
-construction, \emph{equal values} on the two magnets --- not merely equal
-signs.  The decomposition is exact and unique: an arbitrary pair of offsets
-$(a,b)$ splits as $(m,m) + (d,-d)$ with $m = (a+b)/2$ and $d = (a-b)/2$, so a
-same-sign pair of unequal size is a mixture of the two components, not a
-member of either.
+vertical offset vectors.
 
 Carrying this out for all $24$ cells re-expresses the $48$ offsets of one
 plane as $24$ symmetric numbers $m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big)$ and
@@ -390,10 +386,16 @@ gain law
   \label{eq:Gk}
 \end{equation}
 which is resonant for $k$ near the tune and strongly suppressed far above it;
-with $Q \approx 2.3 \ll 24$ the symmetric component is nearly invisible
-[Fig.~\ref{fig:modes}].  Quantitatively, a $10$-$\mu$m-rms pattern leaves an
-orbit trace of $\sim\!115~\mu$m if antisymmetric but only $\sim\!1.7~\mu$m if
-symmetric.
+with $Q \approx 2.3 \ll 24$ the alternating deflection pattern of a symmetric
+component is nearly invisible [Fig.~\ref{fig:modes}].  Quantitatively, a
+$10$-$\mu$m-rms random pattern leaves an rms orbit trace of $\sim\!100~\mu$m
+if antisymmetric but $\sim\!19~\mu$m if symmetric (tracking-derived response),
+and the two traces differ in kind, not only in size: the symmetric trace is
+almost entirely \emph{leakage}, a few-percent admixture of the pattern into
+the strongly-coupled modes.  Orbit correction removes exactly that visible
+slice, so it erases most of an antisymmetric pattern (rms reduced by a factor
+$\sim\!3$ in our simulations) but leaves a symmetric pattern nearly intact
+(rms reduced by only $\sim\!20\%$).
 
 The same conclusion can be read off the response matrix itself without
 reference to harmonics.  The singular-value decomposition of $R$ supplies 48
@@ -486,29 +488,36 @@ difference directly: for the representative pattern, $f_{as} = -272\times$
 target while $f_{sa} = +28\times$ --- an order of magnitude apart and of
 opposite sign.
 
-The channels are measured directly, and this measurement method underlies all
-symmetric/antisymmetric attributions in this paper: the misalignment vectors
-are projected with Eq.~(\ref{eq:projectors}), each projected pair
-$(v_x^{a}, v_y^{b})$ is loaded separately into the tracker, and the resulting
-$f$ is extracted with the estimator of Sec.~\ref{sec:estimator}.
+Each channel is a separate tracking measurement, not a fit, and this
+measurement underlies all symmetric/antisymmetric attributions in this paper.
+The misalignment pattern $(v_x, v_y)$ is projected once with
+Eq.~(\ref{eq:projectors}), and the tracker is then run four times.  In each
+run the quadrupole offsets of the machine are \emph{set to} one projected
+part per plane --- for $f_{as}$, for example, the horizontal offsets are the
+pattern $v_x^{\rm a}$ and the vertical offsets are $v_y^{\rm s}$, with no
+other imperfections --- and the estimator of Sec.~\ref{sec:estimator} returns
+that channel's $f$ directly.  The weights $W_{ij}$ never need to be known or
+computed: they are properties of the lattice that the tracker itself
+embodies, and Eq.~(\ref{eq:bilinear}) enters only through its structural
+consequence that every term contains exactly one horizontal and one vertical
+offset, so that the four runs isolate the four groups of terms.  Bilinearity
+is then checked rather than assumed:
 Figure~\ref{fig:channels} shows the result at $\sigma = 10~\mu$m: the four
-signed channels sum to the full false EDM within $0.1\%$
+signed channels sum to the full-pattern false EDM within $0.1\%$
 ($f/\!\sum = 0.999$--$1.001$ over three seeds), confirming
 Eq.~(\ref{eq:channels}); the pure-symmetric channel is the smallest in every
-seed; and each channel individually scales as $\sigma^{2}$.  The gain law
-accounts for the ordering but not fully for its magnitude: the orbit-trace
-ratio between antisymmetric and symmetric patterns of equal rms is
-$\sim\!70$, while the measured channel ratios are one to two orders of
-magnitude, the difference arising because the pairwise weights respond to
-the rapid azimuthal variation of the symmetric orbit (its slopes), which
-partially compensates its small amplitude.  The
-measured channels, rather than the harmonic estimate, are therefore used as
-the quantitative reference throughout.
+seed; and each channel individually scales as $\sigma^{2}$.  The measured
+channel ratios are consistent with the bilinear structure: one orbit-trace
+factor of $\sim\!5$ enters per plane, so $f_{aa}/f_{ss}$ of order tens is
+expected and observed.  The measured channels are used as the quantitative
+reference throughout.
 
 Two consequences frame the rest of the paper.  First, the false EDM is not a
 function of the rms misalignment: it is $\sigma^{2}$-homogeneous, but at fixed
 $\sigma$ its value depends on the pattern --- in Fig.~\ref{fig:channels} the
-channels span $3.5\times$ to $900\times$ the target at the same $10~\mu$m rms.
+channel magnitudes at the same $10~\mu$m rms range from ${\sim}20\times$ to
+${\sim}400\times$ the target in the three-seed means, and from ${\sim}1\times$
+to ${\sim}900\times$ across individual seeds.
 A single alignment tolerance therefore cannot summarize the systematic, and a
 correction procedure changes not only the size but the \emph{statistics} of
 the misalignment: it converts a random pattern into a structured one,
@@ -725,7 +734,13 @@ imprint changes sign as the beam crosses the center, the center is obtained
 as the weighted least-squares zero over the BPMs, with the spread of the
 per-BPM zero crossings retained as a per-magnet quality measure.  All orbits
 are read with the beam placed on the 4D closed orbit
-(Sec.~\ref{sec:estimator}).
+(Sec.~\ref{sec:estimator}).  In the simulation the steering corrector is a
+controlled transverse displacement of a quadrupole adjacent to the one under
+test; in the experiment the same dipole kick can be produced without moving
+any magnet, by a current asymmetry between the quadrupole coils, which shifts
+the magnetic center electrically.  The two are equivalent --- an offset
+quadrupole and an on-axis quadrupole with a superimposed dipole field act
+identically on both orbit and spin.
 
 The role of the response matrix in this procedure is confined to the
 \emph{forward} direction: a single, well-conditioned element sizes the
@@ -812,7 +827,15 @@ $\sim\!145\times$ (analytic steering) to $\sim\!16\times$ --- and cross terms
 account for the remainder, in the ordering expected from
 Eq.~(\ref{eq:channels}).  The residue is thus the ordinary precision floor of
 the centering rather than the analytic-steering failure, which the measured
-matrix has already cleared.  So BBA does the job only it can do --- reaching
+matrix has already cleared.  We emphasize that BBA itself has no preference
+between the two subspaces: it measures each magnet independently, so its
+errors are uncorrelated from magnet to magnet and land with equal weight in
+the symmetric and antisymmetric components --- it lowers \emph{both} to the
+same few-$\mu$m floor.  The asymmetry visible in Fig.~\ref{fig:bbaconv} is
+one of leverage, not of cleaning: at that common floor the antisymmetric part
+still dominates $f$ through its stronger channels
+[Eq.~(\ref{eq:channels})], while the symmetric part is already near its
+target-equivalent level.  So BBA does the job only it can do --- reaching
 the orbit-blind symmetric part --- but leaves an antisymmetric residue at its
 per-magnet precision floor that more passes do not remove.  That leftover is orbit-visible, and a single standard
 orbit correction removes it: applied to the BBA residual, it brings the
@@ -1006,12 +1029,13 @@ tolerance document.  The principal open items are the magnetic-center
 stability under gradient modulation (the hardware floor of the BBA
 measurement, not yet modeled), the multi-seed distribution of the final
 residual, the ensemble determination of the CW/CCW factor, and the
-portability of the quantitative results to other lattices, which we have
-argued structurally but verified on one lattice only.  All numbers refer to one lattice in a linear model
-without sextupoles; the structural conclusions --- the visibility split, the
-bilinear channel decomposition, and the complementarity of orbit correction
-and BBA --- follow from the alternating-gradient principle and are expected
-to carry over to other strong-focusing implementations.
+verification of the quantitative results on other lattice variants.  All
+numbers refer to the symmetric-hybrid ring designed for the proton EDM
+experiment~\cite{omarov}, in a linear model without sextupoles; the
+structural conclusions --- the visibility split, the bilinear channel
+decomposition, and the complementarity of orbit correction and BBA --- follow
+from the alternating-gradient principle on which that ring, like any
+strong-focusing machine, is built.
 
 \begin{acknowledgments}
 %
