@@ -24,7 +24,7 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
-_BASE = "/home/user/manyetik_alan_olcumu"
+_BASE = os.path.dirname(_DIR)          # repo kökü (berry_data'nın üstü); taşınabilir
 sys.path.insert(0, _BASE)
 import build_response_matrix as brm
 from false_edm_mode_scan import (setup_fields, _make_state,
