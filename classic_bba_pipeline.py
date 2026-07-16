@@ -12,7 +12,8 @@ Boru hattı fiziği (makale §II.D, eq:channels):
   BİRLİKTE → hedefe; tek başına hiçbiri.
 
 RESTART-GÜVENLİ: per-seed durum + geçiş-içi orbit ara-kayıt (classic_bba_iter'den)
-+ tamamlanan seed results JSON'da → atlanır.  --resume ile devam.
++ tamamlanan seed results JSON'da → atlanır.  OTOMATİK devam: aynı komutu
+tekrar çalıştır, biten seed'ler atlanır (--resume bayrağı YOK).
 
 Kullanım: python3 classic_bba_pipeline.py -w 4 --seeds 0 1 2 3 4
 """
