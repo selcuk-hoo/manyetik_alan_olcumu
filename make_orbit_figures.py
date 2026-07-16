@@ -553,7 +553,7 @@ def fig_bba_convergence():
                framealpha=0.95, columnspacing=1.0, handletextpad=0.4)
     ax.set_title("Beam-based alignment lowers the symmetric misalignment but\n"
                  "stalls on the antisymmetric residue "
-                 "(measured-matrix BBA, 1% $\\beta$-beat, C++ tracker)",
+                 "(measured-matrix BBA, 1% grad. error $\\approx$5% $\\beta$-beat, C++ tracker)",
                  fontsize=10.5)
     fig.subplots_adjust(bottom=0.20)
     fig.tight_layout()

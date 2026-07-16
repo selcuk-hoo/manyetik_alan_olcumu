@@ -558,10 +558,12 @@ that do not, and why.  All of them attempt to reconstruct the misalignments
 realistic error model
 includes static BPM offsets ($\sim\!100~\mu$m each, the electronic zero of a
 monitor relative to the true axis), white BPM noise ($\sim\!1~\mu$m per
-reading, reducible by averaging), and a coherent optics-model error
-($\beta$-beating, implemented as per-quadrupole gradient errors of
-$0.5$--$5\%$; a machine calibrated with standard LOCO techniques typically
-retains $\sim\!1\%$).
+reading, reducible by averaging), and a coherent optics-model error (\emph{$\beta$-beating}, implemented in the
+tracker as per-quadrupole fractional gradient errors; the $1\%$ rms operating
+point used in the tests below produces $\approx\!5\%$ rms $\beta$-beating
+(peak $\approx\!10\%$) in this lattice, computed from the perturbed one-turn
+Twiss, so it is if anything pessimistic relative to the $\sim\!1$--$2\%$
+typical of LOCO-corrected optics).
 
 \emph{Difference-orbit inversion.}  Modulating all quadrupole gradients
 between two settings and subtracting the orbits cancels the static BPM
@@ -737,7 +739,8 @@ In idealized optics the procedure works outright: the symmetric centers are
 recovered, and the false EDM of the representative pattern drops from
 $356\times$ to $1.6\times$ the target.
 
-Under a realistic $1\%$ $\beta$-beating a single pass fails, through the same
+Under the realistic $1\%$-gradient-error optics ($\approx\!5\%$ $\beta$-beat)
+a single pass fails, through the same
 breathing mechanism as in Sec.~\ref{sec:inverse}: modulating one quadrupole
 re-transports the large uncorrected orbit through the beating optics and
 biases the zero crossing.  The remedy is iteration --- correct the orbit with
@@ -766,8 +769,9 @@ closed-orbit change is recorded at all 48 BPMs, and the ratio
 (orbit change)/(displacement) fills one column of the matrix.
 
 \begin{table}[tb]
-\caption{Iterated null-finding BBA under $1\%$ $\beta$-beating (tracking,
-three passes), steering with the idealized analytic model versus the measured
+\caption{Iterated null-finding BBA under a $1\%$ rms gradient error
+($\approx\!5\%$ $\beta$-beat; tracking, three passes), steering with the
+idealized analytic model versus the measured
 response matrix.  ``sym $dx$/$dy$'' are the symmetric residuals of the
 measured-matrix run.  Both runs solve the vertical plane; only the measured
 matrix also corrects the horizontal one.}
@@ -808,8 +812,8 @@ $\sigma^{2}$ dependence over the tested range.
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_bba_convergence.png}
 \caption{Beam-based alignment lowers the symmetric misalignment but stalls on
-the antisymmetric residue (measured-matrix BBA under $1\%$ $\beta$-beating,
-C++ tracking).  Blue/cyan (left axis): the symmetric residual of the two
+the antisymmetric residue (measured-matrix BBA under a $1\%$ rms gradient
+error, $\approx\!5\%$ $\beta$-beat, C++ tracking).  Blue/cyan (left axis): the symmetric residual of the two
 planes falls steadily with each pass, the vertical one below the
 target-equivalent level --- BBA reaches the orbit-blind component that
 response-matrix inversion cannot.  Red (right axis): the false EDM $|f|$
