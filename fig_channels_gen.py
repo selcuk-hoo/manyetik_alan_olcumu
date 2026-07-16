@@ -40,8 +40,9 @@ CMAP = {"ss": ("s", "s"), "sa": ("s", "a"),
 
 
 def _pattern(seed, sigma):
-    """Temsili desen: dx, dy ~ N(0, σ); index 0 (cell-0 QF) sıfır (tuzak #8)."""
-    rng = np.random.default_rng(30000 + seed)
+    """Temsili desen (classic_bba_iter ile AYNI konvansiyon: seed 0 → f_raw=356×):
+    default_rng(seed) → dx sonra dy; index 0 (cell-0 QF) sıfır (tuzak #8)."""
+    rng = np.random.default_rng(seed)
     dx = rng.normal(0.0, sigma, NQ); dx[0] = 0.0
     dy = rng.normal(0.0, sigma, NQ); dy[0] = 0.0
     return dx, dy
