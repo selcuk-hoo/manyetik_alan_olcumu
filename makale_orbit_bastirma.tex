@@ -575,15 +575,20 @@ analysis as in Fig.~\ref{fig:modes}, applied to $\Delta R$), so
 reconstruction errors are amplified along the component of interest.
 Regularizing the inversion --- truncated SVD or Tikhonov damping --- does not
 help here: truncation discards precisely the symmetric directions, trading
-their noise amplification for a full bias of the sought component.  White noise can be beaten by synchronous
-detection --- modulating at $\sim\!1$~kHz and averaging reaches an effective
-noise of $\sim\!14$~nm within minutes --- but the optics-model error cannot:
-it is coherent, identical in every average, and at $\beta$-beating of only
-$0.5\%$ the reconstructed symmetric component is several times larger than
-the true one (283~$\mu$m against a 41-$\mu$m signal in our standard test)
-while the antisymmetric component remains accurate
-[Fig.~\ref{fig:lockin}].  Because the limit is coherent, it is independent of
-BPM technology;
+their noise amplification for a full bias of the sought component.  This much
+is already true \emph{without} any optics error: at the lock-in noise floor
+alone the conditioning amplifies the symmetric reconstruction error to about
+ten times the antisymmetric one (Fig.~\ref{fig:lockin}, leftmost bars).  White
+noise can be beaten by synchronous detection --- modulating at $\sim\!1$~kHz
+and averaging reaches an effective noise of $\sim\!14$~nm within minutes ---
+but a coherent optics-model error cannot: it is identical in every average,
+and already at a realistic $1\%$ $\beta$-beating (a $0.2\%$ rms gradient error)
+the reconstructed symmetric component is several times the true one
+($\sim\!110~\mu$m against a $41$-$\mu$m signal in our standard test) while the
+antisymmetric component remains accurate [Fig.~\ref{fig:lockin}]; the error
+grows with the $\beta$-beat but the symmetric channel is already lost at the
+low end of the realistic range.  Because the limit is coherent, it is
+independent of BPM technology;
 lower-noise pickups, including SQUID-based ones, shorten the integration time
 but do not move the floor.  The same structural point can be stated as a
 bound: any estimator that cancels static offsets by a two-setting difference
@@ -595,10 +600,13 @@ relative setting difference.
 \includegraphics[width=\columnwidth]{fig_orbit_lockin.png}
 \caption{Difference-orbit inversion at the synchronous-detection noise floor
 (10~nm, 40 seeds): reconstruction error of the symmetric and antisymmetric
-components versus the optics-model error.  The dashed line marks the size of
-the symmetric signal itself.  A model error at the realistic $\geq0.5\%$
-level drives the symmetric error far above the signal while the Pearson
-correlation (gray labels) remains high.}
+components versus the $\beta$-beat (the driving gradient error $\sigma_g$ is
+$\approx\!5\times$ smaller, shown below each label).  The dashed line marks the
+size of the symmetric signal itself, and the shaded band the realistic
+LOCO range ($\sim\!1$--$2\%$ $\beta$-beat).  Already at $1\%$ the symmetric
+error exceeds the signal, while the Pearson correlation (gray labels) stays
+misleadingly high; even at zero $\beta$-beat the conditioning leaves the
+symmetric error an order of magnitude above the antisymmetric one.}
 \label{fig:lockin}
 \end{figure}
 

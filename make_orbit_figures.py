@@ -331,7 +331,10 @@ def fig_lockin(nseed=40, noise_floor=10e-9):
     dR_model = R_perquad(g1 * 1.02)[0] - R_perquad(g1)[0]
     P_sym, P_anti = sym_anti_projectors()
 
-    sigma_g_list = [0.0, 0.005, 0.01, 0.05]
+    # σ_g = per-quad fraksiyonel GRADYAN hatası; gerçek β-beat ≈ 5.1×σ_g
+    # (tam-tur Twiss'ten). Gerçekçi LOCO ~%1-2 β-beat = %0.2-0.4 gradyan hatası.
+    sigma_g_list = [0.0, 0.002, 0.004, 0.01]        # → β-beat ≈ 0, 1%, 2%, 5%
+    BB_FACTOR = 5.1
     res = {sg: {"corr": [], "sym": [], "anti": []} for sg in sigma_g_list}
     rng = np.random.default_rng(1)
     for sg in sigma_g_list:
@@ -372,15 +375,20 @@ def fig_lockin(nseed=40, noise_floor=10e-9):
             f"symmetric signal itself ({sig_sym*1e6:.0f} μm rms)", fontsize=9)
     ax.set_yscale("log")
     ax.set_xticks(x)
-    ax.set_xticklabels([f"{sg*100:g}%" for sg in sigma_g_list])
-    ax.set_xlabel("gradient / β-beat model error  $\\sigma_g$")
+    ax.set_xticklabels([f"{sg*BB_FACTOR*100:.0f}%\n($\\sigma_g${sg*100:g}%)"
+                        for sg in sigma_g_list])
+    ax.set_xlabel("β-beat  (rms $\\Delta\\beta/\\beta$;  gradient error $\\sigma_g$ below)")
+    # gerçekçi LOCO bandı (~%1-2 β-beat)
+    ax.axvspan(0.5, 2.5, color="tab:green", alpha=0.07)
+    ax.text(1.5, ax.get_ylim()[1]*0.5, "realistic\n(LOCO)", ha="center",
+            fontsize=8, color="tab:green")
     ax.set_ylabel("reconstruction error  [μm]")
     for xi, c in zip(x, corrs):
         ax.text(xi, ax.get_ylim()[0] * 1.6, f"corr = {c:.2f}", ha="center",
                 fontsize=9, color="tab:gray")
     ax.set_title("Single-frequency $\\Delta R$ inversion at the lock-in noise "
-                 f"floor ({noise_floor*1e9:.0f} nm):\nβ-beat ≥ 0.5% drives the "
-                 "symmetric error above the signal", fontsize=11)
+                 f"floor ({noise_floor*1e9:.0f} nm):\neven at a realistic 1% "
+                 "β-beat the symmetric error exceeds the signal", fontsize=11)
     ax.legend(fontsize=9, loc="upper left")
     ax.text(0.98, 0.80, "correlation stays 'good' while the\nsymmetric component "
             "fails —\ncorr is a misleading metric here",
