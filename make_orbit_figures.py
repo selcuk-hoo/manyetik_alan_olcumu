@@ -486,6 +486,67 @@ def fig_crsep():
 
 
 # ═════════════════════════════════════════════════════
+# FIG 3 (C++): bilineer kanal ayrışımı f_ss/f_sa/f_as/f_aa
+#   Kaynak: kmod_drivers/paper_runs_results.json ["channels"]
+#   (üretici: fig_channels_gen.py). (a) 3-seed @10μm bar; (b) σ² ölçekleme.
+# ═════════════════════════════════════════════════════
+def fig_channels():
+    import json as _j
+    path = os.path.join(BASE, "kmod_drivers", "paper_runs_results.json")
+    with open(path) as fh:
+        d = _j.load(fh)["channels"]
+    chans = d["channels"]                       # ["ss","sa","as","aa"]
+    labels = {"ss": r"$f_{ss}$", "sa": r"$f_{sa}$",
+              "as": r"$f_{as}$", "aa": r"$f_{aa}$"}
+    colors = {"ss": "tab:green", "sa": "tab:orange",
+              "as": "tab:red", "aa": "tab:purple"}
+    seeds = d["seeds"]
+
+    fig, (axa, axb) = plt.subplots(1, 2, figsize=(9.0, 4.0))
+
+    # ── (a) σ=σ_a: kanal büyüklükleri (bar=ort |f|, nokta=her seed) ──
+    x = np.arange(len(chans))
+    means = [np.mean([abs(d["a"][ch][i]) for i in range(len(seeds))]) for ch in chans]
+    axa.bar(x, means, 0.6, color=[colors[c] for c in chans], alpha=0.55,
+            edgecolor="k", linewidth=0.6)
+    for k, ch in enumerate(chans):
+        pts = [abs(d["a"][ch][i]) for i in range(len(seeds))]
+        axa.scatter(np.full(len(pts), x[k]), pts, s=22, color=colors[ch],
+                    edgecolor="k", linewidth=0.4, zorder=5)
+    axa.set_yscale("log")
+    axa.set_xticks(x); axa.set_xticklabels([labels[c] for c in chans])
+    axa.set_ylabel(r"$|f|$  [units of target]")
+    axa.set_title(f"(a)  channels at $\\sigma={d['sigma_a']*1e6:.0f}$ μm "
+                  "— $f_{ss}$ smallest", fontsize=10)
+    axa.grid(True, which="both", axis="y", alpha=0.3)
+    # bilineerlik notu
+    rr = d.get("bilinearity_full_over_sum", [])
+    if rr:
+        axa.text(0.02, 0.95, f"$f/\\!\\sum={min(rr):.3f}$–${max(rr):.3f}$",
+                 transform=axa.transAxes, fontsize=8, va="top", color="dimgray")
+
+    # ── (b) σ² ölçekleme: her kanal ──
+    sig = np.array(d["b_sigmas"]) * 1e6         # μm
+    for ch in chans:
+        y = np.array([abs(v) for v in d["b"][ch]])
+        axb.plot(sig, y, "o-", color=colors[ch], ms=5, label=labels[ch])
+    # σ² kılavuz eğrisi (en büyük kanala demirle)
+    ybig = np.array([abs(v) for v in d["b"][max(chans, key=lambda c: abs(d["b"][c][-1]))]])
+    axb.plot(sig, ybig[-1] * (sig / sig[-1])**2, "k--", lw=1, alpha=0.6,
+             label=r"$\propto\sigma^2$")
+    axb.set_xscale("log"); axb.set_yscale("log")
+    axb.set_xlabel(r"misalignment rms  $\sigma$  [μm]")
+    axb.set_ylabel(r"$|f|$  [units of target]")
+    axb.set_title("(b)  each channel scales as $\\sigma^2$", fontsize=10)
+    axb.legend(fontsize=8, ncol=2); axb.grid(True, which="both", alpha=0.3)
+
+    fig.tight_layout()
+    fig.savefig("fig_orbit_channels.png", dpi=150)
+    plt.close(fig)
+    print(f"fig_orbit_channels.png yazıldı (bilineerlik full/Σ={rr})")
+
+
+# ═════════════════════════════════════════════════════
 # FIG 7 (C++): BBA yakınsaması — simetriği indirir, antisimetrikte tıkanır
 #   Kaynak: kmod_drivers/paper_runs_results.json ["bba_iter_cpp"]
 #   (ölçülen-matris BBA, %1 β-beat, 3 geçiş; f = C++ spin izleyici).
