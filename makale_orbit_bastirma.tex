@@ -321,15 +321,19 @@ consists of.
 
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_suppression.png}
-\caption{The single-beam false EDM scales as $\sigma^2$ both before and after
-orbit correction (tracking; measured points, median and full spread of three
-random seeds).  The power-law fits give $p=2.00$ at each stage, confirming the
-geometric-phase scaling; this figure verifies that scaling, not an absolute
-suppression floor, since at fixed $\sigma$ the false EDM varies by more than an
-order of magnitude with the symmetric/antisymmetric content of the pattern
-(Sec.~\ref{sec:bilinear}).  The corrected points use a deep truncated-SVD
-correction; the conservative ensemble floor is quoted separately in
-Table~\ref{tab:chain}.}
+\caption{The single-beam false EDM versus rms misalignment (tracking; median
+and full spread).  Circles: the raw pattern (no correction).  Squares: orbit
+correction alone, which removes the antisymmetric channels but leaves the
+symmetric floor --- still a few times the target at $\sigma=10~\mu$m.  Both
+scale as $\sigma^2$ ($p=2.00$ at each stage), confirming the geometric-phase
+origin; the fit verifies the scaling, not an absolute floor, since at fixed
+$\sigma$ the false EDM varies by more than an order of magnitude with the
+symmetric/antisymmetric content of the pattern (Sec.~\ref{sec:bilinear}).
+Star: the full scheme --- beam-based alignment followed by one orbit
+correction (fixed truncated-SVD depth, $\mathrm{rcond}=0.01$) --- evaluated
+over five misalignment seeds at $\sigma=10~\mu$m; all five fall below the
+target, with median $0.07\times$ and worst case $0.22\times$
+(Table~\ref{tab:chain}).}
 \label{fig:suppression}
 \end{figure}
 
@@ -847,11 +851,14 @@ needs no per-magnet measurement at all --- the orbit displays it directly and
 resonantly amplified, and nulling it collectively with a truncated-SVD
 correction (the ``depth'' above is the singular-value cutoff) is far more
 precise than measuring it magnet by magnet.  Table~\ref{tab:chain}
-summarizes the chain.  The sub-target endpoint quoted is a single misalignment
-seed of a signed, bilinear quantity that scatters from seed to seed
-(Fig.~\ref{fig:channels}); the robust statement is suppression to a symmetric
-floor of a few times the target, with a multi-seed campaign to fix the
-distribution in progress.  As in any beam-based alignment, the reproducibility
+summarizes the chain.  The endpoint is characterized over five misalignment
+seeds: at a fixed truncated-SVD depth ($\mathrm{rcond}=0.01$, chosen once and
+not tuned per seed) all five fall below the target, with median $0.07\times$
+and worst case $0.22\times$ (Fig.~\ref{fig:suppression}).  Because the false
+EDM is a signed, bilinear quantity that scatters from seed to seed
+(Fig.~\ref{fig:channels}), the robust statement is suppression of the whole
+ensemble below the target rather than any single number.  As in any
+beam-based alignment, the reproducibility
 of each campaign --- the stability of the magnetic centers under the gradient
 modulation used to find them --- is a hardware input that sets how often the
 procedure must be repeated; quantifying it is outside the scope of this
@@ -860,11 +867,12 @@ experiment, being free of magnetic hysteresis, are favorable in this respect.
 
 \begin{table}[tb]
 \caption{The suppression chain at $\sigma = 10~\mu$m (single beam, tracking).
-The second row is an ensemble median including the counter-rotating--beam
-difference; the remaining rows follow the representative pattern (raw
+Rows~2 and~4 are ensembles: row~2 an ensemble median including the
+counter-rotating--beam difference, and the last row the five-seed distribution
+of the full scheme (fixed $\mathrm{rcond}=0.01$, all seeds sub-target, median
+$0.07\times$); the raw and BBA rows follow the representative pattern (raw
 $356\times$).  The equivalent EDM uses
-$1~\text{nrad/s} \leftrightarrow 10^{-29}\,e\!\cdot\!$cm.  The final entry is
-a single-seed result; the multi-seed distribution is under study.}
+$1~\text{nrad/s} \leftrightarrow 10^{-29}\,e\!\cdot\!$cm.}
 \label{tab:chain}
 \small
 \begin{ruledtabular}
@@ -874,7 +882,7 @@ Stage & $|f|$ / target & EDM [$e\!\cdot\!$cm] \\
 raw                            & $356\times$ & $\sim4\times10^{-27}$ \\
 orbit corr.\ $+$ CW/CCW        & $\sim62\times$ & $\sim6\times10^{-28}$ \\
 BBA (measured steering)        & $17$--$28\times$ & $\sim2\times10^{-28}$ \\
-BBA $+$ final orbit corr.      & $0.03$--$0.8\times$ & $\lesssim10^{-29}$ \\
+BBA $+$ final orbit corr.      & $0.03$--$0.22\times$ & $\lesssim10^{-29}$ \\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
@@ -956,8 +964,9 @@ the measurement to the inter-configuration displacement.  Should the polarity
 reversal be used in addition, the analysis above shows it still requires the
 BBA-level symmetric alignment to deliver its cancellation --- so BBA is
 required on either path, and orbit correction is what stands in for the
-polarity reversal.  An ensemble determination of the residual on both paths is
-left for the multi-seed campaign.
+polarity reversal.  The orbit-correction path is characterized over five seeds
+above (median $0.07\times$ target, all sub-target); the corresponding ensemble
+on the polarity-reversal path is left for future work.
 
 % ═══════════════════════════════════════════════════════════════════
 \section{Operating the scheme: drift and the time budget}
@@ -1068,9 +1077,8 @@ the experiment for drift rates of order $1~\mu$m/day.
 The paper thus locates orbit correction within the proposed control program
 at the proof-of-principle level; it is not yet a tolerance document.  The
 principal open items are the magnetic-center stability under gradient
-modulation and under polarity reversal (the hardware floor, not yet modeled),
-the multi-seed distribution of the final residual, and the verification of the
-quantitative results on other lattice variants.  All numbers refer to the
+modulation and under polarity reversal (the hardware floor, not yet modeled)
+and the verification of the quantitative results on other lattice variants.  All numbers refer to the
 symmetric-hybrid ring designed for the proton EDM experiment~\cite{omarov}, in
 a linear model without sextupoles.  The structural conclusions --- the
 visibility split, the bilinear channel decomposition, and the two roles of

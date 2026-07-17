@@ -137,6 +137,10 @@ MEAS_F = {5.0:  [0.52, 0.62, 1.42],
 # Standart-derinlik yörünge düzeltmesi + CW/CCW ENSEMBLE tabanı (σ=10, çok seed);
 # muhafazakâr taban referansı (omarov.md §10; Tablo tab:chain 2. satır).
 ENS_FLOOR_SIGMA, ENS_FLOOR_F = 10.0, 62.0
+# BBA + son yörünge düzeltmesi — 5-seed ensemble @σ=10μm (sabit rcond=0.01);
+# medyan/min/max × hedef. Kaynak: kmod_drivers/pipeline_multiseed.json.
+ENS_BBAOC_SIGMA = 10.0
+ENS_BBAOC = [0.068, 0.026, 0.217]       # medyan, min, max (5 seed, hepsi hedef-altı)
 
 
 def _sig_fit(data):
@@ -173,7 +177,14 @@ def fig_suppression():
     ax.errorbar(m_sig, m_med, yerr=[m_med - m_lo, m_hi - m_med],
                 fmt="s", color="tab:green", ms=8, capsize=4, zorder=6,
                 ecolor="tab:green",
-                label=f"after orbit correction: $p={m_p:.2f}$")
+                label=f"orbit correction only: $p={m_p:.2f}$")
+
+    # BBA + son yörünge düzeltmesi — 5-seed ensemble @σ=10 (tam şema tabanı)
+    em, elo, ehi = ENS_BBAOC
+    ax.errorbar([ENS_BBAOC_SIGMA], [em], yerr=[[em - elo], [ehi - em]],
+                fmt="*", color="tab:purple", ms=17, capsize=5, zorder=7,
+                ecolor="tab:purple", mec="k", mew=0.5,
+                label="BBA $+$ orbit corr. (5 seeds): all sub-target")
 
     ax.axhline(1.0, color="tab:red", ls="--", lw=1.3)
     ax.text(1.1, 1.3, "target ($10^{-29}\\,e\\!\\cdot\\!$cm)",
@@ -184,12 +195,11 @@ def fig_suppression():
     sec = ax.secondary_yaxis("right",
                              functions=(lambda v: v * 1e-29, lambda v: v / 1e-29))
     sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]")
-    ax.set_title("The false EDM scales as $\\sigma^2$ before and after orbit\n"
-                 "correction (single beam, tracking; slope verification)",
+    ax.set_title("The false EDM scales as $\\sigma^2$; orbit correction alone\n"
+                 "leaves a symmetric floor, BBA $+$ correction reaches below target",
                  fontsize=11)
-    ax.legend(loc="upper left", fontsize=9, title="measured, 3 seeds "
-              "(median, full spread)")
-    ax.set_xlim(1, 100); ax.set_ylim(2e-2, 3e3)
+    ax.legend(loc="upper left", fontsize=8.5, title="tracking (median, full spread)")
+    ax.set_xlim(1, 100); ax.set_ylim(1e-2, 3e3)
     fig.tight_layout()
     fig.savefig("fig_orbit_suppression.png")
     plt.close(fig)
