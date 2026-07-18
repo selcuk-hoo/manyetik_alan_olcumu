@@ -22,13 +22,16 @@ CFG = L.CFG
 
 
 def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=False,
-                 gscale=1.0, dG=None):
+                 gscale=1.0, dG=None, signed=False):
     """Azaltılmış CO-tur ile measure_false_edm eşdeğeri (tilt/yön/polarite opsiyonel).
 
     direction: +1/-1 (CW/CCW); gflip=True → tüm quad polariteleri çevrilir (g→-g).
     gscale: tüm gradyanlara çarpan (flip-kalibrasyon hatası testi: gflip+gscale=1+ε).
     dG: per-quad fraksiyonel gradyan sapması (β-beat), boy 2*nFODO. Polarite-flip'te
         gradyanla birlikte döner (bağıl hata korunur) — flip dejenerasyonuna uyar.
+    signed: True → İŞARETLİ slope döndür (CW/CCW FARKI için ŞART; f_CW−f_CCW
+        beam-reversal-tek EDM-kanalını izole eder, |·| farkı yanlış olur).
+        Varsayılan False (geriye uyumlu: abs).
     """
     from false_edm_mode_scan import setup_fields, _make_state, measure_dSy_dt_model
     from false_edm_4d import find_co_4d, _T_rev
@@ -58,7 +61,7 @@ def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=F
                                      quad_tilt=tilt, quad_dG=dG)
     sv = np.asarray(poin[:, 7], float)
     slope = float(measure_dSy_dt_model(sv, np.asarray(pt, float)))
-    return abs(slope), resid
+    return (slope if signed else abs(slope)), resid
 
 
 def _w(task):
