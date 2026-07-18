@@ -21,7 +21,9 @@ Kullanım:
 """
 import os, sys, json, time, argparse
 import numpy as np
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+JSONL = "/tmp/kmod_recover/cwccw_telafi.jsonl"    # artımlı (restart-güvenli)
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE); sys.path.insert(0, os.path.join(BASE, "kmod_drivers"))
@@ -75,12 +77,28 @@ def main():
     seeds = list(range(args.nseed))
     tasks = [("raw", s) for s in seeds] + [("oc", s) for s in seeds] \
         + [("sym", s) for s in seeds] + [("anti", s) for s in seeds]
-    print(f"=== CW/CCW artık ENSEMBLE: {len(tasks)} koşum (İŞARETLİ) ===", flush=True)
-    t0 = time.time()
+    # resume: tamamlanan (kind,seed) atla
+    os.makedirs(os.path.dirname(JSONL), exist_ok=True)
     res = {"raw": {}, "oc": {}, "sym": {}, "anti": {}}
-    with ProcessPoolExecutor(args.workers, initializer=brm._worker_init) as pool:
-        for kind, seed, C in pool.map(_task, tasks):
-            res[kind][seed] = C
+    if os.path.exists(JSONL):
+        for ln in open(JSONL):
+            try:
+                r = json.loads(ln); res[r["kind"]][r["seed"]] = r["C"]
+            except Exception:
+                pass
+    todo = [t for t in tasks if t[1] not in res[t[0]]]
+    print(f"=== CW/CCW artık ENSEMBLE: {len(todo)}/{len(tasks)} koşum "
+          f"(İŞARETLİ; {len(tasks)-len(todo)} atlandı) ===", flush=True)
+    t0 = time.time(); done = 0
+    if todo:
+        with ProcessPoolExecutor(args.workers, initializer=brm._worker_init) as pool:
+            for kind, seed, C in pool.map(_task, todo):
+                res[kind][seed] = C
+                with open(JSONL, "a") as fh:
+                    fh.write(json.dumps({"kind": kind, "seed": seed, "C": C}) + "\n")
+                done += 1
+                print(f"  [{done}/{len(todo)}] {kind} seed {seed}: "
+                      f"|C|={abs(C)/TARGET:.1f}×  ({time.time()-t0:.0f}s)", flush=True)
     print(f"  bitti ({time.time()-t0:.0f}s)", flush=True)
 
     def stats(d, lbl):
