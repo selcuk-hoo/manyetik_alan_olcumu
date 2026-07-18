@@ -313,8 +313,8 @@ representative pattern used throughout this paper gives $356\times$.  Standard
 orbit correction --- flattening the closed orbit with steering correctors ---
 reduces the ensemble median by a factor of about eight; combined with the
 counter-rotating--beam difference discussed in Sec.~\ref{sec:polarity}, the
-residual is about $62\times$ the target
-($\approx 6\times10^{-28}\,e\!\cdot\!$cm), scaling as $\sigma^{2}$
+residual is about $47\times$ the target
+($\approx 5\times10^{-28}\,e\!\cdot\!$cm), scaling as $\sigma^{2}$
 (Fig.~\ref{fig:suppression}).  Orbit correction is thus effective but not
 sufficient, and the remainder of this section identifies what the residual
 consists of.
@@ -846,7 +846,7 @@ The resulting picture is consistent and complementary: \emph{orbit
 correction removes the antisymmetric channels of Eq.~(\ref{eq:channels});
 null-finding BBA reduces the symmetric channel that orbit correction cannot
 see; in combination they reach the target, while each alone is limited}
-($62\times$ for orbit correction, $\sim\!10\times$ for five-pass BBA without the
+($47\times$ for orbit correction, $\sim\!10\times$ for five-pass BBA without the
 final correction).  The division of labor is also one of \emph{precision}: each
 per-magnet zero crossing carries a $\sim\!\mu$m-level measurement floor
 (residual breathing and steering-model error), so iterating BBA alone
@@ -871,8 +871,9 @@ experiment, being free of magnetic hysteresis, are favorable in this respect.
 
 \begin{table}[tb]
 \caption{The suppression chain at $\sigma = 10~\mu$m (single beam, tracking).
-Rows~2 and~4 are ensembles: row~2 an ensemble median including the
-counter-rotating--beam difference, and the last row the five-seed distribution
+Rows~2 and~4 are five-seed ensembles: row~2 the median of the
+counter-rotating--beam difference after orbit correction (spread
+$0.6$--$72\times$), and the last row the distribution
 of the full scheme (fixed $\mathrm{rcond}=0.01$, all seeds sub-target, median
 $0.07\times$); the raw and BBA rows follow the representative pattern (raw
 $356\times$).  The equivalent EDM uses
@@ -884,7 +885,7 @@ $1~\text{nrad/s} \leftrightarrow 10^{-29}\,e\!\cdot\!$cm.}
 Stage & $|f|$ / target & EDM [$e\!\cdot\!$cm] \\
 \hline
 raw                            & $356\times$ & $\sim4\times10^{-27}$ \\
-orbit corr.\ $+$ CW/CCW        & $\sim62\times$ & $\sim6\times10^{-28}$ \\
+orbit corr.\ $+$ CW/CCW        & $\sim47\times$ & $\sim5\times10^{-28}$ \\
 BBA (measured steering)        & $17$--$28\times$ & $\sim2\times10^{-28}$ \\
 BBA $+$ final orbit corr.      & $0.03$--$0.22\times$ & $\lesssim10^{-29}$ \\
 \end{tabular}
@@ -903,10 +904,14 @@ Ref.~\cite{omarov}].  Two beams stored simultaneously make this difference
 drift-free.  A false EDM that were purely beam-reversal-even would vanish here;
 the geometric phase is not, because the counter-rotating beams ride slightly
 different closed orbits, and a beam-reversal-\emph{odd} remnant survives.  In
-our tracker this remnant, at $\sigma = 10~\mu$m, is $14\times$ the target for a
-purely symmetric misalignment and $491\times$ for a purely antisymmetric one.
-Orbit correction removes the antisymmetric part; the symmetric remnant is the
-same orbit-blind floor as before, now reached only by BBA.
+our tracker this remnant, at $\sigma = 10~\mu$m over five seeds, is
+$4$--$60\times$ the target (median $22\times$) for a purely symmetric
+misalignment and $38$--$496\times$ (median $175\times$) for a purely
+antisymmetric one --- the antisymmetric remnant dominates, consistent with the
+channel structure.  Orbit correction removes the antisymmetric part, leaving
+the counter-rotating remnant at $\sim\!47\times$ the target (median, $0.6$--$72\times$
+over the same seeds; Table~\ref{tab:chain}); the symmetric floor that survives
+is the same orbit-blind one as before, now reached only by BBA.
 
 Reference~\cite{omarov} removes even this remnant with a second knob:
 \emph{reversing the polarity of all focusing quadrupoles} and repeating the

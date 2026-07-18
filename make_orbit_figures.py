@@ -134,9 +134,9 @@ RAW_F = {2.5: [67.7, 3.6, 99.1],
 MEAS_F = {5.0:  [0.52, 0.62, 1.42],
           10.0: [1.79, 2.72, 5.73],
           20.0: [7.36, 11.09, 23.13]}
-# Standart-derinlik yörünge düzeltmesi + CW/CCW ENSEMBLE tabanı (σ=10, çok seed);
-# muhafazakâr taban referansı (omarov.md §10; Tablo tab:chain 2. satır).
-ENS_FLOOR_SIGMA, ENS_FLOOR_F = 10.0, 62.0
+# Yörünge düzeltmesi + CW/CCW ENSEMBLE tabanı (σ=10, 5 seed, işaretli);
+# medyan 47× [0.6-72] (cwccw_telafi_out.json; tab:chain 2. satır).
+ENS_FLOOR_SIGMA, ENS_FLOOR_F = 10.0, 47.0
 # BBA + son yörünge düzeltmesi — 5-seed ensemble @σ=10μm (sabit rcond=0.01);
 # medyan/min/max × hedef. Kaynak: kmod_drivers/pipeline_multiseed.json.
 ENS_BBAOC_SIGMA = 10.0

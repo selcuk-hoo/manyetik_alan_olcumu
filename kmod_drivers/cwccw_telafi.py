@@ -30,7 +30,7 @@ sys.path.insert(0, BASE); sys.path.insert(0, os.path.join(BASE, "kmod_drivers"))
 os.chdir(BASE)
 import build_response_matrix as brm
 from make_orbit_figures import sym_anti_projectors, NQ
-from classic_bba_pipeline import orbit_correct
+from classic_bba_pipeline import orbit_correct, build_meta, run_bba_seed
 from fast_est import fast_measure
 
 TARGET = 1e-9
@@ -72,9 +72,34 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("-w", "--workers", type=int, default=5)
     ap.add_argument("--nseed", type=int, default=5)
+    ap.add_argument("--bba", action="store_true",
+                    help="§VII: her seed BBA+OC → CW/CCW artığı (PAHALI, ~saatler)")
+    ap.add_argument("--passes", type=int, default=3, help="--bba modu geçiş sayısı")
     args = ap.parse_args()
 
     seeds = list(range(args.nseed))
+
+    # ── §VII: BBA + son OC + CW/CCW artığı (ensemble) ──────────────────
+    if args.bba:
+        R0_model = {"y": Ry, "x": Rx}
+        meta = build_meta(R0_model, 150e-6)
+        OUTB = os.path.join(BASE, "kmod_drivers", "cwccw_bba_out.json")
+        out = json.load(open(OUTB)) if os.path.exists(OUTB) else {}
+        for s in seeds:
+            if str(s) in out:
+                print(f"  seed {s}: atlandı ({out[str(s)]:.2f}×)", flush=True); continue
+            rx, ry = run_bba_seed(s, R0_model, meta, 0.01, args.passes, 0.5,
+                                  150e-6, args.workers)
+            cx = orbit_correct(rx, Rx, RCOND); cy = orbit_correct(ry, Ry, RCOND)
+            C = _C(cx, cy)
+            out[str(s)] = abs(C) / TARGET
+            json.dump(out, open(OUTB, "w"), indent=1)
+            print(f"  seed {s}: BBA+OC+CW/CCW |C| = {abs(C)/TARGET:.2f}×", flush=True)
+        a = np.array([out[str(s)] for s in seeds])
+        print(f"\n=== §VII BBA+OC+CW/CCW ({args.nseed} seed) ===")
+        print(f"  medyan {np.median(a):.2f}×  [{a.min():.2f}, {a.max():.2f}]")
+        print(f"Kaydedildi: {OUTB}")
+        return
     tasks = [("raw", s) for s in seeds] + [("oc", s) for s in seeds] \
         + [("sym", s) for s in seeds] + [("anti", s) for s in seeds]
     # resume: tamamlanan (kind,seed) atla
