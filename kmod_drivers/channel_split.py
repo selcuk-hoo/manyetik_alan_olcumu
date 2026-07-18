@@ -34,7 +34,7 @@ def load_resid(rkey):
 
 
 def meas(dx, dy, label, bbeat=None):
-    f = fast_measure(dx, dy, dG=bbeat)
+    f, _ = fast_measure(dx, dy, dG=bbeat)     # fast_measure → (|slope|, resid)
     print(f"  {label:28s}: |f| = {abs(f)/TARGET:8.2f}× hedef  "
           f"(rms dx={np.std(dx)*1e6:.2f}μm dy={np.std(dy)*1e6:.2f}μm)")
     return abs(f) / TARGET
