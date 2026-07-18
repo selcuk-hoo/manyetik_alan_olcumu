@@ -563,16 +563,18 @@ def fig_channels():
 #   Per-geçiş anti artık kaydedilmediğinden gömülü sayılarla çizilir.
 # ═════════════════════════════════════════════════════
 
-# bba_iter_cpp (ölçülen matris, %1 β-beat); f × hedef, artıklar μm
-BBA_PASS   = [1, 2, 3]
-BBA_F      = [72.8, 16.7, 28.4]
-BBA_SYM_DX = [4.27, 2.90, 2.29]
-BBA_SYM_DY = [3.27, 1.70, 0.91]
+# bba_iter_cpp (ölçülen matris, %1 gradyan hatası ≈ %5 β-beat, 5 geçiş);
+# f × hedef, artıklar μm. Kaynak: paper_runs_results.json["bba_iter_cpp"].
+BBA_PASS   = [1, 2, 3, 4, 5]
+BBA_F      = [72.8, 16.7, 28.4, 20.9, 10.5]
+BBA_SYM_DX = [4.27, 2.90, 2.29, 1.92, 1.51]
+BBA_SYM_DY = [3.27, 1.70, 0.91, 0.50, 0.28]
 BBA_F_RAW  = 356.0
-# geçiş-3 artığının kanal ayrışımı (× hedef): antisimetrik domine eder
-BBA_P3_FSYM, BBA_P3_FANTI = 3.5, 16.0
-# BBA + son yörünge düzeltmesi sonrası (tek seed aralığı)
-BBA_OC_LO, BBA_OC_HI = 0.03, 0.8
+# geçiş-5 artığının kanal ayrışımı (× hedef): antisim domine, sim ihmal edilebilir
+# (channel_split_out.json: f_anti=7.86×, f_sym=9e-5×)
+BBA_P5_FANTI, BBA_P5_FSYM = 7.9, 0.0
+# BBA + son yörünge düzeltmesi sonrası — 5-seed ensemble (sabit rcond=0.01)
+BBA_OC_LO, BBA_OC_HI = 0.03, 0.22
 
 
 def fig_bba_convergence():
@@ -588,11 +590,11 @@ def fig_bba_convergence():
     ax.set_ylabel("symmetric residual, rms  [μm]", color="tab:blue")
     ax.tick_params(axis="y", labelcolor="tab:blue")
     ax.set_xticks(BBA_PASS)
-    ax.set_ylim(0.5, 12)
-    ax.set_xlim(-0.3, 4.3)
+    ax.set_ylim(0.2, 12)
+    ax.set_xlim(-0.4, 6.0)
     ax.annotate("symmetric residual falls steadily\n"
                 "$\\to$ BBA reaches the orbit-blind part",
-                xy=(3, BBA_SYM_DY[-1]), xytext=(0.35, 0.60),
+                xy=(5, BBA_SYM_DY[-1]), xytext=(0.35, 0.35),
                 fontsize=9, color="tab:blue", ha="left",
                 arrowprops=dict(arrowstyle="->", color="tab:blue"))
 
@@ -608,20 +610,20 @@ def fig_bba_convergence():
     ax2.tick_params(axis="y", labelcolor="tab:red")
     ax2.set_ylim(1e-2, 1e4)
     ax2.axhline(1.0, color="k", ls=":", lw=1)
-    ax2.text(3.7, 1.25, "target", fontsize=8.5)
-    # ana mesaj: f platosu + kanal ayrışımı (metne gömülü, inset yok)
-    ax2.annotate("but $|f|$ stalls at $\\sim$20$\\times$ — dominated by the\n"
-                 "orbit-VISIBLE antisymmetric residue ($\\sim$2 μm):\n"
-                 "pass-3 channel split  $f_{\\rm anti}\\!=\\!16\\times \\gg "
-                 "f_{\\rm sym}\\!=\\!3.5\\times$",
-                 xy=(2, BBA_F[1]), xytext=(0.35, 1600),
+    ax2.text(5.3, 1.25, "target", fontsize=8.5)
+    # ana mesaj: f antisim-artıkla sınırlı + kanal ayrışımı (pass-5)
+    ax2.annotate("$|f|$ descends to $\\sim$10$\\times$ but is limited by the\n"
+                 "orbit-VISIBLE antisymmetric residue:\n"
+                 "pass-5 channel split  $f_{\\rm anti}\\!=\\!7.9\\times \\gg "
+                 "f_{\\rm sym}\\!\\approx\\!0$",
+                 xy=(5, BBA_F[-1]), xytext=(0.35, 1600),
                  fontsize=9, color="tab:red", ha="left",
                  arrowprops=dict(arrowstyle="->", color="tab:red"))
     # son yörünge düzeltmesi: antisimetriği sil → hedef-altı
-    ax2.plot([3.5], [0.12], "*", color="tab:green", ms=18, zorder=6)
-    ax2.annotate("+ one final orbit\ncorrection removes it\n"
+    ax2.plot([5.5], [0.12], "*", color="tab:green", ms=18, zorder=6)
+    ax2.annotate("+ one final orbit\ncorrection (5 seeds)\n"
                  f"$\\to$ {BBA_OC_LO}–{BBA_OC_HI}× target",
-                 xy=(3.5, 0.12), xytext=(2.45, 0.018),
+                 xy=(5.5, 0.12), xytext=(3.1, 0.02),
                  fontsize=9, color="tab:green", ha="left",
                  arrowprops=dict(arrowstyle="->", color="tab:green"))
 
@@ -630,9 +632,9 @@ def fig_bba_convergence():
     ax2.legend(ln1 + ln2, lb1 + lb2, loc="upper center",
                bbox_to_anchor=(0.5, -0.11), ncol=3, fontsize=8,
                framealpha=0.95, columnspacing=1.0, handletextpad=0.4)
-    ax.set_title("Beam-based alignment lowers the symmetric misalignment but\n"
-                 "stalls on the antisymmetric residue "
-                 "(measured-matrix BBA, 1% grad. error $\\approx$5% $\\beta$-beat, C++ tracker)",
+    ax.set_title("Beam-based alignment drives the symmetric misalignment down; the\n"
+                 "false EDM is limited by the orbit-visible antisymmetric residue\n"
+                 "(measured-matrix BBA, 1% grad. error $\\approx$5% $\\beta$-beat, 5 passes, C++)",
                  fontsize=10.5)
     fig.subplots_adjust(bottom=0.20)
     fig.tight_layout()

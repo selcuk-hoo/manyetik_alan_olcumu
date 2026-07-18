@@ -805,47 +805,49 @@ raw  & ---  & ---  & $356\times$ & $356\times$ \\
 \subsection{Closing the chain: a final orbit correction}
 \label{sec:chainclose}
 
-The residual of the measured-matrix run, $17$--$28\times$ the target for the
-representative seed (and $4$--$72\times$, median $10\times$, across the
-five-seed ensemble), is not yet the symmetric floor, and
-Fig.~\ref{fig:bbaconv} shows why.  Across the BBA
-passes the symmetric residual falls steadily --- the vertical component to
-below the target-equivalent level --- yet the false EDM $|f|$ does not follow
-it down, stalling near $20\times$.  The reason is that BBA has no preference
-between the two subspaces: measuring each magnet independently, it lowers
-\emph{both} the symmetric and the antisymmetric residual to the same
-few-micron level, but the false EDM at that level is still dominated by the
-antisymmetric part, through its stronger channels [Eq.~(\ref{eq:channels})],
-while the symmetric part has already reached its target-equivalent size.  The
-stall is therefore one of leverage, not of cleaning.  That antisymmetric
-leftover is orbit-visible, so a single standard orbit correction removes it:
-applied to the BBA residual it brings the single-beam false EDM from $28\times$
-to below the target, and scaling the corrected residual down confirms a clean
-$\sigma^{2}$ dependence over the tested range.
+The residual of the measured-matrix run --- $17$--$28\times$ the target at
+three passes for the representative seed, descending to $\sim\!10\times$ by the
+fifth pass (Fig.~\ref{fig:bbaconv}), and $4$--$72\times$ (median $10\times$)
+across the five-seed ensemble --- is not yet the symmetric floor, and
+Fig.~\ref{fig:bbaconv} shows why.  Across the passes the symmetric residual
+falls steadily --- the vertical component below the target-equivalent level ---
+yet the false EDM $|f|$ does not follow it all the way down.  The reason is that
+BBA has no preference between the two subspaces: measuring each magnet
+independently, it lowers \emph{both} the symmetric and the antisymmetric
+residual, but the false EDM is limited by the antisymmetric part, through its
+stronger channels [Eq.~(\ref{eq:channels})], while the symmetric part has
+already reached its target-equivalent size --- the channel decomposition of the
+fifth-pass residual gives $f_{\rm anti}\approx 7.9\times$ against a negligible
+$f_{\rm sym}$.  The limit is therefore one of leverage, not of cleaning.  That
+antisymmetric leftover is orbit-visible, so a single standard orbit correction
+removes it: applied to the BBA residual it brings the false EDM below the target
+(median $0.07\times$ over five seeds, Fig.~\ref{fig:suppression}), and scaling
+the corrected residual down confirms a clean $\sigma^{2}$ dependence over the
+tested range.
 
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_bba_convergence.png}
-\caption{Beam-based alignment lowers the symmetric misalignment but stalls on
-the antisymmetric residue (measured-matrix BBA under a $1\%$ rms gradient
-error, $\approx\!5\%$ $\beta$-beat, C++ tracking).  Blue/cyan (left axis): the symmetric residual of the two
-planes falls steadily with each pass, the vertical one below the
-target-equivalent level --- BBA reaches the orbit-blind component that
-response-matrix inversion cannot.  Red (right axis): the false EDM $|f|$
-nonetheless stalls near $20\times$ the target, because at the common few-micron
-floor it is still dominated by the orbit-visible antisymmetric residue; the
-channel decomposition of the third-pass residual gives $f_{\rm anti}\approx
-16\times \gg f_{\rm sym}\approx 3.5\times$.  A single final orbit correction
-removes that residue (green star), bringing $|f|$ below the target for this
-seed.}
+\caption{Beam-based alignment drives the symmetric misalignment down; the false
+EDM is limited by the antisymmetric residue (measured-matrix BBA under a $1\%$
+rms gradient error, $\approx\!5\%$ $\beta$-beat, five passes, C++ tracking).
+Blue/cyan (left axis): the symmetric residual of the two planes falls steadily
+with each pass, the vertical one below the target-equivalent level --- BBA
+reaches the orbit-blind component that response-matrix inversion cannot.  Red
+(right axis): the false EDM $|f|$ descends to $\sim\!10\times$ the target by the
+fifth pass but is limited there, because at the common few-micron floor it is
+dominated by the orbit-visible antisymmetric residue; the channel decomposition
+of the fifth-pass residual gives $f_{\rm anti}\approx 7.9\times$ against a
+negligible $f_{\rm sym}$.  A single final orbit correction removes that residue
+(green star: five-seed ensemble, median $0.07\times$, all sub-target).}
 \label{fig:bbaconv}
 \end{figure}
 
 The resulting picture is consistent and complementary: \emph{orbit
 correction removes the antisymmetric channels of Eq.~(\ref{eq:channels});
 null-finding BBA reduces the symmetric channel that orbit correction cannot
-see; in combination they reach the target, while each alone stalls}
-($62\times$ for orbit correction, $\sim\!20\times$ for BBA without the final
-correction).  The division of labor is also one of \emph{precision}: each
+see; in combination they reach the target, while each alone is limited}
+($62\times$ for orbit correction, $\sim\!10\times$ for five-pass BBA without the
+final correction).  The division of labor is also one of \emph{precision}: each
 per-magnet zero crossing carries a $\sim\!\mu$m-level measurement floor
 (residual breathing and steering-model error), so iterating BBA alone
 approaches that floor only slowly; the antisymmetric residue, by contrast,
@@ -1001,8 +1003,8 @@ rate.  The arithmetic is simple enough to display.  One BBA pass consists of
 $47~\text{magnets} \times 2~\text{planes} \times 2~\text{beam positions}
 \times 2~\text{gradient settings} \approx 400$ orbit acquisitions; at
 $\sim\!10$~s per acquisition (orbit settling plus averaging) a pass costs
-about an hour of beam time, and the three-pass iteration with its
-intervening orbit corrections a few hours --- of order half a day with
+about an hour of beam time, and the five-pass iteration with its
+intervening orbit corrections several hours --- of order half a day with
 overheads.  Continuous orbit correction runs during data taking at no extra
 cost.  The re-alignment cadence follows from the drift rate: if the total
 random drift is of order $1~\mu$m/day --- a representative figure for a
