@@ -22,7 +22,7 @@ CFG = L.CFG
 
 
 def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=False,
-                 gscale=1.0, dG=None, signed=False):
+                 gscale=1.0, dG=None, signed=False, n_iter=2):
     """Azaltılmış CO-tur ile measure_false_edm eşdeğeri (tilt/yön/polarite opsiyonel).
 
     direction: +1/-1 (CW/CCW); gflip=True → tüm quad polariteleri çevrilir (g→-g).
@@ -53,7 +53,7 @@ def fast_measure(dx, dy, tilt=None, n_turns=14, t2=3e-4, direction=None, gflip=F
     if tilt is None:
         tilt = np.zeros(NQ)
     v_co, resid = find_co_4d(fields, p_mag, direction, dx, dy, tilt, T_rev,
-                             n_turns=n_turns, n_iter=2, dG=dG)
+                             n_turns=n_turns, n_iter=n_iter, dG=dG)
     launch = _make_state(v_co, p_mag, direction, [0.0, 0.0, direction])
     fields.poincare_quad_index = 0.0
     _, poin, pt = integrate_particle(launch, 0.0, t2, DT, fields=fields,

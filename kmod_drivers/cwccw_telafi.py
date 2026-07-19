@@ -46,11 +46,17 @@ def _pattern(seed, sigma=10e-6):
     return dx, dy
 
 
-def _C(dx, dy):
-    """Beam-reversal-tek artık (f_CW - f_CCW)/2, İŞARETLİ."""
-    fcw, _ = fast_measure(dx, dy, direction=+1, signed=True)
-    fccw, _ = fast_measure(dx, dy, direction=-1, signed=True)
-    return 0.5 * (fcw - fccw)
+CO_TOL = 5e-6          # find_co_4d resid bu değerin üstündeyse CO oturmadı → artefakt
+
+def _C(dx, dy, diag=False):
+    """Beam-reversal-tek artık (f_CW - f_CCW)/2, İŞARETLİ; SAĞLAM CO
+    (n_turns=28, n_iter=4 — tek-yön CO yakınsama artefaktına karşı)."""
+    fcw, rcw = fast_measure(dx, dy, direction=+1, signed=True, n_turns=28, n_iter=4)
+    fccw, rccw = fast_measure(dx, dy, direction=-1, signed=True, n_turns=28, n_iter=4)
+    C = 0.5 * (fcw - fccw)
+    if diag:
+        return C, fcw, fccw, rcw, rccw
+    return C
 
 
 def _task(t):
@@ -86,18 +92,37 @@ def main():
         OUTB = os.path.join(BASE, "kmod_drivers", "cwccw_bba_out.json")
         out = json.load(open(OUTB)) if os.path.exists(OUTB) else {}
         for s in seeds:
-            if str(s) in out:
-                print(f"  seed {s}: atlandı ({out[str(s)]:.2f}×)", flush=True); continue
+            if str(s) in out and not (isinstance(out[str(s)], dict)
+                                      and out[str(s)].get("artefakt")):
+                val = out[str(s)]["C"] if isinstance(out[str(s)], dict) else out[str(s)]
+                print(f"  seed {s}: atlandı ({val:.3f}×)", flush=True); continue
             rx, ry = run_bba_seed(s, R0_model, meta, 0.01, args.passes, 0.5,
                                   150e-6, args.workers)
             cx = orbit_correct(rx, Rx, RCOND); cy = orbit_correct(ry, Ry, RCOND)
-            C = _C(cx, cy)
-            out[str(s)] = abs(C) / TARGET
+            C, fcw, fccw, rcw, rccw = _C(cx, cy, diag=True)
+            bad = (rcw > CO_TOL) or (rccw > CO_TOL)
+            out[str(s)] = {"C": abs(C) / TARGET, "f_CW": fcw / TARGET,
+                           "f_CCW": fccw / TARGET, "resid_CW_um": rcw * 1e6,
+                           "resid_CCW_um": rccw * 1e6, "artefakt": bool(bad)}
             json.dump(out, open(OUTB, "w"), indent=1)
-            print(f"  seed {s}: BBA+OC+CW/CCW |C| = {abs(C)/TARGET:.2f}×", flush=True)
-        a = np.array([out[str(s)] for s in seeds])
-        print(f"\n=== §VII BBA+OC+CW/CCW ({args.nseed} seed) ===")
-        print(f"  medyan {np.median(a):.2f}×  [{a.min():.2f}, {a.max():.2f}]")
+            flag = "  ⚠️ CO OTURMADI (artefakt)" if bad else ""
+            print(f"  seed {s}: |C|={abs(C)/TARGET:.3f}×  "
+                  f"f_CW={fcw/TARGET:+.2f} f_CCW={fccw/TARGET:+.2f}  "
+                  f"CO-resid CW/CCW={rcw*1e6:.2f}/{rccw*1e6:.2f}μm{flag}", flush=True)
+        a = np.array([(out[str(s)]["C"] if isinstance(out[str(s)], dict)
+                       else out[str(s)]) for s in seeds
+                      if not (isinstance(out[str(s)], dict) and out[str(s)].get("artefakt"))])
+        nbad = sum(1 for s in seeds if isinstance(out[str(s)], dict)
+                   and out[str(s)].get("artefakt"))
+        if nbad:
+            print(f"\n  ⚠️ {nbad} seed CO-artefakt (istatistiğe alınmadı)", flush=True)
+        print(f"\n=== §VII BBA+OC+CW/CCW ({len(a)} temiz seed) ===")
+        if len(a):
+            g = np.exp(np.mean(np.log(a + 1e-30)))
+            print(f"  medyan {np.median(a):.3f}×  geomean {g:.3f}×  "
+                  f"[{a.min():.3f}, {a.max():.3f}]  hedef-altı {int((a<1).sum())}/{len(a)}")
+        else:
+            print("  tüm seedler artefakt — CO sağlamlığını daha da artır")
         print(f"Kaydedildi: {OUTB}")
         return
     tasks = [("raw", s) for s in seeds] + [("oc", s) for s in seeds] \
