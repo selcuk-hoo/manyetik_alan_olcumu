@@ -7,18 +7,21 @@ karşı-dönen demet simetriği FARKLI görür (R_CW ≠ R_CCW); ikisini birden
 düzeltmek koşullanmayı iyileştirir (cond([R_CCW;R_CW])=118; en-zayıf modlar
 %63-79 simetrik) → simetrik kısmın büyük bölümü kaldırılır → BBA'sız hedef-altı.
 
-Bu betik çok-seed + gürültü ile bunu test eder:
-  her seed (temsili desen, 10μm) için ham kaçıklığa
-    (a) TEK-DEMET OC (R_CCW)  ve  (b) İKİ-DEMET OC ([R_CCW;R_CW])
-  uygular (BPM gürültülü), kalan sahte-EDM'i CW+CCW spin izleyiciyle ölçer,
-  beam-reversal-tek artık C=(f_CW-f_CCW)/2'yi raporlar.
+Her seed (temsili desen, 10μm) için ham kaçıklığa (a) TEK-DEMET OC (R_CCW) ve
+(b) İKİ-DEMET OC ([R_CCW;R_CW]) uygulanır (BPM gürültülü), kalan sahte-EDM
+CW+CCW spin izleyiciyle ölçülür, beam-reversal-tek artık C=(f_CW-f_CCW)/2.
 
-İŞARETLİ ölçüm (fast_measure signed=True); sağlam CO (n_turns=28, n_iter=4).
-Restart-güvenli: seed-başı JSON kaydı.
+--bbeat: β-beat SAĞLAMLIK modu. Düzeltme NOMİNAL R ile hesaplanır (bildiğin
+tepki) ama gerçek makine β-beat'li (R_true); orbit R_true@res, sahte-EDM
+β-beat'li makinede (dG=bbeat) ölçülür. §IV model-uyuşmazlığı senaryosunun
+kötümser hali (nominal model vs β-beat makine). R_true ilk koşuda üretilir
+(build_matrices, quad_dG_pert) ve /tmp'ye cache'lenir.
+
+İŞARETLİ ölçüm; sağlam CO (n_turns=28, n_iter=4); restart-güvenli.
 
 Kullanım:
-  python3 kmod_drivers/twobeam_oc.py -w 5 --nseed 5 --bpm-noise 1e-6
-  python3 kmod_drivers/twobeam_oc.py -w 5 --nseed 5 --bpm-noise 14e-9   # lock-in
+  python3 kmod_drivers/twobeam_oc.py -w 5 --nseed 5 --bpm-noise 14e-9
+  python3 kmod_drivers/twobeam_oc.py -w 5 --nseed 5 --bpm-noise 14e-9 --bbeat 0.01
 """
 import os, sys, json, time, argparse
 import numpy as np
@@ -34,46 +37,73 @@ from fast_est import fast_measure
 
 TARGET = 1e-9
 RCOND = 0.01
-Rx_ccw = np.load("R_dx_1.npy"); Ry_ccw = np.load("R_dy_1.npy")     # direction=-1
-Rx_cw = np.load("R_dx_cw.npy"); Ry_cw = np.load("R_dy_cw.npy")     # direction=+1
-Sx = np.vstack([Rx_ccw, Rx_cw]); Sy = np.vstack([Ry_ccw, Ry_cw])
+Rx_ccw = np.load("R_dx_1.npy"); Ry_ccw = np.load("R_dy_1.npy")     # nominal, dir=-1
+Rx_cw = np.load("R_dx_cw.npy"); Ry_cw = np.load("R_dy_cw.npy")     # nominal, dir=+1
 Ps, Pa = sym_anti_projectors()
 
-
-def oc1(res, R, y_noise):
-    """Tek-demet: R@res + gürültü ölç, düzelt."""
-    y = R @ res + y_noise
-    return res - np.linalg.pinv(R, rcond=RCOND) @ y
+# β-beat modu: gerçek-makine matrisleri (ilk kullanımda üretilir)
+BBEAT = None; RTx_ccw = RTx_cw = RTy_ccw = RTy_cw = None
 
 
-def oc2(res, R1, R2, y1_noise, y2_noise):
-    """İki-demet: her iki yörüngeyi birden düzelt (yığılmış)."""
-    S = np.vstack([R1, R2])
-    y = np.concatenate([R1 @ res + y1_noise, R2 @ res + y2_noise])
+def _ensure_rtrue(bbeat_amp):
+    """β-beat'li R_true (CW+CCW) yükle/üret; sabit makine deseni (seed 0)."""
+    global BBEAT, RTx_ccw, RTx_cw, RTy_ccw, RTy_cw
+    BBEAT = np.random.default_rng(0).normal(0.0, bbeat_amp, NQ); BBEAT[0] = 0.0
+    cache = {t: f"/tmp/Rtrue_{p}_{t}.npy" for t in ("ccw", "cw") for p in ("dy", "dx")}
+    need = not all(os.path.exists(f"/tmp/Rtrue_dy_{t}.npy") for t in ("ccw", "cw"))
+    if need:
+        for d, t in ((-1.0, "ccw"), (1.0, "cw")):
+            cfg = json.load(open("params.json")); cfg["direction"] = d
+            print(f"  R_true_{t} üretiliyor (β-beat {bbeat_amp*100:.0f}%)...", flush=True)
+            Ry, Rx = brm.build_matrices(cfg, delta_q=1e-4, sigma_noise=0.0,
+                                        n_workers=4, quad_dG_pert=BBEAT)
+            np.save(f"/tmp/Rtrue_dy_{t}.npy", Ry); np.save(f"/tmp/Rtrue_dx_{t}.npy", Rx)
+    RTy_ccw = np.load("/tmp/Rtrue_dy_ccw.npy"); RTx_ccw = np.load("/tmp/Rtrue_dx_ccw.npy")
+    RTy_cw = np.load("/tmp/Rtrue_dy_cw.npy"); RTx_cw = np.load("/tmp/Rtrue_dx_cw.npy")
+
+
+def oc1(res, Rcorr, Rtrue, ynoise):
+    """Tek-demet: gerçek orbit (Rtrue) ölç, NOMİNAL model (Rcorr) ile düzelt."""
+    y = Rtrue @ res + ynoise
+    return res - np.linalg.pinv(Rcorr, rcond=RCOND) @ y
+
+
+def oc2(res, Rc1, Rc2, Rt1, Rt2, n1, n2):
+    S = np.vstack([Rc1, Rc2])
+    y = np.concatenate([Rt1 @ res + n1, Rt2 @ res + n2])
     return res - np.linalg.pinv(S, rcond=RCOND) @ y
 
 
-def _C(dx, dy):
-    fcw, _ = fast_measure(dx, dy, direction=+1, signed=True, n_turns=28, n_iter=4)
-    fccw, _ = fast_measure(dx, dy, direction=-1, signed=True, n_turns=28, n_iter=4)
+def _C(dx, dy, dG=None):
+    fcw, _ = fast_measure(dx, dy, direction=+1, signed=True, n_turns=28, n_iter=4, dG=dG)
+    fccw, _ = fast_measure(dx, dy, direction=-1, signed=True, n_turns=28, n_iter=4, dG=dG)
     return fcw / TARGET, fccw / TARGET
 
 
 def _task(task):
     import tempfile; os.chdir(tempfile.mkdtemp())
-    seed, sig = task
+    seed, sig, bbeat_amp = task
+    # β-beat modunda gerçek matrisler /tmp'den (main üretmiş); değilse nominal=gerçek
+    if bbeat_amp > 0:
+        dG = np.random.default_rng(0).normal(0.0, bbeat_amp, NQ); dG[0] = 0.0
+        RTyc = np.load("/tmp/Rtrue_dy_ccw.npy"); RTxc = np.load("/tmp/Rtrue_dx_ccw.npy")
+        RTyw = np.load("/tmp/Rtrue_dy_cw.npy"); RTxw = np.load("/tmp/Rtrue_dx_cw.npy")
+    else:
+        dG = None
+        RTxc, RTxw, RTyc, RTyw = Rx_ccw, Rx_cw, Ry_ccw, Ry_cw
     rng = np.random.default_rng(seed)
     m_dx = rng.normal(0, 10e-6, NQ); m_dx[0] = 0.0
     m_dy = rng.normal(0, 10e-6, NQ); m_dy[0] = 0.0
-    nr = np.random.default_rng(50000 + seed)   # gürültü gerçeklemesi
-    nxa = nr.normal(0, sig, NQ); nxb = nr.normal(0, sig, NQ)
-    nya = nr.normal(0, sig, NQ); nyb = nr.normal(0, sig, NQ)
-    # tek-demet (R_CCW)
-    c1x = oc1(m_dx, Rx_ccw, nxa); c1y = oc1(m_dy, Ry_ccw, nya)
-    fcw1, fccw1 = _C(c1x, c1y)
-    # iki-demet
-    c2x = oc2(m_dx, Rx_ccw, Rx_cw, nxa, nxb); c2y = oc2(m_dy, Ry_ccw, Ry_cw, nya, nyb)
-    fcw2, fccw2 = _C(c2x, c2y)
+    nr = np.random.default_rng(50000 + seed)
+    nxa, nxb = nr.normal(0, sig, NQ), nr.normal(0, sig, NQ)
+    nya, nyb = nr.normal(0, sig, NQ), nr.normal(0, sig, NQ)
+    # tek-demet (düzeltme nominal R_CCW, orbit gerçek R_true_CCW)
+    c1x = oc1(m_dx, Rx_ccw, RTxc, nxa); c1y = oc1(m_dy, Ry_ccw, RTyc, nya)
+    fcw1, fccw1 = _C(c1x, c1y, dG)
+    # iki-demet (düzeltme nominal [R_CCW;R_CW], orbit gerçek [R_true...])
+    c2x = oc2(m_dx, Rx_ccw, Rx_cw, RTxc, RTxw, nxa, nxb)
+    c2y = oc2(m_dy, Ry_ccw, Ry_cw, RTyc, RTyw, nya, nyb)
+    fcw2, fccw2 = _C(c2x, c2y, dG)
     return dict(seed=seed,
                 one={"f_CW": fcw1, "f_CCW": fccw1, "C": abs(fcw1 - fccw1) / 2,
                      "sim_dx": float(np.std(Ps @ c1x) * 1e6)},
@@ -86,9 +116,13 @@ def main():
     ap.add_argument("-w", "--workers", type=int, default=5)
     ap.add_argument("--nseed", type=int, default=5)
     ap.add_argument("--bpm-noise", type=float, default=1e-6)
+    ap.add_argument("--bbeat", type=float, default=0.0,
+                    help=">0: β-beat sağlamlık (nominal model vs β-beat makine)")
     args = ap.parse_args()
     seeds = list(range(args.nseed))
-    tag = f"{args.bpm_noise*1e9:.0f}nm"
+    if args.bbeat > 0:
+        _ensure_rtrue(args.bbeat)     # R_true'yu MAIN'de üret (worker'lar yükler)
+    tag = f"{args.bpm_noise*1e9:.0f}nm" + (f"_bb{args.bbeat*100:.0f}" if args.bbeat > 0 else "")
     OUT = os.path.join(BASE, "kmod_drivers", f"twobeam_oc_{tag}.json")
     out = json.load(open(OUT)) if os.path.exists(OUT) else {}
     todo = [s for s in seeds if str(s) not in out]
@@ -96,15 +130,15 @@ def main():
     t0 = time.time()
     if todo:
         with ProcessPoolExecutor(args.workers, initializer=brm._worker_init) as pool:
-            for r in pool.map(_task, [(s, args.bpm_noise) for s in todo]):
+            for r in pool.map(_task, [(s, args.bpm_noise, args.bbeat) for s in todo]):
                 out[str(r["seed"])] = {"one": r["one"], "two": r["two"]}
                 json.dump(out, open(OUT, "w"), indent=1)
-                print(f"  seed {r['seed']}: TEK-demet C={r['one']['C']:.2f}× "
-                      f"(sim {r['one']['sim_dx']:.2f}μm) | İKİ-demet C={r['two']['C']:.3f}× "
-                      f"(sim {r['two']['sim_dx']:.2f}μm)  [{time.time()-t0:.0f}s]", flush=True)
+                print(f"  seed {r['seed']}: TEK C={r['one']['C']:.2f}× "
+                      f"| İKİ C={r['two']['C']:.3f}× (sim {r['two']['sim_dx']:.2f}μm)  "
+                      f"[{time.time()-t0:.0f}s]", flush=True)
     c1 = np.array([out[str(s)]["one"]["C"] for s in seeds])
     c2 = np.array([out[str(s)]["two"]["C"] for s in seeds])
-    print(f"\n=== ÖZET (odd artık C, × hedef; σ_bpm={tag}) ===")
+    print(f"\n=== ÖZET (odd artık C, × hedef; {tag}) ===")
     print(f"  TEK-demet OC: medyan {np.median(c1):.2f}×  [{c1.min():.2f}, {c1.max():.2f}]  "
           f"hedef-altı {int((c1<1).sum())}/{len(c1)}")
     print(f"  İKİ-demet OC: medyan {np.median(c2):.3f}×  [{c2.min():.3f}, {c2.max():.3f}]  "
