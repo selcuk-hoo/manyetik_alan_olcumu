@@ -141,6 +141,10 @@ ENS_FLOOR_SIGMA, ENS_FLOOR_F = 10.0, 47.0
 # medyan/min/max × hedef. Kaynak: kmod_drivers/pipeline_multiseed.json.
 ENS_BBAOC_SIGMA = 10.0
 ENS_BBAOC = [0.068, 0.026, 0.217]       # medyan, min, max (5 seed, hepsi hedef-altı)
+# İki-demet (CW/CCW) yörünge düzeltme — kalibre referans, %1 β-beat, 14nm, 5 seed;
+# odd artık C=½|f_CW−f_CCW|/target. Kaynak: kmod_drivers/twobeam_oc_14nm_g20.json.
+ENS_TWOBEAM_SIGMA = 10.0
+ENS_TWOBEAM = [0.166, 0.001, 0.342]     # medyan, min, max (5 seed, hepsi hedef-altı)
 
 
 def _sig_fit(data):
@@ -181,10 +185,17 @@ def fig_suppression():
 
     # BBA + son yörünge düzeltmesi — 5-seed ensemble @σ=10 (tam şema tabanı)
     em, elo, ehi = ENS_BBAOC
-    ax.errorbar([ENS_BBAOC_SIGMA], [em], yerr=[[em - elo], [ehi - em]],
+    ax.errorbar([ENS_BBAOC_SIGMA - 0.6], [em], yerr=[[em - elo], [ehi - em]],
                 fmt="*", color="tab:purple", ms=17, capsize=5, zorder=7,
                 ecolor="tab:purple", mec="k", mew=0.5,
                 label="BBA $+$ orbit corr. (5 seeds): all sub-target")
+
+    # İki-demet (CW/CCW) yörünge düzeltmesi — kalibre ref, %1 β-beat, 5-seed
+    tm, tlo, thi = ENS_TWOBEAM
+    ax.errorbar([ENS_TWOBEAM_SIGMA + 0.9], [tm], yerr=[[tm - tlo], [thi - tm]],
+                fmt="D", color="tab:blue", ms=11, capsize=5, zorder=7,
+                ecolor="tab:blue", mec="k", mew=0.5,
+                label="two-beam orbit corr. (calib.\\ ref, 5 seeds): all sub-target")
 
     ax.axhline(1.0, color="tab:red", ls="--", lw=1.3)
     ax.text(1.1, 1.3, "target ($10^{-29}\\,e\\!\\cdot\\!$cm)",
@@ -195,8 +206,8 @@ def fig_suppression():
     sec = ax.secondary_yaxis("right",
                              functions=(lambda v: v * 1e-29, lambda v: v / 1e-29))
     sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]")
-    ax.set_title("The false EDM scales as $\\sigma^2$; orbit correction alone\n"
-                 "leaves a symmetric floor, BBA $+$ correction reaches below target",
+    ax.set_title("The false EDM scales as $\\sigma^2$; single-beam correction alone\n"
+                 "leaves a symmetric floor, reached by BBA or by two-beam correction",
                  fontsize=11)
     ax.legend(loc="upper left", fontsize=8.5, title="tracking (median, full spread)")
     ax.set_xlim(1, 100); ax.set_ylim(1e-2, 3e3)

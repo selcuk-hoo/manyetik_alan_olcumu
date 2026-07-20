@@ -828,11 +828,15 @@ scale as $\sigma^2$ ($p=2.00$ at each stage), confirming the geometric-phase
 origin; the fit verifies the scaling, not an absolute floor, since at fixed
 $\sigma$ the false EDM varies by more than an order of magnitude with the
 symmetric/antisymmetric content of the pattern (Sec.~\ref{sec:bilinear}).
-Star: the full scheme --- beam-based alignment followed by one orbit
-correction (fixed truncated-SVD depth, $\mathrm{rcond}=0.01$) --- evaluated
-over five misalignment seeds at $\sigma=10~\mu$m; all five fall below the
-target, with median $0.07\times$ and worst case $0.22\times$
-(Table~\ref{tab:chain}).}
+The symmetric floor is reached below target by two independent routes at
+$\sigma=10~\mu$m, each over five seeds (fixed $\mathrm{rcond}=0.01$).  Star:
+beam-based alignment followed by one orbit correction (median $0.07\times$,
+worst $0.22\times$; Table~\ref{tab:chain}).  Diamond: two-beam counter-rotating
+orbit correction against a calibrated reference, no BBA, at a realistic $1\%$
+$\beta$-beat (median $0.17\times$, worst $0.34\times$; Table~\ref{tab:twobeam}
+and Sec.~\ref{sec:polarity}).  The diamond is the odd remnant
+$\tfrac12|f_{\rm CW}-f_{\rm CCW}|$; both routes place the residual well below the
+target.}
 \label{fig:suppression}
 \end{figure}
 
@@ -1052,6 +1056,20 @@ vertically): no direction falls below the threshold, and the symmetric modes are
 corrected with a noise amplification of $0.7\times$.  The second beam does not circumvent
 the no-go; it lifts the symmetric component above the noise floor the no-go is
 about, by supplying the sum information no single beam carries.
+
+What performs the correction matters, and is fixed by the same physics.  The
+quantity solved for is a set of \emph{magnetic-center shifts} $c$ --- one per
+alignable quadrupole, $47$ per plane --- realized, as in the BBA of
+Sec.~\ref{sec:bbaproc}, by a current asymmetry between the quadrupole coils, not
+by dipole steering.  The distinction is essential.  A center shift is a geometric
+change of the misalignment itself, $m\to m-c$, the \emph{same} for both beams, so
+it can null the symmetric component at its source; a dipole steering corrector,
+by contrast, displaces the beam rather than the quadrupole, and because the
+Lorentz kick reverses with the beam velocity its effect on the beam-to-center
+offset is direction-odd --- it can flatten one beam's orbit but cannot center
+both beams in the quadrupoles at once.  Two-beam correction therefore presumes
+center-shift actuators, the hardware the alignment program already requires; it
+introduces no new class of corrector, only a new use of the two orbits.
 
 The consequence for the false EDM is decisive.  On the raw $10~\mu$m machine,
 with no beam-based alignment and the orbit measured against a calibrated
