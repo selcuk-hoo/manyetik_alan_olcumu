@@ -11,9 +11,15 @@
 % iki demeti birlikte düzeltmek simetriğe erişir, BBA'sız (§5) → operasyon/
 % zaman bütçesi (§6) → sonuç (§7). Ana tez DEĞİŞTİ: "OC BBA'nın yerini alamaz"
 % yerine "sayaç-dönen OC simetriğe tek başına erişir".
-% Sayılar: iki-demet %1 β-beat medyan 0.17× (5/5, tilt-bağışık); veri
-% kmod_drivers/twobeam_oc_14nm_g{10,20}*.json. fig_orbit_* make_orbit_figures.py
-% ile üretilir (git'te değil). Donanım tabanı modellenmedi — açıkça işaretli.
+% M1 RAFINE (2026-07-20, hakem review-1.md): 100um statik BPM ofseti MUTLAK
+% iki-demet OC'yi çökertir (0.17×→198×), çünkü ofset ve simetrik kaçıklık
+% karşı-dönen TOPLAM'da dejeneredir. Tez düzeltildi: iki-demet OC mutlak
+% hizalamayı BBA'sız yapAMAZ; ama DRİFT diferansiyeldir (ofset zaman-farkında
+% iptal) → sürekli iki-demet OC simetrik DRİFTİ tutar → periyodik BBA'yı kaldırır
+% (drift monitörü). §5 dejenerasyon teoremi + §6 diferansiyel drift.
+% Sayılar: kalibre-ref %1 β-beat medyan 0.17× (5/5, tilt-bağışık); 100um ofset
+% mutlak 198× / diferansiyel 0.17×. Veri kmod_drivers/twobeam_oc_14nm_g*.json
+% + _boff100um.json. fig_orbit_* make_orbit_figures.py ile (git'te değil).
 % ============================================================================
 \documentclass[aps,prab,reprint,superscriptaddress,nofootinbib]{revtex4-2}
 
@@ -51,16 +57,21 @@ orbit measurement reaches it.  We show that the two counter-rotating beams,
 whose orbit responses are nearly opposite, carry the symmetric part in the
 \emph{sum} of their orbits --- invisible in either beam and in their difference,
 the separation the reference chain monitors, but fully exposed in the sum.
-Correcting both orbits jointly therefore reaches the symmetric component
-\emph{without} beam-based alignment: on a raw $10~\mu$m machine at a realistic
-$1\%$ $\beta$-beat the drift-free counter-rotating difference falls to a median
-$0.17$ times the target over five seeds, all sub-target, and is unchanged by an
-unmodeled quadrupole roll.  This counter-rotating orbit correction reaches the
-same sub-target regime as the polarity four-fold --- less deeply, but
-continuously, with the two beams already stored and without the alignment
-campaigns and sequential polarity reversal the four-fold requires.  We verify
-the four-fold cancellation as the baseline, show that BBA alone plateaus above
-target, and give the resulting operating requirements.
+Correcting both orbits jointly therefore reaches the symmetric component from
+the orbit alone: against a calibrated reference, on a raw $10~\mu$m machine at a
+realistic $1\%$ $\beta$-beat, the counter-rotating difference falls to a median
+$0.17$ times the target over five seeds, all sub-target, and is unchanged by
+$\beta$-beating and unmodeled quadrupole roll.  The same sum, however, carries
+the static BPM offset, so symmetric misalignment and offset are degenerate
+there: absolute alignment still needs one calibration campaign (BBA or the
+four-fold), and this we make precise.  What two-beam correction removes is the
+\emph{repeated} campaign: the drift is differential, the static offset cancels
+in the orbit change, and a continuous two-beam feedback holds the symmetric
+drift --- invisible to single-beam feedback --- at the offset-free level.  Its
+role is thus a continuous symmetric-drift monitor that maintains an initial
+alignment indefinitely, in place of the periodic re-alignment the reference
+program requires.  We verify the four-fold cancellation as the baseline and give
+the resulting operating requirements.
 \end{abstract}
 
 \maketitle
@@ -184,10 +195,12 @@ refinement~\cite{ziemann}.  None of these techniques is new in itself.  What
 we examine is how each performs on the specific misalignment component that
 drives the false EDM in this ring, and the result is a reversal of the natural
 expectation: while no single-beam orbit measurement reaches that component,
-correcting the two counter-rotating beams jointly does, so that orbit
-correction alone --- without beam-based alignment and without the polarity
-reversal --- reaches the sub-target regime the reference program secures with
-both.
+correcting the two counter-rotating beams jointly does, because the symmetric
+misalignment lives in the sum of the two orbits.  That same sum carries the
+static BPM offset degenerate with it, so the two-beam correction does not
+displace the one-time absolute alignment --- but it does displace the
+\emph{repeated} one, maintaining the symmetric alignment against drift, which a
+single-beam feedback cannot.
 
 \subsection{Findings and outline}
 \label{sec:outline}
@@ -213,16 +226,20 @@ alignment, and a micron-scale symmetric drift between them, invisible to the
 orbit, re-opens the false EDM.
 
 Third, \emph{counter-rotating orbit correction reaches the symmetric component
-on its own} (Sec.~\ref{sec:orbitreach}).  A single-beam orbit measurement
-cannot: the symmetric misalignment is nearly invisible to it, and the inversion
-that would recover it is ill-conditioned.  But the two counter-rotating beams
-have nearly opposite orbit responses, so the symmetric component --- invisible
-in either beam and in their difference, the separation the reference chain
-monitors --- is fully exposed in their \emph{sum}.  Correcting both orbits
-jointly therefore reaches the symmetric component without beam-based alignment,
-bringing the drift-free counter-rotating difference below target at realistic
-optics error and quadrupole roll --- the same regime as the polarity four-fold,
-reached continuously and with the two beams already stored.
+from the orbit, and its natural role is a continuous symmetric-drift monitor}
+(Sec.~\ref{sec:orbitreach}).  A single-beam orbit measurement cannot reach the
+symmetric component: it is nearly invisible to one beam, and the inversion that
+would recover it is ill-conditioned.  But the two counter-rotating beams have
+nearly opposite orbit responses, so the symmetric component --- invisible in
+either beam and in their difference, the separation the reference chain monitors
+--- is fully exposed in their \emph{sum}.  Correcting both orbits jointly against
+a calibrated reference therefore reaches it, below target at realistic optics
+error and roll.  The same sum, however, carries the static BPM offset, degenerate
+there with the symmetric misalignment, so absolute alignment still needs one
+calibration campaign.  What the two-beam correction removes is the \emph{repeated}
+one: the drift is differential, the offset cancels in the orbit change, and a
+continuous two-beam feedback maintains the symmetric alignment against drift ---
+the component a single-beam feedback cannot hold --- indefinitely.
 
 Section~\ref{sec:operation} examines the operational side --- alignment drift,
 the re-alignment cadence, and the time budget --- and
@@ -1025,7 +1042,8 @@ the no-go; it lifts the symmetric component above the noise floor the no-go is
 about, by supplying the sum information no single beam carries.
 
 The consequence for the false EDM is decisive.  On the raw $10~\mu$m machine,
-with no beam-based alignment, two-beam orbit correction reduces the symmetric
+with no beam-based alignment and the orbit measured against a calibrated
+reference, two-beam orbit correction reduces the symmetric
 misalignment residue from $\sim\!5.5~\mu$m (single beam) to $0.1$--$0.7~\mu$m
 --- at or below the $\sim\!2~\mu$m that BBA reaches (Sec.~\ref{sec:bba}) --- and
 drives both counter-rotating false EDMs to the floor together, so the odd
@@ -1049,37 +1067,66 @@ dominant geometric-phase channel; its second-order coupling of the two
 transverse orbits is not fed into the (uncoupled) correction, so the test bounds
 the leading channel that the $\bm v\times\bm B$ argument identifies.}
 
-This is the orbit-only substitute for the alignment program.  It reaches the
-same sub-target regime as the polarity four-fold of Sec.~\ref{sec:fourfold} ---
-less deeply ($0.17\times$ against the four-fold's $0.009\times$), but using the
-two beams that are \emph{already} stored, with no beam-based alignment campaign,
-no second configuration of the machine, and the correction held continuously and
-non-invasively during data taking.  Where the four-fold cancels the symmetric
-channel only if a BBA-level symmetric alignment is held stable across a
-sequential reversal, counter-rotating orbit correction reaches that channel
-directly and keeps it corrected as the machine drifts.  Should the polarity
-reversal be used in addition, two-beam correction removes the antisymmetric
-channel continuously and lowers the ambient misalignment the reversal must
-reproduce, relaxing its $\sigma^2$-scaling tolerance.
+These figures presuppose a calibrated reference, and the qualification is not a
+technicality.  The static electrical offsets of real BPMs --- $\sim\!100~\mu$m,
+the same offsets the reference control chain removes by differencing
+(Sec.~\ref{sec:inverse}) --- degrade this scheme for a sharp and instructive
+reason.  The offset $b$ is common to the two beams, so it cancels in their
+difference but adds \emph{doubly} to their sum --- and the sum is precisely the
+channel that carries the symmetric component.  Symmetric misalignment and static
+offset are therefore \emph{degenerate} in the counter-rotating sum: the very
+projection that exposes the one exposes the other, and no single-time orbit
+measurement separates them.  In tracking, restoring $100~\mu$m uncalibrated
+offsets returns the odd remnant from $0.17\times$ to $\sim\!200\times$ the target
+(Table~\ref{tab:twobeam}), and the tolerance is severe --- the symmetric residue
+grows as $0.96\times$ the offset rms, so sub-target operation would demand the
+offsets known to $\lesssim\!0.5~\mu$m, the quadrupole-center level that only BBA
+provides.  Two-beam correction thus does not remove the need for an absolute
+position reference; it concentrates that need into a single, cleanly stated
+degeneracy.
+
+What it \emph{does} remove is the \emph{periodic} realignment.  Drift is
+differential: between two orbit acquisitions the static offset is unchanged, so
+it cancels identically in the orbit \emph{change}
+$\Delta y = y(t)-y(t_0) = R\,\Delta q$, and the counter-rotating sum of
+$\Delta y$ exposes the symmetric part of the \emph{drift} with no offset
+contamination whatever (in tracking the leaked symmetric residue is
+$0.000~\mu$m against $100~\mu$m offsets).  A continuous two-beam correction
+acting on the differential orbit therefore holds the symmetric drift at the
+offset-free level of Table~\ref{tab:twobeam}, and --- $\beta$-beat and roll being
+harmless --- robustly so.  This fixes the role of counter-rotating orbit
+correction.  It is not a substitute for the initial absolute alignment, which
+one BBA campaign, or the polarity four-fold of Sec.~\ref{sec:fourfold}, must
+still establish.  But once that alignment is set, two-beam correction maintains
+it against drift --- including the \emph{symmetric} drift that a single-beam
+feedback cannot see, and that in the reference program forces the BBA campaign to
+be \emph{repeated}.  The operational consequence is developed in
+Sec.~\ref{sec:operation}.
 
 \begin{table}[tb]
 \caption{Counter-rotating orbit correction on the raw $\sigma=10~\mu$m machine
-(no BBA), versus the coherent optics error (five seeds, $14$~nm BPM noise;
-tracking).  The odd remnant is the drift-free counter-rotating difference
-$C=\tfrac12|f_{\rm CW}-f_{\rm CCW}|$ in units of the target.  Single-beam
-correction leaves it far above target at every $\beta$-beat; two-beam correction
-is sub-target across the realistic range and degrades only at an unrealistically
-large $5\%$.}
+(no BBA; five seeds, $14$~nm BPM noise; tracking).  The odd remnant is the
+counter-rotating difference $C=\tfrac12|f_{\rm CW}-f_{\rm CCW}|$ in units of the
+target.  Top block: correction against a calibrated reference, versus the
+coherent optics error --- two-beam correction is sub-target across the realistic
+range and degrades only at an unrealistically large $5\%$ $\beta$-beat.  Bottom:
+with $100~\mu$m uncalibrated static BPM offsets the odd remnant returns to
+$\sim\!200\times$, because offset and symmetric misalignment are degenerate in
+the counter-rotating sum --- unless the correction acts on the \emph{differential}
+(drift) orbit, in which the static offset cancels identically.}
 \label{tab:twobeam}
 \small
 \begin{ruledtabular}
 \begin{tabular}{lcc}
-$\beta$-beat ($\sigma_g$) & single-beam & two-beam (median) \\
+$\beta$-beat ($\sigma_g$), reference & single-beam & two-beam (median) \\
 \hline
-$0.5\%$ ($0.1\%$)             & $\sim\!46\times$ & $0.03\times$ \;(5/5) \\
-$1\%$ ($0.2\%$, LOCO)          & $\sim\!45\times$ & $0.17\times$ \;(5/5) \\
-$1\%$ $+\,0.2$~mrad roll        & $\sim\!45\times$ & $0.12\times$ \;(5/5) \\
-$5\%$ ($1\%$)                  & $\sim\!29\times$ & $0.66\times$ \;(3/5) \\
+$0.5\%$ ($0.1\%$), calibrated        & $\sim\!46\times$ & $0.03\times$ \;(5/5) \\
+$1\%$ ($0.2\%$, LOCO), calibrated     & $\sim\!45\times$ & $0.17\times$ \;(5/5) \\
+$1\%$ $+\,0.2$~mrad roll, calibrated   & $\sim\!45\times$ & $0.12\times$ \;(5/5) \\
+$5\%$ ($1\%$), calibrated             & $\sim\!29\times$ & $0.66\times$ \;(3/5) \\
+\hline
+$1\%$, $100~\mu$m offset (absolute)   & $\sim\!650\times$ & $198\times$ \;(0/5) \\
+$1\%$, $100~\mu$m offset (differential) & --- & $0.17\times$ \;(5/5) \\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
@@ -1099,28 +1146,40 @@ The distinction that governs the operational picture is between the two
 misalignment components.  Single-beam orbit feedback removes only the
 antisymmetric part of the drift, so with it alone the false EDM stays below
 target for $\sigma_{\rm d}$ up to $\sim\!5~\mu$m ($0.05\times$ at $2~\mu$m,
-$0.3$--$0.6\times$ at $5~\mu$m), but the slowly accumulating symmetric part
-must be removed by a repeated alignment campaign.  Counter-rotating correction
-(Sec.~\ref{sec:orbitreach}) removes both components, so that, applied
-continuously, it holds the symmetric drift to the same $\sim\!0.5~\mu$m coherent
-floor it reaches from a raw machine, and the periodic re-alignment is then no
-longer required.  The alignment does not need to be \emph{held} mechanically at
-the micron level; the two-beam feedback maintains it.
+$0.3$--$0.6\times$ at $5~\mu$m), but the slowly accumulating \emph{symmetric}
+part is invisible to it and, in the reference program, forces the beam-based
+alignment to be repeated.  This is where counter-rotating correction earns its
+keep.  As shown in Sec.~\ref{sec:orbitreach}, the two-beam correction reaches
+the symmetric component --- and, crucially for drift, it does so on the
+differential orbit without any absolute calibration: the drift is
+$\Delta q = q(t)-q(t_0)$, the corresponding orbit change
+$\Delta y = R\,\Delta q$ is free of the static BPM offset (which cancels between
+the two times), and its counter-rotating sum exposes the symmetric part of
+$\Delta q$.  A continuous two-beam feedback on $\Delta y$ therefore holds the
+\emph{symmetric} drift, not merely the antisymmetric one, at the offset-free
+level of Table~\ref{tab:twobeam}.  The initial absolute alignment still requires
+one campaign --- BBA, or the polarity four-fold --- to set the symmetric
+component against the offset degeneracy of Sec.~\ref{sec:orbitreach}; but its
+\emph{maintenance}, the repeated re-alignment that the symmetric drift would
+otherwise demand, is replaced by the continuous feedback.
 
-The time budget follows.  Continuous orbit correction runs during data taking
-at no extra cost, and on the orbit-only path there are no beam-based-alignment
-acquisitions to schedule.  Should a BBA cross-check be retained, one pass costs
-$47~\text{magnets}\times2~\text{planes}\times2~\text{beam positions}\times
-2~\text{gradient settings}\approx400$ orbit acquisitions --- at $\sim\!10$~s
-each, about an hour of beam time, and a five-pass iteration of order half a day
---- an overhead the two-beam feedback removes from the routine.  The dominant
-time scale of the experiment then remains the statistical one: polarimetry
-reaches the nrad/s level only over months to a year of
+The time budget follows.  The initial alignment is a one-time cost --- a
+five-pass BBA campaign is of order half a day
+($47~\text{magnets}\times2~\text{planes}\times2~\text{beam positions}\times
+2~\text{gradient settings}\approx400$ orbit acquisitions per pass, $\sim\!10$~s
+each) --- after which the two-beam feedback runs during data taking at no extra
+cost and no further campaigns are scheduled for the symmetric drift.  The
+dominant time scale of the experiment then remains the statistical one:
+polarimetry reaches the nrad/s level only over months to a year of
 running~\cite{polarimeter}, and the continuous correction adds nothing to it.
-The unmodeled hardware floor --- magnetic-center motion under the gradient
-modulation used for any BBA cross-check --- enters only as a repeatability limit
-of that optional cross-check, not of the continuous correction, and is the main
-open item on the operational side.
+Two hardware inputs, not modeled here, set the ultimate limits: the
+magnetic-center stability under the gradient modulation of the initial BBA (its
+repeatability), and the stability of the BPM electrical offset over one
+correction cycle --- the differential cancellation requires only that the offset
+be constant between successive acquisitions, seconds apart, which any realistic
+offset drift satisfies by orders of magnitude, but a per-monitor gain error
+enters the differential response like a $\beta$-beat and its tolerance is the
+main remaining item to quantify.
 
 % ═══════════════════════════════════════════════════════════════════
 
@@ -1156,28 +1215,34 @@ the machine presents the same symmetric alignment in two sequential polarity
 states; a $1~\mu$m symmetric inter-configuration drift, invisible to the orbit,
 re-opens the false EDM to tens of times the target.
 
-(3) Counter-rotating orbit correction reaches the symmetric component on its
-own, without beam-based alignment.  A single-beam orbit measurement cannot: the
+(3) Counter-rotating orbit correction reaches the symmetric component from the
+orbit, subject to one degeneracy.  A single-beam measurement cannot: the
 symmetric misalignment is nearly invisible to it, and the counter-rotating
-\emph{separation} the reference chain monitors is no better, because the two
-beams' orbit responses are nearly opposite and the separation is their
-difference.  Their \emph{sum}, however, exposes the symmetric component fully
-(symmetric visibility $1.0$ against $0.2$ for the separation), and correcting
-both orbits jointly uses it: on the raw $10~\mu$m machine the drift-free
-counter-rotating difference falls to a median $0.17\times$ the target over five
-seeds at a realistic $1\%$ $\beta$-beat, all sub-target, unchanged by a
-$0.2$~mrad unmodeled quadrupole roll.  This reaches the same sub-target regime
-as the polarity four-fold --- less deeply, but with the two beams already
-stored, without alignment campaigns, and without the sequential polarity
-reversal or the symmetric-alignment stability it demands.
+\emph{separation} the reference chain monitors is no better, being the
+\emph{difference} of two nearly opposite orbits.  Their \emph{sum}, however,
+exposes the symmetric component fully (symmetric visibility $1.0$ against $0.2$
+for the separation), and correcting both orbits jointly against a calibrated
+reference uses it: on the raw $10~\mu$m machine the counter-rotating difference
+falls to a median $0.17\times$ the target over five seeds at a realistic $1\%$
+$\beta$-beat, all sub-target, unchanged by $\beta$-beating and a $0.2$~mrad
+unmodeled quadrupole roll.  The same sum, however, carries the static BPM
+offset, degenerate there with the symmetric misalignment ($100~\mu$m
+uncalibrated offsets return the remnant to $\sim\!200\times$); so two-beam
+correction does not remove the need for an absolute reference, which one BBA
+campaign, or the four-fold, must still set.
 
-(4) Operationally, the correction is continuous and non-invasive, and because it
-reaches the symmetric component it holds both misalignment components against
-drift, so the periodic BBA re-alignment the reference program requires is not
-needed on the orbit-only path; the time budget is then dominated by the
-statistical time scale of the polarimetry~\cite{polarimeter}.  The main open
-item is the coherent optics-model error, which sets the sub-target floor and
-against which the method is robust up to $\sim\!1\%$ $\beta$-beat.
+(4) What it removes is the \emph{periodic} realignment, and this is its
+operational role.  Drift is differential: the static offset cancels in the orbit
+\emph{change} $\Delta y = R\,\Delta q$, whose counter-rotating sum exposes the
+symmetric part of the drift with no offset contamination, so a continuous
+two-beam feedback holds the symmetric alignment --- the component a single-beam
+feedback cannot see, and that in the reference program forces the BBA to be
+repeated --- at the offset-free level indefinitely.  The initial alignment is a
+one-time cost; its maintenance is then continuous and free, and the time budget
+is dominated by the statistical scale of the polarimetry~\cite{polarimeter}.
+The remaining items to quantify are the coherent optics floor (against which the
+method is robust to $\sim\!1\%$ $\beta$-beat) and a per-monitor BPM gain error,
+which enters the differential response like a $\beta$-beat.
 
 All numbers refer to the symmetric-hybrid ring designed for the proton EDM
 experiment~\cite{omarov}, in a linear model without sextupoles.  The structural
