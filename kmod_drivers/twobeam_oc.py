@@ -92,7 +92,7 @@ def _C(dx, dy, dG=None, tilt=None):
 
 def _task(task):
     import tempfile; os.chdir(tempfile.mkdtemp())
-    seed, sig, bbeat_amp, tilt_rms = task
+    seed, sig, bbeat_amp, tilt_rms, boff = task
     # β-beat modunda gerçek matrisler /tmp'den (main üretmiş); değilse nominal=gerçek
     if bbeat_amp > 0:
         dG = np.random.default_rng(0).normal(0.0, bbeat_amp, NQ); dG[0] = 0.0
@@ -111,12 +111,17 @@ def _task(task):
     nr = np.random.default_rng(50000 + seed)
     nxa, nxb = nr.normal(0, sig, NQ), nr.normal(0, sig, NQ)
     nya, nyb = nr.normal(0, sig, NQ), nr.normal(0, sig, NQ)
+    # statik BPM ofsetleri: kalibre edilmemiş elektriksel sıfır; CW ve CCW AYNI
+    # pickup'ları okur → aynı b vektörü her iki yönün okumasına eklenir
+    ro = np.random.default_rng(70000 + seed)
+    bx = ro.normal(0, boff, NQ) if boff > 0 else np.zeros(NQ)
+    by = ro.normal(0, boff, NQ) if boff > 0 else np.zeros(NQ)
     # tek-demet (düzeltme nominal R_CCW, orbit gerçek R_true_CCW)
-    c1x = oc1(m_dx, Rx_ccw, RTxc, nxa); c1y = oc1(m_dy, Ry_ccw, RTyc, nya)
+    c1x = oc1(m_dx, Rx_ccw, RTxc, nxa + bx); c1y = oc1(m_dy, Ry_ccw, RTyc, nya + by)
     fcw1, fccw1 = _C(c1x, c1y, dG, tilt)
     # iki-demet (düzeltme nominal [R_CCW;R_CW], orbit gerçek [R_true...])
-    c2x = oc2(m_dx, Rx_ccw, Rx_cw, RTxc, RTxw, nxa, nxb)
-    c2y = oc2(m_dy, Ry_ccw, Ry_cw, RTyc, RTyw, nya, nyb)
+    c2x = oc2(m_dx, Rx_ccw, Rx_cw, RTxc, RTxw, nxa + bx, nxb + bx)
+    c2y = oc2(m_dy, Ry_ccw, Ry_cw, RTyc, RTyw, nya + by, nyb + by)
     fcw2, fccw2 = _C(c2x, c2y, dG, tilt)
     return dict(seed=seed,
                 one={"f_CW": fcw1, "f_CCW": fccw1, "C": abs(fcw1 - fccw1) / 2,
@@ -134,6 +139,8 @@ def main():
                     help=">0: β-beat sağlamlık (nominal model vs β-beat makine)")
     ap.add_argument("--tilt", type=float, default=0.0,
                     help=">0: makine quad roll rms [rad] (modellenmemiş; ör. 2e-4=0.2mrad)")
+    ap.add_argument("--bpm-offset", type=float, default=0.0,
+                    help=">0: statik BPM ofset rms [m] (kalibre edilmemiş sıfır; CW/CCW aynı)")
     args = ap.parse_args()
     seeds = list(range(args.nseed))
     if args.bbeat > 0:
@@ -141,7 +148,8 @@ def main():
     # β-beat etiketi σ_g bazıyla (0.01→g100, 0.002→g20, 0.001→g10); yuvarlama çakışması yok
     tag = f"{args.bpm_noise*1e9:.0f}nm" \
           + (f"_g{int(round(args.bbeat*1e4))}" if args.bbeat > 0 else "") \
-          + (f"_tilt{args.tilt*1e3:.1f}mrad" if args.tilt > 0 else "")
+          + (f"_tilt{args.tilt*1e3:.1f}mrad" if args.tilt > 0 else "") \
+          + (f"_boff{args.bpm_offset*1e6:.0f}um" if args.bpm_offset > 0 else "")
     OUT = os.path.join(BASE, "kmod_drivers", f"twobeam_oc_{tag}.json")
     out = json.load(open(OUT)) if os.path.exists(OUT) else {}
     todo = [s for s in seeds if str(s) not in out]
@@ -149,7 +157,7 @@ def main():
     t0 = time.time()
     if todo:
         with ProcessPoolExecutor(args.workers, initializer=brm._worker_init) as pool:
-            for r in pool.map(_task, [(s, args.bpm_noise, args.bbeat, args.tilt) for s in todo]):
+            for r in pool.map(_task, [(s, args.bpm_noise, args.bbeat, args.tilt, args.bpm_offset) for s in todo]):
                 out[str(r["seed"])] = {"one": r["one"], "two": r["two"]}
                 json.dump(out, open(OUT, "w"), indent=1)
                 print(f"  seed {r['seed']}: TEK C={r['one']['C']:.2f}× "
