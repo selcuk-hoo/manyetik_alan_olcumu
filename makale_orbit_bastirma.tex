@@ -927,8 +927,9 @@ demodulates at a BPM is therefore not the quad's own feed-down: for the
 worst-coupled quadrupole the amplitude driven by the breathing of the
 pre-existing orbit is $266$ times larger than the amplitude its own offset
 would produce, so the number one would invert for the offset is dominated by
-the orbit of the \emph{other} magnets, and no calibration can recover the right
-quantity from it [Fig.~\ref{fig:breathing}].  Because breathing is coherent with
+the orbit of the \emph{other} magnets, and within this single-frequency readout
+no fixed calibration recovers the right quantity from it
+[Fig.~\ref{fig:breathing}].  Because breathing is coherent with
 the modulation it does not average away, and removing it in an idealized model
 restores perfect reconstruction, which pins the failure entirely on this
 mechanism.
@@ -1192,9 +1193,13 @@ differential orbit without any absolute calibration: the drift is
 $\Delta q = q(t)-q(t_0)$, the corresponding orbit change
 $\Delta y = R\,\Delta q$ is free of the static BPM offset (which cancels between
 the two times), and its counter-rotating sum exposes the symmetric part of
-$\Delta q$.  A continuous two-beam feedback on $\Delta y$ therefore holds the
-\emph{symmetric} drift, not merely the antisymmetric one, at the offset-free
-level of Table~\ref{tab:twobeam}.  The initial absolute alignment still requires
+$\Delta q$.  Because the offset cancels identically, the differential correction
+vector is the \emph{same} as the offset-free one --- so the tracked performance
+is exactly the offset-free ensemble of Table~\ref{tab:twobeam}, not a separate
+approximation --- and each cycle re-references, so the cancellation does not
+accumulate error over a run.  A continuous two-beam feedback on $\Delta y$ thus
+holds the \emph{symmetric} drift, not merely the antisymmetric one, at that
+offset-free level.  The initial absolute alignment still requires
 one campaign --- BBA, or the polarity four-fold --- to set the symmetric
 component against the offset degeneracy of Sec.~\ref{sec:orbitreach}; but its
 \emph{maintenance}, the repeated re-alignment that the symmetric drift would
@@ -1279,17 +1284,26 @@ one-time cost; its maintenance is then continuous and free, and the time budget
 is dominated by the statistical scale of the polarimetry~\cite{polarimeter}.
 The remaining items to quantify are the coherent optics floor (against which the
 method is robust to $\sim\!1\%$ $\beta$-beat) and a per-monitor BPM gain error,
-which enters the differential response like a $\beta$-beat.
+which enters the differential response like a $\beta$-beat --- a $1\%$ gain
+adding $\sim\!0.6~\mu$m of symmetric residue, comparable to the optics floor, so
+BPM gains calibrated to the standard percent level suffice.
 
 All numbers refer to the symmetric-hybrid ring designed for the proton EDM
-experiment~\cite{omarov}, in a linear model without sextupoles.  The structural
-conclusions --- the visibility split, the bilinear channel decomposition, and
-the exposure of the symmetric component in the counter-rotating sum --- rest on
-the alternating-gradient focusing common to strong-focusing rings, and we expect
-them to carry over to other such lattices, though we have verified them on this
-one.  The principal open items are the magnetic-center stability of any BBA
-cross-check under gradient modulation (the hardware floor, not modeled here) and
-the verification of these results on other lattice variants.
+experiment~\cite{omarov}, in a linear model without sextupoles.  A distinction
+between the qualitative and the quantitative should be kept in mind.  The
+structural conclusions --- the visibility split, the bilinear channel
+decomposition, and the exposure of the symmetric component in the
+counter-rotating sum rather than the difference --- rest on the
+alternating-gradient focusing common to strong-focusing rings, and we expect
+them to carry over to other such lattices.  The numerical values that quantify
+them --- the symmetric visibilities ($0.19$ for the difference, $1.01$ for the
+sum), the condition numbers ($135$ single-beam, $73$ stacked), the
+direction-common residue ($21\%$), and the suppression factors --- are
+properties of this lattice, and would be recomputed for another; it is the
+structure, not these numbers, that we claim to be general.  The principal open
+items are the magnetic-center stability of any BBA cross-check under gradient
+modulation (the hardware floor, not modeled here) and the verification on other
+lattice variants.
 
 The tracking and analysis code, the response matrices, and the data behind the
 figures and tables are available from the authors on reasonable request.
