@@ -45,21 +45,31 @@ Ps, Pa = sym_anti_projectors()
 BBEAT = None; RTx_ccw = RTx_cw = RTy_ccw = RTy_cw = None
 
 
+def _rtrue_path(plane, t, bbeat_amp):
+    """R_true cache yolu — β-beat GENLİĞİYLE anahtarlı (aksi halde farklı
+    seviyeler /tmp'de çakışır ve bayat matris sessizce yeniden kullanılır)."""
+    key = int(round(bbeat_amp * 1e4))     # σ_g bazı: 0.01→100, 0.002→20, 0.001→10
+    return f"/tmp/Rtrue_{plane}_{t}_g{key}.npy"
+
+
 def _ensure_rtrue(bbeat_amp):
     """β-beat'li R_true (CW+CCW) yükle/üret; sabit makine deseni (seed 0)."""
     global BBEAT, RTx_ccw, RTx_cw, RTy_ccw, RTy_cw
     BBEAT = np.random.default_rng(0).normal(0.0, bbeat_amp, NQ); BBEAT[0] = 0.0
-    cache = {t: f"/tmp/Rtrue_{p}_{t}.npy" for t in ("ccw", "cw") for p in ("dy", "dx")}
-    need = not all(os.path.exists(f"/tmp/Rtrue_dy_{t}.npy") for t in ("ccw", "cw"))
+    need = not all(os.path.exists(_rtrue_path("dy", t, bbeat_amp)) for t in ("ccw", "cw"))
     if need:
         for d, t in ((-1.0, "ccw"), (1.0, "cw")):
             cfg = json.load(open("params.json")); cfg["direction"] = d
-            print(f"  R_true_{t} üretiliyor (β-beat {bbeat_amp*100:.0f}%)...", flush=True)
+            print(f"  R_true_{t} üretiliyor (σ_g {bbeat_amp*100:.2f}% ≈ β-beat "
+                  f"{bbeat_amp*5.1*100:.1f}%)...", flush=True)
             Ry, Rx = brm.build_matrices(cfg, delta_q=1e-4, sigma_noise=0.0,
                                         n_workers=4, quad_dG_pert=BBEAT)
-            np.save(f"/tmp/Rtrue_dy_{t}.npy", Ry); np.save(f"/tmp/Rtrue_dx_{t}.npy", Rx)
-    RTy_ccw = np.load("/tmp/Rtrue_dy_ccw.npy"); RTx_ccw = np.load("/tmp/Rtrue_dx_ccw.npy")
-    RTy_cw = np.load("/tmp/Rtrue_dy_cw.npy"); RTx_cw = np.load("/tmp/Rtrue_dx_cw.npy")
+            np.save(_rtrue_path("dy", t, bbeat_amp), Ry)
+            np.save(_rtrue_path("dx", t, bbeat_amp), Rx)
+    RTy_ccw = np.load(_rtrue_path("dy", "ccw", bbeat_amp))
+    RTx_ccw = np.load(_rtrue_path("dx", "ccw", bbeat_amp))
+    RTy_cw = np.load(_rtrue_path("dy", "cw", bbeat_amp))
+    RTx_cw = np.load(_rtrue_path("dx", "cw", bbeat_amp))
 
 
 def oc1(res, Rcorr, Rtrue, ynoise):
@@ -86,8 +96,8 @@ def _task(task):
     # β-beat modunda gerçek matrisler /tmp'den (main üretmiş); değilse nominal=gerçek
     if bbeat_amp > 0:
         dG = np.random.default_rng(0).normal(0.0, bbeat_amp, NQ); dG[0] = 0.0
-        RTyc = np.load("/tmp/Rtrue_dy_ccw.npy"); RTxc = np.load("/tmp/Rtrue_dx_ccw.npy")
-        RTyw = np.load("/tmp/Rtrue_dy_cw.npy"); RTxw = np.load("/tmp/Rtrue_dx_cw.npy")
+        RTyc = np.load(_rtrue_path("dy", "ccw", bbeat_amp)); RTxc = np.load(_rtrue_path("dx", "ccw", bbeat_amp))
+        RTyw = np.load(_rtrue_path("dy", "cw", bbeat_amp)); RTxw = np.load(_rtrue_path("dx", "cw", bbeat_amp))
     else:
         dG = None
         RTxc, RTxw, RTyc, RTyw = Rx_ccw, Rx_cw, Ry_ccw, Ry_cw
@@ -128,7 +138,9 @@ def main():
     seeds = list(range(args.nseed))
     if args.bbeat > 0:
         _ensure_rtrue(args.bbeat)     # R_true'yu MAIN'de üret (worker'lar yükler)
-    tag = f"{args.bpm_noise*1e9:.0f}nm" + (f"_bb{args.bbeat*100:.0f}" if args.bbeat > 0 else "") \
+    # β-beat etiketi σ_g bazıyla (0.01→g100, 0.002→g20, 0.001→g10); yuvarlama çakışması yok
+    tag = f"{args.bpm_noise*1e9:.0f}nm" \
+          + (f"_g{int(round(args.bbeat*1e4))}" if args.bbeat > 0 else "") \
           + (f"_tilt{args.tilt*1e3:.1f}mrad" if args.tilt > 0 else "")
     OUT = os.path.join(BASE, "kmod_drivers", f"twobeam_oc_{tag}.json")
     out = json.load(open(OUT)) if os.path.exists(OUT) else {}
