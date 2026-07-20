@@ -74,15 +74,15 @@ def oc2(res, Rc1, Rc2, Rt1, Rt2, n1, n2):
     return res - np.linalg.pinv(S, rcond=RCOND) @ y
 
 
-def _C(dx, dy, dG=None):
-    fcw, _ = fast_measure(dx, dy, direction=+1, signed=True, n_turns=28, n_iter=4, dG=dG)
-    fccw, _ = fast_measure(dx, dy, direction=-1, signed=True, n_turns=28, n_iter=4, dG=dG)
+def _C(dx, dy, dG=None, tilt=None):
+    fcw, _ = fast_measure(dx, dy, tilt=tilt, direction=+1, signed=True, n_turns=28, n_iter=4, dG=dG)
+    fccw, _ = fast_measure(dx, dy, tilt=tilt, direction=-1, signed=True, n_turns=28, n_iter=4, dG=dG)
     return fcw / TARGET, fccw / TARGET
 
 
 def _task(task):
     import tempfile; os.chdir(tempfile.mkdtemp())
-    seed, sig, bbeat_amp = task
+    seed, sig, bbeat_amp, tilt_rms = task
     # β-beat modunda gerçek matrisler /tmp'den (main üretmiş); değilse nominal=gerçek
     if bbeat_amp > 0:
         dG = np.random.default_rng(0).normal(0.0, bbeat_amp, NQ); dG[0] = 0.0
@@ -91,6 +91,10 @@ def _task(task):
     else:
         dG = None
         RTxc, RTxw, RTyc, RTyw = Rx_ccw, Rx_cw, Ry_ccw, Ry_cw
+    # sabit makine roll deseni (düzeltme R'si bilmez → modellenmemiş sistematik)
+    tilt = None
+    if tilt_rms > 0:
+        tilt = np.random.default_rng(9000).normal(0.0, tilt_rms, NQ); tilt[0] = 0.0
     rng = np.random.default_rng(seed)
     m_dx = rng.normal(0, 10e-6, NQ); m_dx[0] = 0.0
     m_dy = rng.normal(0, 10e-6, NQ); m_dy[0] = 0.0
@@ -99,11 +103,11 @@ def _task(task):
     nya, nyb = nr.normal(0, sig, NQ), nr.normal(0, sig, NQ)
     # tek-demet (düzeltme nominal R_CCW, orbit gerçek R_true_CCW)
     c1x = oc1(m_dx, Rx_ccw, RTxc, nxa); c1y = oc1(m_dy, Ry_ccw, RTyc, nya)
-    fcw1, fccw1 = _C(c1x, c1y, dG)
+    fcw1, fccw1 = _C(c1x, c1y, dG, tilt)
     # iki-demet (düzeltme nominal [R_CCW;R_CW], orbit gerçek [R_true...])
     c2x = oc2(m_dx, Rx_ccw, Rx_cw, RTxc, RTxw, nxa, nxb)
     c2y = oc2(m_dy, Ry_ccw, Ry_cw, RTyc, RTyw, nya, nyb)
-    fcw2, fccw2 = _C(c2x, c2y, dG)
+    fcw2, fccw2 = _C(c2x, c2y, dG, tilt)
     return dict(seed=seed,
                 one={"f_CW": fcw1, "f_CCW": fccw1, "C": abs(fcw1 - fccw1) / 2,
                      "sim_dx": float(np.std(Ps @ c1x) * 1e6)},
@@ -118,11 +122,14 @@ def main():
     ap.add_argument("--bpm-noise", type=float, default=1e-6)
     ap.add_argument("--bbeat", type=float, default=0.0,
                     help=">0: β-beat sağlamlık (nominal model vs β-beat makine)")
+    ap.add_argument("--tilt", type=float, default=0.0,
+                    help=">0: makine quad roll rms [rad] (modellenmemiş; ör. 2e-4=0.2mrad)")
     args = ap.parse_args()
     seeds = list(range(args.nseed))
     if args.bbeat > 0:
         _ensure_rtrue(args.bbeat)     # R_true'yu MAIN'de üret (worker'lar yükler)
-    tag = f"{args.bpm_noise*1e9:.0f}nm" + (f"_bb{args.bbeat*100:.0f}" if args.bbeat > 0 else "")
+    tag = f"{args.bpm_noise*1e9:.0f}nm" + (f"_bb{args.bbeat*100:.0f}" if args.bbeat > 0 else "") \
+          + (f"_tilt{args.tilt*1e3:.1f}mrad" if args.tilt > 0 else "")
     OUT = os.path.join(BASE, "kmod_drivers", f"twobeam_oc_{tag}.json")
     out = json.load(open(OUT)) if os.path.exists(OUT) else {}
     todo = [s for s in seeds if str(s) not in out]
@@ -130,7 +137,7 @@ def main():
     t0 = time.time()
     if todo:
         with ProcessPoolExecutor(args.workers, initializer=brm._worker_init) as pool:
-            for r in pool.map(_task, [(s, args.bpm_noise, args.bbeat) for s in todo]):
+            for r in pool.map(_task, [(s, args.bpm_noise, args.bbeat, args.tilt) for s in todo]):
                 out[str(r["seed"])] = {"one": r["one"], "two": r["two"]}
                 json.dump(out, open(OUT, "w"), indent=1)
                 print(f"  seed {r['seed']}: TEK C={r['one']['C']:.2f}× "
