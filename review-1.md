@@ -149,11 +149,35 @@ iddiadır.
 
 ---
 
-## Durum notu (yazar tarafı)
+## Uygulama durumu (2026-07-20)
 
-- **M1 testi koşuluyor** (100 μm statik BPM ofseti + %1 β-beat + 14 nm, 5 seed,
-  iki-demet vs tek-demet). Lineer ön-analiz: 100 μm ofset iki-demet düzeltmede
-  ~87 μm sahte simetrik artık bırakıyor; tek-artık C'de ortak-mod iptali
-  izleyiciyle sınanıyor. Sonuç tezi belirleyecek.
-- Metin düzeltmeleri (M6a, M7, tab:chain, rossbach) M1'den bağımsız; sonraya
-  bırakıldı.
+- **M1 — ÇÖZÜLDÜ (tez düzeltildi).** 100 μm ofset iki-demet OC'yi 0.17×→198×
+  çökertti (0/5). Fizik: ofset ve simetrik kaçıklık karşı-dönen TOPLAM'da
+  dejenere. Makale iki parçalı yeniden çerçevelendi: (i) §5 dejenerasyon teoremi
+  (mutlak hizalama bir kez BBA ister), (ii) §6 diferansiyel drift monitörü (drift
+  fark-yörüngede; ofset iptal; sürekli iki-demet OC simetrik drifti tutar →
+  periyodik BBA'yı kaldırır). Abstract/outline/§5/§6/§7 güncellendi.
+- **M3 — UYGULANDI.** Δ'nın kökeni yazıldı (kick qv×B ile işaret çevirir → −R
+  baskın; faz-ilerleme yön-simetrik değil → Δ). Her iki düzlem sayısı (dx 0.21,
+  dy 0.21), Frobenius norm tanımı eklendi.
+- **M6a — UYGULANDI.** §4'te "realistic 1%-gradient (≈5%)" → "conservative …
+  stress test, above LOCO"; §5 "unrealistically large 5%" ile tutarlı.
+- **M6b/c — UYGULANDI.** cond sayıları düzlem/kaynak nitelendi (dx 135→73,
+  dy 228→118); mekanizma sayıları iki düzlem için verildi.
+- **M7 — UYGULANDI.** Abstract "no single-beam orbit measurement" → "inversions
+  and amplitude readouts … (null-finding BBA reaches it, but slowly)".
+- **M8 — UYGULANDI.** 14 nm averaj bütçesi + eşzamanlı CW/CCW okuma dipnotu.
+- **M9 — büyük ölçüde MOOT.** Reframe'de 0.17×-vs-0.009× doğrudan kıyası kalktı.
+- **Minör:** tab:chain "single-beam" nitelendi; rossbach atıfı (ground motion)
+  eklendi; wegscheider yazar dizgisi düzeltildi; veri-erişilebilirlik ifadesi
+  eklendi; roll dipnotu korundu.
+
+### Hâlâ bekleyen
+- **M5 (daha çok seed): KOŞULUYOR** — %1 β-beat 15 seed'e çıkarılıyor (arka plan).
+- **M2 (düzeltici donanım modeli):** aktüatör seti (kuad-merkez kaydırıcı /
+  elektrik) ve serbestlik dereceleri hâlâ açıkça yazılmadı — kavramsal, koşu
+  gerektirmez; sonraki turda.
+- **BPM gain testi + kurşun-geçirmez diferansiyel-drift izleyici koşusu:** §6/§7'de
+  "nicelenecek" olarak işaretli; opsiyonel doğrulama.
+- **fig:suppression yıldızı** hâlâ BBA+OC; iki-demet noktası eklenmeli (figür
+  betiği güncellemesi).

@@ -52,8 +52,9 @@ cancels the effect when the machine is identical in the two polarity states.
 Using symplectic spin tracking we ask how far standard orbit correction alone
 can go.  The false EDM depends on two distinct parts of the misalignment: an
 antisymmetric part that distorts the closed orbit, and a symmetric part to
-which the orbit barely responds; the second is the obstacle, and no single-beam
-orbit measurement reaches it.  We show that the two counter-rotating beams,
+which the orbit barely responds; the second is the obstacle, and the orbit
+inversions and amplitude readouts that would reconstruct it from a single beam
+all fail (null-finding BBA reaches it, but slowly and invasively).  We show that the two counter-rotating beams,
 whose orbit responses are nearly opposite, carry the symmetric part in the
 \emph{sum} of their orbits --- invisible in either beam and in their difference,
 the separation the reference chain monitors, but fully exposed in the sum.
@@ -613,7 +614,8 @@ In idealized optics the procedure works outright: the symmetric centers are
 recovered, and the false EDM of the representative pattern drops from
 $356\times$ to $1.6\times$ the target.
 
-Under the realistic $1\%$-gradient-error optics ($\approx\!5\%$ $\beta$-beat)
+Under a conservative $1\%$-gradient-error optics ($\approx\!5\%$ $\beta$-beat,
+above the $1$--$2\%$ LOCO range and thus a stress test)
 a single pass fails, through the same
 breathing mechanism as in Sec.~\ref{sec:inverse}: modulating one quadrupole
 re-transports the large uncorrected orbit through the beating optics and
@@ -752,7 +754,7 @@ $1~\text{nrad/s} \leftrightarrow 10^{-29}\,e\!\cdot\!$cm.}
 Stage & $|f|$ / target & EDM [$e\!\cdot\!$cm] \\
 \hline
 raw                            & $356\times$ & $\sim4\times10^{-27}$ \\
-orbit corr.\ $+$ CW/CCW        & $\sim47\times$ & $\sim5\times10^{-28}$ \\
+single-beam orbit corr.\ $+$ CW/CCW & $\sim47\times$ & $\sim5\times10^{-28}$ \\
 BBA (measured steering)        & $17$--$28\times$ & $\sim2\times10^{-28}$ \\
 BBA $+$ final orbit corr.      & $0.03$--$0.22\times$ & $\lesssim10^{-29}$ \\
 \end{tabular}
@@ -1009,19 +1011,28 @@ $0.1$--$67\times$; Table~\ref{tab:twobeam}).
 The reason a single correction is not enough, and the way past it, are both
 contained in the relation between the two orbit response matrices.  They are
 nearly opposite: writing them for a horizontal quadrupole displacement,
-$R_{\rm CW}=-R_{\rm CCW}+\Delta$, the sign-reversed part dominates (opposite
-traversal flips the sense of every corrector kick,
-$\lVert\tfrac12(R_{\rm CW}-R_{\rm CCW})\rVert=33.8$) and a direction-common
-residue $\Delta$ survives ($\lVert\tfrac12(R_{\rm CW}+R_{\rm CCW})\rVert=7.3$).
-Their near-oppositeness is exactly why the \emph{separation} of the two orbits
---- the observable the reference control chain monitors
-(Sec.~\ref{sec:inverse}) --- is blind to the symmetric component: the difference
-$R_{\rm CW}-R_{\rm CCW}\approx-2R_{\rm CCW}$ doubles the antisymmetric-visible
-part, and its symmetric visibility, measured as
-$\lVert R\,P_{\rm sym}\rVert/\lVert R\,P_{\rm anti}\rVert$, is $0.19$ --- no
-better than a single beam ($0.24$).  The \emph{sum}, by contrast, cancels the
-dominant antisymmetric response and lays the symmetric component bare: its
-symmetric visibility is $1.01$, and its condition number falls to $30$.  The
+$R_{\rm CW}=-R_{\rm CCW}+\Delta$, the sign-reversed part dominates and a
+direction-common residue $\Delta$ survives.  The sign flip is the leading effect
+because a displaced quadrupole acts as a fixed dipole (its feed-down field is set
+by the displacement, not the beam), and the Lorentz force $q\,\bm v\times\bm B$
+reverses with the velocity of the counter-rotating beam, so the same kick
+deflects the two beams oppositely.  What it does \emph{not} reverse is the
+betatron phase advance between magnets, which is not mirror-symmetric about each
+element in a ring with a definite QF/QD/deflector sequence; that non-reciprocity
+is the residue $\Delta$.  In Frobenius norm
+$\lVert\tfrac12(R_{\rm CW}-R_{\rm CCW})\rVert=33.8$ and
+$\lVert\tfrac12(R_{\rm CW}+R_{\rm CCW})\rVert=7.3$ for the horizontal plane, a
+$\Delta$ of $21\%$; the vertical plane is the same ($45.8$ and $9.7$, $21\%$),
+so the effect is not an artifact of the horizontal bending.  This near-opposite-\-
+ness is exactly why the \emph{separation} of the two orbits --- the observable
+the reference control chain monitors (Sec.~\ref{sec:inverse}) --- is blind to
+the symmetric component: the difference $R_{\rm CW}-R_{\rm CCW}\approx-2R_{\rm
+CCW}$ doubles the antisymmetric-visible part, and its symmetric visibility, the
+Frobenius-norm ratio $\lVert R\,P_{\rm sym}\rVert/\lVert R\,P_{\rm anti}\rVert$
+of the response of unit-normalized symmetric versus antisymmetric patterns, is
+$0.19$ --- no better than a single beam ($0.24$).  The \emph{sum}, by contrast,
+cancels the dominant antisymmetric response and lays the symmetric component
+bare: its symmetric visibility is $1.01$ and its condition number is $30$.  The
 information the single beam and the separation both lack is carried in the sum
 of the two counter-rotating orbits.
 
@@ -1030,14 +1041,15 @@ $S=[R_{\rm CCW};\,R_{\rm CW}]$, and solving the single least-squares correction
 that flattens both orbits is equivalent to using their sum and difference
 together; it therefore has access to the symmetric component through the sum.
 The effect is a conditioning one, made sharp by the regularization.  The
-single-beam matrix has $\mathrm{cond}(R_{\rm CCW})=135$; at the truncation of
-the pseudo-inverse ($\mathrm{rcond}=10^{-2}$) seventeen of its weakest singular
-directions fall below the threshold and are discarded, and every one is
-symmetric-dominated --- retaining them would amplify the BPM noise on the
-symmetric correction by $\sim\!7\times$, the same obstruction as the inversion
-no-go of Sec.~\ref{sec:inverse}.  The stacked matrix has $\mathrm{cond}(S)=73$:
-no direction falls below the threshold, and the symmetric modes are corrected
-with a noise amplification of $0.7\times$.  The second beam does not circumvent
+single-beam horizontal matrix (from tracking) has $\mathrm{cond}(R_{\rm CCW})=135$
+($228$ vertically); at the truncation of the pseudo-inverse
+($\mathrm{rcond}=10^{-2}$) seventeen of its weakest singular directions fall
+below the threshold and are discarded, and every one is symmetric-dominated ---
+retaining them would amplify the BPM noise on the symmetric correction by
+$\sim\!7\times$, the same obstruction as the inversion no-go of
+Sec.~\ref{sec:inverse}.  The stacked matrix has $\mathrm{cond}(S)=73$ ($118$
+vertically): no direction falls below the threshold, and the symmetric modes are
+corrected with a noise amplification of $0.7\times$.  The second beam does not circumvent
 the no-go; it lifts the symmetric component above the noise floor the no-go is
 about, by supplying the sum information no single beam carries.
 
@@ -1047,7 +1059,13 @@ reference, two-beam orbit correction reduces the symmetric
 misalignment residue from $\sim\!5.5~\mu$m (single beam) to $0.1$--$0.7~\mu$m
 --- at or below the $\sim\!2~\mu$m that BBA reaches (Sec.~\ref{sec:bba}) --- and
 drives both counter-rotating false EDMs to the floor together, so the odd
-difference falls below target.  Table~\ref{tab:twobeam} gives the dependence on
+difference falls below target.\footnote{The scheme reads the two
+counter-rotating orbits on the shared BPMs, as the reference design already does
+to monitor their separation, distinguished by bunch timing; unlike that
+separation it uses the two absolute orbits, not their difference.  The $14$~nm
+figure is the effective per-point noise reached by synchronous averaging over
+minutes (Sec.~\ref{sec:inverse}), and enters only as the white-noise floor of
+the correction.}  Table~\ref{tab:twobeam} gives the dependence on
 the coherent optics error.  Through the entire realistic range the correction
 is robustly sub-target: at the typical LOCO operating point ($1\%$ $\beta$-beat,
 $0.2\%$ rms gradient error) the odd remnant is a median $0.17\times$ the target
@@ -1137,7 +1155,8 @@ $1\%$, $100~\mu$m offset (differential) & --- & $0.17\times$ \;(5/5) \\
 \label{sec:operation}
 
 An alignment result is useful only if it survives on the machine.  Quadrupole
-positions drift --- thermally and with ground motion --- continuously
+positions drift --- thermally and with ground motion~\cite{rossbach} ---
+continuously
 re-loading random misalignment onto the corrected state.  We simulated this by
 adding fresh random offsets of rms $\sigma_{\rm d}$ and re-measuring the false
 EDM.
@@ -1254,6 +1273,9 @@ one.  The principal open items are the magnetic-center stability of any BBA
 cross-check under gradient modulation (the hardware floor, not modeled here) and
 the verification of these results on other lattice variants.
 
+The tracking and analysis code, the response matrices, and the data behind the
+figures and tables are available from the authors on reasonable request.
+
 % ═══════════════════════════════════════════════════════════════════
 
 \begin{acknowledgments}
@@ -1284,7 +1306,7 @@ matrix,''
 in \emph{Proceedings of PAC 1993}, p.~2263.
 
 \bibitem{wegscheider}
-S.~Wegscheider and J.~Vilsmeier \emph{et al.},
+S.~Wegscheider, J.~Vilsmeier, \emph{et al.},
 ``Inverse modeling of circular lattices via orbit response in the presence
 of degeneracy,''
 Phys.\ Rev.\ Accel.\ Beams \textbf{26}, 032803 (2023).
