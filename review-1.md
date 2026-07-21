@@ -173,7 +173,9 @@ iddiadır.
   eklendi; roll dipnotu korundu.
 
 ### Hâlâ bekleyen
-- **M5 (daha çok seed): KOŞULUYOR** — %1 β-beat 15 seed'e çıkarılıyor (arka plan).
+- **M5 (daha çok seed): ÇÖZÜLDÜ** — %1 β-beat 15 seed'e çıkarıldı: iki-demet
+  medyan 0.043× (5-seed'deki 0.166×'ten daha güçlü), **15/15 hedef-altı**, en
+  kötü seed 0.62× (yine hedef-altı). Tablo/abstract/sonuç/fig güncellendi.
 - **M2 (düzeltici donanım modeli):** aktüatör seti (kuad-merkez kaydırıcı /
   elektrik) ve serbestlik dereceleri hâlâ açıkça yazılmadı — kavramsal, koşu
   gerektirmez; sonraki turda.

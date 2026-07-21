@@ -144,7 +144,7 @@ ENS_BBAOC = [0.068, 0.026, 0.217]       # medyan, min, max (5 seed, hepsi hedef-
 # İki-demet (CW/CCW) yörünge düzeltme — kalibre referans, %1 β-beat, 14nm, 5 seed;
 # odd artık C=½|f_CW−f_CCW|/target. Kaynak: kmod_drivers/twobeam_oc_14nm_g20.json.
 ENS_TWOBEAM_SIGMA = 10.0
-ENS_TWOBEAM = [0.166, 0.001, 0.342]     # medyan, min, max (5 seed, hepsi hedef-altı)
+ENS_TWOBEAM = [0.043, 0.000, 0.620]     # medyan, min, max (15 seed, hepsi hedef-altı)
 
 
 def _sig_fit(data):
@@ -195,7 +195,7 @@ def fig_suppression():
     ax.errorbar([ENS_TWOBEAM_SIGMA + 0.9], [tm], yerr=[[tm - tlo], [thi - tm]],
                 fmt="D", color="tab:blue", ms=11, capsize=5, zorder=7,
                 ecolor="tab:blue", mec="k", mew=0.5,
-                label="two-beam orbit corr. (calib.\\ ref, 5 seeds): all sub-target")
+                label="two-beam orbit corr. (calib.\\ ref, 15 seeds): all sub-target")
 
     ax.axhline(1.0, color="tab:red", ls="--", lw=1.3)
     ax.text(1.1, 1.3, "target ($10^{-29}\\,e\\!\\cdot\\!$cm)",

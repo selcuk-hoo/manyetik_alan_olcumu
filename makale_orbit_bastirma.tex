@@ -12,13 +12,14 @@
 % zaman bütçesi (§6) → sonuç (§7). Ana tez DEĞİŞTİ: "OC BBA'nın yerini alamaz"
 % yerine "sayaç-dönen OC simetriğe tek başına erişir".
 % M1 RAFINE (2026-07-20, hakem review-1.md): 100um statik BPM ofseti MUTLAK
-% iki-demet OC'yi çökertir (0.17×→198×), çünkü ofset ve simetrik kaçıklık
+% iki-demet OC'yi çökertir (0.043×→198×), çünkü ofset ve simetrik kaçıklık
 % karşı-dönen TOPLAM'da dejeneredir. Tez düzeltildi: iki-demet OC mutlak
 % hizalamayı BBA'sız yapAMAZ; ama DRİFT diferansiyeldir (ofset zaman-farkında
 % iptal) → sürekli iki-demet OC simetrik DRİFTİ tutar → periyodik BBA'yı kaldırır
 % (drift monitörü). §5 dejenerasyon teoremi + §6 diferansiyel drift.
-% Sayılar: kalibre-ref %1 β-beat medyan 0.17× (5/5, tilt-bağışık); 100um ofset
-% mutlak 198× / diferansiyel 0.17×. Veri kmod_drivers/twobeam_oc_14nm_g*.json
+% Sayılar: kalibre-ref %1 β-beat medyan 0.043× (15/15 seed, en kötü 0.62×,
+% tilt-bağışık); 100um ofset mutlak 198× / diferansiyel 0.043×. Veri
+% kmod_drivers/twobeam_oc_14nm_g*.json
 % + _boff100um.json. fig_orbit_* make_orbit_figures.py ile (git'te değil).
 % ============================================================================
 \documentclass[aps,prab,reprint,superscriptaddress,nofootinbib]{revtex4-2}
@@ -61,7 +62,7 @@ the separation the reference chain monitors, but fully exposed in the sum.
 Correcting both orbits jointly therefore reaches the symmetric component from
 the orbit alone: against a calibrated reference, on a raw $10~\mu$m machine at a
 realistic $1\%$ $\beta$-beat, the counter-rotating difference falls to a median
-$0.17$ times the target over five seeds, all sub-target, and is unchanged by
+$0.043$ times the target over fifteen seeds, all sub-target, and is unchanged by
 $\beta$-beating and unmodeled quadrupole roll.  The same sum, however, carries
 the static BPM offset, so symmetric misalignment and offset are degenerate
 there: absolute alignment still needs one calibration campaign (BBA or the
@@ -829,12 +830,12 @@ origin; the fit verifies the scaling, not an absolute floor, since at fixed
 $\sigma$ the false EDM varies by more than an order of magnitude with the
 symmetric/antisymmetric content of the pattern (Sec.~\ref{sec:bilinear}).
 The symmetric floor is reached below target by two independent routes at
-$\sigma=10~\mu$m, each over five seeds (fixed $\mathrm{rcond}=0.01$).  Star:
+$\sigma=10~\mu$m (fixed $\mathrm{rcond}=0.01$).  Star:
 beam-based alignment followed by one orbit correction (median $0.07\times$,
-worst $0.22\times$; Table~\ref{tab:chain}).  Diamond: two-beam counter-rotating
-orbit correction against a calibrated reference, no BBA, at a realistic $1\%$
-$\beta$-beat (median $0.17\times$, worst $0.34\times$; Table~\ref{tab:twobeam}
-and Sec.~\ref{sec:polarity}).  The diamond is the odd remnant
+worst $0.22\times$, five seeds; Table~\ref{tab:chain}).  Diamond: two-beam
+counter-rotating orbit correction against a calibrated reference, no BBA, at a
+realistic $1\%$ $\beta$-beat (median $0.043\times$, worst $0.62\times$, fifteen
+seeds; Table~\ref{tab:twobeam} and Sec.~\ref{sec:polarity}).  The diamond is the odd remnant
 $\tfrac12|f_{\rm CW}-f_{\rm CCW}|$; both routes place the residual well below the
 target.}
 \label{fig:suppression}
@@ -1087,8 +1088,8 @@ minutes (Sec.~\ref{sec:inverse}), and enters only as the white-noise floor of
 the correction.}  Table~\ref{tab:twobeam} gives the dependence on
 the coherent optics error.  Through the entire realistic range the correction
 is robustly sub-target: at the typical LOCO operating point ($1\%$ $\beta$-beat,
-$0.2\%$ rms gradient error) the odd remnant is a median $0.17\times$ the target
-with all five seeds sub-target (worst $0.34\times$), and on a well-corrected
+$0.2\%$ rms gradient error) the odd remnant is a median $0.043\times$ the target
+over fifteen seeds, all sub-target (worst $0.62\times$), and on a well-corrected
 machine ($0.5\%$ $\beta$-beat) a median $0.03\times$.  Only at an
 unrealistically large $5\%$ $\beta$-beat, above what LOCO delivers, does the
 coherent residue begin to matter (median $0.66\times$, three of five
@@ -1114,7 +1115,7 @@ channel that carries the symmetric component.  Symmetric misalignment and static
 offset are therefore \emph{degenerate} in the counter-rotating sum: the very
 projection that exposes the one exposes the other, and no single-time orbit
 measurement separates them.  In tracking, restoring $100~\mu$m uncalibrated
-offsets returns the odd remnant from $0.17\times$ to $\sim\!200\times$ the target
+offsets returns the odd remnant from $0.043\times$ to $\sim\!200\times$ the target
 (Table~\ref{tab:twobeam}), and the tolerance is severe --- the symmetric residue
 grows as $0.96\times$ the offset rms, so sub-target operation would demand the
 offsets known to $\lesssim\!0.5~\mu$m, the quadrupole-center level that only BBA
@@ -1142,7 +1143,7 @@ Sec.~\ref{sec:operation}.
 
 \begin{table}[tb]
 \caption{Counter-rotating orbit correction on the raw $\sigma=10~\mu$m machine
-(no BBA; five seeds, $14$~nm BPM noise; tracking).  The odd remnant is the
+(no BBA; $14$~nm BPM noise; tracking).  The odd remnant is the
 counter-rotating difference $C=\tfrac12|f_{\rm CW}-f_{\rm CCW}|$ in units of the
 target.  Top block: correction against a calibrated reference, versus the
 coherent optics error --- two-beam correction is sub-target across the realistic
@@ -1150,7 +1151,8 @@ range and degrades only at an unrealistically large $5\%$ $\beta$-beat.  Bottom:
 with $100~\mu$m uncalibrated static BPM offsets the odd remnant returns to
 $\sim\!200\times$, because offset and symmetric misalignment are degenerate in
 the counter-rotating sum --- unless the correction acts on the \emph{differential}
-(drift) orbit, in which the static offset cancels identically.}
+(drift) orbit, in which the static offset cancels identically.  The LOCO
+operating point is over $15$ seeds, the other points over $5$.}
 \label{tab:twobeam}
 \small
 \begin{ruledtabular}
@@ -1158,12 +1160,12 @@ the counter-rotating sum --- unless the correction acts on the \emph{differentia
 $\beta$-beat ($\sigma_g$), reference & single-beam & two-beam (median) \\
 \hline
 $0.5\%$ ($0.1\%$), calibrated        & $\sim\!46\times$ & $0.03\times$ \;(5/5) \\
-$1\%$ ($0.2\%$, LOCO), calibrated     & $\sim\!45\times$ & $0.17\times$ \;(5/5) \\
+$1\%$ ($0.2\%$, LOCO), calibrated     & $\sim\!32\times$ & $0.043\times$ \;(15/15) \\
 $1\%$ $+\,0.2$~mrad roll, calibrated   & $\sim\!45\times$ & $0.12\times$ \;(5/5) \\
 $5\%$ ($1\%$), calibrated             & $\sim\!29\times$ & $0.66\times$ \;(3/5) \\
 \hline
 $1\%$, $100~\mu$m offset (absolute)   & $\sim\!650\times$ & $198\times$ \;(0/5) \\
-$1\%$, $100~\mu$m offset (differential) & --- & $0.17\times$ \;(5/5) \\
+$1\%$, $100~\mu$m offset (differential) & --- & $0.043\times$ \;(15/15) \\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
@@ -1265,9 +1267,9 @@ symmetric misalignment is nearly invisible to it, and the counter-rotating
 exposes the symmetric component fully (symmetric visibility $1.0$ against $0.2$
 for the separation), and correcting both orbits jointly against a calibrated
 reference uses it: on the raw $10~\mu$m machine the counter-rotating difference
-falls to a median $0.17\times$ the target over five seeds at a realistic $1\%$
-$\beta$-beat, all sub-target, unchanged by $\beta$-beating and a $0.2$~mrad
-unmodeled quadrupole roll.  The same sum, however, carries the static BPM
+falls to a median $0.043\times$ the target over fifteen seeds at a realistic
+$1\%$ $\beta$-beat, all sub-target, unchanged by $\beta$-beating and a
+$0.2$~mrad unmodeled quadrupole roll.  The same sum, however, carries the static BPM
 offset, degenerate there with the symmetric misalignment ($100~\mu$m
 uncalibrated offsets return the remnant to $\sim\!200\times$); so two-beam
 correction does not remove the need for an absolute reference, which one BBA
