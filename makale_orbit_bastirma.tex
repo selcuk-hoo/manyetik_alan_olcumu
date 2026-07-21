@@ -164,11 +164,17 @@ circumference, is correspondingly larger).  Two properties of this arrangement
 matter for what follows.  First, between any two neighboring quadrupoles the
 beam traverses a deflector: the deflectors bend and weakly focus the beam
 \emph{horizontally}, while in the \emph{vertical} plane they act, to a very good
-approximation, as field-free drifts.  Second, the alternating QF/QD gradients
-make the two transverse planes behave nearly identically in the idealized
-lattice, with betatron tunes $Q_y = 2.30$ and $Q_x = 2.35$ from the tracker (the
-tune is the number of transverse oscillations per revolution; the small split is
-the horizontal focusing of the deflectors, Sec.~\ref{sec:bbareal}).
+approximation, as field-free drifts.  Second, the betatron tunes, measured from the intra-turn betatron oscillation
+in the tracker with the deflectors included, are $Q_x = 2.64$ and $Q_y = 2.30$
+(the tune is the number of transverse oscillations per revolution) --- close to
+the design values $2.70$ and $2.245$ of Ref.~\cite{omarov}, which this lattice
+is modeled on but does not reproduce exactly.  The planes are \emph{not}
+degenerate: the horizontal focusing of the deflectors raises $Q_x$ well above
+$Q_y$, whereas an analytic model that treats the deflectors as drifts in both
+planes gives $2.30$ for each and misses the split (a fact that returns in the
+BBA steering of Sec.~\ref{sec:bbareal}).  It is the vertical tune $Q_y \approx
+2.3$ that sets the orbit gain law of Sec.~\ref{sec:symanti}, since the false EDM
+is driven through the vertical plane.
 
 \subsection{The proposed control program and the question of this paper}
 \label{sec:remedy}
@@ -640,8 +646,9 @@ which treats the deflectors as drifts (Sec.~\ref{sec:tools}).  Vertically
 this is accurate, and indeed the model reproduces the tracker's vertical
 tune to four decimal places (fractional tune $0.3032$ in both).
 Horizontally the deflectors focus and bend, and the model does not know it:
-it predicts equal tunes in the two planes, while the tracker's horizontal
-fractional tune is higher by $0.052$; element by element, the model's
+it predicts equal tunes in the two planes ($2.30$), while the tracker's
+horizontal tune is $2.64$, higher by $\sim\!0.34$; element by element, the
+model's
 horizontal response matrix is essentially uncorrelated with the measured one
 (median ratio $-0.05$), and it selects the wrong steering corrector for 36 of
 the 47 magnets, against a $5\%$-accurate response and 12 wrong selections
@@ -1240,14 +1247,25 @@ cost and no further campaigns are scheduled for the symmetric drift.  The
 dominant time scale of the experiment then remains the statistical one:
 polarimetry reaches the nrad/s level only over months to a year of
 running~\cite{polarimeter}, and the continuous correction adds nothing to it.
-Two hardware inputs, not modeled here, set the ultimate limits: the
+A word on the assumption that the BPM offset is static.  The differential
+cancels the offset that is common to two successive readings, so only the offset
+\emph{change} between them survives, and that change --- a slow thermal or
+electronic drift --- leaks into the symmetric channel like a small misalignment.
+In continuous (rolling) operation these per-cycle leaks accumulate as a random
+walk: the symmetric residue after $N$ cycles is $\approx 0.96\,\dot b\,\tau_c
+\sqrt{N}$, where $\dot b$ is the offset drift rate and $\tau_c$ the cycle time
+(the coefficient $0.96$ is the same offset-to-symmetric projection as above, and
+we confirm the $\sqrt{N}$ scaling in the tracker).  Numerically, an offset drift
+of $1~\mu$m/day corrected once per minute leaks only $\sim\!0.03~\mu$m over a
+day and $\sim\!0.5~\mu$m --- the coherent-optics floor --- over a full year of
+continuous running; a \emph{static} offset of any size cancels exactly.  The
+requirement is thus not that the offset be small, but that it drift slowly
+compared with the correction cadence, which realistic BPMs satisfy by orders of
+magnitude.  Two hardware inputs not modeled here remain to quantify: the
 magnetic-center stability under the gradient modulation of the initial BBA (its
-repeatability), and the stability of the BPM electrical offset over one
-correction cycle --- the differential cancellation requires only that the offset
-be constant between successive acquisitions, seconds apart, which any realistic
-offset drift satisfies by orders of magnitude, but a per-monitor gain error
-enters the differential response like a $\beta$-beat and its tolerance is the
-main remaining item to quantify.
+repeatability), and a per-monitor BPM gain error, which enters the differential
+response like a $\beta$-beat ($1\%$ gain leaving $\sim\!0.6~\mu$m of symmetric
+residue, so percent-level gain calibration suffices).
 
 % ═══════════════════════════════════════════════════════════════════
 
