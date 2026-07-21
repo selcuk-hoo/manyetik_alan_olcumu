@@ -155,15 +155,20 @@ by the \emph{electric} bending deflectors:
   (\text{QF}\ldots) &
 \end{align*}
 The deflectors are cylindrical electrostatic capacitors that bend the beam in
-the horizontal plane; at the magic momentum their radial field also freezes
-the in-plane spin precession.  Two properties of this arrangement matter for
-what follows.  First, between any two neighboring quadrupoles the beam
-traverses a deflector: the deflectors bend and weakly focus the beam
-\emph{horizontally}, while in the \emph{vertical} plane they act, to a very
-good approximation, as field-free drifts.  Second, the alternating QF/QD
-gradients make the two transverse planes behave identically in the idealized
-lattice, with betatron tunes $Q_x \approx Q_y \approx 2.3$ (the tune is the
-number of transverse oscillations per revolution).
+the horizontal plane; at the magic momentum ($p = 700.7$~MeV/$c$, $\gamma =
+1.248$, $\beta = 0.598$) their radial field also freezes the in-plane spin
+precession.  The radial field set by the magic condition and the ring radius is
+$E_0 = \beta c\, (p/qR_0) \approx 4.4$~MV/m (the value used in the tracker; the
+local field within the deflectors, which occupy a fraction of the
+circumference, is correspondingly larger).  Two properties of this arrangement
+matter for what follows.  First, between any two neighboring quadrupoles the
+beam traverses a deflector: the deflectors bend and weakly focus the beam
+\emph{horizontally}, while in the \emph{vertical} plane they act, to a very good
+approximation, as field-free drifts.  Second, the alternating QF/QD gradients
+make the two transverse planes behave nearly identically in the idealized
+lattice, with betatron tunes $Q_y = 2.30$ and $Q_x = 2.35$ from the tracker (the
+tune is the number of transverse oscillations per revolution; the small split is
+the horizontal focusing of the deflectors, Sec.~\ref{sec:bbareal}).
 
 \subsection{The proposed control program and the question of this paper}
 \label{sec:remedy}
@@ -617,11 +622,16 @@ $356\times$ to $1.6\times$ the target.
 
 Under a conservative $1\%$-gradient-error optics ($\approx\!5\%$ $\beta$-beat,
 above the $1$--$2\%$ LOCO range and thus a stress test)
-a single pass fails, through the same
-breathing mechanism as in Sec.~\ref{sec:inverse}: modulating one quadrupole
-re-transports the large uncorrected orbit through the beating optics and
-biases the zero crossing.  The remedy is iteration --- correct the orbit with
-the current estimates, then re-measure --- since a smaller orbit breathes
+a single pass fails, through a mechanism we call optics \emph{breathing}:
+changing one quadrupole's gradient to find its center slightly shifts the tune
+and focusing functions of the \emph{whole} ring, which re-transports the large
+pre-existing closed orbit (built by all the other misaligned quadrupoles) and
+moves it at every BPM by an amount that scales with that orbit.  This spurious
+motion, coherent with the modulation and hence un-averageable, biases the zero
+crossing.  (The same breathing defeats the amplitude-readout estimators of
+Sec.~\ref{sec:inverse}, quantified there.)  The remedy is iteration --- correct
+the orbit with the current estimates, then re-measure --- since a smaller orbit
+breathes
 less.  Iterating with under-relaxation and the per-magnet quality cut, the
 vertical plane converges cleanly (residual halving each pass, reaching
 $0.9~\mu$m).  The horizontal plane initially stalled, and the diagnosis is
@@ -646,12 +656,14 @@ closed-orbit change is recorded at all 48 BPMs, and the ratio
 (orbit change)/(displacement) fills one column of the matrix.
 
 \begin{table}[tb]
-\caption{Iterated null-finding BBA under a $1\%$ rms gradient error
-($\approx\!5\%$ $\beta$-beat; tracking, three passes), steering with the
-idealized analytic model versus the measured
-response matrix.  ``sym $dx$/$dy$'' are the symmetric residuals of the
-measured-matrix run.  Both runs solve the vertical plane; only the measured
-matrix also corrects the horizontal one.}
+\caption{Iterated null-finding BBA under a conservative $1\%$ rms gradient error
+($\approx\!5\%$ $\beta$-beat; tracking), steering with the
+idealized analytic model versus the measured response matrix.  ``sym $dx$/$dy$''
+are the symmetric residuals of the measured-matrix run.  Both runs solve the
+vertical plane; only the measured matrix also corrects the horizontal one.  The
+measured steering is iterated to five passes (Fig.~\ref{fig:bbaconv}); the
+analytic steering is shown to three passes, where it is already seen to stall,
+and is not iterated further.}
 \label{tab:bba}
 \small
 \begin{ruledtabular}
@@ -663,101 +675,8 @@ raw  & ---  & ---  & $356\times$ & $356\times$ \\
 1    & 3.27 & 4.27 & $368\times$ & $73\times$ \\
 2    & 1.70 & 2.90 & $238\times$ & $\bm{17\times}$ \\
 3    & 0.91 & 2.29 & $145\times$ & $28\times$ \\
-\end{tabular}
-\end{ruledtabular}
-\end{table}
-
-\subsection{Closing the chain: a final orbit correction}
-\label{sec:chainclose}
-
-The residual of the measured-matrix run --- $17$--$28\times$ the target at
-three passes for the representative seed, descending to $\sim\!10\times$ by the
-fifth pass (Fig.~\ref{fig:bbaconv}), and $4$--$72\times$ (median $10\times$)
-across the five-seed ensemble --- is not yet the symmetric floor, and
-Fig.~\ref{fig:bbaconv} shows why.  Across the passes the symmetric residual
-falls steadily --- the vertical component below the target-equivalent level ---
-yet the false EDM $|f|$ does not follow it all the way down.  The reason is that
-BBA has no preference between the two subspaces: measuring each magnet
-independently, it lowers \emph{both} the symmetric and the antisymmetric
-residual, but the false EDM is limited by the antisymmetric part, through its
-stronger channels [Eq.~(\ref{eq:channels})], while the symmetric part has
-already reached its target-equivalent size --- the channel decomposition of the
-fifth-pass residual gives $f_{\rm anti}\approx 7.9\times$ against a negligible
-$f_{\rm sym}$.  The limit is therefore one of leverage, not of cleaning.  That
-antisymmetric leftover is orbit-visible, so a single standard orbit correction
-removes it: applied to the BBA residual it brings the false EDM below the target
-(median $0.07\times$ over five seeds, Fig.~\ref{fig:suppression}), and scaling
-the corrected residual down confirms a clean $\sigma^{2}$ dependence over the
-tested range.
-
-\begin{figure}[tb]
-\includegraphics[width=\columnwidth]{fig_orbit_bba_convergence.png}
-\caption{Beam-based alignment drives the symmetric misalignment down; the false
-EDM is limited by the antisymmetric residue (measured-matrix BBA under a $1\%$
-rms gradient error, $\approx\!5\%$ $\beta$-beat, five passes, C++ tracking).
-Blue/cyan (left axis): the symmetric residual of the two planes falls steadily
-with each pass, the vertical one below the target-equivalent level --- BBA
-reaches the orbit-blind component that a single-beam response-matrix inversion
-cannot.  Red
-(right axis): the false EDM $|f|$ descends to $\sim\!10\times$ the target by the
-fifth pass but is limited there, because at the common few-micron floor it is
-dominated by the orbit-visible antisymmetric residue; the channel decomposition
-of the fifth-pass residual gives $f_{\rm anti}\approx 7.9\times$ against a
-negligible $f_{\rm sym}$.  A single final orbit correction removes that residue
-(green star: five-seed ensemble, median $0.07\times$, all sub-target).}
-\label{fig:bbaconv}
-\end{figure}
-
-The resulting picture within the alignment route is consistent and
-complementary: \emph{single-beam orbit
-correction removes the antisymmetric channels of Eq.~(\ref{eq:channels});
-null-finding BBA reduces the symmetric channel that single-beam orbit correction
-cannot see; in combination they reach the target, while each alone is limited}
-($47\times$ for orbit correction, $\sim\!10\times$ for five-pass BBA without the
-final correction).  That the symmetric channel is not, in fact, beyond the reach
-of orbit correction altogether --- that correcting the two counter-rotating
-beams jointly reaches it without BBA --- is the subject of
-Sec.~\ref{sec:orbitreach}.  The division of labor is also one of \emph{precision}: each
-per-magnet zero crossing carries a $\sim\!\mu$m-level measurement floor
-(residual breathing and steering-model error), so iterating BBA alone
-approaches that floor only slowly; the antisymmetric residue, by contrast,
-needs no per-magnet measurement at all --- the orbit displays it directly and
-resonantly amplified, and nulling it collectively with a truncated-SVD
-correction (the ``depth'' above is the singular-value cutoff) is far more
-precise than measuring it magnet by magnet.  Table~\ref{tab:chain}
-summarizes the chain.  The endpoint is characterized over five misalignment
-seeds: at a fixed truncated-SVD depth ($\mathrm{rcond}=0.01$, chosen once and
-not tuned per seed) all five fall below the target, with median $0.07\times$
-and worst case $0.22\times$ (Fig.~\ref{fig:suppression}).  Because the false
-EDM is a signed, bilinear quantity that scatters from seed to seed
-(Fig.~\ref{fig:channels}), the robust statement is suppression of the whole
-ensemble below the target rather than any single number.  As in any
-beam-based alignment, the reproducibility
-of each campaign --- the stability of the magnetic centers under the gradient
-modulation used to find them --- is a hardware input that sets how often the
-procedure must be repeated; quantifying it is outside the scope of this
-tracking study.  The air-core (iron-free) quadrupoles foreseen for the
-experiment, being free of magnetic hysteresis, are favorable in this respect.
-
-\begin{table}[tb]
-\caption{The suppression chain at $\sigma = 10~\mu$m (single beam, tracking).
-Rows~2 and~4 are five-seed ensembles: row~2 the median of the
-counter-rotating--beam difference after orbit correction (spread
-$0.6$--$72\times$), and the last row the distribution
-of the full scheme (fixed $\mathrm{rcond}=0.01$, all seeds sub-target, median
-$0.07\times$); the raw and BBA rows follow the representative pattern (raw
-$356\times$).  The equivalent EDM uses
-$1~\text{nrad/s} \leftrightarrow 10^{-29}\,e\!\cdot\!$cm.}
-\label{tab:chain}
-\small
-\begin{ruledtabular}
-\begin{tabular}{lcc}
-Stage & $|f|$ / target & EDM [$e\!\cdot\!$cm] \\
-\hline
-raw                            & $356\times$ & $\sim4\times10^{-27}$ \\
-single-beam orbit corr.\ $+$ CW/CCW & $\sim47\times$ & $\sim5\times10^{-28}$ \\
-BBA (measured steering)        & $17$--$28\times$ & $\sim2\times10^{-28}$ \\
-BBA $+$ final orbit corr.      & $0.03$--$0.22\times$ & $\lesssim10^{-29}$ \\
+4    & 0.50 & 1.92 & ---         & $21\times$ \\
+5    & 0.28 & 1.51 & ---         & $\bm{10\times}$ \\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
@@ -921,7 +840,8 @@ closed orbit --- built by the offsets of all the other quadrupoles, and at
 $\sim\!0.37$~mm rms several hundred times larger than the
 $\sim\!0.9$-$\mu$m feed-down signal being sought --- is re-transported
 through this slightly altered focusing and moves by a few $\mu$m at every
-BPM.  This global response, which we call optics \emph{breathing}, appears
+BPM.  This global response --- the optics \emph{breathing} already met in
+Sec.~\ref{sec:bbareal} --- appears
 at exactly the modulation frequency of the quadrupole being measured, so no
 frequency filter can separate it from the signal.  The reading one then
 demodulates at a BPM is therefore not the quad's own feed-down: for the
@@ -1166,6 +1086,110 @@ $5\%$ ($1\%$), calibrated             & $\sim\!29\times$ & $0.66\times$ \;(3/5) 
 \hline
 $1\%$, $100~\mu$m offset (absolute)   & $\sim\!650\times$ & $198\times$ \;(0/5) \\
 $1\%$, $100~\mu$m offset (differential) & --- & $0.043\times$ \;(15/15) \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════
+
+\subsection{The alignment route: BBA closed by a final orbit correction}
+\label{sec:chainclose}
+
+Counter-rotating correction is the orbit-only route to the symmetric floor.  For
+completeness we record the alternative --- the \emph{alignment} route of
+Sec.~\ref{sec:bba} --- which reaches the same floor by pairing BBA with orbit
+correction, now that both tools are in hand.  It also makes precise the sense in
+which each tool alone is limited.
+
+The residual of the measured-matrix run --- $17$--$28\times$ the target at
+three passes for the representative seed, still falling to $\sim\!10\times$ by
+the fifth pass (Fig.~\ref{fig:bbaconv}, without a clear plateau), and
+$4$--$72\times$ (median $10\times$)
+across the five-seed ensemble --- is not yet the symmetric floor, and
+Fig.~\ref{fig:bbaconv} shows why.  Across the passes the symmetric residual
+falls steadily --- the vertical component below the target-equivalent level ---
+yet the false EDM $|f|$ does not follow it all the way down.  The reason is that
+BBA has no preference between the two subspaces: measuring each magnet
+independently, it lowers \emph{both} the symmetric and the antisymmetric
+residual, but the false EDM is limited by the antisymmetric part, through its
+stronger channels [Eq.~(\ref{eq:channels})], while the symmetric part has
+already reached its target-equivalent size --- the channel decomposition of the
+fifth-pass residual gives $f_{\rm anti}\approx 7.9\times$ against a negligible
+$f_{\rm sym}$.  The limit is therefore one of leverage, not of cleaning.  That
+antisymmetric leftover is orbit-visible, so a single standard orbit correction
+removes it: applied to the BBA residual it brings the false EDM below the target
+(median $0.07\times$ over five seeds, Fig.~\ref{fig:suppression}), and scaling
+the corrected residual down confirms a clean $\sigma^{2}$ dependence over the
+tested range.
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{fig_orbit_bba_convergence.png}
+\caption{Beam-based alignment drives the symmetric misalignment down; the false
+EDM is limited by the antisymmetric residue (measured-matrix BBA under a $1\%$
+rms gradient error, $\approx\!5\%$ $\beta$-beat, five passes, C++ tracking).
+Blue/cyan (left axis): the symmetric residual of the two planes falls steadily
+with each pass, the vertical one below the target-equivalent level --- BBA
+reaches the orbit-blind component that a single-beam response-matrix inversion
+cannot.  Red
+(right axis): the false EDM $|f|$ descends to $\sim\!10\times$ the target by the
+fifth pass and is still falling, dominated at the few-micron floor by the
+orbit-visible antisymmetric residue rather than plateaued; the channel decomposition
+of the fifth-pass residual gives $f_{\rm anti}\approx 7.9\times$ against a
+negligible $f_{\rm sym}$.  A single final orbit correction removes that residue
+(green star: five-seed ensemble, median $0.07\times$, all sub-target).}
+\label{fig:bbaconv}
+\end{figure}
+
+The resulting picture within the alignment route is consistent and
+complementary: \emph{single-beam orbit
+correction removes the antisymmetric channels of Eq.~(\ref{eq:channels});
+null-finding BBA reduces the symmetric channel that single-beam orbit correction
+cannot see; in combination they reach the target, while each alone is limited}
+($47\times$ for orbit correction, $\sim\!10\times$ for five-pass BBA without the
+final correction).  That the symmetric channel is not, in fact, beyond the reach
+of orbit correction altogether --- that correcting the two counter-rotating
+beams jointly reaches it without BBA --- is the subject of
+Sec.~\ref{sec:orbitreach}.  The division of labor is also one of \emph{precision}: each
+per-magnet zero crossing carries a $\sim\!\mu$m-level measurement floor
+(residual breathing and steering-model error), so iterating BBA alone
+approaches that floor only slowly; the antisymmetric residue, by contrast,
+needs no per-magnet measurement at all --- the orbit displays it directly and
+resonantly amplified, and nulling it collectively with a truncated-SVD
+correction (the ``depth'' above is the singular-value cutoff) is far more
+precise than measuring it magnet by magnet.  Table~\ref{tab:chain}
+summarizes the chain.  The endpoint is characterized over five misalignment
+seeds: at a fixed truncated-SVD depth ($\mathrm{rcond}=0.01$, chosen once and
+not tuned per seed) all five fall below the target, with median $0.07\times$
+and worst case $0.22\times$ (Fig.~\ref{fig:suppression}).  Because the false
+EDM is a signed, bilinear quantity that scatters from seed to seed
+(Fig.~\ref{fig:channels}), the robust statement is suppression of the whole
+ensemble below the target rather than any single number.  As in any
+beam-based alignment, the reproducibility
+of each campaign --- the stability of the magnetic centers under the gradient
+modulation used to find them --- is a hardware input that sets how often the
+procedure must be repeated; quantifying it is outside the scope of this
+tracking study.  The air-core (iron-free) quadrupoles foreseen for the
+experiment, being free of magnetic hysteresis, are favorable in this respect.
+
+\begin{table}[tb]
+\caption{The suppression chain at $\sigma = 10~\mu$m (single beam, tracking).
+Rows~2 and~4 are five-seed ensembles: row~2 the median of the
+counter-rotating--beam difference after orbit correction (spread
+$0.6$--$72\times$), and the last row the distribution
+of the full scheme (fixed $\mathrm{rcond}=0.01$, all seeds sub-target, median
+$0.07\times$); the raw and BBA rows follow the representative pattern (raw
+$356\times$).  The equivalent EDM uses
+$1~\text{nrad/s} \leftrightarrow 10^{-29}\,e\!\cdot\!$cm.}
+\label{tab:chain}
+\small
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+Stage & $|f|$ / target & EDM [$e\!\cdot\!$cm] \\
+\hline
+raw                            & $356\times$ & $\sim4\times10^{-27}$ \\
+single-beam orbit corr.\ $+$ CW/CCW & $\sim47\times$ & $\sim5\times10^{-28}$ \\
+BBA (measured steering)        & $17$--$28\times$ & $\sim2\times10^{-28}$ \\
+BBA $+$ final orbit corr.      & $0.03$--$0.22\times$ & $\lesssim10^{-29}$ \\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
