@@ -937,7 +937,36 @@ bare: its symmetric visibility is $1.01$ and its condition number is $30$.  The
 information the single beam and the separation both lack is carried in the sum
 of the two counter-rotating orbits.
 
-Correcting both orbits jointly uses it.  Stacking the two response matrices,
+Figure~\ref{fig:cwccwsum} shows this in real space.  For a representative
+antisymmetric misalignment the two beams ride near-mirror-image closed orbits
+(correlation $-0.95$ at zero azimuthal shift) whose large amplitudes cancel in
+the sum, leaving a small residue.  For a symmetric misalignment the two orbits
+are instead the \emph{same} shape displaced by a few BPMs --- their correlation
+is near zero at zero shift but rises to $+0.94$ at a $\sim\!5$-BPM shift, a
+consequence of the direction-reversed betatron phase advance that constitutes
+the residue $\Delta$ --- so the sum does not cancel and survives at the scale of
+the original symmetric orbit.  The sum thus suppresses precisely the
+antisymmetric orbit that masks the symmetric one in a single beam, and preserves
+the symmetric orbit that a single beam cannot see.
+
+\begin{figure*}[tb]
+\includegraphics[width=\textwidth]{fig_orbit_cwccw.png}
+\caption{Vertical closed orbits of the two counter-rotating beams for the same
+$10~\mu$m-rms misalignment (analytic response matrices).  (a) An antisymmetric
+pattern drives large, near-opposite orbits ($\mathrm{corr}=-0.95$) that cancel
+in the sum (black).  (b) A symmetric pattern drives small orbits that are the
+same shape shifted by a few BPMs ($\mathrm{corr}\approx0$ at zero shift); their
+sum does not cancel and stays at the scale of the individual orbits.  The sum
+therefore removes the antisymmetric orbit that swamps a single beam and keeps the
+symmetric orbit that a single beam cannot resolve.}
+\label{fig:cwccwsum}
+\end{figure*}
+
+Correcting both orbits jointly uses it.  In the frozen-spin ring the clockwise
+and counter-clockwise beams are stored simultaneously and counter-propagate
+through each other; with many bunches the beam-position monitors resolve the two
+species in separate time windows, so the per-BPM sum of the two closed orbits is
+directly available.  Stacking the two response matrices,
 $S=[R_{\rm CCW};\,R_{\rm CW}]$, and solving the single least-squares correction
 that flattens both orbits is equivalent to using their sum and difference
 together; it therefore has access to the symmetric component through the sum.

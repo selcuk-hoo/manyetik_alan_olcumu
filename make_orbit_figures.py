@@ -512,6 +512,64 @@ def fig_channels():
 
 
 # ═════════════════════════════════════════════════════
+# FIG (C++ tepki matrisi): CW/CCW toplamı simetriği neden açığa çıkarır
+#   İki karşı-dönen demetin kapalı yörüngeleri: antisimetrik desende zıt-işaret
+#   (toplamda iptal), simetrik desende ~5 BPM ötelenmiş aynı-işaret (toplamda
+#   kalır). Kaynak matrisler: R_dy_1.npy (CCW, dir=-1), R_dy_cw.npy (CW, dir=+1)
+#   — build_response_matrix.py / C++ izleyiciden; yoksa figür atlanır.
+# ═════════════════════════════════════════════════════
+
+def fig_cwccw_sum(seed=7):
+    try:
+        Ry_ccw = np.load("R_dy_1.npy")
+        Ry_cw = np.load("R_dy_cw.npy")
+    except FileNotFoundError:
+        print("fig_orbit_cwccw.png atlandı (R_dy_1.npy / R_dy_cw.npy yok; "
+              "önce build_response_matrix.py)")
+        return
+    Ps, Pa = sym_anti_projectors()
+    rng = np.random.default_rng(seed)
+
+    def make(P):
+        q = P @ rng.uniform(-1, 1, NQ)
+        q *= 10e-6 / np.std(q)                       # 10 μm rms desen
+        return Ry_ccw @ q, Ry_cw @ q
+
+    yccw_a, ycw_a = make(Pa)                          # antisimetrik
+    yccw_s, ycw_s = make(Ps)                          # simetrik
+    bpm = np.arange(NQ)
+    um = 1e6
+
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=COL2, sharey=True)
+    for ax, yccw, ycw, ttl in [
+            (axA, yccw_a, ycw_a, "antisymmetric pattern"),
+            (axB, yccw_s, ycw_s, "symmetric pattern")]:
+        ca = np.corrcoef(ycw, yccw)[0, 1]
+        ax.axhline(0, color="k", lw=0.6, alpha=0.5)
+        ax.plot(bpm, yccw * um, "-", color=OI["blue"], lw=1.3,
+                label="CCW beam  $y_{\\rm ccw}$")
+        ax.plot(bpm, ycw * um, "-", color=OI["orange"], lw=1.3,
+                label="CW beam  $y_{\\rm cw}$")
+        ax.plot(bpm, (ycw + yccw) * um, "-", color="k", lw=2.2,
+                label="sum  $y_{\\rm cw}\\!+\\!y_{\\rm ccw}$")
+        ax.set_title(f"{ttl}\n$\\mathrm{{corr}}(y_{{\\rm cw}},y_{{\\rm ccw}})"
+                     f"={ca:+.2f}$")
+        ax.set_xlabel("BPM index around the ring")
+    axA.set_ylabel("vertical closed orbit  [$\\mu$m]")
+    axA.legend(loc="upper right")
+    panel_label(axA, "(a)")
+    panel_label(axB, "(b)")
+
+    fig.tight_layout()
+    fig.savefig("fig_orbit_cwccw.png")
+    plt.close(fig)
+    ra = np.std(ycw_a + yccw_a) / np.std(yccw_a)
+    rs = np.std(ycw_s + yccw_s) / np.std(yccw_s)
+    print(f"fig_orbit_cwccw.png yazıldı (antisim toplam/tek={ra:.2f}, "
+          f"sim toplam/tek={rs:.2f})")
+
+
+# ═════════════════════════════════════════════════════
 # FIG 7 (C++): BBA yakınsaması — simetriği indirir, antisimetrikte tıkanır
 #   Kaynak: kmod_drivers/paper_runs_results.json ["bba_iter_cpp"]
 #   (ölçülen-matris BBA, %1 β-beat, 3 geçiş; f = C++ spin izleyici).
@@ -567,7 +625,7 @@ if __name__ == "__main__":
     fig_modes()
     fig_breathing()
     fig_lockin()
-    for fn in (fig_channels,):
+    for fn in (fig_channels, fig_cwccw_sum):
         try:
             fn()
         except (FileNotFoundError, KeyError) as e:
