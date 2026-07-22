@@ -130,6 +130,12 @@ COL1 = (3.4, 2.75)   # tek-kolon baskı boyutu (fontlar gerçek boyutta render o
 COL2 = (7.0, 3.0)    # çift-kolon (figure*) baskı boyutu
 
 
+def panel_label(ax, s):
+    """(a)/(b) panel etiketi — her zaman kutunun DIŞINDA, sol-üstte (tutarlı)."""
+    ax.text(0.0, 1.02, s, transform=ax.transAxes, va="bottom", ha="left",
+            fontweight="bold")
+
+
 # ═════════════════════════════════════════════════════
 # FIG 1 (ANA): ulaşılabilir sahte-EDM vs σ
 #   Sayılar: omarov.md §10 (C++, /tmp/cwccw_telafi, orbit_duzeltme):
@@ -176,24 +182,16 @@ def fig_suppression():
     m_sig, m_med, m_lo, m_hi, m_p, m_c = _sig_fit(MEAS_F)
 
     fig, ax = plt.subplots(figsize=COL1)
+    ax.set_xscale("log"); ax.set_yscale("log")
 
-    # güç-yasası fit çizgileri yalnız veri aralığında (dışına taşma yok)
-    def fit_line(sig, p, c):
-        xs = np.logspace(np.log10(sig.min()), np.log10(sig.max()), 50)
-        return xs, np.exp(c) * xs ** p
-
-    # RAW — ölçülen tek-demet (düzeltme yok)
-    xs, ys = fit_line(r_sig, r_p, r_c)
-    ax.loglog(xs, ys, "-", color=OI["grey"], lw=1.4, zorder=3)
+    # RAW — ölçülen tek-demet (düzeltme yok); noktalar bağ çizgisiyle (fit değil)
     ax.errorbar(r_sig, r_med, yerr=[r_med - r_lo, r_hi - r_med],
-                fmt="o", color=OI["grey"], ms=6, capsize=3, zorder=6,
+                fmt="o-", color=OI["grey"], ms=6, lw=1.3, capsize=3, zorder=6,
                 ecolor=OI["grey"], label="raw")
 
     # ORBIT-CORR — ölçülen tek-demet
-    xs, ys = fit_line(m_sig, m_p, m_c)
-    ax.loglog(xs, ys, "--", color=OI["green"], lw=1.4, zorder=3)
     ax.errorbar(m_sig, m_med, yerr=[m_med - m_lo, m_hi - m_med],
-                fmt="s", color=OI["green"], ms=6, capsize=3, zorder=6,
+                fmt="s--", color=OI["green"], ms=6, lw=1.3, capsize=3, zorder=6,
                 ecolor=OI["green"], label="orbit corr.")
 
     # BBA + son yörünge düzeltmesi — 5-seed ensemble @σ=10
@@ -211,12 +209,13 @@ def fig_suppression():
     ax.axhline(1.0, color=OI["verm"], ls="--", lw=1.1)
     ax.text(1.15, 1.35, "target", color=OI["verm"])
 
-    ax.set_xlabel("rms quad misalignment $\\sigma$  [μm]")
-    ax.set_ylabel("false EDM  [units of target]")
+    ax.set_xlabel("rms quad misalignment $\\sigma$  [μm]", fontsize=8)
+    ax.set_ylabel("false EDM  [units of target]", fontsize=8)
     sec = ax.secondary_yaxis("right",
                              functions=(lambda v: v * 1e-29, lambda v: v / 1e-29))
-    sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]")
-    ax.legend(loc="upper left")
+    sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]", fontsize=8)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.28), ncol=2,
+              fontsize=7.5, columnspacing=1.2, handletextpad=0.4)
     ax.set_xlim(1, 100); ax.set_ylim(1e-2, 3e3)
     fig.savefig("fig_orbit_suppression.png")
     plt.close(fig)
@@ -245,25 +244,23 @@ def fig_modes():
     ax2.axvline(np.sqrt(Q2), color="k", ls=":", lw=1)
     ax2.text(np.sqrt(Q2) * 1.15, 0.05, "$Q_y$")
     ax2.text(3.5, 9, "antisymmetric\n(low $k$)", color=OI["verm"], fontsize=8.5)
-    ax2.text(13, 0.09, "symmetric\n($k\\!\\approx\\!24$)", color=OI["blue"],
-             ha="center", fontsize=8.5)
-    ax2.set_xlabel("azimuthal harmonic $k$")
-    ax2.set_ylabel("orbit gain  $G_k = C/|Q^2-k^2|$")
-    ax2.text(0.95, 0.95, "(a)", transform=ax2.transAxes, va="top", ha="right",
-             fontweight="bold")
+    ax2.text(17, 0.2, "symmetric\n($k\\!\\approx\\!24$)", color=OI["blue"],
+             ha="left", fontsize=8.5)
+    ax2.set_xlabel("azimuthal harmonic $k$", fontsize=5)
+    ax2.set_ylabel("orbit gain  $G_k = C/|Q^2-k^2|$", fontsize=5)
+    panel_label(ax2, "(a)")
 
     # ── (b) SV spektrumu, simetrik içerik renkli ──
     sc = ax1.scatter(np.arange(NQ), s / s[0], c=fsym, cmap="coolwarm",
                      vmin=0, vmax=1, s=30, edgecolors="k", linewidths=0.3)
     ax1.set_yscale("log")
-    ax1.set_xlabel("singular-value index of $R$")
-    ax1.set_ylabel("$\\sigma_i / \\sigma_0$")
+    ax1.set_xlabel("singular-value index of $R$", fontsize=5)
+    ax1.set_ylabel("$\\sigma_i / \\sigma_0$", fontsize=5)
     cb = fig.colorbar(sc, ax=ax1)
     cb.set_label("$\\|P_{\\rm sym} v_i\\|^2$")
     ax1.text(6, 0.6, "antisym.\n(visible)", fontsize=8)
-    ax1.text(20, 4e-3, "symmetric\n(blind)", fontsize=8)
-    ax1.text(0.03, 0.05, "(b)", transform=ax1.transAxes, va="bottom",
-             fontweight="bold")
+    ax1.text(30, 0.01, "symmetric\n(blind)", fontsize=8, ha="left")
+    panel_label(ax1, "(b)")
 
     fig.tight_layout()
     fig.savefig("fig_orbit_modes.png", bbox_inches="tight")
@@ -326,9 +323,9 @@ def fig_breathing(eps=0.02, seed=0):
                 label="with breathing")
     lim = 110
     ax1.plot([-lim, lim], [-lim, lim], "k--", lw=1)
-    ax1.set_xlim(-lim, lim); ax1.set_ylim(-4 * lim, 4 * lim)
-    ax1.set_xlabel("true quad offset $dy_j$  [μm]")
-    ax1.set_ylabel("reconstructed offset  [μm]")
+    ax1.set_xlim(-lim, lim); ax1.set_ylim(-4 * lim, 450)
+    ax1.set_xlabel("true quad offset $dy_j$  [μm]", fontsize=5)
+    ax1.set_ylabel("reconstructed offset  [μm]", fontsize=5)
     ax1.legend(loc="upper left")
 
     fig.savefig("fig_orbit_breathing.png", bbox_inches="tight")
@@ -385,15 +382,15 @@ def fig_lockin(nseed=40, noise_floor=10e-9):
     ax.set_yscale("log")
     # gerçekçi LOCO bandı (~%1-2 β-beat)
     ax.axvspan(1.0, 2.0, color=OI["green"], alpha=0.10)
-    ax.text(1.5, sym_e[1] * 1.3, "LOCO", ha="center", color=OI["green"],
+    ax.text(1.5, max(sym_e) * 0.75, "LOCO", ha="center", color=OI["green"],
             fontsize=8)
     ax.plot(bb, sym_e, "o-", color=OI["verm"], ms=6, label="symmetric error")
     ax.plot(bb, anti_e, "s-", color=OI["blue"], ms=6, label="antisymmetric error")
     ax.axhline(sig_sym * 1e6, color="k", ls="--", lw=1.1)
     ax.text(bb[-1], sig_sym * 1e6 * 1.18, "symmetric signal", ha="right",
             fontsize=8)
-    ax.set_xlabel("β-beat  rms $\\Delta\\beta/\\beta$  [%]")
-    ax.set_ylabel("reconstruction error  [μm]")
+    ax.set_xlabel("β-beat  rms $\\Delta\\beta/\\beta$  [%]", fontsize=5)
+    ax.set_ylabel("reconstruction error  [μm]", fontsize=5)
     ax.legend(loc="lower right")
     fig.savefig("fig_orbit_lockin.png")
     plt.close(fig)
@@ -475,9 +472,9 @@ def fig_channels():
     axa.set_yscale("log")
     axa.set_xticks(x); axa.set_xticklabels([labels[c] for c in chans])
     axa.set_xlim(-0.5, len(chans) - 0.5)
-    axa.set_ylabel(r"$|f|$  [units of target]")
-    axa.text(0.03, 0.05, "(a)", transform=axa.transAxes, va="bottom",
-             fontweight="bold")
+    axa.set_xlabel("channel", fontsize=5)
+    axa.set_ylabel(r"$|f|$  [units of target]", fontsize=5)
+    panel_label(axa, "(a)")
     rr = d.get("bilinearity_full_over_sum", [])
 
     # ── (b) σ² ölçekleme: her kanal ──
@@ -490,11 +487,10 @@ def fig_channels():
     axb.plot(sig, ybig[-1] * (sig / sig[-1])**2, "k--", lw=1, alpha=0.6,
              label=r"$\propto\sigma^2$")
     axb.set_xscale("log"); axb.set_yscale("log")
-    axb.set_xlabel(r"misalignment rms  $\sigma$  [μm]")
-    axb.set_ylabel(r"$|f|$  [units of target]")
+    axb.set_xlabel(r"misalignment rms  $\sigma$  [μm]", fontsize=5)
+    axb.set_ylabel(r"$|f|$  [units of target]", fontsize=5)
     axb.legend(ncol=2, loc="upper left")
-    axb.text(0.03, 0.05, "(b)", transform=axb.transAxes, va="bottom",
-             fontweight="bold")
+    panel_label(axb, "(b)")
 
     fig.tight_layout()
     fig.savefig("fig_orbit_channels.png")
@@ -541,8 +537,8 @@ def fig_bba_convergence():
     ax.axhline(1.0, color="k", ls=":", lw=1)
     ax.text(8.4, 1.3, "target", ha="right", fontsize=8)
 
-    ax.set_xlabel("BBA pass")
-    ax.set_ylabel("false EDM  $|f|$  [units of target]")
+    ax.set_xlabel("BBA pass", fontsize=5)
+    ax.set_ylabel("false EDM  $|f|$  [units of target]", fontsize=5)
     ax.set_xticks(BBA_PASS)
     ax.set_xlim(-0.5, 8.7)
     ax.set_ylim(1e-2, 1e3)
