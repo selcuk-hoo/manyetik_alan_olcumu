@@ -444,7 +444,7 @@ subspace, so that $s_i = 0$ for a purely antisymmetric pattern and $s_i = 1$
 for a purely symmetric one.  Equation~(\ref{eq:symfrac}) thus turns the
 decomposition of Eq.~(\ref{eq:projectors}) into a single number per SVD mode
 that can be plotted against its orbit strength.  Plotting $\sigma_i$ against $s_i$
-[Fig.~\ref{fig:modes}, left] shows the strongly-coupled patterns to be almost
+[Fig.~\ref{fig:modes}, right] shows the strongly-coupled patterns to be almost
 purely antisymmetric ($s_i \approx 0$) and the weakly-coupled ones almost
 purely symmetric ($s_i \approx 1$); the overall visibility ratio between the
 strongest and weakest patterns is $\mathrm{cond}(R) = 193$.  Orbit correction, which by construction removes
@@ -562,8 +562,8 @@ measurement that reaches the symmetric component itself.
 \caption{The four false-EDM channels of Eq.~(\ref{eq:channels}), measured by
 projecting the misalignments and tracking each part separately.  (a) At
 $\sigma=10~\mu$m the pure-symmetric channel $f_{ss}$ is the smallest, and
-every channel containing an antisymmetric factor is larger (bars: mean of
-three seeds; dots: individual seeds; the spread reflects the signed, bilinear
+every channel containing an antisymmetric factor is larger (markers: individual
+seeds; horizontal line: their mean; the spread reflects the signed, bilinear
 character of $f$).  (b) Each channel scales as $\sigma^2$.  The four signed
 channels sum to the full signal within $0.1\%$.}
 \label{fig:channels}
@@ -775,7 +775,7 @@ help here: truncation discards precisely the symmetric directions, trading
 their noise amplification for a full bias of the sought component.  This much
 is already true \emph{without} any optics error: at the lock-in noise floor
 alone the conditioning amplifies the symmetric reconstruction error to about
-ten times the antisymmetric one (Fig.~\ref{fig:lockin}, leftmost bars).  White
+ten times the antisymmetric one (Fig.~\ref{fig:lockin}, at zero $\beta$-beat).  White
 noise can be beaten by synchronous detection --- modulating at $\sim\!1$~kHz
 and averaging reaches an effective noise of $\sim\!14$~nm within minutes ---
 but a coherent optics-model error cannot: it is identical in every average,
@@ -801,12 +801,12 @@ relative setting difference.
 \caption{Difference-orbit inversion at the synchronous-detection noise floor
 (10~nm, 40 seeds): reconstruction error of the symmetric and antisymmetric
 components versus the $\beta$-beat (the driving gradient error $\sigma_g$ is
-$\approx\!5\times$ smaller, shown below each label).  The dashed line marks the
+$\approx\!5\times$ smaller).  The dashed line marks the
 size of the symmetric signal itself, and the shaded band the realistic
 LOCO range ($\sim\!1$--$2\%$ $\beta$-beat).  Already at $1\%$ the symmetric
-error exceeds the signal, while the Pearson correlation (gray labels) stays
-misleadingly high; even at zero $\beta$-beat the conditioning leaves the
-symmetric error an order of magnitude above the antisymmetric one.}
+error exceeds the signal; even at zero $\beta$-beat the conditioning leaves the
+symmetric error an order of magnitude above the antisymmetric one, though the
+Pearson correlation between input and reconstruction stays misleadingly high.}
 \label{fig:lockin}
 \end{figure}
 
@@ -844,9 +844,8 @@ mechanism.
 \includegraphics[width=\columnwidth]{fig_orbit_breathing.png}
 \caption{Per-quadrupole gradient modulation read as an amplitude:
 reconstructed versus true offsets.  The reconstruction is exact when the optics
-breathing is artificially removed (green), but uncorrelated with it present,
-whether one BPM (red) or all 48 (purple) are used --- the breathing, coherent
-with the modulation, does not average down.}
+breathing is artificially removed, but uncorrelated with it present --- the
+breathing, coherent with the modulation, does not average down.}
 \label{fig:breathing}
 \end{figure}
 
@@ -865,8 +864,8 @@ Ref.~\cite{omarov} monitors the \emph{separation} of the two counter-rotating
 however, is itself an orbit observable and inherits the orbit's visibility
 structure: in our tracking the antisymmetric-to-symmetric signature ratio is
 $5.7\times$ in a single-beam orbit and $8.0\times$ in the CR separation (an
-independent pattern set gives $3.8\times$ and $4.5\times$)
-[Fig.~\ref{fig:crsep}] --- the CR separation opens no additional window on the
+independent pattern set gives $3.8\times$ and $4.5\times$) --- the CR
+separation opens no additional window on the
 symmetric component.  The separation, however, is the \emph{difference} of the
 two counter-rotating orbits; that their \emph{sum} does open such a window ---
 and with it a joint correction that reaches the symmetric component --- is the
@@ -879,15 +878,6 @@ the betatron tune toward the symmetric kick harmonic, which would make that
 component visible in principle, is capped by the stopband ($Q \leq 12$,
 against the $Q \geq 16$ the slowly-varying symmetric modes require) and in
 any case raises the false EDM itself steeply (a measured $\sim\!g^{3}$).
-
-\begin{figure}[tb]
-\includegraphics[width=\columnwidth]{fig_orbit_crsep.png}
-\caption{The counter-rotating beam separation (right group) suppresses the
-symmetric pattern by a factor similar to the ordinary single-beam orbit (left
-group): as an orbit observable it shares the orbit's blindness to the
-component that drives the residual false EDM.}
-\label{fig:crsep}
-\end{figure}
 
 The common conclusion of this section is structural.  For every technique in
 the inversion and amplitude-readout families, the limiting effect is
@@ -1091,7 +1081,7 @@ well conditioned: for the representative seed the false EDM is $28\times$,
 $21\times$, $10\times$, $4\times$, $1.0\times$ the target at passes $3$--$7$, and
 reaches $0.09\times$ --- below target --- by the eighth pass
 (Fig.~\ref{fig:bbaconv}).  There is no plateau.  BBA lowers \emph{both} the
-symmetric and the antisymmetric residual each pass [Fig.~\ref{fig:bbaconv}, left],
+symmetric and the antisymmetric residual each pass,
 so with enough passes the false EDM crosses below the target on its own; the
 alignment route does not, in fact, require anything beyond BBA to reach the
 floor.  What it does slowly, though, a single orbit correction does at once.  At
@@ -1107,18 +1097,17 @@ precondition for it.
 
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{fig_orbit_bba_convergence.png}
-\caption{Beam-based alignment drives both misalignment components down and the
-false EDM below target without a plateau (measured-matrix BBA under a
-conservative $1\%$ rms gradient error, $\approx\!5\%$ $\beta$-beat, eight passes,
-C++ tracking).  Blue/cyan (left axis): the symmetric residual of the two planes
-falls steadily with each pass --- BBA reaches the orbit-blind component that a
-single-beam response-matrix inversion cannot.  Red (right axis): the false EDM
-$|f|$ falls monotonically past the third pass and crosses below target by the
-eighth ($0.09\times$).  It does not plateau; the descent is merely slow, because
-BBA grinds the residual down magnet by magnet.  A final orbit correction removes
-the orbit-visible antisymmetric residue collectively, reaching the target in
-about three passes instead of eight (green star: five-seed ensemble, median
-$0.07\times$, all sub-target).}
+\caption{Beam-based alignment drives the false EDM below target without a
+plateau (measured-matrix BBA under a conservative $1\%$ rms gradient error,
+$\approx\!5\%$ $\beta$-beat, eight passes, C++ tracking).  Diamonds: the false
+EDM $|f|$ from the raw machine ($356\times$ target) through eight BBA passes; it
+falls monotonically past the third pass and crosses below target by the eighth
+($0.09\times$).  It does not plateau; the descent is merely slow, because BBA
+grinds the symmetric residual down magnet by magnet, reaching the orbit-blind
+component that a single-beam response-matrix inversion cannot.  A final orbit
+correction removes the orbit-visible antisymmetric residue collectively,
+reaching the target in about three passes instead of eight (green star:
+five-seed ensemble, median $0.07\times$, all sub-target).}
 \label{fig:bbaconv}
 \end{figure}
 
