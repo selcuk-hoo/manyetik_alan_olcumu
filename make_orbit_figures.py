@@ -120,20 +120,28 @@ OI = {"black": "#000000", "orange": "#E69F00", "sky": "#56B4E9",
       "verm": "#D55E00", "purple": "#CC79A7", "grey": "#595959"}
 
 plt.rcParams.update({
-    "font.size": 9, "axes.labelsize": 10, "axes.titlesize": 9,
-    "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 7.8,
+    # LaTeX-standart görünüm: Computer Modern serif (mathtext "cm" ile birebir);
+    # usetex gerektirmez, makale gövde fontuyla aynı aileden görünür.
+    "font.family": "serif", "font.serif": ["cmr10", "STIXGeneral", "DejaVu Serif"],
+    "mathtext.fontset": "cm", "axes.formatter.use_mathtext": True,
+    "axes.unicode_minus": False,
+    # Tek, tutarlı boyut şeması (figür başına override YOK): eksen-ismi ≥ tik-sayısı
+    # hiyerarşisi korunur; hepsi aynı puntoda → PDF'te aynı görünür.
+    "font.size": 8.5, "axes.labelsize": 8.5, "axes.titlesize": 8.5,
+    "xtick.labelsize": 7.5, "ytick.labelsize": 7.5, "legend.fontsize": 7.5,
     "figure.dpi": 200, "savefig.dpi": 300, "savefig.bbox": "tight",
     "axes.linewidth": 0.7, "lines.linewidth": 1.6, "grid.alpha": 0.22,
-    "axes.grid": True, "legend.frameon": False, "font.family": "sans-serif",
+    "axes.grid": True, "legend.frameon": False,
 })
 COL1 = (3.4, 2.75)   # tek-kolon baskı boyutu (fontlar gerçek boyutta render olur)
 COL2 = (7.0, 3.0)    # çift-kolon (figure*) baskı boyutu
 
 
 def panel_label(ax, s):
-    """(a)/(b) panel etiketi — her zaman kutunun DIŞINDA, sol-üstte (tutarlı)."""
-    ax.text(0.0, 1.02, s, transform=ax.transAxes, va="bottom", ha="left",
-            fontweight="bold")
+    """(a)/(b) panel etiketi — her zaman kutunun DIŞINDA, sol-üstte (tutarlı).
+    mathtext \\mathbf ile gerçek kalın (cmr10'un bold varyantı yok)."""
+    ax.text(0.0, 1.02, rf"$\mathbf{{{s}}}$", transform=ax.transAxes,
+            va="bottom", ha="left")
 
 
 # ═════════════════════════════════════════════════════
@@ -209,11 +217,11 @@ def fig_suppression():
     ax.axhline(1.0, color=OI["verm"], ls="--", lw=1.1)
     ax.text(1.15, 1.35, "target", color=OI["verm"])
 
-    ax.set_xlabel("rms quad misalignment $\\sigma$  [μm]", fontsize=8)
-    ax.set_ylabel("false EDM  [units of target]", fontsize=8)
+    ax.set_xlabel("rms quad misalignment $\\sigma$  [$\\mu$m]")
+    ax.set_ylabel("false EDM  [units of target]")
     sec = ax.secondary_yaxis("right",
                              functions=(lambda v: v * 1e-29, lambda v: v / 1e-29))
-    sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]", fontsize=8)
+    sec.set_ylabel("equivalent EDM  [$e\\!\\cdot\\!$cm]")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.28), ncol=2,
               fontsize=7.5, columnspacing=1.2, handletextpad=0.4)
     ax.set_xlim(1, 100); ax.set_ylim(1e-2, 3e3)
@@ -246,16 +254,16 @@ def fig_modes():
     ax2.text(3.5, 9, "antisymmetric\n(low $k$)", color=OI["verm"], fontsize=8.5)
     ax2.text(17, 0.2, "symmetric\n($k\\!\\approx\\!24$)", color=OI["blue"],
              ha="left", fontsize=8.5)
-    ax2.set_xlabel("azimuthal harmonic $k$", fontsize=5)
-    ax2.set_ylabel("orbit gain  $G_k = C/|Q^2-k^2|$", fontsize=5)
+    ax2.set_xlabel("azimuthal harmonic $k$")
+    ax2.set_ylabel("orbit gain  $G_k = C/|Q^2-k^2|$")
     panel_label(ax2, "(a)")
 
     # ── (b) SV spektrumu, simetrik içerik renkli ──
     sc = ax1.scatter(np.arange(NQ), s / s[0], c=fsym, cmap="coolwarm",
                      vmin=0, vmax=1, s=30, edgecolors="k", linewidths=0.3)
     ax1.set_yscale("log")
-    ax1.set_xlabel("singular-value index of $R$", fontsize=5)
-    ax1.set_ylabel("$\\sigma_i / \\sigma_0$", fontsize=5)
+    ax1.set_xlabel("singular-value index of $R$")
+    ax1.set_ylabel("$\\sigma_i / \\sigma_0$")
     cb = fig.colorbar(sc, ax=ax1)
     cb.set_label("$\\|P_{\\rm sym} v_i\\|^2$")
     ax1.text(6, 0.6, "antisym.\n(visible)", fontsize=8)
@@ -324,8 +332,8 @@ def fig_breathing(eps=0.02, seed=0):
     lim = 110
     ax1.plot([-lim, lim], [-lim, lim], "k--", lw=1)
     ax1.set_xlim(-lim, lim); ax1.set_ylim(-4 * lim, 450)
-    ax1.set_xlabel("true quad offset $dy_j$  [μm]", fontsize=5)
-    ax1.set_ylabel("reconstructed offset  [μm]", fontsize=5)
+    ax1.set_xlabel("true quad offset $dy_j$  [$\\mu$m]")
+    ax1.set_ylabel("reconstructed offset  [$\\mu$m]")
     ax1.legend(loc="upper left")
 
     fig.savefig("fig_orbit_breathing.png", bbox_inches="tight")
@@ -389,8 +397,8 @@ def fig_lockin(nseed=40, noise_floor=10e-9):
     ax.axhline(sig_sym * 1e6, color="k", ls="--", lw=1.1)
     ax.text(bb[-1], sig_sym * 1e6 * 1.18, "symmetric signal", ha="right",
             fontsize=8)
-    ax.set_xlabel("β-beat  rms $\\Delta\\beta/\\beta$  [%]", fontsize=5)
-    ax.set_ylabel("reconstruction error  [μm]", fontsize=5)
+    ax.set_xlabel("$\\beta$-beat  rms $\\Delta\\beta/\\beta$  [%]")
+    ax.set_ylabel("reconstruction error  [$\\mu$m]")
     ax.legend(loc="lower right")
     fig.savefig("fig_orbit_lockin.png")
     plt.close(fig)
@@ -424,7 +432,7 @@ def fig_sigma():
     ax.loglog(xs, np.exp(b) * xs ** p, "--", color="tab:red", lw=1.5,
               label=f"power-law fit:  $f \\propto \\sigma^{{{p:.2f}}}$")
 
-    ax.set_xlabel("rms quadrupole misalignment $\\sigma$  [μm]")
+    ax.set_xlabel("rms quadrupole misalignment $\\sigma$  [$\\mu$m]")
     ax.set_ylabel("|false EDM|  $|dS_y/dt|$  [rad/s]")
     ax.set_title("False EDM scales as $\\sigma^2$ — geometric-phase signature\n"
                  "(C++ spin tracking, 4D closed orbit + model-fit estimator)",
@@ -472,8 +480,8 @@ def fig_channels():
     axa.set_yscale("log")
     axa.set_xticks(x); axa.set_xticklabels([labels[c] for c in chans])
     axa.set_xlim(-0.5, len(chans) - 0.5)
-    axa.set_xlabel("channel", fontsize=5)
-    axa.set_ylabel(r"$|f|$  [units of target]", fontsize=5)
+    axa.set_xlabel("channel")
+    axa.set_ylabel(r"$|f|$  [units of target]")
     panel_label(axa, "(a)")
     rr = d.get("bilinearity_full_over_sum", [])
 
@@ -487,8 +495,13 @@ def fig_channels():
     axb.plot(sig, ybig[-1] * (sig / sig[-1])**2, "k--", lw=1, alpha=0.6,
              label=r"$\propto\sigma^2$")
     axb.set_xscale("log"); axb.set_yscale("log")
-    axb.set_xlabel(r"misalignment rms  $\sigma$  [μm]", fontsize=5)
-    axb.set_ylabel(r"$|f|$  [units of target]", fontsize=5)
+    # yatay eksen: bilimsel notasyon yerine düz sayı etiketleri (veri σ'larında)
+    from matplotlib.ticker import FixedLocator, NullLocator, FuncFormatter
+    axb.xaxis.set_major_locator(FixedLocator(sig))
+    axb.xaxis.set_minor_locator(NullLocator())
+    axb.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+    axb.set_xlabel(r"misalignment rms  $\sigma$  [$\mu$m]")
+    axb.set_ylabel(r"$|f|$  [units of target]")
     axb.legend(ncol=2, loc="upper left")
     panel_label(axb, "(b)")
 
@@ -537,8 +550,8 @@ def fig_bba_convergence():
     ax.axhline(1.0, color="k", ls=":", lw=1)
     ax.text(8.4, 1.3, "target", ha="right", fontsize=8)
 
-    ax.set_xlabel("BBA pass", fontsize=5)
-    ax.set_ylabel("false EDM  $|f|$  [units of target]", fontsize=5)
+    ax.set_xlabel("BBA pass")
+    ax.set_ylabel("false EDM  $|f|$  [units of target]")
     ax.set_xticks(BBA_PASS)
     ax.set_xlim(-0.5, 8.7)
     ax.set_ylim(1e-2, 1e3)
