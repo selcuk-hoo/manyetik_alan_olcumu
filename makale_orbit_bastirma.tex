@@ -657,40 +657,14 @@ vertically.  Re-building the steering from the \emph{measured} response
 matrix --- ordinary practice on a real machine --- repairs the horizontal
 plane: the per-magnet quality ceases to throttle the horizontal corrections,
 and the false EDM after three passes improves fivefold over the
-analytic-model steering ($28\times$ versus $145\times$, Table~\ref{tab:bba}).  The measured matrix is
+analytic-model steering ($28\times$ versus $145\times$); iterated with the
+measured matrix it falls monotonically to sub-target by the eighth pass
+(Fig.~\ref{fig:bbaconv}), while the analytic steering stalls near $145\times$.
+The measured matrix is
 obtained in the simulation exactly as it would be on the machine: each
 quadrupole in turn is displaced by a known amount, the resulting
 closed-orbit change is recorded at all 48 BPMs, and the ratio
 (orbit change)/(displacement) fills one column of the matrix.
-
-\begin{table}[tb]
-\caption{Iterated null-finding BBA under a conservative $1\%$ rms gradient error
-($\approx\!5\%$ $\beta$-beat; tracking), steering with the
-idealized analytic model versus the measured response matrix.  ``sym $dx$/$dy$''
-are the symmetric residuals of the measured-matrix run.  Both runs solve the
-vertical plane; only the measured matrix also corrects the horizontal one.  The
-measured steering is iterated to eight passes (Fig.~\ref{fig:bbaconv}), where it
-crosses below target with no plateau; the analytic steering is shown to three
-passes, where it is already seen to stall, and is not iterated further.}
-\label{tab:bba}
-\small
-\begin{ruledtabular}
-\begin{tabular}{lcccc}
-     & sym $dy$ & sym $dx$ & \multicolumn{2}{c}{$|f|$ / target} \\
-pass & [$\mu$m] & [$\mu$m] & analytic & measured \\
-\hline
-raw  & ---  & ---  & $356\times$ & $356\times$ \\
-1    & 3.27 & 4.27 & $368\times$ & $73\times$ \\
-2    & 1.70 & 2.90 & $238\times$ & $17\times$ \\
-3    & 0.91 & 2.29 & $145\times$ & $28\times$ \\
-4    & 0.50 & 1.92 & ---         & $21\times$ \\
-5    & 0.28 & 1.51 & ---         & $10\times$ \\
-6    & 0.16 & 1.25 & ---         & $4.1\times$ \\
-7    & 0.10 & 1.09 & ---         & $1.1\times$ \\
-8    & 0.06 & 0.90 & ---         & $\bm{0.09\times}$ \\
-\end{tabular}
-\end{ruledtabular}
-\end{table}
 
 \subsection{The polarity four-fold and its cost}
 \label{sec:fourfold}
