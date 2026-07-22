@@ -576,10 +576,10 @@ def fig_channels():
 
 # bba_iter_cpp (ölçülen matris, %1 gradyan hatası ≈ %5 β-beat, 5 geçiş);
 # f × hedef, artıklar μm. Kaynak: paper_runs_results.json["bba_iter_cpp"].
-BBA_PASS   = [1, 2, 3, 4, 5]
-BBA_F      = [72.8, 16.7, 28.4, 20.9, 10.5]
-BBA_SYM_DX = [4.27, 2.90, 2.29, 1.92, 1.51]
-BBA_SYM_DY = [3.27, 1.70, 0.91, 0.50, 0.28]
+BBA_PASS   = [1, 2, 3, 4, 5, 6, 7, 8]
+BBA_F      = [72.8, 16.7, 28.4, 20.9, 10.5, 4.06, 1.05, 0.094]
+BBA_SYM_DX = [4.27, 2.90, 2.29, 1.92, 1.51, 1.25, 1.09, 0.90]
+BBA_SYM_DY = [3.27, 1.70, 0.91, 0.50, 0.28, 0.16, 0.10, 0.06]
 BBA_F_RAW  = 356.0
 # geçiş-5 artığının kanal ayrışımı (× hedef): antisim domine, sim ihmal edilebilir
 # (channel_split_out.json: f_anti=7.86×, f_sym=9e-5×)
@@ -601,15 +601,15 @@ def fig_bba_convergence():
     ax.set_ylabel("symmetric residual, rms  [μm]", color="tab:blue")
     ax.tick_params(axis="y", labelcolor="tab:blue")
     ax.set_xticks(BBA_PASS)
-    ax.set_ylim(0.2, 12)
-    ax.set_xlim(-0.4, 6.0)
+    ax.set_ylim(0.04, 12)
+    ax.set_xlim(-0.4, 8.6)
     ax.annotate("symmetric residual falls steadily\n"
                 "$\\to$ BBA reaches the orbit-blind part",
-                xy=(5, BBA_SYM_DY[-1]), xytext=(0.35, 0.35),
+                xy=(7, BBA_SYM_DY[-1]), xytext=(0.35, 0.09),
                 fontsize=9, color="tab:blue", ha="left",
                 arrowprops=dict(arrowstyle="->", color="tab:blue"))
 
-    # sağ eksen: sahte-EDM f (× hedef) — plato/saçılma
+    # sağ eksen: sahte-EDM f (× hedef) — plato YOK, hedef-altına iner
     ax2 = ax.twinx()
     ax2.set_yscale("log")
     ax2.plot(BBA_PASS, BBA_F, "D-", color="tab:red", ms=8, lw=2,
@@ -621,21 +621,21 @@ def fig_bba_convergence():
     ax2.tick_params(axis="y", labelcolor="tab:red")
     ax2.set_ylim(1e-2, 1e4)
     ax2.axhline(1.0, color="k", ls=":", lw=1)
-    ax2.text(5.3, 1.25, "target", fontsize=8.5)
-    # ana mesaj: f antisim-artıkla sınırlı + kanal ayrışımı (pass-5)
-    ax2.annotate("$|f|$ descends to $\\sim$10$\\times$ but is limited by the\n"
-                 "orbit-VISIBLE antisymmetric residue:\n"
-                 "pass-5 channel split  $f_{\\rm anti}\\!=\\!7.9\\times \\gg "
-                 "f_{\\rm sym}\\!\\approx\\!0$",
-                 xy=(5, BBA_F[-1]), xytext=(0.35, 1600),
+    ax2.text(7.3, 1.25, "target", fontsize=8.5)
+    # ana mesaj: plato YOK — f düşmeye devam eder, pass 8'de hedef-altı
+    ax2.annotate("no plateau: $|f|$ keeps falling\n"
+                 "(both residuals shrink each pass)\n"
+                 "and reaches sub-target by pass 8",
+                 xy=(8, BBA_F[-1]), xytext=(1.4, 1800),
                  fontsize=9, color="tab:red", ha="left",
                  arrowprops=dict(arrowstyle="->", color="tab:red"))
-    # son yörünge düzeltmesi: antisimetriği sil → hedef-altı
-    ax2.plot([5.5], [0.12], "*", color="tab:green", ms=18, zorder=6)
-    ax2.annotate("+ one final orbit\ncorrection (5 seeds)\n"
-                 f"$\\to$ {BBA_OC_LO}–{BBA_OC_HI}× target",
-                 xy=(5.5, 0.12), xytext=(3.1, 0.02),
-                 fontsize=9, color="tab:green", ha="left",
+    # son yörünge düzeltmesi: antisim-görünür artığı toplu sil → HIZLANDIRICI
+    ax2.plot([3.4], [0.12], "*", color="tab:green", ms=18, zorder=6)
+    ax2.annotate("a final orbit correction removes the orbit-visible\n"
+                 "antisymmetric residue at once, reaching target in\n"
+                 f"$\\sim$3 passes (5 seeds, {BBA_OC_LO}–{BBA_OC_HI}× target)",
+                 xy=(3.4, 0.12), xytext=(2.0, 0.018),
+                 fontsize=8.5, color="tab:green", ha="left",
                  arrowprops=dict(arrowstyle="->", color="tab:green"))
 
     ln1, lb1 = ax.get_legend_handles_labels()
