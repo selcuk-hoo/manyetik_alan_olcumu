@@ -6,9 +6,18 @@ Amaç: 10-15 seed'de ~1e-5 mi ~1e-6 mı görülüyor? (Omarov fit: 1.5e-5 @ σ=1
 Kullanım (lokal):
     python3 kmod_drivers/sigma_abs_check.py [nseed] [nworker]
     # ör. 15 seed, 8 çekirdek:  python3 kmod_drivers/sigma_abs_check.py 15 8
-    # nworker verilmezse os.cpu_count() kullanılır.
+
+Not: C++ integratörünün ilerleme çıktısı (fd 1) işçilerde susturulur, yoksa
+ekranı boğar. Paralelliği çıktının zaman damgalarından görürsün: paralelse ilk
+`nworker` seed ~aynı t'de biter, seri ise t=40,80,120... diye artar.
 """
-import sys, os, numpy as np, time
+import os
+# numpy/BLAS aşırı-aboneliğini önle (işçi başına tek iş parçacığı) — numpy'den ÖNCE
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+           "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+    os.environ.setdefault(_v, "1")
+
+import sys, numpy as np, time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,12 +29,20 @@ SG = 10e-6
 
 
 def measure_seed(seed):
-    """Tek seed, bağımsız süreç. AYNI desen (rng 3000+seed) + fast_measure_g."""
+    """Tek seed, bağımsız süreç. C++ printf'leri (fd 1) susturulur."""
     from paper_runs import fast_measure_g, NQ
     rng = np.random.default_rng(3000 + seed)
     dx = rng.normal(0, SG, NQ)
     dy = rng.normal(0, SG, NQ)
-    f, _ = fast_measure_g(dx, dy, g_scale=1.0)
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    saved = os.dup(1)
+    os.dup2(devnull, 1)
+    try:
+        f, _ = fast_measure_g(dx, dy, g_scale=1.0)
+    finally:
+        os.dup2(saved, 1)
+        os.close(saved)
+        os.close(devnull)
     return seed, float(f)
 
 
