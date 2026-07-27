@@ -31,6 +31,10 @@ SG = 10e-6
 def measure_seed(seed):
     """Tek seed, bağımsız süreç. C++ printf'leri (fd 1) susturulur."""
     from paper_runs import fast_measure_g, NQ
+    try:  # numpy/OpenBLAS import'u affinity'yi tek çekirdeğe kilitleyebilir — aç
+        os.sched_setaffinity(0, range(os.cpu_count()))
+    except (AttributeError, OSError):
+        pass
     rng = np.random.default_rng(3000 + seed)
     dx = rng.normal(0, SG, NQ)
     dy = rng.normal(0, SG, NQ)
@@ -47,11 +51,22 @@ def measure_seed(seed):
 
 
 def main():
-    nseed = int(sys.argv[1]) if len(sys.argv) > 1 else 15
-    nworker = int(sys.argv[2]) if len(sys.argv) > 2 else (os.cpu_count() or 4)
+    import argparse
+    ap = argparse.ArgumentParser(description="σ=10μm CW-tek sahte-EDM mutlak seviye (paralel)")
+    ap.add_argument("-n", "--seeds", type=int, default=15)
+    ap.add_argument("-w", "--workers", type=int, default=os.cpu_count() or 4)
+    ap.add_argument("pos", nargs="*", type=int, help="geriye dönük: [nseed] [nworker]")
+    a = ap.parse_args()
+    nseed = a.pos[0] if len(a.pos) >= 1 else a.seeds
+    nworker = a.pos[1] if len(a.pos) >= 2 else a.workers
     nworker = max(1, min(nworker, nseed))
-    print(f"σ=10μm, {nseed} seed, {nworker} çekirdek (paralel). "
-          f"Omarov fit: 1.5e-5 @ σ=10.\n", flush=True)
+    try:  # ana süreçte de affinity kilidini aç (çocuklar miras alsın)
+        os.sched_setaffinity(0, range(os.cpu_count()))
+    except (AttributeError, OSError):
+        pass
+    naff = len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count()
+    print(f"σ=10μm, {nseed} seed, {nworker} çekirdek | cpu_count={os.cpu_count()} "
+          f"affinity={naff}. Omarov fit: 1.5e-5 @ σ=10.\n", flush=True)
 
     vals = {}
     t0 = time.time()
