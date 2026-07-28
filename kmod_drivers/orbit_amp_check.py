@@ -105,12 +105,15 @@ def main():
     print(f"  tek-quad 100μm CR-ayrım ≈ {2*single_quad(Rdy)[0]*1e6:.0f} μm  →  Omarov '~250 μm' ile UYUMLU.")
     print("  → Kapalı-yörünge genliğimiz Omarov halkasıyla ~1.5× içinde EŞLEŞİYOR.")
     print("  → f ∝ x_CO·y_CO olsaydı ~10× için düzlem başına ~3.2× açık gerekirdi; YOK.")
-    print("  ∴ Sahte-EDM mutlak farkı yörünge genliğinde DEĞİL. T-BMT de referansla")
-    print("    birebir aynı (AMU=1.792847356). Kalan fark Fig 9(a)'nın saf geometrik")
-    print("    faz OLMAMASINDAN gelir (Omarov: 'dikey hız + 2. mertebe sistematiklerle")
-    print("    karışım'); model-fit estimator'ımız o 1.-mertebe katkıyı kasıtla ayıklar.")
-    print("    → makalede yalnız σ² ÖLÇEKLEMESİ + mekanizma iddia edilmeli; Fig 9(a) ile")
-    print("       MUTLAK sayısal uyum İDDİA EDİLMEMELİ.")
+    print("  ∴ Sahte-EDM mutlak farkı yörünge genliğinde DEĞİL (Fig 9c eşleşiyor), ")
+    print("    spin denkleminde de DEĞİL (T-BMT referansla birebir, AMU=1.792847356),")
+    print("    estimator'da da DEĞİL (Omarov-tarzı ham fit de ~1.1e-6 verir).")
+    print("    Kalan ~10× (Fig 9a) büyük olasılıkla KUYRUK-FİTİ artefaktı: f dağılımı")
+    print("    ağır-kuyruklu (f∝yörünge², rezonansa yakın ekstremler); y=kx² LS fiti")
+    print("    büyük-y noktalarına aşırı ağırlık verir → birkaç ekstrem seed k'yı yukarı")
+    print("    çeker, medyan ~1e-6 kalır. Doğrulama: kmod_drivers/sigma_dist_fit.py.")
+    print("    → makalede yalnız σ² ÖLÇEKLEMESİ + Fig 9c yörünge uyumu iddia edilmeli;")
+    print("       Fig 9(a) fit değeriyle MUTLAK sayısal eşitlik İDDİA EDİLMEMELİ.")
 
 
 if __name__ == "__main__":
