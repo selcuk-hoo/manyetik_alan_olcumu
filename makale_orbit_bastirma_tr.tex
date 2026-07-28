@@ -335,41 +335,31 @@ gelmez.
 \label{sec:symanti}
 
 Bir düzlemin 48 ofseti bir $v$ vektörü oluştursun; $k$ hücresinde QF $2k$
-indisinde, QD $2k{+}1$ indisinde olsun. Bir hücre içinde iki ofseti iki parçaya
-ayırabiliriz: kuadrupollerin \emph{birlikte} hareket ettiği parça ve \emph{zıt}
-hareket ettiği parça. Bu, çift üzerinde basit bir $2\times2$ işlemidir:
-\begin{align}
-  \begin{pmatrix} v^{\rm s}[2k] \\ v^{\rm s}[2k{+}1] \end{pmatrix}
-    &= \frac12\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}
-       \begin{pmatrix} v[2k] \\ v[2k{+}1] \end{pmatrix},
-  \nonumber\\[4pt]
-  \begin{pmatrix} v^{\rm a}[2k] \\ v^{\rm a}[2k{+}1] \end{pmatrix}
-    &= \frac12\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
-       \begin{pmatrix} v[2k] \\ v[2k{+}1] \end{pmatrix} .
+indisinde, QD $2k{+}1$ indisinde olsun. Her hücrede iki ofseti ortak parçaları ve
+farkları olarak yeniden etiketliyoruz,
+\begin{equation}
+  m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big), \qquad
+  d_k = \tfrac12\big(v[2k]-v[2k{+}1]\big),
   \label{eq:projectors}
-\end{align}
-İlk matris her iki ofseti ortalamalarıyla, $\tfrac12\big(v[2k]+v[2k{+}1]\big)$,
-değiştirir ve simetrik parça $v^{\rm s}$'yi verir. İkincisi onları farklarının $\pm$
-yarısıyla, $\tfrac12\big(v[2k]-v[2k{+}1]\big)$, değiştirir ve antisimetrik parça
-$v^{\rm a}$'yı verir. Tam projektörler $P_{\rm sym}$ ile $P_{\rm anti}$, bu aynı
-$2\times2$ bloğu sırayla 24 hücrenin her birine uygular (yani
-$v^{\rm s} = P_{\rm sym}v$ ve $v^{\rm a} = P_{\rm anti}v$). İkisi tamamlayıcıdır,
-$P_{\rm sym}+P_{\rm anti}=I$. Aynı matris çiftini yatay ve dikey ofset vektörlerine
-ayrı ayrı uyguluyoruz.
+\end{equation}
+ki bu $v[2k] = m_k + d_k$ ve $v[2k{+}1] = m_k - d_k$ ile geri alınır: hiçbir şey
+kaybetmeyen tersinir bir yeniden etiketleme ($24 + 24 = 48$), yatay ve dikey
+ofsetlere ayrı ayrı uygulanır.
 
-Bunu 24 hücrenin hepsi için yapınca, bir düzlemin 48 ofseti 24 simetrik sayı
-$m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big)$ ile 24 antisimetrik sayı
-$d_k = \tfrac12\big(v[2k]-v[2k{+}1]\big)$ olarak yeniden yazılır. Orijinaller
-$v[2k] = m_k + d_k$ ve $v[2k{+}1] = m_k - d_k$ ile geri geldiğinden bu, hiçbir şey
-kaybetmeyen tersinir bir yeniden etiketlemedir ($24 + 24 = 48$). Simetrik desen
-$v^{\rm s} = P_{\rm sym}v$ tüm $m_k$'ları toplar (bütün $d_k = 0$); antisimetrik
-desen $v^{\rm a} = P_{\rm anti}v$ tüm $d_k$'ları toplar (bütün $m_k = 0$); her
-kaçıklık vektörü tam olarak birer tanesinin toplamıdır, $v = v^{\rm s} + v^{\rm a}$.
-İki desen ailesi ortogonaldir ve her biri 48-boyutlu kaçıklık uzayının yarısını
-gerer. Yani birlikte tam bir baz çifti oluştururlar; \emph{herhangi} bir desen bu
-çifte çözülür. İki düzleme ayrı ayrı uygulandığında
-$v_x = v_x^{\rm s} + v_x^{\rm a}$ ve $v_y = v_y^{\rm s} + v_y^{\rm a}$ elde edilir;
-Böl.~\ref{sec:bilinear}'in kanal ayrışımında bu gösterimi kullanıyoruz.
+\emph{Simetrik} desen $v^{\rm s}$ yalnız ortak parçaları tutar; her hücrenin iki
+kuadrupolünü de $m_k$'ya koyar (bütün $d_k = 0$). \emph{Antisimetrik} desen
+$v^{\rm a}$ yalnız farkları tutar; her hücrenin iki kuadrupolünü $+d_k$ ve
+$-d_k$'ya koyar (bütün $m_k = 0$). Hücre hücre geri toplayınca orijinal geri
+gelir --- QF indisinde $m_k + d_k = v[2k]$, QD indisinde $m_k - d_k = v[2k{+}1]$
+---, yani her kaçıklık tam olarak birer simetrik ve birer antisimetrik parçanın
+toplamıdır, $v = v^{\rm s} + v^{\rm a}$. $v \mapsto v^{\rm s}$ ve
+$v \mapsto v^{\rm a}$ eşlemeleri, $P_{\rm sym}+P_{\rm anti}=I$ olacak şekilde
+tamamlayıcı projektörlerdir ($P_{\rm sym}$ ve $P_{\rm anti}$). İki desen ailesi
+ortogonaldir ve her biri 48-boyutlu kaçıklık uzayının yarısını gerer; dolayısıyla
+\emph{herhangi} bir desen bir simetrik ve bir antisimetrik parçaya çözülür. İki
+düzleme ayrı ayrı uygulanınca $v_x = v_x^{\rm s} + v_x^{\rm a}$ ve
+$v_y = v_y^{\rm s} + v_y^{\rm a}$ elde edilir; Böl.~\ref{sec:bilinear}'in kanal
+ayrışımında bu gösterimi kullanıyoruz.
 
 İki bileşenin farkı, QF ile QD gradyanlarının zıt işaretli olmasından doğar. Kaçık
 bir kuadrupol demeti, gradyan ile ofsetin çarpımı kadar bir açıyla saptırır. Komşu

@@ -359,45 +359,31 @@ neither.
 \label{sec:symanti}
 
 Let the 48 offsets of one plane form a vector $v$, with QF at index $2k$ and
-QD at index $2k{+}1$ in cell $k$.  Within one cell the two offsets can be
-separated into the part in which the quadrupoles move \emph{together} and the
-part in which they move \emph{oppositely} --- a simple $2\times2$ operation on
-the pair,
-\begin{align}
-  \begin{pmatrix} v^{\rm s}[2k] \\ v^{\rm s}[2k{+}1] \end{pmatrix}
-    &= \frac12\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}
-       \begin{pmatrix} v[2k] \\ v[2k{+}1] \end{pmatrix},
-  \nonumber\\[4pt]
-  \begin{pmatrix} v^{\rm a}[2k] \\ v^{\rm a}[2k{+}1] \end{pmatrix}
-    &= \frac12\begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix}
-       \begin{pmatrix} v[2k] \\ v[2k{+}1] \end{pmatrix} .
+QD at index $2k{+}1$ in cell $k$.  Within each cell we relabel the two offsets
+by their common part and their difference,
+\begin{equation}
+  m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big), \qquad
+  d_k = \tfrac12\big(v[2k]-v[2k{+}1]\big),
   \label{eq:projectors}
-\end{align}
-The first matrix replaces both offsets by their average
-$\tfrac12\big(v[2k]+v[2k{+}1]\big)$, giving the symmetric part $v^{\rm s}$; the
-second replaces them by $\pm$ half their difference
-$\tfrac12\big(v[2k]-v[2k{+}1]\big)$, giving the antisymmetric part $v^{\rm a}$.
-The full projectors $P_{\rm sym}$ and $P_{\rm anti}$ simply apply this same
-$2\times2$ block to each of the 24 cells in turn (so $v^{\rm s} = P_{\rm sym}v$
-and $v^{\rm a} = P_{\rm anti}v$); they are complementary,
-$P_{\rm sym}+P_{\rm anti}=I$.  The same
-pair of matrices is applied independently to the horizontal and to the
-vertical offset vectors.
+\end{equation}
+which is undone by $v[2k] = m_k + d_k$ and $v[2k{+}1] = m_k - d_k$: a reversible
+relabeling that loses nothing ($24 + 24 = 48$), applied independently to the
+horizontal and the vertical offsets.
 
-Carrying this out for all $24$ cells re-expresses the $48$ offsets of one
-plane as $24$ symmetric numbers $m_k = \tfrac12\big(v[2k]+v[2k{+}1]\big)$ and
-$24$ antisymmetric numbers $d_k = \tfrac12\big(v[2k]-v[2k{+}1]\big)$.  Because
-the originals are recovered by $v[2k] = m_k + d_k$ and $v[2k{+}1] = m_k - d_k$,
-this is a reversible relabeling that loses nothing ($24 + 24 = 48$): the
-symmetric pattern $v^{\rm s} = P_{\rm sym}v$ collects the $m_k$ (all $d_k = 0$),
-the antisymmetric pattern $v^{\rm a} = P_{\rm anti}v$ collects the $d_k$ (all
-$m_k = 0$), and every misalignment vector is the sum of exactly one of each,
-$v = v^{\rm s} + v^{\rm a}$.  The two families of patterns are orthogonal and
-each spans half of the $48$-dimensional misalignment space, so they form a
-complete pair of bases into which \emph{any} pattern resolves; applied
-separately to the two planes this gives $v_x = v_x^{\rm s} + v_x^{\rm a}$ and
-$v_y = v_y^{\rm s} + v_y^{\rm a}$, the representation used in the channel
-decomposition of Sec.~\ref{sec:bilinear}.
+The \emph{symmetric} pattern $v^{\rm s}$ keeps only the common parts, setting
+both quadrupoles of every cell to $m_k$ (all $d_k = 0$); the
+\emph{antisymmetric} pattern $v^{\rm a}$ keeps only the differences, setting the
+two quadrupoles of each cell to $+d_k$ and $-d_k$ (all $m_k = 0$).  Adding them
+back returns the original cell by cell --- at the QF index $m_k + d_k = v[2k]$,
+at the QD index $m_k - d_k = v[2k{+}1]$ --- so every misalignment is the sum of
+exactly one of each, $v = v^{\rm s} + v^{\rm a}$.  The maps $v \mapsto v^{\rm s}$
+and $v \mapsto v^{\rm a}$ are complementary projectors $P_{\rm sym}$ and
+$P_{\rm anti}$ with $P_{\rm sym}+P_{\rm anti}=I$; the two pattern families are
+orthogonal and each spans half of the $48$-dimensional misalignment space, so
+\emph{any} pattern resolves into one symmetric and one antisymmetric part.
+Applied separately to the two planes this gives
+$v_x = v_x^{\rm s} + v_x^{\rm a}$ and $v_y = v_y^{\rm s} + v_y^{\rm a}$, the
+representation used in the channel decomposition of Sec.~\ref{sec:bilinear}.
 
 The physical distinction between the two components follows from the
 opposite-sign gradients of QF and QD.  A misaligned quadrupole deflects the
@@ -433,7 +419,7 @@ reference to harmonics.  The singular-value decomposition of $R$ supplies 48
 mutually orthogonal, unit-normalized misalignment patterns $v_i$, each with
 its own orbit strength $\sigma_i$ (pattern $v_i$ produces an orbit of size
 $\sigma_i$).  We ask how symmetric each of these patterns is by applying to it
-the very same projector $P_{\rm sym}$ of Eq.~(\ref{eq:projectors}): the
+the very same symmetric projector $P_{\rm sym}$ defined above: the
 \emph{symmetric fraction}
 \begin{equation}
   s_i = \|P_{\rm sym}\,v_i\|^2 \in [0,1]
