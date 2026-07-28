@@ -474,14 +474,32 @@ Erken bir açıklama — "biz 1.-mertebe dikey-hız katkısını model-fit ile a
 Fig 9(a) onu içeriyor" — **YANLIŞ**: Omarov-tarzı ham/bulut fiti de ~1.1×10⁻⁶
 veriyor. Ölçtüğümüz nicelik zaten Omarov'unkiyle aynı tanım. Fark estimator'da değil.
 
-### 13.4 Kalan ~10× → KUYRUK-FİTİ hipotezi (kullanıcı gözlemi)
-Fig 9(a)'yı gözle: birkaç ekstrem nokta `y=kx²` LS fitini yukarı çekiyor; küçük-σ
-medyanları görünen fit değerinin bayağı altında. Fizik olarak beklenen: f ∝ yörünge²,
-yörünge de rezonansa yakın ağır-kuyruklu → f **çok** ağır-kuyruklu; LS fiti büyük-y
-noktalarına aşırı ağırlık verir → birkaç ekstrem seed k'yı sürer, medyan ~10⁻⁶ kalır.
-Elimizdeki kuyruk izleri: 3-seed'de 27× yayılım; 15-seed medyan 1.09e-6 / max 3.73e-6
-(3.4×); CR-ayrım seed 2 = 384 μm (1.9× tipik → f ~3.7× tipik). **Test:**
-`kmod_drivers/sigma_dist_fit.py` (çok-seed × çok-σ; k_all bulut vs k_medyan vs k_max).
+### 13.4 Kalan ~10× → KUYRUK etkisi (kısmen doğrulandı, 2026-07-28; n=40, taze .dylib)
+Fizik: f ∝ yörünge², yörünge rezonansa yakın ağır-kuyruklu → f ağır-kuyruklu.
+`sigma_dist_fit.py` (40 seed × 3σ, bağımsız desenler) sonuçları:
+
+| σ | medyan | ort | RMS | p90 | max | max/medyan |
+|---|---|---|---|---|---|---|
+| 2.5μm | 7.4e-8 | 1.1e-7 | 1.7e-7 | 2.6e-7 | 6.9e-7 | 9.4× |
+| 5μm | 1.9e-7 | 2.5e-7 | 3.4e-7 | 5.5e-7 | 9.9e-7 | 5.1× |
+| 10μm | 1.56e-6 | 2.11e-6 | 3.08e-6 | 4.7e-6 | **9.07e-6** | 5.8× |
+
+y=kx² fit: k_medyan→f(10)=1.52e-6 (Omarov 9.9×); k_all(bulut)→2.04e-6 (7.3×);
+**k_max→8.77e-6 (1.7×).**
+
+**Okuma (dürüst):**
+- (a) Dağılım GERÇEKTEN ağır-kuyruklu — σ=10μm max **9.07e-6**, 40 seed'de Omarov'un
+  1.5e-5'inin **0.6 katına** ulaştı. Kullanıcının Fig 9(a) ekstrem-nokta okuması DOĞRU:
+  tekil konfigürasyonlar ~10⁻⁵'e çıkıyor.
+- (b) AMA sıradan bulut-LS (2.04e-6) medyanın yalnız 1.35 katı — tek başına 1.5e-5'e
+  ÇEKMİYOR. Fiti Omarov'a yaklaştıran **üst-zarf/max** (8.77e-6, 1.7× içinde).
+- (c) Ağır-kuyruklu dağılımda örnek-ortalaması AŞAĞI YANLI (nadir dev olaylar 40
+  seed'de eksik) → daha çok seed'le k_all tırmanır. 2.04e-6 bir ALT sınır.
+
+**Sonuç:** Omarov'un 1.5e-5'i bizim örneklediğimiz AYNI dağılımın üst kuyruğunda
+(max'ımızın 1.65 katı); ~10× bir FİZİK farkı değil, medyan-vs-üst-zarf + ağır-kuyruk
+örnekleme etkisi. Yörünge (9c) ve T-BMT zaten uyumlu. **Açık uç:** 200–400 seed ile
+k_all'ın tırmanışını ve bir seed'in 1.5e-5'i aşıp aşmadığını görmek (isteğe bağlı teyit).
 
 ### 13.5 Makale çıkarımı
 **σ² ölçekleme (p=2.00) + Fig 9(c) yörünge uyumu (~226 vs ~200 μm) iddia edilir;
