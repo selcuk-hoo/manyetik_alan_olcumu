@@ -439,3 +439,56 @@ kuvveti flip'te değişir → mekanik kayma = konfig-arası drift kaynağı.
 > `/tmp/bba_cwccw.py` (BBA+OC 2'li). `fast_est.fast_measure`'a `gflip`, `gscale`
 > (flip-kalibrasyon), `dG` (β-beat) parametreleri eklendi. β-beat/tilt 4'lüyü
 > BOZMAZ (§11): C2 sırasıyla −0.086× / +0.08×.
+
+---
+
+## 13. CW-tek MUTLAK SEVİYE ÇAPRAZ-KONTROLÜ (2026-07-28): T-BMT birebir + Fig 9(c) yörünge uyumu → kalan ~10× kuyruk-fiti hipotezi
+
+**Motivasyon:** Kullanıcı, bizim CW-tek sahte-EDM'imizin (σ=10 μm, 15 seed RMS
+1.6×10⁻⁶) Omarov **Fig 9(a)** fitinden (1.5×10⁻⁵ @ σ=10 μm) ~10× düşük görünmesini
+sordu. Sistematik eleme: örnekleme (15 seed teyit), estimator/pencere (t2-taraması
+düz, b~1.1e-6 90→900 tur), kanal (T-BMT tam), gradyan (ikisi de ~0.2 T/m).
+
+### 13.1 T-BMT denklemi referansla BİREBİR
+Kullanıcının referans `ds_dt` fonksiyonu ile `integrator.cpp:324-331` terim-terim
+eşleşiyor (MDM: B(G+1/γ), (β·B)β, (β×E); EDM: (β×B), E/c, (β·E)β; ölçek 0.5·η·Q/M).
+Tek fark işaret **konvansiyonunda ama fizik özdeş**: referans `s×cross`, biz
+`Ω×s` (Ω=−cross·Q/M) → `Ω×s = +(Q/M)(s×X) = s×(X·Q/M)` = referansla aynı.
+Anomali sabiti `G_P = 1.792847356` (satır 46) = referans `AMU`. **Spin motoru doğru.**
+
+### 13.2 CR-ayrım MUTLAK genliği Fig 9(c) ile UYUMLU
+Kapalı yörünge misalignment'ta doğrusal → tepki matrisleri (R_dy/R_dx) genliği tam
+kodlar; ayrıca doğrudan C++ (CW − CCW) ile teyit. (`kmod_drivers/orbit_amp_check.py`)
+
+| ölçüm | bizim | Omarov (Fig 9c / Sec IV) | durum |
+|---|---|---|---|
+| tek-quad 100 μm → CR-ayrım | ~300 μm (dy), ~234 μm (dx) | ~250 μm | ✅ |
+| σ=100 μm rms → COD tepe | 1.32 mm | >1 mm | ✅ |
+| **σ=10 μm → CR-ayrım tepe** (5 seed, C++) | **~226 μm** (rms 126 μm) | **~200 μm** | ✅ |
+
+→ Yörünge genliğimiz Omarov halkasıyla **~1.5× içinde eşleşiyor.** f ∝ x_CO·y_CO
+(kuadratik) olsaydı ~10× için düzlem başına ~3.2× yörünge açığı gerekirdi — **yok.**
+
+### 13.3 Estimator DEĞİL (kullanıcı düzeltmesi)
+Erken bir açıklama — "biz 1.-mertebe dikey-hız katkısını model-fit ile ayıklıyoruz,
+Fig 9(a) onu içeriyor" — **YANLIŞ**: Omarov-tarzı ham/bulut fiti de ~1.1×10⁻⁶
+veriyor. Ölçtüğümüz nicelik zaten Omarov'unkiyle aynı tanım. Fark estimator'da değil.
+
+### 13.4 Kalan ~10× → KUYRUK-FİTİ hipotezi (kullanıcı gözlemi)
+Fig 9(a)'yı gözle: birkaç ekstrem nokta `y=kx²` LS fitini yukarı çekiyor; küçük-σ
+medyanları görünen fit değerinin bayağı altında. Fizik olarak beklenen: f ∝ yörünge²,
+yörünge de rezonansa yakın ağır-kuyruklu → f **çok** ağır-kuyruklu; LS fiti büyük-y
+noktalarına aşırı ağırlık verir → birkaç ekstrem seed k'yı sürer, medyan ~10⁻⁶ kalır.
+Elimizdeki kuyruk izleri: 3-seed'de 27× yayılım; 15-seed medyan 1.09e-6 / max 3.73e-6
+(3.4×); CR-ayrım seed 2 = 384 μm (1.9× tipik → f ~3.7× tipik). **Test:**
+`kmod_drivers/sigma_dist_fit.py` (çok-seed × çok-σ; k_all bulut vs k_medyan vs k_max).
+
+### 13.5 Makale çıkarımı
+**σ² ölçekleme (p=2.00) + Fig 9(c) yörünge uyumu (~226 vs ~200 μm) iddia edilir;
+Fig 9(a) fit DEĞERİYLE mutlak sayısal eşitlik İDDİA EDİLMEZ.** Sim düşük değil —
+Fig 9(a) fiti ağır-kuyruklu dağılımın üst zarfını izliyor. Sub-hedef marjinler
+tehlikede değil (§II.D validasyon sayıları geçerli).
+
+> **Reprodüksiyon (kalıcı, /tmp değil):** `kmod_drivers/orbit_amp_check.py`
+> (cached R veya --rebuild; tek-quad + σ-rms genlik), `kmod_drivers/sigma_dist_fit.py`
+> (dağılım + kuyruk-fiti testi, lokal — ağır spin koşumları). T-BMT: `integrator.cpp:283-335`.
