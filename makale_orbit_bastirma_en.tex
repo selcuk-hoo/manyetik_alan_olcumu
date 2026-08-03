@@ -39,7 +39,7 @@ Permanent electric dipole moment of fundamental particles violates time symmetry
 \end{equation}
 Certain couplings with magnetic dipole moment that can mimic this precession, called false EDM signal, must be eliminated. This paper investigates false EDM signals originating from misalignments of magnetic quadrupoles.
 
-The magnetic field at the center of a quadrupole magnet is zero. If it is misaligned, the particles experience magnetic fields proportional to the misalignment. A vertical misalignment $dy$ produces a radial magnetic field that precesses the spin in the vertical plane --- the same plane as the EDM signal. A horizontal misalignment $dx$ produces a vertical field that precesses the spin in the horizontal plane. These precessions are harmless alone because the spin precesses back and forth with these misalignments. However, if the quadrupoles are misaligned horizontally and vertically in any order, noncommutativity of the orthogonal precessions result in a residual out-of-plane precession. This is called the geometric (Berry) phase effect~\cite{berry1984,aharonov1987}, and the false EDM is quadratically related to the RMS of the misalignments:
+The magnetic field at the center of a quadrupole magnet is zero. If it is misaligned, the particles experience magnetic fields proportional to the misalignment. A vertical misalignment $dy$ produces a radial magnetic field that precesses the spin in the vertical plane --- the same plane as the EDM signal. A horizontal misalignment $dx$ produces a vertical field that precesses the spin in the horizontal plane. These precessions are harmless alone because the spin precesses back and forth with these misalignments. However, if the quadrupoles are misaligned horizontally and vertically in any order, noncommutativity of the orthogonal precessions result in a residual out-of-plane precession. This is called the geometric (Berry) phase effect~\cite{berry1984,aharonov1987,farley2004,haciomeroglu2019}, and the false EDM is quadratically related to the RMS of the misalignments:
 \begin{equation}
     f_\text{false} \propto dx\cdot dy \quad \rightarrow \quad \vert f_\text{false} \vert \propto \sigma^2.
     \label{Eq:sigma_quadratic}
@@ -261,7 +261,7 @@ A major advantage of this method is statistics. In the reference scheme, the qua
 
 \subsection{Drift and the time budget}
 \label{sec:drift}
-The scheme is meant to run continuously, as a drift monitor rather than a one-shot alignment. Because each BPM sits next to its quadrupole, the two drift together~\cite{rossbach}, so the two-beam sum tracks this common motion and the accumulated correction is a running measure of how far the machine has drifted since the last calibration. Beam-based alignment then only sets the absolute baseline and is renewed when this drift crosses the sub-target threshold---turning an expensive absolute measurement into an occasional recalibration, with the cheap two-beam orbit covering the interval between.
+The scheme is meant to run continuously, as a drift monitor rather than a one-shot alignment. Because each BPM sits next to its quadrupole, the two are likely to exhibit correlated mechanical motion~\cite{rossbach}, so the two-beam sum tracks this common motion and the accumulated correction is a running measure of how far the machine has drifted since the last calibration. Beam-based alignment then only sets the absolute baseline and is renewed when this drift crosses the sub-target threshold---turning an expensive absolute measurement into an occasional recalibration, with the cheap two-beam orbit covering the interval between.
 
 \section{CONCLUSIONS}
 \label{sec:conclusion}
@@ -381,6 +381,18 @@ Proc.\ R.\ Soc.\ Lond.\ A \textbf{392}, 45 (1984).
 Y.~Aharonov and J.~Anandan,
 ``Phase change during a cyclic quantum evolution,''
 Phys.\ Rev.\ Lett.\ \textbf{58}, 1593 (1987).
+
+\bibitem{farley2004}
+F.~J.~M.~Farley, K.~Jungmann, J.~P.~Miller, W.~M.~Morse, Y.~F.~Orlov,
+B.~L.~Roberts, Y.~K.~Semertzidis, A.~Silenko, and E.~J.~Stephenson,
+``New method of measuring electric dipole moments in storage rings,''
+Phys.\ Rev.\ Lett.\ \textbf{93}, 052001 (2004).
+
+\bibitem{haciomeroglu2019}
+S.~Hac{\i}\"omero\u{g}lu, Y.~F.~Orlov, and Y.~K.~Semertzidis,
+``Magnetic field effects on the proton EDM in a continuous all-electric
+storage ring,''
+Nucl.\ Instrum.\ Methods A \textbf{921}, 12 (2019).
 
 \bibitem{bmt1959}
 V.~Bargmann, L.~Michel, and V.~L.~Telegdi,
