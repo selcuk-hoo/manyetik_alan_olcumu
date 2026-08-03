@@ -274,7 +274,9 @@ Rather than replacing beam-based alignment, the proposed method complements it b
 
 \section{ACKNOWLEDGEMENTS}
 
-This work was supported by TÜBİTAK Project \#123F256.
+This work was supported by the Scientific and Technological Research Council of Türkiye (TÜBİTAK) under the 1001 Program (Project No.~123F256).
+
+AI-based tools were used to assist with software development and manuscript preparation; all physics content, analysis, and conclusions are the responsibility of the authors.
 
 
 \appendix
@@ -331,11 +333,11 @@ $R_{\rm sum}$ is itself a $2\times2$ matrix, and a singular one: its antisymmetr
 
 The misalignment is read back one component at a time. From the difference,
 \begin{equation}
-  a=\frac{(y_{\rm CW}-y_{\rm CCW})_1}{2G},
+  a=\frac{y_{\rm CW}-y_{\rm CCW}}{2G},
 \end{equation}
 free of the offset (it cancelled) and well conditioned. From the sum,
 \begin{equation}
-  s=\frac{(y_{\rm CW}+y_{\rm CCW})_2-2b_s}{2g},
+  s=\frac{(y_{\rm CW}+y_{\rm CCW})-2b_s}{2g},
 \end{equation}
 which needs the small gain $g$ inverted --the ill-conditioning of the symmetric channel-- and, worse, the offset $2b_s$: with $b\sim100~\mu$m$\,\gg gs$, a static symmetric
 misalignment and a static offset are degenerate in the sum and cannot be separated by a
