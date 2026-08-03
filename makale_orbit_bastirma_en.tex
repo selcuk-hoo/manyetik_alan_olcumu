@@ -39,7 +39,7 @@ Permanent electric dipole moment of fundamental particles violates time symmetry
 \end{equation}
 Certain couplings with magnetic dipole moment that can mimic this precession, called false EDM signal, must be eliminated. This paper investigates false EDM signals originating from misalignments of magnetic quadrupoles.
 
-The magnetic field at the center of a quadrupole magnet is zero. If it is misaligned, the particles experience magnetic fields proportional to the misalignment. A vertical misalignment $dy$ produces a radial magnetic field that precesses the spin in the vertical plane --- the same plane as the EDM signal. A horizontal misalignment $dx$ produces a vertical field that precesses the spin in the horizontal plane. These precessions are harmless alone because the spin precesses back and forth with these misalignments. However, if the quadrupoles are misaligned horizontally and vertically in any order, noncommutativity of the orthogonal precessions result in a residual out-of-plane precession. This is called the geometric (Berry) phase effect~\cite{berry1984}, and the false EDM is quadratically related to the RMS of the misalignments:
+The magnetic field at the center of a quadrupole magnet is zero. If it is misaligned, the particles experience magnetic fields proportional to the misalignment. A vertical misalignment $dy$ produces a radial magnetic field that precesses the spin in the vertical plane --- the same plane as the EDM signal. A horizontal misalignment $dx$ produces a vertical field that precesses the spin in the horizontal plane. These precessions are harmless alone because the spin precesses back and forth with these misalignments. However, if the quadrupoles are misaligned horizontally and vertically in any order, noncommutativity of the orthogonal precessions result in a residual out-of-plane precession. This is called the geometric (Berry) phase effect~\cite{berry1984,aharonov1987}, and the false EDM is quadratically related to the RMS of the misalignments:
 \begin{equation}
     f_\text{false} \propto dx\cdot dy \quad \rightarrow \quad \vert f_\text{false} \vert \propto \sigma^2.
     \label{Eq:sigma_quadratic}
@@ -234,7 +234,7 @@ The orbit difference for different gradients is determined by the difference res
 \end{equation}
 where $\Delta x$ and $\Delta y$ are the BPM measurement of the COD. It can be shown that if the gradient is changed by $\epsilon_g$, the inverse of the difference scales as
 \[\vert \vert \Delta R^{-1} \vert \vert \approx \vert \vert R^{-1} \vert \vert / \epsilon_g. \]
-In other words, the weakness of this method is the conditioning: $3.7 \times 10^{4}$ for the pEDM lattice. As the smaller singular values belong to the symmetric components (Figure \ref{fig:fig_orbit_modes}), the matrix inversion selectively underperforms at symmetric components. Attempts like Tikhonov regularization did not help either, because they cut off the lower singular values -- the symmetric modes. Even with 0.1\% RMS gradient, the symmetric components were reconstructed with $\approx 250\%$ error (See Appendix \ref{app:orb_diff_inv}). This limitation cannot be overcome by BPM sensitivity, because the noise is coherent (not white).
+In other words, the weakness of this method is the conditioning: $3.7 \times 10^{4}$ for the pEDM lattice. As the smaller singular values belong to the symmetric components (Figure \ref{fig:fig_orbit_modes}), the matrix inversion selectively underperforms at symmetric components. Attempts like Tikhonov regularization~\cite{tikhonov1977} did not help either, because they cut off the lower singular values -- the symmetric modes. Even with 0.1\% RMS gradient, the symmetric components were reconstructed with $\approx 250\%$ error (See Appendix \ref{app:orb_diff_inv}). This limitation cannot be overcome by BPM sensitivity, because the noise is coherent (not white).
 
 Figure \ref{fig:orbit_suppression} shows how different approaches perform for this task. As the blue diamond at that plot shows, orbit correction can in fact be effective if CR beams are used. %The next title focuses on its mechanism.
 
@@ -377,6 +377,11 @@ M.~V.~Berry,
 ``Quantal phase factors accompanying adiabatic changes,''
 Proc.\ R.\ Soc.\ Lond.\ A \textbf{392}, 45 (1984).
 
+\bibitem{aharonov1987}
+Y.~Aharonov and J.~Anandan,
+``Phase change during a cyclic quantum evolution,''
+Phys.\ Rev.\ Lett.\ \textbf{58}, 1593 (1987).
+
 \bibitem{bmt1959}
 V.~Bargmann, L.~Michel, and V.~L.~Telegdi,
 ``Precession of the polarization of particles moving in a homogeneous
@@ -392,6 +397,10 @@ Y.~Chung, G.~Decker, and K.~Evans,
 ``Closed orbit correction using singular value decomposition of the response
 matrix,''
 in \emph{Proceedings of PAC 1993}, p.~2263.
+
+\bibitem{tikhonov1977}
+A.~N.~Tikhonov and V.~Y.~Arsenin,
+\emph{Solutions of Ill-Posed Problems} (Winston, Washington, DC, 1977).
 
 \bibitem{wegscheider}
 S.~Wegscheider, J.~Vilsmeier, \emph{et al.},
