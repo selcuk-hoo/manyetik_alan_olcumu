@@ -134,9 +134,21 @@ demet) eklenir (iç-inceleme minör #2 de bunu öneriyor). **Cila düzeyinde, ve
 **Cevap:** **TSVD** — `np.linalg.pinv(rcond=0.01)`, yani en büyük tekil değerin %1'inin
 altındaki modlar atılıyor. Yığma ([R_CCW; R_CW]) simetrik ailenin tekil değerlerini
 bu eşiğin üstüne taşıdığı için iki-demet çalışıyor (tek-demette altında kalıyorlar).
-Gürültü: testler zaten 14 nm beyaz BPM gürültüsüyle; sonuç stabil. Grok'un
-"koşullanma hâlâ küçük tekil değer içerir" notu doğru ama yığmanın **amacı** tam da
-bunu iyileştirmek (135→73 / 228→118). **Metinle + mevcut sayılarla kapanır.**
+Gürültü: testler zaten 14 nm beyaz BPM gürültüsüyle; sonuç stabil.
+
+**ÖNEMLİ (yeni teşhis — Q4 dikey bilmecesini de çözer):** rcond=0.01 **düzleme
+duyarlı**. SVD teşhisi (`q4_plane_check` + rcond taraması):
+- **Yatay (dx):** 48/48 mod tutulur, simetrik altuzay **%100** kapsanır → 368×.
+- **Dikey (dy):** rcond=0.01 **8 modu keser**; simetrik altuzayın **%24'ü kesilen
+  modlarda** (en küçük simetrik-baskın mod σ/σ_max=0.0085 < 0.01) → yalnız %76 → 2.3×.
+- **rcond'u 0.005'e düşürünce dikey de 390×'e çıkar (0.017 μm), 14 nm gürültüde
+  cezasız** (sıfır gürültüde makine hassasiyeti). Yani dikeyin zayıflığı **analitik R
+  değil**, sadece fazla agresif kesme eşiğiydi; ikisi de simülasyon R.
+
+**Cevap (Q3):** rcond seçimi raporlanmalı ve **0.005 kullanmak dikey simetriği de tam
+kurtarır** (yatayla eşit). Gürültü-stabilitesi 14 nm'de korunuyor. ⚠️ **Uyarı:** rcond'u
+düşürmek β-beat *model uyuşmazlığını* büyütebilir (kesme, uyuşmazlığa karşı da koruma);
+β-beat altında rcond taraması ayrıca yapılmalı (koşuluyor).
 
 ---
 
