@@ -124,7 +124,7 @@
 	
 	\subsection{Benchmarking the estimations}
 	\label{sec:benchmark}
-	We benchmarked the estimator by following a single observable, the vertical spin precession rate, through three configurations. With the quadrupoles perfectly aligned and the genuine-EDM switch off, the estimator returned $\sim\!10^{-11}$~rad/s, consistent with zero at the numerical floor, so it fabricates no spurious signal. Switching on the EDM of $d = 10^{-29}~e \cdot$cm produces $dS_y/dt = 9.81\times10^{-10}$~rad/s, consistent with Ref.~\cite{srEDM, omarov}. Finally, with the EDM switch off and the misalignments restored, the false signal grew quadratically with the RMS misalignment ($\vert f \vert \propto \sigma^p$, $p=2.00\pm0.01$ over $\sigma=2.5-10~\mu$m), and the corresponding beam separation fell in the $200-230~\mu$m range for a $10~\mu$m RMS misalignment, again consistent with Ref.~\cite{omarov}. Reversing the signs of the displacements flipped the signal as $f(+dx,+dy)=-f(+dx,-dy)=f(-dx,-dy)$, confirming its bilinear $dx\cdot dy$ origin (Equation~\ref{Eq:sigma_quadratic}).
+	We benchmarked the estimator by following a single observable, the vertical spin precession rate, through three configurations. With the quadrupoles perfectly aligned and the genuine-EDM switch off, the estimator returned $\sim\!10^{-11}$~rad/s, consistent with zero at the numerical floor, so it fabricates no spurious signal. Switching on the EDM of $d = 10^{-29}~e \cdot$cm produces $dS_y/dt = 9.81\times10^{-10}$~rad/s, consistent with Ref.~\cite{srEDM, omarov}. Finally, with the EDM switch off and the misalignments restored, the false signal grew quadratically with the RMS misalignment ($\vert f \vert \propto \sigma^p$, $p=2.00\pm0.01$ over $\sigma=2.5-10~\mu$m), and the corresponding beam separation fell in the $200-230~\mu$m range for a $10~\mu$m RMS misalignment, again consistent with Ref.~\cite{omarov}. Reversing the signs of the displacements flipped the signal as $f(+dx,+dy)=-f(+dx,-dy)=f(-dx,-dy)$, confirming its bilinear $dx\cdot dy$ origin (Eq.~\ref{Eq:sigma_quadratic}).
 	
 	\section{FALSE EDM MECHANISM}
 	\label{sec:mechanism}
@@ -153,29 +153,29 @@
 	\end{figure*}
 	
 	The antisymmetric misalignments kick the beam in the same direction and have long range effect over the ring. On the other hand, if the betatron tune is small compared to the number of FODO cells (See Table \ref{tbl:ring_parameters} for the proton EDM ring), the symmetric misalignments kick the beam in opposite directions, leaving a short range fingerprint on the closed orbit. But the long range effect of the kick is significantly cancelled.
-	%Since the two kicks are close to each other, the slight change of the phase advance ($\Delta \psi_{ij}$) of Equation \ref{Eq:response_matrix} forces the relevant matrix elements to be similar.
+	%Since the two kicks are close to each other, the slight change of the phase advance ($\Delta \psi_{ij}$) of Eq.~\ref{Eq:response_matrix} forces the relevant matrix elements to be similar.
 	Rephrasing this statement, the $k^\text{th}$ Fourier component of the misalignment pattern affects the orbit through the gain parameter $G_k$ as
 	\begin{equation}
 		G_k \propto \frac{1}{\vert Q^2 - k^2 \vert}.
 		\label{Eq:orbit_gain}
 	\end{equation}
-	The symmetric modes represent the contributions from $k=24$ for the proton EDM ring. They are strongly suppressed because $Q^2 \ll k^2$. As an example, $k=1$ component is around 100 times larger than the $k=24$ component. This behavior is summarized at Figure \ref{fig:fig_orbit_modes}. However, the effect of the very same field on the spin is not negligible, because of the geometric phase mechanism. While faintly visible to the orbit, this effect is quite strong on the spin. In conclusion, standard orbit correction methods have limited power against the geometric phase effect.
+	The symmetric modes represent the contributions from $k=24$ for the proton EDM ring. They are strongly suppressed because $Q^2 \ll k^2$. As an example, $k=1$ component is around 100 times larger than the $k=24$ component. This behavior is summarized at Fig.~\ref{fig:fig_orbit_modes}. However, the effect of the very same field on the spin is not negligible, because of the geometric phase mechanism. While faintly visible to the orbit, this effect is quite strong on the spin. In conclusion, standard orbit correction methods have limited power against the geometric phase effect.
 	
 	\subsection{False EDM in terms of bilinear functional}
 	\label{sec:bilinear}
-	Following the above conventions, Equation \ref{Eq:sigma_quadratic} can be written for every FODO cell as
+	Following the above conventions, Eq.~\ref{Eq:sigma_quadratic} can be written for every FODO cell as
 	\begin{equation}
 		f =  \sum_i \sum_j W_{ij} v_{x,i}v_{y,j} = F(v_x, v_y),
 	\end{equation}
 	where $i,j$ count the neighbor quadrupoles, $W_{ij}$ is the weight for each FODO cell, defined by the lattice. It is worth noting that $v_{x,i}$ and $v_{y,j}$ belong to two neighbor quadrupoles, not one.
-	Splitting both of them into symmetric and antisymmetric components (Equation \ref{Eq:v_sym_anti}), one gets
+	Splitting both of them into symmetric and antisymmetric components (Eq.~\ref{Eq:v_sym_anti}), one gets
 	\begin{equation}
 		f= \underbrace{F(v_x^s, v_y^s)}_{f_{ss}} +
 		\underbrace{F(v_x^s, v_y^a)}_{f_{sa}} +
 		\underbrace{F(v_x^a, v_y^s)}_{f_{as}} +
 		\underbrace{F(v_x^a, v_y^a)}_{f_{aa}}.
 	\end{equation}
-	Figure \ref{Fig:channels} investigates this mixing. Similar to Figure \ref{fig:fig_orbit_modes} of the orbit response, the antisymmetric content ($f_{aa}$) is more dominant than the symmetric one ($f_{ss}$). However, this dominance is not as strong as the orbit case. Therefore, standard orbit correction suppresses the RMS misalignment $\sigma$, but does not guarantee the elimination of the geometric phase effect. The experimental target ($d_p=10^{-29}~e \cdot$cm) of the proton EDM experiment requires correcting the symmetric component.
+	Figure~\ref{Fig:channels} investigates this mixing. Similar to Fig.~\ref{fig:fig_orbit_modes} of the orbit response, the antisymmetric content ($f_{aa}$) is more dominant than the symmetric one ($f_{ss}$). However, this dominance is not as strong as the orbit case. Therefore, standard orbit correction suppresses the RMS misalignment $\sigma$, but does not guarantee the elimination of the geometric phase effect. The experimental target ($d_p=10^{-29}~e \cdot$cm) of the proton EDM experiment requires correcting the symmetric component.
 	
 	\begin{figure*}[!t]
 		\includegraphics[width=\linewidth]{fig_orbit_channels.png}
@@ -187,14 +187,14 @@
 	\label{sec:bba}
 	Beam based alignment (BBA) does not suffer from the above mentioned imbalance between spin and orbit, because it relies on correcting the quadrupoles individually, rather than relying on the global closed-orbit response. Consequently, the symmetric and antisymmetric structure of the misalignment pattern does not affect the alignment procedure. For this reason, the proposal of Ref.~\cite{omarov}, BBA with CR beams followed by quadrupole polarity switch significantly suppresses the geometric phase effect.
 	
-	It is worth noting that BBA does not require inverting the response matrix. Therefore, it is more immune to the discrepancy between the symmetric and antisymmetric modes. It becomes a significant difficulty for SVD algorithms (See Figure \ref{fig:fig_orbit_modes}).
+	It is worth noting that BBA does not require inverting the response matrix. Therefore, it is more immune to the discrepancy between the symmetric and antisymmetric modes. It becomes a significant difficulty for SVD algorithms (See Fig.~\ref{fig:fig_orbit_modes}).
 	
 	Application of BBA requires iterative minimization of the dipole kick of the quadrupole magnet. The kick becomes zero when the beam passes through the magnetic center of the quadrupole. BBA aims to minimize this kick by correction dipoles next to the quadrupole. The quadrupole gradient is slightly varied in order to isolate the signal from the background sources, making the measurement largely insensitive to BPM offset and slowly varying effects.
 	
 	\subsection{BBA with realistic optics}
 	\label{sec:bba_realistic}
 	
-	As shown at Ref.~\cite{omarov}, the BBA algorithm with CR beams and quadrupole polarity switch reduces the false EDM signal to the target value in ideal conditions. Our simulations with $\approx 1\%$ random gradient error yielded a \textit{breathing} effect (see Appendix \ref{app:breathing}). Variation of the gradient of a quadrupole shifts the focus-related parameters of the \textit{whole} ring slightly, especially the betatron tunes. Therefore, the response of all other quadrupoles, hence the BPM measurements also get shifted. The modulation does not help isolating this effect, because it is the source. However, this systematic error is proportional to the COD, and can be minimized by iteratively applying BBA. As Figure \ref{fig:bba_convergence} shows, the false EDM reduced to the target value after eight iterations.
+	As shown at Ref.~\cite{omarov}, the BBA algorithm with CR beams and quadrupole polarity switch reduces the false EDM signal to the target value in ideal conditions. Our simulations with $\approx 1\%$ random gradient error yielded a \textit{breathing} effect (see Appendix \ref{app:breathing}). Variation of the gradient of a quadrupole shifts the focus-related parameters of the \textit{whole} ring slightly, especially the betatron tunes. Therefore, the response of all other quadrupoles, hence the BPM measurements also get shifted. The modulation does not help isolating this effect, because it is the source. However, this systematic error is proportional to the COD, and can be minimized by iteratively applying BBA. As Fig.~\ref{fig:bba_convergence} shows, the false EDM reduced to the target value after eight iterations.
 	
 	\begin{figure}
 		\centering
@@ -205,7 +205,7 @@
 	
 	Unlike the vertical ones, the horizontal misalignments could not be corrected well with analytical response matrix, where the electrical deflectors were also treated as drifts and the resultant response matrix was deviated on the horizontal plane. Therefore, we constructed the response matrix by simulation, and applied the BBA iterations afterwards.
 	
-	Since BBA does not distinguish the symmetric and antisymmetric components, it reduces them simultaneously. This opens up an opportunity to use OC after enough reduction of the symmetric components by BBA. The green star at Figure \ref{fig:bba_convergence} shows that applying OC after the third BBA iteration performs equivalently with eight iteration BBA. However, we will show at Sec.~\ref{sec:croc} that OC can be utilized more effectively to save the experimental time. It relies on CR beam measurements too.
+	Since BBA does not distinguish the symmetric and antisymmetric components, it reduces them simultaneously. This opens up an opportunity to use OC after enough reduction of the symmetric components by BBA. The green star at Fig.~\ref{fig:bba_convergence} shows that applying OC after the third BBA iteration performs equivalently with eight iteration BBA. However, we will show at Sec.~\ref{sec:croc} that OC can be utilized more effectively to save the experimental time. It relies on CR beam measurements too.
 	
 	\begin{figure}
 		\centering
@@ -228,9 +228,9 @@
 	\end{equation}
 	where $\Delta x$ and $\Delta y$ are the BPM measurement of the COD. It can be shown that if the gradient is changed by $\epsilon_g$, the inverse of the difference scales as
 	\[\vert \vert \Delta R^{-1} \vert \vert \approx \vert \vert R^{-1} \vert \vert / \epsilon_g. \]
-	In other words, the weakness of this method is the conditioning: $3.7 \times 10^{4}$ for the pEDM lattice. As the smaller singular values belong to the symmetric components (Figure \ref{fig:fig_orbit_modes}), the matrix inversion selectively underperforms at symmetric components. Attempts like Tikhonov regularization~\cite{tikhonov1977} did not help either, because they cut off the lower singular values -- the symmetric modes. Even with 0.1\% RMS gradient, the symmetric components were reconstructed with $\approx 250\%$ error (See Appendix \ref{app:orb_diff_inv}). This limitation cannot be overcome by BPM sensitivity, because the noise is coherent (not white).
+	In other words, the weakness of this method is the conditioning: $3.7 \times 10^{4}$ for the pEDM lattice. As the smaller singular values belong to the symmetric components (Fig.~\ref{fig:fig_orbit_modes}), the matrix inversion selectively underperforms at symmetric components. Attempts like Tikhonov regularization~\cite{tikhonov1977} did not help either, because they cut off the lower singular values -- the symmetric modes. Even with 0.1\% RMS gradient, the symmetric components were reconstructed with $\approx 250\%$ error (See Appendix \ref{app:orb_diff_inv}). This limitation cannot be overcome by BPM sensitivity, because the noise is coherent (not white).
 	
-	Figure \ref{fig:orbit_suppression} shows how different approaches perform for this task. As the blue diamond at that plot shows, orbit correction can in fact be effective if CR beams are used. We will discuss it in the next section.
+	Figure~\ref{fig:orbit_suppression} shows how different approaches perform for this task. As the blue diamond at that plot shows, orbit correction can in fact be effective if CR beams are used. We will discuss it in the next section.
 	
 	\subsection{Extracting the symmetric component with counter-rotating beams}
 	\label{sec:extract}
@@ -278,7 +278,7 @@
 	\section{Optical breathing}
 	\label{app:breathing}
 	
-	Optical breathing effect is the second big obstacle in orbit difference approach, if the quadrupoles are modulated. Consider a change in gradient of a single quadrupole. It causes a slight change in betatron-related parameters. Then, each response matrix element (Equation \ref{Eq:response_matrix}) will slightly change, introducing error in the reconstruction. Especially if all the quadrupoles are modulated at different frequencies, the response matrix elements have large contribution from these errors. Simulation results are shown in Figure \ref{fig:breathing}.
+	Optical breathing effect is the second big obstacle in orbit difference approach, if the quadrupoles are modulated. Consider a change in gradient of a single quadrupole. It causes a slight change in betatron-related parameters. Then, each response matrix element (Eq.~\ref{Eq:response_matrix}) will slightly change, introducing error in the reconstruction. Especially if all the quadrupoles are modulated at different frequencies, the response matrix elements have large contribution from these errors. Simulation results are shown in Fig.~\ref{fig:breathing}.
 	
 	\begin{figure}
 		\centering
@@ -289,7 +289,7 @@
 	
 	\section{Inversion of orbit difference}
 	\label{app:orb_diff_inv}
-	Orbit difference cancels the static offsets, but the resulting difference response matrix $\Delta R$ has a high conditioning number, at the order of $10^4$. Hence, the method becomes extremely sensitive to errors. As shown in Figure \ref{fig:orbit_lock}, the symmetric error quickly gets larger than the signal with beta beat. Regularizations like Tikhonov does not make it better, because the they cut off the symmetric component.
+	Orbit difference cancels the static offsets, but the resulting difference response matrix $\Delta R$ has a high conditioning number, at the order of $10^4$. Hence, the method becomes extremely sensitive to errors. As shown in Fig.~\ref{fig:orbit_lock}, the symmetric error quickly gets larger than the signal with beta beat. Regularizations like Tikhonov does not make it better, because the they cut off the symmetric component.
 	
 	\begin{figure}
 		\centering
@@ -301,7 +301,7 @@
 	\begin{comment}
 		\section{Increasing the tune}
 		\label{app:tune}
-		The symmetric component is less visible because the small betatron tune forces the low harmonic content to be more visible to the BPM's (Equation \ref{Eq:orbit_gain}). Then, increasing the betatron tune to near 24 (number of FODO cells) should make the symmetric and antisymmetric modes comparable. Indeed, it does. However, it requires the gradients be stronger as much, hence the false EDM. Eventually, both symmetric and antisymmetric components must be suppressed even more strongly.
+		The symmetric component is less visible because the small betatron tune forces the low harmonic content to be more visible to the BPM's (Eq.~\ref{Eq:orbit_gain}). Then, increasing the betatron tune to near 24 (number of FODO cells) should make the symmetric and antisymmetric modes comparable. Indeed, it does. However, it requires the gradients be stronger as much, hence the false EDM. Eventually, both symmetric and antisymmetric components must be suppressed even more strongly.
 		
 	\end{comment}
 	
