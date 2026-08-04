@@ -44,15 +44,36 @@ bileşeni de aynı seviyede kurtarıyor mu, yoksa fark var mı?
 - Bu, "analitik R yatayda kötüydü → simülasyon-R ile kurunca yatay yıldız düzlem oldu"
   hikâyesini doğruluyor (makale §, `line 206`).
 
-**Dürüstlük notu:** "recover **the** symmetric component" ifadesi sıkı okumada fazla
-iddialı — gerçekte **yatay** simetriği kurtarıyoruz. Hakem "her iki düzlem de mi?"
-derse cevap: "yatay 368×, dikey ~2×; bilineer çarpım nedeniyle bir düzlem yeterli."
-Revizyonda tek cümleyle zarifçe kapatılır: *"Because $f$ is bilinear in the two
-planes, suppressing the symmetric component in one plane suffices to null the false
-EDM; the two-beam correction achieves this in the horizontal plane (×368)."*
+**β-beat (%5) altında (yeni koşu, nominal model vs β-beat makine, 15 seed):**
+| Simetrik artık (μm) | ham | temiz 2-demet | **%5 β-beat 2-demet** |
+|---|---|---|---|
+| Yatay (dx) | 7.06 | 0.017 (368×) | **1.12 (5.3×)** |
+| Dikey (dy) | 6.38 | 2.84 (2.3×) | **3.49 (1.9×)** |
 
-**Ek koşu:** β-beat altında yatay kurtarma bozuluyor mu? — **koşuluyor** (bu dosya
-güncellenecek). Q2 ile aynı kırılganlığın iki yüzü.
+β-beat, temiz-optikteki "yatay yıldız"ı **çökertiyor** (368×→5.3×). Yani temiz
+optikteki "yatayı sıfırla → bilineer çarpımı öldür" mekanizması β-beat altında
+**geçerli değil**: her iki düzlemin simetrik kaçıklığı da ancak birkaç × kurtarılıyor.
+
+**KRİTİK UZLAŞMA (yanlış yorumlamamak için):** Buna rağmen **spin-ölçülü sahte EDM**
+kampanyada aynı işletim noktasında (%5 β-beat) **15/15 hedef-altı** (en kötü 0.62×,
+"hedefe yakın"). Çelişki değil: per-düzlem RMS bir **tanı göstergesi**; sahte EDM ise
+ağırlıklı bilineer fonksiyonel $f=\sum_{ij}W_{ij}v^s_{x,i}v^s_{y,j}$ + beam-reversal-tek
+iptali ($C=(f_{CW}-f_{CCW})/2$) — RMS-çarpımı sahte EDM'e **eşit değil** (bu yüzden
+kaba çarpım tahmini hedef-üstü verirken gerçek spin ölçümü hedef-altı).
+
+**Dürüstlük notu / önerilen çerçeve:** Makalenin **savunulabilir** iddiası
+"**sahte EDM'i hedef-altına bastırıyoruz**" (spin-ölçülü, doğru) — "simetrik kaçıklık
+**desenini** geri çatıyoruz" DEĞİL (kısmi; temiz optikte yatay mükemmel, β-beat'te
+her iki düzlem de birkaç ×; marj β-beat'te inceliyor). Hakem Q4'ü sorarsa:
+- Temiz optik: yatay 368× (çarpım nedeniyle bir düzlem yeter).
+- %5 β-beat: mekanizma tek-düzlem sıfırlamaya dayanmıyor; yine de sahte EDM 15/15
+  hedef-altı (paper zaten "brings it close" diyor) — **çünkü ölçülen şey $C$, per-düzlem
+  RMS değil.**
+- "recover the symmetric component" ifadesini "**suppress the false EDM**" lehine
+  yumuşatmak dürüstlüğü artırır.
+
+**Q2 bağlantısı:** β-beat'te marj daraldığından (0.62×), bağımsız BPM/quad drift'i +
+β-beat birlikte marjı hedef-üstüne itebilir → A2/Q2 koşusu bu yüzden değerli.
 
 ### A2 — Statik BPM ofseti (~100 μm) iki-demet testinde var mı? Drift iddiası simüle edildi mi?
 **Kaynak:** İç-inceleme M1 (en kritik) + M4; Grok Q2.
@@ -179,7 +200,9 @@ Bunlar rapor edildiğinde makaleyi savunur:
    *En olası hakem sorusu; en ucuz savunma.*
 2. **A2 / M4 / Grok Q2 — Bağımsız BPM/quad drift'i ile iki-demet drift monitörü koşusu**
    (σ_d taraması) — kumar oynanabilir, sorulursa yap.
-3. **A1 β-beat uzantısı** — yatay kurtarma β-beat altında bozuluyor mu (bu dosyaya eklenecek).
+3. **A1 β-beat uzantısı — YAPILDI:** yatay kurtarma β-beat'te 368×→5.3× çöküyor;
+   ama spin-ölçülü sahte EDM yine 15/15 hedef-altı (per-düzlem RMS ≠ sahte EDM).
+   İddiayı "suppress the false EDM"e yumuşatmak önerilir.
 4. **B1 — Fig. 4'e β-beat vs C paneli** (opsiyonel görsel güçlendirme).
 5. **BPM gain hatası testi** — opsiyonel doğrulama (§6/§7'de "nicelenecek").
 
