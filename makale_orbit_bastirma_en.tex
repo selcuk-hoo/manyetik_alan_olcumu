@@ -99,7 +99,7 @@
 	\label{sec:simulation}
 	\subsection{Beam and spin tracking}
 	\label{sec:tracking}
-	All of the results of this work were obtained by in-house beam and spin tracking codes. The implementation was benchmarked as described in Sec.~\ref{sec:benchmark}. They utilize Gauss-Legendre symplectic integrator~\cite{hairer} to estimate the \textit{one-particle} tracking inside the lattice as described in Sec.~\ref{sec:ring}. The simulations started with spin of the particle being in longitudinal direction. Then, the spin was precessed according to the Thomas-BMT~\cite{bmt1959} equations by the same integrator at every step.
+	All of the simulated results of this work were obtained by in-house beam and spin tracking codes. The implementation was benchmarked as described in Sec.~\ref{sec:benchmark}. They utilize Gauss-Legendre symplectic integrator~\cite{hairer} to estimate the \textit{one-particle} tracking inside the lattice as described in Sec.~\ref{sec:ring}. The simulations started with spin of the particle being in longitudinal direction. Then, the spin was precessed according to the Thomas-BMT~\cite{bmt1959} equations by the same integrator at every step.
 
 	The genuine EDM as defined through the coupling parameter $\eta = 1.88 \times 10^{-15}$, corresponding to $d_p\approx 10^{-29}~e\cdot$cm, yielded $dS_y/dt = 9.81 \times 10^{-10}$ rad/s in the simulations. This value was reversed for the CR particle, consistent with Ref.~\cite{omarov}. All the false EDM estimations were made by artificially setting $\eta=0$, so that the false EDM signal was isolated. Gradient errors, quadrupole misalignments and tilts, and other studied systematic errors were introduced as ring parameters.
 
