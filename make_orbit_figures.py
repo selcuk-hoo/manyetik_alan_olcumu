@@ -282,114 +282,103 @@ def fig_modes():
 # ═════════════════════════════════════════════════════
 
 def fig_breathing(eps=0.02, seed=0):
+    """C++ SİMÜLASYON: her quad'ı %eps modüle edip kapalı-yörünge değişimini izleyiciyle
+    ölçer (nefes DAHİL — tüm optik yeniden hesaplanır); 48-BPM projeksiyonuyla k-mod
+    reconstruction. Nefes-yok referans feed-down köşegenidir (tam). Cell-0 QF özel
+    elemanı quad_dG'yi okumadığından (CLAUDE.md tuzak #8) maskelenir.
+    NOT: ~145 kapalı-yörünge koşusu → dakikalar sürer (analitik değil)."""
+    from concurrent.futures import ProcessPoolExecutor
+    from build_response_matrix import _run_one, _worker_init
+    CFG = json.load(open("params.json")); DQ = 1e-4; ZER = np.zeros(NQ)
     rng = np.random.default_rng(seed)
-    dy = rng.uniform(-100e-6, 100e-6, NQ)           # ±100 μm kaçıklık
-    g0 = np.full(NQ, G_NOM)
-    R0m, _ = R_perquad(g0)
-    y0 = R0m @ dy                                    # nominal kapalı yörünge
-
-    # Tam (nefes DAHİL) per-quad genlik: quad i'nin g'si %2 artınca TÜM optik değişir
-    A_full = np.zeros((NQ, NQ))                      # [BPM, modüle edilen quad]
-    C_full = np.zeros((NQ, NQ))                      # kalibrasyon: yalnız dy_i=1
+    dy = rng.uniform(-100e-6, 100e-6, NQ)
+    items = [("base", dy, ZER)]
     for i in range(NQ):
-        gi = g0.copy(); gi[i] *= (1.0 + eps)
-        Ri, _ = R_perquad(gi)
-        A_full[:, i] = (Ri - R0m) @ dy
-        e = np.zeros(NQ); e[i] = 1.0
-        C_full[:, i] = (Ri - R0m) @ e
-
-    # Nefessiz (yalnız feed-down) idealizasyon: optik sabit, yalnız kendi kick'i %2
-    A_fd = eps * R0m * dy[None, :]                   # A_fd[b,i] = ε·R0[b,i]·dy_i
-    C_fd = eps * R0m
-
-    def recon(A, C):
-        num = np.sum(C * A, axis=0)
-        den = np.sum(C * C, axis=0)
-        return num / den                             # per-quad projeksiyon (48 BPM)
-
-    dy_full_1 = A_full[0] / C_full[0]                # tek BPM
-    dy_fd_1   = A_fd[0]   / C_fd[0]
-    dy_full_48 = recon(A_full, C_full)
-    corr = lambda a, b: np.corrcoef(a, b)[0, 1]
-    c1, cf, c48 = corr(dy_full_1, dy), corr(dy_fd_1, dy), corr(dy_full_48, dy)
-
-    # Kaldıraç ayrıştırması: en duyarlı quad'da tam-dy vs yalnız-kendi-dy tepkisi
-    i_big = int(np.argmax(np.abs(A_full[0])))
-    gi = g0.copy(); gi[i_big] *= (1.0 + eps)
-    Ri, _ = R_perquad(gi)
-    e = np.zeros(NQ); e[i_big] = dy[i_big]
-    A_own = ((Ri - R0m) @ e)[0]
-    A_all = A_full[0, i_big]
-
-    ratio = abs(A_all / A_own)
-    fig, ax1 = plt.subplots(figsize=COL1)
-
+        dGi = ZER.copy(); dGi[i] = eps
+        ei = ZER.copy(); ei[i] = DQ
+        items += [(f"dymod_{i}", dy, dGi), (f"calnom_{i}", ei, ZER), (f"calmod_{i}", ei, dGi)]
+    tasks = [(CFG, None, None, 'x', lbl, d, ZER, ZER, dG) for (lbl, d, dG) in items]
+    res = {}
+    with ProcessPoolExecutor(max_workers=8, initializer=_worker_init) as pool:
+        for kind, idx, xc, yc in pool.map(_run_one, tasks):
+            res[idx] = np.array(yc)
+    y0 = res["base"]
+    A = np.zeros((NQ, NQ)); C = np.zeros((NQ, NQ))    # [BPM, modüle edilen quad]
+    for i in range(NQ):
+        A[:, i] = res[f"dymod_{i}"] - y0              # nefes DAHİL k-mod sinyali
+        C[:, i] = (res[f"calmod_{i}"] - res[f"calnom_{i}"]) / DQ   # kalibrasyon
+    num = np.sum(C * A, axis=0); den = np.sum(C * C, axis=0)       # 48-BPM projeksiyon
+    m = np.abs(np.diag(C)) > 1e-9                     # cell-0 QF (dG'yi okumaz) maskele
+    with np.errstate(invalid="ignore", divide="ignore"):
+        dy_full = num / den                          # nefes DAHİL reconstruction
     um = 1e6
-    ax1.scatter(dy * um, dy_fd_1 * um, s=22, color=OI["blue"], alpha=0.9,
-                label="no breathing")
-    ax1.scatter(dy * um, dy_full_1 * um, s=26, marker="x", color=OI["verm"],
-                label="with breathing")
+    fig, ax = plt.subplots(figsize=COL1)
+    ax.scatter(dy[m] * um, dy[m] * um, s=22, color=OI["blue"], alpha=0.9,
+               label="no breathing")                 # feed-down köşegeni (=dy, tam)
+    ax.scatter(dy[m] * um, dy_full[m] * um, s=26, marker="x", color=OI["verm"],
+               label="with breathing")
     lim = 110
-    ax1.plot([-lim, lim], [-lim, lim], "k--", lw=1)
-    ax1.set_xlim(-lim, lim); ax1.set_ylim(-4 * lim, 450)
-    ax1.set_xlabel("true quad offset $dy_j$  [$\\mu$m]")
-    ax1.set_ylabel("reconstructed offset  [$\\mu$m]")
-    ax1.legend(loc="upper left")
-
+    ax.plot([-lim, lim], [-lim, lim], "k--", lw=1)
+    ax.set_xlim(-lim, lim)
+    lo = min(-lim, float(np.nanmin(dy_full[m] * um)) * 1.15)
+    hi = max(lim, float(np.nanmax(dy_full[m] * um)) * 1.15)
+    ax.set_ylim(lo, hi)
+    ax.set_xlabel("true quad offset $dy_j$  [$\\mu$m]")
+    ax.set_ylabel("reconstructed offset  [$\\mu$m]")
+    ax.legend(loc="upper left")
     fig.savefig("fig_orbit_breathing.png", bbox_inches="tight")
     plt.close(fig)
-    print(f"fig_orbit_breathing.png yazıldı (corr: fd={cf:+.3f}, 1BPM={c1:+.2f}, "
-          f"48BPM={c48:+.2f}, kaldıraç={ratio:.0f}×)")
+    print(f"fig_orbit_breathing.png yazıldı (SİM, {int(m.sum())} quad, "
+          f"corr={np.corrcoef(dy[m], dy_full[m])[0, 1]:+.2f})")
 
 
 # ═════════════════════════════════════════════════════
-# FIG 4: tek-frekans ΔR + lock-in — corr tuzağı ve β-beat felaketi
-#   squid_bpm_test.md §9.5 reprodüksiyonu (30 seed)
+# FIG 7: ΔR-inversiyonu (orbit-difference) — β-beat felaketi (C++ SİMÜLASYON)
+#   ΔR = R(g·1.02) − R(g); nominal model vs β-beat'li gerçek makine
 # ═════════════════════════════════════════════════════
 
 def fig_lockin(nseed=40, noise_floor=10e-9):
-    g1 = np.full(NQ, G_NOM)
-    dR_model = R_perquad(g1 * 1.02)[0] - R_perquad(g1)[0]
-    P_sym, P_anti = sym_anti_projectors()
+    """C++ SİMÜLASYON: ΔR-inversiyonunun β-beat altında koşullanma çöküşü. R_dy'ler
+    izleyiciyle kurulur (build_matrices, quad_dG_pert). Her β-beat seviyesinde temsilî
+    bir gerçekleme; dy üzerinde Monte Carlo. Simetrik hata sinyali geçer.
+    NOT: 8 tepki-matrisi build'i → ~10-20 dk sürer (analitik değil)."""
+    import build_response_matrix as _brm
+    ZER = np.zeros(NQ)
 
-    # σ_g = per-quad fraksiyonel GRADYAN hatası; gerçek β-beat ≈ 5.1×σ_g
-    # (tam-tur Twiss'ten). Gerçekçi LOCO ~%1-2 β-beat = %0.2-0.4 gradyan hatası.
-    sigma_g_list = [0.0, 0.002, 0.004, 0.01]        # → β-beat ≈ 0, 1%, 2%, 5%
+    def _Rdy(dG):
+        Ry, _ = _brm.build_matrices(json.load(open("params.json")), delta_q=1e-4,
+                                    sigma_noise=0.0, n_workers=8, quad_dG_pert=dG)
+        return Ry
+
+    P_sym, P_anti = sym_anti_projectors()
+    dR_model = _Rdy(np.full(NQ, 0.02)) - _Rdy(ZER)   # nominal model ΔR
+    sigma_g_list = [0.0, 0.002, 0.004, 0.01]         # → β-beat ≈ 0, 1%, 2%, 5%
     BB_FACTOR = 5.1
-    res = {sg: {"corr": [], "sym": [], "anti": []} for sg in sigma_g_list}
     rng = np.random.default_rng(1)
+    sym_e, anti_e = [], []
     for sg in sigma_g_list:
-        for _ in range(nseed):
+        if sg == 0.0:
+            dR_true = dR_model
+        else:
+            dg = rng.normal(0.0, sg, NQ); dg[0] = 0.0
+            dR_true = _Rdy(0.02 + 1.02 * dg) - _Rdy(dg)   # β-beat'li gerçek makine ΔR
+        se, ae = [], []
+        for _ in range(nseed):                        # dy Monte Carlo (ucuz)
             dy = rng.uniform(-100e-6, 100e-6, NQ)
-            # kararsız gerçekleme çıkarsa yeniden örnekle (büyük σ_g kuyruğu)
-            for _try in range(50):
-                delta_g = rng.normal(0.0, sg, NQ) if sg > 0 else np.zeros(NQ)
-                gt = g1 * (1.0 + delta_g)                   # gerçek makine (β-beat)
-                try:
-                    dR_true = R_perquad(gt * 1.02)[0] - R_perquad(gt)[0]
-                    break
-                except ValueError:
-                    continue
-            else:
-                raise RuntimeError(f"σ_g={sg}: 50 denemede kararlı gerçekleme yok")
             meas = dR_true @ dy + rng.normal(0, noise_floor, NQ)
-            dy_hat = np.linalg.solve(dR_model, meas)
+            dy_hat = np.linalg.lstsq(dR_model, meas, rcond=None)[0]
             err = dy_hat - dy
-            res[sg]["corr"].append(np.corrcoef(dy, dy_hat)[0, 1])
-            res[sg]["sym"].append(np.sqrt(np.mean((P_sym @ err) ** 2)))
-            res[sg]["anti"].append(np.sqrt(np.mean((P_anti @ err) ** 2)))
+            se.append(np.sqrt(np.mean((P_sym @ err) ** 2)))
+            ae.append(np.sqrt(np.mean((P_anti @ err) ** 2)))
+        sym_e.append(np.mean(se) * 1e6); anti_e.append(np.mean(ae) * 1e6)
 
     sig_sym = np.sqrt(np.mean((P_sym @ np.random.default_rng(2)
                                .uniform(-100e-6, 100e-6, (200, NQ)).T) ** 2))
-
     bb = np.array([sg * BB_FACTOR * 100 for sg in sigma_g_list])   # β-beat %
-    sym_e = [np.mean(res[sg]["sym"]) * 1e6 for sg in sigma_g_list]
-    anti_e = [np.mean(res[sg]["anti"]) * 1e6 for sg in sigma_g_list]
 
     fig, ax = plt.subplots(figsize=COL1)
     ax.set_yscale("log")
-    # gerçekçi LOCO bandı (~%1-2 β-beat)
-    ax.axvspan(1.0, 2.0, color=OI["green"], alpha=0.10)
+    ax.axvspan(1.0, 2.0, color=OI["green"], alpha=0.10)   # gerçekçi LOCO bandı
     ax.text(1.5, max(sym_e) * 0.75, "LOCO", ha="center", color=OI["green"],
             fontsize=8)
     ax.plot(bb, sym_e, "o-", color=OI["verm"], ms=6, label="symmetric error")
@@ -402,9 +391,7 @@ def fig_lockin(nseed=40, noise_floor=10e-9):
     ax.legend(loc="lower right")
     fig.savefig("fig_orbit_lockin.png")
     plt.close(fig)
-    print("fig_orbit_lockin.png yazıldı:",
-          {f"{sg:g}": (round(np.mean(res[sg]['sym'])*1e6), round(np.mean(res[sg]['corr']), 2))
-           for sg in sigma_g_list})
+    print(f"fig_orbit_lockin.png yazıldı (SİM): sym={[round(s) for s in sym_e]} μm")
 
 
 # ═════════════════════════════════════════════════════
@@ -630,5 +617,5 @@ if __name__ == "__main__":
             fn()
         except (FileNotFoundError, KeyError) as e:
             print(f"{fn.__name__} atlandı ({e})")
-    print("\nTüm analitik figürler üretildi. C++ gerektiren figürler için bkz. "
-          "makale_orbit_bastirma.md §5 (kmod_drivers/fast_est.py vb.).")
+    print("\nFigürler üretildi. NOT: fig_breathing ve fig_lockin artık C++ SİMÜLASYON "
+          "(izleyici gerekli, dakikalar sürer); diğerleri analitik/kampanya-json.")
