@@ -32,6 +32,8 @@ Modlar:
           C = ½|f_CW − f_CCW| (twobeam_oc.py ile aynı metrik), JSONL'e artımlı yazar
   plot  : figürler (PDF + PNG)
 
+β-beat: ADIM1_SIG_G=0.002 ortam değişkeni (önce revizyon/build_rtrue.py --sig-g 0.002).
+
 Kullanım:
   python3 revizyon/adim1_bpm_model.py recon
   python3 revizyon/adim1_bpm_model.py edm -w 4 --seeds 0 1 2
@@ -123,11 +125,22 @@ def make_case(seed, kind, rms, rho, sig_n, family="k0", rcond=RCOND):
         dm = drift_pattern(rng, kind, rms)
         xi = drift_pattern(rng, "gen", rms)        # bağımsız BPM hareketi (aynı rms)
         n1 = rng.normal(0.0, sig_n, NQ); n2 = rng.normal(0.0, sig_n, NQ)
-        res[pl] = residuals(R[pl], dm, rho, xi, n1, n2, est_for(pl, rho, rcond), family)
+        res[pl] = residuals(RT[pl], dm, rho, xi, n1, n2, est_for(pl, rho, rcond), family)
     return res
 
 
 R = load_R()
+# β-beat: gerçek makine (okuma + sahte EDM) gradyan hatalı; kestiriciler NOMİNAL R kullanır.
+SIG_G = float(os.environ.get("ADIM1_SIG_G", "0"))
+if SIG_G > 0:
+    sys.path.insert(0, os.path.join(BASE, "revizyon"))
+    from build_rtrue import path as _rtp, dG_pattern
+    RT = {pl: {d: np.load(_rtp(key, d, SIG_G)) for d in ("ccw", "cw")}
+          for pl, key in (("x", "dx"), ("y", "dy"))}
+    DG = dG_pattern(SIG_G)
+    SUFFIX = f"_g{int(round(SIG_G*1e4))}"
+else:
+    RT, DG, SUFFIX = R, None, ""
 _EST = {}
 
 
@@ -140,7 +153,7 @@ def est_for(pl, rho, rcond):
 
 # ─────────────────────────── recon modu ───────────────────────────
 def run_recon(nseed=200):
-    out = {"params": {"nseed": nseed, "rcond_fixed": RCOND, "rconds": RCONDS, "rhos": RHOS,
+    out = {"params": {"sig_g": SIG_G, "nseed": nseed, "rcond_fixed": RCOND, "rconds": RCONDS, "rhos": RHOS,
                       "drift_rms_um": 5.0, "noise_levels_m": [14e-9, 1e-6]},
            "rows": []}
     for fam, kind, sig_n, rho in [(f, k, n, r) for f in ("k0", "eq") for k in ("sym", "gen")
@@ -171,7 +184,7 @@ def run_recon(nseed=200):
         print(f"{fam} {kind} σn={sig_n*1e9:5.0f}nm ρ={rho:4.2f} | sim artık μm fix/best: "
               + "  ".join(f"{m} {row[m+'_fix_sym_med']:.3f}/{row[m+'_best_sym_med']:.3f}"
                           for m in METHODS), flush=True)
-    json.dump(out, open(os.path.join(OUTDIR, "adim1_recon.json"), "w"), indent=1)
+    json.dump(out, open(os.path.join(OUTDIR, f"adim1_recon{SUFFIX}.json"), "w"), indent=1)
     # koşullanma bilgisi
     cond = {}
     for pl in ("x", "y"):
@@ -180,18 +193,18 @@ def run_recon(nseed=200):
             cond[f"{pl}_rho{rho}"] = {
                 "one": float(np.linalg.cond(Rc - rho * I)),
                 "two": float(np.linalg.cond(np.vstack([Rc - rho * I, Rw - rho * I])))}
-    json.dump(cond, open(os.path.join(OUTDIR, "adim1_cond.json"), "w"), indent=1)
+    json.dump(cond, open(os.path.join(OUTDIR, f"adim1_cond{SUFFIX}.json"), "w"), indent=1)
     print(json.dumps(cond, indent=1))
 
 
 # ─────────────────────────── edm modu ───────────────────────────
 EDM_RHOS = [0.0, 0.5, 1.0]
-EDM_JSONL = os.path.join(OUTDIR, "adim1_edm.jsonl")
+EDM_JSONL = os.path.join(OUTDIR, f"adim1_edm{SUFFIX}.jsonl")
 
 
 def best_rcond(fam, kind, sig_n, rho, method):
     """recon modunun seçtiği en iyi TSVD eşiği (recon önce koşulmalı)."""
-    d = json.load(open(os.path.join(OUTDIR, "adim1_recon.json")))
+    d = json.load(open(os.path.join(OUTDIR, f"adim1_recon{SUFFIX}.json")))
     for r in d["rows"]:
         if (r["family"], r["kind"], r["sig_n"], r["rho"]) == (fam, kind, sig_n, rho):
             return r.get(f"{method}_best_rcond", RCOND)
@@ -206,15 +219,16 @@ def _edm_task(task):
     rc = best_rcond("k0", "sym", sig_n, rho, method)
     res = make_case(seed, "sym", 5e-6, rho, sig_n, "k0", rc)
     dx, dy = res["x"][method], res["y"][method]
-    fcw, _ = fast_measure(dx, dy, direction=+1, signed=True, n_turns=28, n_iter=4)
-    fccw, _ = fast_measure(dx, dy, direction=-1, signed=True, n_turns=28, n_iter=4)
+    fcw, _ = fast_measure(dx, dy, direction=+1, signed=True, n_turns=28, n_iter=4, dG=DG)
+    fccw, _ = fast_measure(dx, dy, direction=-1, signed=True, n_turns=28, n_iter=4, dG=DG)
     return dict(seed=seed, rho=rho, method=method, sig_n=sig_n, rcond=rc,
                 f_cw=fcw / TARGET, f_ccw=fccw / TARGET, C=abs(fcw - fccw) / 2 / TARGET,
                 sym_x=float(np.std(PS @ dx) * 1e6), sym_y=float(np.std(PS @ dy) * 1e6),
                 anti_x=float(np.std(PA @ dx) * 1e6), anti_y=float(np.std(PA @ dy) * 1e6))
 
 
-def run_edm(seeds, workers, sig_n):
+def run_edm(seeds, workers, sig_n, rhos=None):
+    rhos = EDM_RHOS if rhos is None else rhos
     from concurrent.futures import ProcessPoolExecutor
     done = set()
     if os.path.exists(EDM_JSONL):
@@ -224,7 +238,7 @@ def run_edm(seeds, workers, sig_n):
     tasks = []
     for s in seeds:
         tasks.append((s, 0.0, "E0", sig_n))                    # E0 ρ'dan bağımsız
-        for rho in EDM_RHOS:
+        for rho in rhos:
             ms = ["E1", "E3"] if rho == 0.0 else ["E1", "E2", "E3", "E4"]
             tasks += [(s, rho, m, sig_n) for m in ms]
     tasks = [t for t in tasks if t not in done]
@@ -246,7 +260,7 @@ def run_plot():
     import matplotlib.pyplot as plt
     plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm",
                          "font.size": 9, "savefig.bbox": "tight"})
-    d = json.load(open(os.path.join(OUTDIR, "adim1_recon.json")))
+    d = json.load(open(os.path.join(OUTDIR, f"adim1_recon{SUFFIX}.json")))
     col = {"E0": "#595959", "E1": "#009E73", "E2": "#E69F00", "E3": "#0072B2", "E4": "#D55E00"}
     mk = {"E0": "x", "E1": "s", "E2": "^", "E3": "o", "E4": "D"}
     lab = {"E0": "no correction", "E1": "one beam, standard OC",
@@ -278,11 +292,12 @@ def run_plot():
                     ax.set_xlabel(r"BPM–quadrupole correlation $\rho$")
         axs[0, 0].legend(fontsize=7, loc="lower left")
         fig.suptitle(f"{'Symmetric' if kind=='sym' else 'Uncorrelated'} drift, 5 $\\mu$m rms "
-                     f"per plane; BPM motion {'$u=\\rho\\,\\Delta m$' if fam=='k0' else '$u=\\rho\\,\\Delta m+\\sqrt{1-\\rho^2}\\,\\xi$'}; median, 16–84% band, {d['params']['nseed']} seeds\nsolid: best TSVD cut per method; dotted: rcond = 0.01 (paper)",
+                     f"per plane; BPM motion {'$u=\\rho\\,\\Delta m$' if fam=='k0' else '$u=\\rho\\,\\Delta m+\\sqrt{1-\\rho^2}\\,\\xi$'}; median, 16–84% band, {d['params']['nseed']} seeds"
+                     + (f"; gradient error {SIG_G*100:.1f}% rms, nominal model" if SIG_G > 0 else "") + "\nsolid: best TSVD cut per method; dotted: rcond = 0.01 (paper)",
                      fontsize=9)
         fig.tight_layout()
         for ext in ("pdf", "png"):
-            fig.savefig(os.path.join(OUTDIR, f"adim1_recon_{fam}_{kind}.{ext}"), dpi=200)
+            fig.savefig(os.path.join(OUTDIR, f"adim1_recon{SUFFIX}_{fam}_{kind}.{ext}"), dpi=200)
         plt.close(fig)
     # sahte EDM figürü: (a) C = ½|f_CW − f_CCW|, (b) tek yön max(|f_CW|,|f_CCW|)
     if os.path.exists(EDM_JSONL):
@@ -310,11 +325,12 @@ def run_plot():
         axs[0].set_title(r"(a) $C=\frac{1}{2}|f_{\rm CW}-f_{\rm CCW}|$", fontsize=9)
         axs[1].set_title(r"(b) single beam, $\max(|f_{\rm CW}|,|f_{\rm CCW}|)$", fontsize=9)
         fig.legend(*axs[0].get_legend_handles_labels(), loc="lower center", ncol=5, fontsize=7, bbox_to_anchor=(0.5, -0.06))
-        fig.suptitle(r"Symmetric drift 5 $\mu$m rms, BPM noise 14 nm, $u=\rho\,\Delta m$, 3 seeds",
+        fig.suptitle(r"Symmetric drift 5 $\mu$m rms, BPM noise 14 nm, $u=\rho\,\Delta m$, 3 seeds"
+                     + (f", gradient error {SIG_G*100:.1f}% rms (nominal model)" if SIG_G > 0 else ""),
                      fontsize=9)
         fig.tight_layout()
         for ext in ("pdf", "png"):
-            fig.savefig(os.path.join(OUTDIR, f"adim1_edm.{ext}"), dpi=200)
+            fig.savefig(os.path.join(OUTDIR, f"adim1_edm{SUFFIX}.{ext}"), dpi=200)
         plt.close(fig)
     print("figürler:", OUTDIR)
 
@@ -326,10 +342,11 @@ if __name__ == "__main__":
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("--nseed", type=int, default=200)
     ap.add_argument("--sig-n", type=float, default=14e-9)
+    ap.add_argument("--rhos", type=float, nargs="+", default=None)
     a = ap.parse_args()
     if a.mode == "recon":
         run_recon(a.nseed)
     elif a.mode == "edm":
-        run_edm(a.seeds, a.workers, a.sig_n)
+        run_edm(a.seeds, a.workers, a.sig_n, a.rhos)
     else:
         run_plot()
