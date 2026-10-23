@@ -284,27 +284,34 @@ def run_plot():
         for ext in ("pdf", "png"):
             fig.savefig(os.path.join(OUTDIR, f"adim1_recon_{fam}_{kind}.{ext}"), dpi=200)
         plt.close(fig)
-    # sahte EDM figürü
+    # sahte EDM figürü: (a) C = ½|f_CW − f_CCW|, (b) tek yön max(|f_CW|,|f_CCW|)
     if os.path.exists(EDM_JSONL):
         rows = [json.loads(l) for l in open(EDM_JSONL)]
-        fig, ax = plt.subplots(figsize=(4.6, 3.4))
+        fig, axs = plt.subplots(1, 2, figsize=(7.4, 3.3), sharey=True)
         off = {"E0": -0.06, "E1": -0.03, "E2": 0.0, "E3": 0.03, "E4": 0.06}
-        for m in METHODS:
-            pts = [r for r in rows if r["method"] == m]
-            if not pts:
-                continue
-            rhos = sorted(set(r["rho"] for r in pts)) if m != "E0" else EDM_RHOS
-            for k, rho in enumerate(rhos):
-                vals = [r["C"] for r in pts if (m == "E0" or r["rho"] == rho)]
-                ax.scatter(np.full(len(vals), rho + off[m]), np.maximum(vals, 1e-5),
-                           color=col[m], marker=mk[m], s=18,
-                           label=lab[m] if k == 0 else None)
-        ax.axhline(1.0, color="#D55E00", ls="--", lw=1)
-        ax.text(0.02, 1.25, "target", color="#D55E00", fontsize=8)
-        ax.set_yscale("log")
-        ax.set_xlabel(r"BPM–quadrupole correlation $\rho$")
-        ax.set_ylabel(r"false EDM $C=\frac12|f_{CW}-f_{CCW}|$ [target]")
-        ax.legend(fontsize=6.5, loc="best")
+        for ax, key in zip(axs, ("C", "fmax")):
+            for m in METHODS:
+                pts = [r for r in rows if r["method"] == m]
+                if not pts:
+                    continue
+                rhos = EDM_RHOS if m == "E0" else sorted(set(r["rho"] for r in pts))
+                for k, rho in enumerate(rhos):
+                    sel = pts if m == "E0" else [r for r in pts if r["rho"] == rho]
+                    vals = [r["C"] if key == "C" else max(abs(r["f_cw"]), abs(r["f_ccw"]))
+                            for r in sel]
+                    ax.scatter(np.full(len(vals), rho + off[m]), np.maximum(vals, 1e-5),
+                               color=col[m], marker=mk[m], s=18,
+                               label=lab[m] if k == 0 else None)
+            ax.axhline(1.0, color="#D55E00", ls="--", lw=1)
+            ax.text(0.3, 1.3, "target", color="#D55E00", fontsize=8)
+            ax.set_yscale("log")
+            ax.set_xlabel(r"BPM–quadrupole correlation $\rho$")
+        axs[0].set_ylabel("false EDM [units of target]")
+        axs[0].set_title(r"(a) $C=\frac{1}{2}|f_{\rm CW}-f_{\rm CCW}|$", fontsize=9)
+        axs[1].set_title(r"(b) single beam, $\max(|f_{\rm CW}|,|f_{\rm CCW}|)$", fontsize=9)
+        fig.legend(*axs[0].get_legend_handles_labels(), loc="lower center", ncol=5, fontsize=7, bbox_to_anchor=(0.5, -0.06))
+        fig.suptitle(r"Symmetric drift 5 $\mu$m rms, BPM noise 14 nm, $u=\rho\,\Delta m$, 3 seeds",
+                     fontsize=9)
         fig.tight_layout()
         for ext in ("pdf", "png"):
             fig.savefig(os.path.join(OUTDIR, f"adim1_edm.{ext}"), dpi=200)
