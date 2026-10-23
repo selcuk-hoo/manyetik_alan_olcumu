@@ -206,7 +206,7 @@ def run_edm(seeds, workers, cases):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["matrix", "check", "pred", "edm"])
+    ap.add_argument("mode", choices=["matrix", "check", "pred", "edm", "plot"])
     ap.add_argument("-w", "--workers", type=int, default=4)
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("--cases", nargs="+", default=CASES)
@@ -220,5 +220,41 @@ if __name__ == "__main__":
             _, _, corr, pred = make_case(0, c)
             print(c, json.dumps({pl: {k: (v if not isinstance(v, float) else round(v, 4))
                                       for k, v in pred[pl].items()} for pl in pred}))
+    elif a.mode == "plot":
+        pass                                     # dosya sonunda tanımlı; aşağıda çağrılır
     else:
         run_edm(a.seeds, a.workers, a.cases)
+
+
+def run_plot():
+    """C ve çift kısım (f_CW+f_CCW)/2, senaryo başına, 3 seed (log)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm", "font.size": 9})
+    rows = [json.loads(l) for l in open(EDM_JSONL)]
+    lab = {"none": "none", "Mq": "Mq\n(in quad)", "Md_zero": "Md\nzero", "Ed_zero": "Ed\nzero",
+           "MEd_zero": "M+Ed\nzero", "Md_center": "Md\ncenter", "Ed_center": "Ed\ncenter",
+           "MEd_center": "M+Ed\ncenter"}
+    fig, axs = plt.subplots(1, 2, figsize=(7.6, 3.2))
+    for ax, key, t in zip(axs, ("C", "even"), (r"(a) $C=\frac{1}{2}|f_{\rm CW}-f_{\rm CCW}|$",
+                                              r"(b) $|f_{\rm CW}+f_{\rm CCW}|/2$")):
+        for i, c in enumerate(CASES):
+            v = [abs(r[key]) for r in rows if r["case"] == c]
+            ax.scatter(np.full(len(v), i), np.maximum(v, 1e-5), color="#0072B2", s=16, zorder=3)
+        ax.axhline(1, color="#D55E00", ls="--", lw=1)
+        ax.set_yscale("log"); ax.set_xticks(range(len(CASES)))
+        ax.set_xticklabels([lab[c] for c in CASES], fontsize=7)
+        ax.set_title(t, fontsize=9); ax.grid(alpha=0.3, axis="y")
+    axs[0].set_ylabel("false EDM [units of target]")
+    fig.suptitle(r"Symmetric drift 5 $\mu$m, lab-fixed BPM, 14 nm noise, 3 seeds; "
+                 r"Mq: magnetic in quad, Md: magnetic at deflector, Ed: electrostatic at deflector",
+                 fontsize=8)
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(os.path.join(OUTDIR, f"adim3_edm.{ext}"), dpi=200, bbox_inches="tight")
+    print("adim3_edm.pdf/png yazıldı")
+
+
+if __name__ == "__main__" and sys.argv[1:2] == ["plot"]:
+    run_plot()
