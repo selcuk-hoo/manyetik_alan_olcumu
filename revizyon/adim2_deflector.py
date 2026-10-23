@@ -31,7 +31,8 @@ def cod_run(task):
     task = (direction, quad_dy, quad_dx, dipole_tilt, defl_dE, defl_roll, t2, lib)"""
     import tempfile
     os.chdir(tempfile.mkdtemp())
-    direction, qdy, qdx, dtilt, dE, roll, t2, lib = task
+    direction, qdy, qdx, dtilt, dE, roll, t2, lib = task[:8]
+    dG = np.array(task[8]) if len(task) > 8 and task[8] is not None else None
     if lib == "old":                               # eski motor (sıfır testi için)
         import importlib.util
         spec = importlib.util.spec_from_file_location("integrator_old",
@@ -48,7 +49,7 @@ def cod_run(task):
     alanlar, st = brm.setup_fields(cfg)
     integrator_rev.DEFL_DE = np.array(dE); integrator_rev.DEFL_ROLL = np.array(roll)
     x, y = brm.run_sim(alanlar, st, cfg, np.array(qdy), np.array(qdx),
-                       dipole_tilt=np.array(dtilt))
+                       dipole_tilt=np.array(dtilt), quad_dG=dG)
     return x, y
 
 
@@ -92,31 +93,37 @@ def run_kick(workers):
               f"corr(CW,CCW) = {d['corr_cw_ccw']:+.3f}")
 
 
-DPATH = lambda kind, d: os.path.join(OUTDIR, f"D_{kind}_{d}.npy")
+def DPATH(kind, d, sig_g=0.0):
+    suf = f"_g{int(round(sig_g*1e4))}" if sig_g > 0 else ""
+    return os.path.join(OUTDIR, f"D_{kind}_{d}{suf}.npy")
 
 
-def run_matrix(workers, delta=1e-5, t2=3e-4):
+def run_matrix(workers, delta=1e-5, t2=3e-4, sig_g=0.0):
     """Saptırıcı tepki matrisleri: D_eps (ε_k → x_BPM) ve D_roll (φ_k → y_BPM), CW ve CCW.
     Birim: [m / birim ε] ve [m / rad]. Fark: (pert − ref)/delta, aynı fırlatma yöntemi."""
     from concurrent.futures import ProcessPoolExecutor
     z = np.zeros(NQ)
+    dG = None
+    if sig_g > 0:
+        from build_rtrue import dG_pattern
+        dG = dG_pattern(sig_g)
     for d, tag in ((-1, "ccw"), (+1, "cw")):
-        if os.path.exists(DPATH("roll", tag)):
+        if os.path.exists(DPATH("roll", tag, sig_g)):
             print(tag, "mevcut"); continue
-        tasks = [(d, z, z, z, z, z, t2, "rev")]
+        tasks = [(d, z, z, z, z, z, t2, "rev", dG)]
         for k in range(NQ):
             e = z.copy(); e[k] = delta
-            tasks.append((d, z, z, z, e, z, t2, "rev"))
+            tasks.append((d, z, z, z, e, z, t2, "rev", dG))
         for k in range(NQ):
             r = z.copy(); r[k] = delta
-            tasks.append((d, z, z, z, z, r, t2, "rev"))
+            tasks.append((d, z, z, z, z, r, t2, "rev", dG))
         t0 = time.time()
         with ProcessPoolExecutor(workers) as pool:
             res = list(pool.map(cod_run, tasks))
         x0, y0 = res[0]
         De = np.array([(res[1 + k][0] - x0) / delta for k in range(NQ)]).T
         Dr = np.array([(res[1 + NQ + k][1] - y0) / delta for k in range(NQ)]).T
-        np.save(DPATH("eps", tag), De); np.save(DPATH("roll", tag), Dr)
+        np.save(DPATH("eps", tag, sig_g), De); np.save(DPATH("roll", tag, sig_g), Dr)
         print(f"{tag}: D_eps, D_roll yazıldı ({time.time()-t0:.0f}s); "
               f"|D_eps| sütun rms {np.std(De,axis=0).mean():.3g} m, "
               f"|D_roll| sütun rms {np.std(Dr,axis=0).mean():.3g} m/rad", flush=True)
@@ -215,31 +222,44 @@ def tsvd_solve(A, y, rcond):
     return (np.linalg.pinv(A / nrm, rcond=rcond) @ y) / nrm
 
 
-def run_scan(nseed=200, sig_n=14e-9, drift=5e-6):
+def run_scan(nseed=200, sig_n=14e-9, drift=5e-6, sig_g=0.0):
     """Saptırıcı sürüklenmesi (ε_k, φ_k ~ N(0,σ), bağımsız) + simetrik kuadrupol sürüklenmesi
     (5 μm) → iki demetli fit ile simetrik kestirim hatası.
       Q  : yalnız kuadrupol sütunları (makale yöntemi)  — saptırıcı sinyali sızar
       QD : kuadrupol + saptırıcı sütunları (96 bilinmeyen / 96 denklem)
     Her yöntemin rcond'u, saptırıcı sürüklenmesi YOKKEN değil, her σ'da ayrı en iyi seçilir."""
     M = load_mats(); Ps, _ = projectors()
+    # gerçek makine (okuma) matrisleri: β-beat'li R_true, D_true; kestirici NOMİNAL M kullanır
+    T = M
+    if sig_g > 0:
+        from build_rtrue import path as rtp
+        T = {}
+        for pl, rk, dk in (("x", "dx", "eps"), ("y", "dy", "roll")):
+            T[pl] = {"R_ccw": np.load(rtp(rk, "ccw", sig_g)), "R_cw": np.load(rtp(rk, "cw", sig_g)),
+                     "D_ccw": np.load(DPATH(dk, "ccw", sig_g)), "D_cw": np.load(DPATH(dk, "cw", sig_g))}
     grids = {"x": np.logspace(-7, -5, 9),                  # ε (bağıl alan)
              "y": np.logspace(-7, -5, 9)}                  # φ [rad] = 0.1..10 μrad
-    out = {"params": {"nseed": nseed, "sig_n": sig_n, "drift_sym_um": drift * 1e6}, "rows": []}
+    out = {"params": {"nseed": nseed, "sig_n": sig_n, "drift_sym_um": drift * 1e6,
+                      "sig_g": sig_g}, "rows": []}
     for pl in ("x", "y"):
         m = M[pl]
         Sq = np.vstack([m["R_ccw"], m["R_cw"]]); Sd = np.vstack([m["D_ccw"], m["D_cw"]])
         Sqd = np.hstack([Sq, Sd])
+        Tq = np.vstack([T[pl]["R_ccw"], T[pl]["R_cw"]]); Td = np.vstack([T[pl]["D_ccw"], T[pl]["D_cw"]])
         for sd in np.concatenate([[0.0], grids[pl]]):
             errs = {"Q": {}, "QD": {}}
             for rc in RCONDS:
+                nq = np.linalg.norm(Sq, axis=0); nqd = np.linalg.norm(Sqd, axis=0)
+                Pq = np.linalg.pinv(Sq / nq, rcond=rc) / nq[:, None]
+                Pqd = (np.linalg.pinv(Sqd / nqd, rcond=rc) / nqd[:, None])[:NQ]
                 eq, eqd = [], []
                 for s_ in range(nseed):
                     rng = np.random.default_rng(20_000 + s_)
                     dm = Ps @ rng.normal(0, 1, NQ); dm *= drift / np.std(dm)
                     de = rng.normal(0, 1, NQ) * sd
-                    y = Sq @ dm + Sd @ de + rng.normal(0, sig_n, 2 * NQ)
-                    mq = tsvd_solve(Sq, y, rc)
-                    mqd = tsvd_solve(Sqd, y, rc)[:NQ]
+                    y = Tq @ dm + Td @ de + rng.normal(0, sig_n, 2 * NQ)
+                    mq = Pq @ y
+                    mqd = Pqd @ y
                     eq.append(np.std(Ps @ (dm - mq))); eqd.append(np.std(Ps @ (dm - mqd)))
                 errs["Q"][rc] = np.array(eq); errs["QD"][rc] = np.array(eqd)
             row = {"plane": pl, "sigma_defl": float(sd)}
@@ -252,24 +272,92 @@ def run_scan(nseed=200, sig_n=14e-9, drift=5e-6):
                 row[f"{k}_p84"] = float(np.percentile(a, 84))
             # saptırıcı kaynaklı yörünge (düzeltme öncesi) rms — ölçek fikri için
             rng = np.random.default_rng(1)
-            row["orbit_from_defl_um"] = float(np.std(Sd @ (rng.normal(0, 1, NQ) * sd)) * 1e6)
+            row["orbit_from_defl_um"] = float(np.std(Td @ (rng.normal(0, 1, NQ) * sd)) * 1e6)
             out["rows"].append(row)
             print(f"[{pl}] σ_defl={sd:.1e}: simetrik hata Q {row['Q_med']:.3f} μm "
                   f"(rc {row['Q_rcond']:.0e}) | QD {row['QD_med']:.3f} μm (rc {row['QD_rcond']:.0e})"
                   f" | saptırıcı yörüngesi {row['orbit_from_defl_um']:.2f} μm", flush=True)
-    json.dump(out, open(os.path.join(OUTDIR, "adim2_scan.json"), "w"), indent=1)
+    suf = (f"_g{int(round(sig_g*1e4))}" if sig_g > 0 else "") + f"_n{sig_n*1e9:.0f}nm"
+    json.dump(out, open(os.path.join(OUTDIR, f"adim2_scan{suf}.json"), "w"), indent=1)
+
+
+EDM2_JSONL = os.path.join(OUTDIR, "adim2_edm.jsonl")
+SIG_EPS, SIG_ROLL = 3e-7, 3e-7          # sızmanın ~3 μm simetrik hataya ulaştığı seviye
+
+
+def _edm2_case(seed, case, sig_n=14e-9, drift=5e-6, rc_q=1e-2, rc_qd=1e-4):
+    """Bir seed için (dx', dy', ε, φ): sahte EDM'ye girecek kuadrupol artıkları + saptırıcı hataları.
+    case: 'defl'  — yalnız saptırıcı sürüklenmesi (kuadrupoller kusursuz)
+          'none'  — simetrik kuadrupol sürüklenmesi + saptırıcı sürüklenmesi, düzeltme yok
+          'Q'     — makale yöntemi (yalnız kuadrupol sütunları) ile kuadrupol düzeltmesi
+          'QD'    — saptırıcı sütunlu fit ile kuadrupol düzeltmesi (saptırıcılar düzeltilmez)"""
+    M = load_mats(); Ps, _ = projectors()
+    rng = np.random.default_rng(30_000 + seed)
+    out = {}
+    for pl in ("x", "y"):
+        m = M[pl]
+        Sq = np.vstack([m["R_ccw"], m["R_cw"]]); Sd = np.vstack([m["D_ccw"], m["D_cw"]])
+        dm = Ps @ rng.normal(0, 1, NQ); dm *= drift / np.std(dm)
+        de = rng.normal(0, 1, NQ) * (SIG_EPS if pl == "x" else SIG_ROLL)
+        y = Sq @ dm + Sd @ de + rng.normal(0, sig_n, 2 * NQ)
+        if case == "defl":
+            res = np.zeros(NQ)
+        elif case == "none":
+            res = dm
+        elif case == "Q":
+            res = dm - tsvd_solve(Sq, y, rc_q)
+        else:
+            res = dm - tsvd_solve(np.hstack([Sq, Sd]), y, rc_qd)[:NQ]
+        out[pl] = (res, de)
+    return out["x"][0], out["y"][0], out["x"][1], out["y"][1]
+
+
+def _edm2_task(task):
+    import tempfile
+    os.chdir(tempfile.mkdtemp())
+    sys.modules["integrator"] = integrator_rev
+    from fast_est import fast_measure
+    seed, case = task
+    dx, dy, eps, roll = _edm2_case(seed, case)
+    integrator_rev.DEFL_DE = eps; integrator_rev.DEFL_ROLL = roll
+    fcw, _ = fast_measure(dx, dy, direction=+1, signed=True, n_turns=28, n_iter=4)
+    fccw, _ = fast_measure(dx, dy, direction=-1, signed=True, n_turns=28, n_iter=4)
+    Ps, _ = projectors()
+    return dict(seed=seed, case=case, f_cw=fcw / 1e-9, f_ccw=fccw / 1e-9,
+                C=abs(fcw - fccw) / 2 / 1e-9,
+                sym_x=float(np.std(Ps @ dx) * 1e6), sym_y=float(np.std(Ps @ dy) * 1e6),
+                sig_eps=SIG_EPS, sig_roll=SIG_ROLL)
+
+
+def run_edm2(seeds, workers):
+    from concurrent.futures import ProcessPoolExecutor
+    done = set()
+    if os.path.exists(EDM2_JSONL):
+        done = {(json.loads(l)["seed"], json.loads(l)["case"]) for l in open(EDM2_JSONL)}
+    tasks = [(s_, c) for s_ in seeds for c in ("defl", "none", "Q", "QD") if (s_, c) not in done]
+    print(f"{len(tasks)} görev", flush=True)
+    with ProcessPoolExecutor(workers) as pool:
+        for r in pool.map(_edm2_task, tasks):
+            open(EDM2_JSONL, "a").write(json.dumps(r) + "\n")
+            print(f"  seed {r['seed']} {r['case']}: C={r['C']:.4f}× f_CW={r['f_cw']:.3f} "
+                  f"f_CCW={r['f_ccw']:.3f} (sim {r['sym_x']:.2f}/{r['sym_y']:.2f} μm)", flush=True)
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["kick", "matrix", "fit", "scan"])
+    ap.add_argument("mode", choices=["kick", "matrix", "fit", "scan", "edm"])
+    ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("-w", "--workers", type=int, default=4)
+    ap.add_argument("--sig-g", type=float, default=0.0, help="β-beat'li gerçek makine (σ_g)")
+    ap.add_argument("--sig-n", type=float, default=14e-9)
     a = ap.parse_args()
     if a.mode == "kick":
         run_kick(a.workers)
     elif a.mode == "matrix":
-        run_matrix(a.workers)
+        run_matrix(a.workers, sig_g=a.sig_g)
     elif a.mode == "fit":
         run_fit()
     elif a.mode == "scan":
-        run_scan()
+        run_scan(sig_n=a.sig_n, sig_g=a.sig_g)
+    elif a.mode == "edm":
+        run_edm2(a.seeds, a.workers)
