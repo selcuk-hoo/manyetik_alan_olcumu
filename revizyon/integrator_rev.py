@@ -45,9 +45,13 @@ _lib.run_integration.argtypes = [
     ctypes.POINTER(ctypes.c_double), # quad_dG    [2*nFODO, fractional]
     ctypes.POINTER(ctypes.c_double), # defl_dE    [2*nFODO, fractional]  (revizyon)
     ctypes.POINTER(ctypes.c_double), # defl_roll  [2*nFODO, rad]         (revizyon)
+    ctypes.POINTER(ctypes.c_double), # defl_Bv    [2*nFODO, T]           (revizyon Adım 3)
+    ctypes.POINTER(ctypes.c_double), # defl_Br    [2*nFODO, T]           (revizyon Adım 3)
 ]
 DEFL_DE = None     # varsayılan saptırıcı bağıl alan hatası dizisi (None → 0)
 DEFL_ROLL = None   # varsayılan saptırıcı elektrik roll dizisi [rad] (None → 0)
+DEFL_BV = None     # saptırıcı konumunda düşey B düzeltici [T] (None → 0)
+DEFL_BR = None     # saptırıcı konumunda radyal B düzeltici [T] (None → 0)
 _lib.run_integration.restype = None
 
 # ==============================================================================
@@ -149,7 +153,8 @@ def convert_global_to_local_matrix(history_global_np, R0, initial_z):
 # ==============================================================================
 def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
                        quad_dy=None, quad_dx=None, dipole_tilt=None,
-                       quad_tilt=None, quad_dG=None, defl_dE=None, defl_roll=None):
+                       quad_tilt=None, quad_dG=None, defl_dE=None, defl_roll=None,
+                       defl_Bv=None, defl_Br=None):
     """
     Bir parçacığı verilen başlangıç koşulları ve zaman aralığı için C++
     motorunu (GL4 Simplektik Entegratör) kullanarak takip eder.
@@ -200,6 +205,10 @@ def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
     if defl_roll is None: defl_roll = DEFL_ROLL
     _ddE = (ctypes.c_double * n_q)(*(defl_dE if defl_dE is not None else np.zeros(n_q)))
     _drl = (ctypes.c_double * n_q)(*(defl_roll if defl_roll is not None else np.zeros(n_q)))
+    if defl_Bv is None: defl_Bv = DEFL_BV
+    if defl_Br is None: defl_Br = DEFL_BR
+    _dbv = (ctypes.c_double * n_q)(*(defl_Bv if defl_Bv is not None else np.zeros(n_q)))
+    _dbr = (ctypes.c_double * n_q)(*(defl_Br if defl_Br is not None else np.zeros(n_q)))
 
     # C++ hafıza bloklarının (array) Python tarafında tahsis edilmesi.
     history_c = (ctypes.c_double * (9 * return_steps))()
@@ -211,7 +220,7 @@ def integrate_particle(y0_local, t0, t_end, h, fields=None, return_steps=1000,
     # Asıl C++ fonksiyon çağrısı (Performans kritik bölüm)
     _lib.run_integration(y0_arr, field_arr, t0, t_end, h, 9, return_steps, history_c,
                          max_poincare, poincare_c, poincare_t_c, poincare_count,
-                         _qdy, _qdx, _dtilt, _qtilt, _qdG, _ddE, _drl)
+                         _qdy, _qdx, _dtilt, _qtilt, _qdG, _ddE, _drl, _dbv, _dbr)
 
     # C++ bellek bloklarını numpy dizilerine (array) çevirme
     num_p = poincare_count[0]

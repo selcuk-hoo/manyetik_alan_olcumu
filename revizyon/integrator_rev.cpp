@@ -2,6 +2,9 @@
 // EK (revizyon Adım 2): saptırıcı başına ELEKTRİK alan hataları
 //   field_params_local[30] = defl_dE   : bağıl alan hatası ε  (E0 → E0·(1+ε))
 //   field_params_local[31] = defl_roll : s-ekseni etrafında elektrik roll'u φ [rad]
+// EK (revizyon Adım 3): saptırıcı konumunda MANYETİK dipol düzelticiler (düzgün alan, ∇·B=0)
+//   field_params_local[32] = defl_Bv : düşey B [T]   → yatay tekme (CCW'de işaret çevirir)
+//   field_params_local[33] = defl_Br : radyal B [T]  → düşey tekme (CCW'de işaret çevirir)
 // Roll, kapasitör alan deseninin referans yörünge çizgisi (R=R0, Z=0) etrafında
 // rijit dönmesi olarak uygulanır: nokta deflektör çerçevesine döndürülür, alan
 // orada hesaplanır, geri döndürülür. Öncü terim düşey dipol E_z ≈ E0·sinφ'dir;
@@ -189,9 +192,12 @@ void get_electromagnetic_fields(double t, const double* r, const double* field_p
         // radial direction ≈ global X. Adding b_tilt as a constant X-component
         // (no cos_th/sin_th factors) keeps the field uniform inside the magnet.
         double b_tilt  = B_eq * std::sin(field_params[26]);
-        B[0] = -B0rad * cos_th + B0long * sin_th + b_tilt;
+        // revizyon Adım 3: saptırıcı konumunda manyetik düzelticiler (yerel radyal ≈ global X)
+        double corr_Bv = field_params[32];
+        double corr_Br = field_params[33];
+        B[0] = -B0rad * cos_th + B0long * sin_th + b_tilt + corr_Br;
         B[1] = -B0rad * sin_th - B0long * cos_th;
-        B[2] = B0ver;
+        B[2] = B0ver + corr_Bv;
     } else if (element_type == 2 || element_type == 3) {
         // QUADRUPOLE (QF or QD, normal — no time modulation).
         // Misalignment dipole components:
@@ -446,7 +452,9 @@ void run_integration(double* y_init, const double* field_params,
                      const double* quad_tilt,   // 2*nFODO: s-axis tilt [rad] per quad
                      const double* quad_dG,     // 2*nFODO: fractional gradient deviation per quad
                      const double* defl_dE,     // 2*nFODO: revizyon — bağıl deflektör alan hatası
-                     const double* defl_roll)   // 2*nFODO: revizyon — deflektör elektrik roll'u [rad]
+                     const double* defl_roll,   // 2*nFODO: revizyon — deflektör elektrik roll'u [rad]
+                     const double* defl_Bv,     // 2*nFODO: revizyon — deflektörde düşey B düzeltici [T]
+                     const double* defl_Br)     // 2*nFODO: revizyon — deflektörde radyal B düzeltici [T]
 {
     
     long long total_steps_est = (long long)((t_end - t0) / h);
@@ -604,10 +612,12 @@ void run_integration(double* y_init, const double* field_params,
             // field_params_local[28] = quad_dG runtime override (fractional gradient deviation)
             // field_params_local[29] = θ_e : geometric ring azimuth at element entry [rad]
             //                                (for the harmonic radial-B field, params 21/22)
-            double field_params_local[32];
+            double field_params_local[34];
             for (int fp = 0; fp < 25; ++fp) field_params_local[fp] = field_params[fp];
             field_params_local[30] = 0.0;  // defl_dE   (revizyon)
             field_params_local[31] = 0.0;  // defl_roll (revizyon)
+            field_params_local[32] = 0.0;  // defl_Bv   (revizyon Adım 3)
+            field_params_local[33] = 0.0;  // defl_Br   (revizyon Adım 3)
             field_params_local[23] = 0.0;  // quad_dy
             field_params_local[25] = 0.0;  // quad_dx
             field_params_local[26] = 0.0;  // dipole_tilt
@@ -637,10 +647,14 @@ void run_integration(double* y_init, const double* field_params,
                 field_params_local[26] = dipole_tilt[2 * current_fodo];
                 field_params_local[30] = defl_dE[2 * current_fodo];
                 field_params_local[31] = defl_roll[2 * current_fodo];
+                field_params_local[32] = defl_Bv[2 * current_fodo];
+                field_params_local[33] = defl_Br[2 * current_fodo];
             } else if (elem == 4) {        // ARC2
                 field_params_local[26] = dipole_tilt[2 * current_fodo + 1];
                 field_params_local[30] = defl_dE[2 * current_fodo + 1];
                 field_params_local[31] = defl_roll[2 * current_fodo + 1];
+                field_params_local[32] = defl_Bv[2 * current_fodo + 1];
+                field_params_local[33] = defl_Br[2 * current_fodo + 1];
             }
 
             double accumulated = 0.0;
