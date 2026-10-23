@@ -343,9 +343,48 @@ def run_edm2(seeds, workers):
                   f"f_CCW={r['f_ccw']:.3f} (sim {r['sym_x']:.2f}/{r['sym_y']:.2f} μm)", flush=True)
 
 
+def run_plot():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm", "font.size": 9})
+    fig, axs = plt.subplots(1, 2, figsize=(7.4, 3.4), sharey=True)
+    styles = {("", "14nm"): ("#0072B2", "-"), ("_g20", "14nm"): ("#0072B2", "--"),
+              ("", "1000nm"): ("#D55E00", "-"), ("_g20", "1000nm"): ("#D55E00", "--")}
+    for (g, n), (c, ls) in styles.items():
+        f = os.path.join(OUTDIR, f"adim2_scan{g}_n{n}.json")
+        if not os.path.exists(f):
+            continue
+        d = json.load(open(f))
+        lab = (f"noise {'14 nm' if n=='14nm' else '1 $\\mu$m'}"
+               + (", grad. err. 0.2%" if g else ", exact model"))
+        for ax, pl in zip(axs, ("x", "y")):
+            rows = [r for r in d["rows"] if r["plane"] == pl and r["sigma_defl"] > 0]
+            sd = np.array([r["sigma_defl"] for r in rows])
+            xs = sd if pl == "x" else sd * 1e6
+            ax.plot(xs, [r["Q_med"] for r in rows], ls=ls, color=c, marker="o", ms=3,
+                    label="quad-only fit (paper), " + lab)
+            ax.plot(xs, [r["QD_med"] for r in rows], ls=ls, color=c, marker="D", ms=3,
+                    alpha=0.55, label="quad + deflector fit, " + lab)
+    for ax, xl, t in zip(axs, (r"deflector field drift $\sigma_\varepsilon$ (relative)",
+                               r"deflector roll drift $\sigma_\phi$ [$\mu$rad]"),
+                         ("(a) horizontal", "(b) vertical")):
+        ax.set_xscale("log"); ax.set_yscale("log"); ax.set_xlabel(xl); ax.set_title(t, fontsize=9)
+        ax.grid(alpha=0.3, which="both", lw=0.4)
+    axs[0].set_ylabel(r"symmetric reconstruction error [$\mu$m]")
+    h, l = axs[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=2, fontsize=6.5, bbox_to_anchor=(0.5, -0.2))
+    fig.suptitle(r"Two-beam fit with deflector drift; symmetric quad drift 5 $\mu$m, 200 seeds (median)",
+                 fontsize=9)
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(os.path.join(OUTDIR, f"adim2_scan.{ext}"), dpi=200, bbox_inches="tight")
+    print("adim2_scan.pdf/png yazıldı")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["kick", "matrix", "fit", "scan", "edm"])
+    ap.add_argument("mode", choices=["kick", "matrix", "fit", "scan", "edm", "plot"])
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("-w", "--workers", type=int, default=4)
     ap.add_argument("--sig-g", type=float, default=0.0, help="β-beat'li gerçek makine (σ_g)")
@@ -361,3 +400,5 @@ if __name__ == "__main__":
         run_scan(sig_n=a.sig_n, sig_g=a.sig_g)
     elif a.mode == "edm":
         run_edm2(a.seeds, a.workers)
+    elif a.mode == "plot":
+        run_plot()
