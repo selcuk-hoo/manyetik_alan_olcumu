@@ -247,7 +247,8 @@ def run_plot():
         axs[0].fill_between(h, r["sym_p16"], r["sym_p84"], color=col[k], alpha=0.12)
     axs[0].set_xlabel("time [h]"); axs[0].set_ylabel(r"symmetric residual [$\mu$m]")
     axs[0].set_title("(a) residual misalignment (linear, 20 seeds)", fontsize=8.5)
-    axs[0].legend(fontsize=6.5)
+    h0, l0 = axs[0].get_legend_handles_labels()
+    fig.legend(h0, l0, loc="lower center", ncol=5, fontsize=7, bbox_to_anchor=(0.5, -0.08))
     if os.path.exists(JSONL):
         E = [json.loads(l) for l in open(JSONL)]
         t0 = [e for e in E if e["hour"] == 0]
