@@ -137,6 +137,150 @@ hesaplanmış. 100~$\mu$m BPM ofsetiyle aynı hesap hedefin medyan 198 katını 
 \end{enumerate}
 
 %======================================================================
+\section{Simülasyonun doğrulanması ve fırlatma enerjisi sorunu}\label{sec:enerji}
+%======================================================================
+
+Bu bölüm, raporun ilk sürümünden sonra eklendi. Simülasyon çok bileşenli olduğu için bileşenleri tek tek
+sınayan bir test paketi yazdım. Testler fiziksel bileşenlerin doğru olduğunu gösterdi; ama sahte EDM'yi
+\emph{ölçme prosedüründe} ciddi bir sorun ortaya çıktı. Bu sorun düzeltildi ve sahte EDM sayılarının
+önemli bir kısmı yeni prosedürle yeniden ölçüldü. Hangi sayının hangi prosedürle elde edildiği
+Tablo~\ref{tab:hangisi}'de.
+
+\subsection{Bileşen testleri}
+Testler \kod{revizyon/tests/} klasöründedir (\kod{pytest}; hızlı paket 42 test, yavaş paket ayrıca).
+Katmanlar alttan üste şöyledir:
+\begin{center}\small
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+katman & ne sınanıyor & sonuç \\
+\midrule
+0 entegratör & toplam enerji $W=\gamma mc^2+q\Phi(R)$ korunumu, $|S|=1$, zaman adımı yakınsaması
+($\propto\mathrm{d}t^4$), zamanda geri gitme, faz uzayı hacmi (Jacobian $=1$) & geçti~\BEL \\
+1 alanlar & her elemanda $\nabla\cdot E=\nabla\times E=\nabla\cdot B=\nabla\times B=0$; kaydırma, tilt,
+alan hatası ve roll özdeşlikleri; eski ve yeni motorun aynı alanı vermesi & geçti~\BEL \\
+2 yörünge & tepki matrisinin doğrusallığı ve süperpozisyonu; matrisi üretme yönteminin (22 tur ortalaması)
+gerçek kapalı yörüngeyle karşılaştırılması & bkz. aşağı \\
+3 spin (tek eleman) & manyetik alanda spin/momentum dönme oranı $1+G\gamma$; sihirli momentumda
+elektrik alanında 1 (donmuş spin); sihirli olmayan momentumda göreli presesyon; EDM terimi & geçti~\BEL \\
+3 spin (halka) & EDM açıkken $\mathrm{d}S_y/\mathrm{d}t$ analitik değer ($-9.88$ ve $+9.86\times10^{-10}$~rad/s,
+iki yönde zıt işaretli); düzgün roll için $|f|=G\gamma\cdot2\pi\phi/T_{\rm dev}$, iki yönde aynı işaret
+(CW ve CCW 9 basamak aynı) & geçti~\BEL \\
+5 doğrusal cebir & projektörler, harmonik desenlerin türü, gürültüsüz tam geri bulma, Adım~1 hatasının
+regresyon testi, seed tekrar üretilebilirliği, CW/CCW matris işaret yapısı & geçti~\BEL \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Katman 2'nin bir yan bulgusu: dikey tepki matrisi gerçek kapalı yörüngeden \%5, yatay matris ise (enerji
+korunumlu fırlatmayla) \%9 farklı~\BEL. Doğrusal cebir hesaplarında model ve ``gerçek makine'' aynı
+matrisi kullandığından bu fark onları etkilemez; C++ izlemesinde ise küçük bir model hatası gibi davranır~\YOR.
+
+\subsection{Sorun: sahte EDM fırlatma noktasına bağlıydı}
+Eski prosedürde parçacık 4 boyutlu kapalı yörüngenin üzerinden ve momentum büyüklüğü tam sihirli değerde
+fırlatılıyordu. Halka simetrik olduğu için fırlatmanın hangi kuadrupolden yapıldığı fiziği değiştirmemeli.
+Aynı kaçıklık desenini halkada kaydırarak (fırlatma noktasını değiştirerek) bunu sınadım ($\sigma=10~\mu$m,
+seed~0, CCW, tam ölçüm ayarı; \kod{tests/teshis\_enerji\_ABC.py})~\BEL:
+\begin{center}\small
+\begin{tabular}{lcccc}
+\toprule
+fırlatma noktası (kaydırma) & 0 & 6 hücre & 12 hücre & 18 hücre \\
+\midrule
+eski: $|p|=p_{\rm sihirli}$ & 1088 & 2729 & $-456$ & 95 \\
+toplam enerji tasarım değerinde & $-376$ & 162 & $-722$ & 567 \\
+\textbf{donmuş spin noktasında} & \textbf{82.04} & \textbf{81.90} & \textbf{81.89} & \textbf{81.94} \\
+\bottomrule
+\end{tabular}
+\end{center}
+(Değerler hedefin katı.) Eski prosedür aynı fizik için $-456$ ile $+2729$ arasında değer veriyor, yani
+ölçüm prosedürü sonucu belirliyordu.
+
+\paragraph{Neden?} Adım adım:
+\begin{enumerate}
+\item Elektrostatik halkada parçacığın kinetik enerjisi yarıçapa bağlıdır: dışarıda potansiyel enerji
+yüksek, kinetik enerji düşüktür ($\Phi=-E_0R_0\ln(R/R_0)$).
+\item Kapalı yörünge fırlatma noktasında $x_{\rm CO}$ kadar dışarıdaysa ve parçacığa yine de tam sihirli
+momentum verilirse, toplam enerjisi tasarım değerinden yaklaşık $\delta\sim x_{\rm CO}/R_0$ düzeyinde
+farklı olur. $x_{\rm CO}$ desene ve fırlatma noktasına bağlı olduğundan ($-48$ ile $+44~\mu$m arası), bu
+fark da öyledir: $\delta\sim10^{-7}$.
+\item Sahte EDM enerji sapmasına doğrusal ve çok duyarlıdır: bu desen için $\delta=10^{-7}$ başına
+yaklaşık 290~$\times$~hedef~\BEL. Yatay spin presesyonu $\omega_h$ da $\delta$'ya doğrusaldır:
+$\mathrm{d}\omega_h/\mathrm{d}\delta\approx-5.24\times10^{6}$~rad/s~\BEL.
+\item ``Toplam enerji tasarım değerinde'' fırlatma da yetmez, çünkü sert kenarlı saptırıcılarda
+(saptırıcı dışında alan sıfır) tasarım toplam enerjisi tek anlamlı tanımlı değildir; sonuç yine
+fırlatma noktasına bağlı kalır~\BEL.
+\end{enumerate}
+
+\paragraph{Fiziksel olarak doğru çalışma noktası.} Gerçek deneyde demetin enerjisi, yatay spin
+presesyonunu sıfırlayan bir geri besleme ile tutulur (``donmuş spin''). Yani deneyde sabit tutulan şey
+momentum ya da toplam enerji değil, $\omega_h=0$ koşuludur. Bu noktada dört fırlatma noktası \%0.2 içinde
+aynı sonucu veriyor (tablonun son satırı). Demetteki parçacıkların $\sim10^{-4}$'lük momentum dağılımı
+bunu değiştirmez~\YOR: $f$ ve $\omega_h$ $\delta$'ya doğrusal olduğundan, demet ortalaması ortalama
+$\delta$'daki değere eşittir; ortalama $\delta$'yı da geri besleme $\omega_h=0$'a kilitler. Geri beslemenin
+kalan hatası $\Delta\omega_h$ ise $f$'ye $(\mathrm{d}f/\mathrm{d}\delta)/(\mathrm{d}\omega_h/\mathrm{d}\delta)
+\cdot\Delta\omega_h$ kadar geçer; bu oran $\sigma=10~\mu$m'de $\approx5.5\times10^{-7}$ ve kaçıklıkla
+birlikte küçülür~\HIP.
+
+\subsection{Yeni ölçüm aracı}
+\kod{revizyon/sahte\_edm\_donmus.py} şöyle çalışır~\BEL:
+\begin{enumerate}
+\item Kapalı yörünge aranır; parçacık bu yörüngenin üzerinden enerji korunumlu biçimde ($\delta=0$)
+fırlatılır. $f_0=\mathrm{d}S_y/\mathrm{d}t$ (model fit) ve $\omega_0=\mathrm{d}/\mathrm{d}t\,\mathrm{atan2}(S_x,S_z)$ ölçülür.
+\item $\delta_1=-\omega_0/(\mathrm{d}\omega_h/\mathrm{d}\delta)$ ile kapalı yörünge araması ve ölçüm
+tekrarlanır: $f_1$, $\omega_1$.
+\item İki nokta arasında doğrusal ara değerleme ile $\omega_h=0$'daki değer alınır:
+$f^*=f_0+(f_1-f_0)(0-\omega_0)/(\omega_1-\omega_0)$.
+\end{enumerate}
+Saptırıcı hataları ve gradyan hataları da kapalı yörünge aramasına ve izlemeye aynı biçimde girer;
+donmuş spin noktası her durum ve her yön için ayrı aranır.
+
+\paragraph{Aracın sınanması~\BEL.}
+\begin{itemize}
+\item Fırlatma noktasından bağımsızlık: yukarıdaki tablo (\%0.2).
+\item $\sigma^2$ ölçeklemesi: $\sigma=2.5$, 5, 10~$\mu$m, 3 seed, CCW: üs $p=2.0002$. 10~$\mu$m'de
+$f=82$, $-71$, 544~$\times$~hedef (eski prosedür: 1089, 58, 1587). Yani eski değerler 0.3--13 kat ve bir
+seed'de işaretçe yanlıştı.
+\item Kısaltılmış ayar (kapalı yörünge araması 14 tur ve 2 iterasyon, tam ayar 28 ve 4): seed~0'da 82.033
+(tam 82.045); kaçıklık sıfırken sayısal taban 0.008~$\times$~hedef. Tekrar ölçümlerinde kısaltılmış ayar
+kullanıldı; bu yüzden $C\lesssim0.01$ değerleri sayısal tabandadır.
+\end{itemize}
+
+\subsection{Hangi sonuç hangi prosedürle?}
+\begin{table}[H]\centering\small
+\caption{Raporda geçen sahte EDM sayılarının durumu.}\label{tab:hangisi}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+yeni prosedürle yeniden ölçüldü & $\sigma^2$ ölçeklemesi; Şekil~4 (makalenin kurulumu); Adım~1 (10 seed);
+T1 (8 seed); T2 (8 seed); Adım~6 (5 seed) \\
+\addlinespace
+eski prosedür, yeniden ölçülmedi & Adım~2 $\varepsilon\times\phi$ değerleri; Adım~3 düzeltici tablosu;
+Adım~4 korelasyonlu modellerin sahte EDM'si; Adım~5 harmonik başına sahte EDM. Bu sayıların mutlak
+değerleri yukarıdaki kanıta göre 0.3--13 kat yanlış olabilir; yalnız büyük farklara dayanan nitel
+sonuçlar (ör. ``yalnız Mq çalışıyor'') kullanılmalıdır~\YOR. \\
+\addlinespace
+prosedürden bağımsız & bütün doğrusal (yeniden kurma, yörünge) sonuçları; Adım~2 birinci mertebe roll
+etkisi (analitik formülle doğrulandı) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Şekil 4, yeni prosedürle}
+Makalenin kendi kurulumu (\kod{kmod\_drivers/twobeam\_oc.py}: 10~$\mu$m korelasyonsuz kaçıklık, 14~nm,
+sıfır BPM ofseti, \kod{rcond}~$=0.01$), 5 seed, $C$~$\times$~hedef (\kod{donmus\_fig4.jsonl})~\BEL:
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+durum & medyan & 5 seed \\
+\midrule
+düzeltme yok & 49 & 20, 39, 49, 106, 60 \\
+tek demet (yörünge düzeltmesi) & 12 & 29, 20, 4.4, 0.017, 12 \\
+\textbf{iki demet} & \textbf{0.0015} & 0.0015, 0.0015, 0.0018, 0.0022, 0.0010 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Makaledeki sıralama (ham $>$ tek demet $\gg$ iki demet) yeni prosedürle de korunuyor; iki demet sayısal
+tabanda. Tek demetin kötü görünmesi büyük ölçüde \kod{rcond}~$=0.01$ seçiminden geliyor: Adım~1'de uygun
+eşikle tek demet aynı tabana iniyor.
+
+%======================================================================
 \section{Adım 1: BPM modeli}
 %======================================================================
 
@@ -174,7 +318,7 @@ E4 & iki demet & $\rho$ biliniyor: $[R_{\rm CCW}-\rho I;\,R_{\rm CW}-\rho I]$ \\
 
 Her kestiricinin TSVD eşiği bir ızgarada taranıp kendi en iyi değeriyle değerlendirildi; makaledeki sabit
 \kod{rcond}~$=0.01$ de ayrıca raporlandı. Senaryo: 5~$\mu$m rms saf simetrik sürüklenme, 200 seed
-(yeniden kurma) ve 3 seed (C++ sahte EDM).
+(yeniden kurma) ve 10 seed (C++ sahte EDM, donmuş spin prosedürü).
 
 \subsection{Sonuçlar}
 
@@ -193,20 +337,25 @@ $\rho$ & E1 & E2 & E3 (makale) & E4 \\
 \end{table}
 
 \begin{table}[H]\centering\small
-\caption{Sahte EDM $C$ [hedefin katı], 3 seed, 14~nm gürültü, 5~$\mu$m simetrik sürüklenme.
-\kod{adim1\_edm.jsonl}~\BEL.}
-\begin{tabular}{lccc}
+\caption{Sahte EDM $C$ [hedefin katı], \textbf{donmuş spin prosedürü}, 10 seed (0--9), 14~nm gürültü,
+5~$\mu$m simetrik sürüklenme, her kestiricinin en iyi \kod{rcond}'u. Medyan [16--84\%], en büyük değer ve
+hedefi aşan seed sayısı. \kod{donmus\_adim1\_kisa.jsonl}~\BEL.}
+\begin{tabular}{llcccc}
 \toprule
- & $\rho=0$ & $\rho=0.5$ & $\rho=1$ \\
+$\rho$ & kestirici & medyan & [16--84\%] & en büyük & $C>1$ \\
 \midrule
-düzeltme yok & \multicolumn{3}{c}{5.0, 6.1, 9.5} \\
-E1 & 0.003, 0.001, 0.001 & 13.7, 1.5, 0.95 & 6.9, 4.3, 0.36 \\
-E2 & (=E1) & 0.20, 1.08, 0.26 & 0.004, 0.005, 0.002 \\
-E3 (makale) & 0.001, 0.0002, 0.0003 & 0.27, 0.0001, 0.008 & 0.54, 3.1, 2.5 \\
-E4 & (=E3) & 0.0002, 0.003, 0.005 & 0.0001, 0.0007, 0.005 \\
+--  & düzeltme yok & 6.3 & [1.7, 12] & 29 & 9/10 \\
+0   & E1 (tek demet) & 0.008 & [0.003, 0.014] & 0.035 & 0/10 \\
+0   & E3 (makale) & 0.005 & [0.002, 0.009] & 0.012 & 0/10 \\
+1   & E1 & 3.5 & [1.3, 9.8] & 19 & 8/10 \\
+1   & E2 & 0.006 & [0.002, 0.015] & 0.017 & 0/10 \\
+1   & E3 (makale) & 0.19 & [0.05, 0.23] & 0.33 & 0/10 \\
+1   & E4 & 0.003 & [0.0007, 0.008] & 0.011 & 0/10 \\
 \bottomrule
 \end{tabular}
 \end{table}
+İlk sürümdeki 3 seed'lik tablo (eski prosedür) $\rho=1$'de E3 için 0.54, 3.1, 2.5 veriyordu; yeni
+prosedürle 10 seed'in hiçbiri hedefi aşmıyor. $\rho=0.5$ yeni prosedürle ölçülmedi.
 
 \begin{figure}[H]\centering
 \includegraphics[width=0.92\textwidth]{adim1_recon_k0_sym.pdf}
@@ -219,15 +368,23 @@ Gerçek makineye \%0.2 ve \%1 rms gradyan hatası koyup (yaklaşık \%1 ve \%5 $
 modelle çalıştırdım~\BEL. 14~nm gürültü, $\rho=0$, 5~$\mu$m sürüklenmede iki demetin tek demete üstünlüğü
 şöyle değişti: hatasız modelde 2.9 kat, \%0.2 hatada 1.2 kat, \%1 hatada 0.88 kat (yani tek demet daha
 iyi). 1~$\mu$m gürültüde üstünlük her durumda yaklaşık 3 kat kaldı. \%0.2 hatayla sahte EDM ölçümü de
-sonucu değiştirmedi: $\rho=0$'da E1 ve E3 ikisi de $C\le0.007$~\BEL.
+sonucu değiştirmedi: $\rho=0$'da E1 ve E3 ikisi de $C\le0.007$~\BEL\ (eski prosedür, 3 seed; yeniden
+ölçülmedi).
 
 \subsection{Yorum}
 \begin{itemize}
-\item Makaledeki yöntem (E3) yalnızca $\rho\approx0$'da çalışıyor. $\rho\ge0.5$'te simetrik artığın
-büyük kısmı kalıyor; $\rho=1$'de 3 seed'in ikisinde $C>1$~\BEL.
-\item $\rho=1$'de $\rho$'yu bilen tek demet (E2) hedefin 200 kat altına iniyor. Yani BPM kuadrupole
-bağlıysa ``tek demet de görür'' öngörüsü doğru; ama standart yörünge düzeltmesi (E1) sahte EDM'yi
-artırıyor~\BEL.
+\item \textbf{Düzeltilmiş sonuç:} makaledeki yöntem (E3), $\rho=1$'de simetrik sürüklenmenin yalnızca
+küçük kısmını geri bulmasına rağmen (kalan 4.4~$\mu$m) sahte EDM'yi 6.3'ten 0.19'a indiriyor; 10 seed'de
+en büyük değer 0.33~\BEL. Raporun ilk sürümündeki ``$\rho=1$'de 3 seed'in ikisinde $C>1$'' sonucu eski
+ölçüm prosedürünün ürünüydü. Ama E3'ün $\rho=1$'deki $C$'si, $\rho$'yu bilen kestiricilerden (E2, E4)
+30--60 kat büyük; hedefe göre marj yalnızca 3--5 kat~\BEL.
+\item Neden E3 bu kadar iyi? Kalan simetrik artığın harmonik içeriği: E3, spinin en duyarlı olduğu
+$m=2$--3 harmoniklerinin gücünü \%22--24'e indiriyor, $m\ge9$ ve $m=0$--1'e neredeyse dokunmuyor~\BEL
+(Adım~5'e göre spin $m=0$'a ve yüksek $m$'ye az duyarlı). Ancak $C$'deki 33 katlık azalma, $m=2$--3
+gücündeki yaklaşık 4 katlık azalmadan büyük; aradaki fark açıklanmadı~\YOR.
+\item $\rho=1$'de $\rho$'yu bilen tek demet (E2) hedefin yaklaşık 170 kat altına iniyor. Yani BPM
+kuadrupole bağlıysa ``tek demet de görür'' öngörüsü doğru; standart yörünge düzeltmesi (E1) ise sahte
+EDM'yi yalnızca yaklaşık 2 kat azaltıyor ve 10 seed'in 8'inde hedefin üstünde bırakıyor~\BEL.
 \item $\rho=0$'da bile ``tek demet çok zayıf'' iddiası büyük ölçüde sabit \kod{rcond}~$=0.01$
 seçiminden geliyor: uygun eşikle tek demet simetrik sürüklenmeyi 5~$\mu$m'den 0.05~$\mu$m'ye indiriyor~\BEL.
 \item İki demetin üstünlüğü, gürültünün model hatasından baskın olduğu rejimde var~\YOR.
@@ -309,15 +466,18 @@ düşey momentum dönmesini birebir izler. (2) Kapalı yörüngenin kapanması i
 kuadrupollerin manyetik tekmesi dengelemelidir: $\sum\theta_B=-\sum\theta_E$. (3) Manyetik alan ise spini
 momentumdan $G\gamma$ kat fazla döndürür. Bu yüzden tur başına net spin dönmesi $G\gamma\sum\theta_B$ olur.
 
-Sayısal kontrol: saptırıcı başına tekme $\theta_E=(L/R)\,\phi=0.131\,\phi$. 48 rastgele roll'un toplamı
-$\sqrt{48}\times0.131\times3\times10^{-7}\approx2.7\times10^{-7}$~rad. $G\gamma\approx2.24$ ile tur
-başına $\approx6\times10^{-7}$~rad, tur süresi $\approx3.7~\mu$s olduğundan $\approx0.16$~rad/s, yani
-$\approx1.6\times10^{8}\times$hedef. Simülasyon $1.26\times10^{8}$ veriyor~\BEL. Bu etki CW$-$CCW farkında
+Sayısal kontrol: saptırıcı başına düşey tekme $\theta_E=(2\pi/48)\,\phi_i$, yani
+$\sum\theta_E=(2\pi/48)\sum_i\phi_i$. Bu seed'de ($3\times10^{-7}$ rms) $\sum\phi_i=-1.921\times10^{-6}$;
+$G\gamma=2.2377$ ve tur süresi $T_{\rm dev}=4.4577~\mu$s ile $f=G\gamma\sum\theta_E/T_{\rm dev}
+=-1.26243\times10^{8}\times$hedef. Simülasyon $-1.26242\times10^{8}$ veriyor; fark $10^{-5}$ bağıl~\BEL.
+(Raporun ilk sürümünde kaba bir tahminle \%25 fark yazılmıştı; fark tahminin kendisindendi.) Düzgün roll
+için aynı formül test paketinde de doğrulandı (Bölüm~\ref{sec:enerji}). Bu etki CW$-$CCW farkında
 $10^{-10}$ bağıl hassasiyetle sadeleşiyor ($C$ sayısal tabanda); ama gerçek makinede bu sadeleşme CW/CCW
 simetrisine bağlıdır~\YOR.
 
 \paragraph{$\varepsilon\times\phi$ çarpım etkisi.} $\varepsilon$ ve $\phi$ birlikte $3\times10^{-7}$
-olduğunda, kuadrupoller kusursuzken bile $C=1.17$, 0.79, 2.09 kalıyor~\BEL. Bu, saptırıcıların ürettiği
+olduğunda, kuadrupoller kusursuzken bile $C=1.17$, 0.79, 2.09 kalıyor~\BEL\ (eski prosedür, yeniden
+ölçülmedi; T1'deki ``\%0.2 gradyan hatası, yalnız kuadrupol'' durumu buna en yakın yeni ölçümdür). Bu, saptırıcıların ürettiği
 yatay ve düşey kapalı yörüngelerin çarpımından ($x_{\rm CO}\,y_{\rm CO}$) gelen geometrik fazdır;
 kuadrupol kaçıklığındaki mekanizmanın aynısı~\YOR. Yalnız kuadrupolleri düzeltmek bunu gidermiyor
 ($C=1.20$, 0.81, 2.51)~\BEL. Çözüm Bölüm~\ref{sec:T1}'de.
@@ -348,7 +508,7 @@ sürüklenmiş kuadrupollerin merkezinden geçtiği anlamına gelmez.
 
 \subsection{Sonuçlar}
 \begin{table}[H]\centering\small
-\caption{Senaryo Adım 1 ile aynı. 3 seed. \kod{adim3\_edm.jsonl}~\BEL.}
+\caption{Senaryo Adım 1 ile aynı. 3 seed. \kod{adim3\_edm.jsonl}~\BEL. \textbf{Eski prosedür}, yeniden ölçülmedi: mutlak değerler 0.3--13 kat yanlış olabilir; satırlar arası büyük farklar (Mq ile diğerleri arasında $10^3$--$10^4$ kat) güvenilir~\YOR.}
 \begin{tabular}{lccc}
 \toprule
 senaryo & demet $-$ kuad. merkezi [$\mu$m] & $C$ & çift kısım \\
@@ -426,7 +586,9 @@ Beklendiği gibi, komşu kuadrupoller birlikte hareket ettiği için simetrik bi
 BPM, 14~nm, kuadrupol içi düzeltici), 3 seed.}
 \end{figure}
 Ham sahte EDM: korelasyonsuz 294, 56, 124; rastgele yürüyüş 364, 399, 203; karma 523, 118, 2265.
-Düzeltme sonrası her modelde $C\le0.005$~\BEL. Model tam bilinirken kestirici neredeyse tam ters
+Düzeltme sonrası her modelde $C\le0.005$~\BEL. Bu sayılar eski prosedürle ölçüldü; korelasyonsuz model
+için makalenin kurulumundaki yeni ölçüm (Bölüm~\ref{sec:enerji}) aynı tabloyu doğruluyor (ham 49,
+iki demet 0.0015). Korelasyonlu modeller yeni prosedürle ölçülmedi. Model tam bilinirken kestirici neredeyse tam ters
 aldığından kalan artık yalnızca gürültüdür ve korelasyon modelinden bağımsızdır~\YOR.
 
 \subsection{Yer hareketi BPM'leri de taşırsa}
@@ -537,7 +699,7 @@ $dy$ aynı harmonikle ve aynı türle eşleştirildi; iki eşleşme kullanıldı
 \end{figure}
 
 \begin{table}[H]\centering\small
-\caption{$C$ per $\mu$m$^2$ ve dikey yörünge kazancı. \kod{adim5\_edm.jsonl}, \kod{adim5\_gain.json}~\BEL.}
+\caption{$C$ per $\mu$m$^2$ ve dikey yörünge kazancı. \kod{adim5\_edm.jsonl}, \kod{adim5\_gain.json}~\BEL. Sahte EDM sütunları \textbf{eski prosedürle}; yeniden ölçülmedi. Kazançlar doğrusal ve prosedürden bağımsız.}
 \begin{tabular}{cccccc}
 \toprule
 $m$ & sim, aynı & sim, dik & antisim, aynı & antisim, dik & kazanç sim/antisim \\
