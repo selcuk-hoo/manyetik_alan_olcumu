@@ -1,0 +1,15 @@
+{
+ "aciklama": "paper_runs sigma desenleri, sigma=10um, fast_measure_g, CCW; eski=|p| sabit firlatma, yeni=toplam enerji sabit",
+ "seed0": {
+  "eski": 1.089e-06,
+  "enerji_sabit": 3.7652e-07
+ },
+ "seed1": {
+  "eski": 5.8172e-08,
+  "enerji_sabit": 1.7237e-07
+ },
+ "seed2": {
+  "eski": 1.5872e-06,
+  "enerji_sabit": 4.6016e-07
+ }
+}
