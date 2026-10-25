@@ -1,0 +1,731 @@
+% revizyon_kontrolleri.tex — PRAB revizyonu öncesi geçerlilik kontrolleri (Adım 0–6, T1, T2)
+% Derleme: xelatex revizyon_kontrolleri.tex (iki kez)
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{turkish}
+\setotherlanguage{english}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{float}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black}
+\captionsetup{font=small,labelfont=bf}
+\graphicspath{{sonuclar/}}
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+
+% Türkçe dil ayarı \texttt içinde "=" çevresine boşluk ekler; kod makrosunda kapat
+\newcommand{\kod}[1]{{\XeTeXinterchartokenstate=0\texttt{#1}}}
+\newcommand{\BEL}{\textsc{[belgelenmiş]}}
+\newcommand{\YOR}{\textsc{[yorum]}}
+\newcommand{\HIP}{\textsc{[hipotez]}}
+\newcommand{\Csym}{C}
+
+\title{Ters Yönde Dönen Kapalı Yörüngelerle Simetrik Kaçıklık İzleme:\\
+PRAB Revizyonu Öncesi Geçerlilik Kontrolleri}
+\author{Hazırlayan: Claude (Anthropic yapay zekâ asistanı)\\
+\small arXiv:2608.04647v1 ve hakem raporları üzerine yapılan simülasyon kontrolleri}
+\date{25 Ekim 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Bu belge, \emph{``Accessing the symmetric component of quadrupole misalignment through
+counter-rotating closed orbits in EDM storage rings''} makalesine gelen iki hakem raporundan sonra yapılan
+yedi grup simülasyon kontrolünü anlatır. Amaç makaleyi savunmak değil, yöntemin \emph{nerede geçerli
+olduğunu} bulmaktır. Kısa sonuç şudur. Makalede yazıldığı haliyle yöntem (BPM'ler laboratuvara sabit
+varsayılır, fit yalnızca kuadrupol sütunları içerir), BPM'ler yer hareketiyle birlikte kaydığında ve
+saptırıcı (deflector) alanları sürüklendiğinde çalışmaz. Buna karşılık üç tasarım koşulu altında yöntem
+güçlü bir biçimde ayakta kalır: (i)~BPM'ler kuadrupollere rijit bağlıdır ve kestirici bunu bilir,
+(ii)~düzelticiler kuadrupol üstüne sarılmış manyetik trim sargılarıdır, (iii)~saptırıcılar kendi elektrik
+trimleriyle düzeltilir. Bu koşullarda iki demetli izleme tek demetten 25--50 kat iyi sonuç verir ve bir
+hafta boyunca sahte EDM'yi BBA (demet tabanlı hizalama) kalitesinde tutar. Ayrıca makaledeki ``simetrik
+bileşen yörüngeye kördür'' iddiasının yalnızca düşük harmoniklerde ve 4--7 kat düzeyinde geçerli olduğu
+bulunmuştur.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Bu belge nasıl okunmalı}
+%======================================================================
+
+Bu bölümde belgenin yapısını, kullanılan büyüklükleri ve iddiaların nasıl etiketlendiğini anlatıyorum.
+
+\subsection{İddia etiketleri}
+Belgedeki her önemli iddia üç türden biriyle işaretlenmiştir:
+\begin{itemize}
+\item \BEL: Bu çalışmada gerçekten çalıştırılmış bir simülasyonun çıktısı ya da bir kaynaktan doğrudan
+alınmış bilgi. Kaynağı (betik ve sonuç dosyası) yanında verilir.
+\item \YOR: Belgelenmiş sonuçlardan benim çıkardığım sonuç. Mantığı açıkça yazılır.
+\item \HIP: Test edilmemiş bir tahmin ya da varsayılmış bir parametre değeri.
+\end{itemize}
+
+\subsection{Temel büyüklükler}
+
+\paragraph{Simetrik ve antisimetrik bileşen.} Halkada 24 FODO hücresi, yani 48 kuadrupol vardır: her
+hücrede bir odaklayıcı (QF) ve bir odaklamayan (QD). Hücre $k$'daki iki kuadrupolün kaçıklıkları
+$v_{2k}$ (QF) ve $v_{2k+1}$ (QD) olsun. Bu iki sayı her zaman bir ortalamaya ve bir farka ayrılabilir:
+\begin{equation}
+v^{s}_{2k}=v^{s}_{2k+1}=\tfrac12\,(v_{2k}+v_{2k+1}),\qquad
+v^{a}_{2k}=-v^{a}_{2k+1}=\tfrac12\,(v_{2k}-v_{2k+1}).
+\end{equation}
+Burada $v^s$ \emph{simetrik} bileşendir: iki kuadrupol aynı yöne kaymıştır. $v^a$ \emph{antisimetrik}
+bileşendir: iki kuadrupol zıt yönlere kaymıştır. Her kaçıklık deseni bu ikisinin toplamıdır,
+$v=v^s+v^a$. Birimleri metredir; tablolarda mikrometre ($\mu$m) kullanılır.
+
+\paragraph{Sahte EDM ve hedef.} Sahte EDM, spinin dikey bileşeninin büyüme hızıdır, $f=\mathrm{d}S_y/\mathrm{d}t$
+(birimi rad/s). Deneyin hedefi $10^{-29}\,e\cdot$cm'lik bir EDM'dir; bu simülasyonda
+$f\approx 1$~nrad/s'ye karşılık gelir. Belgedeki bütün sahte EDM değerleri bu hedefin katı olarak verilir:
+``$C=3$'' demek, hedefin üç katı demektir.
+
+\paragraph{İki demetli metrik.} Gerçek EDM, demet yönü çevrilince (saat yönü CW'den saat yönünün tersi
+CCW'ye) işaret değiştirir. Bu yüzden deneyde ölçülen büyüklük farktır:
+\begin{equation}
+C=\tfrac12\,\bigl|f_{\rm CW}-f_{\rm CCW}\bigr| .
+\end{equation}
+İki yönde aynı işaretli kalan kısım, yani $\tfrac12(f_{\rm CW}+f_{\rm CCW})$, bu farkta sadeleşir. Ona
+``çift kısım'' diyorum. Makaledeki şekillerde kullanılan metrik de $C$'dir.
+
+\paragraph{Tepki matrisi ve kestirici.} $R$, kuadrupol kaçıklığından BPM okumasına giden $48\times48$
+matristir: $y=R\,v$. CW ve CCW için ayrı matrisler vardır ($R_{\rm CW}$, $R_{\rm CCW}$); C++ izleyiciyle
+ölçülmüşlerdir. Kaçıklığı okumadan geri bulmak için \emph{kesik tekil değer ayrışımı} (TSVD, truncated
+singular value decomposition) kullanılır: matrisin en büyük tekil değerinin \kod{rcond} katından küçük
+tekil değerleri atılır, böylece gürültünün büyütülmesi önlenir.
+
+\paragraph{Hesap araçları.} Bütün spin sonuçları repodaki GL4 semplektik parçacık ve Thomas--BMT spin
+izleyicisiyle (\kod{integrator.cpp}) elde edilmiştir. Saptırıcı hataları ve saptırıcı konumundaki
+düzelticiler için bu motorun değiştirilmemiş bir kopyası yazılmıştır (\kod{revizyon/integrator\_rev.cpp}).
+Hatalar sıfırken yeni motor eskisiyle birebir aynı yörüngeyi verir (fark 0)~\BEL. Motorun doğruluğu,
+kayıtlı bir sonucun yeniden üretilmesiyle de kontrol edildi: seed~0, $\sigma=10\,\mu$m için kayıtlı
+$f=1.0890\times10^{-6}$~rad/s birebir tekrar elde edildi~\BEL.
+
+%======================================================================
+\section{Adım 0: Kodda ne varsayılmış?}
+%======================================================================
+
+Bu adımda hiçbir şey değiştirmeden mevcut kodun hangi fiziksel varsayımları yaptığını inceledim. Sonuçlar,
+sonraki bütün adımların neden gerekli olduğunu açıklıyor.
+
+\begin{enumerate}
+\item \textbf{BPM'ler laboratuvara sabit.} BPM okuması ``yörünge + statik ofset + gürültü'' olarak
+modellenmiş; kuadrupol konumu okumadan çıkarılmıyor (\kod{kmod\_drivers/twobeam\_oc.py}, satır 96--106)~\BEL.
+Makalenin Sec.~V.B'deki ``BPM kuadrupolle birlikte hareket eder'' cümlesi hiçbir simülasyonda yok.
+\item \textbf{Düzeltici, kuadrupol içindeki manyetik dipol.} Düzeltme, kestirilen kaçıklığın doğrudan
+kuadrupol merkezinden çıkarılmasıyla yapılıyor. Bu, kuadrupolün tam içine yerleştirilmiş bir manyetik
+düzelticiye eşdeğer~\BEL. Makale düzeltici türünü yazmıyor.
+\item \textbf{Saptırıcı alan hatası yok; roll hatası yanlış fizikle var.} Mevcut \kod{dipole\_tilt}
+parametresi elektrik alanını döndürmüyor, radyal bir \emph{manyetik} alan ekliyor
+(\kod{integrator.cpp}:153--170)~\BEL. Manyetik kuvvet hız yönüne bağlı olduğu için bu model CCW demetinde
+işaret değiştirir; gerçek elektrik roll'u ise değiştirmez.
+\item \textbf{Hizalama hatası korelasyonsuz Gauss.} Hücre~0'daki QF'in kaçıklığı her zaman sıfır
+alınmış~\BEL.
+\item \textbf{İki demetli fit:} $S=[R_{\rm CCW};R_{\rm CW}]$, \kod{rcond}~$=0.01$ ile TSVD; makalede
+``regularized pseudo-inverse'' diye geçiyor~\BEL.
+\item \textbf{Şekil 4'teki elmas} (iki demetli düzeltme) 14~nm BPM gürültüsü ve \emph{sıfır} BPM ofsetiyle
+hesaplanmış. 100~$\mu$m BPM ofsetiyle aynı hesap hedefin medyan 198 katını veriyor
+(\kod{twobeam\_oc\_14nm\_g20\_boff100um.json})~\BEL. Şekil açıklaması 5 seed diyor, elmas ise 15 seed'den geliyor.
+\end{enumerate}
+
+%======================================================================
+\section{Adım 1: BPM modeli}
+%======================================================================
+
+Bu bölümde makaledeki olası bir iç tutarsızlığı test ediyorum: Sec.~III'teki ``simetrik bileşen
+yörüngeye kör'' argümanı laboratuvara sabit BPM varsayar; Sec.~V.B ise BPM'lerin kuadrupolle birlikte
+hareket ettiğini söyler.
+
+\subsection{Sezgi}
+Bir kuadrupol $d$ kadar kaysın. Laboratuvara sabit bir BPM, demetin yörüngesini okur; simetrik bir kaymanın
+yörüngede bıraktığı iz küçüktür. Ama BPM kuadrupole bağlıysa, kuadrupolle birlikte $d$ kadar kayar. Demet
+yerinden pek oynamadığı için BPM bu sefer yaklaşık $-d$ okur. Yani simetrik kayma, tek demette bile
+büyük bir sinyal olarak görünür. Bu durumda iki demete gerek kalmayabilir.
+
+\subsection{Model}
+BBA kalibrasyonundan sonraki okuma değişimi şöyle yazılır:
+\begin{equation}
+\Delta r_b = R_b\,\Delta m - u + n_b ,\qquad u=\rho\,\Delta m .
+\end{equation}
+Burada $\Delta m$ kuadrupol manyetik merkezlerinin sürüklenmesi (bilinmeyen), $u$ BPM'in elektriksel
+merkezinin hareketi, $n_b$ demet $b$'nin BPM gürültüsü, $\rho$ ise BPM'in kuadrupolü ne kadar izlediğidir.
+$\rho=0$ laboratuvara sabit BPM, $\rho=1$ rijit bağlı BPM demektir. Dört kestirici karşılaştırıldı:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+& demet sayısı & varsayım \\
+\midrule
+E1 & tek demet & BPM sabit (standart yörünge düzeltmesi) \\
+E2 & tek demet & $\rho$ biliniyor: $(R-\rho I)$ \\
+E3 & iki demet & BPM sabit (makaledeki yöntem) \\
+E4 & iki demet & $\rho$ biliniyor: $[R_{\rm CCW}-\rho I;\,R_{\rm CW}-\rho I]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Her kestiricinin TSVD eşiği bir ızgarada taranıp kendi en iyi değeriyle değerlendirildi; makaledeki sabit
+\kod{rcond}~$=0.01$ de ayrıca raporlandı. Senaryo: 5~$\mu$m rms saf simetrik sürüklenme, 200 seed
+(yeniden kurma) ve 3 seed (C++ sahte EDM).
+
+\subsection{Sonuçlar}
+
+\begin{table}[H]\centering\small
+\caption{Kalan simetrik rms [$\mu$m], 14~nm gürültü, 200 seed medyanı. Başlangıç 5~$\mu$m.
+\kod{revizyon/sonuclar/adim1\_recon.json}~\BEL.}
+\begin{tabular}{cccccc}
+\toprule
+$\rho$ & E1 & E2 & E3 (makale) & E4 \\
+\midrule
+0   & 0.051 (\kod{rcond}~0.01 ile 3.87) & 0.051 & 0.017 & 0.017 \\
+0.5 & 4.50 & 0.30 & 3.31 & 0.009 \\
+1   & 4.88 & 0.115 & 4.39 & 0.012 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]\centering\small
+\caption{Sahte EDM $C$ [hedefin katı], 3 seed, 14~nm gürültü, 5~$\mu$m simetrik sürüklenme.
+\kod{adim1\_edm.jsonl}~\BEL.}
+\begin{tabular}{lccc}
+\toprule
+ & $\rho=0$ & $\rho=0.5$ & $\rho=1$ \\
+\midrule
+düzeltme yok & \multicolumn{3}{c}{5.0, 6.1, 9.5} \\
+E1 & 0.003, 0.001, 0.001 & 13.7, 1.5, 0.95 & 6.9, 4.3, 0.36 \\
+E2 & (=E1) & 0.20, 1.08, 0.26 & 0.004, 0.005, 0.002 \\
+E3 (makale) & 0.001, 0.0002, 0.0003 & 0.27, 0.0001, 0.008 & 0.54, 3.1, 2.5 \\
+E4 & (=E3) & 0.0002, 0.003, 0.005 & 0.0001, 0.0007, 0.005 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.92\textwidth]{adim1_recon_k0_sym.pdf}
+\caption{Kalan simetrik ve antisimetrik artık, BPM--kuadrupol korelasyonu $\rho$'ya karşı. Düz çizgi: her
+yöntemin en iyi TSVD eşiği; noktalı: \kod{rcond}~$=0.01$.}
+\end{figure}
+
+\subsection{Model hatası ($\beta$-beat)}
+Gerçek makineye \%0.2 ve \%1 rms gradyan hatası koyup (yaklaşık \%1 ve \%5 $\beta$-beat) kestiricileri nominal
+modelle çalıştırdım~\BEL. 14~nm gürültü, $\rho=0$, 5~$\mu$m sürüklenmede iki demetin tek demete üstünlüğü
+şöyle değişti: hatasız modelde 2.9 kat, \%0.2 hatada 1.2 kat, \%1 hatada 0.88 kat (yani tek demet daha
+iyi). 1~$\mu$m gürültüde üstünlük her durumda yaklaşık 3 kat kaldı. \%0.2 hatayla sahte EDM ölçümü de
+sonucu değiştirmedi: $\rho=0$'da E1 ve E3 ikisi de $C\le0.007$~\BEL.
+
+\subsection{Yorum}
+\begin{itemize}
+\item Makaledeki yöntem (E3) yalnızca $\rho\approx0$'da çalışıyor. $\rho\ge0.5$'te simetrik artığın
+büyük kısmı kalıyor; $\rho=1$'de 3 seed'in ikisinde $C>1$~\BEL.
+\item $\rho=1$'de $\rho$'yu bilen tek demet (E2) hedefin 200 kat altına iniyor. Yani BPM kuadrupole
+bağlıysa ``tek demet de görür'' öngörüsü doğru; ama standart yörünge düzeltmesi (E1) sahte EDM'yi
+artırıyor~\BEL.
+\item $\rho=0$'da bile ``tek demet çok zayıf'' iddiası büyük ölçüde sabit \kod{rcond}~$=0.01$
+seçiminden geliyor: uygun eşikle tek demet simetrik sürüklenmeyi 5~$\mu$m'den 0.05~$\mu$m'ye indiriyor~\BEL.
+\item İki demetin üstünlüğü, gürültünün model hatasından baskın olduğu rejimde var~\YOR.
+\end{itemize}
+
+%======================================================================
+\section{Adım 2: Saptırıcı hataları (Hakem A, madde 1)}
+%======================================================================
+
+Hakem A, 48 saptırıcı için $10^{-4}$ bağıl alan hatası ve 0.1~mrad roll varsayıyor ve tek bir saptırıcının
+yaklaşık 400~$\mu$m yörünge bozulması yaratacağını öngörüyor. Bu bölümde bu sayıyı doğruluyorum ve
+saptırıcı sürüklenmesinin iki demetli izlemeyi nasıl etkilediğini inceliyorum.
+
+\subsection{Neden önemli: elektrik kuvveti yönden bağımsızdır}
+Manyetik kuvvet $q\,\vec v\times\vec B$ demet yönü çevrilince işaret değiştirir; elektrik kuvveti
+$q\vec E$ değiştirmez. Kuadrupol kaçıklığı manyetik bir etkidir, saptırıcı hatası elektrik. Bu yüzden
+saptırıcı hatasının yarattığı yörünge iki demette \emph{aynı işaretlidir} ve tam olarak toplam kanalına,
+yani simetrik bileşeni okuduğumuz kanala düşer.
+
+\subsection{Model}
+Yeni motorda her saptırıcıya iki hata eklendi: bağıl alan hatası $\varepsilon$ ($E_0\to E_0(1+\varepsilon)$)
+ve elektrik roll'u $\phi$. Roll, kapasitörün alan deseninin referans yörünge çizgisi etrafında
+döndürülmesiyle uygulandı; öncü terimi düşey alan $E_z\approx E_0\phi$'dir.
+
+\subsection{Hakem A'nın sayısı}
+\begin{table}[H]\centering\small
+\caption{Tek saptırıcı (indeks 10) hatasının kapalı yörüngeye etkisi. \kod{adim2\_kick.json}~\BEL.}
+\begin{tabular}{lccc}
+\toprule
+hata & CCW rms / max [$\mu$m] & CW rms / max [$\mu$m] & corr(CW,CCW) \\
+\midrule
+$\varepsilon=10^{-4}$ (yatay) & 248 / 418 & 248 / 412 & $+0.95$ \\
+elektrik roll 0.1~mrad (dikey) & 333 / 525 & 333 / 525 & $+0.95$ \\
+eski manyetik \kod{dipole\_tilt} 0.1~mrad & 332 / 523 & 332 / 523 & $-0.95$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+Hakemin $\sim$400~$\mu$m tahmini doğrulandı. Elektrik hatası iki demette aynı işaretli; eski manyetik
+model işaret çeviriyor~\BEL.
+
+\subsection{Fit matrisine saptırıcı sütunları}
+Her düzlemde 48 saptırıcı sütunu eklenince bilinmeyen sayısı 96, denklem sayısı da 96 olur (2 demet
+$\times$ 48 BPM). Rank tam kaldı (96/96), ama koşul sayısı x düzleminde 73'ten $5.6\times10^{3}$'e, y
+düzleminde 118'den $7.9\times10^{3}$'e çıktı. Saptırıcı alt uzayı ile simetrik kuadrupol alt uzayı
+arasında 4--6 doğrultuda asal açı kosinüsü 0.99'u aşıyor~\BEL (\kod{adim2\_fit.json}). Yani tam
+dejenerelik yok, ama yakın dejenerelik var.
+
+\subsection{Sürüklenme taraması}
+\begin{figure}[H]\centering
+\includegraphics[width=0.92\textwidth]{adim2_scan.pdf}
+\caption{Saptırıcı sürüklenmesi altında simetrik kestirim hatası. Daire: makaledeki fit (yalnız kuadrupol
+sütunları). Elmas: saptırıcı sütunları eklenmiş fit. 200 seed medyanı.}
+\end{figure}
+\begin{itemize}
+\item Makaledeki fit, $10^{-7}$ alan sürüklenmesi ya da 0.1~$\mu$rad roll başına yaklaşık 1~$\mu$m simetrik
+hata üretiyor~\BEL.
+\item Saptırıcı sütunlu fit bu sızmayı gideriyor: kusursuz modelde hata 0.036~$\mu$m'de sabit; \%0.2
+gradyan hatasıyla $\varepsilon=10^{-5}$'te 0.41~$\mu$m, $\phi=10~\mu$rad'da 0.92~$\mu$m~\BEL.
+Bedeli, 1~$\mu$m gürültüde gürültünün yaklaşık 2 kat büyümesi (2.6 / 1.2~$\mu$m)~\BEL.
+\end{itemize}
+
+\subsection{Saptırıcı sürüklenmesinin kendi ürettiği sahte EDM}
+\paragraph{Birinci mertebe roll etkisi.} Roll tek başına çok büyük bir sinyal üretiyor ve bu sinyal
+genlikle \emph{doğrusal}:
+\begin{table}[H]\centering\small
+\caption{\kod{adim2\_roll\_C.json}~\BEL.}
+\begin{tabular}{ccc}
+\toprule
+roll rms & $f_{\rm CW}=f_{\rm CCW}$ [hedef] & $C$ [hedef] \\
+\midrule
+$3\times10^{-9}$ & $-1.26\times10^{6}$ & 0.006 \\
+$3\times10^{-8}$ & $-1.26\times10^{7}$ & 0.001 \\
+$3\times10^{-7}$ & $-1.26\times10^{8}$ & 0.008 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Mekanizmayı adım adım yazalım. (1) Sihirli momentumda elektrik alanı spini momentuma göre döndürmez; spin
+düşey momentum dönmesini birebir izler. (2) Kapalı yörüngenin kapanması için düşey elektrik tekmelerini
+kuadrupollerin manyetik tekmesi dengelemelidir: $\sum\theta_B=-\sum\theta_E$. (3) Manyetik alan ise spini
+momentumdan $G\gamma$ kat fazla döndürür. Bu yüzden tur başına net spin dönmesi $G\gamma\sum\theta_B$ olur.
+
+Sayısal kontrol: saptırıcı başına tekme $\theta_E=(L/R)\,\phi=0.131\,\phi$. 48 rastgele roll'un toplamı
+$\sqrt{48}\times0.131\times3\times10^{-7}\approx2.7\times10^{-7}$~rad. $G\gamma\approx2.24$ ile tur
+başına $\approx6\times10^{-7}$~rad, tur süresi $\approx3.7~\mu$s olduğundan $\approx0.16$~rad/s, yani
+$\approx1.6\times10^{8}\times$hedef. Simülasyon $1.26\times10^{8}$ veriyor~\BEL. Bu etki CW$-$CCW farkında
+$10^{-10}$ bağıl hassasiyetle sadeleşiyor ($C$ sayısal tabanda); ama gerçek makinede bu sadeleşme CW/CCW
+simetrisine bağlıdır~\YOR.
+
+\paragraph{$\varepsilon\times\phi$ çarpım etkisi.} $\varepsilon$ ve $\phi$ birlikte $3\times10^{-7}$
+olduğunda, kuadrupoller kusursuzken bile $C=1.17$, 0.79, 2.09 kalıyor~\BEL. Bu, saptırıcıların ürettiği
+yatay ve düşey kapalı yörüngelerin çarpımından ($x_{\rm CO}\,y_{\rm CO}$) gelen geometrik fazdır;
+kuadrupol kaçıklığındaki mekanizmanın aynısı~\YOR. Yalnız kuadrupolleri düzeltmek bunu gidermiyor
+($C=1.20$, 0.81, 2.51)~\BEL. Çözüm Bölüm~\ref{sec:T1}'de.
+
+%======================================================================
+\section{Adım 3: Düzelticiler}
+%======================================================================
+
+Hakem A elektrostatik ve manyetik düzelticilerin farkının açıklanmasını istiyor. Bu bölümde aynı iki
+demetli düzeltmeyi dört düzeltici türüyle koştum.
+
+\subsection{Model}
+\begin{center}\small
+\begin{tabular}{llll}
+\toprule
+kısaltma & tür & konum & kanal \\
+\midrule
+Mq & manyetik (makalenin örtük modeli) & kuadrupol içinde & fark \\
+Md & manyetik dipol & saptırıcıda & fark (corr $-0.95$) \\
+Ed & elektrostatik ($\varepsilon$, $\phi$ trimi) & saptırıcıda & toplam (corr $+0.95$) \\
+M+Ed & ikisi birlikte & saptırıcıda & ikisi \\
+\bottomrule
+\end{tabular}
+\end{center}
+İki hedef karşılaştırıldı: ``sıfır'' (BPM okumasını sıfırla) ve ``merkez'' (demeti kestirilen kuadrupol
+merkezlerinden geçir). Bu ayrım önemlidir: laboratuvara sabit BPM'de yörüngeyi sıfırlamak, demetin
+sürüklenmiş kuadrupollerin merkezinden geçtiği anlamına gelmez.
+
+\subsection{Sonuçlar}
+\begin{table}[H]\centering\small
+\caption{Senaryo Adım 1 ile aynı. 3 seed. \kod{adim3\_edm.jsonl}~\BEL.}
+\begin{tabular}{lccc}
+\toprule
+senaryo & demet $-$ kuad. merkezi [$\mu$m] & $C$ & çift kısım \\
+\midrule
+düzeltme yok & 7.5--10.6 & 5.0, 6.1, 9.5 & 0.8--10 \\
+\textbf{Mq} & 0.02--0.03 & \textbf{0.0002, 0.0005, 0.0013} & $\le$0.004 \\
+Md, sıfır & 5.0 & 0.04, 1.01, 0.76 & $\sim$200 \\
+Md, merkez & 3.6--4.1 & 55, 6.1, 12 & 15--700 \\
+Ed, sıfır & 4.8 & 14, 4.4, 6.7 & $2\times10^{7}$--$1.5\times10^{8}$ \\
+Ed, merkez & 0.07--0.12 & 2.9, 1.5, 2.8 & $10^{6}$--$9\times10^{6}$ \\
+M+Ed, sıfır & 5.0 & 2.2, 16, 18 & $\sim10^{8}$ \\
+M+Ed, merkez & 0.03--0.21 & 5.5, 4.4, 1.1 & $\sim10^{6}$--$10^{7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.92\textwidth]{adim3_edm.pdf}
+\caption{Düzeltici türlerine göre $C$ ve çift kısım.}
+\end{figure}
+
+\subsection{Yorum}
+\begin{itemize}
+\item Yalnız kuadrupol içi düzeltici (Mq) çalışıyor, çünkü kaçıklığın dipol alanını aynı yerde siler:
+$g(y-d)+\Delta B=g\,y$, eğer $\Delta B=g\,d$~\YOR.
+\item Simetrik sürüklenme, demetin iki yönde \emph{aynı işaretle} kaydırılmasını gerektirir. Manyetik
+düzeltici fark kanalına etki ettiği için bunu yapamaz; elektrostatik düzeltici yapabilir (demet 0.1~$\mu$m
+yakından geçer), ama birinci mertebe çift sinyal ve $C\approx1.5$--3 artık bırakır~\BEL.
+\item Elektrostatik düzelticinin spini doğrudan döndürmediği doğrudur; ama yörüngenin kapanması için
+kuadrupollerin manyetik tekmesini zorunlu kılarak sahte EDM'yi o yoldan üretir~\YOR.
+\end{itemize}
+
+%======================================================================
+\section{Adım 4: Korelasyonlu hizalama hataları (Hakem A, madde 2)}
+%======================================================================
+
+Hakem A, iki kuadrupol arasındaki göreli hatanın aradaki mesafenin kareköküyle büyüdüğü bir model
+öneriyor. Bu bölümde böyle bir modelde simetrik bileşenin baskınlaşıp baskınlaşmadığını ve Şekil 4'ün
+nasıl değiştiğini inceliyorum.
+
+\subsection{Model}
+Kuadrupoller eşit aralıklıdır: $\Delta s=16.66$~m, çevre 799.7~m.
+\begin{itemize}
+\item \textbf{Rastgele yürüyüş:} $\langle(y_i-y_j)^2\rangle=a^2|s_i-s_j|$. Halka kapalı olduğu için
+periyodik Brownian köprüsü kullanıldı.
+\item \textbf{ATL:} Shiltsev'in yer hareketi yasası $\langle\Delta Y^2\rangle=A\,T\,L$, sabit $T$ için
+uzayda rastgele yürüyüşle aynı yapıyı verir; farkı genliğin zamanla $\sqrt{T}$ büyümesidir. Adım 6'da
+kullanıldı.
+\item \textbf{Karma:} rastgele yürüyüş + yerel bağımsız hata.
+\end{itemize}
+Rijit öteleme ve eğim demet tarafından izlendiği için zararsızdır; dikeyde $m=0,1$, yatayda $m=1$
+harmonikleri çıkarıldı ve desenler 10~$\mu$m rms'e normalize edildi.
+
+\subsection{Simetrik/antisimetrik ayrışım}
+\begin{table}[H]\centering\small
+\caption{2000 seed, iki düzlem. \kod{adim4\_stats.json}~\BEL.}
+\footnotesize
+\begin{tabular}{lccc}
+\toprule
+model & sim/antisim rms oranı [16--84\%] & simetrik varyans kesri & komşu farkı \\
+\midrule
+korelasyonsuz & 0.94 [0.76, 1.15] & 47\% & 14.6~$\mu$m \\
+rastgele yürüyüş (ham) & 3.6 [2.6, 5.0] & 93\% & 5.4~$\mu$m \\
+rastgele yürüyüş (düzlem çıkarılmış) & 2.3 [1.8, 3.0] & 84\% & 8.0~$\mu$m \\
+karma (düzlem çıkarılmış) & 1.7 [1.4, 2.2] & 75\% & 10.1~$\mu$m \\
+\bottomrule
+\end{tabular}
+\end{table}
+Beklendiği gibi, komşu kuadrupoller birlikte hareket ettiği için simetrik bileşen baskınlaşıyor~\BEL.
+
+\subsection{Şekil 4'ün tekrarı}
+\begin{figure}[H]\centering
+\includegraphics[width=0.92\textwidth]{adim4.pdf}
+\caption{(a) Harmonik içerik. (b) Sahte EDM: ham, tek demet ve iki demetli düzeltme (laboratuvara sabit
+BPM, 14~nm, kuadrupol içi düzeltici), 3 seed.}
+\end{figure}
+Ham sahte EDM: korelasyonsuz 294, 56, 124; rastgele yürüyüş 364, 399, 203; karma 523, 118, 2265.
+Düzeltme sonrası her modelde $C\le0.005$~\BEL. Model tam bilinirken kestirici neredeyse tam ters
+aldığından kalan artık yalnızca gürültüdür ve korelasyon modelinden bağımsızdır~\YOR.
+
+\subsection{Yer hareketi BPM'leri de taşırsa}
+Gerçekte zemin hem kuadrupolleri hem BPM'leri taşır. Kuadrupol $=$ zemin $+$ yerel, BPM $=$ zemin $+$ yerel
+modeliyle (toplam 5~$\mu$m, 14~nm):
+\begin{table}[H]\centering\small
+\caption{Kalan simetrik rms [$\mu$m]. \kod{adim4\_ground\_bpm.json}~\BEL.}
+\begin{tabular}{ccccc}
+\toprule
+yerel/zemin & E1 & E3 (makale) & E4 (BPM'in zemini izlediğini bilen) \\
+\midrule
+0   & 4.70 & 3.31 & 0.010 \\
+0.1 & 4.69 & 3.31 & 0.37 \\
+0.3 & 4.58 & 3.28 & 1.03 \\
+1   & 4.09 & 3.20 & 2.52 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Uzun dalgalı yer hareketinde BPM'ler kuadrupollerle birlikte hareket eder ($\rho\approx1$). Bu durumda
+makaledeki model simetrik sürüklenmenin yalnızca yaklaşık \%30'unu yakalar~\BEL. Hakem A'nın endişesinin
+asıl karşılığı budur~\YOR.
+
+%======================================================================
+\section{Tartışma testleri: yöntemi kurtaran iki dokunuş}
+%======================================================================
+
+Adım 1--4 sonunda iki sorun kaldı: saptırıcı sürüklenmesi ve BPM hareketi. İkisini aynı ilkeyle ele aldım:
+\emph{hatayı kendi kaynağında ve aynı tür alanla gör ya da düzelt}.
+
+\subsection{T1: Saptırıcıyı kaynağında trimlemek}\label{sec:T1}
+Saptırıcı sütunlu fitle her saptırıcının $\Delta\varepsilon$ ve $\Delta\phi$ değerini kestirip, alan
+hatasını yüksek gerilim trimiyle, roll'u ise üst ve alt plakalar arasına uygulanan küçük bir gerilim farkıyla
+(düşey elektrik trimi) geri aldım.
+
+\begin{table}[H]\centering\small
+\caption{Adım 2 senaryosu, 3 seed. \kod{t1\_edm.jsonl}~\BEL.}
+\begin{tabular}{lcc}
+\toprule
+durum & $C$ & çift kısım \\
+\midrule
+yalnız kuadrupol düzeltmesi & 1.20, 0.81, 2.51 & $\sim10^{8}$ \\
+\textbf{kuadrupol + saptırıcı trimi} & \textbf{0.0010, 0.0005, 0.0017} & $6\times10^{3}$--$2.5\times10^{6}$ \\
+kontrol: saptırıcı sürüklenmesi tam biliniyor & 0.0002, 0.0050, 0.0053 & $\sim10^{-3}$ \\
+\%0.2 gradyan hatası, trim & 0.010, 0.011, 0.006 & $\sim2\times10^{6}$ \\
+\%0.2 gradyan hatası, yalnız kuadrupol & 1.28, 0.74, 2.80 & $\sim10^{8}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Neden çalıştığını açıklayayım. Tek tek saptırıcıların kestirimi kötüdür: trimden sonra hata başlangıcın
+\%25--80'i kadar kalır. Ama kötü kestirilen doğrultular, yörüngeye zaten küçük katkı veren doğrultulardır.
+Saptırıcı kaynaklı \emph{yörünge} \%97--99 azalır~\BEL. $\varepsilon\times\phi$ etkisi iki yörüngenin
+çarpımıyla orantılı olduğu için bu yeterlidir~\YOR. Roll trimi, öncü terim olan düşey alanı ekleyerek
+modellendi; alan deseninin dönmesinden gelen ikinci mertebe fark ihmal edildi~\HIP.
+
+\subsection{T2: BPM'i kuadrupole rijit bağlamak}
+BPM kuadrupole rijit bağlıysa okuma $r=x-d$ olur, yani demetin kuadrupol merkezine göre konumu. Bu,
+sahte EDM'yi belirleyen büyüklüğün ta kendisidir. Geriye kalan hata kaynağı, BPM elektriksel merkezi ile
+kuadrupol manyetik merkezi arasındaki farkın BBA'dan sonraki değişimi $\delta$'dır (mekanik kayma ve BPM
+elektroniğinin ofset kayması toplamı).
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.92\textwidth]{t2.pdf}
+\caption{Rijit bağlı BPM: kalan simetrik artık, göreli kayma $\sigma_\delta$'ya karşı.}
+\end{figure}
+
+\begin{table}[H]\centering\small
+\caption{Sahte EDM $C$, 3 seed, 5~$\mu$m sürüklenme, 14~nm. \kod{t2\_edm.jsonl}~\BEL.}
+\begin{tabular}{ccc}
+\toprule
+$\sigma_\delta$ & iki demet (E4) & tek demet (E2) \\
+\midrule
+0.1~$\mu$m & 0.001, 0.003, 0.005 & 0.04, 0.10, 0.004 \\
+0.3~$\mu$m & 0.012, 0.036, 0.026 & 0.63, 0.28, 0.40 \\
+1~$\mu$m & 0.17, 0.35, 0.27 & 8.8, 10.1, 3.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+İki demetin hatası yaklaşık $1.1\,\sigma_\delta$ ve sürüklenme genliğinden neredeyse bağımsız. Bu mimaride
+iki demetin üstünlüğü 25--50 kat~\BEL.
+
+\textbf{Literatür.} BPM'i kuadrupole bağlamak lineer hızlandırıcılarda yerleşik bir uygulamadır: DESY
+TTF2/European XFEL'de BPM'ler kuadrupollerin içindedir ve gerili telle manyetik eksene kalibre edilir;
+CLIC/PACMAN'da BPM ve kuadrupol ortak desteğe mikrometre hassasiyetle monte edilir; LHC ark BPM'leri
+kuadrupol kriyostatlarındadır~\BEL. Işık kaynakları ise senkrotron ışımasının ısıttığı girder yüzünden
+BPM'leri tersine ayırır (SLS, NSRRC)~\BEL. Proton EDM halkasında senkrotron ışıması ihmal edilebilir, bu
+yüzden lineer hızlandırıcı gerekçesi geçerlidir~\YOR. Ancak literatür µm düzeyinde \emph{ön hizalama}
+gösterir; bizim istediğimiz zamanla kararlılıktır. Bu yüzden $\sigma_\delta\lesssim0.3$--1~$\mu$m bir
+tasarım gereksinimi olarak yazılmalıdır~\YOR.
+
+%======================================================================
+\section{Adım 5: Harmonik başına yörünge kazancı ve spin duyarlılığı}
+%======================================================================
+
+Hakem A, uzun dalgalı kaymada demet kuadrupolleri izlediği için yörüngenin bastırıldığını, ama spinin aynı
+bastırmayı görüp görmediğinin belli olmadığını söylüyor. Bu bölümde tek harmonikli desenlerle bunu
+ölçüyorum.
+
+\subsection{Model}
+Hücre harmoniği $m=0\ldots12$ için simetrik desen $v_{2k}=v_{2k+1}=\cos(2\pi mk/24)$, antisimetrik desen
+$v_{2k}=-v_{2k+1}=\cos(2\pi mk/24)$. Yörünge kazancı $\|Rv\|/\|v\|$. Sahte EDM bilineer olduğu için $dx$ ve
+$dy$ aynı harmonikle ve aynı türle eşleştirildi; iki eşleşme kullanıldı: \emph{aynı faz} ($dx=dy=\cos$) ve
+\emph{dik faz} ($dx=\cos$, $dy=\sin$; $m=0,12$'de tanımsız). Genlik 5~$\mu$m; sonuç $C/\mu$m$^2$.
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.92\textwidth]{adim5.pdf}
+\caption{Yörünge kazancı (sol eksen) ve birim genlik karesi başına sahte EDM (sağ eksen).}
+\end{figure}
+
+\begin{table}[H]\centering\small
+\caption{$C$ per $\mu$m$^2$ ve dikey yörünge kazancı. \kod{adim5\_edm.jsonl}, \kod{adim5\_gain.json}~\BEL.}
+\begin{tabular}{cccccc}
+\toprule
+$m$ & sim, aynı & sim, dik & antisim, aynı & antisim, dik & kazanç sim/antisim \\
+\midrule
+0 & $9\times10^{-5}$ & -- & 0.83 & -- & 1.01 / 6.9 \\
+1 & 0.12 & 0.84 & 16 & 0.20 & 1.4 / 8.5 \\
+2 & 3.2 & 11 & 106 & 0.99 & 5.8 / 29 \\
+3 & 4.0 & 9.0 & 59 & 6.4 & 2.4 / 9.6 \\
+6 & 0.16 & 0.15 & 0.52 & 0.040 & 0.55 / 1.16 \\
+10 & 0.070 & 0.019 & 0.082 & 0.0024 & 0.35 / 0.40 \\
+12 & 0.0324 & -- & 0.0324 & -- & 0.34 / 0.34 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Yorum}
+\begin{itemize}
+\item $m\approx12$'de simetrik ve antisimetrik desen ayırt edilemez: kazançlar ve sahte EDM birebir aynı.
+Düşük $m$'de simetrik kazanç antisimetrikten yalnızca 4--7 kat küçük~\BEL. Makaledeki ``$k=24$ bileşeni
+yaklaşık 100 kat bastırılır'' ifadesi ölçülen kazançlarla uyuşmuyor~\YOR.
+\item Spin, $m=0$'da çok güçlü bastırılır ($9\times10^{-5}$): demet kuadrupolleri izleyip merkezlerinden
+geçer. $m=1$'de bastırma kısmi, en büyük duyarlılık betatron tune'una yakın $m=2$--3'te~\BEL.
+Korelasyonlu hata modelleri gücünü tam bu harmoniklerde toplar (Adım 4)~\YOR.
+\item Yörünge kazancının karesine bölünmüş en büyük sahte EDM, simetrik bileşen için antisimetrikten
+2--3 kat büyüktür ($m=2$'de 0.33'e karşı 0.13)~\BEL. Yani simetrik bileşen yörüngedeki görünürlüğüne göre
+spine daha duyarlıdır, ama fark ılımlıdır.
+\end{itemize}
+
+%======================================================================
+\section{Adım 6: Zaman senaryosu (Hakem B)}
+%======================================================================
+
+Hakem B, yöntemin işleyişinin ve performansının titiz bir biçimde gösterilmesini istiyor. Bu bölümde bir
+haftalık gerçekçi bir işletim senaryosu kuruyorum.
+
+\subsection{Senaryo}
+\begin{itemize}
+\item 1 hafta, 1 saatlik adımlar. Sürüklenme: ATL yer hareketi, $A=10^{-5}~\mu$m$^2$/(s$\cdot$m); LEP
+($1.1\times10^{-5}$) ve TRISTAN ($2.7\times10^{-5}$) ölçümlerine göre seçildi~\BEL.
+\item $t=0$'da BBA artığı 0.3~$\mu$m rms~\HIP. BPM--kuadrupol kayması 0.2~$\mu$m$/\sqrt{\text{gün}}$~\HIP;
+beklenen kayma 0.3~$\mu$m'ye ulaşınca BBA tetiklenir (bu hızla yaklaşık her 54 saatte).
+\item Gürültü: 10~$\mu$m/tur, 60~s ortalama, 10~nm elektronik tabanı~\HIP. Ölçüm başına
+$\sigma_n=\sqrt{\sigma_{\rm tur}^2/(f_{\rm dev}T_{\rm ort})+\sigma_{\rm taban}^2}\approx10$~nm. Burada
+$f_{\rm dev}\approx270$~kHz tur frekansıdır.
+\item Senaryolar: W1 iki demet (rijit BPM, E4), W1 tek demet (E2), W0 makale modeli (BPM'ler ayrı ayakta ama
+aynı zeminde, E3), yalnız periyodik BBA, hiçbir şey.
+\end{itemize}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{adim6.pdf}
+\caption{(a) Simetrik artık, doğrusal, 20 seed. (b) Sahte EDM, C++, 3 seed. (c) İki demetli tespit
+sınırı.}
+\end{figure}
+
+\begin{table}[H]\centering\small
+\caption{Sahte EDM $C$, 3 seed (küçükten büyüğe). \kod{adim6\_edm.jsonl}~\BEL. Hız için kısaltılmış
+estimatör ayarı kullanıldı.}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+senaryo & 6 sa & 24 sa & 48 sa & 96 sa & 168 sa \\
+\midrule
+$t=0$ (BBA artığı) & \multicolumn{5}{l}{0.07 / 0.73 / 1.35} \\
+\textbf{W1, iki demet} & 0.05/0.84/1.3 & 0.16/0.37/1.1 & 0.10/0.31/1.4 & 0.22/0.69/0.95 & 0.12/0.31/0.34 \\
+W1, tek demet & 0.16/1.2/2.4 & 0.72/0.98/6.2 & 0.39/2.6/7.6 & 2.8/4.7/12 & 0.33/0.95/1.0 \\
+W0, makale & 0.89/2.2/3.9 & 1.6/2.7/5.5 & 0.8/7.8/13 & 7.5/15/21 & 0.6/1.9/4.2 \\
+yalnız BBA & 4.3/9.5/43 & 2.0/5.7/34 & 28/32/112 & 13/122/129 & 3.5/7.8/15 \\
+hiçbir şey & 4.3/9.5/43 & 2.0/5.7/34 & 28/32/112 & 97/501/673 & 232/427/718 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{En küçük tespit edilebilir sürüklenme}
+Simetrik kestirimin gürültü kazancı iki demette $k=0.75$, tek demette 2.35, makale modelinde 1.23~\BEL.
+3$\sigma$ tespit sınırı $3k\sigma_n$'dir. Örnek hesap: 10~$\mu$m/tur ve 10~nm taban, $T_{\rm ort}=1$~s
+için $\sigma_n=\sqrt{(10~\mu\text{m})^2/(270\,000\times1)+(10~\text{nm})^2}=\sqrt{(19.2)^2+10^2}$~nm
+$\approx21.7$~nm; sınır $3\times0.75\times21.7\approx49$~nm $\approx0.05~\mu$m. Ortalama süresi uzayınca
+sınır elektronik tabanına iner: 10~nm tabanla $\approx0.02~\mu$m, 100~nm tabanla $\approx0.23~\mu$m~\BEL.
+
+\subsection{Yorum}
+\begin{itemize}
+\item İki demetli izleme bir hafta boyunca sahte EDM'yi BBA artığının belirlediği seviyede tutuyor
+(0.05--1.4); yalnız periyodik BBA iki BBA arasında 10--100 kat yükseliyor~\BEL.
+\item İzleyici BBA'nın bıraktığı durumu korur, daha iyisini yapamaz. Hedefin güvenli biçimde altında kalmak
+için BBA artığı $\lesssim0.15$--0.2~$\mu$m olmalı~\HIP (sahte EDM'nin $\sigma^2$ ölçeklemesinden).
+\item BPM'ler zemini izlerken makaledeki model hedefin altında kalamıyor~\BEL.
+\end{itemize}
+
+%======================================================================
+\section{Makale için çıkarımlar}
+%======================================================================
+
+\subsection{Yöntemin geçerlilik alanı}
+\YOR~Makalenin bugünkü iddiası kabaca ``iki demetli toplam, kör simetrik bileşeni görür ve sürüklenme
+izleyicisi olarak kullanılabilir'' şeklindedir. Kontroller bu iddianın aşağıdaki daha dar ama savunulabilir
+biçimini destekliyor:
+
+\begin{quote}
+BPM'ler kuadrupollere rijit bağlı ve kestirici bunu bildiğinde, düzelticiler kuadrupol üstü manyetik trim
+sargıları olduğunda ve saptırıcılar kendi elektrik trimleriyle düzeltildiğinde, iki demetli izleme tek
+demetten 25--50 kat iyi çalışır ve BBA kalitesini günler boyunca korur.
+\end{quote}
+
+\subsection{Tasarım gereksinimleri}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+gereksinim & dayanak \\
+\midrule
+BPM--kuadrupol göreli kararlılığı $\sigma_\delta\lesssim0.3$--1~$\mu$m (BBA aralığı boyunca) & T2 \\
+kuadrupol üstü manyetik dipol trim sargıları & Adım 3 \\
+saptırıcı başına yüksek gerilim ve düşey elektrik trimi; saptırıcı sütunlu fit & Adım 2, T1 \\
+yalnız kuadrupol fiti kullanılırsa saptırıcı kararlılığı $\lesssim5\times10^{-8}$ ve 0.05~$\mu$rad & Adım 2 (\HIP\ eşik) \\
+BBA artığı $\lesssim0.15$--0.2~$\mu$m & Adım 6 (\HIP) \\
+BPM elektronik tabanı $\lesssim10$--100~nm & Adım 6 \\
+çift kısmın sadeleşmesi için CW/CCW simetrisi & Adım 2, T1 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Metinde düzeltilmesi gerekenler}
+\begin{enumerate}
+\item BPM modeli açıkça yazılmalı; Sec.~V.B'deki ``ortak hareket'' argümanı ters çevrilmeli: ortak hareket
+yöntemin aleyhine değil, kestirici bunu bildiğinde lehine.
+\item Düzeltici türü (kuadrupol içi manyetik) ve fitin düzenlileştirmesi (TSVD, \kod{rcond}) belirtilmeli.
+\item Şekil 4 elmasının koşulları (14~nm, sıfır BPM ofseti, 15 seed) yazılmalı.
+\item Sec.~III'teki 100 kat bastırma iddiası ve Şekil 1(a)'daki analitik $G_k$ formülü, ölçülen harmonik
+tabloyla değiştirilmeli.
+\item ``Tek demet kördür'' yerine nicel bir karşılaştırma verilmeli: laboratuvara sabit BPM'de yaklaşık
+3 kat (model hatasıyla kaybolur), rijit BPM'de 25--50 kat.
+\item Hakem B için Adım 6'nın zaman senaryosu ve tespit sınırı eklenmeli.
+\end{enumerate}
+
+%======================================================================
+\section{Sınırlamalar ve açık sorular}
+%======================================================================
+\begin{itemize}
+\item C++ sahte EDM sonuçlarının çoğu 3 seed'e dayanır; seed'ler arası dağılım bazen 10 kattan fazladır.
+Makaleye girecek sayılar için daha fazla seed gerekir.
+\item Statik başlangıç durumu simüle edilmedi: $10^{-4}$/0.1~mrad statik saptırıcı hataları milimetre
+düzeyinde yörünge yaratır; bunu kalibrasyonda düzeltmenin kendi sahte EDM tabanı bilinmiyor~\HIP.
+\item Adım 6'da saptırıcı sürüklenmesi ve T1 trimi aynı senaryoda birleştirilmedi.
+\item Adım 6 parametreleri (BBA artığı, $\delta$ kayma hızı, elektronik taban) tahmindir.
+\item Elektrostatik düzelticilerde kalan $C\approx1.5$--3'ün mekanizması doğrulanmadı.
+\item Adım 6'da kısaltılmış estimatör ayarı kullanıldı (daha önce $p=2.00$ ile doğrulanmış).
+\end{itemize}
+
+%======================================================================
+\section{Çalışma sırasında düzeltilen hatalar}
+%======================================================================
+\begin{enumerate}
+\item \textbf{Adım 1, ilk sürüm:} $\rho=0$'da bile bağımsız BPM hareketi tam genlikle eklenmişti; böylece
+``laboratuvara sabit'' durum yanlışlıkla ``BPM'ler de 5~$\mu$m sürükleniyor'' durumuna dönmüştü. İki aile
+ayrıldı (u $=\rho\Delta m$ ve eşit rms'li kötümser aile).
+\item \textbf{Adım 2, tekme testi:} Sıfır testinde eski motoru yükleyen işçi süreci bu motoru bellekte
+tuttuğu için bir CCW roll koşumu yanlışlıkla sıfır çıkmıştı. Motor her görevde açıkça seçilecek biçimde
+düzeltildi.
+\item \textbf{Adım 5:} $m=0$ simetrik desen sabit olduğundan standart sapmayla normalizasyon NaN verdi;
+rms ile normalize edildi. Ayrıca bir ara sohbette simetrik bileşenin spin/yörünge oranı ``yaklaşık 50 kat''
+diye yanlış yazılmıştı (antisimetrik için yanlış eşleşmeyle kıyaslanmıştı). Doğrusu 2--3 kattır.
+\item \textbf{T2:} Hesap yanlışlıkla iki kez başlatılmıştı; kopya durduruldu, yinelenen satırlar
+temizlendi.
+\end{enumerate}
+
+%======================================================================
+\appendix
+\section{Yeniden üretim}
+%======================================================================
+Bütün betikler ve sonuçlar \kod{claude/brave-allen-92wn61} dalında, \kod{revizyon/} klasöründedir. Mevcut
+kod değiştirilmedi.
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+betik & işlev \\
+\midrule
+\kod{integrator\_rev.cpp/.py} & saptırıcı $\varepsilon$, $\phi$ ve saptırıcı konumunda manyetik düzelticiler \\
+\kod{adim1\_bpm\_model.py} & BPM modeli, $\rho$ taraması, $\beta$-beat (\kod{ADIM1\_SIG\_G}) \\
+\kod{build\_rtrue.py} & gradyan hatalı gerçek makine matrisleri \\
+\kod{adim2\_deflector.py} & tekme testi, saptırıcı matrisleri, rank/tarama, sahte EDM \\
+\kod{adim2\_defl\_diag.py}, \kod{adim2\_roll\_C.py} & roll teşhisi ve ölçekleme \\
+\kod{adim3\_correctors.py} & düzeltici türleri \\
+\kod{adim4\_correlated.py}, \kod{adim4\_ground\_bpm.py} & korelasyonlu hata ve zemin--BPM \\
+\kod{t1\_defl\_trim.py}, \kod{t2\_bpm\_rigid.py} & tartışma testleri \\
+\kod{adim5\_harmonics.py} & harmonik kazanç ve sahte EDM \\
+\kod{adim6\_time.py} & zaman senaryosu ve tespit sınırı \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\end{document}
