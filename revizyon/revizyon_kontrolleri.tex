@@ -624,19 +624,27 @@ hatasını yüksek gerilim trimiyle, roll'u ise üst ve alt plakalar arasına uy
 (düşey elektrik trimi) geri aldım.
 
 \begin{table}[H]\centering\small
-\caption{Adım 2 senaryosu, 3 seed. \kod{t1\_edm.jsonl}~\BEL.}
+\caption{Adım 2 senaryosu, \textbf{donmuş spin prosedürü}, 8 seed. $C$: medyan [16--84\%], en büyük
+değer; çift kısım: $|\,\cdot\,|$ medyanı. \kod{donmus\_t1\_kisa.jsonl}~\BEL.}
+\footnotesize
 \begin{tabular}{lcc}
 \toprule
 durum & $C$ & çift kısım \\
 \midrule
-yalnız kuadrupol düzeltmesi & 1.20, 0.81, 2.51 & $\sim10^{8}$ \\
-\textbf{kuadrupol + saptırıcı trimi} & \textbf{0.0010, 0.0005, 0.0017} & $6\times10^{3}$--$2.5\times10^{6}$ \\
-kontrol: saptırıcı sürüklenmesi tam biliniyor & 0.0002, 0.0050, 0.0053 & $\sim10^{-3}$ \\
-\%0.2 gradyan hatası, trim & 0.010, 0.011, 0.006 & $\sim2\times10^{6}$ \\
-\%0.2 gradyan hatası, yalnız kuadrupol & 1.28, 0.74, 2.80 & $\sim10^{8}$ \\
+\textbf{kuadrupol + saptırıcı trimi} & \textbf{0.010} [0.002, 0.017], max 0.025 & $1.5\times10^{6}$ \\
+kontrol: saptırıcı sürüklenmesi tam biliniyor & 0.006 [0.002, 0.013], max 0.018 & 0.01 \\
+\%0.2 gradyan hatası, trim & 0.016 [0.006, 0.041], max 0.056 & $1.9\times10^{6}$ \\
+\%0.2 gradyan hatası, yalnız kuadrupol & 0.75 [0.23, 1.2], max 1.4; 3/8 $>1$ & $1.8\times10^{8}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Yeni prosedürle sonuç ilk sürümle aynı yönde: trim $C$'yi hedefin yaklaşık 100 kat altına indiriyor;
+\%0.2 gradyan hatasında da 0.06'nın altında kalıyor. Yalnız kuadrupol düzeltmesi 8 seed'in 3'ünde hedefi
+aşıyor~\BEL. (İlk sürümün 3 seed'lik değerleri: trim 0.0005--0.0017, gradyan hatasıyla 0.006--0.011, yalnız
+kuadrupol 0.74--2.8; eski prosedür.) Trimlenmiş durumların $C$'si iki yönde $10^{6}$ düzeyinde, aynı
+işaretli büyük bir çift kısmın farkıdır; 0.01 düzeyindeki değerler bu farkın sayısal hassasiyetine
+yakındır~\YOR.
 
 Neden çalıştığını açıklayayım. Tek tek saptırıcıların kestirimi kötüdür: trimden sonra hata başlangıcın
 \%25--80'i kadar kalır. Ama kötü kestirilen doğrultular, yörüngeye zaten küçük katkı veren doğrultulardır.
