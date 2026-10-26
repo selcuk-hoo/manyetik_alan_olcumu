@@ -656,19 +656,36 @@ elektroniğinin ofset kayması toplamı).
 \end{figure}
 
 \begin{table}[H]\centering\small
-\caption{Sahte EDM $C$, 3 seed, 5~$\mu$m sürüklenme, 14~nm. \kod{t2\_edm.jsonl}~\BEL.}
+\caption{Sahte EDM $C$, \textbf{donmuş spin prosedürü}, 8 seed, 5~$\mu$m sürüklenme, 14~nm. Medyan
+[16--84\%] ve en büyük değer; parantez içinde kalan simetrik rms. \kod{donmus\_t2\_kisa.jsonl}~\BEL.}
+\footnotesize
 \begin{tabular}{ccc}
 \toprule
 $\sigma_\delta$ & iki demet (E4) & tek demet (E2) \\
 \midrule
-0.1~$\mu$m & 0.001, 0.003, 0.005 & 0.04, 0.10, 0.004 \\
-0.3~$\mu$m & 0.012, 0.036, 0.026 & 0.63, 0.28, 0.40 \\
-1~$\mu$m & 0.17, 0.35, 0.27 & 8.8, 10.1, 3.2 \\
+0.1~$\mu$m & 0.008 [0.004, 0.009], max 0.016 (0.13~$\mu$m) & 0.034 [0.008, 0.069], max 0.19 (0.78~$\mu$m) \\
+0.3~$\mu$m & 0.007 [0.001, 0.022], max 0.026 (0.36~$\mu$m) & 0.16 [0.05, 0.37], max 1.5; 1/8 $>1$ (1.6~$\mu$m) \\
+1~$\mu$m & 0.010 [0.002, 0.020], max 0.022 (1.2~$\mu$m) & 8.2 [1.7, 10], max 12; 7/8 $>1$ (2.5~$\mu$m) \\
 \bottomrule
 \end{tabular}
 \end{table}
-İki demetin hatası yaklaşık $1.1\,\sigma_\delta$ ve sürüklenme genliğinden neredeyse bağımsız. Bu mimaride
-iki demetin üstünlüğü 25--50 kat~\BEL.
+\begin{itemize}
+\item Yeniden kurmada iki demetin simetrik hatası yaklaşık $1.1\,\sigma_\delta$ ve sürüklenme genliğinden
+neredeyse bağımsız~\BEL.
+\item Ama iki demetin sahte EDM'si $\sigma_\delta$'yla \emph{büyümüyor}: üç değerde de sayısal tabanda
+($\approx0.008$). Tek demet ise $\sigma_\delta=1~\mu$m'de 8 seed'in 7'sinde hedefi aşıyor~\BEL.
+\item Nedeni kalan artığın harmonik içeriği ($\sigma_\delta=1~\mu$m, 8 seed, iki düzlem): iki demetin
+simetrik artığının gücünün \%93'ü $m=0$ ve $m=1$'de (düzgün öteleme ve eğim), spinin en duyarlı olduğu
+$m=2$--3'te yalnızca \%0.9. Tek demette $m=2$--3 payı \%37~\BEL. Demet düzgün ötelemeyi ve eğimi izler; bu
+desenler spine neredeyse görünmez (Adım~5: $m=0$'da bastırma $\sim10^{-4}$). Rijit BPM'de $(R-I)$ tam da bu
+doğrultularda neredeyse tekil olduğundan (test paketi), iki demetli kestirici onları ``göremez'' ama
+görmesi de gerekmez~\YOR.
+\item Raporun ilk sürümünde iki demet için $\sigma_\delta=1~\mu$m'de 0.17--0.35 yazılmıştı (eski prosedür).
+Düzgün ötelemenin kapalı yörüngeyi ve dolayısıyla fırlatma enerjisini kaydırdığı düşünülürse, o değerlerin
+enerji artefaktı olması beklenir~\YOR.
+\item Sonuç: bu mimaride iki demetin üstünlüğü $\sigma_\delta=0.1~\mu$m'de yaklaşık 4 kat,
+0.3~$\mu$m'de 24 kat, 1~$\mu$m'de yaklaşık 800 kattır (sonuncusu iki demetin sayısal tabanıyla sınırlı)~\BEL.
+\end{itemize}
 
 \textbf{Literatür.} BPM'i kuadrupole bağlamak lineer hızlandırıcılarda yerleşik bir uygulamadır: DESY
 TTF2/European XFEL'de BPM'ler kuadrupollerin içindedir ve gerili telle manyetik eksene kalibre edilir;
@@ -677,7 +694,9 @@ kuadrupol kriyostatlarındadır~\BEL. Işık kaynakları ise senkrotron ışıma
 BPM'leri tersine ayırır (SLS, NSRRC)~\BEL. Proton EDM halkasında senkrotron ışıması ihmal edilebilir, bu
 yüzden lineer hızlandırıcı gerekçesi geçerlidir~\YOR. Ancak literatür µm düzeyinde \emph{ön hizalama}
 gösterir; bizim istediğimiz zamanla kararlılıktır. Bu yüzden $\sigma_\delta\lesssim0.3$--1~$\mu$m bir
-tasarım gereksinimi olarak yazılmalıdır~\YOR.
+tasarım gereksinimi olarak yazılmalıdır~\YOR. Yeni ölçümlere göre iki demet
+$\sigma_\delta=1~\mu$m'de bile hedefin yaklaşık 50 kat altında kaldığından gereksinim $\sigma_\delta\lesssim1~\mu$m
+olarak gevşetilebilir; daha büyük $\sigma_\delta$ test edilmedi~\YOR.
 
 %======================================================================
 \section{Adım 5: Harmonik başına yörünge kazancı ve spin duyarlılığı}
