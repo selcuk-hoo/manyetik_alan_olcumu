@@ -41,15 +41,18 @@ PRAB Revizyonu Öncesi Geçerlilik Kontrolleri}
 \noindent Bu belge, \emph{``Accessing the symmetric component of quadrupole misalignment through
 counter-rotating closed orbits in EDM storage rings''} makalesine gelen iki hakem raporundan sonra yapılan
 yedi grup simülasyon kontrolünü anlatır. Amaç makaleyi savunmak değil, yöntemin \emph{nerede geçerli
-olduğunu} bulmaktır. Kısa sonuç şudur. Makalede yazıldığı haliyle yöntem (BPM'ler laboratuvara sabit
-varsayılır, fit yalnızca kuadrupol sütunları içerir), BPM'ler yer hareketiyle birlikte kaydığında ve
-saptırıcı (deflector) alanları sürüklendiğinde çalışmaz. Buna karşılık üç tasarım koşulu altında yöntem
-güçlü bir biçimde ayakta kalır: (i)~BPM'ler kuadrupollere rijit bağlıdır ve kestirici bunu bilir,
-(ii)~düzelticiler kuadrupol üstüne sarılmış manyetik trim sargılarıdır, (iii)~saptırıcılar kendi elektrik
-trimleriyle düzeltilir. Bu koşullarda iki demetli izleme tek demetten 25--50 kat iyi sonuç verir ve bir
-hafta boyunca sahte EDM'yi BBA (demet tabanlı hizalama) kalitesinde tutar. Ayrıca makaledeki ``simetrik
-bileşen yörüngeye kördür'' iddiasının yalnızca düşük harmoniklerde ve 4--7 kat düzeyinde geçerli olduğu
-bulunmuştur.
+olduğunu} bulmaktır. Çalışma sırasında sahte EDM'yi ölçme prosedüründe ciddi bir sorun bulundu (sonuç
+fırlatma enerjisine bağlıydı); fiziksel olarak doğru olan donmuş spin noktasında ölçen yeni bir araç
+yazıldı ve ana sonuçlar 5--10 seed'le yeniden ölçüldü. Düzeltilmiş tablo şudur. (i)~Saptırıcı
+(deflector) alan sürüklenmesi gerçek bir tehdittir: yalnız kuadrupol düzeltmesi 8 seed'in 3'ünde hedefi
+aşar; saptırıcı sütunlu fit ve saptırıcı trimiyle sahte EDM hedefin yaklaşık 100 kat altına iner.
+(ii)~BPM'lerin kuadrupolle birlikte hareket etmesi makaledeki yöntemi öldürmez ama marjını 3--5 kata
+indirir; BPM'ler kuadrupole rijit bağlı ve kestirici bunu bildiğinde iki demet, tek demetten
+$\sigma_\delta=0.1$, 0.3, 1~$\mu$m göreli kaymada sırasıyla yaklaşık 4, 24 ve 800 kat iyidir.
+(iii)~Yalnız kuadrupol üstü manyetik düzelticiler çalışır. Bir haftalık senaryoda iki demetli izleme
+sahte EDM'yi hedefin 5 katından fazla altında tutar (en büyük değer 0.18); tek demet ve makale modeli
+hedefin çevresinde kalır. Makaledeki ``simetrik bileşen yörüngeye kördür'' iddiası yalnızca düşük
+harmoniklerde ve 4--7 kat düzeyinde geçerlidir.
 \end{abstract}
 
 \tableofcontents
@@ -609,7 +612,9 @@ yerel/zemin & E1 & E3 (makale) & E4 (BPM'in zemini izlediğini bilen) \\
 \end{table}
 Uzun dalgalı yer hareketinde BPM'ler kuadrupollerle birlikte hareket eder ($\rho\approx1$). Bu durumda
 makaledeki model simetrik sürüklenmenin yalnızca yaklaşık \%30'unu yakalar~\BEL. Hakem A'nın endişesinin
-asıl karşılığı budur~\YOR.
+asıl karşılığı budur~\YOR. Ancak yakalanamayan kısmın spine etkisi daha küçüktür: Adım~1'in $\rho=1$
+satırında aynı kestirici simetrik artığın çoğunu bıraktığı halde sahte EDM'yi hedefin altına indiriyor
+(yeni prosedür).
 
 %======================================================================
 \section{Tartışma testleri: yöntemi kurtaran iki dokunuş}
@@ -776,28 +781,31 @@ aynı zeminde, E3), yalnız periyodik BBA, hiçbir şey.
 \end{itemize}
 
 \begin{figure}[H]\centering
-\includegraphics[width=\textwidth]{adim6.pdf}
-\caption{(a) Simetrik artık, doğrusal, 20 seed. (b) Sahte EDM, C++, 3 seed. (c) İki demetli tespit
-sınırı.}
+\includegraphics[width=\textwidth]{donmus_adim6.pdf}
+\caption{(a) Simetrik artık, doğrusal, 20 seed. (b) Sahte EDM, C++, donmuş spin prosedürü, 5 seed
+(çizgi medyan, noktalar tek seed'ler). (c) İki demetli tespit sınırı.}
 \end{figure}
 
 \begin{table}[H]\centering\small
-\caption{Sahte EDM $C$, 3 seed (küçükten büyüğe). \kod{adim6\_edm.jsonl}~\BEL. Hız için kısaltılmış
-estimatör ayarı kullanıldı.}
+\caption{Sahte EDM $C$, \textbf{donmuş spin prosedürü}, 5 seed (0--4), medyan [en küçük, en büyük];
+parantez içinde hedefi aşan seed sayısı. \kod{donmus\_adim6\_kisa.jsonl}~\BEL. BBA saatleri 54, 108, 162;
+168. saat son BBA'dan 6 saat sonradır.}
 \footnotesize
-\begin{tabular}{lccccc}
+\begin{tabular}{lccc}
 \toprule
-senaryo & 6 sa & 24 sa & 48 sa & 96 sa & 168 sa \\
+senaryo & 24 sa & 96 sa & 168 sa \\
 \midrule
-$t=0$ (BBA artığı) & \multicolumn{5}{l}{0.07 / 0.73 / 1.35} \\
-\textbf{W1, iki demet} & 0.05/0.84/1.3 & 0.16/0.37/1.1 & 0.10/0.31/1.4 & 0.22/0.69/0.95 & 0.12/0.31/0.34 \\
-W1, tek demet & 0.16/1.2/2.4 & 0.72/0.98/6.2 & 0.39/2.6/7.6 & 2.8/4.7/12 & 0.33/0.95/1.0 \\
-W0, makale & 0.89/2.2/3.9 & 1.6/2.7/5.5 & 0.8/7.8/13 & 7.5/15/21 & 0.6/1.9/4.2 \\
-yalnız BBA & 4.3/9.5/43 & 2.0/5.7/34 & 28/32/112 & 13/122/129 & 3.5/7.8/15 \\
-hiçbir şey & 4.3/9.5/43 & 2.0/5.7/34 & 28/32/112 & 97/501/673 & 232/427/718 \\
+$t=0$ (BBA artığı) & \multicolumn{3}{l}{0.063 [0.009, 0.14] (0/5)} \\
+\textbf{W1, iki demet} & \textbf{0.048} [0.010, 0.13] (0/5) & \textbf{0.090} [0.009, 0.13] (0/5) & \textbf{0.049} [0.027, 0.17] (0/5) \\
+W1, tek demet & 0.33 [0.04, 0.75] (0/5) & 1.2 [0.08, 2.0] (3/5) & 0.66 [0.03, 0.97] (0/5) \\
+W0, makale & 0.60 [0.12, 0.98] (0/5) & 1.3 [0.08, 2.1] (4/5) & 0.59 [0.25, 1.3] (2/5) \\
+yalnız BBA & 5.2 [1.0, 14] (4/5) & 45 [31, 65] (5/5) & 1.3 [0.05, 7.7] (3/5) \\
+hiçbir şey & 5.2 [1.0, 14] (4/5) & 59 [14, 180] (5/5) & 55 [11, 280] (5/5) \\
 \bottomrule
 \end{tabular}
 \end{table}
+İlk sürümdeki 3 seed'lik tablo (eski prosedür) iki demet için 0.05--1.4, makale modeli için 0.6--21
+veriyordu. Yeni prosedürle iki demet bir hafta boyunca 25 ölçümün hiçbirinde 0.18'i aşmıyor~\BEL.
 
 \subsection{En küçük tespit edilebilir sürüklenme}
 Simetrik kestirimin gürültü kazancı iki demette $k=0.75$, tek demette 2.35, makale modelinde 1.23~\BEL.
@@ -808,11 +816,16 @@ sınır elektronik tabanına iner: 10~nm tabanla $\approx0.02~\mu$m, 100~nm taba
 
 \subsection{Yorum}
 \begin{itemize}
-\item İki demetli izleme bir hafta boyunca sahte EDM'yi BBA artığının belirlediği seviyede tutuyor
-(0.05--1.4); yalnız periyodik BBA iki BBA arasında 10--100 kat yükseliyor~\BEL.
-\item İzleyici BBA'nın bıraktığı durumu korur, daha iyisini yapamaz. Hedefin güvenli biçimde altında kalmak
-için BBA artığı $\lesssim0.15$--0.2~$\mu$m olmalı~\HIP (sahte EDM'nin $\sigma^2$ ölçeklemesinden).
-\item BPM'ler zemini izlerken makaledeki model hedefin altında kalamıyor~\BEL.
+\item İki demetli izleme (rijit BPM) bir hafta boyunca sahte EDM'yi BBA artığının belirlediği seviyede
+tutuyor (medyan 0.05--0.09, en büyük 0.18; $t=0$'da 0.06); yalnız periyodik BBA iki BBA arasında 45 kata
+kadar yükseliyor~\BEL.
+\item İzleyici BBA'nın bıraktığı durumu korur, daha iyisini yapamaz. Bu senaryoda 0.3~$\mu$m BBA artığı
+hedefin yaklaşık 15 kat altında bir sahte EDM veriyor; ilk sürümdeki ``BBA artığı
+$\lesssim0.15$--0.2~$\mu$m olmalı'' gereksinimi eski prosedürden geliyordu ve gevşetilebilir~\YOR.
+\item Tek demet (rijit BPM) ve makale modeli (BPM'ler ayrı ayakta) hedefin çevresinde dolaşıyor: 96. saatte
+sırasıyla 5 seed'in 3'ü ve 4'ü hedefi aşıyor, ama en büyük değer 2.1~\BEL. Yani makale modeli bu
+senaryoda ``hiç çalışmaz'' değil, ``hedefte marjsız'' durumdadır; ilk sürümdeki 21'e varan değerler eski
+prosedürdendi~\YOR.
 \end{itemize}
 
 %======================================================================
@@ -825,22 +838,24 @@ izleyicisi olarak kullanılabilir'' şeklindedir. Kontroller bu iddianın aşağ
 biçimini destekliyor:
 
 \begin{quote}
-BPM'ler kuadrupollere rijit bağlı ve kestirici bunu bildiğinde, düzelticiler kuadrupol üstü manyetik trim
-sargıları olduğunda ve saptırıcılar kendi elektrik trimleriyle düzeltildiğinde, iki demetli izleme tek
-demetten 25--50 kat iyi çalışır ve BBA kalitesini günler boyunca korur.
+Düzelticiler kuadrupol üstü manyetik trim sargıları olduğunda ve saptırıcılar kendi elektrik trimleriyle
+düzeltildiğinde, iki demetli izleme simetrik sürüklenmeyi BBA kalitesinde tutar. BPM'ler kuadrupollere
+rijit bağlı ve kestirici bunu bildiğinde iki demetin üstünlüğü büyüktür (göreli kayma
+$\lesssim1~\mu$m'de sahte EDM hedefin $\sim$50--100 kat altında); BPM'ler ayrı ayakta ve zeminle birlikte
+hareket ettiğinde makaledeki model hedefin çevresinde, marjsız kalır.
 \end{quote}
 
 \subsection{Tasarım gereksinimleri}
 \begin{center}\small
-\begin{tabularx}{\textwidth}{lX}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}Xl}
 \toprule
 gereksinim & dayanak \\
 \midrule
-BPM--kuadrupol göreli kararlılığı $\sigma_\delta\lesssim0.3$--1~$\mu$m (BBA aralığı boyunca) & T2 \\
+BPM--kuadrupol göreli kararlılığı $\sigma_\delta\lesssim1~\mu$m (BBA aralığı boyunca; daha büyüğü test edilmedi) & T2 \\
 kuadrupol üstü manyetik dipol trim sargıları & Adım 3 \\
 saptırıcı başına yüksek gerilim ve düşey elektrik trimi; saptırıcı sütunlu fit & Adım 2, T1 \\
 yalnız kuadrupol fiti kullanılırsa saptırıcı kararlılığı $\lesssim5\times10^{-8}$ ve 0.05~$\mu$rad & Adım 2 (\HIP\ eşik) \\
-BBA artığı $\lesssim0.15$--0.2~$\mu$m & Adım 6 (\HIP) \\
+BBA artığı $\sim0.3~\mu$m yeterli (hedefin $\sim$15 kat altı) & Adım 6 \\
 BPM elektronik tabanı $\lesssim10$--100~nm & Adım 6 \\
 çift kısmın sadeleşmesi için CW/CCW simetrisi & Adım 2, T1 \\
 \bottomrule
@@ -856,7 +871,10 @@ yöntemin aleyhine değil, kestirici bunu bildiğinde lehine.
 \item Sec.~III'teki 100 kat bastırma iddiası ve Şekil 1(a)'daki analitik $G_k$ formülü, ölçülen harmonik
 tabloyla değiştirilmeli.
 \item ``Tek demet kördür'' yerine nicel bir karşılaştırma verilmeli: laboratuvara sabit BPM'de yaklaşık
-3 kat (model hatasıyla kaybolur), rijit BPM'de 25--50 kat.
+3 kat (model hatasıyla kaybolur); rijit BPM'de $\sigma_\delta$'ya bağlı olarak 4--800 kat.
+\item Makaledeki bütün sahte EDM sayıları (Şekil~4 dahil) donmuş spin prosedürüyle yeniden ölçülmeli ya
+da en azından enerji tanımı yazılmalı; eski prosedür fırlatma noktasına göre 0.3--13 kat ve işaret
+düzeyinde değişen sonuç veriyor.
 \item Hakem B için Adım 6'nın zaman senaryosu ve tespit sınırı eklenmeli.
 \end{enumerate}
 
@@ -864,14 +882,19 @@ tabloyla değiştirilmeli.
 \section{Sınırlamalar ve açık sorular}
 %======================================================================
 \begin{itemize}
-\item C++ sahte EDM sonuçlarının çoğu 3 seed'e dayanır; seed'ler arası dağılım bazen 10 kattan fazladır.
-Makaleye girecek sayılar için daha fazla seed gerekir.
+\item Yeniden ölçülen sonuçlar 5--10 seed'e dayanır; seed'ler arası dağılım bazen 10 kattan fazladır.
+Yüzdelik aralıklar bu yüzden kabadır.
 \item Statik başlangıç durumu simüle edilmedi: $10^{-4}$/0.1~mrad statik saptırıcı hataları milimetre
 düzeyinde yörünge yaratır; bunu kalibrasyonda düzeltmenin kendi sahte EDM tabanı bilinmiyor~\HIP.
 \item Adım 6'da saptırıcı sürüklenmesi ve T1 trimi aynı senaryoda birleştirilmedi.
 \item Adım 6 parametreleri (BBA artığı, $\delta$ kayma hızı, elektronik taban) tahmindir.
 \item Elektrostatik düzelticilerde kalan $C\approx1.5$--3'ün mekanizması doğrulanmadı.
-\item Adım 6'da kısaltılmış estimatör ayarı kullanıldı (daha önce $p=2.00$ ile doğrulanmış).
+\item Yeniden ölçümlerde kısaltılmış ayar kullanıldı (tam ayardan farkı \%0.015, sayısal taban
+$\approx0.008\times$hedef). $C\lesssim0.01$ değerleri bu tabandadır; bu düzeydeki farklar yorumlanmamalı.
+\item Adım~2 ($\varepsilon\times\phi$), Adım~3, Adım~4 (korelasyonlu modeller) ve Adım~5'in sahte EDM
+sayıları eski prosedürle; yeniden ölçülmedi (Tablo~\ref{tab:hangisi}).
+\item Donmuş spin noktası tek bir doğrusal ara değerlemeyle bulunuyor; $f(\delta)$ ve $\omega_h(\delta)$'nın
+doğrusallığı yalnız bir desende ($\sigma=10~\mu$m, seed~0) $\delta=\pm10^{-6}$ aralığında sınandı.
 \end{itemize}
 
 %======================================================================
@@ -888,7 +911,14 @@ düzeltildi.
 rms ile normalize edildi. Ayrıca bir ara sohbette simetrik bileşenin spin/yörünge oranı ``yaklaşık 50 kat''
 diye yanlış yazılmıştı (antisimetrik için yanlış eşleşmeyle kıyaslanmıştı). Doğrusu 2--3 kattır.
 \item \textbf{T2:} Hesap yanlışlıkla iki kez başlatılmıştı; kopya durduruldu, yinelenen satırlar
-temizlendi.
+temizlendi. Adım~6 yeniden ölçümünde de aynı şey oldu; kopya sonuç yazmadan durduruldu.
+\item \textbf{Ölçüm prosedürü (en önemlisi):} sahte EDM, kapalı yörünge üzerinde sihirli momentumla
+fırlatmaya bağlı bir enerji kaymasıyla ölçülüyordu; sonuç fırlatma noktasına göre $-456$ ile $+2729$
+arasında değişiyordu. Donmuş spin prosedürüne geçildi (Bölüm~\ref{sec:enerji}). Bu düzeltme üç sonucu
+değiştirdi: makale yöntemi (E3) $\rho=1$'de hedefin altında kalıyor; rijit BPM'de iki demet
+$\sigma_\delta=1~\mu$m'de de sayısal tabanda; Adım~6'da makale modeli hedefin çevresinde, çok üstünde değil.
+\item \textbf{Adım 2 roll kontrolü:} kaba tahmin ($\sqrt{48}$, $T_{\rm dev}\approx3.7~\mu$s) \%25 fark
+veriyordu; kesin formül simülasyonla $10^{-5}$ içinde uyuşuyor.
 \end{enumerate}
 
 %======================================================================
@@ -899,7 +929,7 @@ Bütün betikler ve sonuçlar \kod{claude/brave-allen-92wn61} dalında, \kod{rev
 kod değiştirilmedi.
 
 \begin{center}\small
-\begin{tabularx}{\textwidth}{lX}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.45\textwidth}X}
 \toprule
 betik & işlev \\
 \midrule
@@ -913,6 +943,10 @@ betik & işlev \\
 \kod{t1\_defl\_trim.py}, \kod{t2\_bpm\_rigid.py} & tartışma testleri \\
 \kod{adim5\_harmonics.py} & harmonik kazanç ve sahte EDM \\
 \kod{adim6\_time.py} & zaman senaryosu ve tespit sınırı \\
+\kod{sahte\_edm\_donmus.py} & donmuş spin ölçüm aracı ve $\sigma^2$ kampanyası \\
+\kod{donmus\_fig4.py}, \kod{donmus\_adim1.py}, \kod{donmus\_t1.py}, \kod{donmus\_t2.py},
+\kod{donmus\_adim6.py} & yeni prosedürle yeniden ölçümler (\kod{--ozet}, \kod{--cizim}) \\
+\kod{tests/} & doğrulama paketi (\kod{pytest}; yavaşlar \kod{-m slow}) ve enerji teşhis betikleri \\
 \bottomrule
 \end{tabularx}
 \end{center}
