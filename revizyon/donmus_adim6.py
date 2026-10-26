@@ -69,14 +69,75 @@ def summarize(out):
                       f"(sim medyan {np.median(sy):.3f} μm)")
 
 
+def plot(out):
+    """adim6_time.run_plot ile aynı üç panel; (b) donmuş spin sonuçlarıyla. → sonuclar/donmus_adim6.{pdf,png}"""
+    import adim6_time as A6
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    rows = [json.loads(l) for l in open(out)]
+    E = []
+    for key in sorted({(r["seed"], r["world"], r["method"], r["hour"]) for r in rows}):
+        f = {r["direction"]: r["f"] for r in rows if (r["seed"], r["world"], r["method"], r["hour"]) == key}
+        if len(f) == 2:
+            E.append(dict(seed=key[0], world=key[1], method=key[2], hour=key[3], C=abs(f[1] - f[-1]) / 2 / 1e-9))
+    nseed = len({e["seed"] for e in E})
+    plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm", "font.size": 9})
+    fig, axs = plt.subplots(1, 3, figsize=(10.5, 3.3))
+    col = {"W1_E4": "#D55E00", "W1_E2": "#E69F00", "W0_E3": "#0072B2", "W1_bba_only": "#009E73",
+           "W1_none": "#595959"}
+    lab = {"W1_E4": "rigid BPM, two beams", "W1_E2": "rigid BPM, one beam",
+           "W0_E3": "BPM on own stand, paper model", "W1_bba_only": "periodic BBA only",
+           "W1_none": "no monitoring, no BBA"}
+    S = json.load(open(os.path.join(A6.OUTDIR, "adim6_series.json")))
+    for k, r in S["runs"].items():
+        h = np.array(r["hours"])
+        axs[0].semilogy(h, r["sym_med"], color=col[k], label=lab[k])
+        axs[0].fill_between(h, r["sym_p16"], r["sym_p84"], color=col[k], alpha=0.12)
+    axs[0].set_xlabel("time [h]"); axs[0].set_ylabel(r"symmetric residual [$\mu$m]")
+    axs[0].set_title("(a) residual misalignment (linear, 20 seeds)", fontsize=8.5)
+    h0, l0 = axs[0].get_legend_handles_labels()
+    fig.legend(h0, l0, loc="lower center", ncol=5, fontsize=7, bbox_to_anchor=(0.5, -0.08))
+    t0 = [e for e in E if e["hour"] == 0]
+    for k in col:
+        w, m = k.split("_", 1)
+        pts = [e for e in E if e["world"] == w and e["method"] == m and e["hour"] > 0] + \
+              [dict(e, world=w, method=m) for e in t0]
+        hs = sorted(set(e["hour"] for e in pts))
+        med = [np.median([e["C"] for e in pts if e["hour"] == hh]) for hh in hs]
+        axs[1].semilogy(hs, med, "o-", color=col[k], ms=3)
+        for e in pts:
+            axs[1].scatter(e["hour"], max(e["C"], 1e-5), color=col[k], s=6, alpha=0.4)
+    axs[1].axhline(1, color="#D55E00", ls="--", lw=1)
+    axs[1].set_xlabel("time [h]"); axs[1].set_ylabel(r"false EDM $C$ [target]")
+    axs[1].set_title(f"(b) false EDM (C++, frozen spin, {nseed} seeds)", fontsize=8.5)
+    D = json.load(open(os.path.join(A6.OUTDIR, "adim6_detect.json")))
+    for st, ls in ((1e-6, ":"), (10e-6, "-"), (100e-6, "--")):
+        for fl, c in ((0.0, "#595959"), (10e-9, "#0072B2"), (100e-9, "#D55E00")):
+            g = [x for x in D["grid"] if x["sig_turn"] == st and x["floor"] == fl]
+            axs[2].loglog([x["T_avg"] for x in g], [x["min_E4"] * 1e6 for x in g], ls, color=c, lw=1,
+                          label=f"{st*1e6:.0f} $\\mu$m/turn, floor {fl*1e9:.0f} nm")
+    axs[2].set_xlabel(r"averaging time $T_{\rm avg}$ [s]")
+    axs[2].set_ylabel(r"min. detectable sym. drift (3$\sigma$) [$\mu$m]")
+    axs[2].set_title("(c) two-beam detection limit", fontsize=8.5)
+    axs[2].legend(fontsize=5.5, ncol=1)
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(os.path.join(REV, "sonuclar", f"donmus_adim6.{ext}"), dpi=200, bbox_inches="tight")
+    print("donmus_adim6.pdf/png yazıldı")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, nargs="+", default=list(range(5)))
     ap.add_argument("-w", "--workers", type=int, default=4)
     ap.add_argument("--ayar", choices=["kisa", "tam"], default="kisa")
     ap.add_argument("--ozet", action="store_true")
+    ap.add_argument("--cizim", action="store_true")
     a = ap.parse_args()
-    if a.ozet:
+    if a.cizim:
+        plot(os.path.join(REV, "sonuclar", f"donmus_adim6_{a.ayar}.jsonl"))
+    elif a.ozet:
         summarize(os.path.join(REV, "sonuclar", f"donmus_adim6_{a.ayar}.jsonl"))
     else:
         main(a.seeds, a.workers, a.ayar)
