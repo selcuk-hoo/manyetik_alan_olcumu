@@ -331,7 +331,7 @@ def s11():
         ax.text(v * 1.3, yi, f"{v:.0e}".replace("e-0", "e−"), va="center", fontsize=8, color=INK2)
     ax.set_yticks(y, [n for n, *_ in items], fontsize=7.5); ax.set_xscale("log"); ax.set_xlim(1e-7, 1e-3)
     ax.set_xlabel("bağıl alan / gerilim kararlılığı"); ax.grid(axis="y", visible=False)
-    ax.set_title("varsayılan saptırıcı sürüklenmesi bugünkü kaynaklardan 30–300 kat küçük (kaynaklar ek raporda)",
+    ax.set_title("T1 genliği ve literatür değerleri (farklı türden sayılar; trimle izin verilen sınır için Şekil s16)",
                  fontsize=8.5)
     save(fig, "s11_hv")
 
@@ -441,8 +441,38 @@ def s15():
     save(fig, "s15_bpm_lit")
 
 
+# ─────────────── S16: saptırıcı sürüklenmesi genlik taraması (soru 25, 40) ───────────────
+def s16():
+    rows = [json.loads(l) for l in open(os.path.join(OUT, "donmus_t1_genlik.jsonl"))]
+    t1 = [json.loads(l) for l in open(os.path.join(OUT, "donmus_t1_kisa.jsonl"))]
+    fig, ax = plt.subplots(figsize=(6.0, 3.2))
+    for case, c, lab in (("trim", C1, "trim, model kusursuz"), ("trim_g20", C2, "trim, %0.2 gradyan hatası (β-beat)")):
+        A, med = [], []
+        for a in (3e-7, 1e-6, 3e-6, 1e-5):
+            src = t1 if a == 3e-7 else [r for r in rows if r["amp"] == a]
+            Cs = []
+            for s_ in range(8):
+                f = {r["direction"]: r["f"] for r in src if r["case"] == case and r["seed"] == s_}
+                if len(f) == 2:
+                    Cs.append(abs(f[1] - f[-1]) / 2e-9)
+            ax.scatter([a] * len(Cs), Cs, color=c, s=12, alpha=0.5)
+            A.append(a); med.append(np.median(Cs))
+        ax.plot(A, med, "o-", color=c, ms=6, label=lab)
+    aa = np.array([3e-7, 1e-5])
+    ax.plot(aa, 0.0103 * (aa / 3e-7) ** 2, color=INK2, lw=1, ls="--", label="ilk tahminim: C ∝ A² (yanlış)")
+    ax.axhline(0.008, color=INK2, lw=1, ls=":"); ax.text(3.2e-7, 0.0055, "sayısal taban", fontsize=7, color=INK2)
+    ax.set_xscale("log"); ax.set_yscale("log"); ax.set_ylim(1e-3, 30)
+    ax.axvspan(1e-5, 1e-4, color=C4, alpha=0.12, lw=0)
+    ax.text(1.05e-5, 0.0015, "bugünkü HV\nkaynakları", fontsize=7, color=INK2)
+    target_line(ax)
+    ax.set_xlabel("saptırıcı başına bağımsız sürüklenme A (ε ve φ rms)")
+    ax.set_ylabel("C [× hedef]"); ax.legend(loc="upper left", fontsize=7)
+    ax.set_title("trimden sonra sahte EDM: sınırı genlik değil, model hatası belirliyor", fontsize=8.5)
+    save(fig, "s16_genlik")
+
+
 ALL = dict(s1=s1, s2=s2, s3=s3, s4=s4, s5=s5, s6=s6, s7=s7, s8=s8, s9=s9, s10=s10, s11=s11, s12=s12,
-           s13=s13, s14=s14, s15=s15)
+           s13=s13, s14=s14, s15=s15, s16=s16)
 
 if __name__ == "__main__":
     for k in (sys.argv[1:] or ALL):

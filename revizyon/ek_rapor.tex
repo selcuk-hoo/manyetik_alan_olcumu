@@ -54,9 +54,12 @@ Cevapların bir kısmı için yeni hesaplar yapıldı: (i)~fırlatma noktasına 
 açıklaması yanlıştı ve düzeltildi), (ii)~$\rho$ yanlış bilinirse ne olur, (iii)~$\rho=0.5$'te sahte EDM,
 (iv)~elektrostatik düzelticinin (Ed) yeni prosedürle sahte EDM'si, (v)~TSVD eşiğinin doğru kaçıklığı
 bilmeden seçilmesi. Literatür değerleri (BPM kararlılığı, BPM gürültüsü, yüksek gerilim kararlılığı)
-kaynaklarıyla verildi. En önemli yeni bulgu olumsuzdur: saptırıcı başına alan kararlılığı için
-varsaydığımız $\sim3\times10^{-7}$ düzeyi, bugünkü yüksek gerilim kaynaklarının
-($10^{-5}$--$10^{-4}$) çok altındadır; bu, yöntemin en zor tasarım gereksinimidir.
+kaynaklarıyla verildi. Saptırıcı alan kararlılığı ayrıca bir genlik taramasıyla incelendi. İlk bakışta
+varsayımımız ($3\times10^{-7}$) bugünkü yüksek gerilim kaynaklarından ($10^{-5}$--$10^{-4}$) iki mertebe
+iyi görünüyordu. Tarama gösterdi ki saptırıcı trimi uygulandığında model kusursuzsa $10^{-5}$'lik bağımsız
+sürüklenmede bile sahte EDM sayısal tabanda kalıyor; sınırı genlik değil, tepki modelinin doğruluğu
+belirliyor (\%0.2 gradyan hatasıyla $C<1$ için $\lesssim3$--$5\times10^{-6}$). Yani açık iki mertebe değil,
+yaklaşık 2--3 kat; ve model doğruluğu iyileştikçe kapanıyor.
 \end{abstract}
 
 \tableofcontents
@@ -706,18 +709,54 @@ raporlanmıştır~\cite{hirfl}. Yani bugünkü teknoloji $10^{-5}$--$10^{-4}$ d�
 $3\times10^{-7}$ sürüklenme bundan 30--300 kat küçüktür.
 
 \sekil{ek_sekil_s11_hv.pdf}{Saptırıcı alan kararlılığı: bu çalışmanın varsayımı ve bulunan literatür değerleri (logaritmik eksen).}
-\textbf{Bu ne kadar ciddi~\YOR.} Birkaç ayrım gerekir:
+\textbf{Bu ne kadar ciddi? Önce ayrımlar~\YOR.}
 \begin{itemize}[nosep]
 \item Bütün saptırıcılarda \emph{ortak} değişim enerjiyi kaydırır; donmuş spin geri beslemesi bunu
 otomatik düzeltir. Önemli olan saptırıcıdan saptırıcıya \emph{bağımsız} değişimdir.
-\item Hızlı dalgalanma (kHz) yörüngeyi titretir ama spin ve kestirim zaman ortalaması alır; önemli olan
-yavaş sürüklenmedir.
-\item Bağımsız yavaş sürüklenme $10^{-5}$ olsaydı, Adım~2'nin doğrusallığına göre her saptırıcı
-$\sim40~\mu$m yörünge bozulması yaratırdı ve T1'deki $\varepsilon\times\phi$ etkisi (amplitüdün karesiyle)
-$\sim(33)^2\approx1000$ kat büyürdü. Trim sonrası $C\approx0.01$ olan sonuç $\sim10$'a çıkardı.
+\item Hızlı dalgalanma (kHz): sahte EDM yatay ($\varepsilon$) ve düşey ($\phi$) hatanın aynı andaki
+çarpımından gelir; ikisi bağımsız dalgalanıyorsa çarpımın zaman ortalaması sıfıra gider~\HIP\ (C++
+izleyicide zamanla değişen alan yok; test edilmedi). Önemli olan yavaş sürüklenmedir.
+\item Statik hata trimle geri alınır; önemli olan iki trim güncellemesi arasındaki sürüklenmedir. İzleme
+sürekli çalışıyorsa bu, dakikalar ölçeğinde kararlılık demektir.
+\item Literatür sayıları aynı türden değil: COSY'nin $10^{-5}$'i hızlı dalgalanma, nEDM kaynağının
+$10^{-4}$'ü uzun süreli kararlılık ve sıcaklık katsayısı belirtimi. Dakikalar ölçeğindeki yavaş sürüklenme
+için kaynak bulamadım.
 \end{itemize}
-Bu yüzden saptırıcı başına alan kararlılığı, yöntemin (aslında herhangi bir proton EDM halkasının)
-\textbf{en zor tasarım gereksinimidir} (soru 40). Bu ana raporda yeterince vurgulanmamıştı.
+
+\textbf{Genlik taraması~\BEL} (\kod{donmus\_t1\_genlik.py}; T1 senaryosu, saptırıcı sürüklenmesi
+$A=\sigma_\varepsilon=\sigma_\phi$, 4 seed, iki yön; $3\times10^{-7}$ satırı T1'den, 8 seed):
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+$A$ & trim, model kusursuz & trim, \%0.2 gradyan hatası \\
+\midrule
+$3\times10^{-7}$ & 0.010 & 0.016 \\
+$1\times10^{-6}$ & 0.006 [0.001, 0.011] & 0.015 [0.007, 0.11] \\
+$3\times10^{-6}$ & 0.009 [0.006, 0.011] & 0.28 [0.23, 0.80] \\
+$1\times10^{-5}$ & 0.010 [0.007, 0.020] & 3.5 [2.0, 8.1] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\sekil[0.75]{ek_sekil_s16_genlik.pdf}{Trimden sonra sahte EDM, saptırıcı başına bağımsız sürüklenmeye karşı.
+Kesikli çizgi, ilk sürümdeki ``$C\propto A^2$'' tahminimdir; model kusursuzken tamamen yanlış çıktı.}
+
+\textbf{Okunuşu.}
+\begin{enumerate}[nosep]
+\item \emph{İlk tahminim yanlıştı~\BEL.} Ek raporun ilk taslağında ve sohbette $C\propto A^2$ diye
+ekstrapolasyon yapmıştım ($10^{-5}$'te $C\sim10$). Model kusursuzken $C$ genlikten bağımsız olarak sayısal
+tabanda kalıyor. Yani $3\times10^{-7}$'deki 0.010 da zaten tabandı; ekstrapolasyon tabanı ölçeklemişti.
+\item \emph{Neden~\YOR.} Saptırıcı sütunlu fit doğrusaldır. Model doğruysa kestirim hatası yalnız BPM
+gürültüsünden gelir ve genlikten bağımsızdır; trimden sonra kalan saptırıcı yörüngesi genlik ne olursa olsun
+gürültü düzeyindedir.
+\item \emph{Sınırı model hatası belirler~\BEL.} \%0.2 gradyan hatasıyla (yaklaşık \%1 $\beta$-beat) kestirim
+hatası genlikle orantılı olur ve $C$ genliğin karesiyle büyür (3'ten 10'a $\times12$; $A^2$ oranı 11).
+$C<1$ için medyan $A\lesssim5\times10^{-6}$, en kötü seed için $A\lesssim3.5\times10^{-6}$.
+\item \emph{Sonuç~\YOR.} Gereken saptırıcı kararlılığı $10^{-6}$ mertebesinin üstünde, $\sim3\times10^{-6}$
+düzeyindedir ve tepki modelinin doğruluğuyla ölçeklenir: model hatası yarıya inerse izin verilen sürüklenme
+iki katına çıkar~\HIP. Bugünkü kaynaklarla açık iki mertebe değil, yaklaşık 2--3 kat (ve karşılaştırılan
+sayılar aynı türden değil). Bu hâlâ zor bir gereksinimdir, ama model doğruluğu (LOCO kalitesinde bir tepki
+matrisi ölçümü) ve sık trim güncellemesiyle kapatılabilir görünüyor.
+\end{enumerate}
 
 \soru{26}{Kestirim bu kadar kötüyken yöntem neden yine de çalışıyor? ``Kötü kestirilen doğrultular
 yörüngeye zaten küçük katkı verir'' argümanını açar mısın?}
@@ -991,9 +1030,12 @@ kuadrupol üstü manyetik dipol trim sargıları & yalnız bu düzeltici türü 
 saptırıcı başına yüksek gerilim ve düşey elektrik trimi; saptırıcı sütunlu fit & saptırıcı sürüklenmesini
 kestirip kaynağında geri almak (T1) & trimin kendisi kolay (soru 25) \\
 \addlinespace
-\textbf{saptırıcı başına alan kararlılığı $\sim3\times10^{-7}$ (bağımsız, yavaş)} & T1 bu düzeyde test edildi;
-$10^{-5}$'te $C\sim10$'a çıkması beklenir (soru 25) & \textbf{en zor}: bugünkü kaynaklar
-$10^{-5}$--$10^{-4}$ \\
+\textbf{saptırıcı başına bağımsız yavaş sürüklenme $\lesssim3\times10^{-6}$ (trim güncellemeleri arasında)} &
+\%0.2 gradyan hatalı modelle $C<1$ sınırı; model kusursuzsa $10^{-5}$'te bile tabanda (soru 25) &
+\textbf{zor}: literatür $10^{-5}$--$10^{-4}$ (farklı türden sayılar); açık $\sim$2--3 kat \\
+\addlinespace
+tepki modelinin doğruluğu (gradyan hatası $\lesssim$\%0.2) & saptırıcı kararlılığı sınırını doğrudan
+belirler (soru 25) & LOCO kalitesinde ulaşılabilir~\HIP \\
 \addlinespace
 yalnız kuadrupol fiti kullanılırsa saptırıcı kararlılığı $\lesssim5\times10^{-8}$ ve 0.05~$\mu$rad & saptırıcı
 sütunu olmayan fitin sızıntısı $\sim1~\mu$m / ($10^{-7}$) (Adım 2) & gerçekçi değil; saptırıcı sütunları
@@ -1010,7 +1052,7 @@ günler boyunca zor (soru 35) \\
 \bottomrule
 \end{tabularx}
 \end{center}
-En zor iki gereksinim saptırıcı alan kararlılığı ve CW/CCW simetrisidir. İkisi de bu yönteme özgü değildir;
+En zor iki gereksinim saptırıcı alan kararlılığı (model doğruluğuyla birlikte) ve CW/CCW simetrisidir. İkisi de bu yönteme özgü değildir;
 her proton EDM halkasının genel sorunlarıdır. Ama yöntem, saptırıcı sürüklenmesine özellikle duyarlıdır,
 çünkü saptırıcı hataları simetrik sinyalle aynı kanala düşer~\YOR.
 
@@ -1106,9 +1148,11 @@ Yapılması gerekir mi?}
 veriyor; Adım~6'nın iki demetli sonucu 0.05--0.18. İki katkı büyük ölçüde bağımsız ise toplam
 $\approx0.05$--0.2 olur; yani sonuç değişmez. Ama iki önemli soru var: (1)~saptırıcı sürüklenmesinin
 \emph{zaman yasası} ne (yer hareketi gibi $\sqrt t$ mi, sıcaklıkla mı, doğrusal mı)? (2)~soru 25'e göre
-gerçekçi kararlılık $10^{-5}$ ise sonuç $C\sim10$ olur. Yani birleştirmenin asıl değeri, ``hangi saptırıcı
-kararlılığında yöntem hâlâ çalışır'' sorusuna nicel cevap vermesidir. Önerilir: Adım~6 + saptırıcı
-sürüklenmesi, kararlılık taraması $10^{-7}$--$10^{-5}$ (bir günlük iş).
+gerçekçi sürüklenme $10^{-5}$ ve model \%0.2 hatalıysa trimden sonra bile $C\approx3.5$ olur; model
+kusursuzsa taban. Yani birleştirmenin asıl değeri, ``hangi saptırıcı
+kararlılığında yöntem hâlâ çalışır'' sorusuna nicel cevap vermesidir. Genlik taraması (soru 25) bu sorunun
+statik kısmını cevapladı; zaman senaryosunda birleştirmek, sürüklenme yasasına bağlı olarak trim güncelleme
+sıklığını belirlemek için önerilir (yarım günlük iş).
 
 \soru{47}{Adım 5'in sahte EDM sayıları makalede kullanılacak mı? Kullanılacaksa yeniden ölçülmeleri şart mı?}
 
