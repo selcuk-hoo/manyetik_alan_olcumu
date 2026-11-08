@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.25)  8 NOV 2026 01:54
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.25)  8 NOV 2026 02:42
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -642,7 +642,7 @@ LaTeX Info: Redefining \ttfamily on input line 2.
 \openout4 = `ek_rapor.toc'.
 
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 73--77
+Underfull \hbox (badness 10000) in paragraph at lines 76--80
 []\TU/lmr/m/n/10.95 Yeni hesapların hepsi \TU/lmtt/m/n/10.95 claude/brave-allen
 -92wn61 \TU/lmr/m/n/10.95 dalında, \TU/lmtt/m/n/10.95 revizyon/ \TU/lmr/m/n/10.
 95 altındadır:
@@ -659,7 +659,7 @@ File: sonuclar/ek_sekil_s3_delta.pdf Graphic file (type pdf)
 
 
 LaTeX Font Warning: Font shape `TU/lmr/bx/sc' undefined
-(Font)              using `TU/lmr/bx/n' instead on input line 215.
+(Font)              using `TU/lmr/bx/n' instead on input line 218.
 
 [6] [7]
 File: sonuclar/ek_sekil_s4_firlatma.pdf Graphic file (type pdf)
@@ -685,22 +685,41 @@ File: sonuclar/ek_sekil_s10_roll.pdf Graphic file (type pdf)
 File: sonuclar/ek_sekil_s11_hv.pdf Graphic file (type pdf)
 <use sonuclar/ek_sekil_s11_hv.pdf>
  [17]
+File: sonuclar/ek_sekil_s16_genlik.pdf Graphic file (type pdf)
+<use sonuclar/ek_sekil_s16_genlik.pdf>
+
+
+LaTeX Font Warning: Font shape `TU/lmr/m/scit' undefined
+(Font)              using `TU/lmr/m/scsl' instead on input line 745.
+
+
+LaTeX Font Warning: Font shape `TU/lmr/m/scit' undefined
+(Font)              using `TU/lmr/m/scsl' instead on input line 748.
+
+
+LaTeX Font Warning: Font shape `TU/lmr/m/scit' undefined
+(Font)              using `TU/lmr/m/scsl' instead on input line 751.
+
+
+LaTeX Font Warning: Font shape `TU/lmr/m/scit' undefined
+(Font)              using `TU/lmr/m/scsl' instead on input line 754.
+
+[18]
 File: sonuclar/ek_sekil_s12_t2.pdf Graphic file (type pdf)
 <use sonuclar/ek_sekil_s12_t2.pdf>
- [18] [19]
+ [19] [20]
 File: sonuclar/ek_sekil_s15_bpm_lit.pdf Graphic file (type pdf)
 <use sonuclar/ek_sekil_s15_bpm_lit.pdf>
- [20]
+ [21]
 File: sonuclar/ek_sekil_s13_beta.pdf Graphic file (type pdf)
 <use sonuclar/ek_sekil_s13_beta.pdf>
- [21]
+ [22]
 File: sonuclar/donmus_adim6.pdf Graphic file (type pdf)
 <use sonuclar/donmus_adim6.pdf>
-
-[22]
+ [23]
 File: sonuclar/ek_sekil_s14_bba.pdf Graphic file (type pdf)
 <use sonuclar/ek_sekil_s14_bba.pdf>
- [23] [24] [25] [26] [27] (./ek_rapor.aux)
+ [24] [25] [26] [27] [28] (./ek_rapor.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -710,15 +729,15 @@ L3 programming layer <2024-01-22>
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `ek_rapor.out' has not changed.
-(rerunfilecheck)             Checksum: 0672D82E74DF4AA477316378C81279A1;3823.
+(rerunfilecheck)             Checksum: 9F3241AEB8F0860501860B8C12C977C1;3823.
  ) 
 Here is how much of TeX's memory you used:
- 16623 strings out of 476316
- 330207 string characters out of 5791084
- 1939627 words of memory out of 5000000
- 38319 multiletter control sequences out of 15000+600000
- 568034 words of font info for 96 fonts, out of 8000000 for 9000
+ 16637 strings out of 476316
+ 330709 string characters out of 5791084
+ 1948627 words of memory out of 5000000
+ 38330 multiletter control sequences out of 15000+600000
+ 568042 words of font info for 97 fonts, out of 8000000 for 9000
  350 hyphenation exceptions out of 8191
  79i,10n,117p,448b,501s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on ek_rapor.pdf (27 pages).
+Output written on ek_rapor.pdf (28 pages).
