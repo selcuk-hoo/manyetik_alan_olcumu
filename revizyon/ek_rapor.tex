@@ -20,6 +20,8 @@
 \hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black}
 \captionsetup{font=small,labelfont=bf}
 \setlength{\parskip}{0.45em}
+\graphicspath{{sonuclar/}}
+\newcommand{\sekil}[3][0.95]{\begin{figure}[H]\centering\includegraphics[width=#1\textwidth]{#2}\caption{#3}\end{figure}}
 \setlength{\parindent}{0pt}
 
 \newcommand{\kod}[1]{{\XeTeXinterchartokenstate=0\texttt{#1}}}
@@ -112,6 +114,8 @@ y, antisimetrik & 45.8 & 45.8 & 6.8 & 45.3 \\
 \bottomrule
 \end{tabular}
 \end{center}
+\sekil{ek_sekil_s1_kanallar.pdf}{Simetrik ve antisimetrik kaçıklığın toplam (CW+CCW) ve fark (CW$-$CCW) kanallarındaki yörünge tepkisi. Antisimetrik sinyal neredeyse tamamen fark kanalında; toplam kanalında ikisi eşit büyüklükte.}
+
 Okunuşu: antisimetrik kaçıklık büyük bir yörünge üretir (norm $\sim$34--46) ve bunun neredeyse tamamı
 fark kanalındadır. Simetrik kaçıklık 4--5 kat küçük bir yörünge üretir ve bu yörüngenin yarısına yakını
 toplam kanalındadır. Toplam kanalında simetrik ve antisimetrik eşit büyüklükte görünür (5.2 ve 5.1).
@@ -170,6 +174,7 @@ iner; aynı eşik x'te hiç, y'de 8 doğrultu atar~\BEL. Atılan doğrultular a�
 desenlerdir (soru 1: simetrik yörünge küçük). Yani tek demet, \kod{rcond}~$=0.01$ ile simetrik
 bileşenin büyük kısmını ``bilinmiyor'' sayıp sıfır kabul eder; iki demet bunları tutar~\YOR.
 
+\sekil{ek_sekil_s2_tekil.pdf}{Tek demet ($R_{\rm CCW}$) ve iki demet ($[R_{\rm CCW};R_{\rm CW}]$) matrislerinin normalize tekil değerleri. Kesikli çizginin altındaki doğrultular \kod{rcond}~$=0.01$ ile atılır.}
 \textbf{0.01 neden?} Makalede gerekçe yok; büyük olasılıkla sezgisel bir seçimdir. Ana rapor Adım~1
 gösterdi ki bu seçim tek demeti haksız yere kötü gösteriyor: tek demet uygun eşikle (0.003) simetrik
 artığı 3.87~$\mu$m yerine 0.051~$\mu$m'ye indiriyor~\BEL. Eşiğin gerçek kaçıklığı bilmeden nasıl seçileceği
@@ -206,6 +211,7 @@ $\omega_h=\mathrm{d}/\mathrm{d}t\,\mathrm{atan2}(S_x,S_z)$ ölçüldü. İkisi d
 eğimler $\mathrm{d}f/\mathrm{d}\delta\approx-2.9$~rad/s (yani $\delta=10^{-7}$ başına $\approx290\times$hedef)
 ve $\mathrm{d}\omega_h/\mathrm{d}\delta\approx-5.24\times10^{6}$~rad/s~\BEL\ (\kod{tests/teshis\_enerji\_ABC.py}).
 
+\sekil{ek_sekil_s3_delta.pdf}{Beş noktalı enerji taraması ($\sigma=10~\mu$m, seed~0). İkisi de doğrusal; elmas, $\omega_h=0$ olan donmuş spin noktası.}
 \textbf{İki eğim çok farklı nitelikte~\BEL.} Donmuş spin aracının $\sigma=2.5$, 5, 10~$\mu$m koşumlarından:
 \begin{itemize}[nosep]
 \item $\mathrm{d}\omega_h/\mathrm{d}\delta=-5.238\times10^{6}$~rad/s, kaçıklıktan \emph{bağımsız}
@@ -307,6 +313,7 @@ kaçıklık yok & $-1.6\times10^{-12}$ & $-1.6\times10^{-12}$ & $-1.0\times10^{-
 \bottomrule
 \end{tabular}
 \end{center}
+\sekil{ek_sekil_s4_firlatma.pdf}{Üst: bir FODO hücresinin eleman sırası ve fırlatma noktası. Sol alt: aynı kapalı yörüngenin farklı hücrelerinde $|p|$. Sağ alt: aynı desen için üç fırlatma kuralı; yalnız donmuş spin fırlatma noktasından bağımsız.}
 Kaçıklık yokken fark sayısal sıfırdır; kaçıklıkla $\sim10^{-7}$'dir. Yani eski prosedür, fırlatma hücresi
 değişince $\sim10^{-7}$ kadar farklı bir yörünge enerjisi seçiyordu. Soru 6'ya göre bu, yüzlerce kat
 hedeflik bir fark yaratmaya yeter.
@@ -344,6 +351,7 @@ Doğrudan görülüyor: enerji korunumlu başlangıç noktasındaki $f_0$'ın do
 $\sigma$'dan bağımsızdır: seed~0: $-4.57$, $-4.58$, $-4.59$; seed~1: $2.45$, $2.44$, $2.44$; seed~2:
 $0.84$, $0.84$, $0.85$ ($\sigma=2.5$, 5, 10~$\mu$m)~\BEL. Oran 1'den farklı, ama sabit.
 
+\sekil{ek_sekil_s5_sigma2.pdf}{Sol: donmuş spin ve sabit fırlatma kuralı ile $|f|$; ikisi de $\sigma^2$ ile ölçeklenir. Sağ: oranları her seed için sabittir ama 1'den farklıdır; $\sigma^2$ testi bu yanlılığı yakalayamaz.}
 Yani $\sigma^2$ testi \emph{mekanizmanın türünü} doğrular (ikinci mertebe, geometrik faz, birinci mertebe
 sızıntı yok); \emph{mutlak değeri} doğrulamaz. Mutlak değer için ek bir değişmezlik testi gerekir (fırlatma
 noktasından bağımsızlık gibi)~\YOR.
@@ -390,6 +398,7 @@ iddiası bu eşikle kurulmuş bir karşılaştırmaya dayanıyor~\YOR.
 \soru{13}{``Simetrik kayma, tek demette bile büyük bir sinyal olarak görünür.'' Bu sezgiyi açar mısın?
 Makalenin iki demet gerekçesini zayıflatıyor mu?}
 
+\sekil{ek_sekil_s6_bpm.pdf}{BPM modeli. (a) Lab-sabit BPM demetin laboratuvardaki konumunu, (b) rijit BPM demetin kuadrupol merkezine göre konumunu okur.}
 Lab-sabit BPM demetin \emph{laboratuvardaki} konumunu okur: $r=x$. Simetrik kaçıklığın ürettiği yörünge
 küçüktür (soru 1), bu yüzden okuma küçüktür. BPM kuadrupole rijit bağlıysa ve kuadrupolle birlikte $d$ kadar
 kayarsa, demetin \emph{BPM'e göre} konumunu okur: $r=x-d$. Demet pek kımıldamadığı için ($x$ küçük)
@@ -427,6 +436,8 @@ $\rho=1$, E3 (yanlış model) & 6.6~$\mu$m & 4.4~$\mu$m & $10^{-5}$ / 0.03 \\
 \bottomrule
 \end{tabular}
 \end{center}
+\sekil{ek_sekil_s7_rcond.pdf}{Üç eşik seçimi: sabit 0.01, uyuşmazlık ilkesi (gerçekte uygulanabilir) ve kahin. Model doğruyken uyuşmazlık ilkesi kahine çok yakın.}
+
 Model doğruyken uyuşmazlık ilkesi kahine çok yakın (en kötü 1.7 kat). Ana rapordaki karşılaştırmalar
 bu yüzden gerçekçidir~\YOR. Model yanlışken (son satır) ilke hiçbir eşikte gürültü düzeyine inemez ve en
 küçük eşiğe gider. Bu bir kusur değil, \emph{yararlı bir uyarıdır}: ``fit gürültü düzeyine inmiyor'',
@@ -459,6 +470,7 @@ $\hat\rho$ & sim [$\mu$m] & $m$=2--3 & $C$ & sim [$\mu$m] & $m$=2--3 & $C$ \\
 \bottomrule
 \end{tabular}
 \end{center}
+\sekil{ek_sekil_s8_rhohat.pdf}{Gerçek $\rho=1$ iken kestiricinin yanlış $\hat\rho$ varsayması. Sol: kalan simetrik rms (doğrusal, 200 seed, gölge 16--84\%). Sağ: C++ sahte EDM (nokta = seed).}
 ($\hat\rho=1$ satırındaki $C$ değerleri ana rapor Adım~1'den, 10 seed medyanı.) \RhoYorum
 
 \soru{16}{Eski ve yeni sonuç arasındaki bu kadar büyük fark neden? $\rho=0.5$'in ölçülmemesi bir eksik mi?
@@ -505,6 +517,7 @@ neredeyse doğrudur. Uzak harmoniklerde $R$ küçüktür ve $-I$ baskındır; or
 bozar. Spin ise tam olarak $m=2$--3'e duyarlıdır (Adım~5; demet $m=0$'da kuadrupolleri izler ve
 merkezlerinden geçer). Bu yüzden 4.4~$\mu$m'lik artık büyük ama zararsıza yakındır.
 
+\sekil{ek_sekil_s9_e3_harmonik.pdf}{$\rho=1$'de makale kestiricisinin (E3) her harmonikteki etkisi: kalan güç / başlangıç gücü. Yalnız spin-duyarlı $m=2$--3 belirgin biçimde azalıyor.}
 \textbf{33 kat ile 4 kat arasındaki fark (açık; tahminler).} Sahte EDM bilineerdir: $f\approx\sum_{ij}
 x_i\,K_{ij}\,y_j$ (yatay ve düşey kaçıklık desenlerinin çarpımı). Güç oranı her düzlemi ayrı ayrı ölçer;
 $C$ ise iki düzlemin \emph{çarpımına} bağlıdır. İki olası katkı~\HIP:
@@ -535,6 +548,7 @@ ve $E_y\approx E_0\phi$. Yani roll, birinci mertebede, yörünge boyunca düzgü
 ekler. Bu alan demete düşey bir tekme verir: $\theta_E=(L/R_0)\,\phi=(2\pi/48)\,\phi$ ($L$ saptırıcı boyu,
 $L/R_0$ saptırıcının bükme açısı)~\YOR.
 
+\sekil[0.45]{ek_sekil_s10_roll.pdf}{Roll: alan vektörü $\phi$ kadar döner; düşey bileşen birinci mertebede $E_0\phi$.}
 \soru{19}{Asal açı kosinüsü ne demek ve 0.99'un üstünde olması pratikte neyi gösteriyor? Bu yakın
 dejenerelik fiziksel olarak nereden geliyor?}
 
@@ -691,6 +705,7 @@ ve 5~ppm dalgalanma belirtir~\cite{fug}. Başka bir halkadaki yüksek gerilim si
 raporlanmıştır~\cite{hirfl}. Yani bugünkü teknoloji $10^{-5}$--$10^{-4}$ düzeyindedir; bizim senaryomuzdaki
 $3\times10^{-7}$ sürüklenme bundan 30--300 kat küçüktür.
 
+\sekil{ek_sekil_s11_hv.pdf}{Saptırıcı alan kararlılığı: bu çalışmanın varsayımı ve bulunan literatür değerleri (logaritmik eksen).}
 \textbf{Bu ne kadar ciddi~\YOR.} Birkaç ayrım gerekir:
 \begin{itemize}[nosep]
 \item Bütün saptırıcılarda \emph{ortak} değişim enerjiyi kaydırır; donmuş spin geri beslemesi bunu
@@ -753,6 +768,7 @@ demet bunları izler, kuadrupol merkezlerinden geçer, alan görmez. Spinin en d
 artık $\sigma_\delta$ ile büyür ama çok küçük kalır ($\sigma_\delta=1~\mu$m'de rms $\sim0.16~\mu$m; soru 32)
 ve sahte EDM sayısal tabanın altında kalır~\YOR.
 
+\sekil{ek_sekil_s12_t2.pdf}{T2 (rijit BPM). Sol: sahte EDM, BPM--kuadrupol göreli kaymasına karşı. Sağ: $\sigma_\delta=1~\mu$m'de kalan simetrik artığın harmonik dağılımı; iki demetin artığı spinin duyarsız olduğu $m=0$--1'de.}
 \soru{29}{Kalan artık neden $m=0,1$'de toplanıyor? Şans mı, kestiricinin yapısı mı? Spin $m=0$ ve $m=1$'e
 neden duyarsız?}
 
@@ -799,6 +815,7 @@ iyileştirilmiş~\cite{lep}.
 aralığında bulunmuş (ön hizalama, zamanla kararlılık değil)~\cite{pacman}.
 \item TTF2 (DESY): kuadrupol içindeki BPM'ler gerili telle kuadrupol ekseninde kalibre edilmiş~\cite{ttf2}.
 \end{itemize}
+\sekil{ek_sekil_s15_bpm_lit.pdf}{BPM sürüklenmesi: literatür değerleri ve bu çalışmanın sayıları (süreler farklı; kaba karşılaştırma).}
 \YOR~Sonuç: ``günler boyunca 1~$\mu$m'' bugünün iyi ışık kaynaklarının şartlarıyla aynı düzeydedir;
 ``0.3~$\mu$m'' zorlayıcıdır. Yeni sonuçlara göre (iki demet $\sigma_\delta=1~\mu$m'de hedefin 100 kat altında)
 gereksinim $\sigma_\delta\lesssim1~\mu$m olarak yazılabilir; bu, ulaşılmış değerlerle uyumludur.
@@ -846,6 +863,7 @@ tekmesine oranı yukarıdaki son sütundur: $\approx0.15$. Bu net tekme, düşü
 \emph{rezonant} biçimde yörünge üretir. Ölçülen simetrik/antisimetrik kazanç oranı düşük $m$'de 0.15--0.25
 (ana rapor Tablo 11)~\BEL; basit $\sqrt\beta$ hesabıyla uyumlu.
 
+\sekil{ek_sekil_s13_beta.pdf}{Sol: simetrik desende QF ve QD tekmelerinin $\sqrt\beta$ ile ağırlıklanmış değerleri; net tekme $\approx\pm0.15$. Sağ: ölçülen simetrik/antisimetrik yörünge kazancı oranı; düşük $m$'de $\sqrt\beta$ tahminiyle uyumlu, makalenin 100 kat iddiasının çok üstünde.}
 Yani hata formülün kendisinde değil, simetrik desenin ``saf $k=24$'' sayılmasındadır: $\beta$ modülasyonu
 simetrik desenin \%15'ini düşük harmoniklere sızdırır ve o kısım bastırılmaz.
 
@@ -911,6 +929,7 @@ genişliği $\sim$3 kat (16--84\% aralığı) ise 1'e ulaşmak $\sim$2 standart 
 \HIP: hedefi aşma olasılığı bir yüzde mertebesindedir. Makaleye girecek bir sayı için 20--50 seed
 önerilir; bu, kısaltılmış ayarla yaklaşık bir gün sürer.
 
+\sekil{donmus_adim6.pdf}{Ana rapor Şekil 7 (tekrar): bir haftalık senaryo. Orta panel: sahte EDM, 5 seed; iki demetin (koyu turuncu) bütün noktaları 0.18'in altında.}
 \soru{37}{Gevşetilmiş BBA artığı gereksinimi ne olmalı ve hangi sonuca dayanıyor?}
 
 \YOR~Dayanak: $t=0$ (yalnız 0.3~$\mu$m BBA artığı) için $C$ medyan 0.063, en büyük 0.14 (5 seed)~\BEL. Sahte
@@ -920,6 +939,7 @@ $C\approx0.14\,(\sigma_{\rm BBA}/0.3~\mu\text{m})^2$ (en kötü seed). $C<1$ iç
 güvenlik payıyla: \textbf{$\sigma_{\rm BBA}\lesssim0.4$--0.5~$\mu$m}. Eski gereksinim (0.15--0.2~$\mu$m)
 eski prosedürün yanlı değerlerinden geliyordu. Bu ölçekleme 5 seed'e dayanır~\HIP.
 
+\sekil[0.7]{ek_sekil_s14_bba.pdf}{BBA artığı gereksinimi: $t=0$'daki ölçülen değerler ve $\sigma^2$ ölçeklemesi.}
 \soru{38}{``Makale modeli hedefte marjsız.'' Makalede bunu nasıl ifade etmeliyiz? İyi haber mi, kötü haber mi?}
 
 \YOR~İkisi birden. \emph{İyi:} BPM'ler zeminle hareket etse bile makalenin yöntemi felaket değil; sahte
