@@ -1,0 +1,62 @@
+[
+ {
+  "sigma_um": 10.0,
+  "co_resid": 1.3700078909100447e-10,
+  "cells": {
+   "0": {
+    "delta_mean": 2.0390356070265625e-12,
+    "delta_std": 2.4146736394061427e-13,
+    "n": 6
+   },
+   "6": {
+    "delta_mean": -5.481539475660213e-07,
+    "delta_std": 4.109157405754515e-13,
+    "n": 6
+   },
+   "12": {
+    "delta_mean": -2.8157672138373613e-07,
+    "delta_std": 3.42845489960986e-13,
+    "n": 6
+   },
+   "18": {
+    "delta_mean": -2.3328832943203537e-07,
+    "delta_std": 4.4160443717670026e-13,
+    "n": 6
+   }
+  }
+ },
+ {
+  "sigma_um": 0.0,
+  "co_resid": 1.8006378774752172e-10,
+  "cells": {
+   "0": {
+    "delta_mean": -1.627031842588167e-12,
+    "delta_std": 1.5380060073121324e-12,
+    "n": 6
+   },
+   "6": {
+    "delta_mean": -1.6010526238119382e-12,
+    "delta_std": 1.7220011971959644e-12,
+    "n": 6
+   },
+   "12": {
+    "delta_mean": -9.628964292573983e-13,
+    "delta_std": 1.6072574648229925e-12,
+    "n": 6
+   },
+   "18": {
+    "delta_mean": -1.5546453013826067e-12,
+    "delta_std": 1.853761517865792e-12,
+    "n": 6
+   }
+  }
+ },
+ {
+  "aciklama": "Tutarl\u0131l\u0131k: teshis_enerji_ABC donmu\u015f spin ko\u015fumlar\u0131ndan (energy modu f\u0131rlatma + \u03b4*) h\u00fccre k'daki |p| sapmas\u0131 P_k = e(x_co,k) + \u03b4*_k; P_k \u2212 P_0 = \u22125.482e-7 (k6), \u22122.816e-7 (k12), \u22122.333e-7 (k18) \u2014 do\u011frudan \u00f6l\u00e7\u00fcmle 4 basamak ayn\u0131. Eski 'tek e\u011fim' \u00f6ng\u00f6r\u00fcs\u00fc (+5.65e-7, \u22125.31e-7, \u22123.41e-7) tutmuyor: donmu\u015f nokta d\u0131\u015f\u0131nda df/d\u03b4 f\u0131rlatma noktas\u0131na ba\u011fl\u0131.",
+  "P_minus_P0": {
+   "6": -5.482e-07,
+   "12": -2.816e-07,
+   "18": -2.333e-07
+  }
+ }
+]
