@@ -196,20 +196,21 @@ toplam enerji tasarım değerinde & $-376$ & 162 & $-722$ & 567 \\
 (Değerler hedefin katı.) Eski prosedür aynı fizik için $-456$ ile $+2729$ arasında değer veriyor, yani
 ölçüm prosedürü sonucu belirliyordu.
 
-\paragraph{Neden?} Adım adım:
+\paragraph{Neden?} Adım adım (bu açıklama ek raporda düzeltildi; ilk sürümdeki ``fırlatma noktasında
+potansiyel enerji farkı'' açıklaması yanlıştı, çünkü fırlatma noktası alansız bir sürüklenme bölgesindedir):
 \begin{enumerate}
-\item Elektrostatik halkada parçacığın kinetik enerjisi yarıçapa bağlıdır: dışarıda potansiyel enerji
-yüksek, kinetik enerji düşüktür ($\Phi=-E_0R_0\ln(R/R_0)$).
-\item Kapalı yörünge fırlatma noktasında $x_{\rm CO}$ kadar dışarıdaysa ve parçacığa yine de tam sihirli
-momentum verilirse, toplam enerjisi tasarım değerinden yaklaşık $\delta\sim x_{\rm CO}/R_0$ düzeyinde
-farklı olur. $x_{\rm CO}$ desene ve fırlatma noktasına bağlı olduğundan ($-48$ ile $+44~\mu$m arası), bu
-fark da öyledir: $\delta\sim10^{-7}$.
+\item Simülasyondaki saptırıcılar sert kenarlıdır: alan saptırıcı sınırında aniden başlar ve sınırda
+potansiyel basamağı yoktur. Saptırıcının içinde elektrik alanı, parçacığın radyal hareketine göre iş yapar.
+\item Bu yüzden aynı kapalı yörüngenin farklı hücrelerindeki alansız bölgelerde $|p|$ farklıdır. Doğrudan
+ölçüldü ($\sigma=10~\mu$m, seed~0): hücre 0'a göre hücre 6, 12, 18'de $-5.48$, $-2.82$, $-2.33\times10^{-7}$;
+kaçıklık sıfırken fark $10^{-12}$ düzeyinde~\BEL\ (\kod{tests/teshis\_p\_azimut.py}).
+\item Eski prosedür, fırlatma hücresinde $|p|=p_{\rm sihirli}$ koyar. Hücre değişince bu, $\sim10^{-7}$
+düzeyinde farklı bir yörünge enerjisi seçmek demektir.
 \item Sahte EDM enerji sapmasına doğrusal ve çok duyarlıdır: bu desen için $\delta=10^{-7}$ başına
 yaklaşık 290~$\times$~hedef~\BEL. Yatay spin presesyonu $\omega_h$ da $\delta$'ya doğrusaldır:
 $\mathrm{d}\omega_h/\mathrm{d}\delta\approx-5.24\times10^{6}$~rad/s~\BEL.
-\item ``Toplam enerji tasarım değerinde'' fırlatma da yetmez, çünkü sert kenarlı saptırıcılarda
-(saptırıcı dışında alan sıfır) tasarım toplam enerjisi tek anlamlı tanımlı değildir; sonuç yine
-fırlatma noktasına bağlı kalır~\BEL.
+\item Dört farklı noktadan bulunan donmuş spin çözümleri aynı tek yörüngedir: bu yörüngenin hücreler
+arası $|p|$ farkları doğrudan ölçümle dört basamak aynı~\BEL.
 \end{enumerate}
 
 \paragraph{Fiziksel olarak doğru çalışma noktası.} Gerçek deneyde demetin enerjisi, yatay spin
@@ -225,8 +226,9 @@ birlikte küçülür~\HIP.
 \subsection{Yeni ölçüm aracı}
 \kod{revizyon/sahte\_edm\_donmus.py} şöyle çalışır~\BEL:
 \begin{enumerate}
-\item Kapalı yörünge aranır; parçacık bu yörüngenin üzerinden enerji korunumlu biçimde ($\delta=0$)
-fırlatılır. $f_0=\mathrm{d}S_y/\mathrm{d}t$ (model fit) ve $\omega_0=\mathrm{d}/\mathrm{d}t\,\mathrm{atan2}(S_x,S_z)$ ölçülür.
+\item Kapalı yörünge aranır; parçacık bu yörüngenin üzerinden ``enerji korunumlu'' kuralla ($\delta=0$)
+fırlatılır. (Bu kural yalnızca bir başlangıç tahminidir; alansız fırlatma noktasında fiziksel bir anlamı
+yoktur. Sonuç, aşağıdaki $\delta$ aramasıyla bu seçimden bağımsızdır.) $f_0=\mathrm{d}S_y/\mathrm{d}t$ (model fit) ve $\omega_0=\mathrm{d}/\mathrm{d}t\,\mathrm{atan2}(S_x,S_z)$ ölçülür.
 \item $\delta_1=-\omega_0/(\mathrm{d}\omega_h/\mathrm{d}\delta)$ ile kapalı yörünge araması ve ölçüm
 tekrarlanır: $f_1$, $\omega_1$.
 \item İki nokta arasında doğrusal ara değerleme ile $\omega_h=0$'daki değer alınır:
@@ -410,7 +412,7 @@ yani simetrik bileşeni okuduğumuz kanala düşer.
 \subsection{Model}
 Yeni motorda her saptırıcıya iki hata eklendi: bağıl alan hatası $\varepsilon$ ($E_0\to E_0(1+\varepsilon)$)
 ve elektrik roll'u $\phi$. Roll, kapasitörün alan deseninin referans yörünge çizgisi etrafında
-döndürülmesiyle uygulandı; öncü terimi düşey alan $E_z\approx E_0\phi$'dir.
+döndürülmesiyle uygulandı; öncü terimi düşey alan $E_y\approx E_0\phi$'dir (projede düşey eksen $y$).
 
 \subsection{Hakem A'nın sayısı}
 \begin{table}[H]\centering\small

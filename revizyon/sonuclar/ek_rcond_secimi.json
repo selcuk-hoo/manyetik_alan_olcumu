@@ -1,0 +1,42 @@
+[
+ {
+  "rho": 0.0,
+  "method": "E1",
+  "morozov_sym_med": 0.05150625073988772,
+  "morozov_p84": 0.057192238914237616,
+  "rcond_mode": 0.003,
+  "oracle_rcond": 0.003
+ },
+ {
+  "rho": 0.0,
+  "method": "E3",
+  "morozov_sym_med": 0.017497018957372677,
+  "morozov_p84": 0.019924025119036924,
+  "rcond_mode": 0.003,
+  "oracle_rcond": 0.003
+ },
+ {
+  "rho": 1.0,
+  "method": "E2",
+  "morozov_sym_med": 0.20445073651256337,
+  "morozov_p84": 0.3749674844688927,
+  "rcond_mode": 0.0003,
+  "oracle_rcond": 0.0003
+ },
+ {
+  "rho": 1.0,
+  "method": "E4",
+  "morozov_sym_med": 0.017241760439563686,
+  "morozov_p84": 0.028436844426107832,
+  "rcond_mode": 0.003,
+  "oracle_rcond": 0.0003
+ },
+ {
+  "rho": 1.0,
+  "method": "E3",
+  "morozov_sym_med": 6.586435367504178,
+  "morozov_p84": 7.190376495178226,
+  "rcond_mode": 1e-05,
+  "oracle_rcond": 0.03
+ }
+]
