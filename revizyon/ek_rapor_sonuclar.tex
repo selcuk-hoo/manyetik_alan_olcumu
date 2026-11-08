@@ -1,16 +1,39 @@
 % otomatik: ek_rapor_sonuc_uret.py
-\newcommand{\Ceqnine}{0.014 [0.014, 0.014] (n=1)}
-\newcommand{\Ceqnf}{0.0078 [0.0078, 0.0078] (n=1)}
-\newcommand{\Cetnine}{0.00084 [0.00084, 0.00084] (n=1)}
-\newcommand{\Cetnf}{0.01 [0.01, 0.01] (n=1)}
-\newcommand{\RhoBirEbir}{13 [13, 13] & 1/1}
-\newcommand{\RhoBirEiki}{0.11 [0.11, 0.11] & 0/1}
-\newcommand{\RhoBirEuc}{bekleniyor & --}
-\newcommand{\RhoBirEdort}{bekleniyor & --}
-\newcommand{\EdSifirKuv}{--}
-\newcommand{\EdSifirC}{bekleniyor & -- & --}
-\newcommand{\EdMerkezKuv}{--}
-\newcommand{\EdMerkezC}{bekleniyor & -- & --}
-\newcommand{\RhoYorum}{\textit{(C++ sonuçları bekleniyor.)}}
-\newcommand{\RhoBesYorum}{\textit{(C++ sonuçları bekleniyor.)}}
-\newcommand{\EdYorum}{\textit{(C++ sonuçları bekleniyor.)}}
+\newcommand{\Ceqnine}{0.0098 [0.0026, 0.027] (n=6)}
+\newcommand{\Ceqnf}{0.0069 [0.0014, 0.014] (n=6)}
+\newcommand{\Cetnine}{0.12 [0.00084, 1.30] (n=6)}
+\newcommand{\Cetnf}{0.027 [0.01, 0.26] (n=6)}
+\newcommand{\RhoBirEbir}{1.84 [0.40, 13] & 5/6}
+\newcommand{\RhoBirEiki}{0.06 [0.016, 0.11] & 0/6}
+\newcommand{\RhoBirEuc}{0.013 [0.0024, 0.05] & 0/6}
+\newcommand{\RhoBirEdort}{0.0041 [0.00011, 0.019] & 0/6}
+\newcommand{\EdSifirKuv}{$5.3$ / $5.3\times10^{-6}$}
+\newcommand{\EdSifirC}{7.57 [3.04, 14] & 5/5 & $1.5\times10^{8}$}
+\newcommand{\EdMerkezKuv}{$7.7$ / $7.7\times10^{-6}$}
+\newcommand{\EdMerkezC}{1.29 [0.073, 2.70] & 3/5 & $4.8\times10^{6}$}
+\newcommand{\RhoYorum}{Okunuşu~\BEL: (1)~İki demette $\hat\rho$ \%5--10 yanlışken kalan simetrik artık 0.6--2~$\mu$m'ye
+çıkıyor, ama bu artığın yalnız \%0.4--0.8'i spin-duyarlı $m=2$--3'te. Sahte EDM sayısal tabanda kalıyor
+(6 seed'in hiçbiri 0.03'ü aşmıyor). Neden soru 29'daki ile aynıdır~\YOR: $\hat\rho\ne\rho$ hatası
+$(\rho-\hat\rho)\Delta d$ biçiminde, yani düzgün öteleme benzeri bir okuma hatası üretir ve iki demetli
+kestirici onu spine görünmeyen doğrultulara koyar. (2)~Tek demet daha duyarlı: $\hat\rho=0.9$'da artığın
+\%19'u $m=2$--3'te ve 6 seed'in birinde $C=1.3$. Sonuç~\YOR: iki demetli rijit mimari $\rho$'nun yaklaşık
+\%10 bilinmesiyle yetinir; tek demet $\rho$'nun birkaç yüzde içinde bilinmesini ister. Bu, iki demetin
+bir başka sağlamlık avantajıdır.}
+\newcommand{\RhoBesYorum}{Okunuşu~\BEL: $\rho=0.5$'te makale kestiricisi (E3) simetrik artığın 3.3~$\mu$m'sini
+bıraktığı halde $C$ medyanı 0.013, en büyük 0.05; $\rho=1$'deki 0.19'dan da iyi. Yani makalenin yöntemi
+BPM'lerin kuadrupolü yarı yarıya izlediği durumda da hedefin rahat altında. Mekanizma soru 17'deki ile
+aynıdır: kalan artık spinin az duyarlı olduğu harmoniklerdedir~\YOR. Standart tek demet (E1) ise
+$\rho=0.5$'te de başarısız: 6 seed'in 5'i hedefin üstünde (en büyük 13). $\rho$'yu bilen kestiriciler (E2,
+E4) her iki $\rho$'da da hedefin çok altında. Eski prosedürün $\rho=0.5$ değerleri (E3: 0.27, 0.0001,
+0.008) yeni prosedürle uyumlu düzeydedir; burada enerji yanlılığı küçük kalmış görünüyor~\YOR.}
+\newcommand{\EdYorum}{Okunuşu~\BEL: Yeni prosedür eski nitel sonucu doğruluyor. Elektrostatik düzeltici ``sıfır''
+hedefiyle 5 seed'in 5'inde, ``merkez'' hedefiyle 3'ünde hedefi aşıyor; kuadrupol içi düzeltici (Mq; ana
+rapor Adım~1, aynı senaryo) ise 0.005. Sayılar eski prosedürden 1.5--2 kat küçük ama aynı büyüklük
+mertebesinde. Çift kısım (iki yönde aynı işaretli sinyal) $10^6$--$10^8$ kat hedeftir: düzelticinin
+$\sim5$--$8\times10^{-6}$'lık elektrik tekmeleri roll benzeri birinci mertebe bir spin dönmesi üretiyor
+(soru 20). Bu kısım CW$-$CCW farkında sadeleşir, ama soru 20'deki simetri gereksinimini çok ağırlaştırır:
+$1.5\times10^{8}$'lik bir çift kısmın $C<1$ kalması için iki yönün $\sim10^{-8}$'den iyi simetrik olması
+gerekir~\YOR. Mekanizma sorusunun cevabı: Ed'nin $C$'si, düzelticinin büyük elektrik tekmelerinin
+kendisinin yarattığı yatay ve düşey kapalı yörüngelerin çarpımından (saptırıcı hatalarındaki
+$\varepsilon\times\phi$ etkisiyle aynı mekanizma) gelir; ``merkez'' hedefinde demet kuadrupollerden
+merkezden geçse de bu çarpım kalır~\HIP\ (ayrıştırılmadı).}

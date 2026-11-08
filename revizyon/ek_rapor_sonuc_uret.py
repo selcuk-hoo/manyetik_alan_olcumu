@@ -38,10 +38,10 @@ for m, nm in (("E1", "RhoBirEbir"), ("E2", "RhoBirEiki"), ("E3", "RhoBirEuc"), (
 for case, nm in (("Ed_zero", "EdSifir"), ("Ed_center", "EdMerkez")):
     Cs, ev, ex = C("Ed", case)
     if len(Cs):
-        M[nm + "Kuv"] = (f"{np.median([e['corr_eps_rms'] for e in ex]):.1e} / "
-                         f"{np.median([e['corr_roll_rms'] for e in ex]):.1e}").replace("e-0", r"$\times10^{-") + "$"
-        M[nm + "Kuv"] = M[nm + "Kuv"].replace(" / ", "}$ / ")
-        M[nm + "C"] = f"{rng_str(Cs)} & {int((Cs > 1).sum())}/{len(Cs)} & {np.median(ev):.1e}"
+        e_ = np.median([e['corr_eps_rms'] for e in ex]); r_ = np.median([e['corr_roll_rms'] for e in ex])
+        M[nm + "Kuv"] = f"${e_/1e-6:.1f}$ / ${r_/1e-6:.1f}\\times10^{{-6}}$"
+        ee = np.median(ev); ex_ = int(np.floor(np.log10(ee)))
+        M[nm + "C"] = f"{rng_str(Cs)} & {int((Cs > 1).sum())}/{len(Cs)} & ${ee/10**ex_:.1f}\\times10^{{{ex_}}}$"
     else:
         M[nm + "Kuv"] = "--"; M[nm + "C"] = "bekleniyor & -- & --"
 yor = os.path.join(REV, "ek_rapor_yorumlar.tex")

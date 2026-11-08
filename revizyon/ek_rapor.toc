@@ -1,0 +1,20 @@
+\xpginauxfiletrue 
+\selectlanguage *{turkish}
+\contentsline {section}{\numberline {1}Bu belge nasıl okunmalı}{3}{section.1}%
+\contentsline {paragraph}{Ana raporda yapılan düzeltmeler.}{3}{section*.2}%
+\contentsline {section}{\numberline {2}Temel büyüklükler (ana rapor 1.2)}{3}{section.2}%
+\contentsline {section}{\numberline {3}Adım 0: Kodda ne varsayılmış?}{4}{section.3}%
+\contentsline {section}{\numberline {4}Fırlatma enerjisi sorunu ve yeni ölçüm aracı (ana rapor 3.2--3.3)}{6}{section.4}%
+\contentsline {section}{\numberline {5}Şekil 4 ve TSVD eşiği (ana rapor 3.5)}{9}{section.5}%
+\contentsline {section}{\numberline {6}Adım 1: BPM modeli (ana rapor 4)}{10}{section.6}%
+\contentsline {section}{\numberline {7}Adım 1 yorumu (ana rapor 4.5)}{13}{section.7}%
+\contentsline {section}{\numberline {8}Adım 2: Saptırıcı hataları (ana rapor 5)}{14}{section.8}%
+\contentsline {section}{\numberline {9}Adım 3: Düzelticiler (ana rapor 6)}{15}{section.9}%
+\contentsline {section}{\numberline {10}Adım 4 ve tartışma testleri (ana rapor 7--8)}{16}{section.10}%
+\contentsline {section}{\numberline {11}T2: Rijit BPM (ana rapor 8.2)}{18}{section.11}%
+\contentsline {section}{\numberline {12}Adım 5: Harmonikler (ana rapor 9)}{20}{section.12}%
+\contentsline {section}{\numberline {13}Adım 6: Zaman senaryosu (ana rapor 10)}{22}{section.13}%
+\contentsline {section}{\numberline {14}Makale için çıkarımlar (ana rapor 11)}{23}{section.14}%
+\contentsline {section}{\numberline {15}Sınırlamalar (ana rapor 12)}{25}{section.15}%
+\contentsline {section}{Kaynaklar}{26}{section*.19}%
+\xpginauxfilefalse 
