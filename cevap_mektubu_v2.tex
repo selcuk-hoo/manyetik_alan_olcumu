@@ -1,0 +1,218 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+\newcommand{\referee}[1]{\par\medskip\noindent{\color{black!60}\itshape #1}\par}
+\newcommand{\reply}{\noindent\textbf{Reply.}~}
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries Response to the Referees}\\[3pt]
+Manuscript ZV10235: ``Accessing the symmetric component of quadrupole misalignment through
+counter-rotating closed orbits in EDM storage rings''\\
+I.~Abedrabbo and S.~Hac{\i}\"omero\u{g}lu
+\end{center}
+
+We thank both referees for their careful reading and constructive comments. The comments led us to test
+the method against the error sources raised by Referee~A and to rewrite the presentation along the lines
+requested by Referee~B. The main changes are:
+\begin{enumerate}[nosep]
+\item A new section ``Domain of validity'' (Sec.~V) quantifies the scheme against monitor motion,
+electrostatic deflector field errors and rolls, corrector type and correlated misalignment.
+\item A new section ``Operating scenario'' (Sec.~VI) follows the machine for one week with ground motion,
+BPM drift and periodic BBA.
+\item The two-beam scheme is now stated as an explicit algorithm (Sec.~IV.C), including the treatment of
+BPM offsets and the choice of the regularization.
+\item The symmetric and antisymmetric components are defined in the introduction (Sec.~I.C), and the claim
+of a 100-fold orbit suppression of the symmetric component has been corrected: the measured suppression is
+four- to sevenfold at low harmonics, explained by the different beta functions at the focusing and
+defocusing quadrupoles (Sec.~III.A, Fig.~2).
+\item The false EDM is now evaluated at the frozen-spin energy (Sec.~II.C, Appendix~A). With a launch at
+fixed momentum, the result depended on the launch point in a misaligned lattice; this affected the
+uncorrected and single-beam results by factors of 1.1--35, but not the two-beam results, which were
+and remain at the numerical floor. The false-EDM values in the paper were recomputed accordingly.
+\textcolor{red}{[Authors: BBA convergence and channel figure are being re-run with the new evaluation;
+update this item and the figure numbers once they are included.]}
+\item To keep the length under control, the main text was streamlined, the BBA section shortened, and
+technical material moved to appendices.
+\end{enumerate}
+
+%======================================================================
+\section*{Referee A}
+%======================================================================
+
+\referee{First, the paper assumes that the orbit perturbation is mainly driven by misalignment of quadrupoles
+with alignment accuracy of about 50--100~$\mu$m. [\dots] there are other sources of orbit perturbation.
+They are errors of bending power of electrostatic bends and their roles. Optimistically one can put the
+relative accuracy of about $10^{-4}$ and the roll of 0.1~mrad. Then for the suggested optics, the orbit
+perturbation from just one of 48 bends is about 400~$\mu$m.}
+
+\reply We agree that this is essential, and we have added Sec.~V.B. We confirm the estimate: a relative field
+error of $10^{-4}$ (roll of 0.1~mrad) in one deflector produces a closed-orbit distortion of 418~$\mu$m
+(525~$\mu$m) peak. Such static errors are removed in the initial calibration; the relevant question for our
+scheme is the \emph{drift} of the deflectors between calibrations, because the electric force does not
+reverse with the beam direction and the deflector-induced orbit therefore appears in the same (sum) channel
+as the symmetric quadrupole misalignment. We find:
+\begin{itemize}[nosep]
+\item A fit containing only quadrupole columns mistakes a deflector drift for a symmetric misalignment
+(about 1~$\mu$m per $10^{-7}$ field drift or 0.1~$\mu$rad roll drift). Adding the deflector columns to the
+fit removes this leakage, at the price of a larger noise amplification [Fig.~6(a)].
+\item A deflector roll produces a first-order false EDM through the magnetic kicks that close the orbit. It
+has the same sign for the two beam directions and cancels in the CW$-$CCW observable; its size sets a
+requirement on the CW/CCW symmetry of the ring, as in Ref.~[2].
+\item Field errors and rolls together produce a geometric phase of their own. It is removed by trimming the
+deflectors at the source (field by the deflector voltage, roll by an up--down electrode voltage difference),
+using the deflector part of the fit. The tolerable deflector drift between trims is set by the accuracy of
+the response model: with an exact model the false EDM stays at the numerical floor up to $10^{-5}$; with a
+0.2\% gradient error the target is reached at $3$--$5\times10^{-6}$ [Fig.~6(b)].
+\end{itemize}
+
+\referee{The second problem is that the authors assume that accuracy of quad positioning is independent on
+their location in the ring. [\dots] A more accurate model should account that an error in relative
+positions of two quads is proportional to the square root of distance between quads. [\dots] The problem
+is complicated by suppression of beam orbit deviation from BPM centers for long wave perturbations, but it
+is not obvious that spin precession out of plane has similar suppression.}
+
+\reply We have added Sec.~V.D with a random-walk (ATL-type) model in which the relative displacement grows
+as the square root of the distance. Because neighboring quadrupoles move together, the symmetric
+component dominates (84\% of the variance after removal of the rigid translation and tilt, against about
+50\% for uncorrelated errors). The two-beam correction is linear and its residual does not depend on the
+pattern statistics. The time-dependent version of this model is used in the one-week scenario of
+Sec.~VI.
+
+On the second point---whether the spin shares the suppression of long-wavelength perturbations---our answer
+is yes, for the components that the beam actually follows. A uniform translation or tilt of the lattice
+moves the closed orbit with it, so the beam still passes through the quadrupole centers and the spin is not
+affected. More generally, the spin is most sensitive near the betatron tune ($m=2$--3) and weakly sensitive
+at $m=0$. We also found that the more important consequence of long-wavelength motion is that the BPMs
+move together with the quadrupoles. Section~V.A treats this explicitly: an estimator that assumes fixed
+BPMs then recovers only about a third of the symmetric drift, but the remaining part lies at harmonics to
+which the spin is weakly sensitive and the false EDM stays below target with a margin of three to five.
+Monitors rigidly attached to the quadrupoles, with an estimator that accounts for the mounting, recover it
+fully and are robust against BPM--quadrupole drifts up to at least 1~$\mu$m.
+
+\referee{It also should be spelled out the difference between usage of electrostatic and magnetic
+correctors.}
+
+\reply Added as Sec.~V.C. Only dipole correctors mounted in the quadrupoles (or quadrupole movers) cancel
+the misalignment where it occurs and keep the false EDM at the floor. Magnetic correctors at the deflectors
+act only on the difference channel and cannot correct a symmetric drift. Electrostatic correctors act on
+both beams alike and can steer them through the quadrupole centers, but the electric kicks they need
+generate first- and second-order deflector effects ($C=1.3$--$7.6$ times the target, plus same-sign
+signals that rely on CW/CCW symmetry).
+
+\referee{Overall impression is that the paper is too long for the reported context.}
+
+\reply We have tightened the introduction and the BBA section, removed repetitions and moved technical
+material (frozen-spin evaluation, breathing, orbit-difference inversion, two-dimensional illustration) to
+appendices. Some length was added to address the substantive points above and those of Referee~B; we kept
+these additions as concise as possible.
+
+\referee{1. Excessive use of acronyms greatly complicates reading of the text.}
+
+\reply We removed most acronyms. The remaining ones (EDM, BPM, BBA, SVD, CW/CCW) are defined at first use.
+\textcolor{red}{[Authors: final pass on acronyms.]}
+
+\referee{2. Section 1.A, line 1: ``A permanent electric dipole moment violates'' $\to$ ``A permanent electric
+dipole moment of an elementary particle violates''.}
+
+\reply Changed as suggested.
+
+\referee{3. Section 1C, line 6: ``Subtracting the'' $\to$ ``Subtraction of the''.}
+
+\reply The sentence has been rewritten.
+
+\referee{4. Section 1D: An explanation of symmetric and antisymmetric quad displacement comes late in the
+text.}
+
+\reply The definitions now appear in Sec.~I.C, before they are first used.
+
+\referee{5. Section II.A, line 3: ``the lattice as described in Sec.~IB'' $\to$ ``the lattice described in
+Sec.~IB''.}
+
+\reply Changed.
+
+\referee{6. Line before Eq.~(9): $\Delta R$ does not look as a matrix.}
+
+\referee{7. Equation after (9) has problem with dimension.}
+
+\reply (6, 7) The orbit-difference discussion was moved to Appendix~C and rewritten: $\Delta R$ is the
+difference of the response matrices for two gradient settings, $\Delta R\approx\epsilon_g\,\partial
+R/\partial g$, and the relation now reads $\|\Delta R^{-1}\|\approx\|R^{-1}\|/\epsilon_g$, with $\epsilon_g$
+the dimensionless relative gradient change.
+
+\referee{8. Section V.A, Line 3: In the phrase ``beams pass through the quadrupoles in the opposite order,''
+state that these are two nearby quads.}
+
+\reply Clarified: ``the reversed order of the two quadrupoles of a cell'' (Sec.~IV.C).
+
+%======================================================================
+\section*{Referee B}
+%======================================================================
+
+\referee{A hypothetical ring is described in Section 1.B. But no corresponding lattice layout or optics plot is
+provided.}
+
+\reply Added as Fig.~1 (cell layout and beta functions), together with the beta functions at the
+quadrupoles in Table~I.
+
+\referee{The manuscript introduces the symmetric and antisymmetric quadrupole modes near the beginning of the
+article, but their mathematical definitions do not appear until Section III.A, in Equation (4). In
+addition, Equation (5) uses $n$ as an index, whereas $k$ is not defined. [\dots]}
+
+\reply The definitions now appear in Sec.~I.C, Eq.~(3), with the indices defined (quadrupole $n=0,\dots,47$,
+cell $k=0,\dots,23$, QF $n=2k$, QD $n=2k+1$), the decomposition $v[n]=v^s[n]+v^a[n]$, and the statement
+that the two projections are orthogonal and span 24-dimensional subspaces.
+
+\referee{The authors state that the low-order singular-value-decomposition (SVD) modes correspond to the
+symmetric mode, but they provide no explanation or supporting evidence for this correspondence.}
+
+\reply Figure~2(b) now shows the singular values of the tracked response matrix colored by the symmetric
+content of the corresponding right singular vectors: the directions with the smallest singular values are
+predominantly symmetric. Section~III.A explains why: the symmetric pattern kicks the beam in opposite
+directions at the two quadrupoles of a cell, and these kicks cancel up to the difference of
+$\sqrt{\beta}$ between the two quadrupoles; the net kick is about 0.15 of that of an antisymmetric
+pattern, in agreement with the measured orbit gains [Fig.~2(a)]. In revising this point we found that the
+statement of a 100-fold suppression in the original manuscript, based on a smooth-focusing estimate, was
+incorrect; the suppression is four- to sevenfold at low harmonics.
+
+\referee{The central purpose of the paper is to present a method for keeping false EDM signals arising from
+quadrupole misalignments below the sub-target threshold by monitoring the sum of the BPM readings from the
+two beams. However, the implementation of this method is described only verbally in a single paragraph in
+Section V.B. [\dots] a PRAB article requires a more rigorous presentation demonstrating how the method works
+and how its performance is evaluated.}
+
+\reply We agree. Section~IV.C now states the scheme as an explicit five-step algorithm: reference readings
+after BBA, differences of both beams relative to the reference, the two-beam least-squares estimate
+[Eq.~(6)] with the regularization chosen by the discrepancy principle (no knowledge of the true
+misalignment is needed), the correction by quadrupole-mounted dipole correctors, and the BBA trigger. The
+performance is evaluated in three steps: (i) static correction of random misalignments (Fig.~4);
+(ii) the validity domain against monitor motion, deflector errors, corrector type and correlated
+misalignment (Sec.~V, Figs.~5 and 6); (iii) a one-week time-dependent scenario with ground motion, BPM
+drift, BPM noise and periodic BBA, in which two-beam monitoring keeps the false EDM at the level set by the
+BBA residual (median 0.05--0.09 of the target, maximum 0.18), whereas periodic BBA alone rises to about
+45 times the target between calibrations (Sec.~VI, Fig.~7). The detection limit of the monitor is given in
+the same section.
+
+\referee{Recommendation: the manuscript undergo major revision before it can be considered further for
+publication.}
+
+\reply We hope that the revised manuscript addresses the referees' concerns.
+
+\bigskip
+\textbf{Additional change not requested by the referees.} While revising, we found that our false-EDM
+estimator launched the particle on the closed orbit at fixed momentum. With hard-edge deflectors the
+momentum varies along a distorted closed orbit, so the result depended on the launch point. Since the
+experiment keeps the horizontal spin frozen by feedback, we now evaluate the false EDM at the frozen-spin
+energy (Sec.~II.C, Appendix~A), where the result is independent of the launch point to 0.2\%. The two-beam
+results of the original manuscript are unaffected (both at the numerical floor); the uncorrected and
+single-beam values decreased by factors of 1.1--35. All values in the revised manuscript use the new
+evaluation.
+
+\end{document}
