@@ -57,7 +57,7 @@ def fA():
     xx = np.array([3e-3, 1e4])
     ax.plot(xx, 0.08 * xx, color=INK2, lw=1, ls="--")
     ax.text(2e2, 0.08 * 2e2 * 2.2, "eğim 1", fontsize=7.5, color=INK2)
-    ax.axhline(0.008, color=INK2, lw=1, ls=":"); ax.text(4e-3, 0.0045, "sayısal taban", fontsize=7, color=INK2)
+    ax.axhline(0.008, color=INK2, lw=1, ls=":"); ax.text(4e-1, 0.0045, "sayısal taban", fontsize=7, color=INK2)
     ax.set_xscale("log"); ax.set_yscale("log")
     ax.set_xlabel(r"fırlatma anındaki kapalı yörünge büyüklüğü  rms$_x\cdot$rms$_y$  [$\mu$m$^2$]")
     ax.set_ylabel(r"|eski $-$ yeni|  [× hedef]")
@@ -145,14 +145,15 @@ def fD():
     axs[0].axhline(0, color=INK2, lw=0.8)
     axs[0].set_xticks(ks); axs[0].set_xlabel("fırlatma hücresi"); axs[0].set_ylabel("$f$ [× hedef]")
     axs[0].legend(fontsize=7); axs[0].set_title("başlangıç kuralı: |p| = p$_{\\rm sihirli}$", fontsize=9)
-    x = np.arange(len(ks)); w = 0.36
-    axs[1].bar(x - w / 2, [r["f_target"] for r in R], w, color=C1, edgecolor="white", label="eski kuraldan başlayarak")
-    axs[1].bar(x + w / 2, [en[k] for k in ks], w, color=C3, edgecolor="white", label="enerji kuralından başlayarak")
-    lo = min(min(r["f_target"] for r in R), min(en.values())); hi = max(max(r["f_target"] for r in R), max(en.values()))
-    axs[1].set_ylim(lo - 0.3, hi + 0.3); axs[1].set_xticks(x, [str(k) for k in ks])
+    dog = {r["k"]: r["f_target"] for r in json.load(open(os.path.join(OUT, "teshis_baslangic_dogrulama.json")))}
+    x = np.arange(len(ks)); w = 0.26
+    axs[1].bar(x - w, [r["f_target"] for r in R], w, color=C4, edgecolor="white", label="eski kural, ara değerleme")
+    axs[1].bar(x, [dog.get(k, np.nan) for k in ks], w, color=C1, edgecolor="white", label="eski kural, δ*'da doğrudan")
+    axs[1].bar(x + w, [en[k] for k in ks], w, color=C3, edgecolor="white", label="enerji kuralı")
+    axs[1].set_ylim(79, 83.6); axs[1].set_xticks(x, [str(k) for k in ks])
     axs[1].set_xlabel("fırlatma hücresi"); axs[1].set_ylabel("donmuş spin $f^*$ [× hedef]")
-    axs[1].legend(fontsize=7, loc="lower right"); axs[1].grid(axis="x", visible=False)
-    axs[1].set_title("sonuç başlangıç kuralından bağımsız (eksen dar)", fontsize=9)
+    axs[1].legend(fontsize=6.5, loc="upper center", ncol=2); axs[1].grid(axis="x", visible=False)
+    axs[1].set_title("donmuş nokta başlangıçtan bağımsız (eksen dar)", fontsize=9)
     save(fig, "fD_baslangic")
 
 

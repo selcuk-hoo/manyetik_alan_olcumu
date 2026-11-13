@@ -18,6 +18,7 @@
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage{fancyvrb}
+\usepackage{fvextra}
 \setmonofont{DejaVu Sans Mono}[Scale=0.82]
 \hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black}
 \captionsetup{font=small,labelfont=bf}
@@ -29,7 +30,7 @@
 \newcommand{\YOR}{\textsc{[yorum]}}
 \newcommand{\HIP}{\textsc{[hipotez]}}
 \newcommand{\sekil}[3][0.95]{\begin{figure}[H]\centering\includegraphics[width=#1\textwidth]{#2}\caption{#3}\end{figure}}
-\DefineVerbatimEnvironment{kodblok}{Verbatim}{fontsize=\small,frame=leftline,framerule=1.2pt,rulecolor=\color{black!30},xleftmargin=4mm,numbers=none}
+\DefineVerbatimEnvironment{kodblok}{Verbatim}{fontsize=\small,frame=leftline,framerule=1.2pt,rulecolor=\color{black!30},xleftmargin=4mm,numbers=none,breaklines=true,breakanywhere=true}
 \input{firlatma_sonuclar.tex}
 
 \title{Sahte EDM Ölçümünde Fırlatma Yöntemi:\\ Makaledeki Yöntem ile Donmuş Spin Yönteminin Karşılaştırılması}
@@ -51,8 +52,8 @@ fizik için fırlatma noktasına göre $-456$ ile $+2729\times$hedef arasında d
 \%0.2 içinde aynıdır; (2)~nedeni, sert kenarlı saptırıcı modelinde $|p|$'nin aynı kapalı yörünge
 boyunca hücreden hücreye $\sim10^{-7}$ değişmesidir; (3)~eski yöntemin hatası fırlatma anındaki kapalı
 yörüngenin büyüklüğüyle orantılıdır, bu yüzden makalenin iki demetli sonuçları (yörünge zaten küçük)
-neredeyse etkilenmez, ama düzeltilmemiş ya da tek demetle düzeltilmiş durumlar 2--35 kat yanlış
-ölçülmüştür; (4)~$\sigma^2$ ölçekleme testi bu hatayı yakalayamaz, çünkü hata da $\sigma^2$ ile ölçeklenir.
+neredeyse etkilenmez, ama düzeltilmemiş ya da tek demetle düzeltilmiş durumlar 1.1--35 kat yanlış
+(çoğunlukla abartılmış) ölçülmüştür; (4)~$\sigma^2$ ölçekleme testi bu hatayı yakalayamaz, çünkü hata da $\sigma^2$ ile ölçeklenir.
 Simülasyonlar yalnız yöntemleri karşılaştırmak için seçildi; tam kapsamlı değildir.
 \end{abstract}
 
@@ -409,9 +410,9 @@ tanım $\omega_h=0$'dır.
 \begin{itemize}[nosep]
 \item Sert kenarlı saptırıcı modeli değişmedi; yeni yöntem yalnız bu modelde çalışma noktasını doğru seçer.
 Saçak alanının kendisinin sahte EDM'ye etkisi test edilmedi.
-\item $f(\delta)$ ve $\omega_h(\delta)$'nın doğrusallığı tek desende ($\delta=\pm10^{-6}$) sınandı. İkinci
-noktadaki $|\omega_1|$ ilk noktadakinin $\sim10^{-5}$'i olduğu için ara değerleme çok küçük bir aralıkta
-yapılır~\BEL.
+\item $f(\delta)$ ve $\omega_h(\delta)$'nın doğrusallığı tek desende ($\delta=\pm10^{-6}$) sınandı. İkinci nokta
+donmuş noktadan uzak düşerse iki noktalı ara değerleme \%3'e kadar sapabilir (Test~4); araç artık bu durumda
+$\delta^*$'da üçüncü bir ölçüm yapıyor. Önceki 666 koşumda ikinci nokta zaten donmuş noktadaydı~\BEL.
 \item Geri beslemenin dinamiği ve demetin momentum dağılımı ($\sim10^{-4}$) simüle edilmedi; tek parçacık
 ortalama $\delta$'yı temsil eder. $f$ ve $\omega_h$ $\delta$'ya doğrusal olduğu için ortalama alma bunu
 değiştirmez~\YOR.
@@ -427,7 +428,7 @@ eski sayılar yeniden ölçülmelidir, dönüştürülemez.
 \begin{enumerate}[nosep]
 \item Makalenin ana sayısı, iki demetli düzeltmeden sonraki sahte EDM, iki yöntemde de sayısal tabanda
 (0.0046 ve 0.0015). Ana iddia etkilenmiyor~\BEL.
-\item Karşılaştırma için verilen sayılar (düzeltme yok, tek demet) eski yöntemle 2--35 kat yanlış~\BEL.
+\item Karşılaştırma için verilen sayılar (düzeltme yok, tek demet) eski yöntemle 1.1--35 kat yanlış~\BEL.
 Makalede ``iki demet tek demetten $\sim10^4$ kat iyi'' türünden bir oran varsa, yeni yöntemle yaklaşık
 $8\times10^3$ olur (12 / 0.0015); oranın büyüklük mertebesi değişmiyor, ama tek demetin kötülüğünün büyük
 kısmı \kod{rcond}~$=0.01$ seçiminden geliyor (ek rapor, soru 12).
@@ -443,17 +444,17 @@ enerjide?'' sorusunu önceden cevaplar.
 %======================================================================
 Dal: \kod{claude/brave-allen-92wn61}.
 \begin{center}\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{6cm}X}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{8.6cm}X}
 \toprule
 dosya & işlev \\
 \midrule
-\kod{kmod\_drivers/fast\_est.py}, \kod{berry\_data/false\_edm\_4d.py}, \kod{berry\_data/false\_edm\_mode\_scan.py} & eski yöntem (değiştirilmedi) \\
+\kod{kmod\_drivers/fast\_est.py},\newline \kod{berry\_data/false\_edm\_4d.py},\newline \kod{berry\_data/false\_edm\_mode\_scan.py} & eski yöntem (değiştirilmedi) \\
 \kod{revizyon/sahte\_edm\_donmus.py} & yeni yöntem \\
 \kod{revizyon/tests/teshis\_enerji\_ABC.py} & Test 1 ve 3 \\
 \kod{revizyon/tests/teshis\_p\_azimut.py} & Test 2 \\
-\kod{revizyon/tests/teshis\_baslangic\_kurali.py} & Test 4 \\
-\kod{revizyon/donmus\_fig4.py}, \kod{revizyon/firlatma\_eski\_ham.py} & Test 6 \\
-\kod{revizyon/firlatma\_sekiller.py}, \kod{revizyon/ek\_sekiller.py} & şekiller \\
+\kod{revizyon/tests/teshis\_baslangic\_kurali.py},\newline \kod{revizyon/tests/teshis\_baslangic\_dogrulama.py} & Test 4 \\
+\kod{revizyon/donmus\_fig4.py},\newline \kod{revizyon/firlatma\_eski\_ham.py} & Test 6 \\
+\kod{revizyon/firlatma\_sekiller.py},\newline \kod{revizyon/ek\_sekiller.py} & şekiller \\
 \bottomrule
 \end{tabularx}
 \end{center}

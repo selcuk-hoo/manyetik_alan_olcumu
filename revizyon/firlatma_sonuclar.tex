@@ -1,0 +1,20 @@
+\input{firlatma_sonuclar_baslangic.tex}
+\newcommand{\HamEskiCW}{$-0.08$}
+\newcommand{\HamEskiCCW}{$-313$}
+\newcommand{\HamEskiC}{150}
+\newcommand{\FarkYorum}{%
+Okunuşu~\BEL: fark, kapalı yörüngenin büyüklüğüyle birlikte yaklaşık doğrusal büyüyor (kesikli çizgi
+eğim 1). Bu, Test~5'teki açıklamayla tutarlı: hata $\propto\sigma\cdot\sigma$, kapalı yörünge
+büyüklüğü (rms$_x\cdot$rms$_y$) de $\propto\sigma^2$. Üç rejim:
+\begin{itemize}[nosep]
+\item \emph{İki demet düzeltmesi} (yörünge $\sim0.01~\mu$m$^2$): fark $\le0.02$, yani sayısal taban; iki
+yöntem uyuşuyor.
+\item \emph{Tek demet, düzeltilen CCW yönü} ($\sim1~\mu$m$^2$): fark $\le0.17$.
+\item \emph{Tek demet CW yönü ve düzeltilmemiş desenler} ($10^2$--$10^4~\mu$m$^2$): fark 1--3000.
+Düzeltilmemiş desenlerde eski yöntem $C$'yi 1.1--13 kat yüksek veriyor (medyan 150'ye karşı 49) ve bir
+seed'de CW işareti farklı ($-0.08$'e karşı $+38$).
+\end{itemize}
+Bir incelik: $C$ iki yönün farkıdır. Eski yöntemin hatası iki yönde farklıdır, çünkü iki yönün kapalı
+yörüngeleri farklıdır (kuadrupol tekmeleri yönle işaret değiştirir). Bu yüzden hata $C$'de sadeleşmez;
+tek demet düzeltmesinde olduğu gibi bir yönün yörüngesi büyük, diğerininki küçükse hata doğrudan $C$'ye
+geçer~\YOR.}

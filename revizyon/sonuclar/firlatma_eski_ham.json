@@ -1,0 +1,52 @@
+[
+ {
+  "seed": 0,
+  "direction": -1,
+  "f_target": -356.57517309582425
+ },
+ {
+  "seed": 0,
+  "direction": 1,
+  "f_target": -0.07904716296485596
+ },
+ {
+  "seed": 1,
+  "direction": -1,
+  "f_target": 697.2662100533223
+ },
+ {
+  "seed": 1,
+  "direction": 1,
+  "f_target": 871.043958879644
+ },
+ {
+  "seed": 2,
+  "direction": -1,
+  "f_target": -313.46203511973766
+ },
+ {
+  "seed": 2,
+  "direction": 1,
+  "f_target": -614.1021805891006
+ },
+ {
+  "seed": 3,
+  "direction": -1,
+  "f_target": -402.68929199583744
+ },
+ {
+  "seed": 3,
+  "direction": 1,
+  "f_target": -643.9057087225758
+ },
+ {
+  "seed": 4,
+  "direction": -1,
+  "f_target": 3117.6558102236804
+ },
+ {
+  "seed": 4,
+  "direction": 1,
+  "f_target": 1575.095768142447
+ }
+]
