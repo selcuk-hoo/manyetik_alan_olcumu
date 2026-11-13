@@ -1,0 +1,460 @@
+% firlatma_karsilastirma.tex — sahte EDM ölçümünde fırlatma yöntemi: makaledeki yöntem ile donmuş spin yöntemi
+% Derleme: xelatex firlatma_karsilastirma.tex (iki kez)
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{turkish}
+\setotherlanguage{english}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{xcolor}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{fancyvrb}
+\setmonofont{DejaVu Sans Mono}[Scale=0.82]
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\graphicspath{{sonuclar/}}
+\newcommand{\kod}[1]{{\XeTeXinterchartokenstate=0\texttt{#1}}}
+\newcommand{\BEL}{\textsc{[belgelenmiş]}}
+\newcommand{\YOR}{\textsc{[yorum]}}
+\newcommand{\HIP}{\textsc{[hipotez]}}
+\newcommand{\sekil}[3][0.95]{\begin{figure}[H]\centering\includegraphics[width=#1\textwidth]{#2}\caption{#3}\end{figure}}
+\DefineVerbatimEnvironment{kodblok}{Verbatim}{fontsize=\small,frame=leftline,framerule=1.2pt,rulecolor=\color{black!30},xleftmargin=4mm,numbers=none}
+\input{firlatma_sonuclar.tex}
+
+\title{Sahte EDM Ölçümünde Fırlatma Yöntemi:\\ Makaledeki Yöntem ile Donmuş Spin Yönteminin Karşılaştırılması}
+\author{Hazırlayan: Claude (Anthropic yapay zekâ asistanı)}
+\date{13 Kasım 2026}
+
+\begin{document}
+\sloppy
+\maketitle
+
+\begin{abstract}
+\noindent Sahte EDM'yi C++ izleyicide ölçmek için parçacığın nasıl fırlatıldığını iki yöntemle
+karşılaştırıyorum. \emph{Eski yöntem} (makaledeki): parçacık kapalı yörüngenin üzerinden ve fırlatma
+noktasında momentum büyüklüğü tam sihirli değerde ($|p|=p_{\rm sihirli}$) fırlatılır. \emph{Yeni yöntem}:
+parçacığın enerjisi, yatay spin presesyonu sıfır olacak biçimde ayarlanır ($\omega_h=0$, ``donmuş spin''),
+yani deneyin kendisinin sabit tuttuğu koşulla. İki yöntem aynı kapalı yörünge aramasını ve aynı eğim
+kestirimini kullanır; tek fark, hangi enerjide ölçüldüğüdür. Bulgular: (1)~eski yöntemin sonucu, aynı
+fizik için fırlatma noktasına göre $-456$ ile $+2729\times$hedef arasında değişir, yeni yöntemin sonucu
+\%0.2 içinde aynıdır; (2)~nedeni, sert kenarlı saptırıcı modelinde $|p|$'nin aynı kapalı yörünge
+boyunca hücreden hücreye $\sim10^{-7}$ değişmesidir; (3)~eski yöntemin hatası fırlatma anındaki kapalı
+yörüngenin büyüklüğüyle orantılıdır, bu yüzden makalenin iki demetli sonuçları (yörünge zaten küçük)
+neredeyse etkilenmez, ama düzeltilmemiş ya da tek demetle düzeltilmiş durumlar 2--35 kat yanlış
+ölçülmüştür; (4)~$\sigma^2$ ölçekleme testi bu hatayı yakalayamaz, çünkü hata da $\sigma^2$ ile ölçeklenir.
+Simülasyonlar yalnız yöntemleri karşılaştırmak için seçildi; tam kapsamlı değildir.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Ne ölçüyoruz ve fırlatma neden önemli?}
+%======================================================================
+
+\paragraph{Ölçülen büyüklük.} Sahte EDM, spinin düşey bileşeninin büyüme hızıdır: $f=\mathrm{d}S_y/\mathrm{d}t$.
+Hedef $f\approx1$~nrad/s'dir. C++ izleyici bir protonu ve spinini halkada birkaç yüz tur izler; her turda
+belirli bir noktada $S_y$ kaydedilir ve bu dizinin eğimi ölçülür.
+
+\paragraph{Kapalı yörünge üzerinden fırlatma (iki yöntemde ortak).} Kuadrupol kaçıklıkları kapalı
+yörüngeyi ideal eksenden kaydırır. Parçacık ideal eksenden fırlatılırsa kapalı yörünge etrafında
+betatron salınımı yapar; bu salınımın $S_y$'ye katkısı aradığımız seküler eğimden yaklaşık bin kat
+büyüktür. Bu yüzden iki yöntemde de önce 4 boyutlu kapalı yörünge ($x,x',y,y'$) aranır ve parçacık onun
+üzerinden fırlatılır~\BEL.
+
+\paragraph{Eğim kestirimi (iki yöntemde ortak).} $S_y(t)$'ye ``doğru $+$ salınımlar'' modeli fit edilir:
+$S_y(t)=a+bt+\sum_k[c_k\cos(2\pi f_kt)+d_k\sin(2\pi f_kt)]$; yalnız $b$ raporlanır. Düz doğru fiti
+kullanılmaz, çünkü kalan küçük salınımlar eğimi bozar.
+
+\paragraph{Fırlatmada açık kalan tek seçim: enerji.} Kapalı yörünge konumu ve açısı belirler; ama
+parçacığın \emph{enerjisini} (momentum büyüklüğünü) belirlemez. Her enerji için ayrı bir kapalı yörünge
+vardır. İki yöntem tam olarak burada ayrılır. Bu önemsiz bir ayrıntı değildir: sahte EDM enerjiye çok
+duyarlıdır (Bölüm~\ref{sec:delta}).
+
+%======================================================================
+\section{Simülasyonun geometrisi}
+%======================================================================
+
+Bir FODO hücresi sekiz elemandan oluşur ve C++ izleyici her turu \emph{sürüklenme (drift)} elemanı 1'den
+başlatır:
+\begin{kodblok}
+// integrator.cpp, run_integration
+// Start each revolution from the first drift element (elem=1),
+// then wrap around: 1,2,3,4,5,6,7,0.
+const int start_elem = 1;
+...
+if (elem == 0 || elem == 4) { type = 0; target_val = Phi_def; }        // ARC1, ARC2: saptırıcı
+else if (elem == 1 || elem == 3 || elem == 5 || elem == 7) { type = 1; }  // sürüklenme
+else if (elem == 2) { type = (current_fodo == 0) ? 4 : 2; }               // QF
+else if (elem == 6) { type = 3; }                                          // QD
+\end{kodblok}
+Yani fırlatma noktası ARC1 saptırıcısının hemen çıkışı, QF'ten öncedir: \textbf{alansız bir bölge}.
+
+Saptırıcıların alanı sert kenarlıdır:
+\begin{kodblok}
+if (element_type == 0) {
+    // DEFLECTOR: cylindrical capacitor, hard-edge (no fringe fields).
+    ...
+    if (n == 1.0) { E_r = E0 * R0 / R; }
+\end{kodblok}
+Alan saptırıcının içinde $E_r=E_0R_0/R$, dışında sıfırdır; sınırda saçak alanı ve potansiyel basamağı
+yoktur. Bunun sonucu Bölüm~\ref{sec:p}'de önemli olacak.
+
+\sekil[0.95]{ek_sekil_s4_firlatma.pdf}{Üst: bir FODO hücresinin eleman sırası ve fırlatma noktası. Sol alt:
+aynı kapalı yörüngenin farklı hücrelerindeki $|p|$ (Bölüm~\ref{sec:p}). Sağ alt: aynı desen, üç fırlatma
+kuralı, dört farklı fırlatma noktası (Bölüm~\ref{sec:degismezlik}).}
+
+%======================================================================
+\section{Eski yöntem (makaledeki)}
+%======================================================================
+
+\subsection{Adımlar}
+\begin{enumerate}[nosep]
+\item Parametreler \kod{params.json}'dan okunur; sihirli momentum $p_{\rm sihirli}$ hesaplanır.
+\item 4 boyutlu kapalı yörünge aranır: fırlatma noktasında $|p|=p_{\rm sihirli}$ olan bir parçacığın
+betatron salınım varyansı Newton yöntemiyle en küçük yapılır.
+\item Parçacık bulunan $(x,x',y,y')$ noktasından, \textbf{momentum büyüklüğü $p_{\rm sihirli}$} ve spin
+boylamsal olarak fırlatılır.
+\item $3\times10^{-4}$~s (yaklaşık 67 tur) izlenir; $S_y$'nin eğimi model fitiyle ölçülür.
+\end{enumerate}
+\textbf{Sabit tutulan:} fırlatma noktasındaki momentum büyüklüğü.
+
+\subsection{Kod}
+Makalenin Şekil~4'ünü üreten \kod{kmod\_drivers/twobeam\_oc.py} her ölçüm için şunu çağırır:
+\begin{kodblok}
+# kmod_drivers/twobeam_oc.py
+def _C(dx, dy, dG=None, tilt=None):
+    fcw, _ = fast_measure(dx, dy, tilt=tilt, direction=+1, signed=True, n_turns=28, n_iter=4, dG=dG)
+    fccw, _ = fast_measure(dx, dy, tilt=tilt, direction=-1, signed=True, n_turns=28, n_iter=4, dG=dG)
+    return fcw / TARGET, fccw / TARGET
+\end{kodblok}
+\kod{fast\_measure}'ın çekirdeği (\kod{kmod\_drivers/fast\_est.py}):
+\begin{kodblok}
+fields, y0, beta0, R0, p_mag, direction = setup_fields(cfg)        # p_mag = p_sihirli
+T_rev = _T_rev(fields, beta0, R0)
+v_co, resid = find_co_4d(fields, p_mag, direction, dx, dy, tilt, T_rev,
+                         n_turns=n_turns, n_iter=n_iter, dG=dG)   # adım 2
+launch = _make_state(v_co, p_mag, direction, [0.0, 0.0, direction])  # adım 3
+fields.poincare_quad_index = 0.0
+_, poin, pt = integrate_particle(launch, 0.0, t2, DT, fields=fields, ...)   # adım 4
+slope = float(measure_dSy_dt_model(poin[:, 7], pt))
+\end{kodblok}
+Fırlatma durumunu kuran fonksiyon (\kod{berry\_data/false\_edm\_mode\_scan.py}); momentum büyüklüğü
+doğrudan \kod{p\_mag}'dir:
+\begin{kodblok}
+def _make_state(v, p_mag, direction, spin):
+    """(x0, y0, x', y') faz-uzayı noktasından 9-bileşenli yerel başlangıç durumu."""
+    return [v[0], v[1], 0.0,
+            p_mag * direction * v[2], p_mag * direction * v[3], p_mag * direction,
+            spin[0], spin[1], spin[2]]
+\end{kodblok}
+Kapalı yörünge araması (\kod{berry\_data/false\_edm\_4d.py}); aranan büyüklük her turda aynı noktadaki
+konumun varyansıdır ve aramada da aynı \kod{\_make\_state} kullanılır:
+\begin{kodblok}
+def find_co_4d(fields, p_mag, direction, dx, dy, tilt, T_rev, n_turns=28, n_iter=2, dG=None):
+    def var4(v):
+        st = _make_state(v, p_mag, direction, spin)
+        _, poin, _ = integrate_particle(st, 0.0, t_probe, DT, fields=fields, ...)
+        return float(np.var(poin[:, 0]) + np.var(poin[:, 1]))
+    # 4x4 Hessian ile Newton adımları (n_iter kez)
+\end{kodblok}
+
+%======================================================================
+\section{Yeni yöntem (donmuş spin)}
+%======================================================================
+
+\subsection{Fikir}
+Gerçek deneyde demetin enerjisi ne momentumla ne toplam enerjiyle sabitlenir; polarimetre spinin yatay
+yönünü (fazını) ölçer ve bir geri besleme, yatay presesyonu sıfır tutacak biçimde enerjiyi ayarlar
+(``donmuş spin''). JEDI işbirliği COSY'de presesyon fazını geri beslemeyle kilitlemeyi göstermiştir. Yeni
+yöntem simülasyonda aynı koşulu kurar: sahte EDM, $\omega_h=0$ olan enerjide ölçülür.
+
+\subsection{Adımlar}
+\begin{enumerate}[nosep]
+\item Bir başlangıç kuralıyla ($\delta=0$) kapalı yörünge aranır ve izlenir: $f_0$ ve yatay presesyon hızı
+$\omega_0=\mathrm{d}/\mathrm{d}t\,\mathrm{atan2}(S_x,S_z)$ ölçülür.
+\item Enerji düzeltilir: $\delta_1=-\omega_0/(\mathrm{d}\omega_h/\mathrm{d}\delta)$. Eğim
+$\mathrm{d}\omega_h/\mathrm{d}\delta=-5.238\times10^6$~rad/s kaçıklıktan bağımsızdır (Bölüm~\ref{sec:delta}).
+Bu $\delta_1$ ile kapalı yörünge \emph{yeniden} aranır ve izlenir: $f_1$, $\omega_1$.
+\item $f$ ve $\omega_h$, $\delta$'ya doğrusal olduğu için $\omega_h=0$'daki değer ara değerlemeyle alınır:
+$f^*=f_0+(f_1-f_0)\,(0-\omega_0)/(\omega_1-\omega_0)$.
+\end{enumerate}
+\textbf{Sabit tutulan:} $\omega_h=0$. Başlangıç kuralı yalnız bir başlangıç tahminidir; sonucu etkilemez
+(Bölüm~\ref{sec:baslangic}).
+
+\subsection{Kod}
+Tamamı \kod{revizyon/sahte\_edm\_donmus.py}'dedir. Başlangıç kuralı (enerji korunumlu tahmin + $\delta$):
+\begin{kodblok}
+def launcher(delta):
+    def make_state(v, p_mag, direction, spin):
+        x = v[0]
+        W_ref = np.sqrt((p_mag * C_LIGHT) ** 2 + (M_P * C_LIGHT ** 2) ** 2)
+        Wk = W_ref - Q_E * (-E0_MAGIC * R0 * np.log((R0 + x) / R0))
+        p = np.sqrt(Wk ** 2 - (M_P * C_LIGHT ** 2) ** 2) / C_LIGHT * (1.0 + delta)
+        return [v[0], v[1], 0.0, p * direction * v[2], p * direction * v[3], p * direction,
+                spin[0], spin[1], spin[2]]
+    return make_state
+\end{kodblok}
+Tek bir $\delta$ için ölçüm: eski yöntemle aynı \kod{find\_co\_4d}, \kod{integrate\_particle} ve
+\kod{measure\_dSy\_dt\_model}; tek ek, yatay presesyon hızının da ölçülmesi:
+\begin{kodblok}
+def _one(dx, dy, direction, delta, tilt, dG, n_turns, n_iter, t2):
+    ms = launcher(delta)
+    false_edm_4d._make_state = ms; false_edm_mode_scan._make_state = ms   # aramada da aynı kural
+    fields, y0, beta0, R0_, p_mag, d = setup_fields(cfg)
+    v_co, resid = find_co_4d(fields, p_mag, d, dx, dy, tilt, _T_rev(...), n_turns=n_turns, n_iter=n_iter, dG=dG)
+    launch = ms(v_co, p_mag, d, [0.0, 0.0, d])
+    _, poin, pt = integrate_particle(launch, 0.0, t2, dt, fields=fields, ...)
+    f = measure_dSy_dt_model(poin[:, 7], t)                               # eskisiyle aynı
+    ang = np.unwrap(np.arctan2(poin[:, 6], poin[:, 8] * d))              # yatay spin açısı
+    return f, np.polyfit(t, ang, 1)[0], resid                            # f, omega_h
+\end{kodblok}
+Donmuş spin noktası:
+\begin{kodblok}
+def measure_frozen(dx, dy, direction=-1, tilt=None, dG=None, n_turns=28, n_iter=4, t2=3e-4):
+    f0, w0, r0 = _one(dx, dy, direction, 0.0, tilt, dG, n_turns, n_iter, t2)
+    d1 = -w0 / S_W_DELTA                                    # S_W_DELTA = -5.238e6 rad/s
+    f1, w1, r1 = _one(dx, dy, direction, d1, tilt, dG, n_turns, n_iter, t2)
+    fs = f0 + (f1 - f0) * (0.0 - w0) / (w1 - w0)           # omega_h = 0'da f
+    return dict(f=fs, f0=f0, f1=f1, w0=w0, w1=w1, delta_star=d1 * (0.0 - w0) / (w1 - w0), ...)
+\end{kodblok}
+
+\subsection{Yan yana}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\toprule
+& eski (makale) & yeni (donmuş spin) \\
+\midrule
+kapalı yörünge araması & \kod{find\_co\_4d} & aynı \\
+eğim kestirimi & \kod{measure\_dSy\_dt\_model} & aynı \\
+sabit tutulan & fırlatma noktasında $|p|=p_{\rm sihirli}$ & $\omega_h=0$ (deneydeki koşul) \\
+izleme sayısı & 1 (+ kapalı yörünge araması) & 2 (+ iki kapalı yörünge araması) \\
+maliyet & 1 birim & $\approx2$ birim \\
+ek çıktı & -- & $\omega_0$, $\omega_1$, $\delta^*$ (donmuş noktanın enerjisi) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%======================================================================
+\section{Karşılaştırma testleri}
+%======================================================================
+Bütün testler $\sigma=10~\mu$m (rng 3000, seed~0) deseninde ya da makalenin Şekil~4 kurulumunda (5 seed)
+yapıldı. Ayar: kapalı yörünge araması 28 tur, 4 iterasyon; izleme $3\times10^{-4}$~s.
+
+\subsection{Test 1: Fırlatma noktasından bağımsızlık}\label{sec:degismezlik}
+Halka simetrik olduğu için, aynı kaçıklık desenini halkada $k$ hücre kaydırmak yalnızca fırlatma
+noktasını değiştirir; fizik aynıdır. Doğru bir yöntem dört fırlatma noktasında aynı sonucu vermelidir
+(\kod{tests/teshis\_enerji\_ABC.py})~\BEL:
+\begin{center}\small
+\begin{tabular}{lcccc}
+\toprule
+fırlatma hücresi & 0 & 6 & 12 & 18 \\
+\midrule
+eski: $|p|=p_{\rm sihirli}$ & 1088 & 2729 & $-456$ & 95 \\
+ara deneme: ``toplam enerji tasarımda'' & $-376$ & 162 & $-722$ & 567 \\
+\textbf{yeni: donmuş spin} & \textbf{82.04} & \textbf{81.90} & \textbf{81.89} & \textbf{81.94} \\
+\bottomrule
+\end{tabular}
+\end{center}
+(Hedefin katı.) Eski yöntem aynı fizik için $-456$ ile $+2729$ arasında değişiyor; yeni yöntem \%0.2 içinde
+aynı. Şekil~1'in sağ alt paneli bunu gösteriyor.
+
+\subsection{Test 2: Neden? Aynı yörüngede $|p|$ hücreden hücreye değişiyor}\label{sec:p}
+Eski yöntemle hücre 0'dan fırlatılan parçacığın kapalı yörüngesi boyunca, hücre 0, 6, 12, 18'deki $|p|$
+doğrudan ölçüldü (\kod{tests/teshis\_p\_azimut.py}; ölçüm ARC2 girişinde, yani fırlatma noktasıyla
+arasında yalnız sürüklenme ve kuadrupol olan yerde)~\BEL:
+\begin{center}\small
+\begin{tabular}{lcccc}
+\toprule
+hücre & 0 & 6 & 12 & 18 \\
+\midrule
+$\sigma=10~\mu$m: $|p|/p_{\rm sihirli}-1$ & $+2\times10^{-12}$ & $-5.48\times10^{-7}$ & $-2.82\times10^{-7}$ & $-2.33\times10^{-7}$ \\
+kaçıklık yok & $\sim10^{-12}$ & $\sim10^{-12}$ & $\sim10^{-12}$ & $\sim10^{-12}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Mekanizma~\YOR: sert kenarlı saptırıcının içinde elektrik alanı parçacığın radyal hareketine göre iş yapar.
+Gerçek bir saptırıcıda bu iş, saçak alanındaki potansiyel basamağında geri alınır ve toplam enerji korunur.
+Sert kenarlı modelde basamak yoktur; bu yüzden kapalı yörüngenin saptırıcı içindeki radyal değişimine bağlı
+olarak $|p|$ bir hücreden diğerine değişir. Kaçıklık yokken kapalı yörünge ideal eksendir ve değişim
+sıfırdır.
+
+Sonuç: eski yöntem ``hücre $k$'da $|p|=p_{\rm sihirli}$'' derken, her $k$ için $\sim10^{-7}$ farklı bir
+yörünge enerjisi seçer.
+
+Çapraz kontrol~\BEL: Test~1'deki dört donmuş spin çözümünden, donmuş spin yörüngesinin her hücredeki
+$|p|$'si hesaplandı; hücre 0'a göre farklar $-5.482$, $-2.816$, $-2.333\times10^{-7}$. Doğrudan ölçümle
+dört basamak aynı. Yani dört farklı noktadan bulunan donmuş spin çözümleri \emph{tek ve aynı yörüngedir}.
+
+\subsection{Test 3: Sahte EDM enerjiye ne kadar duyarlı?}\label{sec:delta}
+Aynı desende enerji $\delta=\pm10^{-7},\pm10^{-6}$ kaydırılarak izlendi~\BEL:
+\sekil[0.9]{ek_sekil_s3_delta.pdf}{Enerji taraması. Sol: yatay presesyon; sağ: sahte EDM. İkisi de $\delta$'ya
+doğrusal; elmas, donmuş spin noktası.}
+$\delta=10^{-7}$ başına sahte EDM $\approx290\times$hedef değişiyor. Test~2'deki $|p|$ farkları
+($2$--$5\times10^{-7}$) bu yüzden yüzlerce hedeflik farklar yaratır. Ayrıca~\BEL\ (donmuş spin aracının 9
+koşumundan): $\mathrm{d}\omega_h/\mathrm{d}\delta=-5.238\times10^6$~rad/s kaçıklıktan bağımsız (halkanın
+özelliği), $\mathrm{d}f/\mathrm{d}\delta$ ise kaçıklıkla doğrusal ölçekleniyor.
+
+\subsection{Test 4: Yeni yöntem başlangıç kuralından bağımsız mı?}\label{sec:baslangic}
+Yeni yöntemin bir başlangıç kuralına ihtiyacı var ($\delta=0$ noktası). Varsayılan kural ``enerji
+korunumlu'' tahmindir ve bu, fırlatma noktası alansız bölgede olduğu için fiziksel bir anlam taşımaz. Bu
+yüzden aynı prosedür, başlangıç kuralı olarak \emph{eski yöntemin kuralıyla} ($|p|=p_{\rm sihirli}(1+\delta)$)
+dört fırlatma hücresinde tekrar çalıştırıldı (\kod{tests/teshis\_baslangic\_kurali.py})~\BEL:
+\BaslangicTablo
+\sekil[0.9]{firlatma_fD_baslangic.pdf}{Sol: eski kuraldan başlayınca başlangıç değeri fırlatma noktasına göre
+çok farklı, ama donmuş spin sonucu aynı. Sağ: iki başlangıç kuralının verdiği donmuş spin sonuçları (dar eksen).}
+\BaslangicYorum
+
+\subsection{Test 5: $\sigma^2$ ölçekleme testi bu farkı neden göremez?}
+Makalede ve önceki çalışmalarda eski yöntem, $\sigma=2.5$, 5, 10~$\mu$m'de $p\approx2.00$ üssüyle
+doğrulanmıştı. Yeni yöntem de $p=2.0002$ veriyor. Ama iki yöntemin değerleri farklı (10~$\mu$m'de eski
+1089, 58, 1587; yeni 82, $-71$, 544).
+
+Nedeni~\BEL: eski yöntemin hatası $=(\mathrm{d}f/\mathrm{d}\delta)\times\delta_{\rm fırlatma}$. İki çarpan da
+kaçıklıkla doğrusal: $\mathrm{d}f/\mathrm{d}\delta\propto\sigma$ (Test~3), $\delta_{\rm fırlatma}\propto
+x_{\rm CO}\propto\sigma$ (Test~2). Çarpım $\propto\sigma^2$, yani hata doğru değerle \emph{aynı üsle}
+ölçeklenir.
+\sekil[0.9]{ek_sekil_s5_sigma2.pdf}{Sol: sabit başlangıç kuralı ve donmuş spin; ikisi de $\sigma^2$. Sağ:
+oranları her seed için $\sigma$'dan bağımsız ama 1'den farklı ($-4.6$, $2.4$, $0.84$).}
+Ders: $\sigma^2$ testi mekanizmanın türünü (ikinci mertebe geometrik faz) doğrular; mutlak değeri
+doğrulamaz. Mutlak değer için Test~1 gibi bir değişmezlik testi gerekir.
+
+\subsection{Test 6: Makalenin Şekil 4'ü, aynı desenlerle}\label{sec:fig4}
+Eski değerler makalenin kendi çıktısıdır (\kod{kmod\_drivers/twobeam\_oc\_14nm.json}); yeni değerler aynı
+desen, aynı gürültü, aynı düzeltmeyle donmuş spin aracından (\kod{donmus\_fig4.jsonl})~\BEL:
+\sekil[0.95]{firlatma_fB_sekil4.pdf}{Şekil 4 kurulumu (10~$\mu$m korelasyonsuz kaçıklık, 14~nm gürültü,
+\kod{rcond}~$=0.01$). $C$, seed başına.}
+\begin{center}\small
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{3}{c}{eski} & \multicolumn{3}{c}{yeni} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+durum & $f_{\rm CW}$ medyan & $f_{\rm CCW}$ medyan & $C$ medyan & $f_{\rm CW}$ & $f_{\rm CCW}$ & $C$ \\
+\midrule
+düzeltme yok & \HamEskiCW & \HamEskiCCW & \HamEskiC & 38 & 78 & 49 \\
+tek demet & $-25.6$ & $-1.55$ & 47 & $-10.1$ & $-1.56$ & 12 \\
+iki demet & 0.006 & 0.001 & 0.0046 & 0.000 & 0.002 & 0.0015 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Tablo yanıltıcı olmasın diye her yönü ayrı inceledim. Tek demet düzeltmesinde yalnız CCW yörüngesi
+düzeltilir; CW yörüngesi büyük kalır. Eski ve yeni yöntem CCW'de neredeyse aynı (fark $\le0.17$), CW'de çok
+farklı (fark 1--100)~\BEL. Bu, hatanın kapalı yörüngenin büyüklüğüne bağlı olduğunu düşündürür; doğrudan
+sınadım:
+\sekil[0.8]{firlatma_fA_fark_yorunge.pdf}{Eski ve yeni yöntem arasındaki fark, fırlatma anındaki kapalı
+yörüngenin büyüklüğüne (yatay ve düşey rms'in çarpımı, $R$ matrisinden) karşı. Her nokta bir seed ve bir
+yön.}
+\FarkYorum
+
+\subsection{Test 7: Önceki raporlardaki ana sayılar}
+Revizyon kontrolleri sırasında eski yöntemle elde edilip yeni yöntemle tekrarlanan sayılar~\BEL:
+\sekil[0.95]{firlatma_fC_ozet.pdf}{Her satır bir sonuç; turuncu eski, mavi yeni yöntem. Elmaslar medyan,
+noktalar seed'ler. Eski değerler 3--5 seed, yeniler 5--10 seed.}
+\begin{center}\small
+\begin{tabular}{lccl}
+\toprule
+sonuç & eski medyan & yeni medyan & yorum \\
+\midrule
+Şekil 4, iki demet & 0.0046 & 0.0015 & ikisi de tabanda; değişmedi \\
+Şekil 4, tek demet & 47 & 12 & 4 kat abartılmıştı \\
+Adım 1: $\rho=1$, makale kestiricisi & 2.5 & 0.19 & hüküm değişti: hedefin altında \\
+T2: rijit BPM, iki demet, $\sigma_\delta=1~\mu$m & 0.27 & 0.010 & 27 kat abartılmıştı \\
+Adım 6: makale modeli, 96. saat & 15 & 1.3 & ``çalışmaz'' $\to$ ``marjsız'' \\
+T1: yalnız kuadrupol, \%0.2 $\beta$-beat & 1.3 & 0.75 & aynı yönde, 2 kat \\
+\bottomrule
+\end{tabular}
+\end{center}
+Desen tutarlı~\YOR: kalan kapalı yörünge küçükse (iki demet, trim) iki yöntem uyuşuyor; büyükse (tek demet,
+yanlış BPM modeli, düzeltilmemiş) eski yöntem sahte EDM'yi ya abartıyor ya da yanlış işaretle veriyor.
+Hükmü değişen iki sonuç var: Adım~1'de makale kestiricisi $\rho=1$'de hedefin altına iniyor; Adım~6'da
+makale modeli ``çalışmaz'' değil ``marjsız''.
+
+%======================================================================
+\section{Hangisi doğru, ve ne kadar emin olabiliriz?}
+%======================================================================
+
+\paragraph{Yeni yöntemden yana kanıtlar~\YOR.}
+\begin{enumerate}[nosep]
+\item \emph{Deneyle aynı çalışma noktası:} deney $\omega_h=0$'ı sabit tutar; yeni yöntem de.
+\item \emph{Değişmezlik:} fiziksel olarak aynı durum (farklı fırlatma noktası) aynı sonucu veriyor (Test~1);
+eski yöntem vermiyor.
+\item \emph{Tek yörünge:} dört noktadan bulunan çözümler aynı yörünge (Test~2 çapraz kontrolü).
+\item \emph{Başlangıçtan bağımsızlık:} başlangıç kuralı değişse de sonuç aynı (Test~4).
+\end{enumerate}
+
+\paragraph{Eski yöntem ``yanlış fizik'' mi?} Hayır~\YOR. Eski yöntem doğru bir izleme yapıyor, ama kontrol
+edilmeyen bir enerjide. Ölçtüğü değer, o enerjideki sahte EDM'dir; o enerji ise fırlatma noktasına ve kapalı
+yörüngeye bağlıdır. Sorun ölçümde değil, çalışma noktasının tanımındadır.
+
+\paragraph{Saçak alanlı (gerçekçi) bir modelde eski yöntem doğru olur muydu?~\HIP} Kısmen. Saçak alanı olan
+bir saptırıcıda toplam enerji korunur ve alansız bölgelerin hepsinde $|p|$ aynıdır; Test~1'deki fırlatma
+noktası bağımlılığı büyük ölçüde kaybolurdu. Ama kaçıklık, kapalı yörüngenin uzunluğunu ve saptırıcılardaki
+ortalama yarıçapını değiştirir; bu da $\omega_h=0$ olan enerjiyi tasarım enerjisinden kaydırır. Eski yöntem
+tasarım enerjisinde ölçeceği için yine donmuş noktanın dışında kalırdı. Bu kaymanın büyüklüğünü bu modelde
+ölçemiyorum (sert kenar onu fırlatma noktası etkisiyle karıştırıyor). Her iki durumda da deneyle eşleşen
+tanım $\omega_h=0$'dır.
+
+\paragraph{Yeni yöntemin sınırları.}
+\begin{itemize}[nosep]
+\item Sert kenarlı saptırıcı modeli değişmedi; yeni yöntem yalnız bu modelde çalışma noktasını doğru seçer.
+Saçak alanının kendisinin sahte EDM'ye etkisi test edilmedi.
+\item $f(\delta)$ ve $\omega_h(\delta)$'nın doğrusallığı tek desende ($\delta=\pm10^{-6}$) sınandı. İkinci
+noktadaki $|\omega_1|$ ilk noktadakinin $\sim10^{-5}$'i olduğu için ara değerleme çok küçük bir aralıkta
+yapılır~\BEL.
+\item Geri beslemenin dinamiği ve demetin momentum dağılımı ($\sim10^{-4}$) simüle edilmedi; tek parçacık
+ortalama $\delta$'yı temsil eder. $f$ ve $\omega_h$ $\delta$'ya doğrusal olduğu için ortalama alma bunu
+değiştirmez~\YOR.
+\item Maliyet yaklaşık iki katı.
+\item Eski yöntemin donmuş nokta dışındaki $\mathrm{d}f/\mathrm{d}\delta$ eğimi fırlatma noktasına göre
+farklı çıkıyor; bunu açıklamadım. Bu, eski değerleri tek bir eğimle ``düzeltmeyi'' imkânsız kılıyor:
+eski sayılar yeniden ölçülmelidir, dönüştürülemez.
+\end{itemize}
+
+%======================================================================
+\section{Makale için sonuç}
+%======================================================================
+\begin{enumerate}[nosep]
+\item Makalenin ana sayısı, iki demetli düzeltmeden sonraki sahte EDM, iki yöntemde de sayısal tabanda
+(0.0046 ve 0.0015). Ana iddia etkilenmiyor~\BEL.
+\item Karşılaştırma için verilen sayılar (düzeltme yok, tek demet) eski yöntemle 2--35 kat yanlış~\BEL.
+Makalede ``iki demet tek demetten $\sim10^4$ kat iyi'' türünden bir oran varsa, yeni yöntemle yaklaşık
+$8\times10^3$ olur (12 / 0.0015); oranın büyüklük mertebesi değişmiyor, ama tek demetin kötülüğünün büyük
+kısmı \kod{rcond}~$=0.01$ seçiminden geliyor (ek rapor, soru 12).
+\item Makalede ölçüm prosedürü tanımlanırken ``parçacık kapalı yörüngeden, $\omega_h=0$ olan enerjide
+fırlatılır'' yazılmalı ve kısa bir değişmezlik testi (Test~1) verilmelidir. Bu, hakemin olası ``hangi
+enerjide?'' sorusunu önceden cevaplar.
+\item Sert kenar modelinin bir sınırlama olarak yazılması önerilir.
+\end{enumerate}
+
+%======================================================================
+\appendix
+\section{Yeniden üretim}
+%======================================================================
+Dal: \kod{claude/brave-allen-92wn61}.
+\begin{center}\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{6cm}X}
+\toprule
+dosya & işlev \\
+\midrule
+\kod{kmod\_drivers/fast\_est.py}, \kod{berry\_data/false\_edm\_4d.py}, \kod{berry\_data/false\_edm\_mode\_scan.py} & eski yöntem (değiştirilmedi) \\
+\kod{revizyon/sahte\_edm\_donmus.py} & yeni yöntem \\
+\kod{revizyon/tests/teshis\_enerji\_ABC.py} & Test 1 ve 3 \\
+\kod{revizyon/tests/teshis\_p\_azimut.py} & Test 2 \\
+\kod{revizyon/tests/teshis\_baslangic\_kurali.py} & Test 4 \\
+\kod{revizyon/donmus\_fig4.py}, \kod{revizyon/firlatma\_eski\_ham.py} & Test 6 \\
+\kod{revizyon/firlatma\_sekiller.py}, \kod{revizyon/ek\_sekiller.py} & şekiller \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{document}
