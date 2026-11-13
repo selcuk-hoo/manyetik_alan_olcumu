@@ -36,6 +36,8 @@ def tasks():
         T += [("B_q03_yalin", d), ("B_q03_roll_trim", d)]
     for d in (-1, 1):
         T.append(("C_Br", d))
+    for d in (-1, 1):
+        T.append(("C_Br11", d))
     T += [("C_cw_dm", 1), ("C_cw_dp", 1)]
     return T
 
@@ -67,6 +69,8 @@ def run(t):
         dx = rng.normal(0, 0.3e-6, NQ); dy = rng.normal(0, 0.3e-6, NQ)
     if name == "C_Br":
         integrator_rev.DEFL_BR = np.full(NQ, 1e-13)
+    if name == "C_Br11":
+        integrator_rev.DEFL_BR = np.full(NQ, 1e-11)
     if name.startswith("C_cw_d"):
         integrator_rev.DEFL_ROLL = roll_pattern(30000, False)
         delta = -1e-6 if name.endswith("dm") else 1e-6
