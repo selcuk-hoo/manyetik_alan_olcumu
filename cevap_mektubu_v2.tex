@@ -27,13 +27,13 @@ requested by Referee~B. The main changes are:
 electrostatic deflector field errors and rolls, corrector type and correlated misalignment.
 \item A new section ``Operating scenario'' (Sec.~VI) follows the machine for one week with ground motion,
 BPM drift and periodic BBA.
-\item The two-beam scheme is now stated as an explicit algorithm (Sec.~IV.C), including the treatment of
+\item The two-beam scheme is now stated as an explicit algorithm (Sec.~IV.B), including the treatment of
 BPM offsets and the choice of the regularization.
 \item The symmetric and antisymmetric components are defined in the introduction (Sec.~I.C), and the claim
 of a 100-fold orbit suppression of the symmetric component has been corrected: the measured suppression is
 four- to sevenfold at low harmonics, explained by the different beta functions at the focusing and
-defocusing quadrupoles (Sec.~III.A, Fig.~2).
-\item The false EDM is now evaluated at the frozen-spin energy (Sec.~II.C, Appendix~A). With a launch at
+defocusing quadrupoles (Sec.~III, Fig.~2).
+\item The false EDM is now evaluated at the frozen-spin energy (Sec.~II, Appendix~A). With a launch at
 fixed momentum, the result depended on the launch point in a misaligned lattice; this affected the
 uncorrected and single-beam results by factors of 1.1--35, but not the two-beam results, which were
 and remain at the numerical floor. The false-EDM values in the paper were recomputed accordingly.
@@ -63,9 +63,14 @@ as the symmetric quadrupole misalignment. We find:
 \item A fit containing only quadrupole columns mistakes a deflector drift for a symmetric misalignment
 (about 1~$\mu$m per $10^{-7}$ field drift or 0.1~$\mu$rad roll drift). Adding the deflector columns to the
 fit removes this leakage, at the price of a larger noise amplification [Fig.~6(a)].
-\item A deflector roll produces a first-order false EDM through the magnetic kicks that close the orbit. It
-has the same sign for the two beam directions and cancels in the CW$-$CCW observable; its size sets a
-requirement on the CW/CCW symmetry of the ring, as in Ref.~[2].
+\item A deflector roll produces a first-order false EDM through the magnetic kicks that close the orbit. We
+show that it depends only on the mean roll (zero-mean roll patterns give no first-order signal), that it lives
+in the even CW+CCW channel while the EDM lives in the odd channel, and that a single common vertical trim
+locking the even channel removes it without affecting the EDM (Table~III). This replaces a CW/CCW-symmetry
+requirement at the $10^{-8}$ level by a feedback on a large, directly measured signal.
+\item Zero-mean rolls still couple to the closed orbit at second order, in the odd channel; individual
+deflector trims remove this term (matched test: $C=1.7$ with the common trim alone, $0.010$ with common and
+individual trims).
 \item Field errors and rolls together produce a geometric phase of their own. It is removed by trimming the
 deflectors at the source (field by the deflector voltage, roll by an up--down electrode voltage difference),
 using the deflector part of the fit. The tolerable deflector drift between trims is set by the accuracy of
@@ -109,10 +114,9 @@ signals that rely on CW/CCW symmetry).
 
 \referee{Overall impression is that the paper is too long for the reported context.}
 
-\reply We have tightened the introduction and the BBA section, removed repetitions and moved technical
-material (frozen-spin evaluation, breathing, orbit-difference inversion, two-dimensional illustration) to
-appendices. Some length was added to address the substantive points above and those of Referee~B; we kept
-these additions as concise as possible.
+\reply We have rewritten the paper concisely: although new sections were added to address the points
+above and those of Referee~B, the revised manuscript is shorter than the original (8 instead of 9 pages).
+Technical material was moved to appendices.
 
 \referee{1. Excessive use of acronyms greatly complicates reading of the text.}
 
@@ -142,7 +146,7 @@ Sec.~IB''.}
 
 \referee{7. Equation after (9) has problem with dimension.}
 
-\reply (6, 7) The orbit-difference discussion was moved to Appendix~C and rewritten: $\Delta R$ is the
+\reply (6, 7) The orbit-difference discussion was moved to Appendix~B and rewritten: $\Delta R$ is the
 difference of the response matrices for two gradient settings, $\Delta R\approx\epsilon_g\,\partial
 R/\partial g$, and the relation now reads $\|\Delta R^{-1}\|\approx\|R^{-1}\|/\epsilon_g$, with $\epsilon_g$
 the dimensionless relative gradient change.
@@ -150,7 +154,7 @@ the dimensionless relative gradient change.
 \referee{8. Section V.A, Line 3: In the phrase ``beams pass through the quadrupoles in the opposite order,''
 state that these are two nearby quads.}
 
-\reply Clarified: ``the reversed order of the two quadrupoles of a cell'' (Sec.~IV.C).
+\reply Clarified: ``the reversed order of the two quadrupoles of a cell'' (Sec.~IV.B).
 
 %======================================================================
 \section*{Referee B}
@@ -190,7 +194,7 @@ and how its performance is evaluated.}
 
 \reply We agree. Section~IV.C now states the scheme as an explicit five-step algorithm: reference readings
 after BBA, differences of both beams relative to the reference, the two-beam least-squares estimate
-[Eq.~(6)] with the regularization chosen by the discrepancy principle (no knowledge of the true
+[Eq.~(4)] with the regularization chosen by the discrepancy principle (no knowledge of the true
 misalignment is needed), the correction by quadrupole-mounted dipole correctors, and the BBA trigger. The
 performance is evaluated in three steps: (i) static correction of random misalignments (Fig.~4);
 (ii) the validity domain against monitor motion, deflector errors, corrector type and correlated
@@ -210,7 +214,7 @@ publication.}
 estimator launched the particle on the closed orbit at fixed momentum. With hard-edge deflectors the
 momentum varies along a distorted closed orbit, so the result depended on the launch point. Since the
 experiment keeps the horizontal spin frozen by feedback, we now evaluate the false EDM at the frozen-spin
-energy (Sec.~II.C, Appendix~A), where the result is independent of the launch point to 0.2\%. The two-beam
+energy (Sec.~II, Appendix~A), where the result is independent of the launch point to 0.2\%. The two-beam
 results of the original manuscript are unaffected (both at the numerical floor); the uncorrected and
 single-beam values decreased by factors of 1.1--35. All values in the revised manuscript use the new
 evaluation.

@@ -1,1 +1,16 @@
-\newcommand{\EslestirilmisParagraf}{\textit{(Eşleştirilmiş test sonuçları eklenecek.)}}
+\newcommand{\EslestirilmisParagraf}{%
+\par Ortak trim ile bireysel trimin katkılarını ayırmak için eşleştirilmiş bir test yaptık: her desende aynı
+başlangıç (0.3~$\mu$m rms kuadrupol kaçıklığı ve $3\times10^{-7}$ rms rastgele roll), dört durum, beş desen
+(Tablo~\ref{tab:eslestirilmis}). Ortak trim çift kanalı temizler ama tek kanaldaki çapraz terimi temizlemez;
+bireysel trim temizler. Son satırın referansın da altında kalması, o durumda kuadrupollerin de aynı fitle
+düzeltilmesindendir.
+\begin{table}[H]\centering\small
+\caption{Eşleştirilmiş test: roll $\times$ kapalı yörünge çapraz terimi (hedefin katı, 5 desen).}\label{tab:eslestirilmis}
+\begin{tabular}{lcc}\toprule
+Durum & $C$ medyan [aralık] & $|S_+|$ \\\midrule
+Yalnız kuadrupol kaçıklığı (referans) & 0.082 [0.028, 0.11] & $\le0.5$ \\
++ roll, trim yok & 1.78 [0.28, 5.0] & $2.5\times10^7$--$2.5\times10^8$ \\
++ yalnız ortak trim & 1.71 [0.29, 4.5] & $\le0.35$ \\
++ ortak ve bireysel trim (kuadrupoller de düzeltilmiş) & 0.0099 [0.004, 0.019] & $\le0.01$ \\\bottomrule
+\end{tabular}
+\end{table}}
