@@ -1,0 +1,39 @@
+\newcommand{\BaslangicTablo}{%
+\begin{center}\small
+\begin{tabular}{lcccc}
+\toprule
+fırlatma hücresi & 0 & 6 & 12 & 18 \\
+\midrule
+başlangıç noktası, eski kural ($\delta=0$): $f_0$ & 1088 & 2729 & $-456$ & 95 \\
+başlangıç noktası: $\omega_0$ [rad/s] & $+1.81$ & $-2.48$ & $-0.39$ & $-0.015$ \\
+ikinci nokta: $\omega_1$ [rad/s] & $-0.90$ & $+1.2$ & $+0.19$ & $+0.0075$ \\
+ara değerleme: $f^*$ & 82.27 & 79.55 & 82.00 & 81.96 \\
+\textbf{$\delta^*$'da doğrudan ölçüm: $f$} & \textbf{82.04} & \textbf{81.87} & -- & -- \\
+\quad ve orada $\omega_h$ [rad/s] & $-7\times10^{-6}$ & $+2\times10^{-5}$ & -- & -- \\
+enerji kuralından başlayarak (Test 1): $f^*$ & 82.04 & 81.90 & 81.89 & 81.94 \\
+\bottomrule
+\end{tabular}
+\end{center}}
+\newcommand{\BaslangicYorum}{%
+Okunuşu~\BEL:
+\begin{enumerate}[nosep]
+\item \emph{Donmuş nokta başlangıç kuralından bağımsız bulunuyor.} Eski kuraldan başlanınca bulunan
+$\delta^*$ değerleri ($+2.313\times10^{-7}$, $-3.168\times10^{-7}$, $-5.02\times10^{-8}$, $-1.95\times10^{-9}$),
+donmuş spin yörüngesinin o hücredeki $|p|$ sapmasıyla (Test~2'nin çapraz kontrolü:
+$+2.313\times10^{-7}$, $-3.168\times10^{-7}$, $-5.024\times10^{-8}$, $-1.952\times10^{-9}$) dört basamak aynı.
+Yani iki farklı başlangıç kuralı aynı yörüngeyi buluyor.
+\item \emph{$\delta^*$'da doğrudan ölçülen $f$, enerji kuralıyla bulunan değerle \%0.04 içinde aynı}
+(82.04 ve 81.87'ye karşı 82.04 ve 81.90); orada $\omega_h$ gerçekten sıfır ($10^{-5}$ rad/s).
+\item \emph{İki noktalı ara değerleme ise bu testte \%3'e kadar sapıyor} (hücre 6: 79.55). Nedeni: eski
+kuralda $\omega_h$'nin $\delta$'ya eğimi farklıdır ($\approx-7.8\times10^{6}$ rad/s; aracın varsaydığı
+$-5.24\times10^{6}$ enerji kuralına aittir). Bu yüzden ikinci nokta donmuş noktaya düşmez
+($|\omega_1|\approx1$~rad/s) ve ara değerleme geniş bir aralıkta yapılır. Donmuş noktanın dışında $f$'nin
+davranışı tam doğrusal olmadığından ara değerleme hata yapar~\HIP.
+\item \emph{Önceki bütün üretim koşumları için sonuç~\BEL:} enerji kuralıyla başlayan 666 koşumun hepsinde
+ikinci nokta donmuş noktaya çok yakındı ($|\omega_1|$ en fazla $2.7\times10^{-4}$, medyanı $10^{-5}$ rad/s).
+Bu testteki 0.9--1.2 rad/s ile karşılaştırınca, önceki sonuçlar fiilen donmuş noktada doğrudan ölçülmüş
+sayılır; ara değerleme hatası ihmal edilebilir.
+\item \emph{Araçta yapılan iyileştirme:} $|\omega_1|>10^{-3}$ rad/s ise araç artık $\delta^*$'da üçüncü bir ölçüm
+yapıyor ve o değeri raporluyor (\kod{W1\_ESIK}). Önceki koşumların hiçbirinde bu eşik aşılmadığı için eski
+sonuçlar değişmez; araç başlangıç kuralına karşı sağlam hâle gelir.
+\end{enumerate}}

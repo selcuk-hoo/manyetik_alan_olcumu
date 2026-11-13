@@ -34,6 +34,7 @@ from ortak import Q_E, M_P, C_LIGHT, E0_MAGIC, R0
 
 S_W_DELTA = -5.238e6        # dω_h/dδ [rad/s] (teshis_enerji_ABC, seed 0; donmuş spin araması için başlangıç)
 NQ = 48
+W1_ESIK = 1e-3            # |ω1| bu eşiği aşarsa δ*'da üçüncü ölçüm [rad/s]
 
 
 def launcher(delta):
@@ -82,8 +83,14 @@ def measure_frozen(dx, dy, direction=-1, tilt=None, dG=None, n_turns=28, n_iter=
         f1, w1, r1 = _one(dx, dy, direction, d1, tilt, dG, n_turns, n_iter, t2)
         fs = f0 + (f1 - f0) * (0.0 - w0) / (w1 - w0) if w1 != w0 else f1
         ds = d1 * (0.0 - w0) / (w1 - w0) if w1 != w0 else d1
-        return dict(f=float(fs), f0=f0, f1=f1, w0=w0, w1=w1, delta1=d1, delta_star=float(ds),
-                    co_resid=max(r0, r1))
+        out = dict(f=float(fs), f0=f0, f1=f1, w0=w0, w1=w1, delta1=d1, delta_star=float(ds),
+                   co_resid=max(r0, r1))
+        # İkinci nokta donmuş noktaya düşmediyse (başlangıç kuralının eğimi farklıysa), δ*'da doğrudan
+        # üçüncü ölçüm yap (firlatma_karsilastirma Test 4). Üretim koşumlarında |ω1| ≤ 3e-4 → tetiklenmez.
+        if abs(w1) > W1_ESIK:
+            f2, w2, r2 = _one(dx, dy, direction, ds, tilt, dG, n_turns, n_iter, t2)
+            out.update(f=float(f2), f_interp=float(fs), w2=w2, co_resid=max(r0, r1, r2))
+        return out
     finally:
         os.chdir(cwd)
 
