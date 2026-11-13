@@ -48,11 +48,12 @@ def run(t):
     integrator_rev.DEFL_ROLL = z; integrator_rev.DEFL_DE = z; integrator_rev.DEFL_BR = z; integrator_rev.DEFL_BV = z
     dx = dy = z
     edm = name.startswith("A_")
-    if edm:
-        orig = FM.setup_fields
-        def setup_edm(cfg):
-            r = orig(cfg); r[0].EDMSwitch = 1.0; return r
-        FM.setup_fields = setup_edm
+    # işçi süreçleri yeniden kullanılır: setup_fields'i HER görevde açıkça kur (EDM açık/kapalı)
+    if not hasattr(FM, "_orig_setup_fields"):
+        FM._orig_setup_fields = FM.setup_fields
+    def setup_sw(cfg, _o=FM._orig_setup_fields, _e=edm):
+        r = _o(cfg); r[0].EDMSwitch = 1.0 if _e else 0.0; return r
+    FM.setup_fields = setup_sw
     if name in ("A_edm_roll",):
         integrator_rev.DEFL_ROLL = roll_pattern(30000, False)
     if name in ("A_edm_roll_trim", "B_q03_roll_trim"):
