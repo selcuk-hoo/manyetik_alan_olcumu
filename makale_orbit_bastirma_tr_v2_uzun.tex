@@ -49,7 +49,8 @@ inceliyoruz: BPM hareketi, elektrostatik saptırıcı alanı ve roll hataları, 
 kaçıklık ve bir haftalık işletim senaryosu. Kuadrupol içi dipol düzelticiler, saptırıcı trimleri ve doğru
 modellenmiş BPM montajıyla, iki demetli izleme kuadrupol polarite çevirmesine gerek kalmadan sahte EDM'yi
 BBA'lar arasında hedefin çok altında tutar. Saptırıcı roll'unun birinci mertebe etkisinin yalnız ortalama
-roll'a bağlı olduğunu ve EDM kanalına dokunmadan ortak bir düşey trimle bastırılabileceğini de gösteriyoruz.
+roll'a bağlı olduğunu ve Omarov ve ark.'nın öngördüğü ortak düşey trimle EDM kanalına dokunmadan
+bastırıldığını da gösteriyoruz.
 \end{abstract}
 
 \tableofcontents
@@ -490,8 +491,12 @@ saptırıcı roll trimi gerekir (aşağıda).
 \end{enumerate}
 
 \paragraph{Ortak trim geri beslemesi.} Çift kanal, polarimetrenin zaten ölçtüğü ve EDM'den $10^8$ kat büyük
-olabilen bir sinyaldir. Önerimiz, bütün saptırıcılara ortak tek bir düşey elektrik trimiyle (üst ve alt
-elektrotlar arasında küçük ortak bir gerilim farkı) çift kanalı sıfıra kilitlemektir. Neden gerekli? Gerçek
+olabilen bir sinyaldir. Bu sinyali ortak bir düşey elektrik trimiyle (üst ve alt elektrotlar arasında küçük
+ortak bir gerilim farkı) sıfırlamak bizim önerimiz \emph{değildir}; temel tasarımda zaten vardır.
+Ref.~\cite{omarov} (Bölüm~III~B ve Tablo~IV), iki demette aynı yönlü düşey dönmenin $10^{-6}$~rad/s'nin altında
+tutulacağını belirtir. Bizim katkımız bu trimin (i) roll'un birinci mertebe etkisini bütünüyle kaldırdığını,
+(ii) EDM kanalına dokunmadığını göstermek ve (iii) aşağıdaki kaçak formülüyle trime nicel bir gereksinim
+koymaktır. Neden gerekli? Gerçek
 makinede iki demet tam simetrik değildir; örneğin iki demet ayrı ayrı donmuş enerjiye kilitlenir ve enerjileri
 farklı olabilir. Roll kaynaklı sinyalin enerjiye duyarlılığı $d\ln f/d\delta=-2.9$ (CCW) ve $-2.5$ (CW); yani
 asimetri $\epsilon\approx(2.5$--$2.9)\Delta\delta$. Kalan tek kanal katkısı bir çarpımdır:
@@ -501,9 +506,11 @@ C_\text{kalan}\approx|S_+|\cdot\epsilon.
 Örnek: $\Delta\delta=10^{-7}$ \tahmin, $\epsilon\approx3\times10^{-7}$. Çift kanal $1.26\times10^8$'de bırakılırsa
 $C\approx40$; $10^{-4}$~rad/s'ye ($10^5\times$hedef) kilitlenirse $C\approx0.03$. Böylece ``CW/CCW simetrisi
 $10^{-8}$ olmalı'' gereksinimi, ``çift kanal yaklaşık $10^{-4}$~rad/s'de tutulmalı'' gereksinimine dönüşür.
-Bunun bedeli, etkin ortalama roll'un yaklaşık $3\times10^{-11}$~rad'da tutulmasıdır; bu mekanik bir hizalama
-değil, ölçülen sinyal üzerinden çalışan bir geri beslemedir, ama trim düğmesinin çözünürlüğü ve kararlılığı çok
-ince olmalıdır \tahmin. Ortalama düşey elektrik alan, EDM halkalarının bilinen ana sistematiği olan ortalama
+Omarov'un $10^{-6}$~rad/s düzeyi bu gereksinimin 100 kat altındadır: $\Delta\delta=10^{-7}$ için kaçak
+$C\sim3\times10^{-4}$ olur ve $\Delta\delta\approx10^{-5}$'e kadar $C\lesssim0.03$ kalır \tahmin. Yani iki eşik
+farklı sorulara cevaptır: $10^{-4}$~rad/s bizim kaçak mekanizmamızın \emph{izin verdiği üst sınır},
+$10^{-6}$~rad/s Omarov'un \emph{çalışma hedefi}dir; tutarlılık için ikincinin birincinin altında olması
+yeterlidir. Ortalama düşey elektrik alan, EDM halkalarının bilinen ana sistematiği olan ortalama
 radyal manyetik alanın elektrik karşılığıdır; deney onu zaten kontrol etmek zorundadır. Geri beslemenin dinamik
 davranışı (gürültü, gecikme, çözünürlük) henüz simüle edilmedi.
 
@@ -605,8 +612,8 @@ aynı kanala düşen hatalar belirler:
 BPM--kuadrupol sürüklenmelerine ve montaj katsayısındaki \%10'luk hatalara karşı sağlam yapar;
 \item saptırıcı sürüklenmeleri fite dahil edilmeli ve kaynağında trimlenmelidir; trimler arası izin verilen
 sürüklenme \%0.2 gradyan hatasıyla $\sim3\times10^{-6}$'dır ve tepki modelinin doğruluğuyla ölçeklenir;
-\item saptırıcı roll'unun birinci mertebe etkisi yalnız ortalama roll'a bağlıdır, çift kanaldadır ve EDM
-kanalına dokunmadan ortak bir düşey trimle bastırılabilir; roll ile kapalı yörüngenin ikinci mertebe çapraz
+\item saptırıcı roll'unun birinci mertebe etkisi yalnız ortalama roll'a bağlıdır, çift kanaldadır ve
+Ref.~\cite{omarov}'un ortak düşey trimiyle EDM kanalına dokunmadan bastırılır; roll ile kapalı yörüngenin ikinci mertebe çapraz
 terimi tek kanaldadır ve bireysel saptırıcı trimi gerektirir;
 \item düzeltmeler kuadrupol içi dipol düzelticilerle (ya da konumlandırıcılarla) uygulanmalıdır.
 \end{itemize}

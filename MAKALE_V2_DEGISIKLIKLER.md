@@ -22,6 +22,11 @@ Kaynak: `makale_orbit_bastirma_en_v2.tex` (tek kaynak). PDF'ler:
 - Ekler: A (yeni) donmuş spin ve fırlatma; B nefes; C fark matrisi (boyut düzeltmesi, Hakem A6–7); D 2B model.
 - Teşekkür: yapay zekâ kullanım cümlesi genişletildi (TODO: yazarlar onaylamalı).
 
+- Ortak düşey trim (çift kanal kilidi) Omarov'a atfedildi (PRD 105, 032001, Böl. III B, Tablo IV; eşik
+  <10⁻⁶ rad/s). Bizim katkımız: roll'un birinci mertebe etkisini kaldırdığının ve EDM kanalına dokunmadığının
+  nicel doğrulaması + kaçak formülü C≈|S+|·2.7Δδ ile gereksinim (≲10⁻⁴ rad/s @ Δδ=10⁻⁷). Makale, Türkçe sürüm
+  ve cevap mektubu güncellendi.
+
 ## TODO'lar (yalnız todo sürümünde görünür)
 1. Önceki arXiv makalesine atıf (donmuş spin enerjisinin kayması).
 2. Kanallar şekli (Fig. 2 eski) yeniden ölçüm — `makale_yeniden_olcum.py ch`.

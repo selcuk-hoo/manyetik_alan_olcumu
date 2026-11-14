@@ -374,13 +374,12 @@ Uniform radial $B$ ($10^{-11}$~T) & 0.017 & 0.006 \\
 In a real ring the two beams are not exactly symmetric---for instance they are frozen at slightly different
 energies; the roll term depends on energy as $d\ln f/d\delta\approx-2.5$ (CW) and $-2.9$ (CCW), so the leak into
 the odd channel is $C\approx|S_+|\cdot\epsilon$ with $\epsilon\approx2.7\,\Delta\delta$. Uncompensated, this would
-demand CW/CCW symmetry at the $10^{-8}$ level. Since $S_+$ is a large signal measured by the polarimeter, we
-propose to lock it to zero by one common vertical electric trim of the deflectors. Table~\ref{tbl:channels}
-shows that this leaves the EDM untouched, under the conditions studied. For $\Delta\delta=10^{-7}$, locking $S_+$
-at $10^{-4}$~rad/s keeps the leak at $C\approx0.03$; this corresponds to holding the effective mean roll at
-$\sim3\times10^{-11}$, by feedback rather than mechanical alignment. The mean vertical electric field is the
-electric counterpart of the mean radial magnetic field, a known leading systematic that the experiment must
-control in any case.
+demand CW/CCW symmetry at the $10^{-8}$ level. The baseline design already removes $S_+$: Ref.~\cite{omarov}
+(Sec.~III~B and Table~IV) applies a common vertical electric trim that keeps the same-sign vertical precession
+of both beams below $10^{-6}$~rad/s. Table~\ref{tbl:channels} confirms that this trim leaves the EDM untouched,
+under the conditions studied. The leak formula gives the requirement on it: for $\Delta\delta=10^{-7}$, $S_+$ must
+stay below $\sim10^{-4}$~rad/s for $C\lesssim0.03$, so the $10^{-6}$~rad/s of Ref.~\cite{omarov} leaves a leak
+$C\sim3\times10^{-4}$ and tolerates $\Delta\delta$ up to $\sim10^{-5}$.
 
 \paragraph*{Spin, second order, and individual trims.} Zero-mean rolls still produce a vertical closed orbit,
 whose product with the horizontal orbit generates a geometric phase in the odd channel: with 0.3~$\mu$m quadrupole
@@ -458,8 +457,8 @@ the symmetric one appearing in the sum of the orbits. Because static offsets are
 is a drift monitor between BBA calibrations and needs no quadrupole polarity reversal. Under the conditions
 studied it requires: a monitor model that matches the mounting (rigidly attached monitors with a model that
 knows it tolerate BPM--quadrupole drifts up to at least 1~$\mu$m); deflector columns in the fit and individual
-deflector trims (tolerable drift between trims $\sim3\times10^{-6}$ with a 0.2\% gradient error); a common vertical
-trim locking the even channel, which removes the first-order roll effect without touching the EDM channel; and
+deflector trims (tolerable drift between trims $\sim3\times10^{-6}$ with a 0.2\% gradient error); the common vertical
+trim of Ref.~\cite{omarov}, which we find removes the first-order roll effect without touching the EDM channel; and
 quadrupole-mounted correctors. Under these conditions two-beam monitoring keeps the false EDM well below target
 between calibrations over a simulated week. Finally, the false EDM of a misaligned lattice must be evaluated at
 the frozen-spin energy; a fixed-momentum evaluation depends on the launch point.
