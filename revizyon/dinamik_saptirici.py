@@ -79,6 +79,8 @@ def run_one(S, seed, rate, trim_h, hours=HOURS, keep=(24, 168)):
             y = s["Tq"] @ dm[pl] + s["Td"] @ de[pl] + rng.normal(0, SIG_N, 2 * NQ)
             est = A2.tsvd_solve(s["S"], y, RC)
             dm[pl] -= est[:NQ]; de[pl] -= est[NQ:]
+        if int(round(h)) in keep and abs(h - round(h)) < 1e-9:
+            snaps[f"{int(round(h))}p"] = {pl: [dm[pl].tolist(), de[pl].tolist()] for pl in ("x", "y")}
         ser["h"].append(h); ser["de_pre"].append(de_pre)
         ser["de_post"].append(float(np.sqrt(np.mean(np.r_[de["x"], de["y"]] ** 2))))
         ser["sym"].append(float(np.mean([np.std(Ps @ dm["x"]), np.std(Ps @ dm["y"])])))
@@ -114,14 +116,15 @@ def _edm_task(t):
                 f=r["f"], f_target=r["f"] / 1e-9, w1=r["w1"])
 
 
-def edm(workers, hours=(168,)):
+def edm(workers, hours=(168,), rates=None):
     from concurrent.futures import ProcessPoolExecutor
     import contextlib, io
     runs = json.load(open(OUT_LIN))["runs"]
     done = set()
     if os.path.exists(OUT_EDM):
         done = {(r["key"], r["hour"], r["direction"]) for r in map(json.loads, open(OUT_EDM))}
-    T = [(k, h, d) for k in runs for h in hours for d in (-1, +1) if (k, h, d) not in done]
+    T = [(k, h, d) for k in runs for h in hours for d in (-1, +1) if (k, h, d) not in done
+         and (rates is None or runs[k]["rate"] in rates)]
     print(f"{len(T)} görev", flush=True)
     with ProcessPoolExecutor(workers) as pool:
         for r in pool.map(_edm_task, T):
@@ -145,6 +148,8 @@ def summ():
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("mode", choices=["lin", "edm", "summ"])
+    ap = argparse.ArgumentParser(); ap.add_argument("mode", choices=["lin", "edm", "edmpost", "summ"])
     ap.add_argument("-w", type=int, default=4); a = ap.parse_args()
-    {"lin": lin, "edm": lambda: edm(a.w), "summ": summ}[a.mode]()
+    {"lin": lin, "edm": lambda: edm(a.w), "summ": summ,
+     # trim-SONRASI durum (h='168p'): sinyali birikmiş sürüklenme mi, trim artığı mı taşıyor?
+     "edmpost": lambda: edm(a.w, hours=("168p",), rates=(1e-6, 1e-5))}[a.mode]()
