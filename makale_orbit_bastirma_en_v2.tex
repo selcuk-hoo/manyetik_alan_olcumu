@@ -189,7 +189,9 @@ The false EDM is a bilinear functional, $f=\sum_{ij}W_{ij}v_{x,i}v_{y,j}$, and s
 $f_{ss}+f_{sa}+f_{as}+f_{aa}$. The antisymmetric content dominates the false EDM as it dominates the orbit,
 but by a smaller factor: relative to its orbit visibility, the symmetric component is the more harmful one.
 \IfFileExists{fig_v2_channels.png}{Figure~\ref{Fig:channels} shows the channels.}{}
-\todo{Channel figure to be added from the frozen-spin re-run (kind \texttt{ch}).}
+At $\sigma=10~\mu$m (three patterns, rms) the channels are $|f_{ss}|=4.8$, $|f_{sa}|=80$, $|f_{as}|=64$ and
+$|f_{aa}|=381$ in units of the target, against 463 for the full false EDM; each channel scales as $\sigma^2$
+(ratio $4.0$ per doubling, except 3.8--4.1 for the smallest, $ss$).
 \IfFileExists{fig_v2_channels.png}{%
 \begin{figure}[tb]
 \includegraphics[width=\linewidth]{fig_v2_channels.png}
@@ -206,7 +208,12 @@ BBA aligns quadrupoles individually and treats both components alike. With $\app
 varying one gradient changes the optics of the whole ring (``breathing'', Appendix~\ref{app:breathing}) and
 biases the null in proportion to the orbit distortion; iterating removes the bias. In our simulation eight
 passes reduced the symmetric misalignment from 4.3 (3.3)~$\mu$m to 0.9 (0.06)~$\mu$m horizontally (vertically).
-\todo{BBA false-EDM values to be re-run with the frozen-spin estimator (office machine, $\sim$19~h).}
+Evaluated with the frozen-spin estimator (one pattern, $\sigma=10~\mu$m, 1\% $\beta$-beat), the false EDM falls
+from $78\times$ target to $4.2$, 13, 9.6, 4.4, 0.01, 1.2, 1.1 and $0.72\times$ after passes 1--8. The sequence is
+not monotonic: channels of opposite sign cancel by chance (the $0.01$ is one such case, the channel sum of
+absolute values being 105 times larger), and the converged value of 0.72 is carried by the channels with
+antisymmetric horizontal content, not by the symmetric ones. This is one pattern; the scatter between patterns is
+not known.
 
 Single-beam correction estimates $\hat v=R^{+}y$ with a truncated-SVD pseudo-inverse. The symmetric directions
 have the smallest singular values and are the first truncated, so the result depends on the threshold: for a
@@ -257,7 +264,8 @@ after two-beam correction. With a lower threshold the single beam also reaches t
 at fixed monitors the advantage is mostly conditioning; the decisive advantage appears when monitors move
 (Sec.~\ref{sec:bpm}). The scheme does not require quadrupole polarity reversal, which could save the second
 storage per measurement.
-\todo{Add the 15-pattern two-beam point with 0.2\% gradient error (kind tb20).}
+With a 0.2\% gradient error in the response model (15 patterns, $\sigma=10~\mu$m) the two-beam result is
+$C=0.054$ (median; maximum 0.15).
 
 \begin{figure}[tb]
 \centering
