@@ -37,7 +37,8 @@ counter-rotating orbits recovers it from their sum. Because static monitor offse
 component, the scheme monitors drifts relative to a beam-based-alignment reference. We determine its domain
 of validity against monitor motion, electrostatic deflector errors, corrector type and correlated
 misalignment, and follow it through a one-week scenario. Under the conditions studied, two-beam monitoring
-keeps the false EDM well below target between alignments without quadrupole polarity reversal.
+keeps the false EDM below target between alignments without quadrupole polarity reversal, provided that
+independent deflector drifts stay below $\sim10^{-7}$ between deflector trims.
 \end{abstract}
 \maketitle
 
@@ -398,11 +399,15 @@ the poorly estimated directions have little orbit effect: the deflector-induced 
 with field and roll drifts of $3\times10^{-7}$ and a 5~$\mu$m symmetric quadrupole drift, $C=0.010$ (0.016 with a
 0.2\% gradient error) against 0.75 with quadrupole correction alone. \MatchedSentenceEN Figure~\ref{fig:deflector}(b)
 scans the deflector drift: with an exact model the trimmed result stays at the floor up to $10^{-5}$; with a
-0.2\% gradient error it reaches the target at $3$--$5\times10^{-6}$. The tolerable drift between trims is set by
-the accuracy of the response model. Present high-voltage supplies quote $10^{-5}$ ripple~\cite{cpedm_feas} and
-$10^{-4}$ long-term stability~\cite{fug}; common-mode changes are absorbed by the frozen-spin feedback, and only
-independent slow drifts between trims matter.
-\todo{Dynamic test of common and individual trims together (noise, delay, resolution) in a time scenario.}
+0.2\% gradient error it reaches the target at $3$--$5\times10^{-6}$. This is the largest error one trim
+removes, not the drift tolerated between trims. Repeating fit and trims hourly for a week, with random-walk
+drifts of rate $r$ in each deflector field and roll (common trim continuous, 0.2\% gradient error, four
+patterns, spin at 168~h), gives just before a trim $C=0.12$ (maximum 0.72) for $r=10^{-7}/\sqrt{\text{h}}$ and
+8.9 for $10^{-6}/\sqrt{\text{h}}$, but 0.03 just after it: the trim residual does not accumulate, the drift
+within one interval enters quadratically. Independent deflector drifts must stay below $\sim10^{-7}$ per trim
+interval. Supplies quote $10^{-5}$ ripple~\cite{cpedm_feas} and $10^{-4}$ long-term stability~\cite{fug};
+only independent drifts matter, but whether they stay at $10^{-7}$ is open. The requirement belongs to the
+deflector errors themselves; the monitor provides the means to trim them.
 
 \begin{figure*}[tb]
 \centering
@@ -443,8 +448,7 @@ monitors keeps the false EDM at the level set by the BBA residual (median $C=0.0
 values) (Fig.~\ref{fig:time}). Single-beam monitoring and the fixed-monitor model hover around the target
 (median up to 1.2 and 1.3); periodic BBA alone rises to $C\approx45$ between calibrations. The monitor detects a
 symmetric drift of $3k\sigma_n\approx0.02~\mu$m ($k=0.75$ the noise gain, $\sigma_n$ the BPM noise per reading).
-Deflector drifts are not included in this scenario, and the spin results rest on five patterns.
-\todo{More patterns; BBA duration and time saving; combined scenario with deflector drifts and trims.}
+Deflector drifts are treated separately (Sec.~\ref{sec:defl}); the spin results rest on five patterns.
 
 \begin{figure*}[tb]
 \centering
@@ -465,10 +469,11 @@ the symmetric one appearing in the sum of the orbits. Because static offsets are
 is a drift monitor between BBA calibrations and needs no quadrupole polarity reversal. Under the conditions
 studied it requires: a monitor model that matches the mounting (rigidly attached monitors with a model that
 knows it tolerate BPM--quadrupole drifts up to at least 1~$\mu$m); deflector columns in the fit and individual
-deflector trims (tolerable drift between trims $\sim3\times10^{-6}$ with a 0.2\% gradient error); the common vertical
+deflector trims, with independent deflector drifts below $\sim10^{-7}$ per trim interval; the common vertical
 trim of Ref.~\cite{omarov}, which we find removes the first-order roll effect without touching the EDM channel; and
-quadrupole-mounted correctors. Under these conditions two-beam monitoring keeps the false EDM well below target
-between calibrations over a simulated week. Finally, the false EDM of a misaligned lattice must be evaluated at
+quadrupole-mounted correctors. Under these conditions two-beam monitoring keeps the false EDM below target
+between calibrations over a simulated week. The deflector stability requirement is the most demanding condition
+and its feasibility is open. Finally, the false EDM of a misaligned lattice must be evaluated at
 the frozen-spin energy; a fixed-momentum evaluation depends on the launch point.
 
 \begin{acknowledgments}
@@ -502,8 +507,8 @@ fails selectively for the symmetric directions [Fig.~\ref{fig:breathing}(b)].
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.8\linewidth]{fig_orbit_breathing.png}
-\includegraphics[width=0.8\linewidth]{fig_orbit_lockin.png}
+\includegraphics[width=0.49\linewidth]{fig_orbit_breathing.png}\hfill
+\includegraphics[width=0.49\linewidth]{fig_orbit_lockin.png}
 \caption{(a) Reconstruction with all quadrupoles modulated, with and without breathing. (b) Reconstruction
 error of the orbit-difference approach versus $\beta$-beat.}
 \label{fig:breathing}

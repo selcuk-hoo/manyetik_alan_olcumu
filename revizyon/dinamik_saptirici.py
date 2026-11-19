@@ -142,7 +142,7 @@ def summ():
     for (rate, T, h, s), v in d.items():
         if len(v) == 2:
             agg.setdefault((rate, T, h), []).append(abs(v[1] - v[-1]) / 2 / 1e-9)
-    for k in sorted(agg):
+    for k in sorted(agg, key=str):
         c = np.array(agg[k])
         print(f"r={k[0]:.0e}/√h T={k[1]:g}h saat {k[2]}: n={len(c)} C medyan {np.median(c):.3g} maks {c.max():.3g}")
 

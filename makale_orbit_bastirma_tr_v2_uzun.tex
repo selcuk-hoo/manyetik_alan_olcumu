@@ -48,7 +48,8 @@ sürüklenme izleyicisidir. Yöntemin geçerlilik alanını, aynı kanala düşe
 inceliyoruz: BPM hareketi, elektrostatik saptırıcı alanı ve roll hataları, düzeltici türü, korelasyonlu
 kaçıklık ve bir haftalık işletim senaryosu. Kuadrupol içi dipol düzelticiler, saptırıcı trimleri ve doğru
 modellenmiş BPM montajıyla, iki demetli izleme kuadrupol polarite çevirmesine gerek kalmadan sahte EDM'yi
-BBA'lar arasında hedefin çok altında tutar. Saptırıcı roll'unun birinci mertebe etkisinin yalnız ortalama
+BBA'lar arasında hedefin altında tutar; bunun koşulu, saptırıcılar arasındaki bağımsız sürüklenmenin iki
+saptırıcı trimi arasında $\sim10^{-7}$'nin altında kalmasıdır. Saptırıcı roll'unun birinci mertebe etkisinin yalnız ortalama
 roll'a bağlı olduğunu ve Omarov ve ark.'nın öngördüğü ortak düşey trimle EDM kanalına dokunmadan
 bastırıldığını da gösteriyoruz.
 \end{abstract}
@@ -526,11 +527,43 @@ $C=0.010$'a (\%0.2 gradyan hatasıyla 0.016) iner.
 
 \paragraph{Saptırıcı kararlılığı.} Şekil~\ref{fig:sapt}(b) saptırıcı sürüklenmesinin genliğini tarar. Model
 kusursuzken trimlenmiş sonuç $10^{-5}$'e kadar tabanda kalır, çünkü kestirim hatası yalnız BPM gürültüsüyle
-belirlenir. \%0.2 gradyan hatasıyla genliğin karesiyle büyür ve $3$--$5\times10^{-6}$'da hedefe ulaşır. Yani trim
-güncellemeleri arasında izin verilen saptırıcı sürüklenmesini tepki modelinin doğruluğu belirler.
+belirlenir. \%0.2 gradyan hatasıyla genliğin karesiyle büyür ve $3$--$5\times10^{-6}$'da hedefe ulaşır. Dikkat:
+bu, \emph{tek bir trimin} temizleyebildiği en büyük hatadır; iki trim arasında izin verilen sürüklenme değildir.
+
+\paragraph{Dinamik test: sürüklenme + tekrarlanan trim.} İkincisini bulmak için bir haftalık bir döngü kurduk
+(\texttt{revizyon/dinamik\_saptirici.py}). Her saptırıcının alanı ($\varepsilon$) ve roll'u ($\phi$) bağımsız
+rastgele yürüyüşle, $r$ hızıyla (1/$\sqrt{\text{saat}}$) sürüklenir; kuadrupoller de küçük bir rastgele
+yürüyüşle ($0.1~\mu$m/$\sqrt{\text{saat}}$, varsayım) sürüklenir. Her saat iki demetli fit (kuadrupol +
+saptırıcı sütunları, nominal model) yapılır; gerçek makine \%0.2 gradyan hatalıdır, BPM gürültüsü 14~nm'dir.
+Kuadrupoller düzelticilerle, saptırıcılar bireysel trimle düzeltilir; ortak trim (ortalama roll) ve enerji
+geri beslemesi (ortalama alan) sürekli çalışır. Yörünge düzeyindeki döngü doğrusaldır (tepki matrisleri);
+sahte EDM, 168. saatteki gerçek durumla C++ donmuş spin izlemesiyle ölçülür (4 desen, seed 70000+s).
+\begin{center}\footnotesize
+\begin{tabular}{lcc}\toprule
+sürüklenme hızı $r$ & $C$, trimden hemen önce & $C$, trimden hemen sonra\\\midrule
+$10^{-7}/\sqrt{\text{saat}}$ & 0.12 [maks 0.72] & --\\
+$10^{-6}/\sqrt{\text{saat}}$ & 8.9 [maks 19] & 0.026 [maks 0.049]\\
+$10^{-5}/\sqrt{\text{saat}}$ & 717 [maks 2050] & 2.3 [maks 2.6]\\\bottomrule
+\end{tabular}\end{center}
+Sonuçlar:
+\begin{enumerate}
+\item \textbf{Trim artığı birikmez.} Kestirimi zayıf yönler de bir sonraki fitte yeniden görülür; trim
+sonrası kalan saptırıcı hatası, bir aralıktaki sürüklenmenin yaklaşık 0.1--0.4 katında sınırlı kalır.
+\item \textbf{Sahte EDM'yi bir trim aralığında biriken sürüklenme belirler} ve karesiyle büyür. Trimden önceki
+değerler, statik ``trimsiz'' noktayla ($3\times10^{-7}$'de 0.75) $a^2$ ölçeklemesine uyar: $10^{-6}$ için
+öngörü $\approx10$, ölçülen 8.9.
+\item \textbf{Gereksinim:} bağımsız saptırıcı sürüklenmesi bir trim aralığında $\sim10^{-7}$'nin altında
+kalmalıdır. Daha sık trim, izin verilen hızı $T^{-1/2}$ ile gevşetir \tahmin: dakikalık trimle
+$\sim8\times10^{-7}/\sqrt{\text{saat}}$. Bu sınanmadı; dakikalık fitin gürültüsü ve trim düğmesinin
+çözünürlüğü belirleyici olacaktır.
+\end{enumerate}
 Karşılaştırma için: bugünkü yüksek gerilim kaynakları $10^{-5}$ dalgalanma~\cite{cpedm_feas} ve $10^{-4}$ uzun
-süreli kararlılık~\cite{fug} belirtir. Ortak mod değişimleri donmuş spin geri beslemesince emilir; yalnız trim
-güncellemeleri arasındaki bağımsız yavaş sürüklenmeler önemlidir.
+süreli kararlılık~\cite{fug} belirtir. Ortak mod değişimleri donmuş spin geri beslemesince emilir; yalnız
+saptırıcılar arasındaki bağımsız sürüklenmeler önemlidir. Bunların saat ölçeğinde $10^{-7}$'de kalıp kalmadığı
+açık bir sorudur ve yöntemin en zorlu koşuludur. Önemli bir ayrım: bu, saptırıcı hatalarının kendi geometrik
+fazıdır; izleme yöntemi bu sistematiği yaratmaz, aksine onu trimleyecek bilgiyi sağlar. Orijinal öneride
+(Omarov) bu ikinci mertebe $\varepsilon\times\phi$ terimi tartışılmaz; kuadrupol polaritesi çevirmenin onu
+söndürüp söndürmediğini sınamadık.
 
 \sekil{fig_v2_deflector.png}{Saptırıcı hataları. (a) Saptırıcı alan sürüklenmesine karşı yeniden kurulan simetrik
 kuadrupol sürüklenmesinin hatası (5~$\mu$m, yatay, 200 desen), yalnız kuadrupol sütunlu ve saptırıcı sütunları
@@ -586,9 +619,8 @@ $3k\sigma_n$ büyüklüğünde bir simetrik sürüklenmeyi algılar; $k=0.75$ ik
 kazancı, $\sigma_n$ okuma başına BPM gürültüsüdür; 10~nm tabanla bu $\approx0.02~\mu$m'dir. Sahte EDM $\sigma^2$
 ile ölçeklendiği için, BBA artığı yaklaşık 0.4--0.5~$\mu$m'ye kadar kabul edilebilir \tahmin.
 
-Sınırlamalar: spin sonuçları 5 desene dayanır; saptırıcı sürüklenmesi ve trimler bu senaryoya henüz dahil
-değildir; BBA'nın kendi süresi ve gerçek zaman kazancı burada hesaplanmadı. Bunlar planlanan birleşik
-senaryonun konusudur.
+Sınırlamalar: spin sonuçları 5 desene dayanır; saptırıcı sürüklenmesi ayrı bir dinamik testte incelendi
+(Bölüm~\ref{sec:gecerlilik}, ``Dinamik test''); BBA'nın kendi süresi ve gerçek zaman kazancı burada hesaplanmadı.
 
 \sekil{fig_v2_time.png}{Bir haftalık işletim senaryosu. (a) Kalan simetrik kaçıklık (doğrusal model, 20 desen,
 medyan ve \%16--84 bandı). (b) İzlemeyle sahte EDM (5 desen; çizgi = medyan). BBA 54, 108 ve 162. saatlerde
@@ -610,15 +642,17 @@ aynı kanala düşen hatalar belirler:
 \begin{itemize}
 \item BPM modeli montajla uyuşmalıdır; rijit bağlı BPM'ler ve bunu bilen bir model, yöntemi en az 1~$\mu$m'lik
 BPM--kuadrupol sürüklenmelerine ve montaj katsayısındaki \%10'luk hatalara karşı sağlam yapar;
-\item saptırıcı sürüklenmeleri fite dahil edilmeli ve kaynağında trimlenmelidir; trimler arası izin verilen
-sürüklenme \%0.2 gradyan hatasıyla $\sim3\times10^{-6}$'dır ve tepki modelinin doğruluğuyla ölçeklenir;
+\item saptırıcı sürüklenmeleri fite dahil edilmeli ve kaynağında trimlenmelidir; bağımsız saptırıcı
+sürüklenmesi bir trim aralığında $\sim10^{-7}$'nin altında kalmalıdır (dinamik test). Bu yöntemin en zorlu
+koşuludur ve donanımla sağlanıp sağlanamayacağı açıktır;
 \item saptırıcı roll'unun birinci mertebe etkisi yalnız ortalama roll'a bağlıdır, çift kanaldadır ve
 Ref.~\cite{omarov}'un ortak düşey trimiyle EDM kanalına dokunmadan bastırılır; roll ile kapalı yörüngenin ikinci mertebe çapraz
 terimi tek kanaldadır ve bireysel saptırıcı trimi gerektirir;
 \item düzeltmeler kuadrupol içi dipol düzelticilerle (ya da konumlandırıcılarla) uygulanmalıdır.
 \end{itemize}
 Bu koşullarda iki demetli izleme, simüle edilen bir haftalık işletim boyunca sahte EDM'yi BBA kalibrasyonları
-arasında hedefin çok altında tutar. Son olarak, kaçık bir örgüde sahte EDM donmuş spin enerjisinde
+arasında hedefin altında tutar. En zorlu koşul saptırıcı kararlılığıdır ($\sim10^{-7}$/trim aralığı); bunun
+donanımla sağlanabilirliği açıktır. Son olarak, kaçık bir örgüde sahte EDM donmuş spin enerjisinde
 hesaplanmalıdır; sabit momentumla yapılan hesap fırlatma noktasına bağlıdır ve mertebelerce farklı sonuç
 verebilir.
 

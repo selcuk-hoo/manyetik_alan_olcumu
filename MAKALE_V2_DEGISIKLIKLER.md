@@ -27,6 +27,14 @@ Kaynak: `makale_orbit_bastirma_en_v2.tex` (tek kaynak). PDF'ler:
   nicel doğrulaması + kaçak formülü C≈|S+|·2.7Δδ ile gereksinim (≲10⁻⁴ rad/s @ Δδ=10⁻⁷). Makale, Türkçe sürüm
   ve cevap mektubu güncellendi.
 
+- Mac sonuçları işlendi: kanallar şekli (fig_v2_channels, 3 desen), BBA donmuş spin (tek desen, 78→0.72×),
+  tb20 (15 desen, C medyan 0.054, maks 0.15). İlgili TODO'lar kaldırıldı.
+- Dinamik saptırıcı testi (`revizyon/dinamik_saptirici.py`): saatlik fit+trim, bir hafta, rastgele yürüyüş
+  sürüklenmesi. Trim artığı birikmez; C'yi bir trim aralığında biriken sürüklenme belirler (karesiyle).
+  r=1e-7/√h → C 0.12 (maks 0.72); 1e-6/√h → 8.9 (trim sonrası 0.026). ESKİ "trimler arası 3e-6 tolere" ifadesi
+  YANLIŞTI (o, tek trimin temizleyebildiği genlikti); yeni gereksinim ~1e-7/trim aralığı. Özet, Sec. V.B,
+  sonuç ve cevap mektubu buna göre düzeltildi; Ek B şekli yan yana alındı (8 sayfa korundu).
+
 ## TODO'lar (yalnız todo sürümünde görünür)
 1. Önceki arXiv makalesine atıf (donmuş spin enerjisinin kayması).
 2. Kanallar şekli (Fig. 2 eski) yeniden ölçüm — `makale_yeniden_olcum.py ch`.

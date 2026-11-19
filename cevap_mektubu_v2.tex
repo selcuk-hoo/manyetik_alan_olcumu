@@ -75,9 +75,14 @@ deflector trims remove this term (matched test: $C=1.7$ with the common trim alo
 individual trims).
 \item Field errors and rolls together produce a geometric phase of their own. It is removed by trimming the
 deflectors at the source (field by the deflector voltage, roll by an up--down electrode voltage difference),
-using the deflector part of the fit. The tolerable deflector drift between trims is set by the accuracy of
-the response model: with an exact model the false EDM stays at the numerical floor up to $10^{-5}$; with a
-0.2\% gradient error the target is reached at $3$--$5\times10^{-6}$ [Fig.~6(b)].
+using the deflector part of the fit. A single trim removes errors up to $10^{-5}$ with an exact model and
+$3$--$5\times10^{-6}$ with a 0.2\% gradient error [Fig.~6(b)]. A week of hourly fits and trims with
+random-walk deflector drifts shows that the trim residual does not accumulate, but the drift accumulated within
+one trim interval enters quadratically: $C=0.12$ for $10^{-7}/\sqrt{\mathrm{h}}$ and $8.9$ for
+$10^{-6}/\sqrt{\mathrm{h}}$ just before a trim. Independent deflector drifts must therefore stay below
+$\sim10^{-7}$ per trim interval. We state this as the most demanding requirement of the scheme and leave its
+feasibility open; it is a property of the deflector errors themselves, and the two-beam fit provides the means
+to trim them.
 \end{itemize}
 
 \referee{The second problem is that the authors assume that accuracy of quad positioning is independent on
