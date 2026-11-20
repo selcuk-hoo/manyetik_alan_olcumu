@@ -356,7 +356,8 @@ def run_plot():
         if not os.path.exists(f):
             continue
         d = json.load(open(f))
-        lab = (f"noise {'14 nm' if n=='14nm' else '1 $\\mu$m'}"
+        noise_label = '14 nm' if n == '14nm' else r'1 $\mu$m'
+        lab = (f"noise {noise_label}"
                + (", grad. err. 0.2%" if g else ", exact model"))
         for ax, pl in zip(axs, ("x", "y")):
             rows = [r for r in d["rows"] if r["plane"] == pl and r["sigma_defl"] > 0]
