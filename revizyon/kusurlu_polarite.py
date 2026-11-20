@@ -113,9 +113,12 @@ def states(seed, sig_d):
     return out
 
 
+SIGDS = (0.0, 1e-5)
+
+
 def tasks():
     T = []
-    for sig_d in (0.0, 1e-5):
+    for sig_d in SIGDS:
         for s in SEEDS:
             for d in (-1, 1):
                 T.append(dict(sig_d=sig_d, seed=s, state="S0", gs=1.0, direction=d))     # birinci koşu
@@ -163,21 +166,28 @@ def ozet():
         f.setdefault((r["sig_d"], r["seed"], r["state"], r["gs"]), {})[r["direction"]] = r["f_target"]
     odd = {k: (v[1] - v[-1]) / 2 for k, v in f.items() if len(v) == 2}
     print("E = ½|odd₊(S0) + odd₋(durum)|  (hedef biriminde; odd₊: birinci koşu, normal polarite)")
-    for sig_d in (0.0, 1e-5):
+    allsig = sorted({r["sig_d"] for r in rows}); allseed = sorted({r["seed"] for r in rows})
+    for sig_d in allsig:
+        SEEDS = [s for s in allseed if (sig_d, s, "S0", 1.0) in odd]
         cases = [("S0", -1.0, "kusursuz çevirme"), ("S0", -1.0001, "η = 1e-4"), ("S0", -1.001, "η = 1e-3"),
                  ("dq_yok", -1.0, "Δq 0.3 μm, düzeltme yok"), ("dq_E2", -1.0, "Δq, tek demet izleyici"),
                  ("dq_E4", -1.0, "Δq, iki demet izleyici"), ("dd_yok", -1.0, "Δε,Δφ 1e-7, trim yok"),
                  ("dd_E4", -1.0, "Δε,Δφ, iki demet fit + trim")]
         ref = [abs(odd.get((sig_d, s, "S0", 1.0), np.nan)) for s in SEEDS]
-        print(f"\nσ_d = {sig_d:g}: |odd₊| (polarite çevirmeden C) = {np.round(ref, 3)}")
+        print(f"\nσ_d = {sig_d:g}: n={len(SEEDS)}  |odd₊| (polarite çevirmeden C) medyan {np.nanmedian(ref):.3g}")
         for st, gs, lab in cases:
             E = [abs(odd[(sig_d, s, "S0", 1.0)] + odd[(sig_d, s, st, gs)]) / 2 for s in SEEDS
                  if (sig_d, s, "S0", 1.0) in odd and (sig_d, s, st, gs) in odd]
             if E:
-                print(f"  {lab:32s} E = {np.round(E, 4)}  medyan {np.median(E):.3g}")
+                print(f"  {lab:32s} n={len(E):2d} medyan {np.median(E):.3g}  %84 {np.percentile(E, 84):.3g}"
+                      f"  maks {np.max(E):.3g}  hedef-üstü {sum(e > 1 for e in E)}")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("-w", type=int, default=4); ap.add_argument("--ozet", action="store_true")
+    ap.add_argument("--seeds", type=int, nargs="+", help="desen (seed) listesi; varsayılan 0 1 2")
+    ap.add_argument("--sigd", type=float, nargs="+", help="statik saptırıcı σ_d listesi; varsayılan 0 1e-5")
     a = ap.parse_args()
+    if a.seeds: SEEDS = a.seeds
+    if a.sigd: SIGDS = tuple(a.sigd)
     ozet() if a.ozet else run(a.w)
