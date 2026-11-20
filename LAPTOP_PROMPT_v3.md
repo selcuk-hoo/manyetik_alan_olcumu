@@ -12,6 +12,17 @@ sağlar") buna dayanacak. Sonuç σ_d'ye çok duyarlı ve gerçek σ_d bilinmiyo
 Bulut sonucu (3 desen, σ_d = 1e-5, medyan): kusursuz çevirme 0.017; η=1e-3 0.70; Δq yok 34 / tek demet 17 /
 iki demet 0.48; saptırıcı 1e-7 sürüklenmesi trim yok 5.1 / trim 2.3.
 
+## En kolay yol: betik (önerilen)
+Asistan gerekmez; her şey otomatik (güncelleme, derleme, iki iş sırayla, 2 saatte bir push, özet):
+```bash
+cd manyetik_alan_olcumu
+git pull origin claude/brave-allen-92wn61      # betiği almak için (yerel .npy çakışırsa aşağıdaki A'ya bak)
+nohup bash revizyon/laptop_v3.sh 10 > laptop_v3.log 2>&1 &
+tail -f laptop_v3.log                          # ilerleme (Ctrl-C yalnız izlemeyi durdurur)
+```
+Kesilirse aynı `nohup` komutunu yeniden çalıştır. Bitince özet `revizyon/sonuclar/LAPTOP_OZET_v3.md`'de ve dala
+itilmiş olur. Aşağıdaki A/B, Claude Code ile yaptırmak istersen içindir.
+
 ## A) Terminal (laptop, Linux), bir kez
 ```bash
 cd manyetik_alan_olcumu
