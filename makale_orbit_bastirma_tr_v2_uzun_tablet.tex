@@ -245,7 +245,22 @@ tekmenin antisimetrik desenin net tekmesine oranı
 \begin{equation}
 \frac{|\sqrt{\beta_F}-\sqrt{\beta_D}|}{\sqrt{\beta_F}+\sqrt{\beta_D}}\approx0.15
 \end{equation}
-olup iki düzlemde de ölçülen düşük harmonik oranıyla uyuşur. Yani simetrik bileşen yörüngeye kör değildir;
+olup iki düzlemde de ölçülen düşük harmonik oranıyla uyuşur. Bu $\sqrt{\beta}$ ağırlıklı toplam yeni değildir:
+Rossbach~\cite{rossbach} yer dalgalarına yörünge tepkisini ince mercek FODO'da tam bu biçimde, odaklayan
+kuadrupollerde $+\sqrt{\beta_F}$, dağıtanlarda $-\sqrt{\beta_D}$ ağırlıklarla yazar; harmonik-$m$ simetrik
+desen, $C/\lambda=m$ dalga sayılı bir yer dalgasıyla aynıdır. Bizim yaptığımız, bu bilinen toplamı
+simetrik/antisimetrik oranına indirgemektir. İnce mercek FODO'da $\beta_\text{max}/\beta_\text{min}=
+(1+\sin\frac{\mu}{2})/(1-\sin\frac{\mu}{2})$ olduğundan oran $\tan(\mu/4)$'e eşittir ($\mu$ hücre başına faz
+ilerlemesi). İkinci bir terim de vardır: desenin yarım hücre boyunca kendi faz değişimi, $\pi m/2N$. İkisi
+karesel toplanınca
+\begin{equation}
+\frac{G_\text{sim}}{G_\text{antisim}}\approx\sqrt{\tan^2\frac{\mu}{4}+\Bigl(\frac{\pi m}{2N}\Bigr)^2}
+\end{equation}
+analitik tepkiyi $\mu\lesssim60^\circ$'de her $m$ için \%8 içinde verir (gradyan taraması,
+\texttt{revizyon/tests/teshis\_tan\_mu4.py}; $\mu>100^\circ$'de bozulur). Oran hiçbir zaman $\pi m/2N$'in altına
+inmez: kararlı bir FODO'da yüz katlık bir gizlenme mümkün değildir. Orijinal makaledeki ``100 kat'' düzgün halka
+yaklaşımından ($G_k\propto1/|Q^2-k^2|$, $k=24$) geliyordu ve $\beta$ modülasyonunu atlıyordu; fırlatma
+yöntemiyle ilgisi yoktur, çünkü bu tamamen yörüngeye ait bir büyüklüktür. Yani simetrik bileşen yörüngeye kör değildir;
 hem yörüngenin hem de aşağıda görüleceği gibi spinin en duyarlı olduğu düşük harmoniklerde antisimetrik
 bileşenden dört ile yedi kat daha zayıftır.
 
