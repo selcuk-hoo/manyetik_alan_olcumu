@@ -595,9 +595,9 @@ $\sim8\times10^{-7}/\sqrt{\text{saat}}$. Bu sınanmadı; dakikalık fitin gürü
 çözünürlüğü belirleyici olacaktır.
 \end{enumerate}
 Karşılaştırma için: bugünkü yüksek gerilim kaynakları $10^{-5}$ dalgalanma~\cite{cpedm_feas} ve $10^{-4}$ uzun
-süreli kararlılık~\cite{fug} belirtir. Ortak mod değişimleri donmuş spin geri beslemesince emilir; yalnız
-saptırıcılar arasındaki bağımsız sürüklenmeler önemlidir. Bunların saat ölçeğinde $10^{-7}$'de kalıp kalmadığı
-açık bir sorudur ve yöntemin en zorlu koşuludur. Önemli bir ayrım: bu, saptırıcı hatalarının kendi geometrik
+süreli kararlılık~\cite{fug} belirtir. Bağımsız sürüklenmelerin saat ölçeğinde $10^{-7}$'de kalıp kalmadığı
+açık bir sorudur ve yöntemin en zorlu koşuludur. (Daha önce ortak mod değişimlerinin donmuş spin geri beslemesince
+emildiğini varsaymıştık; aşağıdaki ortak besleme testi bunun ikinci mertebede doğru olmadığını gösterir.) Önemli bir ayrım: bu, saptırıcı hatalarının kendi geometrik
 fazıdır; izleme yöntemi bu sistematiği yaratmaz, aksine onu trimleyecek bilgiyi sağlar. Orijinal öneride
 (Omarov) bu ikinci mertebe $\varepsilon\times\phi$ terimi tartışılmaz; polarite çevirmenin onu söndürdüğünü
 Bölüm~\ref{sec:polarite} gösterir.
@@ -618,8 +618,27 @@ $\varepsilon$ sürüklenen testte bile roll $\sim1$--$2\times10^{-7}$'ye çıkar
 gürültü tabanına yakındır; ``yalnız anlamlıysa trimle'' türü bir eşik ya da daha uzun ortalama gerekebilir
 \tahmin. Alan ya da roll'dan biri çok kararlı tutulabilirse (örneğin tüm saptırıcıları tek bir yüksek gerilim
 kaynağından beslemek alanın bağımsız sürüklenmesini küçültür) geriye diğerinin tek başına katkısı kalır ve
-gereksinim kabaca bir mertebe gevşer \tahmin. Tek kaynağın ortak $\varepsilon$'sinin zararsız olup olmadığı ayrı
-bir testte (S$_+$ sıfırlanmış hâliyle) sınanıyor; sonuç henüz yok.
+gereksinim kabaca bir mertebe gevşer \tahmin.
+
+\paragraph{Ortak besleme: ortak $\varepsilon$ zararsız değil.} Tek kaynak bağımsız alan sürüklenmesini küçültür,
+ama kaynağın kendi sürüklenmesi bütün saptırıcılara \emph{ortak} bir $\varepsilon$ ekler. Bunu sınamak için
+$r=10^{-7}/\sqrt{\text{saat}}$ koşusunun 168. saatteki durumuna ortak $\varepsilon$ ekledik; çift kanalı önce
+ortak bir roll trimiyle sıfırladık (Ref.~\cite{omarov}'un ortak trimi; S$_+$ 155'ten $\le0.17$'ye iner), sonra
+tek kanalı ölçtük (\texttt{revizyon/tests/teshis\_ortak\_besleme.py}, 4 desen):
+\begin{center}\footnotesize
+\begin{tabular}{lccc}\toprule
+ortak $\varepsilon$ & 0 & $10^{-5}$ & $10^{-4}$\\\midrule
+$C$ medyan [maks] & 0.12 [0.78] & 1.25 [6.0] & 12.6 [60]\\\bottomrule
+\end{tabular}\end{center}
+$C$ ortak $\varepsilon$ ile doğrusal büyür. İlk denemede (S$_+$ sıfırlanmadan) aynı değerler çıkmıştı; onları
+iki demetin farklı enerjilere kilitlenmesinin S$_+$'yı tek kanala sızdırmasına bağlamıştık. S$_+$ sıfırlanınca
+$C$ değişmediği için bu açıklama yanlıştı. Muhtemel neden (hipotez): $\varepsilon\times\phi$ geometrik fazı bütün
+saptırıcı çiftleri üzerinden toplanır; ortak $\varepsilon$ bağımsız roll deseniyle çarpılıp kendi terimini üretir
+ve donmuş spin geri beslemesi enerjiyi düzeltse de bu çarpımı düzeltmez. Sonuç: \textbf{ortak mod saptırıcı alan
+değişimleri ikinci mertebede zararlıdır}; tek kaynak tek başına çözüm değildir. Polarite çevirmeli birleşimde bu
+terimin de söneceği, geriye kaynağın iki koşu arasındaki ortak sürüklenmesinin kalacağı beklenir \tahmin; kaba bir
+ölçeklemeyle, statik roll hatası $10^{-5}$ olan bir halkada bu kaynağın koşular arası $\sim10^{-8}$ kararlılıkta
+olmasını gerektirebilir \tahmin. Bu doğrudan sınanmalıdır.
 
 \sekil{fig_v2_deflector.png}{Saptırıcı hataları. (a) Saptırıcı alan sürüklenmesine karşı yeniden kurulan simetrik
 kuadrupol sürüklenmesinin hatası (5~$\mu$m, yatay, 200 desen), yalnız kuadrupol sütunlu ve saptırıcı sütunları
@@ -807,7 +826,8 @@ sürüklenmesi $10^{-7}$'nin altında olmalıdır ve trim bunu yalnız 1.5--2 ka
 Ref.~\cite{omarov}'un ortak düşey trimiyle EDM kanalına dokunmadan bastırılır.
 \item Düzeltmeler kuadrupol içi dipol düzelticilerle (ya da konumlandırıcılarla) uygulanmalıdır.
 \end{itemize}
-Açık kalanlar: statik saptırıcı hatasının gerçek değeri; ortak yüksek gerilim beslemesinin etkisi (test sürüyor);
+Açık kalanlar: statik saptırıcı hatasının gerçek değeri; ortak yüksek gerilim beslemesinin koşular arası
+sürüklenmesinin polarite çevirmeli birleşimdeki etkisi (ortak $\varepsilon$ tek başına zararlı çıktı);
 koşular arası sürüklenmenin gerçek büyüklüğü; yer hareketi, BPM kayması, saptırıcı sürüklenmesi ve polarite
 çevirmeyi birlikte içeren birleşik senaryo. Son olarak, kaçık bir örgüde sahte EDM donmuş spin enerjisinde
 hesaplanmalıdır; sabit momentumla yapılan hesap fırlatma noktasına bağlıdır ve mertebelerce farklı sonuç
