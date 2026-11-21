@@ -38,20 +38,20 @@
 mikronluk kaçıklığı geometrik (Berry) faz yoluyla gerçek bir EDM'yi taklit eder; $10~\mu$m rms kaçıklıkta
 sahte sinyal, $10^{-29}~e\cdot$cm hedef hassasiyetini bir ile üç mertebe aşar. Her odaklayan--dağıtan
 kuadrupol çiftinin kaçıklığını simetrik ve antisimetrik bileşenlere ayırınca, simetrik bileşenin düşük
-harmoniklerde kapalı yörüngeyi antisimetrik bileşene göre dört ile yedi kat daha zayıf bozduğu görülür; bu
-yüzden tek demetle yörünge düzeltmesi onu büyük ölçüde yerinde bırakır. Bu çalışmada, sahte EDM'nin donmuş
-spin enerjisinde ölçüldüğü semplektik demet ve spin izlemesiyle, iki ters dönen demetin kapalı
-yörüngelerinin birlikte fitlenmesinin simetrik bileşeni geri bulduğunu gösteriyoruz: antisimetrik bileşen
-iki yörüngenin farkında, simetrik bileşen toplamında görünür. Statik BPM ofsetleri toplamda simetrik
-bileşenle ayırt edilemez olduğundan yöntem, demet tabanlı hizalama (BBA) referansına göre çalışan bir
-sürüklenme izleyicisidir. Yöntemin geçerlilik alanını, aynı kanala düşen hatalara karşı nicel olarak
-inceliyoruz: BPM hareketi, elektrostatik saptırıcı alanı ve roll hataları, düzeltici türü, korelasyonlu
-kaçıklık ve bir haftalık işletim senaryosu. Kuadrupol içi dipol düzelticiler, saptırıcı trimleri ve doğru
-modellenmiş BPM montajıyla, iki demetli izleme kuadrupol polarite çevirmesine gerek kalmadan sahte EDM'yi
-BBA'lar arasında hedefin altında tutar; bunun koşulu, saptırıcılar arasındaki bağımsız sürüklenmenin iki
-saptırıcı trimi arasında $\sim10^{-7}$'nin altında kalmasıdır. Saptırıcı roll'unun birinci mertebe etkisinin yalnız ortalama
-roll'a bağlı olduğunu ve Omarov ve ark.'nın öngördüğü ortak düşey trimle EDM kanalına dokunmadan
-bastırıldığını da gösteriyoruz.
+harmoniklerde kapalı yörüngeyi antisimetrik bileşene göre dört ile yedi kat daha zayıf bozduğu görülür. Bu
+oran QF ile QD arasındaki $\beta$ farkından gelir, ince mercek FODO'da yaklaşık $\tan(\mu/4)$'tür ve kararlı
+bir örgüde yüz katlık bir gizlenmeye izin vermez. İki ters dönen demetin kapalı yörüngeleri bileşenleri
+ayırır: antisimetrik bileşen farkta, simetrik bileşen toplamda görünür. Statik BPM ofsetleri toplamda simetrik
+bileşenle ayırt edilemediğinden yöntem, demet tabanlı hizalama (BBA) referansına göre çalışan bir sürüklenme
+izleyicisidir. Semplektik demet ve spin izlemesiyle (sahte EDM donmuş spin enerjisinde) yöntemin geçerlilik
+alanını belirliyoruz. BPM'ler kuadrupollere rijit bağlanır ve fit bunu bilirse, sürekli izleme sahte EDM'yi
+periyodik BBA'ya göre bir mertebe düşürür; iki demet bunun üzerine yaklaşık altı kat daha kazandırır ve
+hedefi aşan durumları ortadan kaldırır. Elektrostatik saptırıcıların alan ve roll hataları ikinci mertebeden
+($\varepsilon\times\phi$) bir geometrik faz üretir. Kuadrupol polaritesini çevirmek bu terimi ve kuadrupol
+kaynaklı terimi tam söndürür; bu yüzden polarite çevirme gereklidir. Ancak statik saptırıcı hataları
+($\sigma_d\gtrsim10^{-6}$) bu söndürmeyi iki polarite koşusu arasındaki kuadrupol sürüklenmesine duyarlı
+yapar. İki demetli izleyici bu bozulmayı yaklaşık 150 kat düzeltir; tek demetli izleyici yalnız 3--4 kat.
+Gradyan tekrarlanabilirliği ve saptırıcı kararlılığı için $\sigma_d$'ye bağlı gereksinimleri de veriyoruz.
 \end{abstract}
 
 \tableofcontents
@@ -144,14 +144,24 @@ süresi ister ve örgünün iki polarite arasında yüksek simetride olmasını 
 Tepki matrisinin tekil değer ayrışımına (SVD) dayanan standart yörünge düzeltmesi~\cite{chung1993,ziemann,mirza,wegscheider}
 sürekli ve demeti rahatsız etmeden çalışır. Bu çalışmada şunları gösteriyoruz:
 \begin{enumerate}[nosep]
-\item Tek demetle yörünge düzeltmesi simetrik bileşenin çoğunu yerinde bırakır, çünkü bu bileşen kapalı
-yörüngeyi zayıf bozar (Bölüm~\ref{sec:mekanizma}).
-\item İki ters dönen demetin birlikte fitlenmesi onu geri bulur (Bölüm~\ref{sec:ikidemet}).
-\item Statik BPM ofsetleri iki demetli fitte simetrik bileşenle ayırt edilemez; bu yüzden yöntem bir BBA
-referansına göre çalışan sürüklenme izleyicisidir.
-\item Yöntemin geçerlilik alanı, aynı kanala düşen hatalara karşı nicel olarak belirlenir
-(Bölüm~\ref{sec:gecerlilik}) ve bir haftalık işletim senaryosunda sınanır (Bölüm~\ref{sec:zaman}).
+\item Simetrik bileşen kapalı yörüngeyi düşük harmoniklerde 4--7 kat zayıf bozar; oran QF/QD $\beta$ farkıyla
+belirlenir (Bölüm~\ref{sec:mekanizma}). Bu, makalenin ilk sürümündeki ``yüz kat'' tahminini düzeltir.
+\item İki ters dönen demetin toplam yörüngesi simetrik bileşeni okur; statik BPM ofsetleri toplamda onunla ayırt
+edilemediği için yöntem bir BBA referansına göre çalışan sürüklenme izleyicisidir (Bölüm~\ref{sec:ikidemet}).
+\item Geçerlilik alanı aynı kanala düşen hatalara karşı nicel olarak belirlenir: BPM montajı, saptırıcı
+hataları, düzeltici türü, korelasyonlu kaçıklık (Bölüm~\ref{sec:gecerlilik}) ve bir haftalık işletim
+(Bölüm~\ref{sec:zaman}).
+\item Kuadrupol polaritesini çevirmek gereklidir; izleyicinin asıl değeri, Ref.~\cite{omarov}'un polarite
+çevirmeli birleşimini iki koşu arasındaki sürüklenmeye karşı korumaktır (Bölüm~\ref{sec:polarite}).
 \end{enumerate}
+
+\paragraph{Bu sürümde değişen çerçeve.} Makalenin ilk sürümü simetrik bileşeni yörüngeye neredeyse kör
+(yüz kat bastırılmış) olarak sundu ve iki demeti ona erişmenin, polarite çevirmeyi de gereksiz kılan yolu
+olarak önerdi. Revizyondaki simülasyonlar bunu üç noktada değiştirdi: (i) bastırma 4--7 kattır (çapraz
+harmonik karşılaştırma hatası, Bölüm~\ref{sec:mekanizma}); (ii) BPM'ler kuadrupole rijit bağlanınca tek demet de
+büyük kazanç sağlar, iki demetin ek katkısı yaklaşık altı kattır (Bölüm~\ref{sec:zaman}); (iii) statik
+saptırıcı hataları polarite çevirmeyi zorunlu kılar (Bölüm~\ref{sec:polarite}). İki demetin değeri ise yeni bir
+yerde, polarite çevirmeli şemanın koşular arası kararlılığında, belirgin biçimde ortaya çıktı.
 
 %======================================================================
 \section{Simülasyon yöntemi}
@@ -258,13 +268,20 @@ karesel toplanınca
 analitik tepkiyi $\mu\lesssim60^\circ$'de her $m$ için \%8 içinde verir (gradyan taraması,
 \texttt{revizyon/tests/teshis\_tan\_mu4.py}; $\mu>100^\circ$'de bozulur). Oran hiçbir zaman $\pi m/2N$'in altına
 inmez: kararlı bir FODO'da yüz katlık bir gizlenme mümkün değildir. Orijinal makaledeki ``100 kat'' düzgün halka
-yaklaşımından ($G_k\propto1/|Q^2-k^2|$, $k=24$) geliyordu ve $\beta$ modülasyonunu atlıyordu; fırlatma
+yaklaşımından ($G_k\propto1/|Q^2-k^2|$, $k=24$) geliyordu ve $\beta$ modülasyonunu atlıyordu. Ayrıca simetrik
+deseni ($k=24$ gibi görülen) antisimetrik desenle \emph{aynı harmonikte} değil, $k=1$'deki antisimetrik desenle
+karşılaştırıyordu; yani harmonik bağımlılığını simetrik/antisimetrik farkıyla karıştırıyordu. Fırlatma
 yöntemiyle ilgisi yoktur, çünkü bu tamamen yörüngeye ait bir büyüklüktür. Yani simetrik bileşen yörüngeye kör değildir;
 hem yörüngenin hem de aşağıda görüleceği gibi spinin en duyarlı olduğu düşük harmoniklerde antisimetrik
 bileşenden dört ile yedi kat daha zayıftır.
 
 Aynı yapı $R$'nin SVD'sinde de görülür [Şekil~\ref{fig:modlar}(b)]: tekil değerler sıralandığında en
-küçüklerine karşılık gelen sağ tekil vektörler ağırlıklı olarak simetriktir. Eşik $10^{-2}$ olan bir kesik SVD,
+küçüklerine karşılık gelen sağ tekil vektörler ağırlıklı olarak simetriktir (düşey, CCW: en küçük altı tekil
+değerin simetrik içeriği \%90--98). Bu gözlem doğrudur ve ilk sürümdeki ``yüz kat'' yorumunu destekler
+görünüyordu: en küçük tekil değerler en büyüğünden yaklaşık 200 kat küçüktür. Ama en büyük tekil değer
+rezonansa yakın düşük harmonikli \emph{antisimetrik} moda, en küçükler yüksek harmonikli simetrik modlara
+aittir; bu oran da aynı çapraz harmonik karşılaştırmasıdır. Sahte EDM'nin en duyarlı olduğu düşük harmoniklerde
+simetrik bileşen 4--7 kat zayıftır; yüksek harmoniklerde ($m\to12$) iki bileşenin kazancı birbirine yaklaşır. Eşik $10^{-2}$ olan bir kesik SVD,
 tek demet matrisinin 48 doğrultusundan 17'sini (yatay) ve 24'ünü (düşey) atar; bunlar çoğunlukla simetrik
 doğrultulardır.
 
@@ -294,8 +311,12 @@ BBA kuadrupolleri tek tek hizalar ve global tepki matrisini ters çevirmez; bu y
 davranır. Yaklaşık \%1 rastgele gradyan hatası olduğunda tek bir kuadrupolün gradyanını değiştirmek bütün
 halkanın optiğini biraz değiştirir (``nefes alma'', Ek~\ref{ek:nefes}) ve sıfır noktasını kapalı yörünge
 bozulmasıyla orantılı bir miktar kaydırır; yinelemek bu kaymayı giderir. Simülasyonumuzda sekiz geçiş, rms
-simetrik kaçıklığı yatayda 4.3'ten 0.9~$\mu$m'ye, düşeyde 3.3'ten 0.06~$\mu$m'ye indirdi. (Bu geçişlerin sahte
-EDM değerleri eski, sabit momentumlu prosedürle ölçüldü; donmuş spinle tekrarı uzun bir koşu olarak planlandı.)
+simetrik kaçıklığı yatayda 4.3'ten 0.9~$\mu$m'ye, düşeyde 3.3'ten 0.06~$\mu$m'ye indirdi. Donmuş spinle
+ölçülen sahte EDM (tek desen, $\sigma=10~\mu$m, \%1 $\beta$ bozulması) hedefin $78$ katından geçişlerden sonra
+sırasıyla 4.2, 13, 9.6, 4.4, 0.01, 1.2, 1.1 ve $0.72$ katına iner. Dizi tekdüze değildir: zıt işaretli kanallar
+rastlantısal olarak birbirini götürür (0.01 böyle bir durumdur; kanal mutlak değerlerinin toplamı 105 kat
+büyüktür). Yakınsanan 0.72'yi yatayda antisimetrik içerikli kanallar taşır. Bu tek bir desendir; desenler
+arası saçılım bilinmiyor.
 
 \subsection{Tek demetle yörünge düzeltmesi}\label{sec:tekdemet}
 Standart düzeltme kaçıklığı $\hat v=R^+y$ ile kestirir; $R^+$ kesik SVD sözde-tersidir. Simetrik bileşen için
@@ -356,9 +377,9 @@ $C=\tfrac12|f_\text{CW}-f_\text{CCW}|$ büyüklüğüyle verilir (gerçek EDM de
 Düzeltilmemiş makine medyan $49\times$hedef; tek demet düzeltmesi $12\times$; iki demet düzeltmesi
 $0.0015\times$, yani sayısal tabanda. Tek demet sonucu daha düşük bir eşikle tabana iner
 (Bölüm~\ref{sec:tekdemet}, Tablo~\ref{tab:bpm}); yani sabit eşikte iki demetin üstünlüğünün büyük kısmı
-koşullanmadan gelir. Asıl avantaj BPM'ler hareket ettiğinde ortaya çıkar (Bölüm~\ref{sec:bpm}). Ayrıca iki
-demetli düzeltme, referans şemadaki kuadrupol polarite çevirmesini gerektirmez; bu, ölçüm başına ikinci bir
-depolamayı gereksiz kılabilir.
+koşullanmadan gelir. Asıl avantaj BPM'ler hareket ettiğinde (Bölüm~\ref{sec:bpm}) ve polarite çevirmeli şemada iki koşu arasında
+(Bölüm~\ref{sec:polarite}) ortaya çıkar. İlk sürümde iki demetli düzeltmenin polarite çevirmeyi gereksiz
+kıldığını öne sürmüştük; Bölüm~\ref{sec:polarite} bunun yanlış olduğunu gösterir.
 
 \sekil[0.6]{fig_v2_suppression.png}{$\sigma=10~\mu$m'de sahte EDM (beş desen, çubuk = medyan): düzeltmesiz,
 tek demet ve iki demet düzeltmesinden sonra (14~nm BPM gürültüsü, eşik $10^{-2}$, sabit BPM'ler). Noktalı:
@@ -577,8 +598,27 @@ süreli kararlılık~\cite{fug} belirtir. Ortak mod değişimleri donmuş spin g
 saptırıcılar arasındaki bağımsız sürüklenmeler önemlidir. Bunların saat ölçeğinde $10^{-7}$'de kalıp kalmadığı
 açık bir sorudur ve yöntemin en zorlu koşuludur. Önemli bir ayrım: bu, saptırıcı hatalarının kendi geometrik
 fazıdır; izleme yöntemi bu sistematiği yaratmaz, aksine onu trimleyecek bilgiyi sağlar. Orijinal öneride
-(Omarov) bu ikinci mertebe $\varepsilon\times\phi$ terimi tartışılmaz; kuadrupol polaritesi çevirmenin onu
-söndürüp söndürmediğini sınamadık.
+(Omarov) bu ikinci mertebe $\varepsilon\times\phi$ terimi tartışılmaz; polarite çevirmenin onu söndürdüğünü
+Bölüm~\ref{sec:polarite} gösterir.
+
+\paragraph{Ek dinamik testler} (\texttt{revizyon/saptirici\_testleri.py}; $r=10^{-6}/\sqrt{\text{saat}}$, 4 desen,
+168. saat, trimden hemen önce):
+\begin{center}\footnotesize
+\begin{tabular}{lcl}\toprule
+durum & $C$ medyan [maks] & yorum\\\midrule
+saatlik trim (referans) & 8.9 [19] & \\
+\textbf{dakikalık trim} & \textbf{0.093 [0.42]} & yaklaşık 100 kat iyileşme ($C\propto r^2T$ ile uyumlu)\\
+yalnız $\varepsilon$ sürüklenir & 0.76 [0.90] & \\
+yalnız $\phi$ sürüklenir & 1.7 [7.0] & ikisi birlikte $\gg$ toplam: baskın terim $\varepsilon\times\phi$\\\bottomrule
+\end{tabular}\end{center}
+Dakikalık trim gereksinimi yaklaşık bir mertebe gevşetir; ama burada trimin kendi gürültüsü belirginleşir:
+14~nm BPM gürültüsüyle her fit saptırıcılara $\sim1$--$2\times10^{-7}$'lik kestirim hatası ekler (yalnız
+$\varepsilon$ sürüklenen testte bile roll $\sim1$--$2\times10^{-7}$'ye çıkar). Yani gereksinim fitin kendi
+gürültü tabanına yakındır; ``yalnız anlamlıysa trimle'' türü bir eşik ya da daha uzun ortalama gerekebilir
+\tahmin. Alan ya da roll'dan biri çok kararlı tutulabilirse (örneğin tüm saptırıcıları tek bir yüksek gerilim
+kaynağından beslemek alanın bağımsız sürüklenmesini küçültür) geriye diğerinin tek başına katkısı kalır ve
+gereksinim kabaca bir mertebe gevşer \tahmin. Tek kaynağın ortak $\varepsilon$'sinin zararsız olup olmadığı ayrı
+bir testte (S$_+$ sıfırlanmış hâliyle) sınanıyor; sonuç henüz yok.
 
 \sekil{fig_v2_deflector.png}{Saptırıcı hataları. (a) Saptırıcı alan sürüklenmesine karşı yeniden kurulan simetrik
 kuadrupol sürüklenmesinin hatası (5~$\mu$m, yatay, 200 desen), yalnız kuadrupol sütunlu ve saptırıcı sütunları
@@ -617,6 +657,91 @@ BPM varsayan kestirici simetrik sürüklenmenin yalnız üçte birini geri bulur
 0.01~$\mu$m'ye kadar bulur.
 
 %======================================================================
+\section{Kuadrupol polaritesi ve Omarov şemasıyla birlikte kullanım}\label{sec:polarite}
+%======================================================================
+\subsection{Polarite çevirme saptırıcı terimini söndürür}
+Ref.~\cite{omarov} her demeti iki kuadrupol polaritesinde ($g\to-g$) ölçer. Simülasyonumuzda polarite
+çevrilince iki demetin sahte EDM'si birebir yer değiştirir: $f_\text{CW}(-g)=f_\text{CCW}(+g)$ (12 desen,
+korelasyon $-1.00$; \%0.2 gradyan hatası ve kuadrupol artıkları dahil). Gerçek EDM ise polariteyle değişmez.
+Her polaritede tek kanal $\text{odd}_\pm=\frac12(f_\text{CW}-f_\text{CCW})$ olmak üzere birleşim
+\begin{equation}
+E=\tfrac12(\text{odd}_++\text{odd}_-)
+\end{equation}
+gerçek EDM'yi korur, sahte terimleri söndürür: saptırıcı $\varepsilon\times\phi$ terimi için kalan $E$,
+söndürmeden önceki değerin 170--470'te biridir (medyan 0.013--0.018, sayısal taban).
+
+\subsection{Statik saptırıcı hataları polarite çevirmeyi zorunlu kılar}
+Dinamik testlerde saptırıcı hataları BBA referansında sıfırdı. Gerçek makinede yapımdan gelen statik
+$\varepsilon$, $\phi$ vardır ve iki demetli fit yalnız referanstan bu yana \emph{değişimi} görür; saptırıcı
+kaynaklı yörünge de toplam kanalında BPM ofsetleriyle ayırt edilemez. Demet BBA ile düzelticiler kullanılarak
+kuadrupol merkezlerinden geçirildikten sonra, polarite çevirmeden kalan sahte EDM (3 desen,
+\texttt{revizyon/tests/teshis\_statik\_saptirici.py}) yaklaşık
+\begin{equation}
+C\approx4\left(\frac{\sigma_d}{10^{-6}}\right)^2\times\text{hedef}
+\end{equation}
+ile büyür ($\sigma_d=10^{-6}$: 1.4--6.3; $10^{-5}$: 136--634). Polarite çevirmeden hedefin altında kalmak
+saptırıcıların mutlak $\sim1.5\times10^{-7}$ doğrulukta olmasını gerektirir; yapım toleransları bunun çok
+üstündedir. \textbf{Sonuç: iki demetli izleme polarite çevirmenin yerini alamaz.} İlk sürümdeki iddia geri
+çekilmiştir.
+
+\subsection{Kusurlu polarite çevirme: izleyicinin rolü}
+Modelimizde söndürme birebirdir, çünkü örgü iki polarite arasında tam simetriktir. Gerçek söndürmeyi iki şey
+bozar: iki polarite arasında gradyan büyüklüğü farkı ($g\to-g(1+\eta)$) ve iki koşu arasında sürüklenme. Bunları
+statik saptırıcı hatası $\sigma_d$ (alan ve roll aynı rms, ortalaması çıkarılmış) ve BBA sonrası 0.3~$\mu$m
+kuadrupol artığı olan bir makinede sınadık (\texttt{revizyon/kusurlu\_polarite.py}; $\sigma_d=10^{-5}$'te 12
+desen, diğerlerinde 3--6 desen). İkinci koşudan önce izleyici, BPM'leri kuadrupole rijit bağlı ($\rho=1$),
+0.05~$\mu$m BPM--kuadrupol kayması ve 14~nm gürültüyle kuadrupol sürüklenmesini kestirip düzeltir.
+
+\begin{table}[H]\centering\footnotesize
+\caption{Omarov birleşiminden sonra kalan $E$ (hedefin katı, medyan; köşeli parantezde hedefi aşan desen
+sayısı). Koşular arası kuadrupol sürüklenmesi 0.3~$\mu$m rms, saptırıcı sürüklenmesi $10^{-7}$ rms.}\label{tab:polarite}
+\begin{tabular}{lccccc}\toprule
+& \multicolumn{5}{c}{statik saptırıcı hatası $\sigma_d$}\\\cmidrule(lr){2-6}
+durum & 0 & $10^{-6}$ & $10^{-5}$ & $3\times10^{-5}$ & $10^{-4}$\\\midrule
+polarite çevirmeden ($|\text{odd}_+|$) & 0.022 & 2.8 & 446 & 3670 & $4\times10^4$\\
+kusursuz çevirme & 0.015 & 0.009 & 0.022 & 0.044 & 0.012\\
+$\eta=10^{-4}$ & 0.011 & 0.029 & 0.073 & 0.57 & 6.2 [6/6]\\
+$\eta=10^{-3}$ & 0.022 & 0.031 & 0.69 [4/12] & 5.4 [6/6] & 62 [6/6]\\\midrule
+kuadrupol sürüklenmesi, düzeltme yok & 0.032 & 3.7 [5/6] & 44 [12/12] & 111 [6/6] & 372 [6/6]\\
+\quad tek demet izleyici & 0.075 & 1.1 [3/6] & 11.5 [11/12] & 37 [6/6] & 124 [6/6]\\
+\quad \textbf{iki demet izleyici} & 0.008 & \textbf{0.025} & \textbf{0.23} [0/12] & \textbf{0.63} [2/6] & 2.3 [4/6]\\\midrule
+saptırıcı sürüklenmesi, trim yok & 0.42 & 0.70 [3/6] & 2.9 [9/12] & 11 [6/6] & 38 [6/6]\\
+\quad iki demet fit + trim & 0.014 & 0.20 & 1.9 [8/12] & 6.4 [6/6] & 21 [6/6]\\\bottomrule
+\end{tabular}
+\end{table}
+
+\sekil{fig_kusurlu_polarite.png}{Omarov birleşiminden sonra kalan sahte EDM, statik saptırıcı hatasına karşı
+(medyan, \%16--84 bandı). (a) İki polarite koşusu arasında 0.3~$\mu$m kuadrupol sürüklenmesi: düzeltme yok,
+tek demetli ve iki demetli izleyici. (b) Diğer kusurlar: gradyan farkı $\eta$, koşular arası saptırıcı
+sürüklenmesi (trimli ve trimsiz), kusursuz çevirme. Kesikli çizgi: hedef.\label{fig:polarite}}
+
+Sonuçlar:
+\begin{enumerate}
+\item \textbf{Saptırıcılar kusursuzsa izleyiciye gerek yoktur.} BBA artığı ve Omarov birleşimi her durumda
+hedefin çok altında kalır.
+\item \textbf{Statik saptırıcı hatası varsa söndürme koşular arası kuadrupol sürüklenmesine duyarlı olur.}
+Kuadrupolleri merkezlemek için gereken düzeltici yörüngeleri ($\sigma_d=10^{-5}$'te $\sim130~\mu$m) küçük bir
+kuadrupol sürüklenmesini büyütür; kalan $E$ $\sigma_d$ ile doğrusal büyür. İki demetli izleyici bunu her
+$\sigma_d$'de yaklaşık 150 kat düzeltir ve $\sigma_d\lesssim3\times10^{-5}$'e kadar hedefin altında tutar; tek
+demetli izleyici yalnız 3--4 kat düzeltir ve $\sigma_d\ge10^{-6}$'da yetmez. \textbf{İki demetin tek demete
+üstünlüğü burada yaklaşık 50 kattır} (Bölüm~\ref{sec:zaman}'daki altı katın çok üstünde).
+\item \textbf{Gradyan tekrarlanabilirliği:} kalan $E$ yaklaşık $\eta\cdot\sigma_d^2$ ile büyür; $\sigma_d=10^{-5}$
+için $\eta\lesssim10^{-3}$ yeter, $\sigma_d=10^{-4}$ için $\eta=10^{-4}$ bile yetmez. İzleyici bunu düzeltemez; bu
+Ref.~\cite{omarov} şemasının kendi gereksinimidir.
+\item \textbf{Koşular arası saptırıcı sürüklenmesi:} kalan $E$ statik hatayla sürüklenmenin çarpımıdır
+($\propto\sigma_d$). Trim ancak 1.5--2 kat yardım eder; trimin kendi gürültüsü ($\sim10^{-7}$) sınırlar.
+$\sigma_d=10^{-5}$'te $10^{-7}$'lik koşular arası sürüklenme bile 12 desenin 8'inde hedefi aşar. Bu da şemanın
+kendi gereksinimidir ve bu çalışmanın açık bıraktığı en ciddi sorundur.
+\end{enumerate}
+Belirleyici büyüklük $\sigma_d$'dir: yapım ve hizalama sonrası saptırıcı başına bağımsız alan ve roll hatası.
+Gerçek değerini bilmiyoruz; makul aralık $10^{-5}$--$10^{-4}$ \tahmin, yani tam olarak izleyicinin gerekli olduğu
+ve saptırıcı gereksinimlerinin ağırlaştığı aralık. Varsayımlar: koşular arası kuadrupol sürüklenmesi 0.3~$\mu$m
+(yaklaşık 20 dakikalık ATL tahmini; $E$'nin bununla doğrusal ölçeklendiği varsayıldı, sınanmadı);
+düzelticiler kuadrupol merkezinin etkin kayması olarak modellendi; alan ve roll hataları aynı $\sigma_d$ ile
+verildi; söndürmenin birebir oluşu ideal örgü simetrisine dayanır, gerçek makinede başka kusurlar da bu
+simetriyi bozabilir.
+
+%======================================================================
 \section{İşletim senaryosu}\label{sec:zaman}
 %======================================================================
 Makineyi bir hafta boyunca 1 saatlik adımlarla izledik. Kuadrupoller ATL yasasıyla sürüklenir:
@@ -626,16 +751,25 @@ değeri 0.3~$\mu$m'ye ulaşınca BBA tekrarlanır (her $\approx54$~saatte). BPM 
 çözünürlük, 60~s ortalama ve 10~nm taban var. Karşılaştırılan durumlar: rijit BPM ve iki demetli (E4) ya da tek
 demetli (E2) düzeltme; zeminle hareket eden ama sabit varsayılan BPM'ler (E3); yalnız periyodik BBA; düzeltme yok.
 
-Sonuç (Şekil~\ref{fig:zaman}): iki demetli izleme sahte EDM'yi hafta boyunca BBA artığının belirlediği düzeyde
-tutar (medyan $C=0.05$--$0.09$, 15 değerin en büyüğü 0.18; BBA'dan hemen sonra $C=0.06$). Tek demetli izleme ve
-sabit BPM varsayımı hedefin çevresinde dolaşır (medyan en fazla 1.2 ve 1.3; 96. saatte beş desenin üçü ve
-dördü hedefin üstünde). Yalnız periyodik BBA, iki kalibrasyon arasında $C\approx45$'e çıkar. İzleyici,
-$3k\sigma_n$ büyüklüğünde bir simetrik sürüklenmeyi algılar; $k=0.75$ iki demetli simetrik kestirimin gürültü
-kazancı, $\sigma_n$ okuma başına BPM gürültüsüdür; 10~nm tabanla bu $\approx0.02~\mu$m'dir. Sahte EDM $\sigma^2$
-ile ölçeklendiği için, BBA artığı yaklaşık 0.4--0.5~$\mu$m'ye kadar kabul edilebilir \tahmin.
+Sonuç (Şekil~\ref{fig:zaman}; 25 desen, 24., 96. ve 168. saatler, toplam 75 değer):
+\begin{center}\footnotesize
+\begin{tabular}{lcccc}\toprule
+yöntem (BBA'lar arası) & medyan & \%84 & maks & hedefi aşan\\\midrule
+yalnız periyodik BBA (5 desen) & 7.7 & -- & 65 & 12/15\\
+tek demet, rijit BPM, doğru model (E2) & 0.43 & 1.4 & 3.3 & 16/75\\
+iki demet, rijit BPM (E4) & 0.072 & 0.13 & 0.26 & 0/75\\\bottomrule
+\end{tabular}\end{center}
+Kazancın büyük kısmı periyodik BBA'dan sürekli izlemeye geçmekten gelir; bunu, BPM'ler kuadrupole bağlı ve
+model bunu biliyorsa, tek demet de sağlar (yaklaşık bir mertebe). İki demet bunun üzerine eşli medyan oranıyla
+yaklaşık altı kat ekler ve hedefi aşan durumları (75'te 16) ortadan kaldırır. İlk 15 değerle bu oran 12 kat
+görünüyordu; 25 desende altı kattır, yani ``bir mertebe'' ifadesi abartılıdır. Tek demetin 168. saatte daha
+küçük çıkması bir anormallik değildir: BBA 162. saatte tekrarlanır. İzleyici, $3k\sigma_n$ büyüklüğünde bir
+simetrik sürüklenmeyi algılar; $k=0.75$ iki demetli simetrik kestirimin gürültü kazancı, $\sigma_n$ okuma başına
+BPM gürültüsüdür; 10~nm tabanla bu $\approx0.02~\mu$m'dir.
 
-Sınırlamalar: spin sonuçları 5 desene dayanır; saptırıcı sürüklenmesi ayrı bir dinamik testte incelendi
-(Bölüm~\ref{sec:gecerlilik}, ``Dinamik test''); BBA'nın kendi süresi ve gerçek zaman kazancı burada hesaplanmadı.
+Sınırlamalar: saptırıcı sürüklenmesi ve polarite çevirme bu senaryoya dahil değildir (ayrı testler:
+Bölüm~\ref{sec:sapt} ve \ref{sec:polarite}); birleşik senaryo sona bırakıldı; BBA'nın kendi süresi
+hesaplanmadı.
 
 \sekil{fig_v2_time.png}{Bir haftalık işletim senaryosu. (a) Kalan simetrik kaçıklık (doğrusal model, 20 desen,
 medyan ve \%16--84 bandı). (b) İzlemeyle sahte EDM (5 desen; çizgi = medyan). BBA 54, 108 ve 162. saatlerde
@@ -646,28 +780,35 @@ tekrarlanır.\label{fig:zaman}}
 %======================================================================
 Kuadrupol kaçıklığından gelen sahte EDM, yatay ve düşey kaçıklık desenlerinin bilineer bir fonksiyonelidir.
 Simetrik ve antisimetrik bileşenlere ayrıldığında simetrik bileşen, düşük harmoniklerde kapalı yörüngede dört
-ile yedi kat daha az görünür (düzgün odaklama bastırmasından değil, QF ile QD arasındaki $\beta$ farkından);
-sahte EDM'deki ağırlığı ise daha küçük bir oranda azalır. Tek demetle yörünge düzeltmesi, eşik dikkatle
-seçilmedikçe onu büyük ölçüde yerinde bırakır.
+ile yedi kat daha az görünür. Oran QF ile QD arasındaki $\beta$ farkından gelir (Rossbach'ın tepki toplamı),
+ince mercek FODO'da yaklaşık $\sqrt{\tan^2(\mu/4)+(\pi m/2N)^2}$'dir ve kararlı bir örgüde yüz katlık bir
+gizlenmeye izin vermez; ilk sürümdeki tahmin çapraz harmonik bir karşılaştırmaydı.
 
 İki ters dönen demet bileşenleri ayırır: antisimetrik olanı iki yörüngenin farkında, simetrik olanı toplamında.
 Statik BPM ofsetleri toplamda simetrik bileşenle ayırt edilemediği için yöntem BBA kalibrasyonları arasında bir
-sürüklenme izleyicisidir ve referans şemadaki kuadrupol polarite çevirmesine ihtiyaç duymaz. Geçerlilik alanını
-aynı kanala düşen hatalar belirler:
+sürüklenme izleyicisidir. Bulgular:
 \begin{itemize}
-\item BPM modeli montajla uyuşmalıdır; rijit bağlı BPM'ler ve bunu bilen bir model, yöntemi en az 1~$\mu$m'lik
-BPM--kuadrupol sürüklenmelerine ve montaj katsayısındaki \%10'luk hatalara karşı sağlam yapar;
-\item saptırıcı sürüklenmeleri fite dahil edilmeli ve kaynağında trimlenmelidir; bağımsız saptırıcı
-sürüklenmesi bir trim aralığında $\sim10^{-7}$'nin altında kalmalıdır (dinamik test). Bu yöntemin en zorlu
-koşuludur ve donanımla sağlanıp sağlanamayacağı açıktır;
-\item saptırıcı roll'unun birinci mertebe etkisi yalnız ortalama roll'a bağlıdır, çift kanaldadır ve
-Ref.~\cite{omarov}'un ortak düşey trimiyle EDM kanalına dokunmadan bastırılır; roll ile kapalı yörüngenin ikinci mertebe çapraz
-terimi tek kanaldadır ve bireysel saptırıcı trimi gerektirir;
-\item düzeltmeler kuadrupol içi dipol düzelticilerle (ya da konumlandırıcılarla) uygulanmalıdır.
+\item \textbf{BPM montajı:} BPM'ler kuadrupole rijit bağlanmalı ve fit bunu bilmelidir; o zaman yöntem en az
+1~$\mu$m'lik BPM--kuadrupol sürüklenmelerine ve montaj katsayısındaki \%10'luk hatalara dayanır. Bu koşulda
+sürekli izleme periyodik BBA'ya göre sahte EDM'yi yaklaşık bir mertebe düşürür; bunu tek demet de yapar. İki
+demet yaklaşık altı kat daha kazandırır ve hedefi aşan durumları ortadan kaldırır (bir haftalık senaryo, 25 desen).
+\item \textbf{Polarite çevirme gereklidir.} Saptırıcı $\varepsilon\times\phi$ terimi ve statik saptırıcı
+hataları ancak Ref.~\cite{omarov}'un polarite çevirmeli birleşimiyle söner; ilk sürümdeki ``polarite çevirmeye
+gerek yok'' iddiası yanlıştır.
+\item \textbf{İzleyicinin asıl değeri:} statik saptırıcı hataları ($\sigma_d\gtrsim10^{-6}$) polarite söndürmesini
+iki koşu arasındaki kuadrupol sürüklenmesine duyarlı yapar. İki demetli izleyici bunu yaklaşık 150 kat düzeltir ve
+$\sigma_d\lesssim3\times10^{-5}$'e kadar hedefin altında tutar; tek demetli izleyici yalnız 3--4 kat düzeltir.
+\item \textbf{Saptırıcı gereksinimleri} (izleyiciden bağımsız, halka sistematiği): polariteler arası gradyan farkı
+kabaca $\eta\lesssim10^{-3}(10^{-5}/\sigma_d)^2$ \tahmin; $\sigma_d=10^{-5}$'te koşular arası bağımsız saptırıcı
+sürüklenmesi $10^{-7}$'nin altında olmalıdır ve trim bunu yalnız 1.5--2 kat gevşetir. Polarite çevirmeden
+çalışan bir düzende ise saptırıcılar arası sürüklenme bir trim aralığında $\sim10^{-7}$'nin altında kalmalıdır.
+\item Saptırıcı roll'unun birinci mertebe etkisi yalnız ortalama roll'a bağlıdır, çift kanaldadır ve
+Ref.~\cite{omarov}'un ortak düşey trimiyle EDM kanalına dokunmadan bastırılır.
+\item Düzeltmeler kuadrupol içi dipol düzelticilerle (ya da konumlandırıcılarla) uygulanmalıdır.
 \end{itemize}
-Bu koşullarda iki demetli izleme, simüle edilen bir haftalık işletim boyunca sahte EDM'yi BBA kalibrasyonları
-arasında hedefin altında tutar. En zorlu koşul saptırıcı kararlılığıdır ($\sim10^{-7}$/trim aralığı); bunun
-donanımla sağlanabilirliği açıktır. Son olarak, kaçık bir örgüde sahte EDM donmuş spin enerjisinde
+Açık kalanlar: statik saptırıcı hatasının gerçek değeri; ortak yüksek gerilim beslemesinin etkisi (test sürüyor);
+koşular arası sürüklenmenin gerçek büyüklüğü; yer hareketi, BPM kayması, saptırıcı sürüklenmesi ve polarite
+çevirmeyi birlikte içeren birleşik senaryo. Son olarak, kaçık bir örgüde sahte EDM donmuş spin enerjisinde
 hesaplanmalıdır; sabit momentumla yapılan hesap fırlatma noktasına bağlıdır ve mertebelerce farklı sonuç
 verebilir.
 
