@@ -23,6 +23,7 @@ OUT = os.path.join(REV, "sonuclar", "teshis_ortak_besleme.jsonl")
 SEEDS = range(4)
 AMPS = (0.0, 1e-5, 1e-4)
 PHI1 = 1e-11
+WORKERS = int(sys.argv[1]) if len(sys.argv) > 1 else 4   # işçi sayısı: python3 teshis_ortak_besleme.py 10
 
 
 def meas(t):
@@ -47,7 +48,7 @@ def run_batch(tasks):
     tasks = [t for t in tasks if t not in done]
     if not tasks:
         return
-    with ProcessPoolExecutor(4) as pool:
+    with ProcessPoolExecutor(WORKERS) as pool:
         for r in pool.map(meas, tasks):
             open(OUT, "a").write(json.dumps(r) + "\n")
             print(r, flush=True)
