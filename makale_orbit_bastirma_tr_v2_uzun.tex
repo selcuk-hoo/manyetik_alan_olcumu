@@ -27,7 +27,7 @@
 \title{Ters Yönde Dönen Kapalı Yörüngelerle Kuadrupol Kaçıklığının Simetrik Bileşenine Erişim\\[4pt]
 \large Revize makalenin Türkçe, ayrıntılı ve açıklayıcı sürümü}
 \author{I. Abedrabbo, S. Hacıömeroğlu\\ \small İstinye Üniversitesi, İstanbul}
-\date{Çalışma taslağı}
+\date{Çalışma taslağı, 21 Kasım 2026}
 
 \begin{document}
 \sloppy
@@ -52,6 +52,8 @@ kaynaklı terimi tam söndürür; bu yüzden polarite çevirme gereklidir. Ancak
 ($\sigma_d\gtrsim10^{-6}$) bu söndürmeyi iki polarite koşusu arasındaki kuadrupol sürüklenmesine duyarlı
 yapar. İki demetli izleyici bu bozulmayı yaklaşık 150 kat düzeltir; tek demetli izleyici yalnız 3--4 kat.
 Gradyan tekrarlanabilirliği ve saptırıcı kararlılığı için $\sigma_d$'ye bağlı gereksinimleri de veriyoruz.
+Saptırıcıların ortak alan değişimi de, bağımsız roll deseniyle çarpılarak, ikinci mertebede sahte EDM üretir;
+yani ortak yüksek gerilim beslemesi tek başına bir çözüm değildir.
 \end{abstract}
 
 \tableofcontents
@@ -572,7 +574,10 @@ rastgele yürüyüşle, $r$ hızıyla (1/$\sqrt{\text{saat}}$) sürüklenir; kua
 yürüyüşle ($0.1~\mu$m/$\sqrt{\text{saat}}$, varsayım) sürüklenir. Her saat iki demetli fit (kuadrupol +
 saptırıcı sütunları, nominal model) yapılır; gerçek makine \%0.2 gradyan hatalıdır, BPM gürültüsü 14~nm'dir.
 Kuadrupoller düzelticilerle, saptırıcılar bireysel trimle düzeltilir; ortak trim (ortalama roll) ve enerji
-geri beslemesi (ortalama alan) sürekli çalışır. Yörünge düzeyindeki döngü doğrusaldır (tepki matrisleri);
+geri beslemesi (ortalama alan) sürekli çalışır; modelde bu, ortalama $\varepsilon$ ve $\phi$'nin her adımda
+çıkarılmasıyla temsil edilir. (Ortalama roll için bu doğrudur; ortalama alan için ise aşağıdaki ortak besleme
+testi, sahte EDM'nin tamamen emilmediğini gösterir. Bu yüzden buradaki sonuçlar, ortak alan sürüklenmesinin
+ayrıca küçük tutulduğu durumu temsil eder.) Yörünge düzeyindeki döngü doğrusaldır (tepki matrisleri);
 sahte EDM, 168. saatteki gerçek durumla C++ donmuş spin izlemesiyle ölçülür (4 desen, seed 70000+s).
 \begin{center}\footnotesize
 \begin{tabular}{lcc}\toprule
@@ -706,7 +711,8 @@ saptırıcıların mutlak $\sim1.5\times10^{-7}$ doğrulukta olmasını gerektir
 \subsection{Kusurlu polarite çevirme: izleyicinin rolü}
 Modelimizde söndürme birebirdir, çünkü örgü iki polarite arasında tam simetriktir. Gerçek söndürmeyi iki şey
 bozar: iki polarite arasında gradyan büyüklüğü farkı ($g\to-g(1+\eta)$) ve iki koşu arasında sürüklenme. Bunları
-statik saptırıcı hatası $\sigma_d$ (alan ve roll aynı rms, ortalaması çıkarılmış) ve BBA sonrası 0.3~$\mu$m
+statik saptırıcı hatası $\sigma_d$ (alan ve roll aynı rms, ortalaması çıkarılmış; ortak alan bileşeni bu testte
+yok) ve BBA sonrası 0.3~$\mu$m
 kuadrupol artığı olan bir makinede sınadık (\texttt{revizyon/kusurlu\_polarite.py}; $\sigma_d=10^{-5}$'te 12
 desen, diğerlerinde 3--6 desen). İkinci koşudan önce izleyici, BPM'leri kuadrupole rijit bağlı ($\rho=1$),
 0.05~$\mu$m BPM--kuadrupol kayması ve 14~nm gürültüyle kuadrupol sürüklenmesini kestirip düzeltir.
