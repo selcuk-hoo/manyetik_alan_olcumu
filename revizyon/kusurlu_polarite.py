@@ -110,6 +110,19 @@ def states(seed, sig_d):
         est = A2.tsvd_solve(S, y, 1e-4)
         qq[pl] = q0[pl] - est[:NQ]; ee[pl] = e[pl] + dd[pl] - est[NQ:]
     out["dd_E4"] = (qq["x"], qq["y"], ee["x"], ee["y"])
+    # Ortak alan sürüklenmesi (ortak HV beslemesi): ikinci koşuda bütün saptırıcılara aynı Δε_c eklenir.
+    # (Yeni rastgele çekimler en sona eklendi; önceki durumlar değişmez.)
+    for tag, dc in (("dc6", 1e-6), ("dc5", 1e-5)):
+        out[f"{tag}_yok"] = (q0["x"], q0["y"], e["x"] + dc, e["y"])
+    m = M["x"]
+    Td = {b: np.load(A2.DPATH("eps", b, 0.002)) for b in ("ccw", "cw")}
+    dvec = np.full(NQ, 1e-5)
+    y = np.r_[Td["ccw"] @ dvec, Td["cw"] @ dvec] + rng.normal(0, SIG_N, 2 * NQ)
+    S = np.hstack([np.vstack([m["R_ccw"], m["R_cw"]]), np.vstack([m["D_ccw"], m["D_cw"]])])
+    est = A2.tsvd_solve(S, y, 1e-4)
+    # yalnız ortak kaynak ayarlanır: fitin saptırıcı kestiriminin ORTALAMASI çıkarılır (bireysel trim ve
+    # kuadrupol düzeltmesi yok; tam fit ortak kaymayı kuadrupol yönleriyle karıştırıp 1e-6 sahte hata yüklüyor)
+    out["dc5_E4"] = (q0["x"], q0["y"], e["x"] + dvec - np.mean(est[NQ:]), e["y"])
     return out
 
 
@@ -125,7 +138,7 @@ def tasks():
                 for eta in (1e-4, 1e-3):
                     T.append(dict(sig_d=sig_d, seed=s, state="S0", gs=-(1 + eta), direction=d))
                 T.append(dict(sig_d=sig_d, seed=s, state="S0", gs=-1.0, direction=d))    # kusursuz kontrol
-                for st in ("dq_yok", "dq_E2", "dq_E4", "dd_yok", "dd_E4"):
+                for st in ("dq_yok", "dq_E2", "dq_E4", "dd_yok", "dd_E4", "dc6_yok", "dc5_yok", "dc5_E4"):
                     if sig_d == 0.0 and st.startswith("dd"):
                         pass
                     T.append(dict(sig_d=sig_d, seed=s, state=st, gs=-1.0, direction=d))
@@ -172,7 +185,9 @@ def ozet():
         cases = [("S0", -1.0, "kusursuz çevirme"), ("S0", -1.0001, "η = 1e-4"), ("S0", -1.001, "η = 1e-3"),
                  ("dq_yok", -1.0, "Δq 0.3 μm, düzeltme yok"), ("dq_E2", -1.0, "Δq, tek demet izleyici"),
                  ("dq_E4", -1.0, "Δq, iki demet izleyici"), ("dd_yok", -1.0, "Δε,Δφ 1e-7, trim yok"),
-                 ("dd_E4", -1.0, "Δε,Δφ, iki demet fit + trim")]
+                 ("dd_E4", -1.0, "Δε,Δφ, iki demet fit + trim"),
+                 ("dc6_yok", -1.0, "ortak Δε 1e-6, düzeltme yok"), ("dc5_yok", -1.0, "ortak Δε 1e-5, düzeltme yok"),
+                 ("dc5_E4", -1.0, "ortak Δε 1e-5, fitle ortak trim")]
         ref = [abs(odd.get((sig_d, s, "S0", 1.0), np.nan)) for s in SEEDS]
         print(f"\nσ_d = {sig_d:g}: n={len(SEEDS)}  |odd₊| (polarite çevirmeden C) medyan {np.nanmedian(ref):.3g}")
         for st, gs, lab in cases:
