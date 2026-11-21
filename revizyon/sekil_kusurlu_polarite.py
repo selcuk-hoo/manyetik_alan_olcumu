@@ -28,7 +28,7 @@ def E(sd, st, gs):
 SD = [1e-6, 1e-5, 3e-5, 1e-4]
 plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm", "font.size": 8,
                      "axes.spines.top": False, "axes.spines.right": False})
-fig, ax = plt.subplots(1, 2, figsize=(7.0, 2.8))
+fig, ax = plt.subplots(1, 2, figsize=(7.0, 3.6))
 for a, cases, title in (
         (ax[0], [("dq_yok", -1.0, "drift, no correction", "#595959", "o"),
                  ("dq_E2", -1.0, "single-beam monitor", "#E69F00", "s"),
@@ -37,6 +37,8 @@ for a, cases, title in (
         (ax[1], [("S0", -1.001, r"$\eta=10^{-3}$", "#D55E00", "^"), ("S0", -1.0001, r"$\eta=10^{-4}$", "#CC79A7", "v"),
                  ("dd_yok", -1.0, r"deflector drift $10^{-7}$", "#595959", "o"),
                  ("dd_E4", -1.0, "same, two-beam fit + trim", "#009E73", "s"),
+                 ("dc5_yok", -1.0, r"common field shift $10^{-5}$", "#000000", "P"),
+                 ("dc5_E4", -1.0, "same, common trim from fit", "#0072B2", "*"),
                  ("S0", -1.0, "perfect reversal", "#56B4E9", "x")],
          "(b) other imperfections")):
     for i, (st, gs, lab, col, mk) in enumerate(cases):
@@ -51,7 +53,8 @@ for a, cases, title in (
     a.set_xscale("log"); a.set_yscale("log")
     a.set_xlabel(r"static deflector error $\sigma_d$ (field and roll, rms)")
     a.set_ylabel(r"$E=\frac{1}{2}|\mathrm{odd}_+ + \mathrm{odd}_-|$ (units of target)")
-    a.set_title(title, fontsize=8); a.legend(frameon=False, fontsize=6.3)
+    a.set_title(title, fontsize=8)
+    a.legend(frameon=False, fontsize=6.3, ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.2))
 fig.tight_layout()
 for e in ("png", "pdf"):
     fig.savefig(os.path.join(BASE, f"fig_kusurlu_polarite.{e}"), dpi=200, bbox_inches="tight")

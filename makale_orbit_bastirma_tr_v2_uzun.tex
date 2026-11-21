@@ -52,8 +52,9 @@ kaynaklı terimi tam söndürür; bu yüzden polarite çevirme gereklidir. Ancak
 ($\sigma_d\gtrsim10^{-6}$) bu söndürmeyi iki polarite koşusu arasındaki kuadrupol sürüklenmesine duyarlı
 yapar. İki demetli izleyici bu bozulmayı yaklaşık 150 kat düzeltir; tek demetli izleyici yalnız 3--4 kat.
 Gradyan tekrarlanabilirliği ve saptırıcı kararlılığı için $\sigma_d$'ye bağlı gereksinimleri de veriyoruz.
-Saptırıcıların ortak alan değişimi de, bağımsız roll deseniyle çarpılarak, ikinci mertebede sahte EDM üretir;
-yani ortak yüksek gerilim beslemesi tek başına bir çözüm değildir.
+Saptırıcıların ortak alan değişimi de ikinci mertebede sahte EDM üretir ve polarite birleşimini bozar; ama
+yörünge fiti bu ortak kaymayı $\sim10^{-8}$ doğrulukla bulur ve ortak kaynağın yeniden ayarlanması etkiyi her
+$\sigma_d$'de hedefin altına indirir.
 \end{abstract}
 
 \tableofcontents
@@ -642,7 +643,9 @@ ve donmuş spin geri beslemesi enerjiyi düzeltse de bu çarpımı düzeltmez. S
 değişimleri ikinci mertebede zararlıdır}; tek kaynak tek başına çözüm değildir. Polarite çevirmeli birleşimde bu
 terimin de söneceği, geriye kaynağın iki koşu arasındaki ortak sürüklenmesinin kalacağı beklenir \tahmin; kaba bir
 ölçeklemeyle, statik roll hatası $10^{-5}$ olan bir halkada bu kaynağın koşular arası $\sim10^{-8}$ kararlılıkta
-olmasını gerektirebilir \tahmin. Bu doğrudan sınanmalıdır.
+olmasını gerektirebilir \tahmin. Bunu doğrudan sınadık (Bölüm~\ref{sec:polarite}, Tablo~\ref{tab:polarite}, son
+üç satır): kaba ölçekleme düzeltmesiz durum için doğru çıktı, ama yörünge fiti ortak kaymayı yakalayıp ortak
+kaynağın yeniden ayarlanmasını sağlıyor ve sorunu ortadan kaldırıyor.
 
 \sekil{fig_v2_deflector.png}{Saptırıcı hataları. (a) Saptırıcı alan sürüklenmesine karşı yeniden kurulan simetrik
 kuadrupol sürüklenmesinin hatası (5~$\mu$m, yatay, 200 desen), yalnız kuadrupol sütunlu ve saptırıcı sütunları
@@ -719,7 +722,9 @@ desen, diğerlerinde 3--6 desen). İkinci koşudan önce izleyici, BPM'leri kuad
 
 \begin{table}[H]\centering\footnotesize
 \caption{Omarov birleşiminden sonra kalan $E$ (hedefin katı, medyan; köşeli parantezde hedefi aşan desen
-sayısı). Koşular arası kuadrupol sürüklenmesi 0.3~$\mu$m rms, saptırıcı sürüklenmesi $10^{-7}$ rms.}\label{tab:polarite}
+sayısı). Koşular arası kuadrupol sürüklenmesi 0.3~$\mu$m rms, bağımsız saptırıcı sürüklenmesi $10^{-7}$ rms, ortak
+alan kayması bütün saptırıcılara aynı. ``Fitle ortak kaynak ayarı'': iki demetli fitin saptırıcı kestiriminin
+yalnız ortalaması uygulanır.}\label{tab:polarite}
 \begin{tabular}{lccccc}\toprule
 & \multicolumn{5}{c}{statik saptırıcı hatası $\sigma_d$}\\\cmidrule(lr){2-6}
 durum & 0 & $10^{-6}$ & $10^{-5}$ & $3\times10^{-5}$ & $10^{-4}$\\\midrule
@@ -731,14 +736,17 @@ kuadrupol sürüklenmesi, düzeltme yok & 0.032 & 3.7 [5/6] & 44 [12/12] & 111 [
 \quad tek demet izleyici & 0.075 & 1.1 [3/6] & 11.5 [11/12] & 37 [6/6] & 124 [6/6]\\
 \quad \textbf{iki demet izleyici} & 0.008 & \textbf{0.025} & \textbf{0.23} [0/12] & \textbf{0.63} [2/6] & 2.3 [4/6]\\\midrule
 saptırıcı sürüklenmesi, trim yok & 0.42 & 0.70 [3/6] & 2.9 [9/12] & 11 [6/6] & 38 [6/6]\\
-\quad iki demet fit + trim & 0.014 & 0.20 & 1.9 [8/12] & 6.4 [6/6] & 21 [6/6]\\\bottomrule
+\quad iki demet fit + trim & 0.014 & 0.20 & 1.9 [8/12] & 6.4 [6/6] & 21 [6/6]\\\midrule
+ortak alan kayması $10^{-6}$, düzeltme yok & 0.27 & 0.33 & 1.3 [7/12] & 4.7 [6/6] & 16 [6/6]\\
+ortak alan kayması $10^{-5}$, düzeltme yok & 2.9 [3/3] & 3.4 [4/6] & 13 [12/12] & 47 [6/6] & 163 [6/6]\\
+\quad \textbf{fitle ortak kaynak ayarı} & \textbf{0.009} & \textbf{0.015} & \textbf{0.036} [0/12] & \textbf{0.062} & \textbf{0.18} [0/6]\\\bottomrule
 \end{tabular}
 \end{table}
 
 \sekil{fig_kusurlu_polarite.png}{Omarov birleşiminden sonra kalan sahte EDM, statik saptırıcı hatasına karşı
 (medyan, \%16--84 bandı). (a) İki polarite koşusu arasında 0.3~$\mu$m kuadrupol sürüklenmesi: düzeltme yok,
 tek demetli ve iki demetli izleyici. (b) Diğer kusurlar: gradyan farkı $\eta$, koşular arası saptırıcı
-sürüklenmesi (trimli ve trimsiz), kusursuz çevirme. Kesikli çizgi: hedef.\label{fig:polarite}}
+sürüklenmesi (trimli ve trimsiz), ortak alan kayması (düzeltmesiz ve fitle ortak kaynak ayarıyla), kusursuz çevirme. Kesikli çizgi: hedef.\label{fig:polarite}}
 
 Sonuçlar:
 \begin{enumerate}
@@ -757,6 +765,17 @@ Ref.~\cite{omarov} şemasının kendi gereksinimidir.
 ($\propto\sigma_d$). Trim ancak 1.5--2 kat yardım eder; trimin kendi gürültüsü ($\sim10^{-7}$) sınırlar.
 $\sigma_d=10^{-5}$'te $10^{-7}$'lik koşular arası sürüklenme bile 12 desenin 8'inde hedefi aşar. Bu da şemanın
 kendi gereksinimidir ve bu çalışmanın açık bıraktığı en ciddi sorundur.
+\item \textbf{Ortak alan kayması (ortak yüksek gerilim beslemesi):} iki koşu arasında bütün saptırıcılara aynı
+alan kayması eklenince kalan $E$ kaymayla doğrusal büyür ve $\sigma_d$ ile artar; $\sigma_d=10^{-5}$'te $10^{-6}$'lık
+kayma bile 12 desenin 7'sinde hedefi aşar. Düzeltmesiz bir şemada kaynağın koşular arası kararlılığı
+$\sigma_d=10^{-5}$'te $\sim10^{-7}$'nin, $10^{-4}$'te $\sim10^{-8}$'in altında olmalıdır \tahmin. Ancak ortak kayma
+büyük ve düzgün bir yörünge kayması üretir: iki demetli fit ortalamasını $\sim10^{-8}$ doğrulukla bulur. Ortak
+kaynağı buna göre yeniden ayarlamak $E$'yi her $\sigma_d$'de hedefin altına indirir (en kötü 0.24; 300--900 kat
+iyileşme). Fitin tam kestirimini (bireysel trim + kuadrupol düzeltmesi) uygulamak ise yanlıştır: ortak kayma
+kuadrupol yönleriyle karışır ve saptırıcılara $\sim10^{-6}$'lık sahte bireysel hatalar yüklenir. Bu sonuç tek
+kaynak fikrini kurtarır: tek kaynak bağımsız alan sürüklenmesini küçültür, ortak kaymayı da yörünge izleyicisi
+yakalar. Ortak kayma düzgün olduğu için tek demet de onu muhtemelen yakalar; bu sınanmadı. $\sigma_d=0$'da bile
+ortak kaymanın bir etkisi vardır (BBA sonrası kuadrupol artığıyla çarpımı olabilir, incelenmedi).
 \end{enumerate}
 Belirleyici büyüklük $\sigma_d$'dir: yapım ve hizalama sonrası saptırıcı başına bağımsız alan ve roll hatası.
 Gerçek değerini bilmiyoruz; makul aralık $10^{-5}$--$10^{-4}$ \tahmin, yani tam olarak izleyicinin gerekli olduğu
@@ -827,12 +846,14 @@ $\sigma_d\lesssim3\times10^{-5}$'e kadar hedefin altında tutar; tek demetli izl
 kabaca $\eta\lesssim10^{-3}(10^{-5}/\sigma_d)^2$ \tahmin; $\sigma_d=10^{-5}$'te koşular arası bağımsız saptırıcı
 sürüklenmesi $10^{-7}$'nin altında olmalıdır ve trim bunu yalnız 1.5--2 kat gevşetir. Polarite çevirmeden
 çalışan bir düzende ise saptırıcılar arası sürüklenme bir trim aralığında $\sim10^{-7}$'nin altında kalmalıdır.
+\item \textbf{Ortak yüksek gerilim beslemesi:} ortak alan kayması ikinci mertebede zararlıdır ve polarite
+birleşimini bozar; ama yörünge fiti onu bulur ve ortak kaynağın yeniden ayarlanması etkiyi bütün $\sigma_d$'lerde
+hedefin altına indirir. Tek kaynak böylece bağımsız alan sürüklenmesini küçültmenin uygulanabilir bir yolu olur.
 \item Saptırıcı roll'unun birinci mertebe etkisi yalnız ortalama roll'a bağlıdır, çift kanaldadır ve
 Ref.~\cite{omarov}'un ortak düşey trimiyle EDM kanalına dokunmadan bastırılır.
 \item Düzeltmeler kuadrupol içi dipol düzelticilerle (ya da konumlandırıcılarla) uygulanmalıdır.
 \end{itemize}
-Açık kalanlar: statik saptırıcı hatasının gerçek değeri; ortak yüksek gerilim beslemesinin koşular arası
-sürüklenmesinin polarite çevirmeli birleşimdeki etkisi (ortak $\varepsilon$ tek başına zararlı çıktı);
+Açık kalanlar: statik saptırıcı hatasının gerçek değeri; ortak kaymanın tek demetle de yakalanıp yakalanmadığı;
 koşular arası sürüklenmenin gerçek büyüklüğü; yer hareketi, BPM kayması, saptırıcı sürüklenmesi ve polarite
 çevirmeyi birlikte içeren birleşik senaryo. Son olarak, kaçık bir örgüde sahte EDM donmuş spin enerjisinde
 hesaplanmalıdır; sabit momentumla yapılan hesap fırlatma noktasına bağlıdır ve mertebelerce farklı sonuç
