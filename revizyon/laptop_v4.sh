@@ -5,7 +5,7 @@
 # Önceki durumlar dosyada olduğu için atlanır; yalnız yeni durumlar hesaplanır (~200 görev).
 # Gerekçe: makale_orbit_bastirma_tr_v2_uzun.tex, 'Ortak besleme' paragrafı. Kesilirse aynı komutla yeniden çalıştır (kaldığı yerden devam).
 #
-# Kullanım (repo kökünden):   nohup bash revizyon/laptop_v3.sh 10 > laptop_v4.log 2>&1 &
+# Kullanım (repo kökünden):   nohup bash revizyon/laptop_v4.sh 10 > laptop_v4.log 2>&1 &
 #   argüman: işçi sayısı (varsayılan 10)
 # İlerleme: tail -f laptop_v4.log
 set -u
@@ -61,7 +61,7 @@ done
 {
   echo "# Laptop dördüncü tur — kusurlu polarite, ortak alan sürüklenmesi"
   echo
-  echo "Tarih: $(date '+%d.%m.%Y %H:%M'). Makine: $(hostname), $(nproc) çekirdek, -w $W. Betik: revizyon/laptop_v3.sh."
+  echo "Tarih: $(date '+%d.%m.%Y %H:%M'). Makine: $(hostname), $(nproc) çekirdek, -w $W. Betik: revizyon/laptop_v4.sh."
   echo "Yeni satırlar: ortak Δε 1e-6 / 1e-5 (düzeltme yok) ve 1e-5 (fitle ortak trim). E = ½|odd₊ + odd₋|, hedef (1e-9) biriminde."
   echo
   echo '```'
@@ -71,5 +71,5 @@ done
   echo "Hata/uyarı satırları (laptop_v4.log):"
   grep -i "uyarı\|hata\|error\|nan" "$ROOT/laptop_v4.log" 2>/dev/null | head -20 || true
 } > revizyon/sonuclar/LAPTOP_OZET_v4.md
-push "laptop v3 özeti"
+push "laptop v4 özeti"
 log "BİTTİ. Özet: revizyon/sonuclar/LAPTOP_OZET_v4.md"
